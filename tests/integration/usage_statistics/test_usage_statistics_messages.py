@@ -5,6 +5,9 @@ from typing import Any, Dict, List
 import pytest
 import requests
 
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    GETTING_STARTED_DATASOURCE_NAME,
+)
 from great_expectations.data_context import BaseDataContext
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -386,7 +389,13 @@ valid_usage_statistics_messages = {
     "data_context.get_batch_list": [
         {
             "event": "data_context.get_batch_list",
-            "event_payload": {},
+            "event_payload": {
+                "batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
+                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                    "anonymized_data_asset_name": "9104abd890c05a364f379443b9f43825",
+                },
+            },
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
@@ -398,6 +407,11 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
+                "batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
+                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                },
                 "batch_request_optional_top_level_keys": ["data_connector_query"],
                 "data_connector_query_keys": ["index"],
             },
@@ -412,6 +426,11 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
+                "batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
+                    "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                    "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                },
                 "batch_request_optional_top_level_keys": ["batch_spec_passthrough"],
                 "batch_spec_passthrough_keys": ["reader_options"],
             },
@@ -426,6 +445,11 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
+                "batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                    "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                    "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                },
                 "batch_request_optional_top_level_keys": [
                     "data_connector_query",
                     "batch_spec_passthrough",
@@ -444,6 +468,11 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
+                "batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                },
                 "batch_request_optional_top_level_keys": [
                     "data_connector_query",
                     "batch_spec_passthrough",
@@ -463,6 +492,11 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
+                "batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                },
                 "batch_request_optional_top_level_keys": [
                     "data_connector_query",
                     "batch_spec_passthrough",

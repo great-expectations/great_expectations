@@ -9,7 +9,10 @@ from great_expectations.core.batch import (
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.util import deep_filter_properties_dict
 
-from great_expectations.core.batch import (  # isort:skip
+from great_expectations.core.usage_statistics.anonymizers.types.base import (  # isort:skip
+    GETTING_STARTED_DATASOURCE_NAME,
+    GETTING_STARTED_EXPECTATION_SUITE_NAME,
+    GETTING_STARTED_CHECKPOINT_NAME,
     BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS,
     BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS,
     DATA_CONNECTOR_QUERY_KEYS,
@@ -23,6 +26,7 @@ class BatchRequestAnonymizer(Anonymizer):
     def __init__(self, salt=None):
         super().__init__(salt=salt)
 
+        self._batch_request_required_top_level_properties = {}
         self._batch_request_optional_top_level_keys = []
         self._data_connector_query_keys = []
         self._runtime_parameters_keys = []
@@ -34,15 +38,15 @@ class BatchRequestAnonymizer(Anonymizer):
         ] = get_batch_request_from_acceptable_arguments(*args, **kwargs)
         batch_request_dict: dict = batch_request.to_json_dict()
         anonymized_batch_request_dict: Optional[
-            Union[Any, dict]
+            Union[str, dict]
         ] = self._anonymize_batch_request_properties(source=batch_request_dict)
         deep_filter_properties_dict(
             properties=anonymized_batch_request_dict,
-            delete_fields=BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS,
             clean_falsy=True,
             inplace=True,
         )
         anonymized_batch_request_keys_dict: Dict[str, List[str]] = {
+            "batch_request_required_top_level_properties": self._batch_request_required_top_level_properties,
             "batch_request_optional_top_level_keys": self._batch_request_optional_top_level_keys,
             "data_connector_query_keys": self._data_connector_query_keys,
             "runtime_parameters_keys": self._runtime_parameters_keys,
@@ -58,7 +62,7 @@ class BatchRequestAnonymizer(Anonymizer):
 
     def _anonymize_batch_request_properties(
         self, source: Optional[Any] = None
-    ) -> Optional[Union[Any, dict]]:
+    ) -> Optional[Union[str, dict]]:
         if source is None:
             return None
 
@@ -73,9 +77,12 @@ class BatchRequestAnonymizer(Anonymizer):
             value: Any
             for key, value in source.items():
                 if key in BATCH_REQUEST_FLATTENED_KEYS:
-                    source_copy[key] = self._anonymize_batch_request_properties(
-                        source=value
-                    )
+                    if self._is_getting_started_keyword(value=value):
+                        source_copy[key] = value
+                    else:
+                        source_copy[key] = self._anonymize_batch_request_properties(
+                            source=value
+                        )
                 else:
                     anonymized_key: str = self.anonymize(key)
                     source_copy[
@@ -95,7 +102,11 @@ class BatchRequestAnonymizer(Anonymizer):
             key: str
             value: Any
             for key, value in source.items():
-                if key in BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS:
+                if key in BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS:
+                    self._batch_request_required_top_level_properties[
+                        f"anonymized_{key}"
+                    ] = value
+                elif key in BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS:
                     self._batch_request_optional_top_level_keys.append(key)
                 elif key in DATA_CONNECTOR_QUERY_KEYS:
                     self._data_connector_query_keys.append(key)
@@ -107,3 +118,11 @@ class BatchRequestAnonymizer(Anonymizer):
                     pass
 
                 self._build_anonymized_batch_request(source=value)
+
+    @staticmethod
+    def _is_getting_started_keyword(value: str):
+        return value in [
+            GETTING_STARTED_DATASOURCE_NAME,
+            GETTING_STARTED_EXPECTATION_SUITE_NAME,
+            GETTING_STARTED_CHECKPOINT_NAME,
+        ]

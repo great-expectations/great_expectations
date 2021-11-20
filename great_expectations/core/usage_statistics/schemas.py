@@ -12,6 +12,21 @@ anonymized_string_schema = {
     "maxLength": 32,
 }
 
+anonymized_datasource_name_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-datasource-name",
+    "definitions": {"anonymized_string": anonymized_string_schema},
+    "oneOf": [
+        {
+            "type": "string",
+            "maxLength": 256,
+        },
+        {
+            "$ref": "#/definitions/anonymized_string",
+        },
+    ],
+}
+
 anonymized_class_info_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-class-info",
@@ -28,7 +43,7 @@ anonymized_class_info_schema = {
             # we don't want this to be true, but this is required to allow show_cta_footer
             # Note AJB-20201218 show_cta_footer was removed in v 0.9.9 via PR #1249
             "required": ["parent_class"],
-        }
+        },
     ],
 }
 
@@ -95,7 +110,7 @@ anonymized_store_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        }
+        },
     ],
 }
 
@@ -113,7 +128,7 @@ anonymized_action_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        }
+        },
     ],
 }
 
@@ -139,7 +154,7 @@ anonymized_validation_operator_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        }
+        },
     ],
 }
 
@@ -173,7 +188,7 @@ anonymized_data_docs_site_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        }
+        },
     ],
 }
 
@@ -270,12 +285,35 @@ init_payload_schema = {
     "additionalProperties": False,
 }
 
-anonymized_batch_request_keys_schema = {
+anonymized_batch_request_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-batch-request-keys",
-    "definitions": {"anonymized_string": anonymized_string_schema},
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+    },
     "type": "object",
     "properties": {
+        "batch_request_required_top_level_properties": {
+            "type": "object",
+            "properties": {
+                "anonymized_datasource_name": {
+                    "$ref": "#/definitions/anonymized_datasource_name",
+                },
+                "anonymized_data_connector_name": {
+                    "$ref": "#/definitions/anonymized_string",
+                },
+                "anonymized_data_asset_name": {
+                    "$ref": "#/definitions/anonymized_string",
+                },
+            },
+            "required": [
+                "anonymized_datasource_name",
+                "anonymized_data_connector_name",
+                "anonymized_data_asset_name",
+            ],
+            "additionalProperties": False,
+        },
         "batch_request_optional_top_level_keys": {
             "type": "array",
             "minItems": 1,
@@ -343,7 +381,10 @@ anonymized_batch_request_keys_schema = {
 anonymized_batch_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-batch",
-    "definitions": {"anonymized_string": anonymized_string_schema},
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+    },
     "oneOf": [
         {
             "type": "object",
@@ -357,7 +398,7 @@ anonymized_batch_schema = {
                     "$ref": "#/definitions/anonymized_string"
                 },
                 "anonymized_datasource_name": {
-                    "$ref": "#/definitions/anonymized_string"
+                    "$ref": "#/definitions/anonymized_datasource_name",
                 },
             },
             "additionalProperties": False,
@@ -366,7 +407,7 @@ anonymized_batch_schema = {
                 "anonymized_expectation_suite_name",
                 "anonymized_datasource_name",
             ],
-        }
+        },
     ],
 }
 
@@ -511,7 +552,7 @@ usage_statistics_record_schema = {
         "init_payload": init_payload_schema,
         "run_validation_operator_payload": run_validation_operator_payload_schema,
         "anonymized_data_docs_site": anonymized_data_docs_site_schema,
-        "anonymized_batch_request_keys": anonymized_batch_request_keys_schema,
+        "anonymized_batch_request_keys": anonymized_batch_request_schema,
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
@@ -625,7 +666,7 @@ usage_statistics_record_schema = {
                         "cli.suite.edit",
                         "cli.suite.edit.begin",
                         "cli.suite.edit.end",
-                    ]
+                    ],
                 },
                 "event_payload": {
                     "$ref": "#/definitions/cli_suite_expectation_suite_payload"

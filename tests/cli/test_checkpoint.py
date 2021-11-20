@@ -17,6 +17,9 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    GETTING_STARTED_DATASOURCE_NAME,
+)
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
@@ -174,7 +177,9 @@ def titanic_data_context_with_spark_datasource(
 
     # noinspection PyUnusedLocal
     datasource: Datasource = context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
+        name=GETTING_STARTED_DATASOURCE_NAME,
+        yaml_config=datasource_config,
+        pretty_print=False,
     )
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -1087,6 +1092,11 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                        "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                    },
                     "batch_request_optional_top_level_keys": [
                         "data_connector_query",
                         "batch_spec_passthrough",
@@ -1424,6 +1434,11 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                        "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                    },
                     "batch_request_optional_top_level_keys": ["data_connector_query"],
                     "data_connector_query_keys": ["index"],
                 },
@@ -1580,7 +1595,13 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
         mock.call(
             {
                 "event": "data_context.get_batch_list",
-                "event_payload": {},
+                "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
+                        "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
+                        "anonymized_data_asset_name": "c30b60089ede018ad9680153ba85adaf",
+                    },
+                },
                 "success": True,
             }
         ),
@@ -1655,7 +1676,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
     run_name_template: "%Y-%M-foo-bar-template-$VAR"
     validations:
       - batch_request:
-          datasource_name: my_datasource
+          datasource_name: {GETTING_STARTED_DATASOURCE_NAME}
           data_connector_name: my_basic_data_connector
           batch_spec_passthrough:
             reader_options:
@@ -1739,6 +1760,11 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
+                        "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                        "anonymized_data_asset_name": "9104abd890c05a364f379443b9f43825",
+                    },
                     "batch_request_optional_top_level_keys": ["batch_spec_passthrough"],
                     "batch_spec_passthrough_keys": ["reader_options"],
                 },
@@ -1898,6 +1924,11 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                        "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                    },
                     "batch_request_optional_top_level_keys": ["data_connector_query"],
                     "data_connector_query_keys": ["index"],
                 },
@@ -2044,7 +2075,13 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
         mock.call(
             {
                 "event": "data_context.get_batch_list",
-                "event_payload": {},
+                "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
+                        "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
+                        "anonymized_data_asset_name": "61b23df5338c9164d0f9514847cba679",
+                    },
+                },
                 "success": True,
             }
         ),
@@ -2118,7 +2155,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     run_name_template: "%Y-%M-foo-bar-template-$VAR"
     validations:
       - batch_request:
-          datasource_name: my_datasource
+          datasource_name: {GETTING_STARTED_DATASOURCE_NAME}
           data_connector_name: my_basic_data_connector
           data_asset_name: Titanic_1911
           data_connector_query:
@@ -2194,6 +2231,11 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
+                        "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                        "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                    },
                     "batch_request_optional_top_level_keys": [
                         "data_connector_query",
                         "batch_spec_passthrough",
@@ -2357,6 +2399,11 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                        "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                    },
                     "batch_request_optional_top_level_keys": ["data_connector_query"],
                     "data_connector_query_keys": ["index"],
                 },
@@ -2499,7 +2546,13 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
         mock.call(
             {
                 "event": "data_context.get_batch_list",
-                "event_payload": {},
+                "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
+                        "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
+                        "anonymized_data_asset_name": "96a15275c07d53de6b4a9464704b12d8",
+                    },
+                },
                 "success": True,
             }
         ),
@@ -2573,7 +2626,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     run_name_template: "%Y-%M-foo-bar-template-$VAR"
     validations:
       - batch_request:
-          datasource_name: my_datasource
+          datasource_name: {GETTING_STARTED_DATASOURCE_NAME}
           data_connector_name: my_special_data_connector
           data_asset_name: users
           data_connector_query:
@@ -2651,6 +2704,11 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
+                        "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                        "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                    },
                     "batch_request_optional_top_level_keys": [
                         "data_connector_query",
                         "batch_spec_passthrough",

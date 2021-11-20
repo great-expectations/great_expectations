@@ -3,7 +3,7 @@ import datetime
 import json
 import logging
 import types
-from typing import Any, Callable, Optional, Set, Union
+from typing import Any, Callable, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
@@ -14,47 +14,6 @@ from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
-
-
-BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS: Set[str] = {
-    "datasource_name",
-    "data_connector_name",
-    "data_asset_name",
-}
-BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS: Set[str] = {
-    "data_connector_query",
-    "runtime_parameters",
-    "batch_identifiers",
-    "batch_spec_passthrough",
-}
-DATA_CONNECTOR_QUERY_KEYS: Set[str] = {
-    "batch_filter_parameters",
-    "limit",
-    "index",
-    "custom_filter_function",
-}
-RUNTIME_PARAMETERS_KEYS: Set[str] = {
-    "batch_data",
-    "query",
-    "path",
-}
-BATCH_SPEC_PASSTHROUGH_KEYS: Set[str] = {
-    "sampling_method",
-    "sampling_kwargs",
-    "splitter_method",
-    "splitter_kwargs",
-    "reader_method",
-    "reader_options",
-}
-BATCH_REQUEST_FLATTENED_KEYS: Set[str] = set().union(
-    *[
-        BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS,
-        BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS,
-        DATA_CONNECTOR_QUERY_KEYS,
-        RUNTIME_PARAMETERS_KEYS,
-        BATCH_SPEC_PASSTHROUGH_KEYS,
-    ]
-)
 
 
 class BatchDefinition(SerializableDictDot):
@@ -636,7 +595,7 @@ def get_batch_request_from_acceptable_arguments(
     path: Optional[str] = None,
     batch_filter_parameters: Optional[dict] = None,
     **kwargs,
-) -> Union[BatchRequest, RuntimeBatchRequest]:
+) -> Union[BatchRequest]:
     """Obtain formal BatchRequest typed object from allowed attributes (supplied as arguments).
     This method applies only to the new (V3) Datasource schema.
 
