@@ -16,7 +16,7 @@ anonymized_datasource_name_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-datasource-name",
     "definitions": {"anonymized_string": anonymized_string_schema},
-    "oneOf": [
+    "anyOf": [
         {
             "type": "string",
             "maxLength": 256,
@@ -543,6 +543,7 @@ usage_statistics_record_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
         "anonymized_datasource": anonymized_datasource_schema,
         "anonymized_store": anonymized_store_schema,
         "anonymized_class_info": anonymized_class_info_schema,
