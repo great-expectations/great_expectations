@@ -43,9 +43,8 @@ data_connectors:
 # Note : this override is for internal GE purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users.
 datasource_yaml = datasource_yaml.replace(
-    "getting_started_datasource", {GETTING_STARTED_DATASOURCE_NAME}
+    "getting_started_datasource", GETTING_STARTED_DATASOURCE_NAME
 )
-
 
 context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
@@ -60,9 +59,7 @@ batch_request = BatchRequest(
 
 # Note : this override is for internal GE purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users.
-batch_request = batch_request.replace(
-    "getting_started_datasource", {GETTING_STARTED_DATASOURCE_NAME}
-)
+batch_request.datasource_name = GETTING_STARTED_DATASOURCE_NAME
 
 expectation_suite_name = "getting_started_expectation_suite_taxi.demo"
 
@@ -132,14 +129,14 @@ validations:
 # Note : these overrides are for internal GE purposes, and are intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users
 my_checkpoint_config = my_checkpoint_config.replace(
-    "getting_started_checkpoint", {GETTING_STARTED_CHECKPOINT_NAME}
+    "getting_started_checkpoint", GETTING_STARTED_CHECKPOINT_NAME
 )
-yaml_config = yaml_config.replace(
-    "getting_started_datasource", {GETTING_STARTED_DATASOURCE_NAME}
+yaml_config = my_checkpoint_config.replace(
+    "getting_started_datasource", GETTING_STARTED_DATASOURCE_NAME
 )
 my_checkpoint_config = my_checkpoint_config.replace(
     "getting_started_expectation_suite_taxi.demo",
-    {GETTING_STARTED_EXPECTATION_SUITE_NAME},
+    GETTING_STARTED_EXPECTATION_SUITE_NAME,
 )
 
 
@@ -173,14 +170,14 @@ validations:
 # Note : this override is for internal GE purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users
 yaml_config = yaml_config.replace(
-    "getting_started_checkpoint", {GETTING_STARTED_CHECKPOINT_NAME}
+    "getting_started_checkpoint", GETTING_STARTED_CHECKPOINT_NAME
 )
 yaml_config = yaml_config.replace(
-    "getting_started_datasource", {GETTING_STARTED_DATASOURCE_NAME}
+    "getting_started_datasource", GETTING_STARTED_DATASOURCE_NAME
 )
 yaml_config = yaml_config.replace(
     "getting_started_expectation_suite_taxi.demo",
-    {GETTING_STARTED_EXPECTATION_SUITE_NAME},
+    GETTING_STARTED_EXPECTATION_SUITE_NAME,
 )
 
 my_new_checkpoint_config = yaml.load(yaml_config)
