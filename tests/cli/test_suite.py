@@ -2876,7 +2876,7 @@ suite = profiler.build_suite()"""
 
     assert mock_webbroser.call_count == 0
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -2901,6 +2901,19 @@ suite = profiler.build_suite()"""
             {
                 "event": "cli.suite.new.end",
                 "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                        "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                    },
+                },
                 "success": True,
             }
         ),
@@ -3086,7 +3099,7 @@ suite = profiler.build_suite()"""
 
     assert mock_webbroser.call_count == 0
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -3111,6 +3124,19 @@ suite = profiler.build_suite()"""
             {
                 "event": "cli.suite.new.end",
                 "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                        "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                    },
+                },
                 "success": True,
             }
         ),
