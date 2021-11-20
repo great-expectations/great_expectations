@@ -868,12 +868,14 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
 
         # If the file or directory exists, treat it appropriately
         # This handles files without extensions
+        filename: Optional[str]
+        directory: Optional[str]
         if config_file_location_path.is_file():
-            filename: Optional[str] = fr"{str(config_file_location_path.name)}"
-            directory: Optional[str] = fr"{str(config_file_location_path.parent)}"
+            filename = fr"{str(config_file_location_path.name)}"
+            directory = fr"{str(config_file_location_path.parent)}"
         elif config_file_location_path.is_dir():
-            filename: Optional[str] = None
-            directory: Optional[str] = config_file_location
+            filename = None
+            directory = config_file_location
 
         else:
             raise ge_exceptions.ConfigNotFoundError()
