@@ -134,6 +134,9 @@ validations:
 my_checkpoint_config = my_checkpoint_config.replace(
     "getting_started_checkpoint", {GETTING_STARTED_CHECKPOINT_NAME}
 )
+yaml_config = yaml_config.replace(
+    "getting_started_datasource", {GETTING_STARTED_DATASOURCE_NAME}
+)
 my_checkpoint_config = my_checkpoint_config.replace(
     "getting_started_expectation_suite_taxi.demo",
     {GETTING_STARTED_EXPECTATION_SUITE_NAME},
