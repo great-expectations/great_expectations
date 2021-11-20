@@ -59,7 +59,12 @@ batch_request = BatchRequest(
 
 # Note : this override is for internal GE purposes, and is intended to helps us better understand how the
 # Getting Started Guide is being used. It can be ignored by users.
-batch_request.datasource_name = GETTING_STARTED_DATASOURCE_NAME
+batch_request = BatchRequest(
+    datasource_name=GETTING_STARTED_DATASOURCE_NAME,
+    data_connector_name="default_inferred_data_connector_name",
+    data_asset_name="yellow_tripdata_sample_2019-01.csv",
+    limit=1000,
+)
 
 expectation_suite_name = "getting_started_expectation_suite_taxi.demo"
 
