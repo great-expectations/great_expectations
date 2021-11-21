@@ -51,10 +51,10 @@ class SimpleCheckpointConfigurator:
         self,
         name: str,
         data_context,
-        site_names: Optional[Union[str, List[str]]] = "all",
+        site_names: Union[str, List[str]] = "all",
         slack_webhook: Optional[str] = None,
-        notify_on: Optional[str] = "all",
-        notify_with: Optional[Union[str, List[str]]] = "all",
+        notify_on: str = "all",
+        notify_with: Union[str, List[str]] = "all",
         **kwargs,
     ):
         """

@@ -627,7 +627,7 @@ class LegacyCheckpoint(Checkpoint):
         evaluation_parameters: Optional[dict] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = {"result_format": "SUMMARY"},
+        result_format: Union[str, dict] = {"result_format": "SUMMARY"},
     ):
         result_format = result_format or {"result_format": "SUMMARY"}
 
@@ -787,10 +787,10 @@ class SimpleCheckpoint(Checkpoint):
         batches: Optional[List[dict]] = None,
         ge_cloud_id: Optional[UUID] = None,
         # the following four arguments are used by SimpleCheckpointConfigurator
-        site_names: Optional[Union[str, List[str]]] = "all",
+        site_names: Union[str, List[str]] = "all",
         slack_webhook: Optional[str] = None,
-        notify_on: Optional[str] = "all",
-        notify_with: Optional[Union[str, List[str]]] = "all",
+        notify_on: str = "all",
+        notify_with: Union[str, List[str]] = "all",
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ):
@@ -852,10 +852,10 @@ class SimpleCheckpoint(Checkpoint):
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[str] = None,
         # the following four arguments are specific to SimpleCheckpoint
-        site_names: Optional[Union[str, List[str]]] = "all",
+        site_names: Union[str, List[str]] = "all",
         slack_webhook: Optional[str] = None,
-        notify_on: Optional[str] = "all",
-        notify_with: Optional[Union[str, List[str]]] = "all",
+        notify_on: str = "all",
+        notify_with: Union[str, List[str]] = "all",
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:

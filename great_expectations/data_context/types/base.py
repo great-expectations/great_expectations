@@ -715,7 +715,7 @@ class DatasourceConfig(DictDot):
     def __init__(
         self,
         class_name=None,
-        module_name: Optional[str] = "great_expectations.datasource",
+        module_name: str = "great_expectations.datasource",
         execution_engine=None,
         data_connectors=None,
         data_asset_type=None,

@@ -1018,7 +1018,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                     .where(split_clause)
                 ).scalar()
-                p: Optional[float] = batch_spec["sampling_kwargs"]["p"] or 1.0
+                p: float = batch_spec["sampling_kwargs"]["p"] or 1.0
                 sample_size: int = round(p * num_rows)
                 return (
                     sa.select("*")
