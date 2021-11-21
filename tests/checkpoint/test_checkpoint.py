@@ -1421,14 +1421,14 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_sparkdf(
-    titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    spark_session,
+    titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 ):
     context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    spark = get_or_create_spark_application()
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    test_df_1 = spark_session.createDataFrame(pandas_df)
+    test_df_1 = spark.createDataFrame(pandas_df)
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})
-    test_df_2 = spark_session.createDataFrame(pandas_df)
+    test_df_2 = spark.createDataFrame(pandas_df)
 
     # add checkpoint config
     runtime_batch_request_1 = RuntimeBatchRequest(
