@@ -52,7 +52,7 @@ When you completed those last few steps, you told Great Expectations that:
 
 Based on that information, the CLI added the following entry into your ```great_expectations.yml``` file, under the datasources header:
 
-```yaml file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L17-L34
+```yaml file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L23-L40
 ```
 
 <details>

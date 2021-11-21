@@ -2,7 +2,8 @@ import copy
 import datetime
 import json
 import logging
-from typing import Any, Callable, Optional, Set, Union
+import types
+from typing import Any, Callable, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
@@ -13,28 +14,6 @@ from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
-
-
-BATCH_REQUEST_INSTANTIATION_KEYS: Set[str] = {
-    "datasource_name",
-    "data_connector_name",
-    "data_asset_name",
-    "batch_data",
-    "data_connector_query",
-    "batch_identifiers",
-    "limit",
-    "index",
-    "custom_filter_function",
-    "batch_spec_passthrough",
-    "sampling_method",
-    "sampling_kwargs",
-    "splitter_method",
-    "splitter_kwargs",
-    "runtime_parameters",
-    "query",
-    "path",
-    "batch_filter_parameters",
-}
 
 
 class BatchDefinition(SerializableDictDot):
@@ -589,7 +568,7 @@ def get_batch_request_from_acceptable_arguments(
     path: Optional[str] = None,
     batch_filter_parameters: Optional[dict] = None,
     **kwargs,
-) -> Union[BatchRequest, RuntimeBatchRequest]:
+) -> Union[BatchRequest]:
     """Obtain formal BatchRequest typed object from allowed attributes (supplied as arguments).
     This method applies only to the new (V3) Datasource schema.
 
