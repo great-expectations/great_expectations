@@ -1,7 +1,7 @@
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Dict, Union, Optional
+from typing import Any, Dict, Optional, Union
 
 import jsonpatch
 
@@ -62,10 +62,7 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
 
 
 class ExpectationContext(SerializableDictDot):
-    def __init__(
-            self,
-            description: Optional[str] = None
-    ):
+    def __init__(self, description: Optional[str] = None):
         self._description = description
 
     @property
@@ -945,7 +942,7 @@ class ExpectationConfiguration(SerializableDictDot):
         meta=None,
         success_on_last_run=None,
         ge_cloud_id=None,
-        expectation_context: Optional[ExpectationContext] = None
+        expectation_context: Optional[ExpectationContext] = None,
     ):
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
