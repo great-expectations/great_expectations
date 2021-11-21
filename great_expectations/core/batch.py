@@ -2,7 +2,6 @@ import copy
 import datetime
 import json
 import logging
-import types
 from typing import Any, Callable, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
