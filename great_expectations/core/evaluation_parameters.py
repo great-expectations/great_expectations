@@ -337,6 +337,7 @@ def parse_evaluation_parameter(
 
     if len(L) == 1 and isinstance(L[0], tuple) and L[0][-1] is False:
         # Necessary to catch `now()` (which only needs to be evaluated with `expr.exprStack`)
+        # NOTE: 20211122 - Chetan - Any future built-ins that are zero arity functions will match this behavior
         pass
 
     elif len(L) == 1 and L[0] not in evaluation_parameters:
