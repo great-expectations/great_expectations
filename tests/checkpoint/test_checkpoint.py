@@ -1405,30 +1405,32 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_sparkdf(
-    titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    sa,
+    data_context_with_datasource_spark_engine,
+    spark_session,
 ):
-    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    test_df = get_or_create_spark_application().createDataFrame(pandas_df)
+    test_df_1 = spark_session.createDataFrame(pandas_df)
+    pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})
+    test_df_2 = spark_session.createDataFrame(pandas_df)
+
     # add checkpoint config
-    batch_request = BatchRequest(
+    runtime_batch_request_1 = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "my_basic_data_connector",
-            "data_asset_name": "Titanic_1911",
+            "data_connector_name": "default_runtime_data_connector_name",
+            "data_asset_name": "test_df_1",
+            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "runtime_parameters": {"batch_data": test_df_1},
         }
     )
-    runtime_batch_request = RuntimeBatchRequest(
+    runtime_batch_request_2 = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "test_df",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
-            "runtime_parameters": {"batch_data": test_df},
+            "data_connector_name": "default_runtime_data_connector_name",
+            "data_asset_name": "test_df_2",
+            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "runtime_parameters": {"batch_data": test_df_2},
         }
     )
     checkpoint = Checkpoint(
@@ -1458,8 +1460,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             },
         ],
         validations=[
-            {"batch_request": runtime_batch_request},
-            {"batch_request": batch_request},
+            {"batch_request": runtime_batch_request_1},
+            {"batch_request": runtime_batch_request_2},
         ],
     )
     with pytest.raises(
