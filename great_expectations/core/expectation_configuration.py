@@ -1045,6 +1045,10 @@ class ExpectationConfiguration(SerializableDictDot):
         else:
             return None
 
+    @expectation_context.setter
+    def expectation_context(self, value):
+        self._expectation_context = value
+
     @property
     def expectation_type(self):
         return self._expectation_type
