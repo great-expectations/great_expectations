@@ -3258,7 +3258,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         """
         # TODO mark experimental
         batch_request, validations = get_batch_request_dict(batch_request, validations)
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
+        checkpoint: Union[Checkpoint, SimpleCheckpoint, LegacyCheckpoint] = self.get_checkpoint(
             name=checkpoint_name, ge_cloud_id=ge_cloud_id
         )
         checkpoint_config_from_store: dict = checkpoint.config.to_json_dict()

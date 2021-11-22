@@ -3113,6 +3113,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint = {
+        "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
         "run_name_template": "%Y-%M-foo-bar-template",
@@ -3169,6 +3170,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint = {
+        "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
         "run_name_template": "%Y-%M-foo-bar-template",
@@ -3226,6 +3228,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint = {
+        "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
         "run_name_template": "%Y-%M-foo-bar-template",
@@ -3283,6 +3286,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint = {
+        "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
         "run_name_template": "%Y-%M-foo-bar-template",
@@ -3339,6 +3343,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint = {
+        "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
         "run_name_template": "%Y-%M-foo-bar-template",
@@ -3396,6 +3401,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint = {
+        "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
         "run_name_template": "%Y-%M-foo-bar-template",
@@ -3460,6 +3466,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint = {
+        "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
         "run_name_template": "%Y-%M-foo-bar-template",
@@ -3525,6 +3532,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint = {
+        "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
         "run_name_template": "%Y-%M-foo-bar-template",
@@ -3589,6 +3597,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint = {
+        "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
         "run_name_template": "%Y-%M-foo-bar-template",
@@ -3656,6 +3665,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     # add checkpoint config
     checkpoint = {
+        "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
         "run_name_template": "%Y-%M-foo-bar-template",
