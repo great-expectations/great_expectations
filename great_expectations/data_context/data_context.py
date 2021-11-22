@@ -3075,26 +3075,25 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if checkpoint_config.get("validations") is not None:
             for val in checkpoint_config["validations"]:
                 if (
-                        val.get("batch_request") is not None
-                        and val["batch_request"].get("runtime_parameters") is not None
-                        and val["batch_request"]["runtime_parameters"].get("batch_data")
-                        is not None
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data")
+                    is not None
                 ):
                     batch_data_list.append(
                         val["batch_request"]["runtime_parameters"].pop("batch_data")
                     )
         elif (
-                checkpoint_config.get("batch_request") is not None
-                and checkpoint_config["batch_request"].get("runtime_parameters")
-                is not None
-                and checkpoint_config["batch_request"]["runtime_parameters"].get(
-            "batch_data"
-        )
-                is not None
+            checkpoint_config.get("batch_request") is not None
+            and checkpoint_config["batch_request"].get("runtime_parameters") is not None
+            and checkpoint_config["batch_request"]["runtime_parameters"].get(
+                "batch_data"
+            )
+            is not None
         ):
-            batch_data = checkpoint_config["batch_request"][
-                "runtime_parameters"
-            ].pop("batch_data")
+            batch_data = checkpoint_config["batch_request"]["runtime_parameters"].pop(
+                "batch_data"
+            )
         checkpoint_config = filter_properties_dict(
             properties=checkpoint_config, clean_falsy=True
         )
@@ -3110,7 +3109,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ] = batch_data
 
         new_checkpoint: Union[
-            Checkpoint, LegacyCheckpoint
+            Checkpoint, SimpleCheckpoint, LegacyCheckpoint
         ] = instantiate_class_from_config(
             config=checkpoint_config,
             runtime_environment={

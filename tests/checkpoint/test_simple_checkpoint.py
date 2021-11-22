@@ -2187,13 +2187,13 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
-        name="my_checkpoint",
-        data_context=context,
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
-        expectation_suite_name="my_expectation_suite",
-        action_list=[
+    checkpoint = {
+        "class_name": "SimpleCheckpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
             {
                 "name": "store_validation_result",
                 "action": {
@@ -2213,9 +2213,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-    )
+    }
 
-    context.add_checkpoint(checkpoint)
+    context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(batch_request=batch_request)
 
@@ -2225,6 +2225,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_context_run_checkpoint_pandas(
     data_context_with_datasource_pandas_engine,
+    webhook,
 ):
     context: DataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
@@ -2244,13 +2245,13 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
-        name="my_checkpoint",
-        data_context=context,
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
-        expectation_suite_name="my_expectation_suite",
-        action_list=[
+    checkpoint = {
+        "class_name": "SimpleCheckpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
             {
                 "name": "store_validation_result",
                 "action": {
@@ -2270,9 +2271,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-    )
+    }
 
-    context.add_checkpoint(checkpoint)
+    context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(batch_request=batch_request)
 
@@ -2302,13 +2303,13 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
-        name="my_checkpoint",
-        data_context=context,
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
-        expectation_suite_name="my_expectation_suite",
-        action_list=[
+    checkpoint = {
+        "class_name": "SimpleCheckpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
             {
                 "name": "store_validation_result",
                 "action": {
@@ -2328,9 +2329,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-    )
+    }
 
-    context.add_checkpoint(checkpoint)
+    context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(batch_request=batch_request)
 
@@ -2360,13 +2361,13 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
-        name="my_checkpoint",
-        data_context=context,
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
-        expectation_suite_name="my_expectation_suite",
-        action_list=[
+    checkpoint = {
+        "class_name": "SimpleCheckpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
             {
                 "name": "store_validation_result",
                 "action": {
@@ -2386,9 +2387,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-    )
+    }
 
-    context.add_checkpoint(checkpoint)
+    context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(validations=[{"batch_request": batch_request}])
 
@@ -2417,13 +2418,13 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
-        name="my_checkpoint",
-        data_context=context,
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
-        expectation_suite_name="my_expectation_suite",
-        action_list=[
+    checkpoint = {
+        "class_name": "SimpleCheckpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
             {
                 "name": "store_validation_result",
                 "action": {
@@ -2443,9 +2444,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-    )
+    }
 
-    context.add_checkpoint(checkpoint)
+    context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(validations=[{"batch_request": batch_request}])
 
@@ -2475,13 +2476,13 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
-        name="my_checkpoint",
-        data_context=context,
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
-        expectation_suite_name="my_expectation_suite",
-        action_list=[
+    checkpoint = {
+        "class_name": "SimpleCheckpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
             {
                 "name": "store_validation_result",
                 "action": {
@@ -2501,9 +2502,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-    )
+    }
 
-    context.add_checkpoint(checkpoint)
+    context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(validations=[{"batch_request": batch_request}])
 
@@ -2539,14 +2540,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         }
     )
 
-    # add simple checkpoint config
-    checkpoint = SimpleCheckpoint(
-        name="my_checkpoint",
-        data_context=context,
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
-        expectation_suite_name="my_expectation_suite",
-        action_list=[
+    # add checkpoint config
+    checkpoint = {
+        "class_name": "SimpleCheckpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
             {
                 "name": "store_validation_result",
                 "action": {
@@ -2566,9 +2567,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-    )
+    }
 
-    context.add_checkpoint(checkpoint)
+    context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(batch_request=batch_request)
 
@@ -2606,13 +2607,13 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
-        name="my_checkpoint",
-        data_context=context,
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
-        expectation_suite_name="my_expectation_suite",
-        action_list=[
+    checkpoint = {
+        "class_name": "SimpleCheckpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
             {
                 "name": "store_validation_result",
                 "action": {
@@ -2632,9 +2633,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-    )
+    }
 
-    context.add_checkpoint(checkpoint)
+    context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(batch_request=batch_request)
 
@@ -2670,14 +2671,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         }
     )
 
-    # add simple checkpoint config
-    checkpoint = SimpleCheckpoint(
-        name="my_checkpoint",
-        data_context=context,
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
-        expectation_suite_name="my_expectation_suite",
-        action_list=[
+    # add checkpoint config
+    checkpoint = {
+        "class_name": "SimpleCheckpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
             {
                 "name": "store_validation_result",
                 "action": {
@@ -2697,9 +2698,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-    )
+    }
 
-    context.add_checkpoint(checkpoint)
+    context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(validations=[{"batch_request": batch_request}])
 
@@ -2737,13 +2738,13 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
-        name="my_checkpoint",
-        data_context=context,
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
-        expectation_suite_name="my_expectation_suite",
-        action_list=[
+    checkpoint = {
+        "class_name": "SimpleCheckpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
             {
                 "name": "store_validation_result",
                 "action": {
@@ -2763,9 +2764,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-    )
+    }
 
-    context.add_checkpoint(checkpoint)
+    context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(validations=[{"batch_request": batch_request}])
 
