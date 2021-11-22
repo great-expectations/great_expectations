@@ -145,14 +145,19 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
-
         try:
             assert (
                 "quantile_ranges" in configuration.kwargs
-            ), "quantile ranges must be provided"
+            ), "quantile_ranges must be provided"
             assert isinstance(
                 configuration.kwargs["quantile_ranges"], dict
             ), "quantile_ranges should be a dictionary"
+            assert all(
+                [
+                    True if None in x or x == sorted(x) else False
+                    for x in configuration.kwargs["quantile_ranges"]["value_ranges"]
+                ]
+            ), "quantile_ranges must consist of ordered pairs"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

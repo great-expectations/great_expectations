@@ -39,7 +39,7 @@
           "suppress_test_for": ["sqlite"]
         },
         {
-          "title": "basic_positive_test_normal_quartiles",
+          "title": "basic_positive_test_normal_quantiles",
           "exact_match_out": false,
           "in": {
             "column": "norm_0_1",
@@ -81,7 +81,7 @@
           "_note": "The large tolerance here documents implementation differences between pandas, sql, and spark wrt interpolation behavior / specific ntile calculation"
       },
         {
-          "title": "basic_negative_test_normal_quartiles_wrong_distribution",
+          "title": "basic_negative_test_normal_quantiles_wrong_distribution",
           "exact_match_out": false,
           "in": {
             "column": "norm_1_1",
@@ -92,6 +92,22 @@
           },
           "out": {
             "success": false
+          },
+          "suppress_test_for": ["sqlite"]
+        },
+      {
+          "title": "basic_negative_test_disordered_quantile_ranges",
+          "exact_match_out": false,
+          "in": {
+            "column": "norm_1_1",
+            "quantile_ranges": {
+              "quantiles": [0.0, 0.25, 0.5, 0.75, 1.0],
+              "value_ranges": [[-3, null], [-0.6, -0.8], [-0.1, 0.1], [0.8, 0.6], [3, null]]
+            }
+          },
+          "out": {},
+          "error": {
+            "traceback_substring":"quantile_ranges must consist of ordered pairs"
           },
           "suppress_test_for": ["sqlite"]
         }
