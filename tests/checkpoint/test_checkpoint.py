@@ -3870,12 +3870,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     batch_request = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "Titanic_19120414_1313.csv",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
+            "data_connector_name": "default_runtime_data_connector_name",
+            "data_asset_name": "test_df_1",
+            "batch_identifiers": {"default_identifier_name": "test_identifier"},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -3913,18 +3910,13 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     context.add_checkpoint(**checkpoint_config)
     checkpoint = context.get_checkpoint(name="my_checkpoint")
 
-    assert type(checkpoint.config.batch_request["runtime_parameters"]["batch_data"]) == pd.DataFrame
-
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})
     batch_request = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "my_runtime_data_connector",
-            "data_asset_name": "Titanic_19120414_1313.csv",
-            "batch_identifiers": {
-                "pipeline_stage_name": "core_processing",
-                "airflow_run_id": 1234567890,
-            },
+            "data_connector_name": "default_runtime_data_connector_name",
+            "data_asset_name": "test_df_2",
+            "batch_identifiers": {"default_identifier_name": "test_identifier"},
             "runtime_parameters": {"batch_data": test_df},
         }
     )
