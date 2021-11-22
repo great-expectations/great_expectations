@@ -310,5 +310,23 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
     )
 
 
-def test_now_evaluation_parameter_by_itself():
-    parse_evaluation_parameter("now()")
+def test_now_evaluation_parameter():
+    """
+    now() is unique in the fact that it is the only evaluation param built-in that has zero arity (takes no arguments).
+    The following tests ensure that it is appropriately accounted for in a variety of contexts.
+    """
+    # By itself
+    res = parse_evaluation_parameter("now()")
+    assert dateutil.parser.parse(
+        res
+    ), "Provided evaluation parameter is not dateutil-parseable"
+
+    # In conjunction with timedelta
+    res = parse_evaluation_parameter("now() - timedelta(weeks=1)")
+    assert dateutil.parser.parse(
+        res
+    ), "Provided evaluation parameter is not dateutil-parseable"
+
+    # Require parens to actually invoke
+    with pytest.raises(EvaluationParameterError):
+        parse_evaluation_parameter("now")
