@@ -28,7 +28,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                * ``quantiles``: (list of float) increasing ordered list of desired quantile values
 
                * ``value_ranges``: (list of lists): Each element in this list consists of a list with two values, a lower \
-                 and upper bound (inclusive) for the corresponding quantile.
+                 and upper bound (inclusive) for the corresponding quantile. These values must be [min, max] ordered.
 
 
            For each provided range:
