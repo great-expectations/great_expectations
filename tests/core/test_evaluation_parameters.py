@@ -313,7 +313,7 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
 def test_now_evaluation_parameter():
     """
     now() is unique in the fact that it is the only evaluation param built-in that has zero arity (takes no arguments).
-    The following tests ensure that it is appropriately accounted for in a variety of contexts.
+    The following tests ensure that it is properly parsed and evaluated in a variety of contexts.
     """
     # By itself
     res = parse_evaluation_parameter("now()")

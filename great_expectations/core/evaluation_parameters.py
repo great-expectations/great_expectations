@@ -336,7 +336,7 @@ def parse_evaluation_parameter(
         L = ["Parse Failure", parameter_expression, (str(err), err.line, err.column)]
 
     if len(L) == 1 and isinstance(L[0], tuple) and L[0][-1] is False:
-        # Necessary to catch `now()` which only needs to be evaluated with `expr.exprStack`)
+        # Necessary to catch `now()` (which only needs to be evaluated with `expr.exprStack`)
         pass
 
     elif len(L) == 1 and L[0] not in evaluation_parameters:
