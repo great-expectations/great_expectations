@@ -2217,7 +2217,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
     context.add_checkpoint(**checkpoint)
 
-    results = context.run_checkpoint(name="my_checkpoint", batch_request=batch_request)
+    results = context.run_checkpoint(
+        checkpoint_name="my_checkpoint", batch_request=batch_request
+    )
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
@@ -2275,7 +2277,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
     context.add_checkpoint(**checkpoint)
 
-    results = context.run_checkpoint(name="my_checkpoint", batch_request=batch_request)
+    results = context.run_checkpoint(
+        checkpoint_name="my_checkpoint", batch_request=batch_request
+    )
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
@@ -2333,7 +2337,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
     context.add_checkpoint(**checkpoint)
 
-    results = context.run_checkpoint(name="my_checkpoint", batch_request=batch_request)
+    results = context.run_checkpoint(
+        checkpoint_name="my_checkpoint", batch_request=batch_request
+    )
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
@@ -2392,7 +2398,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(
-        name="my_checkpoint", validations=[{"batch_request": batch_request}]
+        checkpoint_name="my_checkpoint", validations=[{"batch_request": batch_request}]
     )
 
     assert len(context.validations_store.list_keys()) == 1
@@ -2451,7 +2457,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(
-        name="my_checkpoint", validations=[{"batch_request": batch_request}]
+        checkpoint_name="my_checkpoint", validations=[{"batch_request": batch_request}]
     )
 
     assert len(context.validations_store.list_keys()) == 1
@@ -2511,7 +2517,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(
-        name="my_checkpoint", validations=[{"batch_request": batch_request}]
+        checkpoint_name="my_checkpoint", validations=[{"batch_request": batch_request}]
     )
 
     assert len(context.validations_store.list_keys()) == 1
@@ -2577,7 +2583,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
     context.add_checkpoint(**checkpoint)
 
-    results = context.run_checkpoint(name="my_checkpoint", batch_request=batch_request)
+    results = context.run_checkpoint(
+        checkpoint_name="my_checkpoint", batch_request=batch_request
+    )
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
@@ -2643,7 +2651,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
     context.add_checkpoint(**checkpoint)
 
-    results = context.run_checkpoint(name="my_checkpoint", batch_request=batch_request)
+    results = context.run_checkpoint(
+        checkpoint_name="my_checkpoint", batch_request=batch_request
+    )
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
@@ -2709,7 +2719,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(
-        name="my_checkpoint", validations=[{"batch_request": batch_request}]
+        checkpoint_name="my_checkpoint", validations=[{"batch_request": batch_request}]
     )
 
     assert len(context.validations_store.list_keys()) == 1
@@ -2777,7 +2787,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     context.add_checkpoint(**checkpoint)
 
     results = context.run_checkpoint(
-        name="my_checkpoint", validations=[{"batch_request": batch_request}]
+        checkpoint_name="my_checkpoint", validations=[{"batch_request": batch_request}]
     )
 
     assert len(context.validations_store.list_keys()) == 1
