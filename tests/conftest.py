@@ -2322,6 +2322,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
 def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
     tmp_path_factory,
     monkeypatch,
+    spark_session,
 ):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
