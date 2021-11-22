@@ -553,7 +553,7 @@ usage_statistics_record_schema = {
         "init_payload": init_payload_schema,
         "run_validation_operator_payload": run_validation_operator_payload_schema,
         "anonymized_data_docs_site": anonymized_data_docs_site_schema,
-        "anonymized_batch_request_keys": anonymized_batch_request_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
@@ -603,9 +603,7 @@ usage_statistics_record_schema = {
             "type": "object",
             "properties": {
                 "event": {"enum": ["data_context.get_batch_list"]},
-                "event_payload": {
-                    "$ref": "#/definitions/anonymized_batch_request_keys"
-                },
+                "event_payload": {"$ref": "#/definitions/anonymized_batch_request"},
             },
         },
         {
@@ -645,6 +643,7 @@ usage_statistics_record_schema = {
                     "enum": [
                         "data_context.build_data_docs",
                         "data_context.open_data_docs",
+                        "data_context.run_checkpoint",
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
