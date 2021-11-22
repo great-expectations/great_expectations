@@ -201,10 +201,10 @@ class ExpectationSuite(SerializableDictDot):
 
     def get_citations(
         self,
-        sort: Optional[bool] = True,
-        require_batch_kwargs: Optional[bool] = False,
-        require_batch_request: Optional[bool] = False,
-        require_profiler_config: Optional[bool] = False,
+        sort: bool = True,
+        require_batch_kwargs: bool = False,
+        require_batch_request: bool = False,
+        require_profiler_config: bool = False,
     ) -> List[Dict[str, Any]]:
         citations: List[Dict[str, Any]] = self.meta.get("citations", [])
         if require_batch_kwargs:
