@@ -1890,9 +1890,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    spark_session,
 ):
     context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    spark = get_or_create_spark_application()
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
@@ -2896,9 +2896,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    spark_session,
 ):
     context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    spark = get_or_create_spark_application()
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
@@ -3028,9 +3028,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_checkpoint_run_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    spark_session,
 ):
     context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    spark = get_or_create_spark_application()
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
