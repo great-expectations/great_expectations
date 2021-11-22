@@ -3226,6 +3226,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         else:
             return [x.configuration_key for x in self.checkpoint_store.list_keys()]
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.run_checkpoint",
+    )
     def run_checkpoint(
         self,
         checkpoint_name: Optional[str] = None,

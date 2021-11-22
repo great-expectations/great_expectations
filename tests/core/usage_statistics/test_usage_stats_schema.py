@@ -58,6 +58,7 @@ def test_comprehensive_list_of_messages():
         "data_context.get_batch_list",
         "data_context.build_data_docs",
         "data_context.open_data_docs",
+        "data_context.run_checkpoint",
         "data_context.save_expectation_suite",
         "data_context.test_yaml_config",
         "datasource.sqlalchemy.connect",
@@ -235,6 +236,7 @@ def test_usage_stats_empty_payload_messages():
     usage_stats_records_messages = [
         "data_context.build_data_docs",
         "data_context.open_data_docs",
+        "data_context.run_checkpoint",
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
