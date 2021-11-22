@@ -1091,7 +1091,9 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run(validations=[{"batch_request": batch_request}],)
+    results = checkpoint.run(
+        validations=[{"batch_request": batch_request}],
+    )
 
     assert len(context.validations_store.list_keys()) == 1
     assert results["success"] == True
