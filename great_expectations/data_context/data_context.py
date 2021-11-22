@@ -29,6 +29,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     IDDict,
     RuntimeBatchRequest,
+    get_batch_request_dict,
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -3222,7 +3223,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             CheckpointResult
         """
         # TODO mark experimental
-        batch_request = batch_request or {}
+        batch_request, validations = get_batch_request_dict(batch_request, validations)
         checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
             name=checkpoint_name, ge_cloud_id=ge_cloud_id
         )
@@ -3263,9 +3264,44 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         }
         checkpoint_config.update(checkpoint_config_from_call_args)
         if not self.ge_cloud_mode:
+            batch_data_list = []
+            batch_data = None
+            if checkpoint_config.get("validations") is not None:
+                for val in checkpoint_config["validations"]:
+                    if (
+                        val.get("batch_request") is not None
+                        and val["batch_request"].get("runtime_parameters") is not None
+                        and val["batch_request"]["runtime_parameters"].get("batch_data")
+                        is not None
+                    ):
+                        batch_data_list.append(
+                            val["batch_request"]["runtime_parameters"].pop("batch_data")
+                        )
+            elif (
+                checkpoint_config.get("batch_request") is not None
+                and checkpoint_config["batch_request"].get("runtime_parameters")
+                is not None
+                and checkpoint_config["batch_request"]["runtime_parameters"].get(
+                    "batch_data"
+                )
+                is not None
+            ):
+                batch_data = checkpoint_config["batch_request"][
+                    "runtime_parameters"
+                ].pop("batch_data")
             checkpoint_config = filter_properties_dict(
                 properties=checkpoint_config, clean_falsy=True
             )
+            if len(batch_data_list) > 0:
+                for idx, val in enumerate(checkpoint_config.get("validations")):
+                    if batch_data_list[idx] is not None:
+                        val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ] = batch_data_list[idx]
+            elif batch_data is not None:
+                checkpoint_config["batch_request"]["runtime_parameters"][
+                    "batch_data"
+                ] = batch_data
 
         checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
 
