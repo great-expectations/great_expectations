@@ -1995,7 +1995,9 @@ class CheckpointConfig(BaseYamlConfig):
             if batches is not None and isinstance(batches, list):
                 self.batches = batches
         else:
-            batch_request, validations = get_batch_request_dict(batch_request, validations)
+            batch_request, validations = get_batch_request_dict(
+                batch_request, validations
+            )
 
             class_name = class_name or "Checkpoint"
             self._template_name = template_name
@@ -2100,7 +2102,9 @@ class CheckpointConfig(BaseYamlConfig):
                 batch_request = batch_request or {}
                 runtime_batch_request = runtime_kwargs.get("batch_request")
                 if isinstance(runtime_batch_request, BatchRequest):
-                    batch_request = nested_update(batch_request, runtime_batch_request.to_json_dict())
+                    batch_request = nested_update(
+                        batch_request, runtime_batch_request.to_json_dict()
+                    )
                 else:
                     batch_request = nested_update(batch_request, runtime_batch_request)
                 self._batch_request = batch_request

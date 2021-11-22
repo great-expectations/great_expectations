@@ -736,14 +736,12 @@ def get_batch_request_dict(
     if validations:
         for val in validations:
             if val.get("batch_request") is not None and isinstance(
-                    val["batch_request"], BatchRequest
+                val["batch_request"], BatchRequest
             ):
                 if (
-                        val["batch_request"].runtime_parameters is not None
-                        and val["batch_request"].runtime_parameters.get(
-                    "batch_data"
-                )
-                        is not None
+                    val["batch_request"].runtime_parameters is not None
+                    and val["batch_request"].runtime_parameters.get("batch_data")
+                    is not None
                 ):
                     batch_data = val["batch_request"].runtime_parameters.get(
                         "batch_data"
