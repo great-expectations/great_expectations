@@ -58,6 +58,7 @@ def test_comprehensive_list_of_messages():
         "data_context.get_batch_list",
         "data_context.build_data_docs",
         "data_context.open_data_docs",
+        "data_context.run_checkpoint",
         "data_context.save_expectation_suite",
         "data_context.test_yaml_config",
         "datasource.sqlalchemy.connect",
