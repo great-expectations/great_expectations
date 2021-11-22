@@ -7,7 +7,7 @@ import pandas
 import pytest
 
 from great_expectations.core import ExpectationValidationResult
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     find_evaluation_parameter_dependencies,
@@ -133,6 +133,8 @@ def test_parser_timing():
 
 def test_math_evaluation_paramaters():
     assert parse_evaluation_parameter("sin(2*PI)") == math.sin(math.pi * 2)
+    assert parse_evaluation_parameter("cos(2*PI)") == math.cos(math.pi * 2)
+    assert parse_evaluation_parameter("tan(2*PI)") == math.tan(math.pi * 2)
 
 
 def test_temporal_evaluation_parameters():
@@ -306,3 +308,7 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
             "result": {"observed_value": 3},
         }
     )
+
+
+def test_now_evaluation_parameter_by_itself():
+    parse_evaluation_parameter("now()")
