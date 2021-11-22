@@ -3040,6 +3040,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
 
+        batch_request, validations = get_batch_request_dict(batch_request, validations)
+
         checkpoint_config: Union[CheckpointConfig, dict]
 
         checkpoint_config = {
@@ -3068,9 +3070,45 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
+        batch_data_list = []
+        batch_data = None
+        if checkpoint_config.get("validations") is not None:
+            for val in checkpoint_config["validations"]:
+                if (
+                        val.get("batch_request") is not None
+                        and val["batch_request"].get("runtime_parameters") is not None
+                        and val["batch_request"]["runtime_parameters"].get("batch_data")
+                        is not None
+                ):
+                    batch_data_list.append(
+                        val["batch_request"]["runtime_parameters"].pop("batch_data")
+                    )
+        elif (
+                checkpoint_config.get("batch_request") is not None
+                and checkpoint_config["batch_request"].get("runtime_parameters")
+                is not None
+                and checkpoint_config["batch_request"]["runtime_parameters"].get(
+            "batch_data"
+        )
+                is not None
+        ):
+            batch_data = checkpoint_config["batch_request"][
+                "runtime_parameters"
+            ].pop("batch_data")
         checkpoint_config = filter_properties_dict(
             properties=checkpoint_config, clean_falsy=True
         )
+        if len(batch_data_list) > 0:
+            for idx, val in enumerate(checkpoint_config.get("validations")):
+                if batch_data_list[idx] is not None:
+                    val["batch_request"]["runtime_parameters"][
+                        "batch_data"
+                    ] = batch_data_list[idx]
+        elif batch_data is not None:
+            checkpoint_config["batch_request"]["runtime_parameters"][
+                "batch_data"
+            ] = batch_data
+
         new_checkpoint: Union[
             Checkpoint, LegacyCheckpoint
         ] = instantiate_class_from_config(
