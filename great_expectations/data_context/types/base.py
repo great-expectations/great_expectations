@@ -11,7 +11,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import BatchRequest, get_batch_request_dict
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.marshmallow__shade import (
     INCLUDE,
@@ -1995,35 +1995,9 @@ class CheckpointConfig(BaseYamlConfig):
             if batches is not None and isinstance(batches, list):
                 self.batches = batches
         else:
-            if isinstance(batch_request, BatchRequest):
-                if batch_request.runtime_parameters.get("batch_data") is not None:
-                    batch_data = batch_request.runtime_parameters.get("batch_data")
-                    batch_request = batch_request.to_json_dict()
-                    batch_request["runtime_parameters"]["batch_data"] = batch_data
-                else:
-                    batch_request = batch_request.to_json_dict()
-
-            if validations:
-                for val in validations:
-                    if val.get("batch_request") is not None and isinstance(
-                        val["batch_request"], BatchRequest
-                    ):
-                        if (
-                            val["batch_request"].runtime_parameters is not None
-                            and val["batch_request"].runtime_parameters.get(
-                                "batch_data"
-                            )
-                            is not None
-                        ):
-                            batch_data = val["batch_request"].runtime_parameters.get(
-                                "batch_data"
-                            )
-                            val["batch_request"] = val["batch_request"].to_json_dict()
-                            val["batch_request"]["runtime_parameters"][
-                                "batch_data"
-                            ] = batch_data
-                        else:
-                            val["batch_request"] = val["batch_request"].to_json_dict()
+            batch_request, validations = get_batch_request_dict(
+                batch_request, validations
+            )
 
             class_name = class_name or "Checkpoint"
             self._template_name = template_name
@@ -2127,7 +2101,12 @@ class CheckpointConfig(BaseYamlConfig):
                 batch_request = self.batch_request
                 batch_request = batch_request or {}
                 runtime_batch_request = runtime_kwargs.get("batch_request")
-                batch_request = nested_update(batch_request, runtime_batch_request)
+                if isinstance(runtime_batch_request, BatchRequest):
+                    batch_request = nested_update(
+                        batch_request, runtime_batch_request.to_json_dict()
+                    )
+                else:
+                    batch_request = nested_update(batch_request, runtime_batch_request)
                 self._batch_request = batch_request
             if runtime_kwargs.get("action_list") is not None:
                 self.action_list = self.get_updated_action_list(
