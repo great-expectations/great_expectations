@@ -235,6 +235,7 @@ def test_usage_stats_empty_payload_messages():
     usage_stats_records_messages = [
         "data_context.build_data_docs",
         "data_context.open_data_docs",
+        "data_context.run_checkpoint",
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:
