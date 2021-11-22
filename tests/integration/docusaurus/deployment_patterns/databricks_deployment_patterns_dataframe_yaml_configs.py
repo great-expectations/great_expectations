@@ -151,7 +151,7 @@ my_checkpoint = context.test_yaml_config(my_checkpoint_config)
 
 context.add_checkpoint(**yaml.load(my_checkpoint_config))
 
-checkpoint_result = context.run_checkpoint(
+checkpoint_result = my_checkpoint.run(
     checkpoint_name=my_checkpoint_name,
     validations=[
         {
