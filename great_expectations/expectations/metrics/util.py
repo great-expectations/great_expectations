@@ -57,6 +57,13 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 try:
+    import sqlalchemy_dremio.pyodbc
+
+    registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
+except ImportError:
+    sqlalchemy_dremio = None
+
+try:
     import pybigquery.sqlalchemy_bigquery
 
     ###
@@ -89,6 +96,12 @@ except ImportError:
     bigquery_types_tuple = None
     pybigquery = None
     namedtuple = None
+
+try:
+    import teradatasqlalchemy.dialect
+    import teradatasqlalchemy.types as teradatatypes
+except ImportError:
+    teradatasqlalchemy = None
 
 
 def get_dialect_regex_expression(column, regex, dialect, positive=True):
@@ -159,6 +172,29 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         )
         pass
 
+    try:
+        # Dremio
+        if hasattr(dialect, "DremioDialect"):
+            if positive:
+                return sa.func.REGEXP_MATCHES(column, literal(regex))
+            else:
+                return sa.not_(sa.func.REGEXP_MATCHES(column, literal(regex)))
+    except (
+        AttributeError,
+        TypeError,
+    ):  # TypeError can occur if the driver was not installed and so is None
+        pass
+
+    try:
+        # Teradata
+        if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):
+            if positive:
+                return sa.func.REGEXP_SIMILAR(column, literal(regex), literal("i")) == 1
+            else:
+                return sa.func.REGEXP_SIMILAR(column, literal(regex), literal("i")) == 0
+    except (AttributeError, TypeError):
+        pass
+
     return None
 
 
@@ -186,6 +222,19 @@ def _get_dialect_type_module(dialect=None):
             and bigquery_types_tuple is not None
         ):
             return bigquery_types_tuple
+    except (TypeError, AttributeError):
+        pass
+
+    # Teradata types module
+    try:
+        if (
+            issubclass(
+                dialect,
+                teradatasqlalchemy.dialect.TeradataDialect,
+            )
+            and teradatatypes is not None
+        ):
+            return teradatatypes
     except (TypeError, AttributeError):
         pass
 
@@ -359,6 +408,17 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     try:
         # noinspection PyUnresolvedReferences
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+    try:
+        if hasattr(dialect, "DremioDialect"):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
+    try:
+        if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass

@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy
     from sqlalchemy import create_engine
+    from sqlalchemy.engine import make_url
     from sqlalchemy.sql.elements import quoted_name
 
 except ImportError:
@@ -257,7 +258,8 @@ class SqlAlchemyDatasource(LegacyDatasource):
                     connection.close()
                 elif "url" in credentials:
                     url = credentials.pop("url")
-                    self.drivername = urlparse(url).scheme
+                    parsed_url = make_url(url)
+                    self.drivername = parsed_url.drivername
                     self.engine = create_engine(url, **kwargs)
                     connection = self.engine.connect()
                     connection.close()

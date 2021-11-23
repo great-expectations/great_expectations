@@ -23,8 +23,8 @@ class MetricParameterBuilder(ParameterBuilder):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        enforce_numeric_metric: Optional[Union[str, bool]] = False,
-        replace_nan_with_zero: Optional[Union[str, bool]] = False,
+        enforce_numeric_metric: Union[str, bool] = False,
+        replace_nan_with_zero: Union[str, bool] = False,
         data_context: Optional[DataContext] = None,
         batch_request: Optional[Union[dict, str]] = None,
     ):

@@ -1034,9 +1034,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     custom_gcs_options = {"filename": "a/b/c/my_gcs_credentials.json"}
     engine = PandasExecutionEngine(gcs_options=custom_gcs_options)
     assert "gcs_options" in engine.config
-    assert (
-        engine.config.get("gcs_options")["filename"] == "a/b/c/my_gcs_credentials.json"
-    )
+    assert "filename" not in engine.config.get("gcs_options")
 
 
 @mock.patch(

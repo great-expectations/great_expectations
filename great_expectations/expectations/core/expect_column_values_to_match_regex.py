@@ -176,7 +176,7 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
         else:
             template_str = "values must match this regular expression: $regex"
             if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
+                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                     params["mostly"] * 100, precision=15, no_scientific=True
                 )
                 # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
