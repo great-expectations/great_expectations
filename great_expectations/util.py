@@ -26,7 +26,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, Set, Union
 
 from dateutil.parser import parse
 from packaging import version
@@ -139,8 +139,8 @@ def underscore(word: str) -> str:
     return word.lower()
 
 
-def hyphen(input: str):
-    return input.replace("_", "-")
+def hyphen(txt: str):
+    return txt.replace("_", "-")
 
 
 def profile(func: Callable = None) -> Callable:
@@ -160,22 +160,30 @@ def profile(func: Callable = None) -> Callable:
     return profile_function_call
 
 
-def measure_execution_time(func: Callable = None) -> Callable:
-    @wraps(func)
-    def compute_delta_t(*args, **kwargs) -> Any:
-        time_begin: int = int(round(time.time() * 1000))
-        try:
-            return func(*args, **kwargs)
-        finally:
-            time_end: int = int(round(time.time() * 1000))
-            delta_t: int = time_end - time_begin
-            bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-            call_args: OrderedDict = bound_args.arguments
-            print(
-                f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
-            )
+def measure_execution_time(pretty_print: bool = False) -> Callable:
+    def execution_time_decorator(func: Callable) -> Callable:
+        func.execution_duration_milliseconds = 0
 
-    return compute_delta_t
+        @wraps(func)
+        def compute_delta_t(*args, **kwargs) -> Any:
+            time_begin: int = int(round(time.time() * 1000))
+            try:
+                return func(*args, **kwargs)
+            finally:
+                time_end: int = int(round(time.time() * 1000))
+                delta_t: int = time_end - time_begin
+                func.execution_duration_milliseconds = delta_t
+                bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
+                call_args: OrderedDict = bound_args.arguments
+
+                if pretty_print:
+                    print(
+                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
+                    )
+
+        return compute_delta_t
+
+    return execution_time_decorator
 
 
 # noinspection SpellCheckingInspection
@@ -932,13 +940,13 @@ def lint_code(code: str) -> str:
 
 
 def filter_properties_dict(
-    properties: dict,
-    keep_fields: Optional[list] = None,
-    delete_fields: Optional[list] = None,
-    clean_nulls: Optional[bool] = True,
-    clean_falsy: Optional[bool] = False,
-    keep_falsy_numerics: Optional[bool] = True,
-    inplace: Optional[bool] = False,
+    properties: Optional[dict] = None,
+    keep_fields: Optional[Set[str]] = None,
+    delete_fields: Optional[Set[str]] = None,
+    clean_nulls: bool = True,
+    clean_falsy: bool = False,
+    keep_falsy_numerics: bool = True,
+    inplace: bool = False,
 ) -> Optional[dict]:
     """Filter the entries of the source dictionary according to directives concerning the existing keys and values.
 
@@ -963,10 +971,21 @@ def filter_properties_dict(
     if clean_falsy:
         clean_nulls = True
 
+    if properties is None:
+        properties = {}
+
+    if not isinstance(properties, dict):
+        raise ValueError(
+            f'Source "properties" must be a dictionary (illegal type "{str(type(properties))}" detected).'
+        )
+
     if not inplace:
         properties = copy.deepcopy(properties)
 
     keys_for_deletion: list = []
+
+    key: str
+    value: Any
 
     if keep_fields:
         keys_for_deletion.extend(
@@ -1022,6 +1041,47 @@ def filter_properties_dict(
 
     for key in keys_for_deletion:
         del properties[key]
+
+    if inplace:
+        return None
+
+    return properties
+
+
+def deep_filter_properties_dict(
+    properties: Optional[dict] = None,
+    keep_fields: Optional[Set[str]] = None,
+    delete_fields: Optional[Set[str]] = None,
+    clean_nulls: bool = True,
+    clean_falsy: bool = False,
+    keep_falsy_numerics: bool = True,
+    inplace: bool = False,
+) -> Optional[dict]:
+    key: str
+    value: Any
+    if isinstance(properties, dict):
+        if not inplace:
+            properties = copy.deepcopy(properties)
+
+        filter_properties_dict(
+            properties=properties,
+            keep_fields=keep_fields,
+            delete_fields=delete_fields,
+            clean_nulls=clean_nulls,
+            clean_falsy=clean_falsy,
+            keep_falsy_numerics=keep_falsy_numerics,
+            inplace=True,
+        )
+        for key, value in properties.items():
+            deep_filter_properties_dict(
+                properties=value,
+                keep_fields=keep_fields,
+                delete_fields=delete_fields,
+                clean_nulls=clean_nulls,
+                clean_falsy=clean_falsy,
+                keep_falsy_numerics=keep_falsy_numerics,
+                inplace=True,
+            )
 
     if inplace:
         return None
@@ -1092,8 +1152,8 @@ def delete_blank_lines(text: str) -> str:
 
 
 def generate_temporary_table_name(
-    default_table_name_prefix: Optional[str] = "ge_temp_",
-    num_digits: Optional[int] = 8,
+    default_table_name_prefix: str = "ge_temp_",
+    num_digits: int = 8,
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
     return table_name

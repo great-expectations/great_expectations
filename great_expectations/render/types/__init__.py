@@ -510,9 +510,9 @@ class RenderedAtomicValue(DictDot):
         graph: Optional[dict] = None,
     ):
         # StringValueType
-        self.template: str = template
-        self.params: dict = params
-        self.schema: dict = schema
+        self.template: Optional[str] = template
+        self.params: Optional[dict] = params
+        self.schema: Optional[dict] = schema
 
         # TableType
         self.header: Optional[RenderedAtomicValue] = header

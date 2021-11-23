@@ -22,7 +22,7 @@ Take the following example setup:
 import json 
 import great_expectations as ge
 
-my_expectation_suite = json.load(file("my_titanic_expectations.json"))
+my_expectation_suite = json.load(open("my_titanic_expectations.json"))
 my_df = ge.read_csv(
   "./tests/examples/titanic.csv", 
   expectation_suite=my_expectation_suite
@@ -108,7 +108,7 @@ The resulting report returned looks like this:
 The easiest way to review Validation Results is to view them from your local Data Docs site, where you can also
 conveniently view Expectation Suites and with additional configuration, Profiling Results (
 see [Data Docs site configuration](./). Out of the box, Great Expectations Data Docs is configured to compile a local
-data documentation site when you start a new project by running `great_expectations init`. By default, this local site
+data documentation site when you start a new project by running `great_expectations --v3-api init`. By default, this local site
 is saved to the `uncommitted/data_docs/local_site/` directory of your project and will contain pages for Expectation
 Suites and Validation Results.
 
