@@ -35,8 +35,7 @@
             }
           },
           "tolerance": 0.1,
-          "_note": "The large tolerance here documents implementation differences between pandas, sql, and spark wrt interpolation behavior / specific ntile calculation",
-          "suppress_test_for": ["sqlite"]
+          "_note": "The large tolerance here documents implementation differences between pandas, sql, and spark wrt interpolation behavior / specific ntile calculation"
         },
         {
           "title": "basic_positive_test_normal_quantiles",
@@ -56,8 +55,7 @@
             }
           },
           "tolerance": 0.1,
-          "_note": "The large tolerance here documents implementation differences between pandas, sql, and spark wrt interpolation behavior / specific ntile calculation",
-          "suppress_test_for": ["sqlite"]
+          "_note": "The large tolerance here documents implementation differences between pandas, sql, and spark wrt interpolation behavior / specific ntile calculation"
         },
         {
           "title": "basic_positive_test_uneven_spacing",
@@ -76,7 +74,6 @@
               "values": [-3.40196868, -1.72089571, -0.70115633, -0.04059954,  0.62130846, 1.6855355 ,  3.58540782]
             }
           },
-          "suppress_test_for": ["sqlite"],
           "tolerance": 0.1,
           "_note": "The large tolerance here documents implementation differences between pandas, sql, and spark wrt interpolation behavior / specific ntile calculation"
       },

@@ -2,7 +2,6 @@ import logging
 import uuid
 from pathlib import Path
 from typing import Dict, Tuple
-from urllib.parse import urlparse
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -10,18 +9,8 @@ from great_expectations.util import filter_properties_dict, get_sqlalchemy_url
 
 try:
     import sqlalchemy as sa
-    from sqlalchemy import (
-        Column,
-        MetaData,
-        String,
-        Table,
-        and_,
-        column,
-        create_engine,
-        select,
-        text,
-    )
-    from sqlalchemy.engine.reflection import Inspector
+    from sqlalchemy import Column, MetaData, String, Table, and_, column, select
+    from sqlalchemy.engine import make_url
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
 except ImportError:
@@ -80,7 +69,8 @@ class DatabaseStoreBackend(StoreBackend):
         elif connection_string is not None:
             self.engine = sa.create_engine(connection_string, **kwargs)
         elif url is not None:
-            self.drivername = urlparse(url).scheme
+            parsed_url = make_url(url)
+            self.drivername = parsed_url.drivername
             self.engine = sa.create_engine(url, **kwargs)
         else:
             raise ge_exceptions.InvalidConfigError(

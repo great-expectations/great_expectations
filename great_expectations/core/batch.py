@@ -2,8 +2,7 @@ import copy
 import datetime
 import json
 import logging
-import types
-from typing import Any, Callable, Optional, Set, Union
+from typing import Any, Callable, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
@@ -14,28 +13,6 @@ from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
-
-
-BATCH_REQUEST_INSTANTIATION_KEYS: Set[str] = {
-    "datasource_name",
-    "data_connector_name",
-    "data_asset_name",
-    "batch_data",
-    "data_connector_query",
-    "batch_identifiers",
-    "limit",
-    "index",
-    "custom_filter_function",
-    "batch_spec_passthrough",
-    "sampling_method",
-    "sampling_kwargs",
-    "splitter_method",
-    "splitter_kwargs",
-    "runtime_parameters",
-    "query",
-    "path",
-    "batch_filter_parameters",
-}
 
 
 class BatchDefinition(SerializableDictDot):
@@ -425,33 +402,6 @@ class RuntimeBatchRequest(BatchRequest):
         self._runtime_parameters = runtime_parameters
         self._batch_identifiers = batch_identifiers
 
-    def __deepcopy__(self, memo):
-        runtime_parameters = getattr(self, "_runtime_parameters", None)
-        if isinstance(runtime_parameters, dict) and "batch_data" in runtime_parameters:
-            batch_data = runtime_parameters.pop("batch_data")
-            deepcopy_method = self.__deepcopy__
-            self.__deepcopy__ = None
-            cp = copy.deepcopy(self, memo)
-            self.__deepcopy__ = deepcopy_method
-            # Copy the function object
-            func = types.FunctionType(
-                deepcopy_method.__code__,
-                deepcopy_method.__globals__,
-                deepcopy_method.__name__,
-                deepcopy_method.__defaults__,
-                deepcopy_method.__closure__,
-            )
-            # Bind to cp and set
-            bound_method = func.__get__(cp, cp.__class__)
-            cp.__deepcopy__ = bound_method
-            cp._runtime_parameters["batch_data"] = batch_data
-            self._runtime_parameters["batch_data"] = batch_data
-            return cp
-        else:
-            # Don't use custom deepcopy if batch_data isn't found
-            self.__deepcopy__ = None
-        return copy.deepcopy(self, memo)
-
 
 # TODO: <Alex>The following class is to support the backward compatibility with the legacy design.</Alex>
 class BatchMarkers(BatchKwargs):
@@ -617,7 +567,7 @@ def get_batch_request_from_acceptable_arguments(
     path: Optional[str] = None,
     batch_filter_parameters: Optional[dict] = None,
     **kwargs,
-) -> Union[BatchRequest, RuntimeBatchRequest]:
+) -> Union[BatchRequest]:
     """Obtain formal BatchRequest typed object from allowed attributes (supplied as arguments).
     This method applies only to the new (V3) Datasource schema.
 
@@ -770,3 +720,37 @@ def get_batch_request_from_acceptable_arguments(
         )
 
     return batch_request
+
+
+def get_batch_request_dict(
+    batch_request: Optional[BatchRequest] = None, validations: Optional[list] = None
+) -> dict:
+    if isinstance(batch_request, BatchRequest):
+        if batch_request.runtime_parameters.get("batch_data") is not None:
+            batch_data = batch_request.runtime_parameters.get("batch_data")
+            batch_request = batch_request.to_json_dict()
+            batch_request["runtime_parameters"]["batch_data"] = batch_data
+        else:
+            batch_request = batch_request.to_json_dict()
+
+    if validations:
+        for val in validations:
+            if val.get("batch_request") is not None and isinstance(
+                val["batch_request"], BatchRequest
+            ):
+                if (
+                    val["batch_request"].runtime_parameters is not None
+                    and val["batch_request"].runtime_parameters.get("batch_data")
+                    is not None
+                ):
+                    batch_data = val["batch_request"].runtime_parameters.get(
+                        "batch_data"
+                    )
+                    val["batch_request"] = val["batch_request"].to_json_dict()
+                    val["batch_request"]["runtime_parameters"][
+                        "batch_data"
+                    ] = batch_data
+                else:
+                    val["batch_request"] = val["batch_request"].to_json_dict()
+
+    return batch_request, validations

@@ -1,6 +1,7 @@
 [![Build Status](https://dev.azure.com/great-expectations/great_expectations/_apis/build/status/great_expectations?branchName=develop&stageName=required)](https://dev.azure.com/great-expectations/great_expectations/_build/latest?definitionId=1&branchName=develop)
 ![Coverage](https://img.shields.io/azure-devops/coverage/great-expectations/great_expectations/1/main)
 [![Documentation Status](https://readthedocs.org/projects/great-expectations/badge/?version=latest)](http://great-expectations.readthedocs.io/en/latest/?badge=latest)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5683574.svg)](https://doi.org/10.5281/zenodo.5683574)
 
 <!-- <<<Super-quickstart links go here>>> -->
 
