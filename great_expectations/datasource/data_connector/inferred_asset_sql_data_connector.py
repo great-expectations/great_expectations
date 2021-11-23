@@ -282,9 +282,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     )
 
         except Exception as e:
-            # If we happen to query a "regular" Redshift (not Spectrum), 'svv_external_tables' table
-            # might not exist. Relying on a specific exception will not work consistently in all psycopg2
-            # versions - falling back on string matching
+            # Our testing shows that 'svv_external_tables' table is present in all Redshift clusters. This means that this
+            # exception is highly unlikely to fire.
             if not "UndefinedTable" in str(e):
                 raise e
 
