@@ -335,7 +335,8 @@ def parse_evaluation_parameter(
     except ParseException as err:
         L = ["Parse Failure", parameter_expression, (str(err), err.line, err.column)]
 
-    if len(L) == 1 and isinstance(L[0], tuple) and L[0][-1] is False:
+    # Represents a valid parser result of a single function that has no arguments
+    if len(L) == 1 and isinstance(L[0], tuple) and L[0][2] is False:
         # Necessary to catch `now()` (which only needs to be evaluated with `expr.exprStack`)
         # NOTE: 20211122 - Chetan - Any future built-ins that are zero arity functions will match this behavior
         pass
