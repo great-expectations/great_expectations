@@ -100,6 +100,8 @@ def test_docs_help_output(caplog):
             0,
         ),
         ("--v3-api --assume-yes docs build -sn local_site -nv", None, "", 0),
+        # All the same but with --no-index
+        ("--v3-api docs build --no-index", "\n", "Would you like to proceed? [Y/n]", 0),
     ],
 )
 @mock.patch(
