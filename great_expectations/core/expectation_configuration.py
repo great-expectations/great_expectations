@@ -1,7 +1,7 @@
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 
 import jsonpatch
 
@@ -59,6 +59,27 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
             result_format["include_unexpected_rows"] = False
 
     return result_format
+
+
+class ExpectationContext(SerializableDictDot):
+    def __init__(self, description: Optional[str] = None):
+        self._description = description
+
+    @property
+    def description(self):
+        return self._description
+
+    @description.setter
+    def description(self, value):
+        self._description = value
+
+
+class ExpectationContextSchema(Schema):
+    description = fields.String(required=False, allow_none=True)
+
+    @post_load
+    def make_expectation_context(self, data, **kwargs):
+        return ExpectationContext(**data)
 
 
 class ExpectationConfiguration(SerializableDictDot):
@@ -925,6 +946,7 @@ class ExpectationConfiguration(SerializableDictDot):
         meta=None,
         success_on_last_run=None,
         ge_cloud_id=None,
+        expectation_context: Optional[ExpectationContext] = None,
     ):
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
@@ -946,6 +968,10 @@ class ExpectationConfiguration(SerializableDictDot):
 
         if ge_cloud_id is not None:
             self._ge_cloud_id = ge_cloud_id
+
+        if expectation_context is None:
+            expectation_context = ExpectationContext()
+        self._expectation_context = expectation_context
 
     def process_evaluation_parameters(
         self, evaluation_parameters, interactive_evaluation=True, data_context=None
@@ -1017,6 +1043,17 @@ class ExpectationConfiguration(SerializableDictDot):
     @ge_cloud_id.setter
     def ge_cloud_id(self, value):
         self._ge_cloud_id = value
+
+    @property
+    def expectation_context(self):
+        if hasattr(self, "_expectation_context"):
+            return self._expectation_context
+        else:
+            return None
+
+    @expectation_context.setter
+    def expectation_context(self, value):
+        self._expectation_context = value
 
     @property
     def expectation_type(self):
@@ -1242,6 +1279,9 @@ class ExpectationConfiguration(SerializableDictDot):
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
         myself["kwargs"] = convert_to_json_serializable(myself["kwargs"])
+        myself["expectation_context"] = convert_to_json_serializable(
+            myself["expectation_context"]
+        )
         return myself
 
     def get_evaluation_parameter_dependencies(self):
@@ -1326,6 +1366,7 @@ class ExpectationConfigurationSchema(Schema):
     kwargs = fields.Dict()
     meta = fields.Dict()
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
+    expectation_context = fields.Nested(lambda: ExpectationContextSchema)
 
     # noinspection PyUnusedLocal
     @post_load
@@ -1334,3 +1375,4 @@ class ExpectationConfigurationSchema(Schema):
 
 
 expectationConfigurationSchema = ExpectationConfigurationSchema()
+expectationContextSchema = ExpectationContextSchema()
