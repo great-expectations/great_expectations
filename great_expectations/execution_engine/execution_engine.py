@@ -9,7 +9,7 @@ from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
-from great_expectations.core.util import AzureUrl, GCSUrl, S3Url
+from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.util import filter_properties_dict
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -65,6 +65,8 @@ class DataConnectorStorageDataReferenceResolver:
         "ConfiguredAssetGCSDataConnector": "GCS",
         "InferredAssetAzureDataConnector": "ABS",
         "ConfiguredAssetAzureDataConnector": "ABS",
+        "InferredAssetDBFSDataConnector": "DBFS",
+        "ConfiguredAssetDBFSDataConnector": "DBFS",
     }
     STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
         Tuple[str, str], Callable
@@ -103,6 +105,18 @@ class DataConnectorStorageDataReferenceResolver:
             "ABS",
             "SparkDFExecutionEngine",
         ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "DBFS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
+            **template_arguments
+        ),
+        (
+            "DBFS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
             **template_arguments
         ),
     }

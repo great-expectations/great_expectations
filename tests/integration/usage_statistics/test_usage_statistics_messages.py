@@ -5,10 +5,12 @@ from typing import Any, Dict, List
 import pytest
 import requests
 
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    GETTING_STARTED_DATASOURCE_NAME,
+)
 from great_expectations.data_context import BaseDataContext
-
-USAGE_STATISTICS_QA_URL = (
-    "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+from tests.integration.usage_statistics.test_integration_usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
 )
 
 
@@ -370,11 +372,11 @@ valid_usage_statistics_messages = {
     ],
     "data_context.add_datasource": [
         {
+            "event": "data_context.add_datasource",
             "event_payload": {
                 "anonymized_name": "c9633f65c36d1ba9fbaa9009c1404cfa",
                 "parent_class": "PandasDatasource",
             },
-            "event": "data_context.add_datasource",
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
@@ -383,6 +385,134 @@ valid_usage_statistics_messages = {
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         }
+    ],
+    "data_context.get_batch_list": [
+        {
+            "event": "data_context.get_batch_list",
+            "event_payload": {
+                "batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
+                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                    "anonymized_data_asset_name": "9104abd890c05a364f379443b9f43825",
+                },
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:16.030Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "data_context.get_batch_list",
+            "event_payload": {
+                "batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
+                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                },
+                "batch_request_optional_top_level_keys": ["data_connector_query"],
+                "data_connector_query_keys": ["index"],
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:16.030Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "data_context.get_batch_list",
+            "event_payload": {
+                "batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
+                    "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                    "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                },
+                "batch_request_optional_top_level_keys": ["batch_spec_passthrough"],
+                "batch_spec_passthrough_keys": ["reader_options"],
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:16.030Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "data_context.get_batch_list",
+            "event_payload": {
+                "batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                    "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                    "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                },
+                "batch_request_optional_top_level_keys": [
+                    "data_connector_query",
+                    "batch_spec_passthrough",
+                ],
+                "data_connector_query_keys": ["index"],
+                "batch_spec_passthrough_keys": ["reader_options"],
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:16.030Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "data_context.get_batch_list",
+            "event_payload": {
+                "batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                },
+                "batch_request_optional_top_level_keys": [
+                    "data_connector_query",
+                    "batch_spec_passthrough",
+                ],
+                "data_connector_query_keys": ["index"],
+                "runtime_parameters_keys": ["path"],
+                "batch_spec_passthrough_keys": ["reader_method"],
+            },
+            "success": False,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:16.030Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "data_context.get_batch_list",
+            "event_payload": {
+                "batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                },
+                "batch_request_optional_top_level_keys": [
+                    "data_connector_query",
+                    "batch_spec_passthrough",
+                ],
+                "data_connector_query_keys": ["index"],
+                "runtime_parameters_keys": ["path"],
+                "batch_spec_passthrough_keys": ["reader_options", "reader_method"],
+            },
+            "success": False,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:16.030Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
     ],
     "data_context.build_data_docs": [
         {
@@ -410,6 +540,19 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         }
     ],
+    "data_context.run_checkpoint": [
+        {
+            "event_payload": {},
+            "event": "data_context.run_checkpoint",
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:28.070Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        }
+    ],
     "data_context.save_expectation_suite": [
         {
             "event_payload": {
@@ -423,21 +566,6 @@ valid_usage_statistics_messages = {
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
-        }
-    ],
-    "datasource.sqlalchemy.connect": [
-        {
-            "event": "datasource.sqlalchemy.connect",
-            "event_payload": {
-                "anonymized_name": "6989a7654d0e27470dc01292b6ed0dea",
-                "sqlalchemy_dialect": "postgresql",
-            },
-            "success": True,
-            "version": "1.0.0",
-            "event_time": "2020-08-04T00:38:32.664Z",
-            "data_context_id": "00000000-0000-0000-0000-000000000002",
-            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
-            "ge_version": "0.11.5.manual_testing",
         }
     ],
     # BaseDataContext.test_yaml_config() MESSAGES
@@ -579,6 +707,21 @@ valid_usage_statistics_messages = {
             }
         ],
     ),
+    "datasource.sqlalchemy.connect": [
+        {
+            "event": "datasource.sqlalchemy.connect",
+            "event_payload": {
+                "anonymized_name": "6989a7654d0e27470dc01292b6ed0dea",
+                "sqlalchemy_dialect": "postgresql",
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-08-04T00:38:32.664Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.5.manual_testing",
+        }
+    ],
     # CLI INIT COMMANDS
     "cli.init.create": [
         {
