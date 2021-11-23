@@ -1279,6 +1279,7 @@ class ExpectationConfiguration(SerializableDictDot):
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
         myself["kwargs"] = convert_to_json_serializable(myself["kwargs"])
+        myself["expectation_context"] = convert_to_json_serializable(myself["expectation_context"])
         return myself
 
     def get_evaluation_parameter_dependencies(self):
