@@ -1,11 +1,10 @@
-import inspect
 import logging
 import os
 from mimetypes import guess_type
+from typing import Optional, Union
 
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
     SiteSectionIdentifier,
     ValidationResultIdentifier,
 )
@@ -262,7 +261,13 @@ class HtmlSiteStore:
             content_type="text/html; charset=utf-8",
         )
 
-    def get_url_for_resource(self, resource_identifier=None, only_if_exists=True):
+    def get_url_for_resource(
+        self,
+        resource_identifier: Optional[
+            Union[ExpectationSuiteIdentifier, ValidationResultIdentifier]
+        ] = None,
+        only_if_exists: bool = True,
+    ) -> str:
         """
         Return the URL of the HTML document that renders a resource
         (e.g., an expectation suite or a validation result).

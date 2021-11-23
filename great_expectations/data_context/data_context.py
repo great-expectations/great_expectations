@@ -2455,11 +2455,13 @@ class BaseDataContext:
     )
     def build_data_docs(
         self,
-        site_names=None,
-        resource_identifiers=None,
-        dry_run=False,
+        site_names: Optional[List[str]] = None,
+        resource_identifiers: Optional[
+            List[Union[ExpectationSuiteIdentifier, ValidationResultIdentifier]]
+        ] = None,
+        dry_run: bool = False,
         build_index: bool = True,
-    ):
+    ) -> Dict[str, str]:
         """
         Build Data Docs for your project.
 
