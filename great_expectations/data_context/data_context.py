@@ -3079,7 +3079,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     and val["batch_request"]["runtime_parameters"].get("batch_data")
                     is not None
                 ):
-                    raise ge_exceptions.InvalidConfigError(f'batch_data found in validations at index {idx} cannot be saved to CheckpointStore "{self.checkpoint_store_name}"')
+                    raise ge_exceptions.InvalidConfigError(
+                        f'batch_data found in validations at index {idx} cannot be saved to CheckpointStore "{self.checkpoint_store_name}"'
+                    )
         elif (
             checkpoint_config.get("batch_request") is not None
             and checkpoint_config["batch_request"].get("runtime_parameters") is not None
@@ -3088,7 +3090,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             is not None
         ):
-            raise ge_exceptions.InvalidConfigError(f'batch_data found in batch_request cannot be saved to CheckpointStore "{self.checkpoint_store_name}"')
+            raise ge_exceptions.InvalidConfigError(
+                f'batch_data found in batch_request cannot be saved to CheckpointStore "{self.checkpoint_store_name}"'
+            )
 
         checkpoint_config = filter_properties_dict(
             properties=checkpoint_config, clean_falsy=True

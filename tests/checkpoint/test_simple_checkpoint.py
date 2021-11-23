@@ -3361,6 +3361,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
         == 1
     )
 
+
 def test_simple_checkpoint_does_not_pass_dataframes_via_batch_request_into_checkpoint_store(
     data_context_with_datasource_pandas_engine,
 ):
@@ -3411,7 +3412,10 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_batch_request_into_check
         "batch_request": batch_request,
     }
 
-    with pytest.raises(ge_exceptions.InvalidConfigError, match='batch_data found in batch_request cannot be saved to CheckpointStore "checkpoint_store"'):
+    with pytest.raises(
+        ge_exceptions.InvalidConfigError,
+        match='batch_data found in batch_request cannot be saved to CheckpointStore "checkpoint_store"',
+    ):
         context.add_checkpoint(**checkpoint_config)
 
 
@@ -3465,5 +3469,8 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_validations_into_checkpo
         "validations": [{"batch_request": batch_request}],
     }
 
-    with pytest.raises(ge_exceptions.InvalidConfigError, match='batch_data found in validations at index 0 cannot be saved to CheckpointStore "checkpoint_store"'):
+    with pytest.raises(
+        ge_exceptions.InvalidConfigError,
+        match='batch_data found in validations at index 0 cannot be saved to CheckpointStore "checkpoint_store"',
+    ):
         context.add_checkpoint(**checkpoint_config)
