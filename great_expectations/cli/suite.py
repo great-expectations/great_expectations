@@ -8,6 +8,8 @@ import click
 from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
+
+# noinspection PyPep8Naming
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core import ExpectationSuite
@@ -284,6 +286,7 @@ def _suite_new_workflow(
         else:
             batch_request = None
 
+        # noinspection PyShadowingNames
         suite: ExpectationSuite = toolkit.get_or_create_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             data_context=context,
@@ -549,7 +552,7 @@ def _suite_edit_workflow(
     usage_event: str,
     interactive: bool,
     no_jupyter: bool,
-    create_if_not_exist: Optional[bool] = False,
+    create_if_not_exist: bool = False,
     datasource_name: Optional[str] = None,
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
@@ -557,14 +560,15 @@ def _suite_edit_workflow(
     additional_batch_request_args: Optional[
         Dict[str, Union[str, int, Dict[str, Any]]]
     ] = None,
-    suppress_usage_message: Optional[bool] = False,
-    assume_yes: Optional[bool] = False,
+    suppress_usage_message: bool = False,
+    assume_yes: bool = False,
 ):
     # suppress_usage_message flag is for the situation where _suite_edit_workflow is called by _suite_new_workflow().
     # when called by _suite_new_workflow(), the flag will be set to True, otherwise it will default to False
     if suppress_usage_message:
         usage_event = None
 
+    # noinspection PyShadowingNames
     suite: ExpectationSuite = toolkit.load_expectation_suite(
         data_context=context,
         expectation_suite_name=expectation_suite_name,
@@ -705,6 +709,7 @@ def suite_demo(ctx):
     )
 
 
+# noinspection PyShadowingNames
 @suite.command(name="delete")
 @click.argument("suite")
 @click.pass_context

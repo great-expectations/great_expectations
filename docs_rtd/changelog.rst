@@ -8,6 +8,77 @@ Changelog
 develop
 -----------------
 
+0.13.43
+-----------------
+* [FEATURE] Enable support for Teradata SQLAlchemy dialect (#3496) (thanks @imamolp)
+* [FEATURE] Dremio connector added (SQLalchemy) (#3624) (thanks @chufe-dremio)
+* [FEATURE] Adds expect_column_values_to_be_string_integers_increasing (#3642)
+* [FEATURE] Enable "column.quantile_values" and "expect_column_quantile_values_to_be_between" for SQLite; add/enable new tests (#3695)
+* [BUGFIX] Allow glob_directive for DBFS Data Connectors (#3673)
+* [BUGFIX] Update black version in pre-commit config (#3674)
+* [BUGFIX] Make sure to add "mostly_pct" value if "mostly" kwarg present (#3661)
+* [BUGFIX] Fix BatchRequest.to_json_dict() to not overwrite original fields; also type usage cleanup in CLI tests (#3683)
+* [BUGFIX] Fix pyfakefs boto / GCS incompatibility (#3694)
+* [BUGFIX] Update prefix attr assignment in cloud-based DataConnector constructors (#3668)
+* [BUGFIX] Update 'list_keys' signature for all cloud-based tuple store child classes (#3669)
+* [BUGFIX] evaluation parameters from different expectation suites dependencies (#3684) (thanks @OmriBromberg)
+* [DOCS] Databricks deployment pattern documentation (#3682)
+* [DOCS] Remove how_to_instantiate_a_data_context_on_databricks_spark_cluster (#3687)
+* [DOCS] Updates to Databricks doc based on friction logging (#3696)
+* [MAINTENANCE] Fix checkpoint anonymization and make BatchRequest.to_json_dict() more robust (#3675)
+* [MAINTENANCE] Update kl_divergence domain_type (#3681)
+* [MAINTENANCE] update filter_properties_dict to use set for inclusions and exclusions (instead of list) (#3698)
+* [MAINTENANCE] Adds CITATION.cff (#3697)
+
+0.13.42
+-----------------
+* [FEATURE] DBFS Data connectors (#3659)
+* [BUGFIX] Fix "null" appearing in notebooks due to incorrect ExpectationConfigurationSchema serialization (#3638)
+* [BUGFIX] Ensure that result_format from saved expectation suite json file takes effect (#3634)
+* [BUGFIX] Allowing user specified run_id to appear in WarningAndFailureExpectationSuitesValidationOperator validation result (#3386) (thanks @wniroshan)
+* [BUGFIX] Update black dependency to ensure passing Azure builds on Python 3.9 (#3664)
+* [BUGFIX] fix Issue #3405 - gcs client init in pandas engine (#3408) (thanks @dz-1)
+* [BUGFIX] Recursion error when passing RuntimeBatchRequest with query into Checkpoint using validations (#3654)
+* [MAINTENANCE] Cloud 388/supported expectations query (#3635)
+* [MAINTENANCE] Proper separation of concerns between specific File Path Data Connectors and corresponding ExecutionEngine objects (#3643)
+* [MAINTENANCE] Enable Docusaurus tests for S3 (#3645)
+* [MAINTENANCE] Formalize Exception Handling Between DataConnector and ExecutionEngine Implementations, and Update DataConnector Configuration Usage in Tests (#3644)
+* [MAINTENANCE] Adds util for handling SADeprecation warning (#3651)
+
+0.13.41
+-----------------
+* [FEATURE] Support median calculation in AWS Athena (#3596) (thanks @persiyanov)
+* [BUGFIX] Be able to use spark execution engine with spark reuse flag (#3541) (thanks @fep2)
+* [DOCS] punctuation how_to_contribute_a_new_expectation_to_great_expectations.md (#3484) (thanks @plain-jane-gray)
+* [DOCS] Update next_steps.md (#3483) (thanks @plain-jane-gray)
+* [DOCS] Update how_to_configure_a_validation_result_store_in_gcs.md (#3482) (thanks @plain-jane-gray)
+* [DOCS] Choosing and configuring DataConnectors (#3533)
+* [DOCS] Remove --no-spark flag from docs tests (#3625)
+* [DOCS] DevRel - docs fixes (#3498)
+* [DOCS] Adding a period (#3627) (thanks @plain-jane-gray)
+* [DOCS] Remove comments that describe Snowflake parameters as optional (#3639)
+* [MAINTENANCE] Update CODEOWNERS (#3604)
+* [MAINTENANCE] Fix logo (#3598)
+* [MAINTENANCE] Add Expectations to docs navbar (#3597)
+* [MAINTENANCE] Remove unused fixtures (#3218)
+* [MAINTENANCE] Remove unnecessary comment (#3608)
+* [MAINTENANCE] Superconductive Warnings hackathon (#3612)
+* [MAINTENANCE] Bring Core Skills Doc for Creating Batch Under Test (#3629)
+* [MAINTENANCE] Refactor and Clean Up Expectations and Metrics Parts of the Codebase (better encapsulation, improved type hints) (#3633)
+
+
+0.13.40
+-----------------
+* [FEATURE] Retrieve data context config through Cloud API endpoint #3586
+* [FEATURE] Update Batch IDs to match name change in paths included in batch_request #3587
+* [FEATURE] V2-to-V3 Upgrade/Migration #3592
+* [FEATURE] table and graph atomic renderers #3595
+* [FEATURE] V2-to-V3 Upgrade/Migration (Sidebar.js update) #3603
+* [DOCS] Fixing broken links and linking to Expectation Gallery #3591
+* [MAINTENANCE] Get TZLocal back to its original version control. #3585
+* [MAINTENANCE] Add tests for datetime evaluation parameters #3601
+* [MAINTENANCE] Removed warning for pandas option display.max_colwidth #3606
+
 0.13.39
 -----------------
 * [FEATURE] Migration of Expectations to Atomic Prescriptive Renderers (#3530, #3537)

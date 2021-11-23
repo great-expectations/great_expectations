@@ -28,7 +28,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                * ``quantiles``: (list of float) increasing ordered list of desired quantile values
 
                * ``value_ranges``: (list of lists): Each element in this list consists of a list with two values, a lower \
-                 and upper bound (inclusive) for the corresponding quantile.
+                 and upper bound (inclusive) for the corresponding quantile. These values must be [min, max] ordered.
 
 
            For each provided range:
@@ -134,7 +134,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     )
     default_kwarg_values = {
         "row_condition": None,
-        "allow_relative_eror": None,
+        "allow_relative_error": None,
         "condition_parser": None,
         "quantile_ranges": None,
         "result_format": "BASIC",
@@ -145,14 +145,19 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
-
         try:
             assert (
                 "quantile_ranges" in configuration.kwargs
-            ), "quantile ranges must be provided"
+            ), "quantile_ranges must be provided"
             assert isinstance(
                 configuration.kwargs["quantile_ranges"], dict
             ), "quantile_ranges should be a dictionary"
+            assert all(
+                [
+                    True if None in x or x == sorted(x) else False
+                    for x in configuration.kwargs["quantile_ranges"]["value_ranges"]
+                ]
+            ), "quantile_ranges must consist of ordered pairs"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -225,8 +230,17 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             )
             header_params_with_json_schema.update(conditional_params)
 
-        quantiles = params["quantile_ranges"]["quantiles"]
-        value_ranges = params["quantile_ranges"]["value_ranges"]
+        quantile_ranges = (
+            params.get("quantile_ranges") if params.get("quantile_ranges") else {}
+        )
+        quantiles = (
+            quantile_ranges.get("quantiles") if quantile_ranges.get("quantiles") else []
+        )
+        value_ranges = (
+            quantile_ranges.get("value_ranges")
+            if quantile_ranges.get("value_ranges")
+            else []
+        )
 
         table_header_row = [
             {"schema": {"type": "string"}, "value": "Quantile"},
