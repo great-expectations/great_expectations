@@ -2947,7 +2947,6 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     suite.add_expectation(expectation)
     context.save_expectation_suite(suite)
 
-    # add checkpoint config
     batch_request = BatchRequest(
         **{
             "datasource_name": "my_datasource",
@@ -3048,7 +3047,6 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     suite.add_expectation(expectation)
     context.save_expectation_suite(suite)
 
-    # add checkpoint config
     batch_request = BatchRequest(
         **{
             "datasource_name": "my_datasource",
@@ -3163,7 +3161,6 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     suite.add_expectation(expectation)
     context.save_expectation_suite(suite)
 
-    # add checkpoint config
     batch_request = BatchRequest(
         **{
             "datasource_name": "my_datasource",
@@ -3265,7 +3262,6 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     suite.add_expectation(expectation)
     context.save_expectation_suite(suite)
 
-    # add checkpoint config
     batch_request = BatchRequest(
         **{
             "datasource_name": "my_datasource",
