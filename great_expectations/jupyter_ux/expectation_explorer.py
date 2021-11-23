@@ -1,6 +1,7 @@
 import datetime
 import logging
 from itertools import chain
+from typing import Optional
 
 import ipywidgets as widgets
 from IPython.display import display
@@ -122,6 +123,7 @@ class ExpectationExplorer:
             "expect_column_pair_values_to_be_in_set": [
                 "value_pairs_set",
                 "ignore_row_if",
+                "mostly",
             ],
             "expect_compound_columns_to_be_unique": ["ignore_row_if"],
             "expect_multicolumn_sum_to_equal": ["sum_total", "ignore_row_if"],
@@ -1018,7 +1020,7 @@ class ExpectationExplorer:
     def generate_parse_strings_as_datetimes_widget_dict(
         self,
         expectation_state,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes: bool = False,
         column=None,
         **expectation_kwargs,
     ):

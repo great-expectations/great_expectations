@@ -659,7 +659,7 @@ def _collect_snowflake_credentials(default_credentials=None):
     ).strip()
 
     database = click.prompt(
-        "What is database name for the snowflake connection? (optional -- leave blank for none)",
+        "What is database name for the snowflake connection?",
         default=default_credentials.get("database", ""),
     ).strip()
     if len(database) > 0:
@@ -667,16 +667,14 @@ def _collect_snowflake_credentials(default_credentials=None):
 
     credentials["query"] = {}
     schema = click.prompt(
-        "What is schema name for the snowflake connection? (optional -- leave "
-        "blank for none)",
+        "What is schema name for the snowflake connection?",
         default=default_credentials.get("schema_name", ""),
     ).strip()
 
     if len(schema) > 0:
         credentials["query"]["schema"] = schema
     warehouse = click.prompt(
-        "What is warehouse name for the snowflake connection? (optional "
-        "-- leave blank for none)",
+        "What is warehouse name for the snowflake connection?",
         default=default_credentials.get("warehouse", ""),
     ).strip()
 
@@ -684,7 +682,7 @@ def _collect_snowflake_credentials(default_credentials=None):
         credentials["query"]["warehouse"] = warehouse
 
     role = click.prompt(
-        "What is role name for the snowflake connection? (optional -- leave blank for none)",
+        "What is role name for the snowflake connection?",
         default=default_credentials.get("role", ""),
     ).strip()
     if len(role) > 0:
@@ -1334,7 +1332,7 @@ Would you like to continue?"""
 
     # Some backends require named temporary table parameters. We specifically elicit those and add them
     # where appropriate.
-    temp_table_kwargs = dict()
+    temp_table_kwargs = {}
     datasource = context.get_datasource(datasource_name)
 
     if datasource.engine.dialect.name.lower() == "bigquery":

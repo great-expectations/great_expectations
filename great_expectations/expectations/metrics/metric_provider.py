@@ -1,11 +1,9 @@
-import copy
 import logging
 from functools import wraps
 from typing import Callable, Optional, Type, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.util import nested_update
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
     MetricDomainTypes,
@@ -14,12 +12,11 @@ from great_expectations.execution_engine.execution_engine import (
 )
 from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.expectations.registry import (
-    get_metric_function_type,
     get_metric_provider,
     register_metric,
     register_renderer,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +96,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
 
     domain_keys = tuple()
     value_keys = tuple()
-    default_kwarg_values = dict()
+    default_kwarg_values = {}
 
     @classmethod
     def _register_metric_functions(cls):
@@ -125,7 +122,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     # No metric name has been defined
                     continue
                 metric_definition_kwargs = getattr(
-                    metric_fn, "metric_definition_kwargs", dict()
+                    metric_fn, "metric_definition_kwargs", {}
                 )
                 declared_metric_name = metric_name + metric_definition_kwargs.get(
                     "metric_name_suffix", ""
@@ -191,7 +188,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 execution_engine=execution_engine,
                 runtime_configuration=runtime_configuration,
             )
-            or dict()
+            or {}
         )
 
     @classmethod
@@ -203,7 +200,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
         runtime_configuration: Optional[dict] = None,
     ):
         metric_name = metric.metric_name
-        dependencies = dict()
+        dependencies = {}
         for metric_fn_type in MetricPartialFunctionTypes:
             metric_suffix = "." + metric_fn_type.metric_suffix
             try:

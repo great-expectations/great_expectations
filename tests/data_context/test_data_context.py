@@ -47,6 +47,8 @@ except ImportError:
 
 yaml = YAML()
 
+parameterized_expectation_suite_name = "my_dag_node.default"
+
 
 @pytest.fixture()
 def parameterized_expectation_suite():
@@ -159,17 +161,21 @@ def test_get_available_data_asset_names_with_multiple_datasources_with_and_witho
 
 def test_list_expectation_suite_keys(data_context_parameterized_expectation_suite):
     assert data_context_parameterized_expectation_suite.list_expectation_suites() == [
-        ExpectationSuiteIdentifier(expectation_suite_name="my_dag_node.default")
+        ExpectationSuiteIdentifier(
+            expectation_suite_name=parameterized_expectation_suite_name
+        )
     ]
 
 
 def test_get_existing_expectation_suite(data_context_parameterized_expectation_suite):
     expectation_suite = (
         data_context_parameterized_expectation_suite.get_expectation_suite(
-            "my_dag_node.default"
+            parameterized_expectation_suite_name
         )
     )
-    assert expectation_suite.expectation_suite_name == "my_dag_node.default"
+    assert (
+        expectation_suite.expectation_suite_name == parameterized_expectation_suite_name
+    )
     assert len(expectation_suite.expectations) == 2
 
 
@@ -209,7 +215,7 @@ def test_save_expectation_suite(data_context_parameterized_expectation_suite):
 
 
 def test_compile_evaluation_parameter_dependencies(
-    data_context_parameterized_expectation_suite,
+    data_context_parameterized_expectation_suite: DataContext,
 ):
     assert (
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
@@ -390,6 +396,25 @@ def test_data_context_get_validation_result(titanic_data_context):
     assert len(failed_validation_result.results) == 8
 
 
+def test_data_context_get_latest_validation_result(titanic_data_context):
+    """
+    Test that the latest validation result can be correctly fetched from the configured results
+    store
+    """
+    for _ in range(2):
+        titanic_data_context.profile_datasource("mydatasource")
+    assert len(titanic_data_context.validations_store.list_keys()) == 2
+
+    validation_results = [
+        titanic_data_context.validations_store.get(val_key)
+        for val_key in titanic_data_context.validations_store.list_keys()
+    ]
+    latest_validation_result = titanic_data_context.get_validation_result(
+        "mydatasource.mygenerator.Titanic.BasicDatasetProfiler"
+    )
+    assert latest_validation_result in validation_results
+
+
 def test_data_context_get_datasource(titanic_data_context):
     isinstance(titanic_data_context.get_datasource("mydatasource"), LegacyDatasource)
 
@@ -535,13 +560,6 @@ project_path/
                 subdir_reader/
                     Titanic/
                         BasicDatasetProfiler.json
-        notebooks/
-            pandas/
-                validation_playground.ipynb
-            spark/
-                validation_playground.ipynb
-            sql/
-                validation_playground.ipynb
         plugins/
             custom_data_docs/
                 renderers/
@@ -1043,13 +1061,6 @@ great_expectations/
     checkpoints/
     expectations/
         .ge_store_backend_id
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
@@ -1075,13 +1086,6 @@ great_expectations/
     checkpoints/
     expectations/
         .ge_store_backend_id
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
@@ -1145,7 +1149,6 @@ def test_data_context_create_builds_base_directories(tmp_path_factory):
 
     for directory in [
         "expectations",
-        "notebooks",
         "plugins",
         "checkpoints",
         "uncommitted",
@@ -1176,12 +1179,9 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
     assert "# LOOK I WAS MODIFIED" in obs
 
 
-def test_scaffold_directories_and_notebooks(tmp_path_factory):
-    empty_directory = str(
-        tmp_path_factory.mktemp("test_scaffold_directories_and_notebooks")
-    )
+def test_scaffold_directories(tmp_path_factory):
+    empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories"))
     DataContext.scaffold_directories(empty_directory)
-    DataContext.scaffold_notebooks(empty_directory)
 
     assert set(os.listdir(empty_directory)) == {
         "plugins",
@@ -1189,15 +1189,11 @@ def test_scaffold_directories_and_notebooks(tmp_path_factory):
         "expectations",
         ".gitignore",
         "uncommitted",
-        "notebooks",
     }
     assert set(os.listdir(os.path.join(empty_directory, "uncommitted"))) == {
         "data_docs",
         "validations",
     }
-    for subdir in DataContext.NOTEBOOK_SUBDIRECTORIES:
-        subdir_path = os.path.join(empty_directory, "notebooks", subdir)
-        assert set(os.listdir(subdir_path)) == {"validation_playground.ipynb"}
 
 
 def test_build_batch_kwargs(titanic_multibatch_data_context):
@@ -1838,6 +1834,7 @@ validations:
     expectation_suite_name: newsuite
 profilers: []
 ge_cloud_id:
+expectation_suite_ge_cloud_id:
 """
 
     checkpoint_dir = os.path.join(
@@ -1905,6 +1902,7 @@ ge_cloud_id:
             },
         ],
         "evaluation_parameters": {},
+        "expectation_suite_ge_cloud_id": None,
         "runtime_configuration": {},
         "validations": [
             {

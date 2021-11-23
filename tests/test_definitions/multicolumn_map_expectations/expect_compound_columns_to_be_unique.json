@@ -44,8 +44,8 @@
       }
     },{
       "title": "row_condition_with_ignore_if_any_are_missing",
-      "only_for": ["pandas"],
       "exact_match_out" : true,
+      "only_for": ["pandas"],
       "in": {
         "column_list": ["w", "x"],
         "row_condition": "x!=1 & w!=6",
@@ -63,8 +63,9 @@
         }
       }
     },{
-      "title": "unexpected_values",
+      "title": "unexpected_values_with_unexpected_index_list",
       "exact_match_out" : false,
+      "only_for": ["pandas"],
       "in": {
         "column_list": ["a", "b"]
       },
@@ -111,8 +112,56 @@
         "success": false
       }
     },{
-      "title": "unexpected_values_exact_match_out",
+      "title": "unexpected_values_without_unexpected_index_list",
+      "exact_match_out" : false,
+      "in": {
+        "column_list": ["a", "b"]
+      },
+      "out": {
+        "unexpected_list": [
+          {
+            "a": 1.0,
+            "b": 1.0
+          },
+          {
+            "a": 1.0,
+            "b": 2.0
+          },
+          {
+            "a": 1.0,
+            "b": 1.0
+          },
+          {
+            "a": 1.0,
+            "b": 2.0
+          },
+          {
+            "a": 1.0,
+            "b": 1.0
+          },
+          {
+            "a": 2.0,
+            "b": 2.0
+          },
+          {
+            "a": 2.0,
+            "b": 1.0
+          },
+          {
+            "a": 2.0,
+            "b": 2.0
+          },
+          {
+            "a": 2.0,
+            "b": 1.0
+          }
+        ],
+        "success": false
+      }
+    },{
+      "title": "unexpected_values_exact_match_out_with_unexpected_index_list",
       "exact_match_out" : true,
+      "only_for": ["pandas"],
       "in": {
         "column_list": ["a", "b"]
       },
@@ -207,6 +256,103 @@
             }
           ],
           "unexpected_index_list": [0,1,2,3,4,5,6,7,8]
+        }
+      }
+    },{
+      "title": "unexpected_values_exact_match_out_without_unexpected_index_list",
+      "exact_match_out" : true,
+      "in": {
+        "column_list": ["a", "b"]
+      },
+      "out": {
+        "success": false,
+        "result": {
+          "element_count": 10,
+          "missing_count": 1,
+          "missing_percent": 10.0,
+          "unexpected_count": 9,
+          "unexpected_percent": 100.0,
+          "unexpected_percent_total": 90.0,
+          "unexpected_percent_nonmissing": 100.0,
+          "partial_unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            }
+          ],
+          "details": {
+            "partial_unexpected_counts_error": "partial_unexpected_counts requested, but requires a hashable type"
+          },
+          "unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            }
+          ]
         }
       }
     }]

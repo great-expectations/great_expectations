@@ -16,15 +16,19 @@ class Asset:
         base_directory: Optional[str] = None,
         glob_directive: Optional[str] = None,
         pattern: Optional[str] = None,
-        group_names: List[str] = None,
+        group_names: Optional[List[str]] = None,
         batch_spec_passthrough: Optional[dict] = None,
         # S3
         bucket: Optional[str] = None,
-        prefix: Optional[str] = None,
-        max_keys: int = None,
+        max_keys: Optional[int] = None,
         # Azure
         container: Optional[str] = None,
         name_starts_with: Optional[str] = None,
+        # GCS
+        bucket_or_name: Optional[str] = None,
+        max_results: Optional[int] = None,
+        # Both S3/GCS
+        prefix: Optional[str] = None,
         # Both S3/Azure
         delimiter: Optional[str] = None,
     ):
@@ -38,12 +42,18 @@ class Asset:
 
         # S3
         self._bucket = bucket
-        self._prefix = prefix
         self._max_keys = max_keys
 
         # Azure
         self._container = container
         self._name_starts_with = name_starts_with
+
+        # GCS
+        self._bucket_or_name = bucket_or_name
+        self._max_results = max_results
+
+        # Both S3/GCS
+        self._prefix = prefix
 
         # Both S3/Azure
         self._delimiter = delimiter
@@ -69,16 +79,12 @@ class Asset:
         return self._group_names
 
     @property
+    def batch_spec_passthrough(self) -> Optional[dict]:
+        return self._batch_spec_passthrough
+
+    @property
     def bucket(self) -> Optional[str]:
         return self._bucket
-
-    @property
-    def prefix(self) -> Optional[str]:
-        return self._prefix
-
-    @property
-    def delimiter(self) -> Optional[str]:
-        return self._delimiter
 
     @property
     def max_keys(self) -> Optional[int]:
@@ -93,5 +99,17 @@ class Asset:
         return self._name_starts_with
 
     @property
-    def batch_spec_passthrough(self) -> Optional[dict]:
-        return self._batch_spec_passthrough
+    def bucket_or_name(self) -> Optional[str]:
+        return self._bucket_or_name
+
+    @property
+    def max_results(self) -> Optional[int]:
+        return self._max_results
+
+    @property
+    def prefix(self) -> Optional[str]:
+        return self._prefix
+
+    @property
+    def delimiter(self) -> Optional[str]:
+        return self._delimiter

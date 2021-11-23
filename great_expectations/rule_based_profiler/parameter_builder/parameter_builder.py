@@ -20,7 +20,7 @@ from great_expectations.rule_based_profiler.util import (
     get_validator as get_validator_from_batch_request,
 )
 from great_expectations.util import is_numeric
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 
@@ -146,8 +146,8 @@ class ParameterBuilder(ABC):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        enforce_numeric_metric: Optional[Union[str, bool]] = False,
-        replace_nan_with_zero: Optional[Union[str, bool]] = False,
+        enforce_numeric_metric: Union[str, bool] = False,
+        replace_nan_with_zero: Union[str, bool] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -224,8 +224,8 @@ class ParameterBuilder(ABC):
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        enforce_numeric_metric: Optional[Union[str, bool]] = False,
-        replace_nan_with_zero: Optional[Union[str, bool]] = False,
+        enforce_numeric_metric: Union[str, bool] = False,
+        replace_nan_with_zero: Union[str, bool] = False,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,

@@ -1,6 +1,5 @@
 import logging
-from typing import Any, List, Optional, Tuple, Union, cast
-from urllib.parse import urlparse
+from typing import Any, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -10,6 +9,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import (
+    AzureBatchSpec,
     BatchMarkers,
     BatchSpec,
     PathBatchSpec,
@@ -127,6 +127,7 @@ class RuntimeDataConnector(DataConnector):
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
+        self._execution_engine.load_batch_data(batch_definition.id, batch_data)
         return (
             batch_data,
             batch_spec,
@@ -224,18 +225,19 @@ class RuntimeDataConnector(DataConnector):
         batch_spec: BatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
-        if runtime_parameters.get("batch_data") is not None:
+        if "batch_data" in runtime_parameters:
             batch_spec["batch_data"] = runtime_parameters.get("batch_data")
             return RuntimeDataBatchSpec(batch_spec)
-        elif runtime_parameters.get("query"):
+        elif "query" in runtime_parameters:
             batch_spec["query"] = runtime_parameters.get("query")
             return RuntimeQueryBatchSpec(batch_spec)
-        elif runtime_parameters.get("path"):
-            path = runtime_parameters.get("path")
+        elif "path" in runtime_parameters:
+            path: str = runtime_parameters["path"]
             batch_spec["path"] = path
-            parsed_url = urlparse(path)
-            if "s3" in parsed_url.scheme:
+            if "s3" in path:
                 return S3BatchSpec(batch_spec)
+            elif "blob.core.windows.net" in path:
+                return AzureBatchSpec(batch_spec)
             else:
                 return PathBatchSpec(batch_spec)
 
@@ -274,6 +276,7 @@ class RuntimeDataConnector(DataConnector):
 
         runtime_parameters = batch_request.runtime_parameters
         batch_identifiers = batch_request.batch_identifiers
+
         if not (
             (not runtime_parameters and not batch_identifiers)
             or (runtime_parameters and batch_identifiers)

@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import List
 
 import pandas as pd
 import pytest
@@ -11,13 +12,20 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
+    SqlAlchemyBatchData,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 
 # Function to test for spark dataframe equality
 from great_expectations.self_check.util import build_sa_engine
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.util import (
+    get_sqlalchemy_domain_data,
+    get_sqlalchemy_selectable,
+)
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
 
@@ -123,7 +131,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_1 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -131,7 +139,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -139,7 +147,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -147,7 +155,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -166,7 +174,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_1 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_1,
             "table.columns": table_columns_metric,
@@ -175,7 +183,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_2,
             "table.columns": table_columns_metric,
@@ -184,7 +192,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_3,
             "table.columns": table_columns_metric,
@@ -193,7 +201,7 @@ def test_sa_batch_aggregate_metrics(caplog, sa):
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_4,
             "table.columns": table_columns_metric,
@@ -243,7 +251,7 @@ def test_get_domain_records_with_column_domain(sa):
             "condition_parser": "great_expectations__experimental__",
         }
     )
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
 
     expected_column_df = df.iloc[:3]
     engine = build_sa_engine(expected_column_df, sa)
@@ -271,7 +279,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "column_B": "b",
             "row_condition": 'col("b")>2',
             "condition_parser": "great_expectations__experimental__",
-            "ignore_row_if": "either_value_is_missing",
+            "ignore_row_if": "both_values_are_missing",
         }
     )
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
@@ -293,7 +301,7 @@ def test_get_domain_records_with_column_pair_domain(sa):
         domain_kwargs={
             "column_A": "b",
             "column_B": "c",
-            "row_condition": 'col("a")<6',
+            "row_condition": 'col("b")>2',
             "condition_parser": "great_expectations__experimental__",
             "ignore_row_if": "either_value_is_missing",
         }
@@ -301,7 +309,35 @@ def test_get_domain_records_with_column_pair_domain(sa):
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
 
     expected_column_pair_df = pd.DataFrame(
-        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+        {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}
+    )
+    engine = build_sa_engine(expected_column_pair_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
+
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_A": "b",
+            "column_B": "c",
+            "row_condition": 'col("a")<6',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "neither",
+        }
+    )
+    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
+
+    expected_column_pair_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5],
+            "b": [2.0, 3.0, 4.0, 5.0, None],
+            "c": [1.0, 2.0, 3.0, 4.0, 5.0],
+        }
     )
     engine = build_sa_engine(expected_column_pair_df, sa)
     expected_data = engine.engine.execute(
@@ -355,7 +391,7 @@ def test_get_domain_records_with_multicolumn_domain(sa):
     data = engine.get_domain_records(
         domain_kwargs={
             "column_list": ["b", "c"],
-            "row_condition": 'col("a")<6',
+            "row_condition": 'col("a")<5',
             "condition_parser": "great_expectations__experimental__",
             "ignore_row_if": "any_value_is_missing",
         }
@@ -363,7 +399,40 @@ def test_get_domain_records_with_multicolumn_domain(sa):
     domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
 
     expected_multicolumn_df = pd.DataFrame(
-        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}, index=[0, 1, 2, 3]
+    )
+    engine = build_sa_engine(expected_multicolumn_df, sa)
+    expected_data = engine.engine.execute(
+        sa.select(["*"]).select_from(engine.active_batch_data.selectable)
+    ).fetchall()
+
+    assert (
+        domain_data == expected_data
+    ), "Data does not match after getting full access compute domain"
+
+    df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, None, 5],
+            "b": [2, 3, 4, 5, 6, 7],
+            "c": [1, 2, 3, 4, None, 6],
+        }
+    )
+    engine = build_sa_engine(df, sa)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_list": ["b", "c"],
+            "ignore_row_if": "never",
+        }
+    )
+    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+
+    expected_multicolumn_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, None, 5],
+            "b": [2, 3, 4, 5, 6, 7],
+            "c": [1, 2, 3, 4, None, 6],
+        },
+        index=[0, 1, 2, 3, 4, 5],
     )
     engine = build_sa_engine(expected_multicolumn_df, sa)
     expected_data = engine.engine.execute(
@@ -496,7 +565,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
         .select_from(engine.active_batch_data.selectable)
         .where(sa.column("b") > 24)
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -529,7 +598,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
         .select_from(engine.active_batch_data.selectable)
         .where(sa.column("b") == 2)
     ).fetchall()
-    domain_data = engine.engine.execute(sa.select(["*"]).select_from(data)).fetchall()
+    domain_data = engine.engine.execute(get_sqlalchemy_domain_data(data)).fetchall()
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -566,22 +635,22 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
     desired_metric_1 = MetricConfiguration(
         metric_name="column_values.unique",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metric_4 = MetricConfiguration(
         metric_name="column.does_not_exist",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
 
     # Ensuring a metric provider error is raised if metric does not exist
@@ -619,12 +688,12 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         temp_tables = [
             name
             for name in get_sqlite_temp_table_names(engine.engine)
-            if name.startswith("ge_tmp_")
+            if name.startswith("ge_temp_")
         ]
         tables = [
             name
             for name in get_sqlite_table_names(engine.engine)
-            if name.startswith("ge_tmp_")
+            if name.startswith("ge_temp_")
         ]
         assert len(temp_tables) == 0
         assert len(tables) == 0
@@ -646,7 +715,7 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     condition_metric = MetricConfiguration(
         metric_name="column_values.unique.condition",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -661,7 +730,7 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     desired_metric = MetricConfiguration(
         metric_name="column_values.unique.unexpected_count",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "unexpected_condition": condition_metric,
         },
@@ -671,3 +740,90 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     )
 
     validate_tmp_tables()
+
+
+def test_sample_using_random(sqlite_view_engine, test_df):
+    my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
+        engine=sqlite_view_engine
+    )
+
+    p: float
+    batch_spec: SqlAlchemyDatasourceBatchSpec
+    batch_data: SqlAlchemyBatchData
+    num_rows: int
+    rows_0: List[tuple]
+    rows_1: List[tuple]
+
+    # First, make sure that degenerative case never passes.
+
+    test_df_0: pd.DataFrame = test_df.iloc[:1]
+    test_df_0.to_sql("test_table_0", con=my_execution_engine.engine)
+
+    p = 1.0
+    batch_spec = SqlAlchemyDatasourceBatchSpec(
+        table_name="test_table_0",
+        schema_name="main",
+        sampling_method="_sample_using_random",
+        sampling_kwargs={"p": p},
+    )
+
+    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
+    num_rows = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == round(p * test_df_0.shape[0])
+
+    rows_0: List[tuple] = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
+    num_rows = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == round(p * test_df_0.shape[0])
+
+    rows_1: List[tuple] = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    assert len(rows_0) == len(rows_1) == 1
+
+    assert rows_0 == rows_1
+
+    # Second, verify that realistic case always returns different random sample of rows.
+
+    test_df_1: pd.DataFrame = test_df
+    test_df_1.to_sql("test_table_1", con=my_execution_engine.engine)
+
+    p = 2.0e-1
+    batch_spec = SqlAlchemyDatasourceBatchSpec(
+        table_name="test_table_1",
+        schema_name="main",
+        sampling_method="_sample_using_random",
+        sampling_kwargs={"p": p},
+    )
+
+    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
+    num_rows = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == round(p * test_df_1.shape[0])
+
+    rows_0 = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
+    num_rows = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+    ).scalar()
+    assert num_rows == round(p * test_df_1.shape[0])
+
+    rows_1 = batch_data.execution_engine.engine.execute(
+        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+    ).fetchall()
+
+    assert len(rows_0) == len(rows_1)
+
+    assert not (rows_0 == rows_1)

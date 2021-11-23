@@ -26,7 +26,7 @@ Steps
     name: my_checkpoint
     config_version: 1
     class_name: Checkpoint
-    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    run_name_template: "%Y-%m-foo-bar-template-$VAR"
     validations:
       - batch_request:
           datasource_name: my_datasource
@@ -60,7 +60,7 @@ Steps
     name: my_checkpoint
     config_version: 1
     class_name: Checkpoint
-    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    run_name_template: "%Y-%m-foo-bar-template-$VAR"
     validations:
       - batch_request:
           datasource_name: my_datasource
@@ -118,7 +118,7 @@ Steps
     name: my_fancy_checkpoint
     config_version: 1
     class_name: Checkpoint
-    run_name_template: "%Y-%M-foo-bar-template-$VAR"
+    run_name_template: "%Y-%m-foo-bar-template-$VAR"
     expectation_suite_name: users.delivery
     action_list:
         - name: store_validation_result

@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     column_condition_partial,
     column_function_partial,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):

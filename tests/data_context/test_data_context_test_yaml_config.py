@@ -846,6 +846,9 @@ data_connectors:
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
 
+    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+    assert mock_emit.call_count == 2
+
     df_data = my_batch.data.dataframe
     assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
@@ -868,6 +871,9 @@ data_connectors:
             data_asset_name="DOES_NOT_EXIST",
         )
 
+    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+    assert mock_emit.call_count == 3
+
     my_validator = context.get_validator(
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
@@ -883,6 +889,10 @@ data_connectors:
             },
         },
     )
+
+    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+    assert mock_emit.call_count == 4
+
     my_evr = my_validator.expect_column_values_to_be_between(
         column="d", min_value=1, max_value=31
     )
@@ -893,7 +903,8 @@ data_connectors:
     # assert my_evr.success
 
     # No other usage stats calls detected
-    assert mock_emit.call_count == 1
+    # assert mock_emit.call_count == 1
+    assert mock_emit.call_count == 4
 
 
 @mock.patch(
@@ -1043,6 +1054,9 @@ data_connectors:
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
 
+    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+    assert mock_emit.call_count == 2
+
     my_batch.head()
 
     df_data = my_batch.data.dataframe
@@ -1067,6 +1081,9 @@ data_connectors:
             data_asset_name="DOES_NOT_EXIST",
         )
 
+    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+    assert mock_emit.call_count == 3
+
     my_validator = context.get_validator(
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
@@ -1087,11 +1104,14 @@ data_connectors:
     )
     assert my_evr.success
 
+    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+    assert mock_emit.call_count == 4
+
     # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
     # assert my_evr.success
 
     # No other usage stats calls detected
-    assert mock_emit.call_count == 1
+    assert mock_emit.call_count == 4
 
 
 @mock.patch(
@@ -1158,6 +1178,8 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
         "class_name": "PandasExecutionEngine",
         "discard_subset_failing_expectations": False,
         "boto3_options": {},
+        "azure_options": {},
+        "gcs_options": {},
     }
     assert report_object["data_connectors"]["count"] == 1
 
@@ -1262,6 +1284,8 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
         "class_name": "PandasExecutionEngine",
         "discard_subset_failing_expectations": False,
         "boto3_options": {},
+        "azure_options": {},
+        "gcs_options": {},
     }
     assert report_object["data_connectors"]["count"] == 2
     assert report_object["data_connectors"]["default_runtime_data_connector_name"] == {

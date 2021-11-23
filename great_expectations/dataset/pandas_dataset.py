@@ -195,7 +195,14 @@ class MetaPandasDataset(Dataset):
                 boolean_mapped_null_values = series_A.isnull() & series_B.isnull()
             elif ignore_row_if == "either_value_is_missing":
                 boolean_mapped_null_values = series_A.isnull() | series_B.isnull()
+            # elif ignore_row_if == "neither":
             elif ignore_row_if == "never":
+                """
+                TODO: <Alex>Note: The value of the "ignore_row_if" directive in the commented out line above is correct.
+                However, fixing the error would constitute a breaking change.  Hence, the documentation is updated now
+                (8/16/2021), while the implementation is corrected as part of the Expectations V3 API release.
+                </Alex>
+                """
                 boolean_mapped_null_values = series_A.map(lambda x: False)
             else:
                 raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
@@ -608,7 +615,7 @@ Notes:
                     other_values = sorted(value_counts.index[n_bins:])
                     replace = {value: "(other)" for value in other_values}
             else:
-                replace = dict()
+                replace = {}
                 for x in bins:
                     replace.update({value: ", ".join(x) for value in x})
             return (

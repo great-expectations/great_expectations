@@ -1,5 +1,5 @@
 ---
-title: ✳ How to create and edit Expectations with instant feedback from a sample Batch of data
+title: How to create and edit Expectations with instant feedback from a sample Batch of data
 ---
 
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
@@ -28,8 +28,8 @@ Steps
    great_expectations --v3-api suite new --interactive
    ```
 
-   This command prompts you to select a datasource, a data connector, and a data asset so as to identify a sample
-   Batch of data the suite will eventually describe.  If there are unique choices (e.g., only one data connector in
+   This command prompts you to select a Datasource, a Data Connector, and a Data Asset so as to identify a sample
+   Batch of data the suite will eventually describe.  If there are unique choices (e.g., only one Data Connector in
    your datasource configuration), then Great Expectations will automatically select it for you (to speed up the process).
 
    Finally, unless you specify the name of the Expectation Suite on the command line (using the
@@ -38,10 +38,10 @@ Steps
 
    Then an empty suite is created and added to your project.
 
-   Then Great Expectations creates a jupyter notebook for you to start creating your new suite.  The command
-   concludes by opening the newly generated jupyter notebook.
+   Then Great Expectations creates a Jupyter Notebook for you to start creating your new suite.  The command
+   concludes by opening the newly generated Jupyter Notebook.
 
-2. If you wish to skip the automated opening of jupyter notebook, add the ``--no-jupyter`` flag:
+2. If you wish to skip the automated opening of Jupyter Notebook, add the ``--no-jupyter`` flag:
 
    ```bash
    great_expectations --v3-api suite new --interactive --no-jupyter
@@ -51,13 +51,13 @@ Steps
    (please see [How to create and edit Expectations with a Profiler](./how_to_create_and_edit_expectations_with_a_profiler.md)).
 
    :::info
-   When in the interactive mode, the initialization cell of your jupyter notebook will contain the ``batch_request``
+   When in the interactive mode, the initialization cell of your Jupyter Notebook will contain the ``batch_request``
    dictionary.  You can convert it to JSON and save in a file for future use.  The contents of this file would look like this:
    :::
 
    ```bash
    {
-       "datasource_name": my_datasource",
+       "datasource_name": "my_datasource",
        "data_connector_name": "my_data_connector",
        "data_asset_name": "my_asset"
    }

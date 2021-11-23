@@ -1,10 +1,11 @@
 import copy
+import datetime
 import logging
 import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Optional, Union
+from typing import Optional
 
 import requests
 
@@ -16,11 +17,21 @@ from great_expectations.data_context.types.base import CheckpointConfig
 logger = logging.getLogger(__name__)
 
 
-def send_slack_notification(query, slack_webhook):
+def send_slack_notification(
+    query, slack_webhook=None, slack_channel=None, slack_token=None
+):
     session = requests.Session()
+    url = slack_webhook
+    query = query
+    headers = None
+
+    if not slack_webhook:
+        url = "https://slack.com/api/chat.postMessage"
+        headers = {"Authorization": f"Bearer {slack_token}"}
+        query["channel"] = slack_channel
 
     try:
-        response = session.post(url=slack_webhook, json=query)
+        response = session.post(url=url, headers=headers, json=query)
     except requests.ConnectionError:
         logger.warning(
             "Failed to connect to Slack webhook at {url} "
@@ -38,13 +49,15 @@ def send_slack_notification(query, slack_webhook):
                     text=response.text,
                 )
             )
+
         else:
             return "Slack notification succeeded."
 
 
+# noinspection SpellCheckingInspection
 def send_opsgenie_alert(query, suite_name, settings):
     """Creates an alert in Opsgenie."""
-    if settings["region"] != None:
+    if settings["region"] is not None:
         url = "https://api.{region}.opsgenie.com/v2/alerts".format(
             region=settings["region"]
         )  # accommodate for Europeans
@@ -145,6 +158,7 @@ def send_webhook_notifications(query, webhook, target_platform):
             )
 
 
+# noinspection SpellCheckingInspection
 def send_email(
     title,
     html,
@@ -163,7 +177,6 @@ def send_email(
     msg["Subject"] = title
     msg.attach(MIMEText(html, "html"))
     try:
-        mailserver = None
         if use_ssl:
             if use_tls:
                 logger.warning("Please choose between SSL or TLS, will default to SSL")
@@ -191,42 +204,67 @@ def send_email(
         return "success"
 
 
-# TODO: <Alex>BatchRequest attribute processing here is not flexible, compared to DataContext.get_batch_list().</Alex>
 # TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_runtime_batch_request(
     substituted_runtime_config: CheckpointConfig,
     validation_batch_request: Optional[dict] = None,
-) -> Union[BatchRequest, RuntimeBatchRequest]:
+    ge_cloud_mode: bool = False,
+) -> Optional[BatchRequest]:
     runtime_config_batch_request = substituted_runtime_config.batch_request
 
     if (
-        runtime_config_batch_request is not None
-        and "runtime_parameters" in runtime_config_batch_request
-    ) or (
-        validation_batch_request is not None
-        and "runtime_parameters" in validation_batch_request
+        (
+            runtime_config_batch_request is not None
+            and "runtime_parameters" in runtime_config_batch_request
+        )
+        or (
+            validation_batch_request is not None
+            and "runtime_parameters" in validation_batch_request
+        )
+        or (isinstance(validation_batch_request, RuntimeBatchRequest))
     ):
         batch_request_class = RuntimeBatchRequest
     else:
         batch_request_class = BatchRequest
 
+    if runtime_config_batch_request is None and validation_batch_request is None:
+        return None
+
     if runtime_config_batch_request is None:
-        return (
-            validation_batch_request
-            if validation_batch_request is None
-            else batch_request_class(**validation_batch_request)
-        )
+        runtime_config_batch_request = {}
 
     if validation_batch_request is None:
-        return batch_request_class(**runtime_config_batch_request)
+        validation_batch_request = {}
 
-    runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
-    for key, val in runtime_batch_request_dict.items():
-        if val is not None and runtime_config_batch_request.get(key) is not None:
+    if (
+        validation_batch_request.get("runtime_parameters") is not None
+        and validation_batch_request["runtime_parameters"].get("batch_data") is not None
+    ):
+        batch_data = validation_batch_request["runtime_parameters"].pop("batch_data")
+        runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
+        validation_batch_request["runtime_parameters"][
+            "batch_data"
+        ] = runtime_batch_request_dict["runtime_parameters"]["batch_data"] = batch_data
+    else:
+        runtime_batch_request_dict: dict = copy.deepcopy(validation_batch_request)
+
+    for key, runtime_batch_request_dict_val in runtime_batch_request_dict.items():
+        runtime_config_batch_request_val = runtime_config_batch_request.get(key)
+        if (
+            runtime_batch_request_dict_val is not None
+            and runtime_config_batch_request_val is not None
+        ):
             raise ge_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )
     runtime_batch_request_dict.update(runtime_config_batch_request)
+
+    if ge_cloud_mode and batch_request_class is RuntimeBatchRequest:
+        batch_identifiers = runtime_batch_request_dict.get("batch_identifiers", {})
+        if len(batch_identifiers.keys()) == 0:
+            batch_identifiers["timestamp"] = str(datetime.datetime.now())
+            runtime_batch_request_dict["batch_identifiers"] = batch_identifiers
+
     return batch_request_class(**runtime_batch_request_dict)
 
 
@@ -240,6 +278,10 @@ def get_substituted_validation_dict(
         ),
         "expectation_suite_name": validation_dict.get("expectation_suite_name")
         or substituted_runtime_config.expectation_suite_name,
+        "expectation_suite_ge_cloud_id": validation_dict.get(
+            "expectation_suite_ge_cloud_id"
+        )
+        or substituted_runtime_config.expectation_suite_ge_cloud_id,
         "action_list": CheckpointConfig.get_updated_action_list(
             base_action_list=substituted_runtime_config.action_list,
             other_action_list=validation_dict.get("action_list", {}),

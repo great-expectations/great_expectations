@@ -2,7 +2,19 @@
 title: Glossary of Expectations
 ---
 
-This is a list of all built-in Expectations. Expectations are extendable so you can create custom expectations for your data domain! To do so see this article: How to create custom Expectations.
+:::info WIP
+While we work on autodoc API generation for our newer docs, the legacy docs are currently up to date.
+:::
+
+[API Reference Link](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/index.html#)
+
+This is a list of all built-in Expectations. Expectations are extendable so you can create custom expectations for your data domain! To do so see this article: [How to create custom Expectations](/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations).
+
+:::tip
+
+ Check out our new [Expectation Gallery](https://greatexpectations.io/expectations) for a more indepth view of each Expectation.
+
+:::
 
 ## Dataset
 Dataset objects model tabular data and include expectations with row and column semantics. Many Dataset expectations are implemented using column_map_expectation and column_aggregate_expectation decorators.

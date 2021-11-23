@@ -40,7 +40,7 @@ Steps
 
   :::note
 
-    - If you wish to store values that include the dollar sign character ``$``, please escape them using a backslash ``\`` so substitution is not attempted. For example in the above example for postgres credentials you could set ``password: pa\$sword`` if your password is ``pa$sword``. Say that 5 times fast, and also please choose a more secure password!
+    - If you wish to store values that include the dollar sign character ``$``, please escape them using a backslash ``\`` so substitution is not attempted. For example in the above example for Postgres credentials you could set ``password: pa\$sword`` if your password is ``pa$sword``. Say that 5 times fast, and also please choose a more secure password!
     - When you save values via the CLI, they are automatically escaped if they contain the ``$`` character.
     - You can also have multiple substitutions for the same item, e.g. ``database_string: ${USER}:${PASSWORD}@${HOST}:${PORT}/${DATABASE}``
 

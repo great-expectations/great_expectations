@@ -36,6 +36,9 @@ def titanic_sqlite_db_file(sa, tmp_path_factory):
     return db_path
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @freeze_time("09/26/2019 13:42:41")
 def test_cli_init_on_new_project(
@@ -128,13 +131,6 @@ great_expectations/
     expectations/
         .ge_store_backend_id
         warning.json
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
@@ -199,6 +195,9 @@ great_expectations/
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_new_project_extra_whitespace_in_url(
     mock_webbrowser, caplog, tmp_path_factory, titanic_sqlite_db_file, sa
@@ -298,6 +297,9 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
     mock_webbrowser, caplog, initialized_sqlite_project, titanic_sqlite_db_file, sa
@@ -466,6 +468,9 @@ def initialized_sqlite_project(
     return project_dir
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     mock_webbrowser,
@@ -509,6 +514,9 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no(
     mock_webbrowser,
@@ -542,6 +550,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes(
     mock_webbrowser,
@@ -581,6 +592,9 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     mock_webbrowser, caplog, initialized_sqlite_project, sa
@@ -605,7 +619,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     datasource = all_datasources[0] if all_datasources else None
 
     # create a sqlalchemy engine using the URL of existing datasource
-    engine = sa.create_engine(datasource.get("credentials", dict()).get("url"))
+    engine = sa.create_engine(datasource.get("credentials", {}).get("url"))
     inspector = sa.inspect(engine)
 
     # get the default schema and table for testing

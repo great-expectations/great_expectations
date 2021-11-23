@@ -23,7 +23,7 @@ class ExpectationSuiteAnonymizer(Anonymizer):
         self._ge_expectation_types = GE_EXPECTATION_TYPES
 
     def anonymize_expectation_suite_info(self, expectation_suite):
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
         anonymized_expectation_counts = list()
 
         expectations = expectation_suite.expectations

@@ -2,7 +2,7 @@ import datetime
 import logging
 import uuid
 import warnings
-from collections import Callable
+from collections.abc import Callable
 from functools import partial
 from io import BytesIO
 
@@ -159,23 +159,23 @@ class PandasDatasource(LegacyDatasource):
         if self._reader_options:
             # Then update with any locally-specified reader options
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"].update(self._reader_options)
 
         # Then update with any locally-specified reader options
         if reader_options:
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"].update(reader_options)
 
         if self._limit:
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"]["nrows"] = self._limit
 
         if limit is not None:
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"]["nrows"] = limit
 
         if self._reader_method:

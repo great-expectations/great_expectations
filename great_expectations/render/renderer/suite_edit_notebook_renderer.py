@@ -162,7 +162,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self.add_markdown_cell(markdown)
 
         if not batch_kwargs:
-            batch_kwargs = dict()
+            batch_kwargs = {}
         code = self.render_with_overwrite(
             self.header_code,
             "header.py.j2",

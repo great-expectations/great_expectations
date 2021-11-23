@@ -130,13 +130,6 @@ great_expectations/
     expectations/
         .ge_store_backend_id
         warning.json
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
@@ -641,7 +634,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     datasource = all_datasources[0] if all_datasources else None
 
     # create a sqlalchemy engine using the URL of existing datasource
-    engine = sa.create_engine(datasource.get("credentials", dict()).get("url"))
+    engine = sa.create_engine(datasource.get("credentials", {}).get("url"))
     inspector = sa.inspect(engine)
 
     # get the default schema and table for testing

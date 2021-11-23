@@ -8,15 +8,15 @@ If you want to change documentation, but not code, we suggest using the GitHub m
 
 ### Start editing
 
-#### 1A. Edit from https://knoxpod.netlify.app/docs/
+#### 1A. Edit from https://docs.greatexpectations.io/docs/
 
-* Go to the [Great Expectations docs](https://knoxpod.netlify.app/docs/).
+* Go to the [Great Expectations docs](https://docs.greatexpectations.io/docs/).
 
 * On each page, you’ll see an `Edit` button in the lower left. Click this to go to the source file in the Great Expectations GitHub repo.
 
 #### 1B. Edit from Github
 
-* If you’re already on GitHub, the docs are located in `great_expectations > docs`. You can directly navigate to the respective page you want to edit (but getting there from https://knoxpod.netlify.app/docs/ is a little easier).
+* If you’re already on GitHub, the docs are located in `great_expectations > docs`. You can directly navigate to the respective page you want to edit (but getting there from https://docs.greatexpectations.io/docs/ is a little easier).
 
 * In the top right of the grey header bar of the actual file, click the pencil icon to get into edit mode on GitHub.
 
@@ -24,7 +24,7 @@ If you want to change documentation, but not code, we suggest using the GitHub m
 
 * Make your edits and use the Preview tab to preview changes.
 
-* Please pay close attention to the [Style Guide](/docs/contributing/contributing_style).
+* Please pay close attention to the [Style Guide](/docs/contributing/style_guides/docs_style).
 
 ### Submit a pull request
 

@@ -1,6 +1,7 @@
 [![Build Status](https://dev.azure.com/great-expectations/great_expectations/_apis/build/status/great_expectations?branchName=develop&stageName=required)](https://dev.azure.com/great-expectations/great_expectations/_build/latest?definitionId=1&branchName=develop)
 ![Coverage](https://img.shields.io/azure-devops/coverage/great-expectations/great_expectations/1/main)
 [![Documentation Status](https://readthedocs.org/projects/great-expectations/badge/?version=latest)](http://great-expectations.readthedocs.io/en/latest/?badge=latest)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5683574.svg)](https://doi.org/10.5281/zenodo.5683574)
 
 <!-- <<<Super-quickstart links go here>>> -->
 
@@ -209,7 +210,7 @@ What does Great Expectations _not_ do?
 
 **Great Expectations is _not_ a pipeline execution framework.**
 
-We aim to integrate seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), etc. We DON'T execute your pipelines for you.
+We aim to integrate seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), [Flyte](https://flyte.org/), etc. We DON'T execute your pipelines for you.
 
 **Great Expectations is _not_ a data versioning tool.**
 
@@ -235,4 +236,4 @@ If you'd like hands-on assistance setting up Great Expectations, establishing a 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
-Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/en/latest/contributing.html) and please don't be shy with questions.
+Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/docs/contributing/contributing/) and please don't be shy with questions.

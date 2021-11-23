@@ -1,7 +1,9 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
-from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
+    ConfiguredAssetSqlDataConnector,
+)
 from great_expectations.execution_engine import ExecutionEngine
 
 try:
@@ -21,16 +23,16 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
-        data_asset_name_prefix: Optional[str] = "",
-        data_asset_name_suffix: Optional[str] = "",
-        include_schema_name: Optional[bool] = False,
+        data_asset_name_prefix: str = "",
+        data_asset_name_suffix: str = "",
+        include_schema_name: bool = False,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
         excluded_tables: Optional[list] = None,
         included_tables: Optional[list] = None,
-        skip_inapplicable_tables: Optional[bool] = True,
+        skip_inapplicable_tables: bool = True,
         introspection_directives: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -161,6 +163,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             data_asset_config = {
                 "schema_name": metadata["schema_name"],
                 "table_name": metadata["table_name"],
+                "type": metadata["type"],
             }
             if not splitter_method is None:
                 data_asset_config["splitter_method"] = splitter_method
@@ -262,3 +265,12 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                         )
 
         return tables
+
+    def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:
+        """
+        Return the list of asset names and types known by this DataConnector.
+
+        Returns:
+            A list of tuples consisting of available names and types
+        """
+        return [(asset["table_name"], asset["type"]) for asset in self.assets.values()]
