@@ -250,6 +250,10 @@ class SqlAlchemyBatchData(BatchData):
             stmt_2 = "CREATE GLOBAL TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}".format(
                 temp_table_name=temp_table_name, query=query
             )
+        elif self.sql_engine_dialect.name.lower() == "teradatasql":
+            stmt = 'CREATE VOLATILE TABLE "{temp_table_name}" AS ({query}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
+                temp_table_name=temp_table_name, query=query
+            )
         else:
             stmt = 'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'.format(
                 temp_table_name=temp_table_name, query=query
