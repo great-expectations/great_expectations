@@ -160,7 +160,7 @@ def determine_files_to_test(source_files: List[str]) -> List[str]:
 
 def main() -> None:
     changed_files = get_changed_files()
-    source_files = determine_relevant_source_files(changed_files, depth=3)
+    source_files = determine_relevant_source_files(changed_files, depth=2)
     files_to_test = determine_files_to_test(source_files)
     for file in files_to_test:
         print(file)
