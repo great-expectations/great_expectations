@@ -341,7 +341,7 @@ class Checkpoint:
     # TODO: Add eval param processing using new TBD parser syntax and updated EvaluationParameterParser and
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
-    # while run_name_template also undergoes strftime datetime substitution
+    #  while run_name_template also undergoes strftime datetime substitution
     def run(
         self,
         template_name: Optional[str] = None,
@@ -358,7 +358,6 @@ class Checkpoint:
         run_time: Optional[Union[str, datetime.datetime]] = None,
         result_format: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
-        **kwargs,
     ) -> CheckpointResult:
         assert not (run_id and run_name) and not (
             run_id and run_time
@@ -632,7 +631,7 @@ class LegacyCheckpoint(Checkpoint):
         evaluation_parameters: Optional[dict] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Union[str, dict] = {"result_format": "SUMMARY"},
+        result_format: Optional[Union[str, dict]] = None,
     ):
         result_format = result_format or {"result_format": "SUMMARY"}
 
@@ -862,7 +861,6 @@ class SimpleCheckpoint(Checkpoint):
         notify_on: str = "all",
         notify_with: Union[str, List[str]] = "all",
         expectation_suite_ge_cloud_id: Optional[str] = None,
-        **kwargs,
     ) -> CheckpointResult:
         new_baseline_config = None
 
@@ -897,5 +895,4 @@ class SimpleCheckpoint(Checkpoint):
             run_time=run_time,
             result_format=result_format,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
-            **kwargs,
         )

@@ -2,7 +2,7 @@ import copy
 import datetime
 import json
 import logging
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
@@ -247,9 +247,6 @@ class BatchRequestBase(SerializableDictDot):
         if self.limit is not None:
             json_dict["limit"] = self.limit
 
-        if self.batch_identifiers is not None:
-            json_dict["batch_identifiers"] = self.batch_identifiers
-
         if self.runtime_parameters is not None:
             key: str
             value: Any
@@ -262,6 +259,9 @@ class BatchRequestBase(SerializableDictDot):
                 json_dict["runtime_parameters"]["batch_data"] = str(
                     type(self.runtime_parameters.get("batch_data"))
                 )
+
+        if self.batch_identifiers is not None:
+            json_dict["batch_identifiers"] = self.batch_identifiers
 
         filter_properties_dict(properties=json_dict, clean_falsy=True, inplace=True)
 
@@ -397,7 +397,9 @@ class RuntimeBatchRequest(BatchRequest):
         )
 
         self._validate_runtime_batch_request_specific_init_parameters(
-            runtime_parameters, batch_identifiers, batch_spec_passthrough
+            runtime_parameters=runtime_parameters,
+            batch_identifiers=batch_identifiers,
+            batch_spec_passthrough=batch_spec_passthrough,
         )
         self._runtime_parameters = runtime_parameters
         self._batch_identifiers = batch_identifiers
@@ -724,7 +726,7 @@ def get_batch_request_from_acceptable_arguments(
 
 def get_batch_request_dict(
     batch_request: Optional[BatchRequest] = None, validations: Optional[list] = None
-) -> dict:
+) -> Tuple[Optional[dict], Optional[list]]:
     if isinstance(batch_request, BatchRequest):
         if batch_request.runtime_parameters.get("batch_data") is not None:
             batch_data = batch_request.runtime_parameters.get("batch_data")

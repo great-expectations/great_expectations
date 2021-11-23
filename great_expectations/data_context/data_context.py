@@ -3294,7 +3294,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
-        checkpoint_config = {
+        checkpoint_config: dict = {
             key: value
             for key, value in checkpoint_config_from_store.items()
             if key in checkpoint_config_from_call_args
