@@ -2,6 +2,7 @@ import logging
 import os
 import traceback
 from collections import OrderedDict
+from typing import List, Optional, Tuple, Union
 
 import great_expectations.exceptions as exceptions
 from great_expectations.core.util import nested_update
@@ -280,7 +281,13 @@ class SiteBuilder:
     def clean_site(self):
         self.target_store.clean_site()
 
-    def build(self, resource_identifiers=None, build_index: bool = True):
+    def build(
+        self,
+        resource_identifiers: Optional[
+            List[Union[ValidationResultIdentifier, ExpectationSuiteIdentifier]]
+        ] = None,
+        build_index: bool = True,
+    ) -> Tuple[str, dict]:
         """
 
         :param resource_identifiers: a list of resource identifiers
@@ -316,7 +323,13 @@ class SiteBuilder:
             index_links_dict,
         )
 
-    def get_resource_url(self, resource_identifier=None, only_if_exists=True):
+    def get_resource_url(
+        self,
+        resource_identifier: Optional[
+            Union[ValidationResultIdentifier, ExpectationSuiteIdentifier]
+        ] = None,
+        only_if_exists: bool = True,
+    ) -> str:
         """
         Return the URL of the HTML document that renders a resource
         (e.g., an expectation suite or a validation result).
@@ -717,7 +730,7 @@ class DefaultSiteIndexBuilder:
         return results
 
     # TODO: deprecate dual batch api support
-    def build(self, skip_and_clean_missing=True, build_index: bool = True):
+    def build(self, skip_and_clean_missing: bool = True, build_index: bool = True):
         """
         :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will
         be skipped and removed from the target store
