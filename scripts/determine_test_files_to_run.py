@@ -131,6 +131,7 @@ def traverse_graph(root: str, graph: Dict[str, List[str]], depth: int) -> List[s
 
     while stack:
         node, d = stack.pop()
+        # If we've hit a cycle, traversed past our stated depth, or touched a file that isn't GE, throw away the node
         if node in seen or d <= 0 or not node.startswith("great_expectations"):
             continue
         seen.add(node)
