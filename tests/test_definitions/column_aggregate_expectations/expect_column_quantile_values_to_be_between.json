@@ -89,7 +89,7 @@
           },
           "out": {
             "success": false
-          },
+          }
         },
       {
           "title": "basic_negative_test_disordered_quantile_ranges",
@@ -105,7 +105,7 @@
           "out": {},
           "error": {
             "traceback_substring": "quantile_ranges must consist of ordered pairs"
-          },
+          }
         }
     ]
   }]
