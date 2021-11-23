@@ -8,7 +8,7 @@ the specific method in which this is done is explained in detail below.
 The script takes the following steps:
     1. Determine which files have changed in the last commit (when compared to `develop`)
     2. For each changed file, find which files it depends on and which files depend on it (i.e. "relevant source files")
-    3. For each relevant source file, determine the corresponding test file.
+    3. For each relevant source file, determine the associated test files and run them.
 
 By determining which files are related to which other files, we're able to create a directed, acyclic graph from our codebase.
 
@@ -49,7 +49,7 @@ from typing import Dict, List
 
 
 def get_changed_files() -> List[str]:
-    """git diff HEAD origin/develop --name-only"""
+    """Standard git diff against `develop` to determine list of changed files"""
     process = subprocess.run(
         ["git", "diff", "HEAD", "origin/develop", "--name-only"], stdout=subprocess.PIPE
     )
@@ -142,7 +142,7 @@ def traverse_graph(root: str, graph: Dict[str, List[str]], depth: int) -> List[s
 
 
 def determine_relevant_source_files(changed_files: List[str], depth: int) -> List[str]:
-    """Perform graph traversal on all changed files to determine which source files are possibly influenced in the commit"""
+    """Perform graph traversal on all changed files to determine which source files are possibly influenced by the commit"""
     ge_graph = create_dependency_graph("great_expectations", bidirectional=True)
     res = set()
     for file in changed_files:
