@@ -2,7 +2,7 @@ import logging
 import os
 import traceback
 from collections import OrderedDict
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as exceptions
 from great_expectations.core.util import nested_update
@@ -520,7 +520,7 @@ class DefaultSiteIndexBuilder:
         name,
         site_name,
         data_context,
-        target_store,
+        target_store: HtmlSiteStore,
         site_section_builders_config,
         custom_styles_directory=None,
         custom_views_directory=None,
@@ -730,7 +730,9 @@ class DefaultSiteIndexBuilder:
         return results
 
     # TODO: deprecate dual batch api support
-    def build(self, skip_and_clean_missing: bool = True, build_index: bool = True):
+    def build(
+        self, skip_and_clean_missing: bool = True, build_index: bool = True
+    ) -> Tuple[Any, OrderedDict]:
         """
         :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will
         be skipped and removed from the target store
