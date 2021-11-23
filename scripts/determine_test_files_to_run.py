@@ -27,6 +27,11 @@ Upon creating a valid graph, we can use standard graph traversal algorithms to t
 the changed file. To determine which tests to run, we create yet another graph; this one parses our test suite and determines
 which source files are associated with a given test file. Once we have all our relevant source files and our mapping between
 source file and test file, we can simple feed in our files to determine which tests need to be run in a given CI/CD cycle.
+  ```
+  # test_qux.py
+  from foo import foo
+  ```
+The `test_qux.py` file directly links to `foo` (which is associated with `bar` and `baz`). A change in one will cause `test_qux.py` to run.
 
 While this script does not provide as much coverage as a traditional test run, the fact that it traverses GE's internal dependency
 graph layer by layer to determine the most relevant files allows us to maintain high coverage (all while improving performance).
