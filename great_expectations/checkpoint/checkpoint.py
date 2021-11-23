@@ -269,7 +269,6 @@ class Checkpoint:
             expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
                 "expectation_suite_ge_cloud_id"
             )
-            action_list: list = substituted_validation_dict.get("action_list")
 
             validator: Validator = self.data_context.get_validator(
                 batch_request=batch_request,
