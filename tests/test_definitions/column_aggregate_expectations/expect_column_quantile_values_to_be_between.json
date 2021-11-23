@@ -89,8 +89,7 @@
           },
           "out": {
             "success": false
-          },
-          "suppress_test_for": ["sqlite"]
+          }
         },
       {
           "title": "basic_negative_test_disordered_quantile_ranges",
@@ -106,8 +105,7 @@
           "out": {},
           "error": {
             "traceback_substring": "quantile_ranges must consist of ordered pairs"
-          },
-          "suppress_test_for": ["sqlite"]
+          }
         }
     ]
   }]
