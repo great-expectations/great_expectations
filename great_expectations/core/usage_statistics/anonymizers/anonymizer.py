@@ -40,6 +40,8 @@ class Anonymizer:
         assert (
             object_ or object_class or object_config
         ), "Must pass either object_ or object_class or object_config."
+
+        object_class_name: Optional[str] = None
         try:
             if object_class is None and object_ is not None:
                 object_class = object_.__class__
@@ -69,8 +71,8 @@ class Anonymizer:
 
         return anonymized_info_dict
 
+    @staticmethod
     def _is_parent_class_recognized(
-        self,
         classes_to_check,
         object_=None,
         object_class=None,
