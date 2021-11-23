@@ -569,7 +569,7 @@ def get_batch_request_from_acceptable_arguments(
     path: Optional[str] = None,
     batch_filter_parameters: Optional[dict] = None,
     **kwargs,
-) -> Union[BatchRequest]:
+) -> BatchRequest:
     """Obtain formal BatchRequest typed object from allowed attributes (supplied as arguments).
     This method applies only to the new (V3) Datasource schema.
 
