@@ -19,6 +19,9 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
     BatchAnonymizer,
 )
+from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
+    BatchRequestAnonymizer,
+)
 from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
     DataDocsSiteAnonymizer,
 )
@@ -68,6 +71,7 @@ class UsageStatisticsHandler:
             data_context_id
         )
         self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
+        self._batch_request_anonymizer = BatchRequestAnonymizer(data_context_id)
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
         try:
@@ -119,6 +123,7 @@ class UsageStatisticsHandler:
 
     def send_usage_message(self, event, event_payload=None, success=None):
         """send a usage statistics message."""
+        # noinspection PyBroadException
         try:
             message = {
                 "event": event,
@@ -185,7 +190,8 @@ class UsageStatisticsHandler:
         message["ge_version"] = self._ge_version
         return message
 
-    def validate_message(self, message, schema):
+    @staticmethod
+    def validate_message(message, schema):
         try:
             jsonschema.validate(message, schema=schema)
             return True
@@ -256,7 +262,6 @@ def usage_statistics_enabled_method(
             # Set event_payload now so it can be updated below
             event_payload = {}
             message = {"event_payload": event_payload, "event": event_name}
-            handler = None
             try:
                 if args_payload_fn is not None:
                     nested_update(event_payload, args_payload_fn(*args, **kwargs))
@@ -269,7 +274,6 @@ def usage_statistics_enabled_method(
                 message["success"] = True
                 if handler is not None:
                     handler.emit(message)
-            # except Exception:
             except Exception:
                 message["success"] = False
                 handler = get_usage_statistics_handler(args)
@@ -281,6 +285,7 @@ def usage_statistics_enabled_method(
         return usage_statistics_wrapped_method
     else:
 
+        # noinspection PyShadowingNames
         def usage_statistics_wrapped_method_partial(func):
             return usage_statistics_enabled_method(
                 func,
@@ -292,12 +297,12 @@ def usage_statistics_enabled_method(
         return usage_statistics_wrapped_method_partial
 
 
+# noinspection PyUnusedLocal
 def run_validation_operator_usage_statistics(
-    data_context,  # self
+    data_context,
     validation_operator_name,
     assets_to_validate,
-    run_id=None,
-    **kwargs
+    **kwargs,
 ):
     try:
         data_context_id = data_context.data_context_id
@@ -317,6 +322,7 @@ def run_validation_operator_usage_statistics(
             "run_validation_operator_usage_statistics: Unable to create validation_operator_name hash"
         )
     if data_context._usage_statistics_handler:
+        # noinspection PyBroadException
         try:
             batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer
             payload["anonymized_batches"] = [
@@ -327,15 +333,17 @@ def run_validation_operator_usage_statistics(
             logger.debug(
                 "run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
             )
+
     return payload
 
 
+# noinspection SpellCheckingInspection
+# noinspection PyUnusedLocal
 def save_expectation_suite_usage_statistics(
     data_context,
     expectation_suite,
     expectation_suite_name=None,
-    ge_cloud_id=None,  # self
-    **kwargs
+    **kwargs,
 ):
     try:
         data_context_id = data_context.data_context_id
@@ -353,6 +361,7 @@ def save_expectation_suite_usage_statistics(
         elif isinstance(expectation_suite, dict):
             expectation_suite_name = expectation_suite.get("expectation_suite_name")
 
+    # noinspection PyBroadException
     try:
         payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
             expectation_suite_name
@@ -361,6 +370,7 @@ def save_expectation_suite_usage_statistics(
         logger.debug(
             "save_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
         )
+
     return payload
 
 
@@ -375,6 +385,7 @@ def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name
         _anonymizers[data_context_id] = anonymizer
     payload = {}
 
+    # noinspection PyBroadException
     try:
         payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
             expectation_suite_name
@@ -383,6 +394,7 @@ def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name
         logger.debug(
             "edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
         )
+
     return payload
 
 
@@ -394,6 +406,7 @@ def add_datasource_usage_statistics(data_context, name, **kwargs):
     except AttributeError:
         data_context_id = None
 
+    # noinspection PyBroadException
     try:
         datasource_anonymizer = (
             data_context._usage_statistics_handler._datasource_anonymizer
@@ -402,12 +415,41 @@ def add_datasource_usage_statistics(data_context, name, **kwargs):
         datasource_anonymizer = DatasourceAnonymizer(data_context_id)
 
     payload = {}
+    # noinspection PyBroadException
     try:
         payload = datasource_anonymizer.anonymize_datasource_info(name, kwargs)
     except Exception:
         logger.debug(
             "add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"
         )
+
+    return payload
+
+
+# noinspection SpellCheckingInspection
+def get_batch_list_usage_statistics(data_context, *args, **kwargs):
+    try:
+        data_context_id = data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+    anonymizer = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+    payload = {}
+
+    if data_context._usage_statistics_handler:
+        # noinspection PyBroadException
+        try:
+            batch_request_anonymizer: BatchRequestAnonymizer = (
+                data_context._usage_statistics_handler._batch_request_anonymizer
+            )
+            payload = batch_request_anonymizer.anonymize_batch_request(*args, **kwargs)
+        except Exception:
+            logger.debug(
+                "get_batch_list_usage_statistics: Unable to create anonymized_batch_request_keys payload field"
+            )
+
     return payload
 
 
@@ -418,6 +460,7 @@ def send_usage_message(
     success: Optional[bool] = None,
 ):
     """send a usage statistics message."""
+    # noinspection PyBroadException
     try:
         handler: UsageStatisticsHandler = getattr(
             data_context, "_usage_statistics_handler", None

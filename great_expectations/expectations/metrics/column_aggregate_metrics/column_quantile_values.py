@@ -1,15 +1,20 @@
+import itertools
 import logging
 import traceback
 from collections.abc import Iterable
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.execution_engine import (
+    ExecutionEngine,
+    MetricDomainTypes,
+)
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -23,6 +28,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +44,7 @@ except ImportError:
     ProgrammingError = None
     Select = None
     Label = None
-    TextClaus = None
+    TextClause = None
     WithinGroup = None
     CTE = None
 
@@ -79,7 +85,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
@@ -98,6 +104,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         dialect = sqlalchemy_engine.dialect
         quantiles = metric_value_kwargs["quantiles"]
         allow_relative_error = metric_value_kwargs.get("allow_relative_error", False)
+        table_row_count = metrics.get("table.row_count")
         if dialect.name.lower() == "mssql":
             return _get_column_quantiles_mssql(
                 column=column,
@@ -136,6 +143,14 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 selectable=selectable,
                 sqlalchemy_engine=sqlalchemy_engine,
             )
+        elif dialect.name.lower() == "sqlite":
+            return _get_column_quantiles_sqlite(
+                column=column,
+                quantiles=quantiles,
+                selectable=selectable,
+                sqlalchemy_engine=sqlalchemy_engine,
+                table_row_count=table_row_count,
+            )
         else:
             return _get_column_quantiles_generic_sqlalchemy(
                 column=column,
@@ -149,7 +164,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[Tuple, Any],
@@ -176,6 +191,33 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 "SparkDFDataset requires relative error to be False or to be a float between 0 and 1."
             )
         return df.approxQuantile(column, list(quantiles), allow_relative_error)
+
+    @classmethod
+    def _get_evaluation_dependencies(
+        cls,
+        metric: MetricConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[dict] = None,
+    ):
+        dependencies: dict = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+
+        table_domain_kwargs: dict = {
+            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
+        }
+        dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+
+        return dependencies
 
 
 def _get_column_quantiles_mssql(
@@ -272,6 +314,47 @@ def _get_column_quantiles_mysql(
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
+    except ProgrammingError as pe:
+        exception_message: str = "An SQL syntax Exception occurred."
+        exception_traceback: str = traceback.format_exc()
+        exception_message += (
+            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+        )
+        logger.error(exception_message)
+        raise pe
+
+
+def _get_column_quantiles_sqlite(
+    column, quantiles: Iterable, selectable, sqlalchemy_engine, table_row_count
+) -> list:
+    """
+    The present implementation is somewhat inefficient, because it requires as many
+    calls to "sqlalchemy_engine.execute()" as the number of partitions in the "quantiles" parameter (albeit, typically,
+    only a few).  However, this is the only mechanism available for SQLite at the present time (11/17/2021), because
+    the analytical processing is not a very strongly represented capability of the SQLite database management system.
+    """
+    offsets: List[int] = [quantile * table_row_count - 1 for quantile in quantiles]
+    quantile_queries: List[Select] = [
+        sa.select([column])
+        .order_by(column.asc())
+        .offset(offset)
+        .limit(1)
+        .select_from(selectable)
+        for offset in offsets
+    ]
+
+    quantile_result: Row
+    quantile_query: Select
+    try:
+        quantiles_results: List[Row] = [
+            sqlalchemy_engine.execute(quantile_query).fetchone()
+            for quantile_query in quantile_queries
+        ]
+        return list(
+            itertools.chain.from_iterable(
+                [list(quantile_result) for quantile_result in quantiles_results]
+            )
+        )
     except ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()

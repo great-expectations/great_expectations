@@ -50,9 +50,7 @@ except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.engine import reflection
-    from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.engine.url import URL
+    from sqlalchemy.engine import make_url
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import TextClause, quoted_name
@@ -75,6 +73,14 @@ try:
     import sqlalchemy_redshift.dialect
 except ImportError:
     sqlalchemy_redshift = None
+
+try:
+    import sqlalchemy_dremio.pyodbc
+
+    if sa:
+        sa.dialects.registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
+except ImportError:
+    sqlalchemy_dremio = None
 
 try:
     import snowflake.sqlalchemy.snowdialect
@@ -122,6 +128,12 @@ except (ImportError, AttributeError):
     bigquery_types_tuple = None
     pybigquery = None
 
+try:
+    import teradatasqlalchemy.dialect
+    import teradatasqlalchemy.types as teradatatypes
+except ImportError:
+    teradatasqlalchemy = None
+
 
 def _get_dialect_type_module(dialect):
     """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
@@ -148,6 +160,19 @@ def _get_dialect_type_module(dialect):
             and bigquery_types_tuple is not None
         ):
             return bigquery_types_tuple
+    except (TypeError, AttributeError):
+        pass
+
+    # Teradata types module
+    try:
+        if (
+            issubclass(
+                dialect,
+                teradatasqlalchemy.dialect.TeradataDialect,
+            )
+            and teradatatypes is not None
+        ):
+            return teradatatypes
     except (TypeError, AttributeError):
         pass
 
@@ -220,7 +245,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             elif connection_string is not None:
                 self.engine = sa.create_engine(connection_string, **kwargs)
             elif url is not None:
-                self.drivername = urlparse(url).scheme
+                parsed_url = make_url(url)
+                self.drivername = parsed_url.drivername
                 self.engine = sa.create_engine(url, **kwargs)
             else:
                 raise InvalidConfigError(
@@ -244,6 +270,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self.dialect_module = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
+        elif self.engine.dialect.name.lower() == "dremio":
+            # WARNING: Dremio Support is experimental, functionality is not fully under test
+            self.dialect_module = import_library_module(
+                module_name="sqlalchemy_dremio.pyodbc"
+            )
         elif self.engine.dialect.name.lower() == "redshift":
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
@@ -251,6 +282,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         elif self.engine.dialect.name.lower() == "bigquery":
             self.dialect_module = import_library_module(
                 module_name="pybigquery.sqlalchemy_bigquery"
+            )
+        elif self.engine.dialect.name.lower() == "teradatasql":
+            # WARNING: Teradata Support is experimental, functionality is not fully under test
+            self.dialect_module = import_library_module(
+                module_name="teradatasqlalchemy.dialect"
             )
         else:
             self.dialect_module = None
@@ -981,7 +1017,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                     .where(split_clause)
                 ).scalar()
-                p: Optional[float] = batch_spec["sampling_kwargs"]["p"] or 1.0
+                p: float = batch_spec["sampling_kwargs"]["p"] or 1.0
                 sample_size: int = round(p * num_rows)
                 return (
                     sa.select("*")

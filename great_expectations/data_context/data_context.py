@@ -29,6 +29,8 @@ from great_expectations.core.batch import (
     BatchRequest,
     IDDict,
     RuntimeBatchRequest,
+    get_batch_request_dict,
+    get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
@@ -50,6 +52,7 @@ from great_expectations.core.usage_statistics.anonymizers.store_anonymizer impor
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
+    get_batch_list_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     send_usage_message,
@@ -99,7 +102,7 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.exceptions import DataContextError
+from great_expectations.exceptions import DataContextError, InvalidKeyError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -765,7 +768,7 @@ class BaseDataContext:
         self,
         resource_identifier: Optional[str] = None,
         site_name: Optional[str] = None,
-        only_if_exists: Optional[bool] = True,
+        only_if_exists: bool = True,
     ) -> None:
         """
         A stdlib cross-platform way to open a file in a browser.
@@ -1380,7 +1383,11 @@ class BaseDataContext:
             assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
                 the list can be either batches, or a tuple that will allow the operator to fetch the batch:
                 (batch_kwargs, expectation_suite_name)
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: one of several supported formatting directives for expectation validation results
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
@@ -1555,6 +1562,10 @@ class BaseDataContext:
             batch_parameters=batch_parameters,
         )
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.get_batch_list",
+        args_payload_fn=get_batch_list_usage_statistics,
+    )
     def get_batch_list(
         self,
         datasource_name: Optional[str] = None,
@@ -1563,12 +1574,11 @@ class BaseDataContext:
         *,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
-        data_connector_query: Optional[Union[IDDict, dict]] = None,
+        data_connector_query: Optional[dict] = None,
         batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
         custom_filter_function: Optional[Callable] = None,
-        batch_spec_passthrough: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
@@ -1577,6 +1587,7 @@ class BaseDataContext:
         query: Optional[str] = None,
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
         **kwargs,
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -1592,6 +1603,7 @@ class BaseDataContext:
             batch_request
             batch_data
             query
+            path
             runtime_parameters
             data_connector_query
             batch_identifiers
@@ -1621,125 +1633,30 @@ class BaseDataContext:
         This method attempts to return any number of batches, including an empty list.
         """
 
-        datasource_name: str
-        if batch_request:
-            if not isinstance(batch_request, BatchRequest):
-                raise TypeError(
-                    f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
-                )
-            datasource_name = batch_request.datasource_name
-
-        # ensure that the first parameter is datasource_name, which should be a str. This check prevents users
-        # from passing in batch_request as an unnamed parameter.
-        if not isinstance(datasource_name, str):
-            raise ge_exceptions.GreatExpectationsTypeError(
-                f"the first parameter, datasource_name, must be a str, not {type(datasource_name)}"
-            )
+        batch_request = get_batch_request_from_acceptable_arguments(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            batch_data=batch_data,
+            data_connector_query=data_connector_query,
+            batch_identifiers=batch_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            runtime_parameters=runtime_parameters,
+            query=query,
+            path=path,
+            batch_filter_parameters=batch_filter_parameters,
+            batch_spec_passthrough=batch_spec_passthrough,
+            **kwargs,
+        )
+        datasource_name = batch_request.datasource_name
         datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
-
-        if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
-            raise ValueError("Must provide only one of batch_data, query, or path.")
-        if any(
-            [
-                batch_data is not None
-                and runtime_parameters
-                and "batch_data" in runtime_parameters,
-                query and runtime_parameters and "query" in runtime_parameters,
-                path and runtime_parameters and "path" in runtime_parameters,
-            ]
-        ):
-            raise ValueError(
-                "If batch_data, query, or path arguments are provided, the same keys cannot appear in the "
-                "runtime_parameters argument."
-            )
-
-        if batch_request:
-            # TODO: Raise a warning if any parameters besides batch_requests are specified
-            return datasource.get_batch_list_from_batch_request(
-                batch_request=batch_request
-            )
-        elif any([batch_data is not None, query, path, runtime_parameters]):
-            runtime_parameters = runtime_parameters or {}
-            if batch_data is not None:
-                runtime_parameters["batch_data"] = batch_data
-            elif query is not None:
-                runtime_parameters["query"] = query
-            elif path is not None:
-                runtime_parameters["path"] = path
-
-            if batch_identifiers is None:
-                batch_identifiers = kwargs
-            else:
-                # Raise a warning if kwargs exist
-                pass
-
-            batch_request = RuntimeBatchRequest(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                batch_spec_passthrough=batch_spec_passthrough,
-                runtime_parameters=runtime_parameters,
-                batch_identifiers=batch_identifiers,
-            )
-
-        else:
-            if data_connector_query is None:
-                if (
-                    batch_filter_parameters is not None
-                    and batch_identifiers is not None
-                ):
-                    raise ValueError(
-                        'Must provide either "batch_filter_parameters" or "batch_identifiers", not both.'
-                    )
-                elif batch_filter_parameters is None and batch_identifiers is not None:
-                    logger.warning(
-                        'Attempting to build data_connector_query but "batch_identifiers" was provided '
-                        'instead of "batch_filter_parameters". The "batch_identifiers" key on '
-                        'data_connector_query has been renamed to "batch_filter_parameters". Please update '
-                        'your code. Falling back on provided "batch_identifiers".'
-                    )
-                    batch_filter_parameters = batch_identifiers
-                elif batch_filter_parameters is None and batch_identifiers is None:
-                    batch_filter_parameters = kwargs
-                else:
-                    # Raise a warning if kwargs exist
-                    pass
-
-                data_connector_query_params: dict = {
-                    "batch_filter_parameters": batch_filter_parameters,
-                    "limit": limit,
-                    "index": index,
-                    "custom_filter_function": custom_filter_function,
-                }
-                data_connector_query = IDDict(data_connector_query_params)
-            else:
-                # Raise a warning if batch_filter_parameters or kwargs exist
-                data_connector_query = IDDict(data_connector_query)
-
-            if batch_spec_passthrough is None:
-                batch_spec_passthrough = {}
-                if sampling_method is not None:
-                    sampling_params: dict = {
-                        "sampling_method": sampling_method,
-                    }
-                    if sampling_kwargs is not None:
-                        sampling_params["sampling_kwargs"] = sampling_kwargs
-                    batch_spec_passthrough.update(sampling_params)
-                if splitter_method is not None:
-                    splitter_params: dict = {
-                        "splitter_method": splitter_method,
-                    }
-                    if splitter_kwargs is not None:
-                        splitter_params["splitter_kwargs"] = splitter_kwargs
-                    batch_spec_passthrough.update(splitter_params)
-
-            batch_request: BatchRequest = BatchRequest(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                data_connector_query=data_connector_query,
-                batch_spec_passthrough=batch_spec_passthrough,
-            )
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     def get_validator(
@@ -1758,10 +1675,6 @@ class BaseDataContext:
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
         custom_filter_function: Optional[Callable] = None,
-        expectation_suite_name: Optional[str] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        create_expectation_suite_with_name: Optional[str] = None,
-        batch_spec_passthrough: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
@@ -1771,6 +1684,10 @@ class BaseDataContext:
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        expectation_suite_name: Optional[str] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        create_expectation_suite_with_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
         """
@@ -1832,7 +1749,6 @@ class BaseDataContext:
                     limit=limit,
                     index=index,
                     custom_filter_function=custom_filter_function,
-                    batch_spec_passthrough=batch_spec_passthrough,
                     sampling_method=sampling_method,
                     sampling_kwargs=sampling_kwargs,
                     splitter_method=splitter_method,
@@ -1841,6 +1757,7 @@ class BaseDataContext:
                     query=query,
                     path=path,
                     batch_filter_parameters=batch_filter_parameters,
+                    batch_spec_passthrough=batch_spec_passthrough,
                     **kwargs,
                 )
             )
@@ -2151,7 +2068,7 @@ class BaseDataContext:
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
-        overwrite_existing: Optional[bool] = False,
+        overwrite_existing: bool = False,
         ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> ExpectationSuite:
@@ -2279,7 +2196,7 @@ class BaseDataContext:
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
-        overwrite_existing: Optional[bool] = True,
+        overwrite_existing: bool = True,
         ge_cloud_id: Optional[str] = None,
         **kwargs,
     ):
@@ -2405,14 +2322,7 @@ class BaseDataContext:
 
     def store_evaluation_parameters(self, validation_results, target_store_name=None):
         if not self._evaluation_parameter_dependencies_compiled:
-            # get the expectation suite if it exists, otherwise None
-            expectation_suite_name = validation_results.meta["expectation_suite_name"]
-            if expectation_suite_name in self.list_expectation_suite_names():
-                expectation_suite = self.get_expectation_suite(expectation_suite_name)
-            else:
-                expectation_suite = None
-
-            self._compile_evaluation_parameter_dependencies(expectation_suite)
+            self._compile_evaluation_parameter_dependencies()
 
         if target_store_name is None:
             target_store_name = self.evaluation_parameter_store_name
@@ -2441,17 +2351,15 @@ class BaseDataContext:
     def validations_store(self):
         return self.stores[self.validations_store_name]
 
-    def _compile_evaluation_parameter_dependencies(self, expectation_suite):
+    def _compile_evaluation_parameter_dependencies(self):
         self._evaluation_parameter_dependencies = {}
+        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
+        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
+        for key in self.expectations_store.list_keys():
+            expectation_suite = self.expectations_store.get(key)
+            if not expectation_suite:
+                continue
 
-        # only if we don't have an expectation suite do we do a key scan
-        if expectation_suite is None:
-            for key in self.expectations_store.list_keys():
-                expectation_suite = self.expectations_store.get(key)
-                if not expectation_suite:
-                    continue
-
-        if expectation_suite:
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
             if len(dependencies) > 0:
                 nested_update(self._evaluation_parameter_dependencies, dependencies)
@@ -2542,7 +2450,9 @@ class BaseDataContext:
         """
         return return_obj
 
-    @usage_statistics_enabled_method(event_name="data_context.build_data_docs")
+    @usage_statistics_enabled_method(
+        event_name="data_context.build_data_docs",
+    )
     def build_data_docs(
         self,
         site_names=None,
@@ -3130,6 +3040,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
 
+        batch_request, validations = get_batch_request_dict(batch_request, validations)
+
         checkpoint_config: Union[CheckpointConfig, dict]
 
         checkpoint_config = {
@@ -3158,11 +3070,46 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
+        batch_data_list = []
+        batch_data = None
+        if checkpoint_config.get("validations") is not None:
+            for val in checkpoint_config["validations"]:
+                if (
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data")
+                    is not None
+                ):
+                    batch_data_list.append(
+                        val["batch_request"]["runtime_parameters"].pop("batch_data")
+                    )
+        elif (
+            checkpoint_config.get("batch_request") is not None
+            and checkpoint_config["batch_request"].get("runtime_parameters") is not None
+            and checkpoint_config["batch_request"]["runtime_parameters"].get(
+                "batch_data"
+            )
+            is not None
+        ):
+            batch_data = checkpoint_config["batch_request"]["runtime_parameters"].pop(
+                "batch_data"
+            )
         checkpoint_config = filter_properties_dict(
             properties=checkpoint_config, clean_falsy=True
         )
+        if len(batch_data_list) > 0:
+            for idx, val in enumerate(checkpoint_config.get("validations")):
+                if batch_data_list[idx] is not None:
+                    val["batch_request"]["runtime_parameters"][
+                        "batch_data"
+                    ] = batch_data_list[idx]
+        elif batch_data is not None:
+            checkpoint_config["batch_request"]["runtime_parameters"][
+                "batch_data"
+            ] = batch_data
+
         new_checkpoint: Union[
-            Checkpoint, LegacyCheckpoint
+            Checkpoint, SimpleCheckpoint, LegacyCheckpoint
         ] = instantiate_class_from_config(
             config=checkpoint_config,
             runtime_environment={
@@ -3279,6 +3226,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         else:
             return [x.configuration_key for x in self.checkpoint_store.list_keys()]
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.run_checkpoint",
+    )
     def run_checkpoint(
         self,
         checkpoint_name: Optional[str] = None,
@@ -3310,10 +3260,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             CheckpointResult
         """
         # TODO mark experimental
-        batch_request = batch_request or {}
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
-            name=checkpoint_name, ge_cloud_id=ge_cloud_id
-        )
+        batch_request, validations = get_batch_request_dict(batch_request, validations)
+        checkpoint: Union[
+            Checkpoint, SimpleCheckpoint, LegacyCheckpoint
+        ] = self.get_checkpoint(name=checkpoint_name, ge_cloud_id=ge_cloud_id)
         checkpoint_config_from_store: dict = checkpoint.config.to_json_dict()
 
         if (
@@ -3351,9 +3301,44 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         }
         checkpoint_config.update(checkpoint_config_from_call_args)
         if not self.ge_cloud_mode:
+            batch_data_list = []
+            batch_data = None
+            if checkpoint_config.get("validations") is not None:
+                for val in checkpoint_config["validations"]:
+                    if (
+                        val.get("batch_request") is not None
+                        and val["batch_request"].get("runtime_parameters") is not None
+                        and val["batch_request"]["runtime_parameters"].get("batch_data")
+                        is not None
+                    ):
+                        batch_data_list.append(
+                            val["batch_request"]["runtime_parameters"].pop("batch_data")
+                        )
+            elif (
+                checkpoint_config.get("batch_request") is not None
+                and checkpoint_config["batch_request"].get("runtime_parameters")
+                is not None
+                and checkpoint_config["batch_request"]["runtime_parameters"].get(
+                    "batch_data"
+                )
+                is not None
+            ):
+                batch_data = checkpoint_config["batch_request"][
+                    "runtime_parameters"
+                ].pop("batch_data")
             checkpoint_config = filter_properties_dict(
                 properties=checkpoint_config, clean_falsy=True
             )
+            if len(batch_data_list) > 0:
+                for idx, val in enumerate(checkpoint_config.get("validations")):
+                    if batch_data_list[idx] is not None:
+                        val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ] = batch_data_list[idx]
+            elif batch_data is not None:
+                checkpoint_config["batch_request"]["runtime_parameters"][
+                    "batch_data"
+                ] = batch_data
 
         checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
 
@@ -3563,7 +3548,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                         data_context=self, **checkpoint_config
                     )
 
-                checkpoint_anonymizer = CheckpointAnonymizer(self.data_context_id)
+                checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
+                    self.data_context_id
+                )
 
                 usage_stats_event_payload = (
                     checkpoint_anonymizer.anonymize_checkpoint_info(

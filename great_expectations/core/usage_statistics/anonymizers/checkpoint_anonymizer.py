@@ -10,15 +10,16 @@ class CheckpointAnonymizer(Anonymizer):
         self._ge_classes = [SimpleCheckpoint, Checkpoint]
 
     def anonymize_checkpoint_info(self, name, config):
-        anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self.anonymize(name)
-
-        self.anonymize_object_info(
-            anonymized_info_dict=anonymized_info_dict,
-            ge_classes=self._ge_classes,
-            object_config=config,
+        anonymized_info_dict = {
+            "anonymized_name": self.anonymize(name),
+        }
+        anonymized_info_dict.update(
+            self.anonymize_object_info(
+                anonymized_info_dict=anonymized_info_dict,
+                ge_classes=self._ge_classes,
+                object_config=config,
+            )
         )
-
         return anonymized_info_dict
 
     def is_parent_class_recognized(self, config):
