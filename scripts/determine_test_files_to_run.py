@@ -102,7 +102,6 @@ def determine_relevant_source_files(changed_files: List[str], depth: int) -> Lis
 def determine_files_to_test(source_files: List[str]) -> List[str]:
     """Perform graph traversal on all source files to determine which test files need to be run"""
     tests_graph = create_dependency_graph("tests", bidirectional=False)
-    print("TESTS:", len(tests_graph))
     res = set()
     for file in source_files:
         for test in tests_graph.get(file, []):
@@ -114,13 +113,10 @@ def determine_files_to_test(source_files: List[str]) -> List[str]:
 
 if __name__ == "__main__":
     changed_files = [
-        "great_expectations/cli/build_docs.py",
-        "great_expectations/cli/docs.py",
-        "great_expectations/data_context/data_context.py",
-        "great_expectations/data_context/store/html_site_store.py",
         "great_expectations/render/renderer/site_builder.py",
     ]
     source_files = determine_relevant_source_files(changed_files, 2)
     files_to_test = determine_files_to_test(source_files)
-    pprint(files_to_test)
-    print(len(files_to_test))
+
+    for file in files_to_test:
+        print(file)
