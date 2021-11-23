@@ -2101,10 +2101,22 @@ class CheckpointConfig(BaseYamlConfig):
                 batch_request = self.batch_request
                 batch_request = batch_request or {}
                 runtime_batch_request = runtime_kwargs.get("batch_request")
-                if isinstance(runtime_batch_request, BatchRequest):
-                    batch_request = nested_update(
-                        batch_request, runtime_batch_request.to_json_dict()
+                if (
+                    runtime_batch_request.get("runtime_parameters") is not None
+                    and runtime_batch_request["runtime_parameters"].get("batch_data")
+                    is not None
+                ):
+                    if (
+                        batch_request.get("runtime_parameters") is not None
+                        and batch_request["runtime_parameters"].get("batch_data")
+                        is not None
+                    ):
+                        batch_request["runtime_parameters"].pop("batch_data")
+                    batch_data = runtime_batch_request["runtime_parameters"].pop(
+                        "batch_data"
                     )
+                    batch_request = nested_update(batch_request, runtime_batch_request)
+                    batch_request["runtime_parameters"]["batch_data"] = batch_data
                 else:
                     batch_request = nested_update(batch_request, runtime_batch_request)
                 self._batch_request = batch_request
