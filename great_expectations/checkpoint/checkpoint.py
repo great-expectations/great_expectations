@@ -250,8 +250,11 @@ class Checkpoint:
         result_format: Optional[dict],
         run_id: Optional[Union[str, RunIdentifier]],
         idx: Optional[int] = 0,
-        validation_dict: Optional[dict] = {},
+        validation_dict: Optional[dict] = None,
     ):
+        if validation_dict is None:
+            validation_dict = {}
+
         try:
             substituted_validation_dict: dict = get_substituted_validation_dict(
                 substituted_runtime_config=substituted_runtime_config,
@@ -356,7 +359,7 @@ class Checkpoint:
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[str] = None,
+        result_format: Optional[Union[str, dict]] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> CheckpointResult:
         assert not (run_id and run_name) and not (
@@ -364,14 +367,14 @@ class Checkpoint:
         ), "Please provide either a run_id or run_name and/or run_time."
 
         run_time = run_time or datetime.datetime.now()
-        runtime_configuration: dict = runtime_configuration or {}
-        result_format: Optional[dict] = result_format or runtime_configuration.get(
-            "result_format"
+        runtime_configuration = runtime_configuration or {}
+        result_format = result_format or runtime_configuration.get("result_format")
+
+        batch_request, validations = get_batch_request_dict(
+            batch_request=batch_request, validations=validations
         )
 
-        batch_request, validations = get_batch_request_dict(batch_request, validations)
-
-        runtime_kwargs = {
+        runtime_kwargs: dict = {
             "template_name": template_name,
             "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
@@ -386,16 +389,16 @@ class Checkpoint:
         substituted_runtime_config: CheckpointConfig = self.get_substituted_config(
             runtime_kwargs=runtime_kwargs
         )
-        run_name_template: Optional[str] = substituted_runtime_config.run_name_template
-        validations: list = substituted_runtime_config.validations
-        batch_request: BatchRequest = substituted_runtime_config.batch_request
+        run_name_template = substituted_runtime_config.run_name_template
+        validations = substituted_runtime_config.validations
+        batch_request = substituted_runtime_config.batch_request
         if len(validations) == 0 and not batch_request:
             raise ge_exceptions.CheckpointError(
                 f'Checkpoint "{self.name}" must contain either a batch_request or validations.'
             )
 
         if run_name is None and run_name_template is not None:
-            run_name: str = get_datetime_string_from_strftime_format(
+            run_name = get_datetime_string_from_strftime_format(
                 format_str=run_name_template, datetime_obj=run_time
             )
 
@@ -787,8 +790,6 @@ class SimpleCheckpoint(Checkpoint):
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         profilers: Optional[List[dict]] = None,
-        validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
         ge_cloud_id: Optional[UUID] = None,
         # the following four arguments are used by SimpleCheckpointConfigurator
         site_names: Union[str, List[str]] = "all",
