@@ -1,8 +1,17 @@
 import ast
 import glob
 import os
-from pprint import pprint
+import subprocess
 from typing import Dict, List
+
+
+def get_changed_files() -> List[str]:
+    """git diff HEAD origin/develop --name-only"""
+    process = subprocess.run(
+        ["git", "diff", "HEAD", "origin/develop", "--name-only"], stdout=subprocess.PIPE
+    )
+    files = [f.decode("utf-8") for f in process.stdout.splitlines()]
+    return files
 
 
 def parse_imports(path: str) -> List[str]:
@@ -111,12 +120,13 @@ def determine_files_to_test(source_files: List[str]) -> List[str]:
     return sorted(res)
 
 
-if __name__ == "__main__":
-    changed_files = [
-        "great_expectations/render/renderer/site_builder.py",
-    ]
+def main() -> None:
+    changed_files = get_changed_files()
     source_files = determine_relevant_source_files(changed_files, 2)
     files_to_test = determine_files_to_test(source_files)
-
     for file in files_to_test:
         print(file)
+
+
+if __name__ == "__main__":
+    main()
