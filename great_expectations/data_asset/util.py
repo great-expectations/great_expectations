@@ -121,26 +121,15 @@ def recursively_convert_to_json_serializable(test_obj):
     except (TypeError, ValueError):
         pass
 
-    if isinstance(test_obj, str):
-        if "'" in test_obj:
-            raise InvalidExpectationConfigurationError(
-                "%s cannot be serialized to json. Do not introduce simple quotes in configuration. Use double quotes instead."
-                % (test_obj)
-            )
-        if "\n" in test_obj:
-            raise InvalidExpectationConfigurationError(
-                "%s cannot be serialized to json. Do not introduce \\n in configuration."
-                % (repr(test_obj))
-            )
-        return test_obj
-
-    if isinstance(test_obj, (int, float, bool)):
+    if isinstance(test_obj, (str, int, float, bool)):
         # No problem to encode json
         return test_obj
 
     elif isinstance(test_obj, dict):
         new_dict = {}
         for key in test_obj:
+            if key == 'row_condition':
+                ensure_row_condition_is_correct(test_obj[key])
             # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string
             new_dict[str(key)] = recursively_convert_to_json_serializable(test_obj[key])
 
@@ -214,4 +203,28 @@ def recursively_convert_to_json_serializable(test_obj):
         raise TypeError(
             "%s is of type %s which cannot be serialized."
             % (str(test_obj), type(test_obj).__name__)
+        )
+
+
+def ensure_row_condition_is_correct(row_condition_string):
+    """Ensure no quote nor \\n are introduced in row_condition string.
+
+    Otherwise it may cause an issue at the reload of the expectation.
+    An error is raised at the declaration of the expectations to ensure 
+    the user is not doing a mistake. He can use double quotes for example.
+
+    Parameters
+    ----------
+    row_condition_string : str
+        the pandas query string
+    """
+    if "'" in row_condition_string:
+        raise InvalidExpectationConfigurationError(
+            "%s cannot be serialized to json. Do not introduce simple quotes in configuration. Use double quotes instead."
+            % (row_condition_string)
+        )
+    if "\n" in row_condition_string:
+        raise InvalidExpectationConfigurationError(
+            "%s cannot be serialized to json. Do not introduce \\n in configuration."
+            % (repr(row_condition_string))
         )
