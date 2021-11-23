@@ -726,7 +726,10 @@ def get_batch_request_dict(
     batch_request: Optional[BatchRequest] = None, validations: Optional[list] = None
 ) -> dict:
     if isinstance(batch_request, BatchRequest):
-        if batch_request.runtime_parameters.get("batch_data") is not None:
+        if (
+            batch_request.runtime_parameters is not None
+            and batch_request.runtime_parameters.get("batch_data") is not None
+        ):
             batch_data = batch_request.runtime_parameters.get("batch_data")
             batch_request = batch_request.to_json_dict()
             batch_request["runtime_parameters"]["batch_data"] = batch_data
