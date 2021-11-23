@@ -50,9 +50,7 @@ except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.engine import reflection
-    from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.engine.url import URL
+    from sqlalchemy.engine import make_url
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import TextClause, quoted_name
@@ -247,7 +245,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             elif connection_string is not None:
                 self.engine = sa.create_engine(connection_string, **kwargs)
             elif url is not None:
-                self.drivername = urlparse(url).scheme
+                parsed_url = make_url(url)
+                self.drivername = parsed_url.drivername
                 self.engine = sa.create_engine(url, **kwargs)
             else:
                 raise InvalidConfigError(
