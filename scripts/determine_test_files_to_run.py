@@ -1,3 +1,41 @@
+"""
+Usage: `python determine_test_files_to_run.py`
+
+This script is used in our Azure pipeline (azure-pipelines.yml) to determine which test files to run in CI/CD.
+Rather than test all tests each time, the test files that are selected are based on which source files that have changed;
+the specific method in which this is done is explained in detail below.
+
+The script takes the following steps:
+    1. Determine which files have changed in the last commit (when compared to `develop`)
+    2. For each changed file, find which files it depends on and which files depend on it (i.e. "relevant source files")
+    3. For each relevant source file, determine the corresponding test file.
+
+By determining which files are related to which other files, we're able to create a directed, acyclic graph from our codebase.
+
+Let's look at the following example:
+  ```
+  # foo.py
+  from bar import bar
+  from baz import baz
+  ```
+The module `foo` depends on `bar` and `baz` so the following links are created in the dependency graph:
+  `foo` <--> `bar`
+  `foo` <--> `baz`
+Now that we know that `foo`, `bar`, and `baz` are strongly coupled, we want our testing strategy to reflect that.
+
+Upon creating a valid graph, we can use standard graph traversal algorithms to test modules that are dependent or relevant to
+the changed file. To determine which tests to run, we create yet another graph; this one parses our test suite and determines
+which source files are associated with a given test file. Once we have all our relevant source files and our mapping between
+source file and test file, we can simple feed in our files to determine which tests need to be run in a given CI/CD cycle.
+
+While this script does not provide as much coverage as a traditional test run, the fact that it traverses GE's internal dependency
+graph layer by layer to determine the most relevant files allows us to maintain high coverage (all while improving performance).
+
+If a key file like `data_context.py` is changed, the vast majority of the test suite will run because the corresponding node in
+the dependency graph has so many ingoing and outgoing connections. This treatment of "high traffic" areas allow us to keep a watchful eye
+over the most important and used parts of our codebase.
+
+"""
 import ast
 import glob
 import os
@@ -122,7 +160,7 @@ def determine_files_to_test(source_files: List[str]) -> List[str]:
 
 def main() -> None:
     changed_files = get_changed_files()
-    source_files = determine_relevant_source_files(changed_files, 2)
+    source_files = determine_relevant_source_files(changed_files, depth=3)
     files_to_test = determine_files_to_test(source_files)
     for file in files_to_test:
         print(file)
