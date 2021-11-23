@@ -566,10 +566,11 @@ usage_statistics_record_schema = {
     "type": "object",
     "properties": {
         "version": {"enum": ["1.0.0"]},
-        "event_time": {"type": "string", "format": "date-time"},
+        "ge_version": {"type": "string", "maxLength": 32},
         "data_context_id": {"type": "string", "format": "uuid"},
         "data_context_instance_id": {"type": "string", "format": "uuid"},
-        "ge_version": {"type": "string", "maxLength": 32},
+        "event_time": {"type": "string", "format": "date-time"},
+        "event_duration": {"type": "number"},
         "x-forwarded-for": {"type": "string"},
         "success": {"type": ["boolean", "null"]},
     },

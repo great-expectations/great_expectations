@@ -153,7 +153,7 @@ valid_usage_statistics_messages = {
                         "anonymized_name": "f57d8a6edae4f321b833384801847498",
                         "parent_class": "SqlAlchemyDatasource",
                         "sqlalchemy_dialect": "postgresql",
-                    }
+                    },
                 ],
                 "anonymized_stores": [
                     {
@@ -196,7 +196,7 @@ valid_usage_statistics_messages = {
                                 "parent_class": "UpdateDataDocsAction",
                             },
                         ],
-                    }
+                    },
                 ],
                 "anonymized_data_docs_sites": [
                     {
@@ -209,7 +209,7 @@ valid_usage_statistics_messages = {
                             "parent_class": "DefaultSiteIndexBuilder",
                             "show_cta_footer": True,
                         },
-                    }
+                    },
                 ],
                 "anonymized_expectation_suites": [
                     {
@@ -224,7 +224,7 @@ valid_usage_statistics_messages = {
                             "expect_table_column_count_to_equal": 1,
                             "expect_table_columns_to_match_ordered_list": 1,
                         },
-                    }
+                    },
                 ],
             },
             "event": "data_context.__init__",
@@ -246,7 +246,7 @@ valid_usage_statistics_messages = {
                         "anonymized_name": "f57d8a6edae4f321b833384801847498",
                         "parent_class": "SqlAlchemyDatasource",
                         "sqlalchemy_dialect": "postgresql",
-                    }
+                    },
                 ],
                 "anonymized_stores": [
                     {
@@ -289,7 +289,7 @@ valid_usage_statistics_messages = {
                                 "parent_class": "UpdateDataDocsAction",
                             },
                         ],
-                    }
+                    },
                 ],
                 "anonymized_data_docs_sites": [
                     {
@@ -302,7 +302,7 @@ valid_usage_statistics_messages = {
                             "parent_class": "DefaultSiteIndexBuilder",
                             "show_cta_footer": True,
                         },
-                    }
+                    },
                 ],
                 "anonymized_expectation_suites": [
                     {
@@ -338,7 +338,7 @@ valid_usage_statistics_messages = {
                                 "count": 1,
                             },
                         ],
-                    }
+                    },
                 ],
             },
             "event": "data_context.__init__",
@@ -368,7 +368,7 @@ valid_usage_statistics_messages = {
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
-        }
+        },
     ],
     "data_context.add_datasource": [
         {
@@ -384,7 +384,7 @@ valid_usage_statistics_messages = {
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
-        }
+        },
     ],
     "data_context.get_batch_list": [
         {
@@ -525,7 +525,7 @@ valid_usage_statistics_messages = {
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
-        }
+        },
     ],
     "data_context.open_data_docs": [
         {
@@ -538,7 +538,32 @@ valid_usage_statistics_messages = {
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
-        }
+        },
+    ],
+    "data_context.run_checkpoint": [
+        {
+            "event_payload": {},
+            "event": "data_context.run_checkpoint",
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:28.070Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event_payload": {},
+            "event": "data_context.run_checkpoint",
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:28.070Z",
+            "event_duration": 123,
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
     ],
     "data_context.run_checkpoint": [
         {
@@ -566,7 +591,7 @@ valid_usage_statistics_messages = {
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
-        }
+        },
     ],
     # BaseDataContext.test_yaml_config() MESSAGES
     "data_context.test_yaml_config": generate_messages_with_defaults(
@@ -658,7 +683,7 @@ valid_usage_statistics_messages = {
                     },
                 },
                 "ge_version": "0.13.20.manual_testing",
-            }
+            },
         ]
         # Datasource Message Types
         + [
@@ -676,11 +701,11 @@ valid_usage_statistics_messages = {
                         {
                             "anonymized_name": "fake_anonymized_name_for_testing",
                             "parent_class": "InferredAssetFilesystemDataConnector",
-                        }
+                        },
                     ],
                 },
                 "ge_version": "0.13.20.manual_testing",
-            }
+            },
         ]
         # DataConnector Message Types
         + [
@@ -692,7 +717,7 @@ valid_usage_statistics_messages = {
                     "parent_class": "ConfiguredAssetFilesystemDataConnector",
                 },
                 "ge_version": "0.13.20.manual_testing",
-            }
+            },
         ]
         # Checkpoint Message Types
         + [
@@ -704,7 +729,7 @@ valid_usage_statistics_messages = {
                     "parent_class": "Checkpoint",
                 },
                 "ge_version": "0.13.20.manual_testing",
-            }
+            },
         ],
     ),
     "datasource.sqlalchemy.connect": [
@@ -720,7 +745,7 @@ valid_usage_statistics_messages = {
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.5.manual_testing",
-        }
+        },
     ],
     # CLI INIT COMMANDS
     "cli.init.create": [
