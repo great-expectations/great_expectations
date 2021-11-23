@@ -12,12 +12,15 @@ def build_docs(
     site_names: Optional[List[str]] = None,
     view: bool = True,
     assume_yes: bool = False,
+    build_index: bool = True,
 ):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
 
     index_page_locator_infos: Dict[str, str] = context.build_data_docs(
-        site_names=site_names, dry_run=True
+        site_names=site_names,
+        dry_run=True,
+        build_index=build_index,
     )
 
     msg: str = "\nThe following Data Docs sites will be built:\n\n"
@@ -32,7 +35,7 @@ def build_docs(
         )
 
     cli_message("\nBuilding Data Docs...\n")
-    context.build_data_docs(site_names=site_names)
+    context.build_data_docs(site_names=site_names, build_index=build_index)
 
     cli_message("Done building Data Docs")
 

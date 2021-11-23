@@ -44,8 +44,16 @@ def docs(ctx):
     help="By default open in browser unless you specify the --no-view flag",
     default=False,
 )
+@click.option(
+    "--no-build-index",
+    "-nbi",
+    "no_build_index",
+    is_flag=True,
+    help="By default build an index page unless you specific the --no-build-index flag",
+    default=False,
+)
 @click.pass_context
-def docs_build(ctx, site_name=None, no_view=False):
+def docs_build(ctx, site_name=None, no_view=False, no_build_index=False):
     """Build Data Docs for a project."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
@@ -67,6 +75,7 @@ def docs_build(ctx, site_name=None, no_view=False):
         site_names=sites_to_build,
         view=not no_view,
         assume_yes=ctx.obj.assume_yes,
+        build_index=not no_build_index,
     )
     toolkit.send_usage_message(
         data_context=context, event=usage_event_end, success=True
