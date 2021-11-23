@@ -935,10 +935,10 @@ def filter_properties_dict(
     properties: Optional[dict] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
-    clean_nulls: Optional[bool] = True,
-    clean_falsy: Optional[bool] = False,
-    keep_falsy_numerics: Optional[bool] = True,
-    inplace: Optional[bool] = False,
+    clean_nulls: bool = True,
+    clean_falsy: bool = False,
+    keep_falsy_numerics: bool = True,
+    inplace: bool = False,
 ) -> Optional[dict]:
     """Filter the entries of the source dictionary according to directives concerning the existing keys and values.
 
@@ -1044,10 +1044,10 @@ def deep_filter_properties_dict(
     properties: Optional[dict] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
-    clean_nulls: Optional[bool] = True,
-    clean_falsy: Optional[bool] = False,
-    keep_falsy_numerics: Optional[bool] = True,
-    inplace: Optional[bool] = False,
+    clean_nulls: bool = True,
+    clean_falsy: bool = False,
+    keep_falsy_numerics: bool = True,
+    inplace: bool = False,
 ) -> Optional[dict]:
     key: str
     value: Any
@@ -1144,8 +1144,8 @@ def delete_blank_lines(text: str) -> str:
 
 
 def generate_temporary_table_name(
-    default_table_name_prefix: Optional[str] = "ge_temp_",
-    num_digits: Optional[int] = 8,
+    default_table_name_prefix: str = "ge_temp_",
+    num_digits: int = 8,
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
     return table_name
