@@ -3,6 +3,7 @@ title: Changelog
 ---
 
 ### Develop
+* [BUGFIX] Enable use of RuntimeBatchRequest with in-memory DataFrame in a Checkpoint (#3723)
 
 ### 0.13.43
 * [FEATURE] Enable support for Teradata SQLAlchemy dialect (#3496) (thanks @imamolp)
