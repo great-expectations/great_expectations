@@ -69,6 +69,10 @@ class ExpectationContext(SerializableDictDot):
     def description(self):
         return self._description
 
+    @description.setter
+    def description(self, value):
+        self._description = value
+
 
 class ExpectationContextSchema(Schema):
     description = fields.String(required=False, allow_none=True)
