@@ -29,6 +29,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     IDDict,
     RuntimeBatchRequest,
+    get_batch_request_dict,
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -51,6 +52,7 @@ from great_expectations.core.usage_statistics.anonymizers.store_anonymizer impor
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
+    get_batch_list_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     send_usage_message,
@@ -1381,7 +1383,11 @@ class BaseDataContext:
             assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
                 the list can be either batches, or a tuple that will allow the operator to fetch the batch:
                 (batch_kwargs, expectation_suite_name)
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: one of several supported formatting directives for expectation validation results
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
@@ -1556,6 +1562,10 @@ class BaseDataContext:
             batch_parameters=batch_parameters,
         )
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.get_batch_list",
+        args_payload_fn=get_batch_list_usage_statistics,
+    )
     def get_batch_list(
         self,
         datasource_name: Optional[str] = None,
@@ -3030,6 +3040,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
 
+        batch_request, validations = get_batch_request_dict(batch_request, validations)
+
         checkpoint_config: Union[CheckpointConfig, dict]
 
         checkpoint_config = {
@@ -3058,11 +3070,35 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
+        # DataFrames shouldn't be saved to CheckpointStore
+        if checkpoint_config.get("validations") is not None:
+            for idx, val in enumerate(checkpoint_config["validations"]):
+                if (
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data")
+                    is not None
+                ):
+                    raise ge_exceptions.InvalidConfigError(
+                        f'batch_data found in validations at index {idx} cannot be saved to CheckpointStore "{self.checkpoint_store_name}"'
+                    )
+        elif (
+            checkpoint_config.get("batch_request") is not None
+            and checkpoint_config["batch_request"].get("runtime_parameters") is not None
+            and checkpoint_config["batch_request"]["runtime_parameters"].get(
+                "batch_data"
+            )
+            is not None
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f'batch_data found in batch_request cannot be saved to CheckpointStore "{self.checkpoint_store_name}"'
+            )
+
         checkpoint_config = filter_properties_dict(
             properties=checkpoint_config, clean_falsy=True
         )
         new_checkpoint: Union[
-            Checkpoint, LegacyCheckpoint
+            Checkpoint, SimpleCheckpoint, LegacyCheckpoint
         ] = instantiate_class_from_config(
             config=checkpoint_config,
             runtime_environment={
@@ -3072,6 +3108,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "module_name": "great_expectations.checkpoint.checkpoint",
             },
         )
+
         if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
                 resource_type="contract", ge_cloud_id=ge_cloud_id
@@ -3080,6 +3117,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             key: ConfigurationIdentifier = ConfigurationIdentifier(
                 configuration_key=name,
             )
+
         checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
         checkpoint_ref = self.checkpoint_store.set(key=key, value=checkpoint_config)
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):
@@ -3179,6 +3217,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         else:
             return [x.configuration_key for x in self.checkpoint_store.list_keys()]
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.run_checkpoint",
+    )
     def run_checkpoint(
         self,
         checkpoint_name: Optional[str] = None,
@@ -3210,10 +3251,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             CheckpointResult
         """
         # TODO mark experimental
-        batch_request = batch_request or {}
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
-            name=checkpoint_name, ge_cloud_id=ge_cloud_id
-        )
+        batch_request, validations = get_batch_request_dict(batch_request, validations)
+        checkpoint: Union[
+            Checkpoint, SimpleCheckpoint, LegacyCheckpoint
+        ] = self.get_checkpoint(name=checkpoint_name, ge_cloud_id=ge_cloud_id)
         checkpoint_config_from_store: dict = checkpoint.config.to_json_dict()
 
         if (
@@ -3251,9 +3292,44 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         }
         checkpoint_config.update(checkpoint_config_from_call_args)
         if not self.ge_cloud_mode:
+            batch_data_list = []
+            batch_data = None
+            if checkpoint_config.get("validations") is not None:
+                for val in checkpoint_config["validations"]:
+                    if (
+                        val.get("batch_request") is not None
+                        and val["batch_request"].get("runtime_parameters") is not None
+                        and val["batch_request"]["runtime_parameters"].get("batch_data")
+                        is not None
+                    ):
+                        batch_data_list.append(
+                            val["batch_request"]["runtime_parameters"].pop("batch_data")
+                        )
+            elif (
+                checkpoint_config.get("batch_request") is not None
+                and checkpoint_config["batch_request"].get("runtime_parameters")
+                is not None
+                and checkpoint_config["batch_request"]["runtime_parameters"].get(
+                    "batch_data"
+                )
+                is not None
+            ):
+                batch_data = checkpoint_config["batch_request"][
+                    "runtime_parameters"
+                ].pop("batch_data")
             checkpoint_config = filter_properties_dict(
                 properties=checkpoint_config, clean_falsy=True
             )
+            if len(batch_data_list) > 0:
+                for idx, val in enumerate(checkpoint_config.get("validations")):
+                    if batch_data_list[idx] is not None:
+                        val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ] = batch_data_list[idx]
+            elif batch_data is not None:
+                checkpoint_config["batch_request"]["runtime_parameters"][
+                    "batch_data"
+                ] = batch_data
 
         checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
 

@@ -2322,6 +2322,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
 def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
     tmp_path_factory,
     monkeypatch,
+    spark_session,
 ):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
@@ -4108,9 +4109,10 @@ def titanic_profiled_name_column_expectations():
     ) as infile:
         titanic_profiled_expectations = expectationSuiteSchema.load(json.load(infile))
 
-    columns, ordered_columns = Renderer()._group_and_order_expectations_by_column(
-        titanic_profiled_expectations
-    )
+    (
+        columns,
+        ordered_columns,
+    ) = titanic_profiled_expectations.get_grouped_and_ordered_expectations_by_column()
     name_column_expectations = columns["Name"]
 
     return name_column_expectations
