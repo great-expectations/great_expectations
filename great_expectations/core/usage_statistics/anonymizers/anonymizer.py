@@ -36,7 +36,7 @@ class Anonymizer:
         object_=None,
         object_class=None,
         object_config=None,
-    ):
+    ) -> dict:
         assert (
             object_ or object_class or object_config
         ), "Must pass either object_ or object_class or object_config."
