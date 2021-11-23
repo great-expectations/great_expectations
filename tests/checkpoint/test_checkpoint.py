@@ -13,6 +13,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -3858,21 +3859,38 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run(
-    data_context_with_datasource_pandas_engine,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    sa,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    suite = context.create_expectation_suite("my_expectation_suite")
+    expectation = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_between",
+        kwargs={"column": "col1", "min_value": 1, "max_value": 2},
+    )
+    suite.add_expectation(expectation)
+    context.save_expectation_suite(suite)
 
-    # RuntimeBatchRequest with a path
-    batch_request = RuntimeBatchRequest(
+    # add checkpoint config
+    batch_request = BatchRequest(
         **{
             "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "test_df_1",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
+            "data_connector_name": "my_basic_data_connector",
+            "data_asset_name": "Titanic_1911",
+        }
+    )
+    runtime_batch_request = RuntimeBatchRequest(
+        **{
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_runtime_data_connector",
+            "data_asset_name": "test_df",
+            "batch_identifiers": {
+                "pipeline_stage_name": "core_processing",
+                "airflow_run_id": 1234567890,
+            },
             "runtime_parameters": {"batch_data": test_df},
         }
     )
@@ -3910,16 +3928,32 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     context.add_checkpoint(**checkpoint_config)
     checkpoint = context.get_checkpoint(name="my_checkpoint")
 
-    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})
-    batch_request = RuntimeBatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "default_runtime_data_connector_name",
-            "data_asset_name": "test_df_2",
-            "batch_identifiers": {"default_identifier_name": "test_identifier"},
-            "runtime_parameters": {"batch_data": test_df},
-        }
+    results = checkpoint.run()
+    assert results["success"] == False
+    assert (
+        list(results.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(results.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
     )
 
-    results = checkpoint.run(batch_request=batch_request)
+    results = checkpoint.run(batch_request=runtime_batch_request)
     assert results["success"] == True
+    assert (
+        list(results.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(results.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 1
+    )
