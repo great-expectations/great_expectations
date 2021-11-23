@@ -3070,18 +3070,17 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
-        batch_data_list = []
-        batch_data = None
+        # DataFrames shouldn't be saved to CheckpointStore
         if checkpoint_config.get("validations") is not None:
-            for val in checkpoint_config["validations"]:
+            for idx, val in enumerate(checkpoint_config["validations"]):
                 if (
                     val.get("batch_request") is not None
                     and val["batch_request"].get("runtime_parameters") is not None
                     and val["batch_request"]["runtime_parameters"].get("batch_data")
                     is not None
                 ):
-                    batch_data_list.append(
-                        val["batch_request"]["runtime_parameters"].pop("batch_data")
+                    raise ge_exceptions.InvalidConfigError(
+                        f'batch_data found in validations at index {idx} cannot be saved to CheckpointStore "{self.checkpoint_store_name}"'
                     )
         elif (
             checkpoint_config.get("batch_request") is not None
@@ -3091,23 +3090,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             is not None
         ):
-            batch_data = checkpoint_config["batch_request"]["runtime_parameters"].pop(
-                "batch_data"
+            raise ge_exceptions.InvalidConfigError(
+                f'batch_data found in batch_request cannot be saved to CheckpointStore "{self.checkpoint_store_name}"'
             )
+
         checkpoint_config = filter_properties_dict(
             properties=checkpoint_config, clean_falsy=True
         )
-        if len(batch_data_list) > 0:
-            for idx, val in enumerate(checkpoint_config.get("validations")):
-                if batch_data_list[idx] is not None:
-                    val["batch_request"]["runtime_parameters"][
-                        "batch_data"
-                    ] = batch_data_list[idx]
-        elif batch_data is not None:
-            checkpoint_config["batch_request"]["runtime_parameters"][
-                "batch_data"
-            ] = batch_data
-
         new_checkpoint: Union[
             Checkpoint, SimpleCheckpoint, LegacyCheckpoint
         ] = instantiate_class_from_config(
@@ -3119,6 +3108,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "module_name": "great_expectations.checkpoint.checkpoint",
             },
         )
+
         if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
                 resource_type="contract", ge_cloud_id=ge_cloud_id
@@ -3127,6 +3117,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             key: ConfigurationIdentifier = ConfigurationIdentifier(
                 configuration_key=name,
             )
+
         checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
         checkpoint_ref = self.checkpoint_store.set(key=key, value=checkpoint_config)
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):
