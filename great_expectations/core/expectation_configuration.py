@@ -968,8 +968,10 @@ class ExpectationConfiguration(SerializableDictDot):
 
         if ge_cloud_id is not None:
             self._ge_cloud_id = ge_cloud_id
-        if expectation_context is not None:
-            self._expectation_context = expectation_context
+
+        if expectation_context is None:
+            expectation_context = ExpectationContext()
+        self._expectation_context = expectation_context
 
     def process_evaluation_parameters(
         self, evaluation_parameters, interactive_evaluation=True, data_context=None
