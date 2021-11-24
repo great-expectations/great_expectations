@@ -136,7 +136,7 @@ In a notebook,
 
    :::warning
 
-   In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the [Great Expectations discussion forum ](https://discuss.great_expectations.io) and [Slack channel](https://greatexpectations.io/slack).
+   In general, the development loop for testing and debugging URN and Evaluation Parameters is not very user-friendly. We plan to simplify this workflow in the future. In the meantime, we welcome questions in the [Great Expectations discussion forum ](https://discuss.greatexpectations.io) and [Slack channel](https://greatexpectations.io/slack).
 
    :::
 
