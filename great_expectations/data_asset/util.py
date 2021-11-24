@@ -210,7 +210,7 @@ def ensure_row_condition_is_correct(row_condition_string):
     """Ensure no quote nor \\n are introduced in row_condition string.
 
     Otherwise it may cause an issue at the reload of the expectation.
-    An error is raised at the declaration of the expectations to ensure 
+    An error is raised at the declaration of the expectations to ensure
     the user is not doing a mistake. He can use double quotes for example.
 
     Parameters
