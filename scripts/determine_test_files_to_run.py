@@ -7,31 +7,32 @@ the specific method in which this is done is explained in detail below.
 
 The script takes the following steps:
     1. Determine which files have changed in the last commit (when compared to `develop`)
-    2. For each changed file, find which files it depends on and which files depend on it (i.e. "relevant source files")
+    2. For each changed file, find which files depend on it (i.e. "relevant source files")
     3. For each relevant source file, determine the associated test files and run them.
 
 By determining which files are related to which other files, we're able to create a directed, acyclic graph from our codebase.
 
 Let's look at the following example:
   ```
-  # foo.py
-  from bar import bar
-  from baz import baz
+  # great_expectations/data_context/data_context.py
+  from great_expectations.checkpoint import Checkpoint
+  from great_expectations.core.batch import Batch
   ```
-The module `foo` depends on `bar` and `baz` so the following links are created in the dependency graph:
-  `foo` <--> `bar`
-  `foo` <--> `baz`
-Now that we know that `foo`, `bar`, and `baz` are strongly coupled, we want our testing strategy to reflect that.
+The module `data_context` depends on `checkpoint` and `batch` so the following links are created in the dependency graph:
+  `checkpoint` --> `data_context`
+  `batch` --> `data_context`
+Now that we know that `data_context`, `checkpoint`, and `batch` are strongly coupled, we want our testing strategy to reflect that.
 
 Upon creating a valid graph, we can use standard graph traversal algorithms to test modules that are dependent or relevant to
 the changed file. To determine which tests to run, we create yet another graph; this one parses our test suite and determines
 which source files are associated with a given test file. Once we have all our relevant source files and our mapping between
 source file and test file, we can simple feed in our files to determine which tests need to be run in a given CI/CD cycle.
   ```
-  # test_qux.py
-  from foo import foo
+  # test_pandas_datasource.py
+  from great_expectations.core.batch import Batch
   ```
-The `test_qux.py` file directly links to `foo` (which is associated with `bar` and `baz`). A change in one will cause `test_qux.py` to run.
+The `test_pandas_datasource.py` file directly links to `batch` (which is associated with `data_context`). These linkages determine what tests are selected.
+The specificity of the algorithm can be tweaked through the `depth` argument (how many layers out do you want to traverse).
 
 While this script does not provide as much coverage as a traditional test run, the fact that it traverses GE's internal dependency
 graph layer by layer to determine the most relevant files allows us to maintain high coverage (all while improving performance).
@@ -45,7 +46,10 @@ import ast
 import glob
 import os
 import subprocess
+from collections import namedtuple
 from typing import Dict, List
+
+Import = namedtuple("Import", ["source", "module", "name", "alias"])
 
 
 def get_changed_files() -> List[str]:
@@ -54,38 +58,44 @@ def get_changed_files() -> List[str]:
         ["git", "diff", "HEAD", "origin/develop", "--name-only"], stdout=subprocess.PIPE
     )
     files = [f.decode("utf-8") for f in process.stdout.splitlines()]
-    return files
+    return [f for f in files if f.startswith("great_expectations")]
 
 
-def parse_imports(path: str) -> List[str]:
+def parse_imports(path: str) -> List[Import]:
     """Traverses a file using AST and determines relative imports (from within GE)"""
+    imports = []
     with open(path) as f:
-        imports = set()
-        root: ast.Module = ast.parse(f.read())
+        root = ast.parse(f.read(), path)
 
-        for node in ast.walk(root):
-            # ast.Import is only used for external deps
-            if not isinstance(node, ast.ImportFrom):
-                continue
+    for node in ast.walk(root):
+        if isinstance(node, ast.Import):
+            module = []
+        elif isinstance(node, ast.ImportFrom) and node.module is not None:
+            module = node.module.split(".")
+        else:
+            continue
 
-            # Only consider imports relevant to GE (note that "import great_expectations as ge" is discarded)
-            if (
-                isinstance(node.module, str)
-                and "great_expectations" in node.module
-                and node.module.count(".") > 0  # Excludes `import great_expectations`
-            ):
-                imports.add(node.module)
+        for n in node.names:
+            imp = Import(path, module, n.name.split("."), n.asname)
+            imports.append(imp)
 
-    return sorted(imports)
+    return imports
 
 
-def get_import_paths(imports: List[str]) -> List[str]:
+def get_import_paths(imports: List[Import]) -> List[str]:
     """Takes a list of imports and determines the relative path to each source file or module"""
     paths = []
-
     for imp in imports:
-        # AST nodes are formatted as "great_expectations.module.file"
-        path = imp.replace(".", "/")
+        if "great_expectations" not in imp.module:
+            continue
+        path = ""
+        if len(imp.module) == 1:
+            if "DataContext" in imp.name:
+                path = "great_expectations/data_context/data_context"
+            elif "exceptions" in imp.name:
+                path = "great_expectations/exceptions/exceptions"
+        else:
+            path = "/".join(x for x in imp.module)
 
         if os.path.isfile(f"{path}.py"):
             paths.append(f"{path}.py")
@@ -97,26 +107,17 @@ def get_import_paths(imports: List[str]) -> List[str]:
     return paths
 
 
-def create_dependency_graph(
-    directory: str, bidirectional: bool
-) -> Dict[str, List[str]]:
+def create_dependency_graph(directory: str) -> Dict[str, List[str]]:
     """Traverse a given directory, parse all imports, and create a DAG linking source files to dependencies"""
-    files = glob.glob(f"{directory}/**/*.py")
-
     graph = {}
-    for file in files:
-        imports = parse_imports(file)
+    for file in glob.glob(f"{directory}/**/*.py", recursive=True):
+        imports = parse_imports(str(file))
         paths = get_import_paths(imports)
-
-        if bidirectional and file not in graph:
-            graph[file] = set()
 
         for path in paths:
             if path not in graph:
                 graph[path] = set()
             graph[path].add(file)
-            if bidirectional:
-                graph[file].add(path)
 
     for k, v in graph.items():
         graph[k] = sorted(v)
@@ -144,7 +145,7 @@ def traverse_graph(root: str, graph: Dict[str, List[str]], depth: int) -> List[s
 
 def determine_relevant_source_files(changed_files: List[str], depth: int) -> List[str]:
     """Perform graph traversal on all changed files to determine which source files are possibly influenced by the commit"""
-    ge_graph = create_dependency_graph("great_expectations", bidirectional=True)
+    ge_graph = create_dependency_graph("great_expectations")
     res = set()
     for file in changed_files:
         deps = traverse_graph(file, ge_graph, depth)
@@ -154,7 +155,7 @@ def determine_relevant_source_files(changed_files: List[str], depth: int) -> Lis
 
 def determine_files_to_test(source_files: List[str]) -> List[str]:
     """Perform graph traversal on all source files to determine which test files need to be run"""
-    tests_graph = create_dependency_graph("tests", bidirectional=False)
+    tests_graph = create_dependency_graph("tests")
     res = set()
     for file in source_files:
         for test in tests_graph.get(file, []):
@@ -166,7 +167,7 @@ def determine_files_to_test(source_files: List[str]) -> List[str]:
 
 def main() -> None:
     changed_files = get_changed_files()
-    source_files = determine_relevant_source_files(changed_files, depth=2)
+    source_files = determine_relevant_source_files(changed_files, depth=3)
     files_to_test = determine_files_to_test(source_files)
     for file in files_to_test:
         print(file)
