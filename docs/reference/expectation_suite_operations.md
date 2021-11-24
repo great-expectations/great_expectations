@@ -42,7 +42,7 @@ suite.add_Expectation(
 To remove an Expectation from a Suite, you can use
 
 ```python
-suite.remove_Expectation(
+validator.remove_expectation(
     expectation_configuration, 
     match_type, 
     remove_multiple_matches
