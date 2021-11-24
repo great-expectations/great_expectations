@@ -220,7 +220,9 @@ def ensure_row_condition_is_correct(row_condition_string):
     """
     if "'" in row_condition_string:
         raise InvalidExpectationConfigurationError(
-            "%s cannot be serialized to json. Do not introduce simple quotes in configuration. Use double quotes instead."
+            "%s cannot be serialized to json. "
+            "Do not introduce simple quotes in configuration."
+            "Use double quotes instead."
             % (row_condition_string)
         )
     if "\n" in row_condition_string:
