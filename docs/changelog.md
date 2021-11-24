@@ -3,8 +3,37 @@ title: Changelog
 ---
 
 ### Develop
-* [FEATURE] InferredAssetSqlDataConnector's introspection can list external tables in Redshift Spectrum 
-* [BUGFIX] Enable use of RuntimeBatchRequest with in-memory DataFrame in a Checkpoint (#3723)
+
+### 0.13.44
+* [FEATURE] Add new result_format to include unexpected_row_list (#3346)
+* [FEATURE] Implement "deep_filter_properties_dict()" method (#3703)
+* [FEATURE] Create Constants for GETTING_STARTED Entities (e.g., datasource_name, expectation_suite_name, etc.) (#3712)
+* [FEATURE] Add usage statistics event for DataContext.get_batch_list() method (#3708)
+* [FEATURE] Add data_context.run_checkpoint event to usage statistics (#3721)
+* [FEATURE] Add event_duration to usage statistics events (#3729)
+* [FEATURE] InferredAssetSqlDataConnector's introspection can list external tables in Redshift Spectrum (#3646)
+* [BUGFIX] Using a RuntimeBatchRequest in a Checkpoint with a top-level batch_request instead of validations (#3680)
+* [BUGFIX] Using a RuntimeBatchRequest in a Checkpoint at runtime with Checkpoint.run() (#3713)
+* [BUGFIX] Using a RuntimeBatchRequest in a Checkpoint at runtime with context.run_checkpoint() (#3718)
+* [BUGFIX] Use SQLAlchemy make_url helper where applicable when parsing URLs (#3722)
+* [BUGFIX] Adds check for quantile_ranges to be ordered or unbounded pairs (#3724)
+* [BUGFIX] Updates MST renderer to return JSON-parseable boolean (#3728)
+* [BUGFIX] Removes sqlite suppression for expect_column_quantile_values_to_be_between test definitions (#3735)
+* [BUGFIX] Handle contradictory configurations in checkpoint.yml, checkpoint.run(), and context.run_checkpoint() (#3723)
+* [BUGFIX] fixed a bug where expectation metadata doesn't appear in edit template for table-level expectations (#3129) (thanks @olechiw)
+* [BUGFIX] Added temp_table creation for Teradata in SqlAlchemyBatchData (#3731) (thanks @imamolp)
+* [DOCS] Add Databricks video walkthrough link (#3702, #3704)
+* [DOCS] Update the link to configure a MetricStore (#3711, #3714) (thanks @txblackbird)
+* [DOCS] Updated code example to remove deprecated "File" function (#3632) (thanks @daccorti)
+* [DOCS] Delete how_to_add_a_validation_operator.md as OBE. (#3734)
+* [DOCS] Update broken link in FOOTER.md to point to V3 documentation (#3745)
+* [MAINTENANCE] Improve type hinting (using Optional type) (#3709)
+* [MAINTENANCE] Standardize names for assets that are used in Getting Started Guide (#3706)
+* [MAINTENANCE] Clean up remaining improper usage of Optional type annotation (#3710)
+* [MAINTENANCE] Refinement of Getting Started Guide script (#3715)
+* [MAINTENANCE] cloud-410 - Support for Column Descriptions (#3707)
+* [MAINTENANCE] Types Clean Up in Checkpoint, Batch, and DataContext Classes (#3737)
+* [MAINTENANCE] Remove DeprecationWarning for validator.remove_expectation (#3744)
 
 ### 0.13.43
 * [FEATURE] Enable support for Teradata SQLAlchemy dialect (#3496) (thanks @imamolp)
