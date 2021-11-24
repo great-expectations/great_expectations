@@ -134,6 +134,7 @@ def test__create_expectations_for_numeric_column(
     if test_backend in [
         "PandasDataset",
         "SparkDFDataset",
+        "sqlite",
         "postgresql",
         "mysql",
         "mssql",
@@ -162,6 +163,7 @@ def test__create_expectations_for_numeric_column(
             "expect_column_max_to_be_between",
             "expect_column_mean_to_be_between",
             "expect_column_median_to_be_between",
+            "expect_column_quantile_values_to_be_between",
             "expect_column_values_to_not_be_null",
         }
 

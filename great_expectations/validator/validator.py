@@ -1545,9 +1545,9 @@ set as active.
 
     def head(
         self,
-        n_rows: Optional[int] = 5,
+        n_rows: int = 5,
         domain_kwargs: Optional[Dict[str, Any]] = None,
-        fetch_all: Optional[bool] = False,
+        fetch_all: bool = False,
     ) -> pd.DataFrame:
         if domain_kwargs is None:
             domain_kwargs = {

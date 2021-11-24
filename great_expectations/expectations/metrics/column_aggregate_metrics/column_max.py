@@ -27,7 +27,7 @@ class ColumnMax(ColumnAggregateMetricProvider):
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        parse_strings_as_datetimes: Optional[bool] = (
+        parse_strings_as_datetimes: bool = (
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
@@ -48,7 +48,7 @@ future release.  Please update code accordingly.
 
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, **kwargs):
-        parse_strings_as_datetimes: Optional[bool] = (
+        parse_strings_as_datetimes: bool = (
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
@@ -63,7 +63,7 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
-        parse_strings_as_datetimes: Optional[bool] = (
+        parse_strings_as_datetimes: bool = (
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
