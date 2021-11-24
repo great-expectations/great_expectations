@@ -207,7 +207,7 @@ def recursively_convert_to_json_serializable(test_obj):
 
 
 def ensure_row_condition_is_correct(row_condition_string):
-    """Ensure no quote nor \\n are introduced in row_condition string.
+    """Ensure no quote nor \\\\n are introduced in row_condition string.
 
     Otherwise it may cause an issue at the reload of the expectation.
     An error is raised at the declaration of the expectations to ensure
