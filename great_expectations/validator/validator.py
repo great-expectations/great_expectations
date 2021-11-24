@@ -811,12 +811,7 @@ aborting graph resolution.
         remove_multiple_matches: bool = False,
         ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
-        """This method is a thin wrapper for ExpectationSuite.remove()"""
-        warnings.warn(
-            "DataAsset.remove_expectations is deprecated, and will be removed in a future release. "
-            + "Please use ExpectationSuite.remove_expectation instead.",
-            DeprecationWarning,
-        )
+
         return self._expectation_suite.remove_expectation(
             expectation_configuration=expectation_configuration,
             match_type=match_type,
