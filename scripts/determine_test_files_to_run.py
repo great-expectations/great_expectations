@@ -1,5 +1,7 @@
 """
 Usage: `python determine_test_files_to_run.py`
+Output: A list of '\n' delimited file paths that represent relevant test files to run
+        (using `xargs`, we can feed in this list to `pytest` in our Azure config)
 
 This script is used in our Azure pipeline (azure-pipelines.yml) to determine which test files to run in CI/CD.
 Rather than test all tests each time, the test files that are selected are based on which source files that have changed;
