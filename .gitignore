@@ -136,14 +136,3 @@ DO_NOT_COMMIT
 
 # Hive Metastore from Spark
 metastore_db
-environment.yml
-.gitignore
-# great_expectations/great_expectations.yml
-great_expectations/expectations/.ge_store_backend_id
-great_expectations/expectations/airbnb2.json
-great_expectations/expectations/airbnb/warning.json
-great_expectations/plugins/custom_data_docs/styles/data_docs_custom_styles.css
-expertise-nlp-3c26880fb0f5.json
-great_expectations/great_expectations.yml
-0.14
-14.0
