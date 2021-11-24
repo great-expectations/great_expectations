@@ -53,7 +53,10 @@ Import = namedtuple("Import", ["source", "module", "name", "alias"])
 
 
 def get_changed_files() -> List[str]:
-    """Standard git diff against `develop` to determine list of changed files"""
+    """
+    Standard git diff against `develop` to determine list of changed files.
+    Filters out anything that isn't in `great_expectations/`.
+    """
     process = subprocess.run(
         ["git", "diff", "HEAD", "origin/develop", "--name-only"], stdout=subprocess.PIPE
     )
@@ -62,7 +65,13 @@ def get_changed_files() -> List[str]:
 
 
 def parse_imports(path: str) -> List[Import]:
-    """Traverses a file using AST and determines relative imports (from within GE)"""
+    """
+    Traverses a file using AST and determines relative imports (from within GE)
+
+    Parses both:
+      * from great_expectations.x.y.z import ...
+      * from great_expectation import ...
+    """
     imports = []
     with open(path) as f:
         root = ast.parse(f.read(), path)
@@ -83,15 +92,27 @@ def parse_imports(path: str) -> List[Import]:
 
 
 def get_import_paths(imports: List[Import]) -> List[str]:
-    """Takes a list of imports and determines the relative path to each source file or module"""
+    """
+    Takes a list of Imports and determines the relative path to each source file or module.
+
+    Imports of type:
+      * `from great_expectations.x.y.z import ...` originate from `great_expectations/x/y/z.py`.
+      * `from great_expectations import ...` must be evaluated on a case by case basis.
+         Thankfully, there are only two edge cases we need to consider (DataContext and exceptions).
+
+    If it is the case that an Import is pointing to a module or directory, we play it safe
+    and add all files from that directory to ensure a high level of coverage.
+    """
     paths = []
     for imp in imports:
         if "great_expectations" not in imp.module:
             continue
         path = ""
         if len(imp.module) == 1:
+            # `from great_expectations import DataContext`
             if "DataContext" in imp.name:
                 path = "great_expectations/data_context/data_context"
+            # `from great_expectations import exceptions as ge_exceptions`
             elif "exceptions" in imp.name:
                 path = "great_expectations/exceptions/exceptions"
         else:
@@ -108,7 +129,16 @@ def get_import_paths(imports: List[Import]) -> List[str]:
 
 
 def create_dependency_graph(directory: str) -> Dict[str, List[str]]:
-    """Traverse a given directory, parse all imports, and create a DAG linking source files to dependencies"""
+    """
+    Traverse a given directory, parse all imports, and create a DAG linking source files to dependencies.
+
+    The output dictionary has the following structure:
+      * key: the dependency or import in the current file
+      * val: the path of the current file
+
+    This allows us to traverse from a changed file to all files that use the origin file as a dependency.
+    If we ever see a change in a given module, we immediately know which files are related and possibly impacted by the change.
+    """
     graph = {}
     for file in glob.glob(f"{directory}/**/*.py", recursive=True):
         imports = parse_imports(str(file))
@@ -125,10 +155,16 @@ def create_dependency_graph(directory: str) -> Dict[str, List[str]]:
 
 
 def traverse_graph(root: str, graph: Dict[str, List[str]], depth: int) -> List[str]:
-    """Perform an iterative, DFS-based traversal of a given dependency graph"""
+    """
+    Perform an iterative, DFS-based traversal of a given dependency graph.
+
+    The provided `depth` arg determines how many layers you want to traverse. The smaller the number, the
+    more relevant the matches (but the less overall coverage you obtain).
+
+    The output is a series of files that are determined to be relevant to the root file.
+    """
     stack = [(root, depth)]
     seen = set()
-    res = set()
 
     while stack:
         node, d = stack.pop()
@@ -136,15 +172,17 @@ def traverse_graph(root: str, graph: Dict[str, List[str]], depth: int) -> List[s
         if node in seen or d <= 0 or not node.startswith("great_expectations"):
             continue
         seen.add(node)
-        res.add(node)
         for child in graph.get(node, []):
             stack.append((child, d - 1))
 
-    return sorted(res)
+    return sorted(seen)
 
 
 def determine_relevant_source_files(changed_files: List[str], depth: int) -> List[str]:
-    """Perform graph traversal on all changed files to determine which source files are possibly influenced by the commit"""
+    """
+    Perform graph traversal on all changed files to determine which source files are possibly influenced by the commit.
+    Using a dependency graph from the `great_expectations/` directory, we can perform graph traversal for all changed files.
+    """
     ge_graph = create_dependency_graph("great_expectations")
     res = set()
     for file in changed_files:
@@ -154,18 +192,24 @@ def determine_relevant_source_files(changed_files: List[str], depth: int) -> Lis
 
 
 def determine_files_to_test(source_files: List[str]) -> List[str]:
-    """Perform graph traversal on all source files to determine which test files need to be run"""
+    """
+    Perform graph traversal on all source files to determine which test files need to be run.
+
+    Use a dependency graph of our `tests/` directory, we're able to map relevant source file to all tests that use
+    that file as an import.
+    """
     tests_graph = create_dependency_graph("tests")
     res = set()
     for file in source_files:
         for test in tests_graph.get(file, []):
+            # Some basic filtering is necessary to remove things like conftest.py
             test_filename = test.split("/")[-1]
             if test_filename.startswith("test_"):
                 res.add(test)
     return sorted(res)
 
 
-def main() -> None:
+def main():
     changed_files = get_changed_files()
     source_files = determine_relevant_source_files(changed_files, depth=2)
     files_to_test = determine_files_to_test(source_files)
