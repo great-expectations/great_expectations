@@ -15,8 +15,8 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuiteSchema,
 )
 from great_expectations.exceptions import (
-    SuiteEditNotebookCustomTemplateModuleNotFoundError,
     InvalidExpectationConfigurationError,
+    SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
