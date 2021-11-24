@@ -21,7 +21,7 @@ This guide will help you implement renderers for your custom Expectations, allow
 - Implemented a [custom Expectation](../../../guides/expectations/creating_custom_expectations/how_to_create_custom_expectations.md).
 - Set up a [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md) site.
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md) containing your custom Expectation.
-- Generated one Validation Result ([Validation Operator](../../../guides/validation/how_to_add_a_validation_operator.md)) containing your custom Expectation
+- Ran one [Checkpoint](../../../guides/validation/how_to_validate_data_by_running_a_checkpoint.md) to validate data.
     
 </Prerequisites>
 
