@@ -60,3 +60,4 @@ The following are a few details about other files Docusaurus uses that you may w
 - `../babel.config.js`: Babel config file used when building
 - `../package.json`: dependencies and scripts
 - `../yarn.lock`: dependency lock file that ensures reproducibility
+- `sitemap.xml`: After any changes to sidebars.js are merged, use https://www.xml-sitemaps.com/ with the temporary netlify url and then download the resulting sitemap.xml to update the existing sitemap.xml file. Make sure to change the temporary netlify url to the real docs url https://docs.greatexpectations.io/docs/ in the sitemap.xml file.

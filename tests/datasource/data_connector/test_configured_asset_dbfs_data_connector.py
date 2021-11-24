@@ -1,5 +1,9 @@
+import os
+import pathlib
 from typing import List
 
+import boto3
+import botocore
 from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchDefinition, BatchRequest
@@ -24,6 +28,16 @@ def test__get_full_file_path_for_asset_pandas(fs):
     This test verifies that a config using a `/dbfs/` path is NOT translated to `dbfs:/`
     when preparing the PathBatchSpec for the PandasExecutionEngine.
     """
+
+    # Copy boto modules into fake filesystem (see https://github.com/spulec/moto/issues/1682#issuecomment-645016188)
+    for module in [boto3, botocore]:
+        module_dir = pathlib.Path(module.__file__).parent
+        fs.add_real_directory(module_dir, lazy_read=False)
+
+    # Copy google credentials into fake filesystem if they exist on your filesystem
+    google_cred_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    if google_cred_file:
+        fs.add_real_file(google_cred_file)
 
     base_directory: str = "/dbfs/great_expectations"
     fs.create_dir(base_directory)
