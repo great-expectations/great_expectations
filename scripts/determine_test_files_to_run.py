@@ -49,12 +49,12 @@ import glob
 import os
 import subprocess
 from collections import namedtuple
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 Import = namedtuple("Import", ["source", "module", "name", "alias"])
 
 
-def get_changed_files() -> List[str]:
+def get_changed_files() -> Tuple[List[str], List[str]]:
     """
     Standard git diff against `develop` to determine list of changed files.
     Filters out anything that isn't in `great_expectations/`.
@@ -63,7 +63,9 @@ def get_changed_files() -> List[str]:
         ["git", "diff", "HEAD", "origin/develop", "--name-only"], stdout=subprocess.PIPE
     )
     files = [f.decode("utf-8") for f in process.stdout.splitlines()]
-    return [f for f in files if f.startswith("great_expectations")]
+    test_files = [f for f in files if f.startswith("tests")]
+    source_files = [f for f in files if f.startswith("great_expectations")]
+    return source_files, test_files
 
 
 def parse_imports(path: str) -> List[Import]:
@@ -211,10 +213,23 @@ def determine_files_to_test(source_files: List[str]) -> List[str]:
     return sorted(res)
 
 
+def update_files_to_test(
+    files_to_test: List[str], changed_test_files: List[str]
+) -> None:
+    """
+    If a test file was picked up as part of our diff (see `get_changed_files()`), ensure
+    that we include it in the final output.
+    """
+    for file in changed_test_files:
+        if file not in files_to_test:
+            files_to_test.append(file)
+
+
 def main():
-    changed_files = get_changed_files()
-    source_files = determine_relevant_source_files(changed_files, depth=2)
-    files_to_test = determine_files_to_test(source_files)
+    changed_source_files, changed_test_files = get_changed_files()
+    relevant_files = determine_relevant_source_files(changed_source_files, depth=2)
+    files_to_test = determine_files_to_test(relevant_files)
+    update_files_to_test(files_to_test, changed_test_files)
     for file in files_to_test:
         print(file)
 
