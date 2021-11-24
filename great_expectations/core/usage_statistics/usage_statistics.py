@@ -6,6 +6,7 @@ import platform
 import signal
 import sys
 import threading
+import time
 from functools import wraps
 from queue import Queue
 from typing import Optional
@@ -121,20 +122,6 @@ class UsageStatisticsHandler:
             finally:
                 self._message_queue.task_done()
 
-    def send_usage_message(self, event, event_payload=None, success=None):
-        """send a usage statistics message."""
-        # noinspection PyBroadException
-        try:
-            message = {
-                "event": event,
-                "event_payload": event_payload or {},
-                "success": success,
-            }
-
-            self.emit(message)
-        except Exception:
-            pass
-
     def build_init_payload(self):
         """Adds information that may be available only after full data context construction, but is useful to
         calculate only one time (for example, anonymization)."""
@@ -179,15 +166,25 @@ class UsageStatisticsHandler:
 
     def build_envelope(self, message):
         message["version"] = "1.0.0"
+        message["ge_version"] = self._ge_version
+
+        message["data_context_id"] = self._data_context_id
+        message["data_context_instance_id"] = self._data_context_instance_id
+
         message["event_time"] = (
             datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y-%m-%dT%H:%M:%S.%f"
             )[:-3]
             + "Z"
         )
-        message["data_context_id"] = self._data_context_id
-        message["data_context_instance_id"] = self._data_context_instance_id
-        message["ge_version"] = self._ge_version
+
+        event_duration_property_name: str = f'{message["event_name"]}.duration'.replace(
+            ".", "_"
+        )
+        if hasattr(self, event_duration_property_name):
+            delta_t: int = getattr(self, event_duration_property_name)
+            message["event_duration"] = delta_t
+
         return message
 
     @staticmethod
@@ -199,6 +196,24 @@ class UsageStatisticsHandler:
             logger.debug("invalid message: " + str(e))
             return False
 
+    def send_usage_message(
+        self,
+        event: str,
+        event_payload: Optional[dict] = None,
+        success: Optional[bool] = None,
+    ):
+        """send a usage statistics message."""
+        # noinspection PyBroadException
+        try:
+            message: dict = {
+                "event": event,
+                "event_payload": event_payload or {},
+                "success": success,
+            }
+            self.emit(message)
+        except Exception:
+            pass
+
     def emit(self, message):
         """
         Emit a message.
@@ -206,7 +221,7 @@ class UsageStatisticsHandler:
         try:
             if message["event"] == "data_context.__init__":
                 message["event_payload"] = self.build_init_payload()
-            message = self.build_envelope(message)
+            message = self.build_envelope(message=message)
             if not self.validate_message(
                 message, schema=usage_statistics_record_schema
             ):
@@ -262,24 +277,33 @@ def usage_statistics_enabled_method(
             # Set event_payload now so it can be updated below
             event_payload = {}
             message = {"event_payload": event_payload, "event": event_name}
+            result = None
+            time_begin: int = int(round(time.time() * 1000))
             try:
                 if args_payload_fn is not None:
                     nested_update(event_payload, args_payload_fn(*args, **kwargs))
+
                 result = func(*args, **kwargs)
-                # We try to get the handler only now, so that it *could* be initialized in func, e.g. if it is an
-                # __init__ method
-                handler = get_usage_statistics_handler(args)
-                if result_payload_fn is not None:
-                    nested_update(event_payload, result_payload_fn(result))
                 message["success"] = True
-                if handler is not None:
-                    handler.emit(message)
             except Exception:
                 message["success"] = False
+                raise
+            finally:
+                if not ((result is None) or (result_payload_fn is None)):
+                    nested_update(event_payload, result_payload_fn(result))
+
+                time_end: int = int(round(time.time() * 1000))
+                delta_t: int = time_end - time_begin
+
                 handler = get_usage_statistics_handler(args)
                 if handler:
+                    event_duration_property_name: str = (
+                        f"{event_name}.duration".replace(".", "_")
+                    )
+                    setattr(handler, event_duration_property_name, delta_t)
                     handler.emit(message)
-                raise
+                    delattr(handler, event_duration_property_name)
+
             return result
 
         return usage_statistics_wrapped_method

@@ -160,22 +160,30 @@ def profile(func: Callable = None) -> Callable:
     return profile_function_call
 
 
-def measure_execution_time(func: Callable = None) -> Callable:
-    @wraps(func)
-    def compute_delta_t(*args, **kwargs) -> Any:
-        time_begin: int = int(round(time.time() * 1000))
-        try:
-            return func(*args, **kwargs)
-        finally:
-            time_end: int = int(round(time.time() * 1000))
-            delta_t: int = time_end - time_begin
-            bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-            call_args: OrderedDict = bound_args.arguments
-            print(
-                f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
-            )
+def measure_execution_time(pretty_print: bool = False) -> Callable:
+    def execution_time_decorator(func: Callable) -> Callable:
+        func.execution_duration_milliseconds = 0
 
-    return compute_delta_t
+        @wraps(func)
+        def compute_delta_t(*args, **kwargs) -> Any:
+            time_begin: int = int(round(time.time() * 1000))
+            try:
+                return func(*args, **kwargs)
+            finally:
+                time_end: int = int(round(time.time() * 1000))
+                delta_t: int = time_end - time_begin
+                func.execution_duration_milliseconds = delta_t
+                bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
+                call_args: OrderedDict = bound_args.arguments
+
+                if pretty_print:
+                    print(
+                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
+                    )
+
+        return compute_delta_t
+
+    return execution_time_decorator
 
 
 # noinspection SpellCheckingInspection
