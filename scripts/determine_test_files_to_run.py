@@ -195,7 +195,9 @@ def determine_relevant_source_files(changed_files: List[str], depth: int) -> Lis
     return sorted(res)
 
 
-def determine_files_to_test(source_files: List[str]) -> List[str]:
+def determine_files_to_test(
+    source_files: List[str], changed_test_files: List[str]
+) -> List[str]:
     """
     Perform graph traversal on all source files to determine which test files need to be run.
 
@@ -203,7 +205,9 @@ def determine_files_to_test(source_files: List[str]) -> List[str]:
     that file as an import.
     """
     tests_graph = create_dependency_graph("tests")
-    res = set()
+    res = {
+        file for file in changed_test_files
+    }  # Ensure we include test files that were caught by `get_changed_files()`
     for file in source_files:
         for test in tests_graph.get(file, []):
             # Some basic filtering is necessary to remove things like conftest.py
@@ -213,23 +217,10 @@ def determine_files_to_test(source_files: List[str]) -> List[str]:
     return sorted(res)
 
 
-def update_files_to_test(
-    files_to_test: List[str], changed_test_files: List[str]
-) -> None:
-    """
-    If a test file was picked up as part of our diff (see `get_changed_files()`), ensure
-    that we include it in the final output.
-    """
-    for file in changed_test_files:
-        if file not in files_to_test:
-            files_to_test.append(file)
-
-
 def main():
     changed_source_files, changed_test_files = get_changed_files()
     relevant_files = determine_relevant_source_files(changed_source_files, depth=2)
-    files_to_test = determine_files_to_test(relevant_files)
-    update_files_to_test(files_to_test, changed_test_files)
+    files_to_test = determine_files_to_test(relevant_files, changed_test_files)
     for file in files_to_test:
         print(file)
 
