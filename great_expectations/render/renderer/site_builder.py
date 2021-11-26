@@ -6,7 +6,6 @@ from collections import OrderedDict
 import great_expectations.exceptions as exceptions
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.store.html_site_store import (
-    GeCloudIdentifier,
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
@@ -948,6 +947,7 @@ class DefaultSiteIndexBuilder:
                     )
                     logger.warning(error_msg)
 
+        viewable_content = ""
         try:
             rendered_content = self.renderer_class.render(index_links_dict)
             viewable_content = self.view_class.render(
@@ -967,7 +967,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
             logger.error(exception_message)
 
-        return (self.target_store.write_index_page(viewable_content), index_links_dict)
+        return self.target_store.write_index_page(viewable_content), index_links_dict
 
 
 class CallToActionButton:

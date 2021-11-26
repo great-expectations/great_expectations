@@ -30,7 +30,12 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationResultsPageRenderer(Renderer):
-    def __init__(self, column_section_renderer=None, run_info_at_end: bool = False):
+    def __init__(
+        self,
+        column_section_renderer=None,
+        run_info_at_end: bool = False,
+        data_context=None,
+    ):
         """
         Args:
             column_section_renderer:
@@ -57,6 +62,7 @@ class ValidationResultsPageRenderer(Renderer):
                 class_name=column_section_renderer["class_name"],
             )
         self.run_info_at_end = run_info_at_end
+        self._data_context = data_context
 
     def render_validation_operator_result(
         self, validation_operator_result: ValidationOperatorResult
@@ -116,7 +122,20 @@ class ValidationResultsPageRenderer(Renderer):
 
         # Group EVRs by column
         columns = {}
+        try:
+            suite_meta = (
+                self._data_context.get_expectation_suite(expectation_suite_name).meta
+                if self._data_context is not None
+                else None
+            )
+        except:
+            suite_meta = None
+        meta_properties_to_render = self._get_meta_properties_notes(suite_meta)
         for evr in validation_results.results:
+            if meta_properties_to_render is not None:
+                evr.expectation_config.kwargs[
+                    "meta_properties_to_render"
+                ] = meta_properties_to_render
             if "column" in evr.expectation_config.kwargs:
                 column = evr.expectation_config.kwargs["column"]
             else:
@@ -261,6 +280,48 @@ class ValidationResultsPageRenderer(Renderer):
                 "utm_medium": "validation-results-page",
             }
         )
+
+    @classmethod
+    def _get_meta_properties_notes(cls, suite_meta):
+        """
+        This method is used for fetching the custom meta to be added at the suite level
+        "notes": {
+            "content": {
+                "dimension": "properties.dimension",
+                "severity": "properties.severity"
+            },
+            "format": "renderer.diagnostic.meta_properties"
+        }
+        expectation level
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "city"
+            },
+            "meta": {
+                "attributes": {
+                    "properties": {
+                        "dimension": "completeness",
+                        "severity": "P3"
+                    },
+                    "user_meta": {
+                        "notes": ""
+                    }
+                }
+            }
+        }
+        This will fetch dimension and severity values which are in the expectation meta.
+
+        """
+        if (
+            suite_meta is not None
+            and "notes" in suite_meta
+            and "format" in suite_meta["notes"]
+            and suite_meta["notes"]["format"] == "renderer.diagnostic.meta_properties"
+        ):
+            return suite_meta["notes"]["content"]
+        else:
+            return None
 
     @classmethod
     def _render_validation_header(cls, validation_results):
@@ -575,9 +636,10 @@ class ExpectationSuitePageRenderer(Renderer):
             )
 
     def render(self, expectations):
-        columns, ordered_columns = self._group_and_order_expectations_by_column(
-            expectations
-        )
+        (
+            columns,
+            ordered_columns,
+        ) = expectations.get_grouped_and_ordered_expectations_by_column()
         expectation_suite_name = expectations.expectation_suite_name
 
         overview_content_blocks = [
