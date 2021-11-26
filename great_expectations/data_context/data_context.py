@@ -2549,7 +2549,7 @@ class BaseDataContext:
         resource_identifiers=None,
         dry_run=False,
         build_index: bool = True,
-        rebuild_previous_validations: bool = False
+        rebuild_previous_validation_result_pages: bool = False,
     ):
         """
         Build Data Docs for your project.
@@ -2574,7 +2574,7 @@ class BaseDataContext:
                             confirm.
 
         :param build_index: a flag if False, skips building the index page
-        :param rebuild_previous_validations: a flag if False, skips building previously built validation and profiling
+        :param rebuild_previous_validation_result_pages: a flag if False, skips building previously built validation and profiling
             pages
 
         Returns:
@@ -2621,7 +2621,7 @@ class BaseDataContext:
                         index_page_resource_identifier_tuple = site_builder.build(
                             resource_identifiers,
                             build_index=(build_index and not self.ge_cloud_mode),
-                            rebuild_previous_validations=rebuild_previous_validations
+                            rebuild_previous_validation_result_pages=rebuild_previous_validation_result_pages,
                         )
                         if index_page_resource_identifier_tuple:
                             index_page_locator_infos[
