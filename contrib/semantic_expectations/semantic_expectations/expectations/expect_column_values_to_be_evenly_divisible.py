@@ -59,10 +59,6 @@ class ValuesAreEvenlyDivisible(ColumnMapMetricProvider):
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeEvenlyDivisible(ColumnMapExpectation):
     """
-    
-
-    parameters:
-        reverse: Checks for Z to A alphabetical if True, otherwise checks A to Z
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -162,16 +158,20 @@ class ExpectColumnValuesToBeEvenlyDivisible(ColumnMapExpectation):
     # For more info on Renderers, see {some doc}
     #!!! This example renderer should render RenderedStringTemplateContent, not just a string
 
+    @classmethod
+    @renderer(renderer_type="renderer.question")
+    def _question_renderer(
+        cls, configuration, result=None, language=None, runtime_configuration=None
+    ):
+        column = configuration.kwargs.get("column")
+        mostly = configuration.kwargs.get("mostly")
+        divisor = configuration.kwargs.get("divisor")
 
-#     @classmethod
-#     @renderer(renderer_type="renderer.question")
-#     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
-#     ):
-#         column = configuration.kwargs.get("column")
-#         mostly = configuration.kwargs.get("mostly")
+        if mostly == None:
+            return f'Are all values in column "{column}" equally divisible by "{divisor}"?'
 
-#         return f'Do at least {mostly * 100}% of values in column "{column}" equal 3?'
+        else:
+            return f'Are at least {mostly * 100}% of values in column "{column}" equally divisible by "{divisor}"?'
 
 # This method defines an answer Renderer
 #!!! This example renderer should render RenderedStringTemplateContent, not just a string
