@@ -124,7 +124,6 @@ class Checkpoint:
     def ge_cloud_id(self) -> UUID:
         return self._config.ge_cloud_id
 
-    # TODO: (Rob) should we type the big validation dicts for better validation/prevent duplication
     def get_substituted_config(
         self,
         config: Optional[Union[CheckpointConfig, dict]] = None,
@@ -136,69 +135,18 @@ class Checkpoint:
         if isinstance(config, dict):
             config = CheckpointConfig(**config)
 
-        print(f'\n[ALEX_TEST] [GET_SUBSTITUTED_CONFIG] CONFIG-0: {config} ; TYPE: {str(type(config))}')
         if any(runtime_kwargs.values()):
             config.update(runtime_kwargs=runtime_kwargs)
 
         substituted_config: Union[CheckpointConfig, dict]
-        print(f'\n[ALEX_TEST] [GET_SUBSTITUTED_CONFIG] CONFIG-1: {config} ; TYPE: {str(type(config))}')
 
         template_name = config.template_name
         if not template_name:
-            if (
-                config.batch_request is not None
-                and config.batch_request.get("runtime_parameters") is not None
-                and config.batch_request["runtime_parameters"].get("batch_data")
-                is not None
-            ):
-                batch_data = config.batch_request["runtime_parameters"].pop(
-                    "batch_data"
-                )
-                substituted_config = copy.deepcopy(config)
-                substituted_config.batch_request["runtime_parameters"][
-                    "batch_data"
-                ] = batch_data
-            elif len(config.validations) > 0:
-                batch_data_list = []
-                for val in config.validations:
-                    if (
-                        val.get("batch_request") is not None
-                        and val["batch_request"].get("runtime_parameters") is not None
-                        and val["batch_request"]["runtime_parameters"].get("batch_data")
-                        is not None
-                    ):
-                        batch_data_list.append(
-                            val["batch_request"]["runtime_parameters"].pop("batch_data")
-                        )
-                    else:
-                        batch_data_list.append(None)
-                substituted_config = copy.deepcopy(config)
-                for idx, val in enumerate(substituted_config.validations):
-                    if (
-                        val.get("batch_request") is not None
-                        and val["batch_request"].get("runtime_parameters") is not None
-                        and batch_data_list[idx] is not None
-                    ):
-                        val["batch_request"]["runtime_parameters"][
-                            "batch_data"
-                        ] = batch_data_list[idx]
-
-                for idx, val in enumerate(config.validations):
-                    if (
-                        val.get("batch_request") is not None
-                        and val["batch_request"].get("runtime_parameters") is not None
-                        and batch_data_list[idx] is not None
-                    ):
-                        val["batch_request"]["runtime_parameters"][
-                            "batch_data"
-                        ] = batch_data_list[idx]
-            else:
-                substituted_config = copy.deepcopy(config)
-
+            substituted_config = copy.deepcopy(config)
             self._substituted_config = substituted_config
         else:
-            checkpoint = self.data_context.get_checkpoint(name=template_name)
-            template_config = checkpoint.config
+            checkpoint: Checkpoint = self.data_context.get_checkpoint(name=template_name)
+            template_config: CheckpointConfig = checkpoint.config
 
             if template_config.config_version != config.config_version:
                 raise ge_exceptions.CheckpointError(
@@ -209,7 +157,7 @@ class Checkpoint:
             if template_config.template_name is not None:
                 substituted_config = self.get_substituted_config(config=template_config)
             else:
-                substituted_config = template_config
+                substituted_config = copy.deepcopy(template_config)
 
             # merge template with config
             substituted_config.update(
@@ -219,8 +167,10 @@ class Checkpoint:
             # don't replace _substituted_config if already exists
             if self._substituted_config is None:
                 self._substituted_config = substituted_config
+
         if self.data_context.ge_cloud_mode:
             return substituted_config
+
         return self._substitute_config_variables(config=substituted_config)
 
     def _substitute_config_variables(
