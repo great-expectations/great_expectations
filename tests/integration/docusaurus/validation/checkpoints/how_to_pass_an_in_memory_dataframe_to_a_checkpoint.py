@@ -103,7 +103,7 @@ results = context.run_checkpoint(
         "batch_identifiers": {
             "default_identifier_name": "<YOUR MEANINGFUL IDENTIFIER>"
         },
-    }
+    },
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.
@@ -138,6 +138,7 @@ assert test_yaml == test_python
 assert context.list_checkpoints() == ["my_checkpoint"]
 
 df_1 = pd.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
+df_2 = pd.read_csv("./data/yellow_tripdata_sample_2019-02.csv")
 
 batch_request_1 = RuntimeBatchRequest(
     datasource_name="taxi_datasource",
@@ -146,8 +147,6 @@ batch_request_1 = RuntimeBatchRequest(
     runtime_parameters={"batch_data": df_1},  # Pass your DataFrame here.
     batch_identifiers={"default_identifier_name": "<YOUR MEANINGFUL IDENTIFIER 1>"},
 )
-
-df_2 = pd.read_csv("./data/yellow_tripdata_sample_2019-02.csv")
 
 batch_request_2 = RuntimeBatchRequest(
     datasource_name="taxi_datasource",
@@ -159,7 +158,10 @@ batch_request_2 = RuntimeBatchRequest(
 
 results = context.run_checkpoint(
     checkpoint_name="my_checkpoint",
-    validations=[{"batch_request": batch_request_1}, {"batch_request": batch_request_2}]
+    validations=[
+        {"batch_request": batch_request_1},
+        {"batch_request": batch_request_2},
+    ],
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.

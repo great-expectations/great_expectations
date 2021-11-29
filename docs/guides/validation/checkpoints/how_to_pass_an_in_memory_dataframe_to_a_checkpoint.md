@@ -114,8 +114,10 @@ If we configure a `SimpleCheckpoint` that does not contain any `validations`:
 
 We can pass one or more `RuntimeBatchRequest`s into `validations` at runtime. Here is an example that passes multiple `batch_request`s into `validations`:
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L140-L163
+```python
+df_1 = pd.read_csv("<PATH TO DATA 1>")
+df_2 = pd.read_csv("<PATH TO DATA 2>")
 ```
 
-## Additional notes
-
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L143-L165
+```
