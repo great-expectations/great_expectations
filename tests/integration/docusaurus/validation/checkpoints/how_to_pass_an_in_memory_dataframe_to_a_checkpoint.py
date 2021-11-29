@@ -20,6 +20,7 @@ data_connectors:
     batch_identifiers:
       - default_identifier_name
 """
+context.add_datasource(**yaml.load(datasource_yaml))
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
@@ -39,6 +40,7 @@ datasource_config = {
         },
     },
 }
+context.add_datasource(**datasource_config)
 
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config), return_mode="report_object"
@@ -46,12 +48,9 @@ test_python = context.test_yaml_config(
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert test_yaml == test_python
-
-context.add_datasource(**datasource_config)
-context.create_expectation_suite("my_expectation_suite")
-
-# NOTE: The following code is only for testing and can be ignored by users.
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
+
+context.create_expectation_suite("my_expectation_suite")
 
 # YAML
 checkpoint_yaml = """
