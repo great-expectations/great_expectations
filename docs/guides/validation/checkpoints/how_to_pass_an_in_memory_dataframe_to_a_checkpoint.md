@@ -5,7 +5,7 @@ title: How to pass an in-memory DataFrame to a Checkpoint
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 
 This guide will help you pass an in-memory DataFrame to an existing Checkpoint.
-This is useful if you 
+This is especially useful if you already have your data in-memory due to an existing process such as a pipeline runner.
 
 
 <Prerequisites>
