@@ -44,9 +44,60 @@ test_python = context.test_yaml_config(
     yaml.dump(datasource_config), return_mode="report_object"
 )
 
+# NOTE: The following code is only for testing and can be ignored by users.
 assert test_yaml == test_python
 
 context.add_datasource(**datasource_config)
+
+# NOTE: The following code is only for testing and can be ignored by users.
+assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
+
+# YAML
+checkpoint_yaml = """
+name: my_checkpoint
+config_version: 1
+class_name: SimpleCheckpoint
+validations:
+  - batch_request:
+      datasource_name: taxi_datasource
+      data_connector_name: default_runtime_data_connector_name
+      data_asset_name: taxi_data
+      data_connector_query:
+        index: -1
+    expectation_suite_name: my_suite
+"""
+
+test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
+
+# Python
+checkpoint_config = {
+    "name": "my_checkpoint",
+    "config_version": 1,
+    "class_name": "SimpleCheckpoint",
+    "validations": [
+        {
+            "batch_request": {
+                "datasource_name": "taxi_datasource",
+                "data_connector_name": "default_runtime_data_connector_name",
+                "data_asset_name": "taxi_data",
+                "data_connector_query": {"index": -1},
+            },
+            "expectation_suite_name": "my_suite",
+        }
+    ],
+}
+
+test_python = context.test_yaml_config(
+    yaml.dump(checkpoint_config), return_mode="report_object"
+)
+
+# NOTE: The following code is only for testing and can be ignored by users.
+assert test_yaml == test_python
+
+context.add_checkpoint(**checkpoint_config)
+
+# NOTE: The following code is only for testing and can be ignored by users.
+assert context.list_checkpoints() == ["my_checkpoint"]
 
 path = "./data/yellow_tripdata_sample_2019-01.csv"
 df = pd.read_csv(path)
@@ -59,17 +110,4 @@ batch_request = RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "<YOUR MEANINGFUL IDENTIFIER>"},
 )
 
-validator = context.get_validator(
-    batch_request=batch_request,
-    create_expectation_suite_with_name="<MY EXPECTATION SUITE NAME>",
-)
-print(validator.head())
 
-# NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
-assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
-assert "<YOUR MEANINGFUL NAME>" in set(
-    context.get_available_data_asset_names()["taxi_datasource"][
-        "default_runtime_data_connector_name"
-    ]
-)
