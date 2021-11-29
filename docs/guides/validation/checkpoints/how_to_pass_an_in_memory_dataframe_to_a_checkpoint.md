@@ -7,20 +7,20 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
 This guide will help you pass an in-memory DataFrame to an existing Checkpoint.
-This is especially useful if you already have your data in-memory due to an existing process such as a pipeline runner.
+This is especially useful if you already have your data in memory due to an existing process such as a pipeline runner.
 
 
 <Prerequisites>
 
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
+- Configured an [Expectation Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
 - Configured a [Checkpoint](./how_to_create_a_new_checkpoint)
 
 </Prerequisites>
 
 ## Steps
 
-### 1. Import the required libraries
+### 1. Import the required libraries and load your DataContext
 
 ```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L1-L7
 ```
@@ -82,14 +82,14 @@ If we configure a `SimpleCheckpoint` that contains a single `batch_request` in `
 </TabItem>
 </Tabs>
 
-We can then pass the remaining keys for the in-memory DataFrame (`df`) and it's associated `batch_identifiers` at into `batch_request` runtime:
+We can then pass the remaining keys for the in-memory DataFrame (`df`) and it's associated `batch_identifiers` at runtime using `batch_request`:
 
 ```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L97-L107
 ```
 
 #### Example 2: Pass a complete RuntimeBatchRequest at runtime
 
-If we configure a `SimpleCheckpoint` that does not contain `validations`:
+If we configure a `SimpleCheckpoint` that does not contain any `validations`:
 
 <Tabs
   groupId="yaml-or-python"
@@ -114,7 +114,7 @@ If we configure a `SimpleCheckpoint` that does not contain `validations`:
 
 We can pass one or more `RuntimeBatchRequest`s into `validations` at runtime. Here is an example that passes multiple `batch_request`s into `validations`:
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L140-L162
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L140-L163
 ```
 
 ## Additional notes
