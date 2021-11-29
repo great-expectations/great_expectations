@@ -374,6 +374,11 @@ docs_test_matrix = [
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "extra_backend_dependencies": BackendDependencies.SPARK,
     },
+    {
+        "user_flow_script": "tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
 ]
 
 integration_test_matrix = [
