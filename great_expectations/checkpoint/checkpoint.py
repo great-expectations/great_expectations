@@ -136,9 +136,14 @@ class Checkpoint:
         if isinstance(config, dict):
             config = CheckpointConfig(**config)
 
-        substituted_config: Union[CheckpointConfig, dict]
-        template_name = runtime_kwargs.get("template_name") or config.template_name
+        print(f'\n[ALEX_TEST] [GET_SUBSTITUTED_CONFIG] CONFIG-0: {config} ; TYPE: {str(type(config))}')
+        if any(runtime_kwargs.values()):
+            config.update(runtime_kwargs=runtime_kwargs)
 
+        substituted_config: Union[CheckpointConfig, dict]
+        print(f'\n[ALEX_TEST] [GET_SUBSTITUTED_CONFIG] CONFIG-1: {config} ; TYPE: {str(type(config))}')
+
+        template_name = config.template_name
         if not template_name:
             if (
                 config.batch_request is not None
@@ -189,9 +194,6 @@ class Checkpoint:
                         ] = batch_data_list[idx]
             else:
                 substituted_config = copy.deepcopy(config)
-
-            if any(runtime_kwargs.values()):
-                substituted_config.update(runtime_kwargs=runtime_kwargs)
 
             self._substituted_config = substituted_config
         else:
@@ -410,10 +412,11 @@ class Checkpoint:
         with AsyncExecutor(
             self.data_context.concurrency, max_workers=len(validations)
         ) as async_executor:
+            # noinspection PyUnresolvedReferences
             async_validation_operator_results: List[
                 AsyncResult[ValidationOperatorResult]
             ] = []
-            if len(validations) != 0:
+            if len(validations) > 0:
                 for idx, validation_dict in enumerate(validations):
                     self._run_validation(
                         substituted_runtime_config=substituted_runtime_config,

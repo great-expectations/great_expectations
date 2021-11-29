@@ -1,10 +1,11 @@
 import enum
+from uuid import UUID
 import itertools
 import json
 import logging
 import uuid
-from copy import deepcopy
-from typing import Any, Dict, List, MutableMapping, Optional, Union
+import copy
+from typing import Any, Dict, List, MutableMapping, Optional, Union, Tuple
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -18,6 +19,7 @@ from great_expectations.marshmallow__shade import (
     Schema,
     ValidationError,
     fields,
+    pre_dump,
     post_dump,
     post_load,
     validates_schema,
@@ -92,8 +94,16 @@ class BaseYamlConfig(SerializableDictDot):
             raise
 
     def _get_schema_validated_updated_commented_map(self) -> CommentedMap:
-        commented_map: CommentedMap = deepcopy(self._commented_map)
-        commented_map.update(self._get_schema_instance().dump(self))
+        commented_map: CommentedMap = copy.deepcopy(self._commented_map)
+        print(f'\n[ALEX_TEST] [BASE.PY:_GET_SCHEMA_VALIDATED_UPDATED_COMMENTED_MAP] COMMENTED_MAP: {commented_map} ; TYPE: {str(type(commented_map))}')
+        # TODO: <Alex>ALEX</Alex>
+        a = self._get_schema_instance().dump(self)
+        print(f'\n[ALEX_TEST] [BASE.PY:_GET_SCHEMA_VALIDATED_UPDATED_COMMENTED_MAP] UPDATING_WITH: {a} ; TYPE: {str(type(a))}')
+        # TODO: <Alex>ALEX</Alex>
+        commented_map.update(a)
+        # TODO: <Alex>ALEX</Alex>
+        # commented_map.update(self._get_schema_instance().dump(self))
+        # TODO: <Alex>ALEX</Alex>
         return commented_map
 
     def to_yaml(self, outfile):
@@ -1380,10 +1390,10 @@ class BaseStoreBackendDefaults(DictDot):
         self.checkpoint_store_name = checkpoint_store_name
         self.validation_operators = validation_operators
         if stores is None:
-            stores = deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
+            stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
         self.stores = stores
         if data_docs_sites is None:
-            data_docs_sites = deepcopy(
+            data_docs_sites = copy.deepcopy(
                 DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
             )
         self.data_docs_sites = data_docs_sites
@@ -1927,6 +1937,13 @@ class CheckpointConfigSchema(Schema):
     notify_on = fields.String(required=False, allow_none=True)
     notify_with = fields.String(required=False, allow_none=True)
 
+    # TODO: <Alex>ALEX</Alex>
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #
+    #     self._batch_data_references = None
+    # TODO: <Alex>ALEX</Alex>
+
     # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -1950,10 +1967,43 @@ class CheckpointConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @post_dump
     def remove_keys_if_none(self, data, **kwargs):
-        data = deepcopy(data)
+        data = copy.deepcopy(data)
         for key in self.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:
                 data.pop(key)
+        return data
+
+    # TODO: <Alex>ALEX</Alex>
+    # @pre_dump
+    # def save_and_delete_runtime_parameters_batch_data_references(self, data, **kwargs):
+    #     print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.SAVE_AND_DELETE_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES] DATA-0: {data} ; TYPE: {str(type(data))}')
+    #     print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.SAVE_AND_DELETE_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES] DATA-0.JSON_DICT: {data.to_json_dict()} ; TYPE: {str(type(data.to_json_dict()))}')
+    #     print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.SAVE_AND_DELETE_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES] KWARGS: {kwargs} ; TYPE: {str(type(kwargs))}')
+    #     batch_data_references: Tuple[Optional[Any], Optional[List[Any]]] = get_runtime_parameters_batch_data_references_from_config(config=data)
+    #     print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.SAVE_AND_DELETE_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES] BATCH_DATA_REFERENCES: {batch_data_references} ; TYPE: {str(type(batch_data_references))}')
+    #     self._batch_data_references = batch_data_references
+    #     print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.SAVE_AND_DELETE_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES] SELF._BATCH_DATA_REFERENCES: {self._batch_data_references} ; TYPE: {str(type(self._batch_data_references))}')
+    #     delete_runtime_parameters_batch_data_references_from_config(config=data)
+    #     print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.SAVE_AND_DELETE_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES] DATA-1: {data} ; TYPE: {str(type(data))}')
+    #
+    # @post_dump
+    # def restore_runtime_parameters_batch_data_references(self, data, **kwargs):
+    #     print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.RESTORE_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES] DATA-0: {data} ; TYPE: {str(type(data))}')
+    #     print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.RESTORE_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES] SELF._BATCH_DATA_REFERENCES: {self._batch_data_references} ; TYPE: {str(type(self._batch_data_references))}')
+    #     restore_runtime_parameters_batch_data_references_into_config(config=data, batch_data_references=self._batch_data_references)
+    #     print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.RESTORE_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES] DATA-1: {data} ; TYPE: {str(type(data))}')
+    # TODO: <Alex>ALEX</Alex>
+
+    def dump(self, obj: Any, *, many: Optional[bool] = None) -> dict:
+        print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.DUMP] DATA-0: {obj} ; TYPE: {str(type(obj))}')
+        batch_data_references: Tuple[Optional[Any], Optional[List[Any]]] = get_runtime_parameters_batch_data_references_from_config(config=obj)
+        print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.DUMP] BATCH_DATA_REFERENCES: {batch_data_references} ; TYPE: {str(type(batch_data_references))}')
+        delete_runtime_parameters_batch_data_references_from_config(config=obj)
+        print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.DUMP] DATA-1: {obj} ; TYPE: {str(type(obj))}')
+        data: dict = super().dump(obj=obj, many=many)
+        print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.DUMP] DATA-2-SUPER_DUMP: {data} ; TYPE: {str(type(data))}')
+        restore_runtime_parameters_batch_data_references_into_config(config=data, batch_data_references=batch_data_references)
+        print(f'\n[ALEX_TEST] [BASE.CHECKPOINT_CONFIG_SCHEMA.DUMP] DATA-3-RETURNING: {data} ; TYPE: {str(type(data))}')
         return data
 
 
@@ -1979,13 +2029,13 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
-        ge_cloud_id: Optional[str] = None,
+        ge_cloud_id: Optional[Union[UUID, str]] = None,
         # the following four args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[Union[UUID, str]] = None,
     ):
         self._name = name
         self._config_version = config_version
@@ -2147,7 +2197,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls):
+    def get_config_class(cls) -> type:
         return cls  # CheckpointConfig
 
     @classmethod
@@ -2155,23 +2205,23 @@ class CheckpointConfig(BaseYamlConfig):
         return CheckpointConfigSchema
 
     @property
-    def ge_cloud_id(self):
+    def ge_cloud_id(self) -> Optional[Union[UUID, str]]:
         return self._ge_cloud_id
 
     @ge_cloud_id.setter
-    def ge_cloud_id(self, value: str):
+    def ge_cloud_id(self, value: Union[UUID, str]):
         self._ge_cloud_id = value
 
     @property
-    def expectation_suite_ge_cloud_id(self):
+    def expectation_suite_ge_cloud_id(self) -> Optional[Union[UUID, str]]:
         return self._expectation_suite_ge_cloud_id
 
     @expectation_suite_ge_cloud_id.setter
-    def expectation_suite_ge_cloud_id(self, value: str):
+    def expectation_suite_ge_cloud_id(self, value: Union[UUID, str]):
         self._expectation_suite_ge_cloud_id = value
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
@@ -2179,7 +2229,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._name = value
 
     @property
-    def template_name(self):
+    def template_name(self) -> str:
         return self._template_name
 
     @template_name.setter
@@ -2187,19 +2237,31 @@ class CheckpointConfig(BaseYamlConfig):
         self._template_name = value
 
     @property
-    def config_version(self):
+    def config_version(self) -> float:
         return self._config_version
 
+    @config_version.setter
+    def config_version(self, value: float):
+        self._config_version = value
+
     @property
-    def validations(self):
+    def validations(self) -> List[dict]:
         return self._validations
 
-    @property
-    def profilers(self):
-        return self._profilers
+    @validations.setter
+    def validations(self, value: List[dict]):
+        self._validations = value
 
     @property
-    def module_name(self):
+    def profilers(self) -> List[dict]:
+        return self._profilers
+
+    @profilers.setter
+    def profilers(self, value: List[dict]):
+        self._profilers = value
+
+    @property
+    def module_name(self) -> str:
         return self._module_name
 
     @module_name.setter
@@ -2207,7 +2269,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._module_name = value
 
     @property
-    def class_name(self):
+    def class_name(self) -> str:
         return self._class_name
 
     @class_name.setter
@@ -2215,7 +2277,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._class_name = value
 
     @property
-    def run_name_template(self):
+    def run_name_template(self) -> str:
         return self._run_name_template
 
     @run_name_template.setter
@@ -2223,7 +2285,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._run_name_template = value
 
     @property
-    def batch_request(self):
+    def batch_request(self) -> dict:
         return self._batch_request
 
     @batch_request.setter
@@ -2231,7 +2293,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._batch_request = value
 
     @property
-    def expectation_suite_name(self):
+    def expectation_suite_name(self) -> str:
         return self._expectation_suite_name
 
     @expectation_suite_name.setter
@@ -2239,7 +2301,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._expectation_suite_name = value
 
     @property
-    def action_list(self):
+    def action_list(self) -> List[dict]:
         return self._action_list
 
     @action_list.setter
@@ -2247,19 +2309,19 @@ class CheckpointConfig(BaseYamlConfig):
         self._action_list = value
 
     @property
-    def site_names(self):
+    def site_names(self) -> List[str]:
         return self._site_names
 
     @property
-    def slack_webhook(self):
+    def slack_webhook(self) -> str:
         return self._slack_webhook
 
     @property
-    def notify_on(self):
+    def notify_on(self) -> str:
         return self._notify_on
 
     @property
-    def notify_with(self):
+    def notify_with(self) -> str:
         return self._notify_with
 
     @classmethod
@@ -2285,58 +2347,106 @@ class CheckpointConfig(BaseYamlConfig):
         return list(base_action_list_dict.values())
 
     @property
-    def evaluation_parameters(self):
+    def evaluation_parameters(self) -> dict:
         return self._evaluation_parameters
 
+    @evaluation_parameters.setter
+    def evaluation_parameters(self, value: dict):
+        self._evaluation_parameters = value
+
     @property
-    def runtime_configuration(self):
+    def runtime_configuration(self) -> dict:
         return self._runtime_configuration
 
-    def __repr__(self):
-        batch_data_list = []
-        if len(self.validations) > 0:
-            for val in self.validations:
-                if (val["batch_request"].get("runtime_parameters") is not None) and (
-                    val["batch_request"]["runtime_parameters"].get("batch_data")
-                    is not None
-                ):
-                    batch_data_list.append(
-                        val["batch_request"]["runtime_parameters"].pop("batch_data")
-                    )
-                else:
-                    batch_data_list.append(None)
+    @runtime_configuration.setter
+    def runtime_configuration(self, value: dict):
+        self._runtime_configuration = value
 
-        batch_data = None
-        if (
-            (self.batch_request is not None)
-            and (self.batch_request.get("runtime_parameters") is not None)
-            and (self.batch_request["runtime_parameters"].get("batch_data") is not None)
-        ):
-            batch_data = self.batch_request["runtime_parameters"].pop("batch_data")
+    def __deepcopy__(self, memo):
+        print(f'\n[ALEX_TEST] [DEEPCOPY] MEMO-0: {memo} ; TYPE: {str(type(memo))}')
+        batch_data_references: Tuple[Optional[Any], Optional[List[Any]]] = get_runtime_parameters_batch_data_references_from_config(config=self)
+        print(f'\n[ALEX_TEST] [DEEPCOPY] SELF-0: {self} ; TYPE: {str(type(self))}')
+        delete_runtime_parameters_batch_data_references_from_config(config=self)
+        print(f'\n[ALEX_TEST] [DEEPCOPY] SELF-1-AFTER_POP: {self} ; TYPE: {str(type(self))}')
+        config: dict = self.to_json_dict()
+        print(f'\n[ALEX_TEST] [DEEPCOPY] SELF-1-AFTER_POP-AS_DICT: {config} ; TYPE: {str(type(config))}')
+        cls = self.__class__
+        print(f'\n[ALEX_TEST] [DEEPCOPY] CLS: {cls} ; TYPE: {str(type(cls))}')
+        result = cls.__new__(cls)
+        result._commented_map = CommentedMap()
+        # print(f'\n[ALEX_TEST] [DEEPCOPY] RESULT: {result} ; TYPE: {str(type(result))}')
+        print(f'\n[ALEX_TEST] [DEEPCOPY] RESULT-0: ; TYPE: {str(type(result))}')
+        memo[id(self)] = result
+        # print(f'\n[ALEX_TEST] [DEEPCOPY] MEMO-1: {memo} ; TYPE: {str(type(memo))}')
+        print(f'\n[ALEX_TEST] [DEEPCOPY] MEMO-1: ; TYPE: {str(type(memo))}')
+        # TODO: <Alex>ALEX</Alex>
+        for key, value in config.items():
+            print(f'\n[ALEX_TEST] [DEEPCOPY] RESULT-UPDATING -- KEY: {key} ; TYPE: {str(type(key))}')
+            print(f'\n[ALEX_TEST] [DEEPCOPY] RESULT-UPDATING -- VALUE: {value} ; TYPE: {str(type(value))}')
+            # noinspection PyArgumentList
+            value_copy = copy.deepcopy(value, memo)
+            print(f'\n[ALEX_TEST] [DEEPCOPY] RESULT-UPDATING -- VALUE_COPY: {value_copy} ; TYPE: {str(type(value_copy))}')
+            # TODO: <Alex>ALEX</Alex>
+            # setattr(result, key, copy.deepcopy(value, memo))
+            # TODO: <Alex>ALEX</Alex>
+            setattr(result, key, value_copy)
+            # TODO: <Alex>ALEX</Alex>
+            print(f'\n[ALEX_TEST] [DEEPCOPY] RESULT-UPDATING -- SET_ATTR_SUCCESS_FOR_ATTR: {key}')
+        print(f'\n[ALEX_TEST] [DEEPCOPY] RESULT-1-AFTER_CONFIG_DICT_COPY: {result} ; TYPE: {str(type(result))}')
+        restore_runtime_parameters_batch_data_references_into_config(config=self, batch_data_references=batch_data_references)
+        print(f'\n[ALEX_TEST] [DEEPCOPY] SELF-2-AFTER_CONFIG_DICT_COPY-AND_RESTORE: {self} ; TYPE: {str(type(self))}')
+        restore_runtime_parameters_batch_data_references_into_config(config=result, batch_data_references=batch_data_references)
+        print(f'\n[ALEX_TEST] [DEEPCOPY] RESULT-2-FINAL-AFTER_CONFIG_DICT_COPY-AND_RESTORE: {result} ; TYPE: {str(type(result))}')
+        # TODO: <Alex>ALEX</Alex>
+        return result
 
-        serializeable_dict = self.to_json_dict()
-
-        if len(self.validations) > 0:
-            for idx, val in enumerate(self.validations):
-                if (val["batch_request"].get("runtime_parameters") is not None) and (
-                    batch_data_list[idx] is not None
-                ):
-                    val["batch_request"]["runtime_parameters"][
-                        "batch_data"
-                    ] = batch_data_list[idx]
-                    serializeable_dict["validations"][idx]["batch_request"][
-                        "runtime_parameters"
-                    ]["batch_data"] = str(type(batch_data_list[idx]))
-
-        if (batch_data is not None) and (
-            self.batch_request.get("runtime_parameters") is not None
-        ):
-            self.batch_request["runtime_parameters"]["batch_data"] = batch_data
-            serializeable_dict["batch_request"]["runtime_parameters"][
-                "batch_data"
-            ] = str(type(batch_data))
-
-        return json.dumps(serializeable_dict, indent=2)
+    # TODO: <Alex>ALEX</Alex>
+    # def __repr__(self):
+    #     batch_data_list = []
+    #     if len(self.validations) > 0:
+    #         for val in self.validations:
+    #             if (val["batch_request"].get("runtime_parameters") is not None) and (
+    #                 val["batch_request"]["runtime_parameters"].get("batch_data")
+    #                 is not None
+    #             ):
+    #                 batch_data_list.append(
+    #                     val["batch_request"]["runtime_parameters"].pop("batch_data")
+    #                 )
+    #             else:
+    #                 batch_data_list.append(None)
+    #
+    #     batch_data = None
+    #     if (
+    #         (self.batch_request is not None)
+    #         and (self.batch_request.get("runtime_parameters") is not None)
+    #         and (self.batch_request["runtime_parameters"].get("batch_data") is not None)
+    #     ):
+    #         batch_data = self.batch_request["runtime_parameters"].pop("batch_data")
+    #
+    #     serializeable_dict = self.to_json_dict()
+    #
+    #     if len(self.validations) > 0:
+    #         for idx, val in enumerate(self.validations):
+    #             if (val["batch_request"].get("runtime_parameters") is not None) and (
+    #                 batch_data_list[idx] is not None
+    #             ):
+    #                 val["batch_request"]["runtime_parameters"][
+    #                     "batch_data"
+    #                 ] = batch_data_list[idx]
+    #                 serializeable_dict["validations"][idx]["batch_request"][
+    #                     "runtime_parameters"
+    #                 ]["batch_data"] = str(type(batch_data_list[idx]))
+    #
+    #     if (batch_data is not None) and (
+    #         self.batch_request.get("runtime_parameters") is not None
+    #     ):
+    #         self.batch_request["runtime_parameters"]["batch_data"] = batch_data
+    #         serializeable_dict["batch_request"]["runtime_parameters"][
+    #             "batch_data"
+    #         ] = str(type(batch_data))
+    #
+    #     return json.dumps(serializeable_dict, indent=2)
+    # TODO: <Alex>ALEX</Alex>
 
 
 class CheckpointValidationConfig(DictDot):
@@ -2345,6 +2455,150 @@ class CheckpointValidationConfig(DictDot):
 
 class CheckpointValidationConfigSchema(Schema):
     pass
+
+
+# TODO: <Alex>ALEX</Alex>
+def get_runtime_parameters_batch_data_references_from_config(config: CheckpointConfig) -> Tuple[Optional[Any], Optional[List[Any]]]:
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    if not isinstance(config, CheckpointConfig):
+        raise TypeError(
+            f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" (the type given is \
+"{str(type(config))}", which is illegal).
+"""
+        )
+
+    default_batch_data: Optional[Any] = None
+    validations_batch_data_list: Optional[List[Any]] = None
+    print(f'\n[ALEX_TEST] [BASE.py:GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] CONFIG-0: {config} ; TYPE: {str(type(config))}')
+    print(f'\n[ALEX_TEST] [BASE.py:GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] CONFIG-0.BATCH_REQUEST: {config.batch_request} ; TYPE: {str(type(config.batch_request))}')
+    print(f'\n[ALEX_TEST] [BASE.py:GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] CONFIG-0.VALIDATIONS: {config.validations} ; TYPE: {str(type(config.validations))}')
+
+    if (
+        config.batch_request is not None
+        and config.batch_request.get("runtime_parameters") is not None
+        and config.batch_request["runtime_parameters"].get("batch_data") is not None
+        and default_batch_data is None
+    ):
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        default_batch_data = config.batch_request["runtime_parameters"]["batch_data"]
+        print(f'\n[ALEX_TEST] [BASE.py:GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] DEFAULT_BATCH_DATA: {default_batch_data} ; TYPE: {str(type(default_batch_data))}')
+        # TODO: <Alex>ALEX</Alex>
+
+    if len(config.validations) > 0:
+        validations_batch_data_list = []
+        print(f'\n[ALEX_TEST] [BASE.py:GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] INITIALIZED_VALIDATIONS_BATCH_DATA_LIST: {validations_batch_data_list} ; TYPE: {str(type(validations_batch_data_list))}')
+        for val in config["validations"]:
+            if (
+                val.get("batch_request") is not None
+                and val["batch_request"].get("runtime_parameters") is not None
+                and val["batch_request"]["runtime_parameters"].get("batch_data")
+                is not None
+            ):
+                validations_batch_data_list.append(
+                    # TODO: <Alex>ALEX</Alex>
+                    # TODO: <Alex>ALEX</Alex>
+                    val["batch_request"]["runtime_parameters"]["batch_data"]
+                )
+            else:
+                validations_batch_data_list.append(None)
+
+    print(f'\n[ALEX_TEST] [BASE.py:GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] RETURNING-DEFAULT_BATCH_DATA: {default_batch_data} ; TYPE: {str(type(default_batch_data))}')
+    print(f'\n[ALEX_TEST] [BASE.py:GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] RETURNING-VALIDATIONS_BATCH_DATA_LIST: {validations_batch_data_list} ; TYPE: {str(type(validations_batch_data_list))}')
+    return default_batch_data, validations_batch_data_list
+# TODO: <Alex>ALEX</Alex>
+
+
+# TODO: <Alex>ALEX</Alex>
+def delete_runtime_parameters_batch_data_references_from_config(config: CheckpointConfig):
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    if not isinstance(config, CheckpointConfig):
+        raise TypeError(
+            f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" (the type given is \
+"{str(type(config))}", which is illegal).
+"""
+        )
+
+    if (
+        config.batch_request is not None
+        and config.batch_request.get("runtime_parameters") is not None
+        and "batch_data" in config.batch_request["runtime_parameters"]
+    ):
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        config.batch_request["runtime_parameters"].pop("batch_data")
+        # TODO: <Alex>ALEX</Alex>
+
+    if len(config.validations) > 0:
+        for val in config["validations"]:
+            if (
+                val.get("batch_request") is not None
+                and val["batch_request"].get("runtime_parameters") is not None
+                and "batch_data" in val["batch_request"]["runtime_parameters"]
+                is not None
+            ):
+                val["batch_request"]["runtime_parameters"].pop("batch_data")
+# TODO: <Alex>ALEX</Alex>
+
+
+def restore_runtime_parameters_batch_data_references_into_config(config: Union[CheckpointConfig, dict], batch_data_references: Tuple[Optional[Any], Optional[List[Any]]]):
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    if not isinstance(config, (CheckpointConfig, dict)):
+        raise TypeError(
+            f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" or "dict" (the type given \
+is "{str(type(config))}", which is illegal).
+"""
+        )
+
+    default_batch_data: Optional[Any] = batch_data_references[0]
+    validations_batch_data_list: Optional[List[Any]] = batch_data_references[1]
+
+    if isinstance(config, dict):
+        if (
+            config["batch_request"] is not None
+            and config["batch_request"].get("runtime_parameters") is not None
+            and config["batch_request"]["runtime_parameters"].get("batch_data") is None
+            and default_batch_data is not None
+        ):
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            config["batch_request"]["runtime_parameters"]["batch_data"] = default_batch_data
+            # TODO: <Alex>ALEX</Alex>
+
+        if len(config["validations"]) > 0 and validations_batch_data_list is not None:
+            for idx, val in enumerate(config["validations"]):
+                if (
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data") is None
+                    and validations_batch_data_list[idx] is not None
+                ):
+                    val["batch_request"]["runtime_parameters"]["batch_data"] = validations_batch_data_list[idx]
+    else:
+        if (
+            config.batch_request is not None
+            and config.batch_request.get("runtime_parameters") is not None
+            and config.batch_request["runtime_parameters"].get("batch_data") is None
+            and default_batch_data is not None
+        ):
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            config.batch_request["runtime_parameters"]["batch_data"] = default_batch_data
+            # TODO: <Alex>ALEX</Alex>
+
+        if len(config.validations) > 0 and validations_batch_data_list is not None:
+            for idx, val in enumerate(config["validations"]):
+                if (
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data") is None
+                    and validations_batch_data_list[idx] is not None
+                ):
+                    val["batch_request"]["runtime_parameters"]["batch_data"] = validations_batch_data_list[idx]
+# TODO: <Alex>ALEX</Alex>
 
 
 dataContextConfigSchema = DataContextConfigSchema()

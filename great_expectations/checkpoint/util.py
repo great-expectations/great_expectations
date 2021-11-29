@@ -5,7 +5,9 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Optional
+# TODO: <Alex>ALEX</Alex>
+from typing import Optional, Any, List, Tuple, Union
+# TODO: <Alex>ALEX</Alex>
 
 import requests
 
@@ -310,3 +312,140 @@ def validate_validation_dict(validation_dict: dict):
         )
     if not validation_dict.get("action_list"):
         raise ge_exceptions.CheckpointError("validation action_list cannot be empty")
+
+
+# # TODO: <Alex>ALEX</Alex>
+# def get_runtime_parameters_batch_data_references_from_config(config: CheckpointConfig) -> Tuple[Optional[Any], Optional[List[Any]]]:
+#     # TODO: <Alex>ALEX</Alex>
+#     # TODO: <Alex>ALEX</Alex>
+#     if not isinstance(config, CheckpointConfig):
+#         raise TypeError(
+#             f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" (the type given is \
+# "{str(type(config))}", which is illegal).
+# """
+#         )
+#
+#     default_batch_data: Optional[Any] = None
+#     validations_batch_data_list: Optional[List[Any]] = None
+#
+#     if (
+#         config.batch_request is not None
+#         and config.batch_request.get("runtime_parameters") is not None
+#         and config.batch_request["runtime_parameters"].get("batch_data") is not None
+#         and default_batch_data is None
+#     ):
+#         # TODO: <Alex>ALEX</Alex>
+#         # TODO: <Alex>ALEX</Alex>
+#         default_batch_data = config.batch_request["runtime_parameters"]["batch_data"]
+#         # TODO: <Alex>ALEX</Alex>
+#
+#     if len(config.validations) > 0:
+#         validations_batch_data_list = []
+#         for val in config["validations"]:
+#             if (
+#                 val.get("batch_request") is not None
+#                 and val["batch_request"].get("runtime_parameters") is not None
+#                 and val["batch_request"]["runtime_parameters"].get("batch_data")
+#                 is not None
+#             ):
+#                 validations_batch_data_list.append(
+#                     # TODO: <Alex>ALEX</Alex>
+#                     # TODO: <Alex>ALEX</Alex>
+#                     val["batch_request"]["runtime_parameters"]["batch_data"]
+#                 )
+#             else:
+#                 validations_batch_data_list.append(None)
+#
+#     return default_batch_data, validations_batch_data_list
+# # TODO: <Alex>ALEX</Alex>
+#
+#
+# # TODO: <Alex>ALEX</Alex>
+# def delete_runtime_parameters_batch_data_references_from_config(config: CheckpointConfig):
+#     # TODO: <Alex>ALEX</Alex>
+#     # TODO: <Alex>ALEX</Alex>
+#     if not isinstance(config, CheckpointConfig):
+#         raise TypeError(
+#             f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" (the type given is \
+# "{str(type(config))}", which is illegal).
+# """
+#         )
+#
+#     if (
+#         config.batch_request is not None
+#         and config.batch_request.get("runtime_parameters") is not None
+#         and "batch_data" in config.batch_request["runtime_parameters"]
+#     ):
+#         # TODO: <Alex>ALEX</Alex>
+#         # TODO: <Alex>ALEX</Alex>
+#         config.batch_request["runtime_parameters"].pop("batch_data")
+#         # TODO: <Alex>ALEX</Alex>
+#
+#     if len(config.validations) > 0:
+#         for val in config["validations"]:
+#             if (
+#                 val.get("batch_request") is not None
+#                 and val["batch_request"].get("runtime_parameters") is not None
+#                 and "batch_data" in val["batch_request"]["runtime_parameters"]
+#                 is not None
+#             ):
+#                 val["batch_request"]["runtime_parameters"].pop("batch_data")
+# # TODO: <Alex>ALEX</Alex>
+#
+#
+# def restore_runtime_parameters_batch_data_references_into_config(config: Union[CheckpointConfig, dict], batch_data_references: Tuple[Optional[Any], Optional[List[Any]]]):
+#     # TODO: <Alex>ALEX</Alex>
+#     # TODO: <Alex>ALEX</Alex>
+#     if not isinstance(config, (CheckpointConfig, dict)):
+#         raise TypeError(
+#             f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" or "dict" (the type given \
+# is "{str(type(config))}", which is illegal).
+# """
+#         )
+#
+#     default_batch_data: Optional[Any] = batch_data_references[0]
+#     validations_batch_data_list: Optional[List[Any]] = batch_data_references[1]
+#
+#     if isinstance(config, dict):
+#         if (
+#             config["batch_request"] is not None
+#             and config["batch_request"].get("runtime_parameters") is not None
+#             and config["batch_request"]["runtime_parameters"].get("batch_data") is None
+#             and default_batch_data is not None
+#         ):
+#             # TODO: <Alex>ALEX</Alex>
+#             # TODO: <Alex>ALEX</Alex>
+#             config["batch_request"]["runtime_parameters"]["batch_data"] = default_batch_data
+#             # TODO: <Alex>ALEX</Alex>
+#
+#         if len(config["validations"]) > 0 and validations_batch_data_list is not None:
+#             for idx, val in enumerate(config["validations"]):
+#                 if (
+#                     val.get("batch_request") is not None
+#                     and val["batch_request"].get("runtime_parameters") is not None
+#                     and val["batch_request"]["runtime_parameters"].get("batch_data") is None
+#                     and validations_batch_data_list[idx] is not None
+#                 ):
+#                     val["batch_request"]["runtime_parameters"]["batch_data"] = validations_batch_data_list[idx]
+#     else:
+#         if (
+#             config.batch_request is not None
+#             and config.batch_request.get("runtime_parameters") is not None
+#             and config.batch_request["runtime_parameters"].get("batch_data") is None
+#             and default_batch_data is not None
+#         ):
+#             # TODO: <Alex>ALEX</Alex>
+#             # TODO: <Alex>ALEX</Alex>
+#             config.batch_request["runtime_parameters"]["batch_data"] = default_batch_data
+#             # TODO: <Alex>ALEX</Alex>
+#
+#         if len(config.validations) > 0 and validations_batch_data_list is not None:
+#             for idx, val in enumerate(config["validations"]):
+#                 if (
+#                     val.get("batch_request") is not None
+#                     and val["batch_request"].get("runtime_parameters") is not None
+#                     and val["batch_request"]["runtime_parameters"].get("batch_data") is None
+#                     and validations_batch_data_list[idx] is not None
+#                 ):
+#                     val["batch_request"]["runtime_parameters"]["batch_data"] = validations_batch_data_list[idx]
+# # TODO: <Alex>ALEX</Alex>
