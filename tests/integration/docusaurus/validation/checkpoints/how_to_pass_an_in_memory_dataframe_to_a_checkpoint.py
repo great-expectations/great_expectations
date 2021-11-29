@@ -64,6 +64,7 @@ validations:
       data_asset_name: taxi_data
     expectation_suite_name: my_expectation_suite
 """
+context.add_checkpoint(**yaml.load(checkpoint_yaml))
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
 
@@ -83,6 +84,7 @@ checkpoint_config = {
         }
     ],
 }
+context.add_checkpoint(**checkpoint_config)
 
 test_python = context.test_yaml_config(
     yaml.dump(checkpoint_config), return_mode="report_object"
@@ -90,14 +92,9 @@ test_python = context.test_yaml_config(
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert test_yaml == test_python
-
-context.add_checkpoint(**checkpoint_config)
-
-# NOTE: The following code is only for testing and can be ignored by users.
 assert context.list_checkpoints() == ["my_checkpoint"]
 
-path = "./data/yellow_tripdata_sample_2019-01.csv"
-df = pd.read_csv(path)
+df = pd.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
 
 results = context.run_checkpoint(
     checkpoint_name="my_checkpoint",
@@ -119,6 +116,7 @@ config_version: 1
 class_name: SimpleCheckpoint
 expectation_suite_name: my_expectation_suite
 """
+context.add_checkpoint(**yaml.load(checkpoint_yaml))
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
 
@@ -129,6 +127,7 @@ checkpoint_config = {
     "class_name": "SimpleCheckpoint",
     "expectation_suite_name": "my_expectation_suite",
 }
+context.add_checkpoint(**checkpoint_config)
 
 test_python = context.test_yaml_config(
     yaml.dump(checkpoint_config), return_mode="report_object"
@@ -136,16 +135,10 @@ test_python = context.test_yaml_config(
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert test_yaml == test_python
-
-context.add_checkpoint(**checkpoint_config)
-
-# NOTE: The following code is only for testing and can be ignored by users.
 assert context.list_checkpoints() == ["my_checkpoint"]
 
-path = "./data/yellow_tripdata_sample_2019-01.csv"
-df_1 = pd.read_csv(path)
-path = "./data/yellow_tripdata_sample_2019-02.csv"
-df_2 = pd.read_csv(path)
+df_1 = pd.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
+df_2 = pd.read_csv("./data/yellow_tripdata_sample_2019-02.csv")
 
 batch_request_1 = RuntimeBatchRequest(
     datasource_name="taxi_datasource",
