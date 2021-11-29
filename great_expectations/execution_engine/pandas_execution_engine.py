@@ -432,9 +432,7 @@ Please check your config."""
                 )
             else:
                 # Querying row condition
-                data = data.query(row_condition, parser=condition_parser).reset_index(
-                    drop=True
-                )
+                data = data.query(row_condition, parser=condition_parser)
 
         if "column" in domain_kwargs:
             return data
