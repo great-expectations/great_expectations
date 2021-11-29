@@ -3,6 +3,7 @@ title: Changelog
 ---
 
 ### Develop
+* [DOCS] How to pass an in-memory DataFrame to a Checkpoint (#3756)
 
 ### 0.13.44
 * [FEATURE] Add new result_format to include unexpected_row_list (#3346)
