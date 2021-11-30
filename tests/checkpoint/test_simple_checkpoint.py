@@ -812,7 +812,6 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
             runtime_kwargs=expected_runtime_kwargs
         )
     )
-    expected_runtime_kwargs.pop("template_name")
     assert filter_properties_dict(
         properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
     ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
