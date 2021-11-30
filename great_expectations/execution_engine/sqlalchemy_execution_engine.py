@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy as sa
 
-    make_url = import_make_url(sa)
+    make_url = import_make_url()
 except ImportError:
     sa = None
 
