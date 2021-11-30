@@ -361,8 +361,8 @@ is illegal.
     ):
         if not (runtime_parameters and (isinstance(runtime_parameters, dict))):
             raise TypeError(
-                f"""The type for runtime_parameters must be a dict object.
-                The type given is "{str(type(runtime_parameters))}", which is illegal."""
+                f"""The runtime_parameters must be a non-empty dict object.
+                The type given is "{str(type(runtime_parameters))}", which is an illegal type or an empty dictionary."""
             )
 
         if not (batch_identifiers and isinstance(batch_identifiers, dict)):
