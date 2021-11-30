@@ -19,7 +19,6 @@ from great_expectations.marshmallow__shade import (
     Schema,
     ValidationError,
     fields,
-    pre_dump,
     post_dump,
     post_load,
     validates_schema,
@@ -2076,6 +2075,8 @@ class CheckpointConfig(BaseYamlConfig):
                     other_action_list=other_config.action_list,
                 )
             if other_config.evaluation_parameters is not None:
+                # print(f'\n[ALEX_TEST] [] ORIGINAL_EVALUATION_PARAMETERS: {self.evaluation_parameters} ; TYPE: {str(type(self.evaluation_parameters))}')
+                # print(f'\n[ALEX_TEST] [] OTHER_CONFIG_EVALUATION_PARAMETERS: {other_config.evaluation_parameters} ; TYPE: {str(type(other_config.evaluation_parameters))}')
                 nested_update(
                     self.evaluation_parameters,
                     other_config.evaluation_parameters,
@@ -2093,8 +2094,12 @@ class CheckpointConfig(BaseYamlConfig):
                 )
             if other_config.profilers is not None:
                 self.profilers.extend(other_config.profilers)
+
         if runtime_kwargs is not None and any(runtime_kwargs.values()):
+            # print(f'\n[ALEX_TEST] [] RUNTIME_KWARGS.TEMPLATE_NAME: {runtime_kwargs["template_name"]} ; TYPE: {str(type(runtime_kwargs["template_name"]))}')
             # replace
+            if runtime_kwargs.get("template_name") is not None:
+                self.template_name = runtime_kwargs.get("template_name")
             if runtime_kwargs.get("run_name_template") is not None:
                 self.run_name_template = runtime_kwargs.get("run_name_template")
             if runtime_kwargs.get("expectation_suite_name") is not None:
@@ -2289,20 +2294,43 @@ class CheckpointConfig(BaseYamlConfig):
         base_action_list: list,
         other_action_list: list,
     ) -> List[dict]:
+        print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] BASE_ACTION_LIST: {base_action_list} ; TYPE: {str(type(base_action_list))}')
+        print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] OTHER_ACTION_LIST: {other_action_list} ; TYPE: {str(type(other_action_list))}')
         base_action_list_dict = {action["name"]: action for action in base_action_list}
+        print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] BASE_ACTION_LIST_DICT: {base_action_list_dict} ; TYPE: {str(type(base_action_list_dict))}')
+        # validated_other_action_list = []
+        # for other_action in other_action_list:
+        #     if other_action["action"]:
+        #         validated_other_action_list.append(other_action)
+
         for other_action in other_action_list:
             other_action_name = other_action["name"]
             if other_action_name in base_action_list_dict:
-                if other_action["action"] is None:
-                    base_action_list_dict.pop(other_action_name)
-                else:
+                if other_action["action"]:
                     nested_update(
                         base_action_list_dict[other_action_name],
                         other_action,
                         dedup=True,
                     )
+                else:
+                    print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] OTHER_ACTION-0: {other_action} ; TYPE: {str(type(other_action))}')
+                    base_action_list_dict.pop(other_action_name)
+                    print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] BASE_ACTION_LIST_DICT-0 WITH {other_action_name} POPPED: {base_action_list_dict} ; TYPE: {str(type(base_action_list_dict))}')
+            # TODO: <Alex>ALEX</Alex>
+            # elif not other_action["action"]:
+            #     print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] OTHER_ACTION-1: {other_action} ; TYPE: {str(type(other_action))}')
+            #     base_action_list_dict.pop(other_action_name)
+            #     print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] BASE_ACTION_LIST_DICT-1 WITH {other_action_name} POPPED: {base_action_list_dict} ; TYPE: {str(type(base_action_list_dict))}')
+            # TODO: <Alex>ALEX</Alex>
             else:
                 base_action_list_dict[other_action_name] = other_action
+
+        for other_action in other_action_list:
+            other_action_name = other_action["name"]
+            if other_action_name in base_action_list_dict:
+                if not other_action["action"]:
+                    base_action_list_dict.pop(other_action_name)
+        print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] RETURNING: {base_action_list_dict.values()} ; TYPE: {str(type(base_action_list_dict.values()))}')
         return list(base_action_list_dict.values())
 
     @property
@@ -2357,67 +2385,111 @@ class CheckpointValidationConfigSchema(Schema):
     pass
 
 
-def get_runtime_parameters_batch_data_references_from_config(config: CheckpointConfig) -> Tuple[Optional[Any], Optional[List[Any]]]:
-    if not isinstance(config, CheckpointConfig):
+def get_runtime_parameters_batch_data_references_from_config(config: Union[CheckpointConfig, dict]) -> Tuple[Optional[Any], Optional[List[Any]]]:
+    if not isinstance(config, (CheckpointConfig, dict)):
         raise TypeError(
-            f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" (the type given is \
-"{str(type(config))}", which is illegal).
+            f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" or "dict" (the type given \
+is "{str(type(config))}", which is illegal).
 """
         )
 
     default_batch_data: Optional[Any] = None
     validations_batch_data_list: Optional[List[Any]] = None
 
-    if (
-        config.batch_request is not None
-        and config.batch_request.get("runtime_parameters") is not None
-        and config.batch_request["runtime_parameters"].get("batch_data") is not None
-        and default_batch_data is None
-    ):
-        default_batch_data = config.batch_request["runtime_parameters"]["batch_data"]
+    if isinstance(config, dict):
+        if (
+            "batch_request" in config
+            and config["batch_request"] is not None
+            and config["batch_request"].get("runtime_parameters") is not None
+            and config["batch_request"]["runtime_parameters"].get("batch_data") is not None
+            and default_batch_data is None
+        ):
+            default_batch_data = config["batch_request"]["runtime_parameters"]["batch_data"]
 
-    if len(config.validations) > 0:
-        validations_batch_data_list = []
-        for val in config["validations"]:
-            if (
-                val.get("batch_request") is not None
-                and val["batch_request"].get("runtime_parameters") is not None
-                and val["batch_request"]["runtime_parameters"].get("batch_data")
-                is not None
-            ):
-                validations_batch_data_list.append(
-                    val["batch_request"]["runtime_parameters"]["batch_data"]
-                )
-            else:
-                validations_batch_data_list.append(None)
+        if config.get("validations"):
+            validations_batch_data_list = []
+            for val in config["validations"]:
+                if (
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data")
+                    is not None
+                ):
+                    validations_batch_data_list.append(
+                        val["batch_request"]["runtime_parameters"]["batch_data"]
+                    )
+                else:
+                    validations_batch_data_list.append(None)
+    else:
+        if (
+            config.batch_request is not None
+            and config.batch_request.get("runtime_parameters") is not None
+            and config.batch_request["runtime_parameters"].get("batch_data") is not None
+            and default_batch_data is None
+        ):
+            default_batch_data = config.batch_request["runtime_parameters"]["batch_data"]
+
+        if len(config.validations) > 0:
+            validations_batch_data_list = []
+            for val in config["validations"]:
+                if (
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data")
+                    is not None
+                ):
+                    validations_batch_data_list.append(
+                        val["batch_request"]["runtime_parameters"]["batch_data"]
+                    )
+                else:
+                    validations_batch_data_list.append(None)
 
     return default_batch_data, validations_batch_data_list
 
 
-def delete_runtime_parameters_batch_data_references_from_config(config: CheckpointConfig):
-    if not isinstance(config, CheckpointConfig):
+def delete_runtime_parameters_batch_data_references_from_config(config: Union[CheckpointConfig, dict]):
+    if not isinstance(config, (CheckpointConfig, dict)):
         raise TypeError(
-            f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" (the type given is \
-"{str(type(config))}", which is illegal).
+            f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" or "dict" (the type given \
+is "{str(type(config))}", which is illegal).
 """
         )
 
-    if (
-        config.batch_request is not None
-        and config.batch_request.get("runtime_parameters") is not None
-        and "batch_data" in config.batch_request["runtime_parameters"]
-    ):
-        config.batch_request["runtime_parameters"].pop("batch_data")
+    if isinstance(config, dict):
+        if (
+            "batch_request" in config
+            and config["batch_request"] is not None
+            and config["batch_request"].get("runtime_parameters") is not None
+            and "batch_data" in config["batch_request"]["runtime_parameters"]
+        ):
+            config["batch_request"]["runtime_parameters"].pop("batch_data")
 
-    if len(config.validations) > 0:
-        for val in config["validations"]:
-            if (
-                val.get("batch_request") is not None
-                and val["batch_request"].get("runtime_parameters") is not None
-                and "batch_data" in val["batch_request"]["runtime_parameters"]
-                is not None
-            ):
-                val["batch_request"]["runtime_parameters"].pop("batch_data")
+        if config.get("validations"):
+            for val in config["validations"]:
+                if (
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and "batch_data" in val["batch_request"]["runtime_parameters"]
+                    is not None
+                ):
+                    val["batch_request"]["runtime_parameters"].pop("batch_data")
+    else:
+        if (
+            config.batch_request is not None
+            and config.batch_request.get("runtime_parameters") is not None
+            and "batch_data" in config.batch_request["runtime_parameters"]
+        ):
+            config.batch_request["runtime_parameters"].pop("batch_data")
+
+        if len(config.validations) > 0:
+            for val in config["validations"]:
+                if (
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and "batch_data" in val["batch_request"]["runtime_parameters"]
+                    is not None
+                ):
+                    val["batch_request"]["runtime_parameters"].pop("batch_data")
 
 
 def restore_runtime_parameters_batch_data_references_into_config(config: Union[CheckpointConfig, dict], batch_data_references: Tuple[Optional[Any], Optional[List[Any]]], replace_value_with_type_string: bool = False):
@@ -2433,7 +2505,8 @@ is "{str(type(config))}", which is illegal).
 
     if isinstance(config, dict):
         if (
-            config["batch_request"] is not None
+            "batch_request" in config
+            and config["batch_request"] is not None
             and config["batch_request"].get("runtime_parameters") is not None
             and config["batch_request"]["runtime_parameters"].get("batch_data") is None
             and default_batch_data is not None
@@ -2443,7 +2516,7 @@ is "{str(type(config))}", which is illegal).
             else:
                 config["batch_request"]["runtime_parameters"]["batch_data"] = default_batch_data
 
-        if len(config["validations"]) > 0 and validations_batch_data_list is not None:
+        if config.get("validations") and validations_batch_data_list is not None:
             for idx, val in enumerate(config["validations"]):
                 if (
                     val.get("batch_request") is not None

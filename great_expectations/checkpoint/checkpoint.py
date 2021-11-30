@@ -135,18 +135,30 @@ class Checkpoint:
         if isinstance(config, dict):
             config = CheckpointConfig(**config)
 
+        print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] ORIGINAL_CONFIG:\n{config} ; TYPE: {str(type(config))}')
         if any(runtime_kwargs.values()):
+            print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] RUNTIME_KWARGS:\n{runtime_kwargs} ; TYPE: {str(type(runtime_kwargs))}')
             config.update(runtime_kwargs=runtime_kwargs)
+            # print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] RESULTING_CONFIG:\n{config} ; TYPE: {str(type(config))}')
+        print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] UPDATED_CONFIG:\n{config} ; TYPE: {str(type(config))}')
 
         substituted_config: Union[CheckpointConfig, dict]
 
         template_name = config.template_name
+        print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] TEMPLATE_NAME:\n{template_name} ; TYPE: {str(type(template_name))}')
         if not template_name:
+            print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] NO_TEMPLATE_NAME_GOING_ORDINARY_SUBSTITUTION:\n{template_name} ; TYPE: {str(type(template_name))}')
             substituted_config = copy.deepcopy(config)
+            # if any(runtime_kwargs.values()):
+            #     print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] RUNTIME_KWARGS:\n{runtime_kwargs} ; TYPE: {str(type(runtime_kwargs))}')
+            #     config.update(runtime_kwargs=runtime_kwargs)
+            #     print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] UPDATED_CONFIG:\n{config} ; TYPE: {str(type(config))}')
             self._substituted_config = substituted_config
         else:
+            print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] EXISTING_TEMPLATE_NAME_GOING_DEEPER:\n{template_name} ; TYPE: {str(type(template_name))}')
             checkpoint: Checkpoint = self.data_context.get_checkpoint(name=template_name)
             template_config: CheckpointConfig = checkpoint.config
+            print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] TEMPLATE_CONFIG[{template_name}]:\n{template_config} ; TYPE: {str(type(template_config))}')
 
             if template_config.config_version != config.config_version:
                 raise ge_exceptions.CheckpointError(
@@ -155,14 +167,28 @@ class Checkpoint:
                 )
 
             if template_config.template_name is not None:
+                print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] YET_ANOTHER_TEMPLATE-{template_config.template_name}-IN_EXISTING_TEMPLATE_NAME_GOING_RECURSIVE_NOW:\n{template_name} ; TYPE: {str(type(template_name))}')
                 substituted_config = self.get_substituted_config(config=template_config)
             else:
+                # TODO: <Alex>ALEX</Alex>
                 substituted_config = copy.deepcopy(template_config)
+                print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] SUBSTITUTED_CONFIG_COPY_OF_TEMPLATE_CONFIG[{template_name}]:\n{substituted_config} ; TYPE: {str(type(substituted_config))}')
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                # substituted_config = template_config
+                # TODO: <Alex>ALEX</Alex>
 
             # merge template with config
+            # TODO: <Alex>ALEX</Alex>
             substituted_config.update(
                 other_config=config, runtime_kwargs=runtime_kwargs
             )
+            # TODO: <Alex>ALEX</Alex>
+            # substituted_config.update(
+            #     other_config=config
+            # )
+            # TODO: <Alex>ALEX</Alex>
+            print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] SUBSTITUTED_CONFIG_GOT_UPDATED_WITH_RUNTIME_KWARGS:\n{substituted_config} ; TYPE: {str(type(substituted_config))}')
 
             # don't replace _substituted_config if already exists
             if self._substituted_config is None:
@@ -171,6 +197,7 @@ class Checkpoint:
         if self.data_context.ge_cloud_mode:
             return substituted_config
 
+        print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG] FINAL_SUBSTITUTED_CONFIG:\n{substituted_config} ; TYPE: {str(type(substituted_config))}')
         return self._substitute_config_variables(config=substituted_config)
 
     def _substitute_config_variables(

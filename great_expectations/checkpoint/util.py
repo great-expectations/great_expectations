@@ -5,9 +5,7 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-# TODO: <Alex>ALEX</Alex>
-from typing import Optional, Any, List, Tuple, Union
-# TODO: <Alex>ALEX</Alex>
+from typing import Optional
 
 import requests
 
