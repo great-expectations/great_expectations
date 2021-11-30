@@ -172,7 +172,11 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 content_block = cls._rendered_component_type(
                     **rendered_component_type_init_kwargs
                 )
-                cls._process_content_block(content_block, has_failed_evr=has_failed_evr)
+                cls._process_content_block(
+                    content_block,
+                    has_failed_evr=has_failed_evr,
+                    render_object=render_object,
+                )
 
                 return content_block
             else:
@@ -351,7 +355,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
 
     @classmethod
-    def _process_content_block(cls, content_block, has_failed_evr):
+    def _process_content_block(cls, content_block, has_failed_evr, render_object=None):
         header = cls._get_header()
         if header != "":
             content_block.header = header
