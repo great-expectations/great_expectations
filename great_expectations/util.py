@@ -1201,8 +1201,8 @@ def get_sqlalchemy_domain_data(domain_data):
     return domain_data
 
 
-def import_make_url(sqlalchemy):
-    if version.parse(sqlalchemy.__version__) < version.parse("1.4"):
+def import_make_url():
+    if version.parse(sa.__version__) < version.parse("1.4"):
         from sqlalchemy.engine.url import make_url
     else:
         from sqlalchemy.engine import make_url
