@@ -46,6 +46,11 @@ test_python = context.test_yaml_config(
     yaml.dump(datasource_config), return_mode="report_object"
 )
 
+# CLI
+datasource_cli = """
+great_expectations --v3-api datasource new
+"""
+
 # NOTE: The following code is only for testing and can be ignored by users.
 assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
