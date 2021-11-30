@@ -145,7 +145,9 @@ class Checkpoint:
             substituted_config = copy.deepcopy(config)
             self._substituted_config = substituted_config
         else:
-            checkpoint: Checkpoint = self.data_context.get_checkpoint(name=template_name)
+            checkpoint: Checkpoint = self.data_context.get_checkpoint(
+                name=template_name
+            )
             template_config: CheckpointConfig = checkpoint.config
 
             if template_config.config_version != config.config_version:

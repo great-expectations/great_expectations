@@ -1,11 +1,11 @@
+import copy
 import enum
-from uuid import UUID
 import itertools
 import json
 import logging
 import uuid
-import copy
-from typing import Any, Dict, List, MutableMapping, Optional, Union, Tuple
+from typing import Any, Dict, List, MutableMapping, Optional, Tuple, Union
+from uuid import UUID
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -1958,10 +1958,14 @@ class CheckpointConfigSchema(Schema):
         return data
 
     def dump(self, obj: Any, *, many: Optional[bool] = None) -> dict:
-        batch_data_references: Tuple[Optional[Any], Optional[List[Any]]] = get_runtime_parameters_batch_data_references_from_config(config=obj)
+        batch_data_references: Tuple[
+            Optional[Any], Optional[List[Any]]
+        ] = get_runtime_parameters_batch_data_references_from_config(config=obj)
         delete_runtime_parameters_batch_data_references_from_config(config=obj)
         data: dict = super().dump(obj=obj, many=many)
-        restore_runtime_parameters_batch_data_references_into_config(config=data, batch_data_references=batch_data_references)
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=data, batch_data_references=batch_data_references
+        )
         return data
 
 
@@ -2332,7 +2336,9 @@ class CheckpointConfig(BaseYamlConfig):
         self._runtime_configuration = value
 
     def __deepcopy__(self, memo):
-        batch_data_references: Tuple[Optional[Any], Optional[List[Any]]] = get_runtime_parameters_batch_data_references_from_config(config=self)
+        batch_data_references: Tuple[
+            Optional[Any], Optional[List[Any]]
+        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
         delete_runtime_parameters_batch_data_references_from_config(config=self)
 
         cls = self.__class__
@@ -2345,17 +2351,29 @@ class CheckpointConfig(BaseYamlConfig):
             value_copy = copy.deepcopy(value, memo)
             setattr(result, key, value_copy)
 
-        restore_runtime_parameters_batch_data_references_into_config(config=self, batch_data_references=batch_data_references)
-        restore_runtime_parameters_batch_data_references_into_config(config=result, batch_data_references=batch_data_references)
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=self, batch_data_references=batch_data_references
+        )
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=result, batch_data_references=batch_data_references
+        )
 
         return result
 
     def __repr__(self) -> str:
-        batch_data_references: Tuple[Optional[Any], Optional[List[Any]]] = get_runtime_parameters_batch_data_references_from_config(config=self)
+        batch_data_references: Tuple[
+            Optional[Any], Optional[List[Any]]
+        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
         delete_runtime_parameters_batch_data_references_from_config(config=self)
         config: dict = self.to_json_dict()
-        restore_runtime_parameters_batch_data_references_into_config(config=self, batch_data_references=batch_data_references)
-        restore_runtime_parameters_batch_data_references_into_config(config=config, batch_data_references=batch_data_references, replace_value_with_type_string=True)
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=self, batch_data_references=batch_data_references
+        )
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=config,
+            batch_data_references=batch_data_references,
+            replace_value_with_type_string=True,
+        )
         return json.dumps(config, indent=2)
 
 
@@ -2367,7 +2385,9 @@ class CheckpointValidationConfigSchema(Schema):
     pass
 
 
-def get_runtime_parameters_batch_data_references_from_config(config: Union[CheckpointConfig, dict]) -> Tuple[Optional[Any], Optional[List[Any]]]:
+def get_runtime_parameters_batch_data_references_from_config(
+    config: Union[CheckpointConfig, dict]
+) -> Tuple[Optional[Any], Optional[List[Any]]]:
     if not isinstance(config, (CheckpointConfig, dict)):
         raise TypeError(
             f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" or "dict" (the type given \
@@ -2383,10 +2403,13 @@ is "{str(type(config))}", which is illegal).
             "batch_request" in config
             and config["batch_request"] is not None
             and config["batch_request"].get("runtime_parameters") is not None
-            and config["batch_request"]["runtime_parameters"].get("batch_data") is not None
+            and config["batch_request"]["runtime_parameters"].get("batch_data")
+            is not None
             and default_batch_data is None
         ):
-            default_batch_data = config["batch_request"]["runtime_parameters"]["batch_data"]
+            default_batch_data = config["batch_request"]["runtime_parameters"][
+                "batch_data"
+            ]
 
         if config.get("validations"):
             validations_batch_data_list = []
@@ -2409,7 +2432,9 @@ is "{str(type(config))}", which is illegal).
             and config.batch_request["runtime_parameters"].get("batch_data") is not None
             and default_batch_data is None
         ):
-            default_batch_data = config.batch_request["runtime_parameters"]["batch_data"]
+            default_batch_data = config.batch_request["runtime_parameters"][
+                "batch_data"
+            ]
 
         if len(config.validations) > 0:
             validations_batch_data_list = []
@@ -2429,7 +2454,9 @@ is "{str(type(config))}", which is illegal).
     return default_batch_data, validations_batch_data_list
 
 
-def delete_runtime_parameters_batch_data_references_from_config(config: Union[CheckpointConfig, dict]):
+def delete_runtime_parameters_batch_data_references_from_config(
+    config: Union[CheckpointConfig, dict]
+):
     if not isinstance(config, (CheckpointConfig, dict)):
         raise TypeError(
             f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" or "dict" (the type given \
@@ -2451,7 +2478,8 @@ is "{str(type(config))}", which is illegal).
                 if (
                     val.get("batch_request") is not None
                     and val["batch_request"].get("runtime_parameters") is not None
-                    and "batch_data" in val["batch_request"]["runtime_parameters"]
+                    and "batch_data"
+                    in val["batch_request"]["runtime_parameters"]
                     is not None
                 ):
                     val["batch_request"]["runtime_parameters"].pop("batch_data")
@@ -2468,13 +2496,18 @@ is "{str(type(config))}", which is illegal).
                 if (
                     val.get("batch_request") is not None
                     and val["batch_request"].get("runtime_parameters") is not None
-                    and "batch_data" in val["batch_request"]["runtime_parameters"]
+                    and "batch_data"
+                    in val["batch_request"]["runtime_parameters"]
                     is not None
                 ):
                     val["batch_request"]["runtime_parameters"].pop("batch_data")
 
 
-def restore_runtime_parameters_batch_data_references_into_config(config: Union[CheckpointConfig, dict], batch_data_references: Tuple[Optional[Any], Optional[List[Any]]], replace_value_with_type_string: bool = False):
+def restore_runtime_parameters_batch_data_references_into_config(
+    config: Union[CheckpointConfig, dict],
+    batch_data_references: Tuple[Optional[Any], Optional[List[Any]]],
+    replace_value_with_type_string: bool = False,
+):
     if not isinstance(config, (CheckpointConfig, dict)):
         raise TypeError(
             f"""The Checkpoint configuraiton argument must have the type "CheckpointConfig" or "dict" (the type given \
@@ -2494,22 +2527,31 @@ is "{str(type(config))}", which is illegal).
             and default_batch_data is not None
         ):
             if replace_value_with_type_string:
-                config["batch_request"]["runtime_parameters"]["batch_data"] = str(type(default_batch_data))
+                config["batch_request"]["runtime_parameters"]["batch_data"] = str(
+                    type(default_batch_data)
+                )
             else:
-                config["batch_request"]["runtime_parameters"]["batch_data"] = default_batch_data
+                config["batch_request"]["runtime_parameters"][
+                    "batch_data"
+                ] = default_batch_data
 
         if config.get("validations") and validations_batch_data_list is not None:
             for idx, val in enumerate(config["validations"]):
                 if (
                     val.get("batch_request") is not None
                     and val["batch_request"].get("runtime_parameters") is not None
-                    and val["batch_request"]["runtime_parameters"].get("batch_data") is None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data")
+                    is None
                     and validations_batch_data_list[idx] is not None
                 ):
                     if replace_value_with_type_string:
-                        val["batch_request"]["runtime_parameters"]["batch_data"] = str(type(validations_batch_data_list[idx]))
+                        val["batch_request"]["runtime_parameters"]["batch_data"] = str(
+                            type(validations_batch_data_list[idx])
+                        )
                     else:
-                        val["batch_request"]["runtime_parameters"]["batch_data"] = validations_batch_data_list[idx]
+                        val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ] = validations_batch_data_list[idx]
     else:
         if (
             config.batch_request is not None
@@ -2517,25 +2559,38 @@ is "{str(type(config))}", which is illegal).
             and config.batch_request["runtime_parameters"].get("batch_data") is None
             and default_batch_data is not None
         ):
-            config.batch_request["runtime_parameters"]["batch_data"] = default_batch_data
+            config.batch_request["runtime_parameters"][
+                "batch_data"
+            ] = default_batch_data
             if replace_value_with_type_string:
-                config.batch_request["runtime_parameters"]["batch_data"] = str(type(default_batch_data))
+                config.batch_request["runtime_parameters"]["batch_data"] = str(
+                    type(default_batch_data)
+                )
             else:
-                config.batch_request["runtime_parameters"]["batch_data"] = default_batch_data
+                config.batch_request["runtime_parameters"][
+                    "batch_data"
+                ] = default_batch_data
 
         if len(config.validations) > 0 and validations_batch_data_list is not None:
             for idx, val in enumerate(config["validations"]):
                 if (
                     val.get("batch_request") is not None
                     and val["batch_request"].get("runtime_parameters") is not None
-                    and val["batch_request"]["runtime_parameters"].get("batch_data") is None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data")
+                    is None
                     and validations_batch_data_list[idx] is not None
                 ):
-                    val["batch_request"]["runtime_parameters"]["batch_data"] = validations_batch_data_list[idx]
+                    val["batch_request"]["runtime_parameters"][
+                        "batch_data"
+                    ] = validations_batch_data_list[idx]
                     if replace_value_with_type_string:
-                        val["batch_request"]["runtime_parameters"]["batch_data"] = str(type(validations_batch_data_list[idx]))
+                        val["batch_request"]["runtime_parameters"]["batch_data"] = str(
+                            type(validations_batch_data_list[idx])
+                        )
                     else:
-                        val["batch_request"]["runtime_parameters"]["batch_data"] = validations_batch_data_list[idx]
+                        val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ] = validations_batch_data_list[idx]
 
 
 dataContextConfigSchema = DataContextConfigSchema()

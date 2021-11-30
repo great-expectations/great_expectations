@@ -1,6 +1,6 @@
 import json
 from copy import deepcopy
-from typing import Dict, List, Union, Optional, Any, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -10,8 +10,8 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointConfigSchema,
-    get_runtime_parameters_batch_data_references_from_config,
     delete_runtime_parameters_batch_data_references_from_config,
+    get_runtime_parameters_batch_data_references_from_config,
     restore_runtime_parameters_batch_data_references_into_config,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -291,9 +291,19 @@ class CheckpointResult(DictDot):
 
     def __repr__(self):
         serializeable_dict: dict = self.to_json_dict()
-        batch_data_references: Tuple[Optional[Any], Optional[List[Any]]] = get_runtime_parameters_batch_data_references_from_config(config=serializeable_dict["checkpoint_config"])
-        delete_runtime_parameters_batch_data_references_from_config(config=serializeable_dict["checkpoint_config"])
-        restore_runtime_parameters_batch_data_references_into_config(config=serializeable_dict["checkpoint_config"], batch_data_references=batch_data_references, replace_value_with_type_string=True)
+        batch_data_references: Tuple[
+            Optional[Any], Optional[List[Any]]
+        ] = get_runtime_parameters_batch_data_references_from_config(
+            config=serializeable_dict["checkpoint_config"]
+        )
+        delete_runtime_parameters_batch_data_references_from_config(
+            config=serializeable_dict["checkpoint_config"]
+        )
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=serializeable_dict["checkpoint_config"],
+            batch_data_references=batch_data_references,
+            replace_value_with_type_string=True,
+        )
         return json.dumps(serializeable_dict, indent=2)
 
 
