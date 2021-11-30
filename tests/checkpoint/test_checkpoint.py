@@ -2429,7 +2429,6 @@ def test_newstyle_checkpoint_config_substitution_nested(
         )
     )
 
-    print(f'\n[ALEX_TEST] [****************************************STARTING_MAIN_SUBSTITUTION_TEST****************************] NESTED_CHECKPOINT.ORIGINAL_CONFIG: {nested_checkpoint.config} ; TYPE: {str(type(nested_checkpoint.config))}')
     substituted_config_template_and_runtime_kwargs = nested_checkpoint.get_substituted_config(
         runtime_kwargs={
             "expectation_suite_name": "runtime_suite_name",
@@ -2491,12 +2490,6 @@ def test_newstyle_checkpoint_config_substitution_nested(
             },
         }
     )
-    print(f'\n[ALEX_TEST] [****************************************FINISHED_MAIN_SUBSTITUTION_TEST****************************]')
-    # TODO: <Alex>ALEX</Alex>
-    import json
-    # TODO: <Alex>ALEX</Alex>
-    print(f'\n[ALEX_TEST] [] substituted_config_template_and_runtime_kwargs:\n{json.dumps(substituted_config_template_and_runtime_kwargs.to_json_dict(), indent=2)} ; TYPE: {str(type(substituted_config_template_and_runtime_kwargs.to_json_dict()))}')
-    print(f'\n[ALEX_TEST] [] expected_substituted_checkpoint_config_template_and_runtime_kwargs:\n{json.dumps(expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict(), indent=2)} ; TYPE: {str(type(expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict()))}')
     assert (
         substituted_config_template_and_runtime_kwargs.to_json_dict()
         == expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict()

@@ -291,7 +291,6 @@ class CheckpointResult(DictDot):
 
     def __repr__(self):
         serializeable_dict: dict = self.to_json_dict()
-        print(f'\n[ALEX_TEST] [CHECKPOINT_RESULT.__REPR__] SERIALIZABLE_DICT: {serializeable_dict} ; TYPE: {str(type(serializeable_dict))}')
         batch_data_references: Tuple[Optional[Any], Optional[List[Any]]] = get_runtime_parameters_batch_data_references_from_config(config=serializeable_dict["checkpoint_config"])
         delete_runtime_parameters_batch_data_references_from_config(config=serializeable_dict["checkpoint_config"])
         restore_runtime_parameters_batch_data_references_into_config(config=serializeable_dict["checkpoint_config"], batch_data_references=batch_data_references, replace_value_with_type_string=True)

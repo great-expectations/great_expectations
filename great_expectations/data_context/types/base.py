@@ -2075,8 +2075,6 @@ class CheckpointConfig(BaseYamlConfig):
                     other_action_list=other_config.action_list,
                 )
             if other_config.evaluation_parameters is not None:
-                # print(f'\n[ALEX_TEST] [] ORIGINAL_EVALUATION_PARAMETERS: {self.evaluation_parameters} ; TYPE: {str(type(self.evaluation_parameters))}')
-                # print(f'\n[ALEX_TEST] [] OTHER_CONFIG_EVALUATION_PARAMETERS: {other_config.evaluation_parameters} ; TYPE: {str(type(other_config.evaluation_parameters))}')
                 nested_update(
                     self.evaluation_parameters,
                     other_config.evaluation_parameters,
@@ -2096,7 +2094,6 @@ class CheckpointConfig(BaseYamlConfig):
                 self.profilers.extend(other_config.profilers)
 
         if runtime_kwargs is not None and any(runtime_kwargs.values()):
-            # print(f'\n[ALEX_TEST] [] RUNTIME_KWARGS.TEMPLATE_NAME: {runtime_kwargs["template_name"]} ; TYPE: {str(type(runtime_kwargs["template_name"]))}')
             # replace
             if runtime_kwargs.get("template_name") is not None:
                 self.template_name = runtime_kwargs.get("template_name")
@@ -2294,14 +2291,7 @@ class CheckpointConfig(BaseYamlConfig):
         base_action_list: list,
         other_action_list: list,
     ) -> List[dict]:
-        print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] BASE_ACTION_LIST: {base_action_list} ; TYPE: {str(type(base_action_list))}')
-        print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] OTHER_ACTION_LIST: {other_action_list} ; TYPE: {str(type(other_action_list))}')
         base_action_list_dict = {action["name"]: action for action in base_action_list}
-        print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] BASE_ACTION_LIST_DICT: {base_action_list_dict} ; TYPE: {str(type(base_action_list_dict))}')
-        # validated_other_action_list = []
-        # for other_action in other_action_list:
-        #     if other_action["action"]:
-        #         validated_other_action_list.append(other_action)
 
         for other_action in other_action_list:
             other_action_name = other_action["name"]
@@ -2313,15 +2303,7 @@ class CheckpointConfig(BaseYamlConfig):
                         dedup=True,
                     )
                 else:
-                    print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] OTHER_ACTION-0: {other_action} ; TYPE: {str(type(other_action))}')
                     base_action_list_dict.pop(other_action_name)
-                    print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] BASE_ACTION_LIST_DICT-0 WITH {other_action_name} POPPED: {base_action_list_dict} ; TYPE: {str(type(base_action_list_dict))}')
-            # TODO: <Alex>ALEX</Alex>
-            # elif not other_action["action"]:
-            #     print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] OTHER_ACTION-1: {other_action} ; TYPE: {str(type(other_action))}')
-            #     base_action_list_dict.pop(other_action_name)
-            #     print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] BASE_ACTION_LIST_DICT-1 WITH {other_action_name} POPPED: {base_action_list_dict} ; TYPE: {str(type(base_action_list_dict))}')
-            # TODO: <Alex>ALEX</Alex>
             else:
                 base_action_list_dict[other_action_name] = other_action
 
@@ -2330,7 +2312,7 @@ class CheckpointConfig(BaseYamlConfig):
             if other_action_name in base_action_list_dict:
                 if not other_action["action"]:
                     base_action_list_dict.pop(other_action_name)
-        print(f'\n[ALEX_TEST] [UPDATING_ACTION_LIST] RETURNING: {base_action_list_dict.values()} ; TYPE: {str(type(base_action_list_dict.values()))}')
+
         return list(base_action_list_dict.values())
 
     @property
