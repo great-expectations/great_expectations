@@ -12,11 +12,7 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
 from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
-from great_expectations.core.batch import (
-    BatchRequest,
-    RuntimeBatchRequest,
-    get_batch_request_dict,
-)
+from great_expectations.core.batch import BatchRequest, get_batch_request_dict
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -214,9 +210,9 @@ class Checkpoint:
                 substituted_runtime_config=substituted_runtime_config,
                 validation_dict=validation_dict,
             )
-            batch_request: Union[
-                BatchRequest, RuntimeBatchRequest
-            ] = substituted_validation_dict.get("batch_request")
+            batch_request: BatchRequest = substituted_validation_dict.get(
+                "batch_request"
+            )
             expectation_suite_name: str = substituted_validation_dict.get(
                 "expectation_suite_name"
             )
@@ -331,13 +327,13 @@ class Checkpoint:
             "template_name": template_name,
             "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
             "batch_request": batch_request,
             "action_list": action_list,
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,
             "validations": validations,
             "profilers": profilers,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
         substituted_runtime_config: CheckpointConfig = self.get_substituted_config(
             runtime_kwargs=runtime_kwargs
