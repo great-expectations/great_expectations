@@ -18,12 +18,23 @@ This is especially useful if you already have your data in memory due to an exis
 
 ## Steps
 
-### 1. Import the required libraries and load your DataContext
+## 1. Setting up Great Expectations
+### Import the required libraries and load your DataContext
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L1-L7
+
+
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L1-L5
 ```
 
-### 2. Ensure your DataContext contains a Datasource with a RuntimeDataConnector
+If you have an existing configured DataContext in your filesystem in the form of a `great_expectations.yml` file, you can load it like this:
+
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L7
+```
+
+If you do not have a filesystem to work with, you can load your DataContext following the instructions in [How to instantiate a Data Context without a yml file](../../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md).
+
+## 2. Connecting to your data
+### Ensure your DataContext contains a Datasource with a RuntimeDataConnector
 
 In order to pass in a DataFrame at runtime, your `great_expectations.yml` should contain a Datasource configured with a `RuntimeDataConnector`. If it does not, you can add a new Datasource using the code below:
 
@@ -57,7 +68,8 @@ After running the CLI command above, choose option 1 for "Files on a filesystem.
 </TabItem>
 </Tabs>
 
-### 3. Create a Checkpoint and pass it the DataFrame at runtime
+## 3. Creating Expectations and validating your data
+### Create a Checkpoint and pass it the DataFrame at runtime
 
 You will need an Expectation Suite to validate your data against. If you have not already created an Expectation Suite for your in-memory DataFrame, reference [How to create and edit Expectations with instant feedback from a sample Batch of data](../../expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) to create your suite.
 
@@ -134,7 +146,7 @@ df_1 = pd.read_csv("<PATH TO DATA 1>")
 df_2 = pd.read_csv("<PATH TO DATA 2>")
 ```
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L148-L170
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L149-L171
 ```
 
 ### Additional Notes
