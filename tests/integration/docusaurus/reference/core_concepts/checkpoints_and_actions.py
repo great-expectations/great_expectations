@@ -64,7 +64,12 @@ context.add_checkpoint(**yaml.load(checkpoint_yaml))
 assert context.list_checkpoints() == ["my_checkpoint"]
 
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
-assert type(results.run_id) == RunIdentifier
-assert set(type(k) for k in results.run_results.keys()) == {ValidationResultIdentifier}
+run_id_type = type(results.run_id)
+assert run_id_type == RunIdentifier
+validation_result_id_type = set(type(k) for k in results.run_results.keys())
+assert len(validation_result_id_type) == 1
+assert next(iter(validation_result_id_type)) == ValidationResultIdentifier
+print(results.run_results)
+assert results.run_results
 assert type(results.checkpoint_config) == CheckpointConfig
 assert results.success == True
