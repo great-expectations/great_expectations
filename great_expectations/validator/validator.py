@@ -27,7 +27,6 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
-from great_expectations.data_context import BaseDataContext
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.exceptions import (
@@ -127,7 +126,9 @@ class Validator:
         interactive_evaluation: bool = True,
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
-        data_context: Optional[BaseDataContext] = None,
+        data_context: Optional[
+            Any
+        ] = None,  # Cannot type DataContext due to circular import
         batches: Optional[List[Batch]] = None,
         **kwargs,
     ):
@@ -139,7 +140,7 @@ class Validator:
         :param interactive_evaluation (bool):
         :param expectation_suite (Optional[ExpectationSuite]):
         :param expectation_suite_name (Optional[str]):
-        :param data_context (Optional[BaseDataContext]):
+        :param data_context (Optional[DataContext]):
         :param batches (Optional[List[Batch]]):
 
         """
@@ -1171,7 +1172,9 @@ set as active.
         self,
         expectation_suite=None,
         run_id=None,
-        data_context: Optional[BaseDataContext] = None,
+        data_context: Optional[
+            Any
+        ] = None,  # Cannot type DataContext due to circular import
         evaluation_parameters: Optional[dict] = None,
         catch_exceptions: bool = True,
         result_format: Optional[str] = None,
