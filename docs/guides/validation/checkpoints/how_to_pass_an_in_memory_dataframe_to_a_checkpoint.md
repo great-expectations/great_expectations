@@ -68,7 +68,7 @@ For the purposes of this example, we have created an empty suite named `my_expec
 
 
 
-#### Example 1: Pass only the complementary keys at runtime 
+#### Example 1: Pass only the batch_request's missing keys at runtime 
 
 If we configure a `SimpleCheckpoint` that contains a single `batch_request` in `validations`:
 
