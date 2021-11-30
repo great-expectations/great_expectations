@@ -1,5 +1,6 @@
 import logging
 from hashlib import md5
+from typing import Optional
 
 from great_expectations.util import load_class
 
@@ -35,10 +36,12 @@ class Anonymizer:
         object_=None,
         object_class=None,
         object_config=None,
-    ):
+    ) -> dict:
         assert (
             object_ or object_class or object_config
         ), "Must pass either object_ or object_class or object_config."
+
+        object_class_name: Optional[str] = None
         try:
             if object_class is None and object_ is not None:
                 object_class = object_.__class__
@@ -67,3 +70,36 @@ class Anonymizer:
             anonymized_info_dict["anonymized_class"] = self.anonymize(object_class_name)
 
         return anonymized_info_dict
+
+    @staticmethod
+    def _is_parent_class_recognized(
+        classes_to_check,
+        object_=None,
+        object_class=None,
+        object_config=None,
+    ) -> Optional[str]:
+        """
+        Check if the parent class is a subclass of any core GE class.
+        This private method is intended to be used by anonymizers in a public `is_parent_class_recognized()` method. These anonymizers define and provide the core GE classes_to_check.
+        Returns:
+            The name of the parent class found, or None if no parent class was found
+        """
+        assert (
+            object_ or object_class or object_config
+        ), "Must pass either object_ or object_class or object_config."
+        try:
+            if object_class is None and object_ is not None:
+                object_class = object_.__class__
+            elif object_class is None and object_config is not None:
+                object_class_name = object_config.get("class_name")
+                object_module_name = object_config.get("module_name")
+                object_class = load_class(object_class_name, object_module_name)
+
+            for class_to_check in classes_to_check:
+                if issubclass(object_class, class_to_check):
+                    return class_to_check.__name__
+
+            return None
+
+        except AttributeError:
+            return None

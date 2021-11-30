@@ -14,7 +14,7 @@ This is useful if you wish to have a fully portable Great Expectations runtime t
 Steps
 -----
 
-#. First, choose which image you'd like to use by browsing the offical `Great Expectations Docker image registry <https://hub.docker.com/r/greatexpectations/great_expectations/tags>`_.
+#. First, choose which image you'd like to use by browsing the official `Great Expectations Docker image registry <https://hub.docker.com/r/greatexpectations/great_expectations/tags>`_.
    **Note**: We do not use the `:latest` tag, so you will need to specify an exact tag.
 
 #. Pull the Docker image down, e.g.:

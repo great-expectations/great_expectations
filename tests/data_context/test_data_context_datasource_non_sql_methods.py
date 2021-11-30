@@ -316,3 +316,300 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         "name": "Test",
         "year": "2010",
     }
+
+
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter(
+    empty_data_context, tmp_path_factory
+):
+    context = empty_data_context
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter"
+        )
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "Test_1998.csv",
+            "Test_1999.csv",
+            "Test_2000.csv",
+            "Test_2010.csv",
+            "Test_2021.csv",
+        ],
+        file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
+    )
+
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+
+    execution_engine:
+        class_name: PandasExecutionEngine
+
+    data_connectors:
+        my_data_connector:
+            class_name: ConfiguredAssetFilesystemDataConnector
+            base_directory: {base_directory}
+            glob_directive: "*.csv"
+
+            default_regex:
+                pattern: (.+)_(\\d.*)\\.csv
+                group_names:
+                    - name
+                    - year
+            sorters:
+                - orderby: desc
+                  class_name: NumericSorter
+                  name: year
+            assets:
+                YearTest:
+                    base_directory: {base_directory}
+                    pattern: (.+)_(\\d.*)\\.csv
+                    group_names:
+                        - name
+                        - year
+
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+
+    # only select files from 1999 or later
+    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
+        return int(batch_identifiers["year"]) >= 1999
+
+    # Use an instantiated BatchRequest object with custom filter AND limit
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="my_data_connector",
+        data_asset_name="YearTest",
+        data_connector_query={"custom_filter_function": my_custom_batch_selector},
+        limit=2,
+    )
+
+    batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+    assert len(batch_list) == 2
+
+    # first batch
+    batch: Batch = batch_list[0]
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "YearTest"
+    assert batch.batch_definition["batch_identifiers"] == {
+        "name": "Test",
+        "year": "2021",
+    }
+
+    # second batch
+    batch: Batch = batch_list[1]
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "YearTest"
+    assert batch.batch_definition["batch_identifiers"] == {
+        "name": "Test",
+        "year": "2010",
+    }
+
+
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter_limit_param_ignored(
+    empty_data_context, tmp_path_factory
+):
+    """
+    What does this test and why?
+    This test mirrors other tests in this file but the key difference is that it tests whether a limit parameter passed in as a part of the data_connector_query overrides a limit passed in as a parameter to the BatchRequest.
+    """
+    context = empty_data_context
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_and_custom_filter"
+        )
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "Test_1998.csv",
+            "Test_1999.csv",
+            "Test_2000.csv",
+            "Test_2010.csv",
+            "Test_2021.csv",
+        ],
+        file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
+    )
+
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+
+    execution_engine:
+        class_name: PandasExecutionEngine
+
+    data_connectors:
+        my_data_connector:
+            class_name: ConfiguredAssetFilesystemDataConnector
+            base_directory: {base_directory}
+            glob_directive: "*.csv"
+
+            default_regex:
+                pattern: (.+)_(\\d.*)\\.csv
+                group_names:
+                    - name
+                    - year
+            sorters:
+                - orderby: desc
+                  class_name: NumericSorter
+                  name: year
+            assets:
+                YearTest:
+                    base_directory: {base_directory}
+                    pattern: (.+)_(\\d.*)\\.csv
+                    group_names:
+                        - name
+                        - year
+
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+
+    # only select files from 1999 or later
+    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
+        return int(batch_identifiers["year"]) >= 1999
+
+    # Use an instantiated BatchRequest object with custom filter AND limit
+    # limit in data_connector_query should override the limit in the constructor
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="my_data_connector",
+        data_asset_name="YearTest",
+        data_connector_query={
+            "custom_filter_function": my_custom_batch_selector,
+            "limit": 3,
+        },
+        limit=2,
+    )
+
+    batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+    assert len(batch_list) == 3
+
+    # first batch
+    batch: Batch = batch_list[0]
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "YearTest"
+    assert batch.batch_definition["batch_identifiers"] == {
+        "name": "Test",
+        "year": "2021",
+    }
+
+    # second batch
+    batch: Batch = batch_list[1]
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "YearTest"
+    assert batch.batch_definition["batch_identifiers"] == {
+        "name": "Test",
+        "year": "2010",
+    }
+    # third batch
+    batch: Batch = batch_list[2]
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "YearTest"
+    assert batch.batch_definition["batch_identifiers"] == {
+        "name": "Test",
+        "year": "2000",
+    }
+
+
+def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_in_get_batch_list_with_batch_request(
+    empty_data_context, tmp_path_factory
+):
+    context = empty_data_context
+    base_directory = str(
+        tmp_path_factory.mktemp(
+            "test_get_batch_list_from_new_style_datasource_with_file_system_datasource_configured_assets_testing_limit_in_get_batch_list_with_batch_request"
+        )
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "Test_1998.csv",
+            "Test_1999.csv",
+            "Test_2000.csv",
+            "Test_2010.csv",
+            "Test_2021.csv",
+        ],
+        file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
+    )
+
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+
+    execution_engine:
+        class_name: PandasExecutionEngine
+
+    data_connectors:
+        my_data_connector:
+            class_name: ConfiguredAssetFilesystemDataConnector
+            base_directory: {base_directory}
+            glob_directive: "*.csv"
+
+            default_regex:
+                pattern: (.+)_(\\d.*)\\.csv
+                group_names:
+                    - name
+                    - year
+            sorters:
+                - orderby: desc
+                  class_name: NumericSorter
+                  name: year
+            assets:
+                YearTest:
+                    base_directory: {base_directory}
+                    pattern: (.+)_(\\d.*)\\.csv
+                    group_names:
+                        - name
+                        - year
+
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+
+    # only select files from 1999 or later
+    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
+        return int(batch_identifiers["year"]) >= 1999
+
+    # Use an instantiated BatchRequest object with custom filter
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="my_data_connector",
+        data_asset_name="YearTest",
+        data_connector_query={"custom_filter_function": my_custom_batch_selector},
+    )
+
+    # Add the limit here in the call to get_batch_list instead of in the BatchRequest. The limit is ignored since we passed a BatchRequest via batch_request
+    batch_list: List[Batch] = context.get_batch_list(
+        batch_request=batch_request, limit=2
+    )
+    assert len(batch_list) == 4
+
+    # first batch
+    batch: Batch = batch_list[0]
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "YearTest"
+    assert batch.batch_definition["batch_identifiers"] == {
+        "name": "Test",
+        "year": "2021",
+    }
+
+    # second batch
+    batch: Batch = batch_list[1]
+    assert batch.batch_spec is not None
+    assert batch.batch_definition["data_asset_name"] == "YearTest"
+    assert batch.batch_definition["batch_identifiers"] == {
+        "name": "Test",
+        "year": "2010",
+    }

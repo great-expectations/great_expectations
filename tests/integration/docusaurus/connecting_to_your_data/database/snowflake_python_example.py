@@ -1,7 +1,6 @@
 import os
 
 from ruamel import yaml
-from util import load_data_into_database
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -13,16 +12,9 @@ sfDatabase = os.environ.get("SNOWFLAKE_DATABASE")
 sfSchema = os.environ.get("SNOWFLAKE_SCHEMA")
 sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
 
-
 CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
-load_data_into_database(
-    table_name="taxi_data",
-    csv_path="./data/yellow_trip_data_sample_2019-01.csv",
-    connection_string=CONNECTION_STRING,
-)
 
 context = ge.get_context()
-
 
 datasource_config = {
     "name": "my_snowflake_datasource",
@@ -57,7 +49,7 @@ batch_request = RuntimeBatchRequest(
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
-    batch_identifiers={"default_identifier_name": "something_something"},
+    batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
 context.create_expectation_suite(
@@ -93,4 +85,4 @@ assert "taxi_data" in set(
         "default_inferred_data_connector_name"
     ]
 )
-validator.execution_engine.engine.close()
+validator.execution_engine.close()

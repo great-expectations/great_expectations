@@ -9,8 +9,10 @@ from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
     SiteSectionIdentifier,
 )
+from great_expectations.data_context.store.json_site_store import JsonSiteStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -114,12 +116,14 @@ class SiteBuilder:
         show_how_to_buttons=True,
         site_section_builders=None,
         runtime_environment=None,
+        ge_cloud_mode=False,
         **kwargs,
     ):
         self.site_name = site_name
         self.data_context = data_context
         self.store_backend = store_backend
         self.show_how_to_buttons = show_how_to_buttons
+        self.ge_cloud_mode = ge_cloud_mode
 
         usage_statistics_config = data_context.anonymous_usage_statistics
         data_context_id = None
@@ -158,9 +162,14 @@ class SiteBuilder:
         # three types of backends using the base
         # type of the configuration defined in the store_backend section
 
-        self.target_store = HtmlSiteStore(
-            store_backend=store_backend, runtime_environment=runtime_environment
-        )
+        if ge_cloud_mode:
+            self.target_store = JsonSiteStore(
+                store_backend=store_backend, runtime_environment=runtime_environment
+            )
+        else:
+            self.target_store = HtmlSiteStore(
+                store_backend=store_backend, runtime_environment=runtime_environment
+            )
 
         default_site_section_builders_config = {
             "expectations": {
@@ -221,6 +230,7 @@ class SiteBuilder:
                     "custom_views_directory": custom_views_directory,
                     "data_context_id": self.data_context_id,
                     "show_how_to_buttons": self.show_how_to_buttons,
+                    "ge_cloud_mode": self.ge_cloud_mode,
                 },
                 config_defaults={"name": site_section_name, "module_name": module_name},
             )
@@ -252,6 +262,7 @@ class SiteBuilder:
                     if section_config not in FALSEY_YAML_STRINGS
                 },
                 "site_section_builders_config": site_section_builders,
+                "ge_cloud_mode": self.ge_cloud_mode,
             },
             config_defaults={
                 "name": "site_index_builder",
@@ -287,10 +298,15 @@ class SiteBuilder:
         """
 
         # copy static assets
-        self.target_store.copy_static_assets()
-
         for site_section, site_section_builder in self.site_section_builders.items():
             site_section_builder.build(resource_identifiers=resource_identifiers)
+
+        # GE Cloud supports JSON Site Data Docs
+        # Skip static assets, indexing
+        if self.ge_cloud_mode:
+            return
+
+        self.target_store.copy_static_assets()
 
         index_page_url, index_links_dict = self.site_index_builder.build(
             build_index=build_index
@@ -332,6 +348,7 @@ class DefaultSiteSectionBuilder:
         renderer=None,
         view=None,
         data_context_id=None,
+        ge_cloud_mode=False,
         **kwargs,
     ):
         self.name = name
@@ -341,7 +358,7 @@ class DefaultSiteSectionBuilder:
         self.validation_results_limit = validation_results_limit
         self.data_context_id = data_context_id
         self.show_how_to_buttons = show_how_to_buttons
-
+        self.ge_cloud_mode = ge_cloud_mode
         if renderer is None:
             raise exceptions.InvalidConfigError(
                 "SiteSectionBuilder requires a renderer configuration "
@@ -400,7 +417,7 @@ class DefaultSiteSectionBuilder:
             if resource_identifiers and resource_key not in resource_identifiers:
                 continue
 
-            if self.run_name_filter:
+            if self.run_name_filter and not isinstance(resource_key, GeCloudIdentifier):
                 if not resource_key_passes_run_name_filter(
                     resource_key, self.run_name_filter
                 ):
@@ -446,19 +463,30 @@ class DefaultSiteSectionBuilder:
 
             try:
                 rendered_content = self.renderer_class.render(resource)
-                viewable_content = self.view_class.render(
-                    rendered_content,
-                    data_context_id=self.data_context_id,
-                    show_how_to_buttons=self.show_how_to_buttons,
-                )
 
-                self.target_store.set(
-                    SiteSectionIdentifier(
-                        site_section_name=self.name,
-                        resource_identifier=resource_key,
-                    ),
-                    viewable_content,
-                )
+                if self.ge_cloud_mode:
+                    self.target_store.set(
+                        GeCloudIdentifier(
+                            resource_type="rendered_data_doc",
+                        ),
+                        rendered_content,
+                        source_type=resource_key.resource_type,
+                        source_id=resource_key.ge_cloud_id,
+                    )
+                else:
+                    viewable_content = self.view_class.render(
+                        rendered_content,
+                        data_context_id=self.data_context_id,
+                        show_how_to_buttons=self.show_how_to_buttons,
+                    )
+                    # Verify type
+                    self.target_store.set(
+                        SiteSectionIdentifier(
+                            site_section_name=self.name,
+                            resource_identifier=resource_key,
+                        ),
+                        viewable_content,
+                    )
             except Exception as e:
                 exception_message = f"""\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
@@ -892,6 +920,7 @@ class DefaultSiteIndexBuilder:
                     )
                     logger.warning(error_msg)
 
+        viewable_content = ""
         try:
             rendered_content = self.renderer_class.render(index_links_dict)
             viewable_content = self.view_class.render(
@@ -911,7 +940,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             )
             logger.error(exception_message)
 
-        return (self.target_store.write_index_page(viewable_content), index_links_dict)
+        return self.target_store.write_index_page(viewable_content), index_links_dict
 
 
 class CallToActionButton:

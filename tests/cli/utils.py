@@ -117,14 +117,14 @@ def assert_no_tracebacks(click_result):
         )
     assert (
         "traceback" not in click_result.output.lower()
-    ), "Found a traceback in the console output: {}".format(click_result.output)
+    ), f"Found a traceback in the console output: {click_result.output}"
     assert (
         "traceback" not in click_result.stdout.lower()
-    ), "Found a traceback in the console output: {}".format(click_result.stdout)
+    ), f"Found a traceback in the console output: {click_result.stdout}"
     try:
         assert (
             "traceback" not in click_result.stderr.lower()
-        ), "Found a traceback in the console output: {}".format(click_result.stderr)
+        ), f"Found a traceback in the console output: {click_result.stderr}"
     except ValueError as ve:
         # sometimes stderr is not captured separately
         pass

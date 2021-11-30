@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -213,7 +213,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             batch_definition_batch_spec_passthrough = (
                 deepcopy(batch_definition.batch_spec_passthrough) or {}
             )
-            # batch_spec_passthrough from Batch Definition supercedes batch_spec_passthrough from data_asset
+            # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset
             batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
             batch_definition.batch_spec_passthrough = batch_spec_passthrough
 
@@ -268,8 +268,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         """Split using the values in the named column"""
         # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
 
-        return sa.select([sa.func.distinct(sa.column(column_name))]).select_from(
-            sa.text(table_name)
+        return (
+            sa.select([sa.func.distinct(sa.column(column_name))])
+            .select_from(sa.text(table_name))
+            .order_by(sa.column(column_name).asc())
         )
 
     def _split_on_converted_datetime(

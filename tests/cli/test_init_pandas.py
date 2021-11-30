@@ -103,13 +103,6 @@ def test_cli_init_on_new_project(
         .ge_store_backend_id
         Titanic/
             warning.json
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
@@ -612,7 +605,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         in stdout
     )
     assert "Try again? [Y/n]:" in stdout
-    assert "[{}]:".format(data_path) in stdout
+    assert f"[{data_path}]:" in stdout
 
     assert "Name the new Expectation Suite [Titanic.warning]" in stdout
     assert (
@@ -651,13 +644,6 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         .ge_store_backend_id
         Titanic/
             warning.json
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/

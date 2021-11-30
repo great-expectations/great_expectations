@@ -76,7 +76,7 @@ def init(target_directory, view, usage_stats):
                 # Ensure the context can be instantiated
                 cli_message(PROJECT_IS_COMPLETE)
         except (DataContextError, DatasourceInitializationError) as e:
-            cli_message("<red>{}</red>".format(e.message))
+            cli_message(f"<red>{e.message}</red>")
             sys.exit(1)
 
         try:
@@ -88,7 +88,7 @@ def init(target_directory, view, usage_stats):
             # cli_message(SETUP_SUCCESS)
             # exit(0)
         except DataContextError as e:
-            cli_message("<red>{}</red>".format(e.message))
+            cli_message(f"<red>{e.message}</red>")
             # TODO ensure this is covered by a test
             exit(5)
     else:
@@ -106,7 +106,7 @@ def init(target_directory, view, usage_stats):
             )
         except DataContextError as e:
             # TODO ensure this is covered by a test
-            cli_message("<red>{}</red>".format(e))
+            cli_message(f"<red>{e}</red>")
 
     try:
         # if expectations exist, offer to build docs
@@ -188,7 +188,7 @@ def init(target_directory, view, usage_stats):
         OSError,
         SQLAlchemyError,
     ) as e:
-        cli_message("<red>{}</red>".format(e))
+        cli_message(f"<red>{e}</red>")
         sys.exit(1)
 
 

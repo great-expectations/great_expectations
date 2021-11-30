@@ -9,18 +9,20 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    sa as sa,
+)
 from great_expectations.expectations.metrics.import_manager import F
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class ColumnMostCommonValue(ColumnMetricProvider):
+class ColumnMostCommonValue(ColumnAggregateMetricProvider):
     metric_name = "column.most_common_value"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
@@ -30,6 +32,20 @@ class ColumnMostCommonValue(ColumnMetricProvider):
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
+        cls,
+        execution_engine: "SqlAlchemyExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        column_value_counts = metrics.get("column.value_counts")
+        return list(
+            column_value_counts[column_value_counts == column_value_counts.max()].index
+        )
+
+    @metric_value(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: Dict,
@@ -59,7 +75,9 @@ class ColumnMostCommonValue(ColumnMetricProvider):
             runtime_configuration=runtime_configuration,
         )
 
-        if isinstance(execution_engine, SparkDFExecutionEngine):
+        if isinstance(
+            execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)
+        ):
             dependencies["column.value_counts"] = MetricConfiguration(
                 metric_name="column.value_counts",
                 metric_domain_kwargs=metric.metric_domain_kwargs,

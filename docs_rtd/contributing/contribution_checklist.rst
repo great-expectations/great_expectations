@@ -54,7 +54,7 @@ Once your code is ready, please go through the following checklist before submit
 
         If your PR contains **only** changes to ``contrib`` directory (community contributed Expectations), please skip this step.
 
-    * Please add a bullet point to ``docs/changelog.rst``, in the ``develop`` section.
+    * Please add a bullet point to ``docs_rtd/changelog.rst``, in the ``develop`` section.
         * Please group in the following order: [BREAKING], [FEATURE], [BUGFIX], [DOCS], [MAINTENANCE]
     * You can see the past Changelog here: :ref:`changelog`
 

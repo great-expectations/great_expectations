@@ -2,7 +2,7 @@ import datetime
 import logging
 import uuid
 import warnings
-from collections import Callable
+from collections.abc import Callable
 from functools import partial
 from io import BytesIO
 
@@ -45,7 +45,7 @@ class PandasDatasource(LegacyDatasource):
         reader_method=None,
         reader_options=None,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         """
         Build a full configuration object for a datasource, potentially including generators with defaults.
@@ -114,7 +114,7 @@ class PandasDatasource(LegacyDatasource):
         reader_method=None,
         reader_options=None,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         configuration_with_defaults = PandasDatasource.build_configuration(
             data_asset_type,
@@ -123,7 +123,7 @@ class PandasDatasource(LegacyDatasource):
             reader_method=reader_method,
             reader_options=reader_options,
             limit=limit,
-            **kwargs
+            **kwargs,
         )
 
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
@@ -135,7 +135,7 @@ class PandasDatasource(LegacyDatasource):
             data_context=data_context,
             data_asset_type=data_asset_type,
             batch_kwargs_generators=batch_kwargs_generators,
-            **configuration_with_defaults
+            **configuration_with_defaults,
         )
 
         self._build_generators()
@@ -159,23 +159,23 @@ class PandasDatasource(LegacyDatasource):
         if self._reader_options:
             # Then update with any locally-specified reader options
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"].update(self._reader_options)
 
         # Then update with any locally-specified reader options
         if reader_options:
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"].update(reader_options)
 
         if self._limit:
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"]["nrows"] = self._limit
 
         if limit is not None:
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"]["nrows"] = limit
 
         if self._reader_method:
@@ -222,9 +222,7 @@ class PandasDatasource(LegacyDatasource):
             raw_url = batch_kwargs["s3"]
             reader_method = batch_kwargs.get("reader_method")
             url = S3Url(raw_url)
-            logger.debug(
-                "Fetching s3 object. Bucket: {} Key: {}".format(url.bucket, url.key)
-            )
+            logger.debug(f"Fetching s3 object. Bucket: {url.bucket} Key: {url.key}")
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
             reader_fn = self._get_reader_fn(reader_method, url.key)
             default_reader_options = self._infer_default_options(

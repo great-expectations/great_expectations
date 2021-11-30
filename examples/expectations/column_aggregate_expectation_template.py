@@ -245,7 +245,7 @@ class ExpectColumnCustomMedianToBeBetween(ColumnExpectation):
     # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
     #     """
     #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-    #     neccessary configuration arguments have been provided for the validation of the expectation.
+    #     necessary configuration arguments have been provided for the validation of the expectation.
     #
     #     Args:
     #         configuration (OPTIONAL[ExpectationConfiguration]): \

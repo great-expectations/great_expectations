@@ -5,7 +5,7 @@ How to create a new Checkpoint
 
 This guide will help you create a new Checkpoint, which allows you to couple an Expectation Suite with a data set to validate.
 
-**Note:** As of Great Expectations version 0.13.7, we have updated and improved the Checkpoints feature. You can continue to use your existing legacy Checkpoint worfklows if you're working with concepts from the Batch Kwargs (v2) API. If you're using concepts from the BatchRequest (v3) API, please refer to the new Checkpoints guides.
+**Note:** As of Great Expectations version 0.13.7, we have updated and improved the Checkpoints feature. You can continue to use your existing legacy Checkpoint workflows if you're working with concepts from the Batch Kwargs (v2) API. If you're using concepts from the BatchRequest (v3) API, please refer to the new Checkpoints guides.
 
 Steps
 -----

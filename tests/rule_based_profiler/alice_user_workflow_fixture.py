@@ -1,6 +1,8 @@
 from typing import Dict, List
 
 import pytest
+from freezegun import freeze_time
+from ruamel.yaml import YAML
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 
@@ -9,6 +11,7 @@ from great_expectations.data_context.util import file_relative_path
 
 
 @pytest.fixture
+@freeze_time("09/26/2019 13:42:41")
 def alice_columnar_table_single_batch():
     """
     About the "Alice" User Workflow Fixture
@@ -178,6 +181,13 @@ def alice_columnar_table_single_batch():
     # NOTE that this expectation suite should fail when validated on the data in "sample_data_relative_path"
     # because the device_ts is ahead of the event_ts for the latest event
     sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
+
+    yaml = YAML()
+    profiler_config: dict = yaml.load(verbose_profiler_config)
+    expected_expectation_suite.add_citation(
+        comment="Suite created by Rule-Based Profiler with the configuration included.",
+        profiler_config=profiler_config,
+    )
 
     return {
         "profiler_config": verbose_profiler_config,

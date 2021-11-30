@@ -267,6 +267,7 @@ def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
         "batch_kwargs",
         "batch_markers",
         "batch_parameters",
+        "expectation_suite_meta",
         "expectation_suite_name",
         "great_expectations_version",
         "run_id",

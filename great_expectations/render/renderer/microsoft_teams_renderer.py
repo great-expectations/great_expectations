@@ -40,7 +40,7 @@ class MicrosoftTeamsRenderer(Renderer):
                             {
                                 "type": "Container",
                                 "height": "auto",
-                                "separator": True,
+                                "separator": "true",
                                 "items": [
                                     {
                                         "type": "ColumnSet",
@@ -54,7 +54,7 @@ class MicrosoftTeamsRenderer(Renderer):
                                                         "text": "Validation results",
                                                         "weight": "bolder",
                                                         "size": "large",
-                                                        "wrap": True,
+                                                        "wrap": "true",
                                                     },
                                                 ],
                                             }
@@ -65,7 +65,7 @@ class MicrosoftTeamsRenderer(Renderer):
                             {
                                 "type": "Container",
                                 "height": "auto",
-                                "separator": True,
+                                "separator": "true",
                                 "items": [
                                     {
                                         "type": "TextBlock",
@@ -139,8 +139,8 @@ class MicrosoftTeamsRenderer(Renderer):
                         "type": "TextBlock",
                         "spacing": "none",
                         "text": run_time.strftime("%b %d %Y %H:%M:%S"),
-                        "isSubtle": True,
-                        "wrap": True,
+                        "isSubtle": "true",
+                        "wrap": "true",
                     }
                 )
 
@@ -184,7 +184,7 @@ class MicrosoftTeamsRenderer(Renderer):
     def _render_validation_result_element(key, value, validation_result=None):
         validation_result_element = {
             "type": "TextBlock",
-            "text": "**{key}:** {value}".format(key=key, value=value),
+            "text": f"**{key}:** {value}",
             "horizontalAlignment": "left",
         }
         if validation_result and validation_result.success:

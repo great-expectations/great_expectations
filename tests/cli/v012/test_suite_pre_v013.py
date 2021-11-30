@@ -2,6 +2,7 @@ import json
 import os
 from unittest import mock
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
@@ -132,6 +133,9 @@ def test_suite_demo_enter_existing_suite_name_as_arg(
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
@@ -377,6 +381,9 @@ def test_suite_new_empty_with_no_jupyter(
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_one_datasource_without_generator_without_suite_name_argument(
@@ -457,6 +464,9 @@ def test_suite_demo_one_datasource_without_generator_without_suite_name_argument
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argument(
@@ -541,6 +551,9 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument(
@@ -710,7 +723,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite edit not_a_real_suite -d {}".format(project_dir),
+        f"suite edit not_a_real_suite -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -763,6 +776,9 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations(
@@ -848,6 +864,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations(
@@ -918,6 +937,9 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
@@ -1129,6 +1151,9 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations(
@@ -1219,7 +1244,7 @@ def test_suite_list_with_zero_suites(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"suite list -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1239,7 +1264,7 @@ def test_suite_list_with_one_suite(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"suite list -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1262,7 +1287,7 @@ def test_suite_list_with_multiple_suites(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"suite list -d {project_dir}",
         catch_exceptions=False,
     )
     output = result.output
@@ -1374,7 +1399,7 @@ def test_suite_delete_with_one_suite(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite delete a.warning -d {}".format(project_dir),
+        f"suite delete a.warning -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

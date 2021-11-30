@@ -3,7 +3,7 @@
 Set up the tutorial data and initialize a Data Context
 ======================================================
 
-**Welcome to the Great Expectations Getting Started tutorial for the V3 (Batch Kwargs) API!** This tutorial will walk you through a simple exercise where you create an Expectation suite that catches a data issue in a sample data set we provide.
+**Welcome to the Great Expectations Getting Started tutorial for the V3 (Batch Request) API!** This tutorial will walk you through a simple exercise where you create an Expectation suite that catches a data issue in a sample data set we provide.
 
 .. admonition:: Prerequisites for the tutorial:
 

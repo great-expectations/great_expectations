@@ -1,5 +1,5 @@
 ---
-title: How to connect to your data in a postgresql database
+title: How to connect to a PostgreSQL database
 ---
 import Prerequisites from '../components/prerequisites.jsx'
 import WhereToRunCode from '../components/where_to_run_code.md'
@@ -9,7 +9,7 @@ import DatabaseCredentials from '../components/adding_database_credentials.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you connect to data in a Postgresql database.
+This guide will help you connect to data in a PostgreSQL database.
 This will allow you to validate and explore your data.
 
 <Prerequisites>
@@ -26,7 +26,7 @@ This will allow you to validate and explore your data.
 
 ### 2. Install required dependencies
 
-First, install the necessary dependencies for Great Expectations to connect to your postgres database by running the following in your terminal:
+First, install the necessary dependencies for Great Expectations to connect to your Postgres database by running the following in your terminal:
 
 ```console
 pip install sqlalchemy psycopg2
@@ -42,16 +42,16 @@ For this guide we will use a `connection_string` like this:
 postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 ```   
 
-### 4. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L1-L5
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L1-L4
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L14
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L17
 ```
 
 ### 5. Configure your Datasource
@@ -61,16 +61,16 @@ Load your DataContext into memory using the `get_context()` method.
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L16-L30
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L19-L33
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L39
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L42
 ```
 
 </TabItem>
@@ -78,10 +78,10 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L16-L33
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L19-L36
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L39
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L42
 ```
 
 </TabItem>
@@ -100,17 +100,17 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L41
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L44
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L41
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L44
 ```
 
 </TabItem>
@@ -130,7 +130,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L44-L57
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L47-L60
 ```
 
   </TabItem>
@@ -139,7 +139,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L63-L74
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py#L66-L77
 ```
 
   </TabItem>
@@ -154,6 +154,6 @@ To view the full scripts used in this page, see them on GitHub:
 - [postgres_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py)
 - [postgres_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py)
 
-## Next Steps
+## Next Steps	
 
-<NextSteps />
+<NextSteps />	

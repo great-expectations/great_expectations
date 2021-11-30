@@ -1,14 +1,17 @@
 from ruamel import yaml
-from util import load_data_into_database
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
+
+# This utility is not for general use. It is only to support testing.
+from util import load_data_into_database
+
 load_data_into_database(
-    "taxi_data",
-    "./data/yellow_trip_data_sample_2019-01.csv",
-    CONNECTION_STRING,
+    table_name="taxi_data",
+    csv_path="./data/yellow_tripdata_sample_2019-01.csv",
+    connection_string=CONNECTION_STRING,
 )
 
 context = ge.get_context()
@@ -46,7 +49,7 @@ batch_request = RuntimeBatchRequest(
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
-    batch_identifiers={"default_identifier_name": "something_something"},
+    batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
 context.create_expectation_suite(

@@ -91,7 +91,7 @@ class ConfigurationStore(Store):
         return self.store_backend.remove_key(key)
 
     def serialize(self, key, value):
-        if isinstance(self.store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             config_schema = value.get_schema_class()()
             return config_schema.dump(value)
@@ -127,7 +127,7 @@ class ConfigurationStore(Store):
             print("Checking for existing keys...")
 
         report_object["keys"] = sorted(
-            [key.configuration_key for key in self.list_keys()]
+            key.configuration_key for key in self.list_keys()
         )
 
         report_object["len_keys"] = len(report_object["keys"])

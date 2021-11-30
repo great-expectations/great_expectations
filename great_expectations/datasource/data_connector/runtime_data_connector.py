@@ -1,6 +1,5 @@
 import logging
-from typing import Any, List, Optional, Tuple, Union, cast
-from urllib.parse import urlparse
+from typing import Any, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -10,6 +9,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import (
+    AzureBatchSpec,
     BatchMarkers,
     BatchSpec,
     PathBatchSpec,
@@ -127,6 +127,7 @@ class RuntimeDataConnector(DataConnector):
         batch_data, batch_markers = self._execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
         )
+        self._execution_engine.load_batch_data(batch_definition.id, batch_data)
         return (
             batch_data,
             batch_spec,
@@ -207,11 +208,11 @@ class RuntimeDataConnector(DataConnector):
     ):
         return {}
 
-    # This method is currently called called only in tests.
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:
-        return {}
+        data_asset_name: str = batch_definition.data_asset_name
+        return {"data_asset_name": data_asset_name}
 
     # This method is currently called called only in tests.
     # noinspection PyMethodOverriding
@@ -224,18 +225,19 @@ class RuntimeDataConnector(DataConnector):
         batch_spec: BatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
-        if runtime_parameters.get("batch_data") is not None:
+        if "batch_data" in runtime_parameters:
             batch_spec["batch_data"] = runtime_parameters.get("batch_data")
             return RuntimeDataBatchSpec(batch_spec)
-        elif runtime_parameters.get("query"):
+        elif "query" in runtime_parameters:
             batch_spec["query"] = runtime_parameters.get("query")
             return RuntimeQueryBatchSpec(batch_spec)
-        elif runtime_parameters.get("path"):
-            path = runtime_parameters.get("path")
+        elif "path" in runtime_parameters:
+            path: str = runtime_parameters["path"]
             batch_spec["path"] = path
-            parsed_url = urlparse(path)
-            if "s3" in parsed_url.scheme:
+            if "s3" in path:
                 return S3BatchSpec(batch_spec)
+            elif "blob.core.windows.net" in path:
+                return AzureBatchSpec(batch_spec)
             else:
                 return PathBatchSpec(batch_spec)
 
@@ -274,12 +276,13 @@ class RuntimeDataConnector(DataConnector):
 
         runtime_parameters = batch_request.runtime_parameters
         batch_identifiers = batch_request.batch_identifiers
+
         if not (
             (not runtime_parameters and not batch_identifiers)
             or (runtime_parameters and batch_identifiers)
         ):
             raise ge_exceptions.DataConnectorError(
-                f"""RuntimeDataConnector "{self.name}" requires runtime_parameters and batch_identifiers to be both 
+                f"""RuntimeDataConnector "{self.name}" requires runtime_parameters and batch_identifiers to be both
                 present and non-empty or
                 both absent in the batch_request parameter.
                 """
@@ -305,3 +308,61 @@ class RuntimeDataConnector(DataConnector):
 appear among the configured batch identifiers.
                     """
                 )
+
+    def self_check(self, pretty_print=True, max_examples=3):
+        """
+        Overrides the self_check method for RuntimeDataConnector. Normally the `self_check()` method will check
+        the configuration of the DataConnector by doing the following :
+
+        1. refresh or create data_reference_cache
+        2. print batch_definition_count and example_data_references for each data_asset_names
+        3. also print unmatched data_references, and allow the user to modify the regex or glob configuration if necessary
+
+        However, in the case of the RuntimeDataConnector there is no example data_asset_names until the data is passed
+        in through the RuntimeBatchRequest. Therefore, there will be a note displayed to the user saying that
+        RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest.
+
+        Args:
+            pretty_print (bool): should the output be printed?
+            max_examples (int): how many data_references should be printed?
+
+        Returns:
+            report_obj (dict): dictionary containing self_check output
+        """
+        if pretty_print:
+            print(f"\t{self.name}:{self.__class__.__name__}\n")
+        asset_names = self.get_available_data_asset_names()
+        asset_names.sort()
+        len_asset_names = len(asset_names)
+
+        report_obj = {
+            "class_name": self.__class__.__name__,
+            "data_asset_count": len_asset_names,
+            "example_data_asset_names": asset_names[:max_examples],
+            "data_assets": {},
+            "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
+            # "data_reference_count": self.
+        }
+        if pretty_print:
+            print(
+                f"\tAvailable data_asset_names ({min(len_asset_names, max_examples)} of {len_asset_names}):"
+            )
+            print(
+                "\t\t"
+                + "Note : RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
+            )
+
+        unmatched_data_references = self.get_unmatched_data_references()
+        len_unmatched_data_references = len(unmatched_data_references)
+
+        if pretty_print:
+            if pretty_print:
+                print(
+                    f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}): {unmatched_data_references[:max_examples]}\n"
+                )
+        report_obj["unmatched_data_reference_count"] = len_unmatched_data_references
+        report_obj["example_unmatched_data_references"] = unmatched_data_references[
+            :max_examples
+        ]
+
+        return report_obj

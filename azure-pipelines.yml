@@ -22,7 +22,7 @@ resources:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_DATABASE: test_ci
   - container: mssql
-    image: microsoft/mssql-server-linux
+    image: mcr.microsoft.com/mssql/server:2019-latest
     env:
       ACCEPT_EULA: Y
       MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
@@ -81,7 +81,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==20.8b1 pyupgrade==2.7.2
+              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==21.8b0 pyupgrade==2.7.2
               EXIT_STATUS=0
               isort . --check-only --skip docs/ || EXIT_STATUS=$?
               black --check --exclude docs/ . || EXIT_STATUS=$?
@@ -98,40 +98,56 @@ stages:
       - job: compatibility_matrix
         condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
         variables:
-          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
           matrix:
             Python36-Pandas023:
               python.version: '3.6'
+              numpy.version: '1.14.1'
               pandas.version: '0.23.4'
+              scipy.version: '0.19.0'
+              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
             Python37-Pandas025:
               python.version: '3.7'
+              numpy.version: '1.14.1'
               pandas.version: '0.25.3'
+              # numpy 1.20 and pandas 0.25.3 do not coexist happily
+              scipy.version: '0.19.0'
+              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
             Python38-PandasLatest:
               python.version: '3.8'
+              numpy.version: 'latest'
               pandas.version: 'latest'
+              scipy.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
 
-        # TODO: refactor steps into a task
         steps:
           - task: UsePythonVersion@0
             inputs:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # --upgrade pip==20.2.4
             displayName: 'Update pip'
+
+          - bash: pip install numpy
+            condition: eq(variables['scipy.version'], 'numpy')
+            displayName: 'Install numpy latest'
 
           - bash: pip install pandas
             condition: eq(variables['pandas.version'], 'latest')
             displayName: 'Install pandas latest'
+
+          - bash: pip install scipy
+            condition: eq(variables['scipy.version'], 'latest')
+            displayName: 'Install scipy latest'
 
           - bash: pip install pandas==$(pandas.version)
             condition: ne(variables['pandas.version'], 'latest')
             displayName: 'Install pandas - $(pandas.version)'
 
           - script: |
-              pip install  $(GE_pytest_pip_opts)
+              pip install $(GE_pytest_pip_opts)
               pip install  --requirement requirements.txt
               # Consider fragmenting *all* integration tests into separate folder and run
               pip install  .
@@ -161,7 +177,6 @@ stages:
           postgres: postgres
 
         variables:
-          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt'
           GE_pytest_opts: ''
 
         strategy:
@@ -169,9 +184,19 @@ stages:
             Python36:
               python.version: '3.6'
               pandas.version: 'latest'
+              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
             Python37:
               python.version: '3.7'
               pandas.version: 'latest'
+              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+            Python38:
+              python.version: '3.8'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+            Python39:
+              python.version: '3.9'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
 
         steps:
           - task: UsePythonVersion@0
@@ -179,7 +204,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
             displayName: 'Update pip'
 
           - script: |
@@ -197,6 +222,7 @@ stages:
 
           - script: |
               pip install --requirement requirements.txt
+              echo "about to run pip install $(GE_pytest_pip_opts)"
               pip install $(GE_pytest_pip_opts)
               pip install  .
             displayName: 'Install dependencies'
@@ -239,7 +265,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt
+              pip install --requirement requirements-dev-base.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
@@ -271,7 +297,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
             displayName: 'Update pip'
 
           - script: |
@@ -288,7 +314,7 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
@@ -314,14 +340,14 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
             displayName: 'Update pip'
 
           - script: |
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
@@ -352,7 +378,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
             displayName: 'Update pip'
 
           - script: |
@@ -361,16 +387,10 @@ stages:
             displayName: 'Install pandoc'
 
           - script: |
-              # not including "--requirement requirements-dev-spark.txt", because it specifies "pyspark>=2.3.2,<3.0.0" versions, which do not support Python 3.8 (see script step below)
-              pip install --requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
               pip install --requirement requirements.txt
               pip install .
             displayName: 'Install dependencies'
-
-          - script: |
-              pip install pyspark>=3.0.0  # "pyspark<3.0.0" versions do not support Python 3.8 (see comment above)
-              pip install findspark
-            displayName: 'Install pyspark'
 
           - script: |
               pip install pytest pytest-azurepipelines
@@ -387,7 +407,7 @@ stages:
       - job: build_gallery
         variables:
           python.version: '3.7'
-          GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt'
+          GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
           GE_pytest_opts: ''
 
         steps:
@@ -396,7 +416,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
             displayName: 'Update pip'
 
           - script: |
@@ -448,7 +468,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
             displayName: 'Update pip'
 
           - script: |

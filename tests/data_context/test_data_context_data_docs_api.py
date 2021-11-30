@@ -311,9 +311,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     assert os.path.isfile(expected_path)
 
     obs = context.get_docs_sites_urls()
-    assert obs == [
-        {"site_name": "my_rad_site", "site_url": "file://{}".format(expected_path)}
-    ]
+    assert obs == [{"site_name": "my_rad_site", "site_url": f"file://{expected_path}"}]
 
 
 def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_local_site(
@@ -356,10 +354,10 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     obs = context.get_docs_sites_urls()
 
     assert obs == [
-        {"site_name": "my_rad_site", "site_url": "file://{}".format(path_1)},
+        {"site_name": "my_rad_site", "site_url": f"file://{path_1}"},
         {
             "site_name": "another_just_amazing_site",
-            "site_url": "file://{}".format(path_2),
+            "site_url": f"file://{path_2}",
         },
     ]
 

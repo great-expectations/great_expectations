@@ -176,14 +176,14 @@ This guide will help you create Expectations that span multiple :ref:`Batches <r
                     data_connector_name="my_data_connector",
                     data_asset_name="my_data_asset_1"
                 )
-                upstream_validator = context.get_validator(batch_request=batch_request_1, expectation_suite="my_expectation_suite_1")
+                upstream_validator = context.get_validator(batch_request=batch_request_1, expectation_suite_name="my_expectation_suite_1")
 
                 batch_request_2 = BatchRequest(
                     datasource_name="my_datasource",
                     data_connector_name="my_data_connector",
                     data_asset_name="my_data_asset_2"
                 )
-                downstream_validator = context.get_validator(batch_request=batch_request_2, expectation_suite="my_expectation_suite_2")
+                downstream_validator = context.get_validator(batch_request=batch_request_2, expectation_suite_name="my_expectation_suite_2")
 
         #. **Disable interactive evaluation for the downstream Validator.**
 

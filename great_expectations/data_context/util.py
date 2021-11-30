@@ -7,6 +7,7 @@ import os
 import re
 import warnings
 from collections import OrderedDict
+from functools import lru_cache
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -233,6 +234,7 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
     return template_str
 
 
+@lru_cache(maxsize=None)
 def substitute_value_from_secret_store(value):
     """
     This method takes a value, tries to parse the value to fetch a secret from a secret manager
@@ -460,7 +462,40 @@ def substitute_all_config_variables(
         data = DataContextConfigSchema().dump(data)
 
     if isinstance(data, CheckpointConfig):
-        data = CheckpointConfigSchema().dump(data)
+        if (
+            data.batch_request is not None
+            and data.batch_request.get("runtime_parameters") is not None
+            and data.batch_request["runtime_parameters"].get("batch_data") is not None
+        ):
+            batch_data = data.batch_request["runtime_parameters"].pop("batch_data")
+            data = CheckpointConfigSchema().dump(data)
+            data["batch_request"]["runtime_parameters"]["batch_data"] = batch_data
+        elif len(data.validations) > 0:
+            batch_data_list = []
+            for val in data["validations"]:
+                if (
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data")
+                    is not None
+                ):
+                    batch_data_list.append(
+                        val["batch_request"]["runtime_parameters"].pop("batch_data")
+                    )
+                else:
+                    batch_data_list.append(None)
+            data = CheckpointConfigSchema().dump(data)
+            for idx, val in enumerate(data["validations"]):
+                if (
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and batch_data_list[idx] is not None
+                ):
+                    val["batch_request"]["runtime_parameters"][
+                        "batch_data"
+                    ] = batch_data_list[idx]
+        else:
+            data = CheckpointConfigSchema().dump(data)
 
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {
@@ -514,6 +549,9 @@ def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
 
 
 def default_checkpoints_exist(directory_path: str) -> bool:
+    if not directory_path:
+        return False
+
     checkpoints_directory_path: str = os.path.join(
         directory_path,
         DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,

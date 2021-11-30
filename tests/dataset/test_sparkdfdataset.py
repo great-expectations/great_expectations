@@ -391,7 +391,7 @@ def test_expect_column_values_to_be_json_parseable(spark_session):
         "most": [d1, d2, d3, "d4"],
     }
 
-    data_reshaped = list(zip(*[v for _, v in inner.items()]))
+    data_reshaped = list(zip(*(v for _, v in inner.items())))
     df = spark_session.createDataFrame(
         data_reshaped, ["json_col", "not_json", "py_dict", "most"]
     )

@@ -64,7 +64,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         asset_globs=None,
         reader_method=None,
     ):
-        logger.debug("Constructing GlobReaderBatchKwargsGenerator {!r}".format(name))
+        logger.debug(f"Constructing GlobReaderBatchKwargsGenerator {name!r}")
         super().__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = {}

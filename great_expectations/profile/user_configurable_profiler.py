@@ -21,7 +21,7 @@ from great_expectations.profile.base import (
     profiler_data_types_with_mapping,
     profiler_semantic_types,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -114,11 +114,11 @@ class UserConfigurableProfiler:
                 batches=[self.profile_dataset],
             )
             self.all_table_columns = self.profile_dataset.get_metric(
-                MetricConfiguration("table.columns", dict())
+                MetricConfiguration("table.columns", {})
             )
         elif isinstance(self.profile_dataset, Validator):
             self.all_table_columns = self.profile_dataset.get_metric(
-                MetricConfiguration("table.columns", dict())
+                MetricConfiguration("table.columns", {})
             )
         else:
             self.all_table_columns = self.profile_dataset.get_table_columns()
@@ -557,7 +557,7 @@ class UserConfigurableProfiler:
             column_name: The name of the column
 
         Returns:
-            A list of semantic_types for a given colum
+            A list of semantic_types for a given column
         """
         column_info_entry = self.column_info.get(column_name)
         if not column_info_entry:
@@ -911,16 +911,7 @@ class UserConfigurableProfiler:
             len(column_list) > 1
             and "expect_compound_columns_to_be_unique" not in self.excluded_expectations
         ):
-            if isinstance(profile_dataset, Validator) and not hasattr(
-                profile_dataset, "expect_compound_columns_to_be_unique"
-            ):
-                # TODO: Remove this upon implementation of this expectation for V3
-                logger.warning(
-                    "expect_compound_columns_to_be_unique is not currently available in the V3 (Batch Request) API. Specifying a compound key will not add any expectations. This will be updated when that expectation becomes available."
-                )
-                return profile_dataset
-            else:
-                profile_dataset.expect_compound_columns_to_be_unique(column_list)
+            profile_dataset.expect_compound_columns_to_be_unique(column_list)
         elif len(column_list) < 1:
             raise ValueError(
                 "When specifying a primary or compound key, column_list must not be empty"

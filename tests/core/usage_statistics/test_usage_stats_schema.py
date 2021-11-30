@@ -1,6 +1,7 @@
 import jsonschema
 
 from great_expectations.core.usage_statistics.schemas import (
+    anonymized_batch_request_schema,
     anonymized_batch_schema,
     anonymized_datasource_schema,
     cli_new_ds_choice_payload_schema,
@@ -9,6 +10,7 @@ from great_expectations.core.usage_statistics.schemas import (
     empty_payload_schema,
     init_payload_schema,
     save_or_edit_expectation_suite_payload_schema,
+    test_yaml_config_payload_schema,
     usage_statistics_record_schema,
 )
 from tests.integration.usage_statistics.test_usage_statistics_messages import (
@@ -53,9 +55,12 @@ def test_comprehensive_list_of_messages():
         "data_asset.validate",
         "data_context.__init__",
         "data_context.add_datasource",
+        "data_context.get_batch_list",
         "data_context.build_data_docs",
         "data_context.open_data_docs",
+        "data_context.run_checkpoint",
         "data_context.save_expectation_suite",
+        "data_context.test_yaml_config",
         "datasource.sqlalchemy.connect",
     }
 
@@ -111,6 +116,23 @@ def test_data_context_add_datasource_message():
             jsonschema.validate(
                 message["event_payload"],
                 anonymized_datasource_schema,
+            )
+
+
+def test_data_context_get_batch_list_message():
+    usage_stats_records_messages = [
+        "data_context.get_batch_list",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                anonymized_batch_request_schema,
             )
 
 
@@ -193,10 +215,28 @@ def test_cli_suite_edit_message():
             )
 
 
+def test_test_yaml_config_messages():
+    usage_stats_records_messages = [
+        "data_context.test_yaml_config",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                test_yaml_config_payload_schema,
+            )
+
+
 def test_usage_stats_empty_payload_messages():
     usage_stats_records_messages = [
         "data_context.build_data_docs",
         "data_context.open_data_docs",
+        "data_context.run_checkpoint",
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:

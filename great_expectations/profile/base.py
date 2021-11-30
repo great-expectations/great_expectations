@@ -142,6 +142,7 @@ class ProfilerTypeMapping:
         "NUMERIC",
         "FloatType",
         "DoubleType",
+        "float",
         "float_",
         "float16",
         "float32",
@@ -204,7 +205,7 @@ class ProfilerTypeMapping:
         "SMALLMONEY",
         "smallmoney",
     ]
-    IDENTITY_TYPE_NAMES = [
+    IDENTIFIER_TYPE_NAMES = [
         "UNIQUEIDENTIFIER",
         "uniqueidentifier",
     ]

@@ -8,6 +8,7 @@
     "batch_kwargs": {
       "ge_batch_id": "1234"
     },
+    "expectation_suite_meta": {},
     "batch_markers": {},
     "batch_parameters": {},
     "validation_time": "19551105T000000.000000Z"

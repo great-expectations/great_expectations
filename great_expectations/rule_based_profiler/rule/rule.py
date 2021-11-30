@@ -2,20 +2,14 @@ import copy
 from typing import Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.rule_based_profiler.domain_builder.domain import Domain
-from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
-    DomainBuilder,
-)
-from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
+from great_expectations.rule_based_profiler.domain_builder import Domain, DomainBuilder
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
-)
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
     ParameterContainer,
 )
-from great_expectations.validator.validator import Validator
 
 
 class Rule:
@@ -49,19 +43,17 @@ class Rule:
 
     def generate(
         self,
-        validator: Validator,
     ) -> List[ExpectationConfiguration]:
         """
         Builds a list of Expectation Configurations, returning a single Expectation Configuration entry for every
         ConfigurationBuilder available based on the instantiation.
 
-        :param validator: A Validator object utilized to obtain domain
         :return: List of Corresponding Expectation Configurations representing every configured rule
         """
         expectation_configurations: List[ExpectationConfiguration] = []
 
         domains: List[Domain] = self._domain_builder.get_domains(
-            validator=validator,
+            variables=self.variables
         )
 
         domain: Domain
@@ -75,7 +67,6 @@ class Rule:
                 parameter_builder.build_parameters(
                     parameter_container=parameter_container,
                     domain=domain,
-                    validator=validator,
                     variables=self.variables,
                     parameters=self.parameters,
                 )

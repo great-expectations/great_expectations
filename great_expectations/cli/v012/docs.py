@@ -41,7 +41,7 @@ def docs():
     default=False,
 )
 def docs_build(directory, site_name, view=True, assume_yes=False):
-    """ Build Data Docs for a project."""
+    """Build Data Docs for a project."""
     context = toolkit.load_data_context_with_error_handling(directory)
     build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
     toolkit.send_usage_message(
@@ -144,8 +144,8 @@ def build_docs(context, site_name=None, view=True, assume_yes=False):
 
     msg = "\nThe following Data Docs sites will be built:\n\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
-        msg += " - <cyan>{}:</cyan> ".format(site_name)
-        msg += "{}\n".format(index_page_locator_info)
+        msg += f" - <cyan>{site_name}:</cyan> "
+        msg += f"{index_page_locator_info}\n"
 
     cli_message(msg)
     if not assume_yes:

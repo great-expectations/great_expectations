@@ -59,7 +59,7 @@
         "unexpected_index_list": [4],
         "unexpected_list": ["bee"]
       },
-      "suppress_test_for": ["sqlite", "mssql"]
+      "suppress_test_for": ["sqlite", "mssql", "bigquery"]
     },
     {
       "title": "positive_test_sufficient_mostly_w_one_non_matching_value",

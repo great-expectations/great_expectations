@@ -20,7 +20,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
     This profiler helps build coarse expectations for columns you care about.
 
     The goal of this profiler is to expedite the process of authoring an
-    expectation suite by building possibly relevant expections for columns that
+    expectation suite by building possibly relevant exceptions for columns that
     you care about. You can then easily edit the suite and adjust or delete
     these expectations to hone your new suite.
 

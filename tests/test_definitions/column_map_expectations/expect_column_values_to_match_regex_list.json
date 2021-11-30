@@ -100,7 +100,7 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "suppress_test_for": ["sqlite", "mssql"]
+      "suppress_test_for": ["sqlite", "mssql", "bigquery"]
     }]
   }]
 }

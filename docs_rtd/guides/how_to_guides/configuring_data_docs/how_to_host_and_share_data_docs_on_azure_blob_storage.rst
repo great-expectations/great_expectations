@@ -87,7 +87,7 @@ Data Docs will be served using an Azure Blob Storage static website with restric
      Done building Data Docs
 
   If successful, the CLI will provide the object URL of the index page. 
-  You may secure the access of your website using an IP filtering mecanism.
+  You may secure the access of your website using an IP filtering mechanism.
 
 
 5. **Limit the access to your company.**

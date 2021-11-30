@@ -1,6 +1,5 @@
 import datetime
 import os
-import shutil
 from typing import List, Optional
 
 import pandas as pd
@@ -8,10 +7,10 @@ import pytest
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.profiler import Profiler
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 yaml = YAML()
 
@@ -258,3 +257,57 @@ def test_batches_are_accessible(
             )
         )
         assert metric_value_set == {"category0", "category1", "category2"}
+
+
+def test_profile_includes_citations(
+    alice_columnar_table_single_batch_context,
+    alice_columnar_table_single_batch,
+):
+    # Load data context
+    data_context: DataContext = alice_columnar_table_single_batch_context
+    # Load profiler configs & loop (run tests for each one)
+    yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
+
+    # Instantiate Profiler
+    profiler_config: dict = yaml.load(yaml_config)
+
+    profiler: Profiler = Profiler(
+        profiler_config=profiler_config,
+        data_context=data_context,
+    )
+
+    expectation_suite: ExpectationSuite = profiler.profile(
+        expectation_suite_name=alice_columnar_table_single_batch[
+            "expected_expectation_suite_name"
+        ],
+        include_citation=True,
+    )
+
+    assert len(expectation_suite.meta["citations"]) > 0
+
+
+def test_profile_excludes_citations(
+    alice_columnar_table_single_batch_context,
+    alice_columnar_table_single_batch,
+):
+    # Load data context
+    data_context: DataContext = alice_columnar_table_single_batch_context
+    # Load profiler configs & loop (run tests for each one)
+    yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
+
+    # Instantiate Profiler
+    profiler_config: dict = yaml.load(yaml_config)
+
+    profiler: Profiler = Profiler(
+        profiler_config=profiler_config,
+        data_context=data_context,
+    )
+
+    expectation_suite: ExpectationSuite = profiler.profile(
+        expectation_suite_name=alice_columnar_table_single_batch[
+            "expected_expectation_suite_name"
+        ],
+        include_citation=False,
+    )
+
+    assert expectation_suite.meta.get("citations") is None

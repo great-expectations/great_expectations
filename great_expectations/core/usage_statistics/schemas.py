@@ -6,33 +6,29 @@
 
 # An anonymized string *must* be an md5 hash, so must have exactly 32 characters
 anonymized_string_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "string",
     "minLength": 32,
     "maxLength": 32,
 }
 
-anonymized_datasource_schema = {
-    "$schema": "http://json-schema.org/schema#",
-    "title": "anonymized-datasource",
+anonymized_datasource_name_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-datasource-name",
     "definitions": {"anonymized_string": anonymized_string_schema},
-    "oneOf": [
+    "anyOf": [
         {
-            "type": "object",
-            "properties": {
-                "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
-                "parent_class": {"type": "string", "maxLength": 256},
-                "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
-                "sqlalchemy_dialect": {"type": "string", "maxLength": 256},
-            },
-            "additionalProperties": False,
-            "required": ["parent_class", "anonymized_name"],
-        }
+            "type": "string",
+            "maxLength": 256,
+        },
+        {
+            "$ref": "#/definitions/anonymized_string",
+        },
     ],
 }
 
 anonymized_class_info_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-class-info",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "oneOf": [
@@ -47,12 +43,55 @@ anonymized_class_info_schema = {
             # we don't want this to be true, but this is required to allow show_cta_footer
             # Note AJB-20201218 show_cta_footer was removed in v 0.9.9 via PR #1249
             "required": ["parent_class"],
-        }
+        },
+    ],
+}
+
+anonymized_datasource_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-datasource",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_class_info": anonymized_class_info_schema,
+    },
+    "anyOf": [
+        # v2 (Batch Kwargs) API:
+        {
+            "type": "object",
+            "properties": {
+                "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+                "parent_class": {"type": "string", "maxLength": 256},
+                "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
+                "sqlalchemy_dialect": {"type": "string", "maxLength": 256},
+            },
+            "additionalProperties": False,
+            "required": ["parent_class", "anonymized_name"],
+        },
+        # v3 (Batch Request) API:
+        {
+            "type": "object",
+            "properties": {
+                "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+                "parent_class": {"type": "string", "maxLength": 256},
+                "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
+                "sqlalchemy_dialect": {"type": "string", "maxLength": 256},
+                "anonymized_execution_engine": {
+                    "$ref": "#/definitions/anonymized_class_info"
+                },
+                "anonymized_data_connectors": {
+                    "type": "array",
+                    "maxItems": 1000,
+                    "items": {"$ref": "#/definitions/anonymized_class_info"},
+                },
+            },
+            "additionalProperties": False,
+            "required": ["parent_class", "anonymized_name"],
+        },
     ],
 }
 
 anonymized_store_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-store",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
@@ -71,12 +110,12 @@ anonymized_store_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        }
+        },
     ],
 }
 
 anonymized_action_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-action",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "oneOf": [
@@ -89,12 +128,12 @@ anonymized_action_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        }
+        },
     ],
 }
 
 anonymized_validation_operator_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-validation-operator",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
@@ -115,19 +154,19 @@ anonymized_validation_operator_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        }
+        },
     ],
 }
 
 empty_payload_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "properties": {},
     "additionalProperties": False,
 }
 
 anonymized_data_docs_site_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-data-docs-site",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
@@ -149,13 +188,13 @@ anonymized_data_docs_site_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        }
+        },
     ],
 }
 
 anonymized_expectation_suite_schema = {
-    "$schema": "http://json-schema.org/schema#",
-    "title": "anonymized-expectation-suite-schema",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-expectation-suite",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "oneOf": [
         {
@@ -246,10 +285,106 @@ init_payload_schema = {
     "additionalProperties": False,
 }
 
+anonymized_batch_request_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-batch-request-keys",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+    },
+    "type": "object",
+    "properties": {
+        "batch_request_required_top_level_properties": {
+            "type": "object",
+            "properties": {
+                "anonymized_datasource_name": {
+                    "$ref": "#/definitions/anonymized_datasource_name",
+                },
+                "anonymized_data_connector_name": {
+                    "$ref": "#/definitions/anonymized_string",
+                },
+                "anonymized_data_asset_name": {
+                    "$ref": "#/definitions/anonymized_string",
+                },
+            },
+            "required": [
+                "anonymized_datasource_name",
+                "anonymized_data_connector_name",
+                "anonymized_data_asset_name",
+            ],
+            "additionalProperties": False,
+        },
+        "batch_request_optional_top_level_keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+                "type": "string",
+                "enum": [
+                    "data_connector_query",
+                    "runtime_parameters",
+                    "batch_identifiers",
+                    "batch_spec_passthrough",
+                ],
+            },
+            "uniqueItems": True,
+        },
+        "data_connector_query_keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+                "type": "string",
+                "enum": [
+                    "batch_filter_parameters",
+                    "limit",
+                    "index",
+                    "custom_filter_function",
+                ],
+            },
+            "uniqueItems": True,
+        },
+        "runtime_parameters_keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+                "type": "string",
+                "enum": [
+                    "batch_data",
+                    "query",
+                    "path",
+                ],
+            },
+        },
+        "batch_spec_passthrough_keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 6,
+            "items": {
+                "type": "string",
+                "enum": [
+                    "sampling_method",
+                    "sampling_kwargs",
+                    "splitter_method",
+                    "splitter_kwargs",
+                    "reader_method",
+                    "reader_options",
+                ],
+            },
+            "uniqueItems": True,
+        },
+    },
+    "additionalProperties": False,
+}
+
 anonymized_batch_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-batch",
-    "definitions": {"anonymized_string": anonymized_string_schema},
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+    },
     "oneOf": [
         {
             "type": "object",
@@ -263,7 +398,7 @@ anonymized_batch_schema = {
                     "$ref": "#/definitions/anonymized_string"
                 },
                 "anonymized_datasource_name": {
-                    "$ref": "#/definitions/anonymized_string"
+                    "$ref": "#/definitions/anonymized_datasource_name",
                 },
             },
             "additionalProperties": False,
@@ -272,12 +407,12 @@ anonymized_batch_schema = {
                 "anonymized_expectation_suite_name",
                 "anonymized_datasource_name",
             ],
-        }
+        },
     ],
 }
 
 run_validation_operator_payload_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_batch": anonymized_batch_schema,
@@ -296,7 +431,7 @@ run_validation_operator_payload_schema = {
 }
 
 save_or_edit_expectation_suite_payload_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
@@ -309,7 +444,7 @@ save_or_edit_expectation_suite_payload_schema = {
 }
 
 cli_suite_expectation_suite_payload_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
@@ -326,7 +461,7 @@ cli_suite_expectation_suite_payload_schema = {
 }
 
 cli_payload_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "cli-payload",
     "type": "object",
     "properties": {
@@ -342,7 +477,7 @@ cli_payload_schema = {
 }
 
 cli_new_ds_choice_payload_schema = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "properties": {
         "type": {"type": "string", "maxLength": 256},
@@ -355,7 +490,7 @@ cli_new_ds_choice_payload_schema = {
 
 
 datasource_sqlalchemy_connect_payload = {
-    "$schema": "http://json-schema.org/schema#",
+    "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "properties": {
         "anonymized_name": {"type": "string", "maxLength": 256},
@@ -365,10 +500,50 @@ datasource_sqlalchemy_connect_payload = {
     "additionalProperties": False,
 }
 
-usage_statistics_record_schema = {
-    "$schema": "http://json-schema.org/schema#",
+test_yaml_config_payload_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "test-yaml-config",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
+        "anonymized_class_info": anonymized_class_info_schema,
+    },
+    "type": "object",
+    "properties": {
+        "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+        "parent_class": {"type": "string", "maxLength": 256},
+        "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
+        "diagnostic_info": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+                "enum": [
+                    "__substitution_error__",
+                    "__yaml_parse_error__",
+                    "__custom_subclass_not_core_ge__",
+                    "__class_name_not_provided__",
+                ],
+            },
+        },
+        # Store
+        "anonymized_store_backend": {"$ref": "#/definitions/anonymized_class_info"},
+        # Datasource v2 (Batch Kwargs) API & v3 (Batch Request) API:
+        "sqlalchemy_dialect": {"type": "string", "maxLength": 256},
+        # Datasource v3 (Batch Request) API only:
+        "anonymized_execution_engine": {"$ref": "#/definitions/anonymized_class_info"},
+        "anonymized_data_connectors": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {"$ref": "#/definitions/anonymized_class_info"},
+        },
+    },
+    "additionalProperties": False,
+}
+
+usage_statistics_record_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
         "anonymized_datasource": anonymized_datasource_schema,
         "anonymized_store": anonymized_store_schema,
         "anonymized_class_info": anonymized_class_info_schema,
@@ -378,6 +553,7 @@ usage_statistics_record_schema = {
         "init_payload": init_payload_schema,
         "run_validation_operator_payload": run_validation_operator_payload_schema,
         "anonymized_data_docs_site": anonymized_data_docs_site_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
@@ -385,14 +561,16 @@ usage_statistics_record_schema = {
         "cli_payload": cli_payload_schema,
         "cli_new_ds_choice_payload": cli_new_ds_choice_payload_schema,
         "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
+        "test_yaml_config_payload": test_yaml_config_payload_schema,
     },
     "type": "object",
     "properties": {
         "version": {"enum": ["1.0.0"]},
-        "event_time": {"type": "string", "format": "date-time"},
+        "ge_version": {"type": "string", "maxLength": 32},
         "data_context_id": {"type": "string", "format": "uuid"},
         "data_context_instance_id": {"type": "string", "format": "uuid"},
-        "ge_version": {"type": "string", "maxLength": 32},
+        "event_time": {"type": "string", "format": "date-time"},
+        "event_duration": {"type": "number"},
         "x-forwarded-for": {"type": "string"},
         "success": {"type": ["boolean", "null"]},
     },
@@ -420,6 +598,13 @@ usage_statistics_record_schema = {
                 "event_payload": {
                     "$ref": "#/definitions/run_validation_operator_payload"
                 },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": ["data_context.get_batch_list"]},
+                "event_payload": {"$ref": "#/definitions/anonymized_batch_request"},
             },
         },
         {
@@ -459,9 +644,19 @@ usage_statistics_record_schema = {
                     "enum": [
                         "data_context.build_data_docs",
                         "data_context.open_data_docs",
+                        "data_context.run_checkpoint",
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": ["data_context.test_yaml_config"],
+                },
+                "event_payload": {"$ref": "#/definitions/test_yaml_config_payload"},
             },
         },
         {
@@ -472,7 +667,7 @@ usage_statistics_record_schema = {
                         "cli.suite.edit",
                         "cli.suite.edit.begin",
                         "cli.suite.edit.end",
-                    ]
+                    ],
                 },
                 "event_payload": {
                     "$ref": "#/definitions/cli_suite_expectation_suite_payload"
