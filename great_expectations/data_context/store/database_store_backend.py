@@ -5,14 +5,19 @@ from typing import Dict, Tuple
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.util import filter_properties_dict, get_sqlalchemy_url
+from great_expectations.util import (
+    filter_properties_dict,
+    get_sqlalchemy_url,
+    import_make_url,
+)
 
 try:
     import sqlalchemy as sa
     from sqlalchemy import Column, MetaData, String, Table, and_, column, select
-    from sqlalchemy.engine import make_url
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
+
+    make_url = import_make_url(sa)
 except ImportError:
     sa = None
     create_engine = None
