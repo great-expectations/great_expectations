@@ -24,7 +24,7 @@ try:
     from sqlalchemy import create_engine
     from sqlalchemy.sql.elements import quoted_name
 
-    make_url = import_make_url(sqlalchemy)
+    make_url = import_make_url()
 
 except ImportError:
     sqlalchemy = None
