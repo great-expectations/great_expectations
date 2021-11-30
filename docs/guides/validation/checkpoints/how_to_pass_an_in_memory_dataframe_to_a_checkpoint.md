@@ -146,7 +146,7 @@ df_1 = pd.read_csv("<PATH TO DATA 1>")
 df_2 = pd.read_csv("<PATH TO DATA 2>")
 ```
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L149-L171
+```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L152-L174
 ```
 
 ### Additional Notes
