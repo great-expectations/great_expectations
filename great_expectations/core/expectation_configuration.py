@@ -1306,7 +1306,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 )
                 continue
 
-            # Use-case with query store does not have the following fields so we skip `nested_update` entirely
+            # Should only conditionally update due to use-case with query store (which doesn't have "expectation_suite_name")
             if "expectation_suite_name" in urn and "metric_name" in urn:
                 if not urn.get("metric_kwargs"):
                     nested_update(
