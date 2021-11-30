@@ -2427,7 +2427,8 @@ is "{str(type(config))}", which is illegal).
                     validations_batch_data_list.append(None)
     else:
         if (
-            config.batch_request is not None
+            hasattr(config, "batch_request")
+            and config.batch_request is not None
             and config.batch_request.get("runtime_parameters") is not None
             and config.batch_request["runtime_parameters"].get("batch_data") is not None
             and default_batch_data is None
@@ -2436,7 +2437,7 @@ is "{str(type(config))}", which is illegal).
                 "batch_data"
             ]
 
-        if len(config.validations) > 0:
+        if hasattr(config, "validations") and len(config.validations) > 0:
             validations_batch_data_list = []
             for val in config["validations"]:
                 if (
@@ -2485,13 +2486,14 @@ is "{str(type(config))}", which is illegal).
                     val["batch_request"]["runtime_parameters"].pop("batch_data")
     else:
         if (
-            config.batch_request is not None
+            hasattr(config, "batch_request")
+            and config.batch_request is not None
             and config.batch_request.get("runtime_parameters") is not None
             and "batch_data" in config.batch_request["runtime_parameters"]
         ):
             config.batch_request["runtime_parameters"].pop("batch_data")
 
-        if len(config.validations) > 0:
+        if hasattr(config, "validations") and len(config.validations) > 0:
             for val in config["validations"]:
                 if (
                     val.get("batch_request") is not None
@@ -2554,7 +2556,8 @@ is "{str(type(config))}", which is illegal).
                         ] = validations_batch_data_list[idx]
     else:
         if (
-            config.batch_request is not None
+            hasattr(config, "batch_request")
+            and config.batch_request is not None
             and config.batch_request.get("runtime_parameters") is not None
             and config.batch_request["runtime_parameters"].get("batch_data") is None
             and default_batch_data is not None
@@ -2571,7 +2574,11 @@ is "{str(type(config))}", which is illegal).
                     "batch_data"
                 ] = default_batch_data
 
-        if len(config.validations) > 0 and validations_batch_data_list is not None:
+        if (
+            hasattr(config, "validations")
+            and len(config.validations) > 0
+            and validations_batch_data_list is not None
+        ):
             for idx, val in enumerate(config["validations"]):
                 if (
                     val.get("batch_request") is not None
