@@ -22,6 +22,7 @@ from great_expectations.validator.validator import Validator
 # This class defines a Metric to support your Expectation
 # The main business logic for calculation lives here.
 
+
 class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference the metric.
@@ -31,7 +32,6 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
     condition_value_keys = ("",)
     # This method defines the business logic for evaluating the metric when using a PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-
     def _pandas(cls, column, **kwargs):
         def not_contain_special_character(val, *special_characters):
             for c in special_characters:
@@ -39,7 +39,9 @@ class ColumnValuesToNotContainSpecialCharacters(ColumnMapMetricProvider):
                     return False
             return True
 
-        return column.apply(not_contain_special_character, args = (list(string.punctuation)))
+        return column.apply(
+            not_contain_special_character, args=(list(string.punctuation))
+        )
 
 
 # This class defines the Expectation itself
@@ -61,8 +63,17 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for the Expectation
-    examples = [{"data":{
-                "mostly_no_special_character": ["apple@", "pear$!", "%banana%", "maxwell", "neil armstrong", 234],
+    examples = [
+        {
+            "data": {
+                "mostly_no_special_character": [
+                    "apple@",
+                    "pear$!",
+                    "%banana%",
+                    "maxwell",
+                    "neil armstrong",
+                    234,
+                ],
             },
             "tests": [
                 {
@@ -72,7 +83,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
                     "in": {"column": "mostly_no_special_character", "mostly": 1},
                     "out": {
                         "success": False,
-                        "unexpected_index_list": [0,1,2],
+                        "unexpected_index_list": [0, 1, 2],
                         "unexpected_list": ["apple@", "pear$!", "%banana%"],
                     },
                     "exact_match_out": False,
@@ -83,9 +94,11 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["experimental expectation",
-                "column map expectation",
-                "special characters"],
+        "tags": [
+            "experimental expectation",
+            "column map expectation",
+            "special characters",
+        ],
         "contributors": ["@jaibirsingh"],
         "package": "experimental_expectations",
     }
@@ -95,14 +108,13 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
     map_metric = "column_values.not_contain_special_character"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False.
-    success_keys = ( "mostly",)
+    success_keys = ("mostly",)
 
     default_kwarg_values = {
-    "mostly" : 1,
+        "mostly": 1,
     }
 
-
-# This method defines a prescriptive Renderer
+    # This method defines a prescriptive Renderer
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
@@ -160,6 +172,9 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
             )
         ]
 
+
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToNotContainSpecialCharacters().run_diagnostics()
+    diagnostics_report = (
+        ExpectColumnValuesToNotContainSpecialCharacters().run_diagnostics()
+    )
     print(json.dumps(diagnostics_report, indent=2))
