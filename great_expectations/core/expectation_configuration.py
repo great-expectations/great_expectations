@@ -4,6 +4,7 @@ from copy import deepcopy
 from typing import Any, Dict, Optional, Union
 
 import jsonpatch
+from pyparsing import ParseResults
 
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -1306,29 +1307,36 @@ class ExpectationConfiguration(SerializableDictDot):
                 )
                 continue
 
-            # Should only conditionally update due to use-case with query store (which doesn't have "expectation_suite_name")
-            if "expectation_suite_name" in urn and "metric_name" in urn:
-                if not urn.get("metric_kwargs"):
-                    nested_update(
-                        dependencies,
-                        {urn["expectation_suite_name"]: [urn["metric_name"]]},
-                    )
-                else:
-                    nested_update(
-                        dependencies,
-                        {
-                            urn["expectation_suite_name"]: [
-                                {
-                                    "metric_kwargs_id": {
-                                        urn["metric_kwargs"]: [urn["metric_name"]]
-                                    }
-                                }
-                            ]
-                        },
-                    )
+            # Stores do not have "expectation_suite_name"
+            if urn.urn_type == "stores":
+                pass
+            else:
+                self._update_dependencies_with_expectation_suite_urn(dependencies, urn)
 
         dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
+
+    def _update_dependencies_with_expectation_suite_urn(
+        self, dependencies: dict, urn: ParseResults
+    ) -> None:
+        if not urn.get("metric_kwargs"):
+            nested_update(
+                dependencies,
+                {urn["expectation_suite_name"]: [urn["metric_name"]]},
+            )
+        else:
+            nested_update(
+                dependencies,
+                {
+                    urn["expectation_suite_name"]: [
+                        {
+                            "metric_kwargs_id": {
+                                urn["metric_kwargs"]: [urn["metric_name"]]
+                            }
+                        }
+                    ]
+                },
+            )
 
     def _get_expectation_impl(self):
         return get_expectation_impl(self.expectation_type)
