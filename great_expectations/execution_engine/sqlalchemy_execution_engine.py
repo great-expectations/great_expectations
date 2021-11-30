@@ -51,7 +51,7 @@ except ImportError:
     sa = None
 
 try:
-    make_url = import_make_url()
+    make_url = import_make_url(sa)
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import TextClause, quoted_name

@@ -17,7 +17,7 @@ try:
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
 
-    make_url = import_make_url()
+    make_url = import_make_url(sa)
 except ImportError:
     sa = None
     create_engine = None
