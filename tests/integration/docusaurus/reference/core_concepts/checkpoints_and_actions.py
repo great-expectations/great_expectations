@@ -2,6 +2,9 @@ import pandas as pd
 from ruamel import yaml
 
 import great_expectations as ge
+from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
+from great_expectations.data_context.types.base import CheckpointConfig
 
 context = ge.get_context()
 
@@ -61,4 +64,7 @@ context.add_checkpoint(**yaml.load(checkpoint_yaml))
 assert context.list_checkpoints() == ["my_checkpoint"]
 
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
-assert results["success"] == True
+assert type(results.run_id) == RunIdentifier
+assert set(type(k) for k in results.run_results.keys()) == {ValidationResultIdentifier}
+assert type(results.checkpoint_config) == CheckpointConfig
+assert results.success == True
