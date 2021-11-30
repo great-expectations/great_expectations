@@ -140,7 +140,9 @@ test_python = context.test_yaml_config(
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert test_yaml == test_python
-assert set(context.list_checkpoints()) == set(["my_missing_keys_checkpoint", "my_missing_batch_request_checkpoint"])
+assert set(context.list_checkpoints()) == set(
+    ["my_missing_keys_checkpoint", "my_missing_batch_request_checkpoint"]
+)
 
 df_1 = pd.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
 df_2 = pd.read_csv("./data/yellow_tripdata_sample_2019-02.csv")
