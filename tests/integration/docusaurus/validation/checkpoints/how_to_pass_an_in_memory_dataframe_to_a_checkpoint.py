@@ -59,7 +59,7 @@ context.create_expectation_suite("my_expectation_suite")
 
 # YAML
 checkpoint_yaml = """
-name: my_checkpoint
+name: my_missing_keys_checkpoint
 config_version: 1
 class_name: SimpleCheckpoint
 validations:
@@ -75,7 +75,7 @@ test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object
 
 # Python
 checkpoint_config = {
-    "name": "my_checkpoint",
+    "name": "my_missing_keys_checkpoint",
     "config_version": 1,
     "class_name": "SimpleCheckpoint",
     "validations": [
@@ -97,12 +97,12 @@ test_python = context.test_yaml_config(
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert test_yaml == test_python
-assert context.list_checkpoints() == ["my_checkpoint"]
+assert context.list_checkpoints() == ["my_missing_keys_checkpoint"]
 
 df = pd.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
 
 results = context.run_checkpoint(
-    checkpoint_name="my_checkpoint",
+    checkpoint_name="my_missing_keys_checkpoint",
     batch_request={
         "runtime_parameters": {"batch_data": df},
         "batch_identifiers": {
@@ -116,7 +116,7 @@ assert results["success"] == True
 
 # YAML
 checkpoint_yaml = """
-name: my_checkpoint
+name: my_missing_batch_request_checkpoint
 config_version: 1
 class_name: SimpleCheckpoint
 expectation_suite_name: my_expectation_suite
@@ -127,7 +127,7 @@ test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object
 
 # Python
 checkpoint_config = {
-    "name": "my_checkpoint",
+    "name": "my_missing_batch_request_checkpoint",
     "config_version": 1,
     "class_name": "SimpleCheckpoint",
     "expectation_suite_name": "my_expectation_suite",
@@ -140,7 +140,7 @@ test_python = context.test_yaml_config(
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert test_yaml == test_python
-assert context.list_checkpoints() == ["my_checkpoint"]
+assert context.list_checkpoints() == ["my_missing_keys_checkpoint", "my_missing_batch_request_checkpoint"]
 
 df_1 = pd.read_csv("./data/yellow_tripdata_sample_2019-01.csv")
 df_2 = pd.read_csv("./data/yellow_tripdata_sample_2019-02.csv")
@@ -162,7 +162,7 @@ batch_request_2 = RuntimeBatchRequest(
 )
 
 results = context.run_checkpoint(
-    checkpoint_name="my_checkpoint",
+    checkpoint_name="my_missing_batch_request_checkpoint",
     validations=[
         {"batch_request": batch_request_1},
         {"batch_request": batch_request_2},
