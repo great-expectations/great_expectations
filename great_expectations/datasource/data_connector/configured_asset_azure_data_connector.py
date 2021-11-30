@@ -9,6 +9,9 @@ from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
+from great_expectations.datasource.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+)
 from great_expectations.datasource.data_connector.util import list_azure_keys
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -86,7 +89,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._container = container
-        self._name_starts_with = os.path.join(name_starts_with, "")
+        self._name_starts_with = FilePathDataConnector.sanitize_prefix(name_starts_with)
         self._delimiter = delimiter
 
         if azure_options is None:

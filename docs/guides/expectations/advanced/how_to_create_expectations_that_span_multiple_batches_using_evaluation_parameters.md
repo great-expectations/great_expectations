@@ -12,7 +12,7 @@ This guide will help you create [Expectations](../../../reference/expectations/e
 - Configured a [Datasource](../../../reference/datasources) (or several Datasources) with at least two **Data Assets** and understand the basics of **Batch Requests**.
 - Also created [Expectations Suites](../../../tutorials/getting_started/create_your_first_expectations.md) for those Data Assets.
 - Have a working [Evaluation Parameter store](../../../reference/data_context#evaluation-parameter-stores). (The default in-memory store from ``great_expectations init`` can work for this.)
-- Have a working [Validation Operator](../../../reference/checkpoints_and_actions) (see also [How to add a Validation Operator](../../../guides/validation/how_to_add_a_validation_operator)). (The default Validation Operator from ``great_expectations init`` can work for this.)
+- Have a working [Checkpoint](../../../guides/validation/how_to_validate_data_by_running_a_checkpoint.md)
 
 </Prerequisites>
 
@@ -100,17 +100,13 @@ In a notebook,
 
     This step is necessary because your ``$PARAMETER`` will only function properly when invoked within a Validation operation with multiple Validators. The simplest way to execute such an operation is through a :ref:`Validation Operator <reference__core_concepts__validation__validation_operator>`, and Validation Operators are configured to load Expectation Suites from Expectation Stores, not memory.
 
-6. **Execute an existing Validation Operator on your upstream and downstream Validators.**
+6. **Execute an existing Checkpoint.**
 
-    You can do this within your notebook by running ``context.run_validation_operator``.
+    You can do this within your notebook by running ``context.run_checkpoint``.
 
     ```python
-    results = context.run_validation_operator(
-        "action_list_operator",
-        assets_to_validate=[
-            upstream_validator,
-            downstream_validator
-        ]
+    results = context.run_checkpoint(
+        checkpoint_name="my_checkpoint"
     )
     ```
 

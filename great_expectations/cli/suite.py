@@ -552,7 +552,7 @@ def _suite_edit_workflow(
     usage_event: str,
     interactive: bool,
     no_jupyter: bool,
-    create_if_not_exist: Optional[bool] = False,
+    create_if_not_exist: bool = False,
     datasource_name: Optional[str] = None,
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
@@ -560,8 +560,8 @@ def _suite_edit_workflow(
     additional_batch_request_args: Optional[
         Dict[str, Union[str, int, Dict[str, Any]]]
     ] = None,
-    suppress_usage_message: Optional[bool] = False,
-    assume_yes: Optional[bool] = False,
+    suppress_usage_message: bool = False,
+    assume_yes: bool = False,
 ):
     # suppress_usage_message flag is for the situation where _suite_edit_workflow is called by _suite_new_workflow().
     # when called by _suite_new_workflow(), the flag will be set to True, otherwise it will default to False

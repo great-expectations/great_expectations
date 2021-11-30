@@ -11,7 +11,7 @@ Let’s set up our first Checkpoint! **Go back to your terminal** and shut down 
 
 
 ```console
-great_expectations --v3-api checkpoint new my_new_checkpoint
+great_expectations --v3-api checkpoint new getting_started_checkpoint
 ```
 
 This will open a **Jupyter Notebook** that will allow you to complete the configuration of your Checkpoint.
@@ -19,16 +19,16 @@ This will open a **Jupyter Notebook** that will allow you to complete the config
 The Jupyter Notebook contains some boilerplate code that allows you to configure a new Checkpoint. The second code cell is pre-populated with an arbitrarily chosen batch request and Expectation Suite to get you started. Edit the `data_asset_name` to reference the data we want to validate (the February data), as follows:
 
 
-```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L117-L130
+```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L161-L174
 ```
 
 You can then execute all cells in the notebook in order to store the Checkpoint to your Data Context.
 
 **What just happened?**
 
-- `my_new_checkpoint` is the name of your new Checkpoint.
+- `getting_started_checkpoint` is the name of your new Checkpoint.
 
-- The Checkpoint uses `taxi.demo` as its primary Expectation Suite.
+- The Checkpoint uses `getting_started_expectation_suite_taxi.demo` as its primary Expectation Suite.
 
 - You configured the Checkpoint to validate the `yellow_tripdata_sample_2019-02.csv` (i.e. our February data) file.
 

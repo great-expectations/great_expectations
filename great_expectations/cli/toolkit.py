@@ -76,11 +76,11 @@ def get_or_create_expectation_suite(
     data_context: DataContext,
     data_asset_name: Optional[str] = None,
     usage_event: Optional[str] = None,
-    suppress_usage_message: Optional[bool] = False,
+    suppress_usage_message: bool = False,
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = None,
-    create_if_not_exist: Optional[bool] = True,
+    create_if_not_exist: bool = True,
 ) -> ExpectationSuite:
     if expectation_suite_name is None:
         default_expectation_suite_name: str = get_default_expectation_suite_name(
@@ -142,7 +142,7 @@ def tell_user_suite_exists(
     data_context: DataContext,
     expectation_suite_name: str,
     usage_event: str,
-    suppress_usage_message: Optional[bool] = False,
+    suppress_usage_message: bool = False,
 ):
     exit_with_failure_message_and_stats(
         data_context=data_context,
@@ -189,8 +189,8 @@ def load_expectation_suite(
     data_context: DataContext,
     expectation_suite_name: str,
     usage_event: str,
-    suppress_usage_message: Optional[bool] = False,
-    create_if_not_exist: Optional[bool] = True,
+    suppress_usage_message: bool = False,
+    create_if_not_exist: bool = True,
 ) -> Optional[ExpectationSuite]:
     """
     Load an expectation suite from a given context.
@@ -232,7 +232,7 @@ def load_expectation_suite(
 def exit_with_failure_message_and_stats(
     data_context: DataContext,
     usage_event: str,
-    suppress_usage_message: Optional[bool] = False,
+    suppress_usage_message: bool = False,
     message: Optional[str] = None,
 ):
     if message:
@@ -868,12 +868,14 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
 
         # If the file or directory exists, treat it appropriately
         # This handles files without extensions
+        filename: Optional[str]
+        directory: Optional[str]
         if config_file_location_path.is_file():
-            filename: Optional[str] = fr"{str(config_file_location_path.name)}"
-            directory: Optional[str] = fr"{str(config_file_location_path.parent)}"
+            filename = fr"{str(config_file_location_path.name)}"
+            directory = fr"{str(config_file_location_path.parent)}"
         elif config_file_location_path.is_dir():
-            filename: Optional[str] = None
-            directory: Optional[str] = config_file_location
+            filename = None
+            directory = config_file_location
 
         else:
             raise ge_exceptions.ConfigNotFoundError()
@@ -1042,7 +1044,7 @@ def get_batch_request_from_json_file(
     batch_request_json_file_path: str,
     data_context: DataContext,
     usage_event: Optional[str] = None,
-    suppress_usage_message: Optional[bool] = False,
+    suppress_usage_message: bool = False,
 ) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
@@ -1071,7 +1073,7 @@ def get_batch_request_using_datasource_name(
     data_context: DataContext,
     datasource_name: Optional[str] = None,
     usage_event: Optional[str] = None,
-    suppress_usage_message: Optional[bool] = False,
+    suppress_usage_message: bool = False,
     additional_batch_request_args: Optional[
         Dict[str, Union[str, int, Dict[str, Any]]]
     ] = None,
