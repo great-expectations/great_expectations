@@ -121,3 +121,7 @@ df_2 = pd.read_csv("<PATH TO DATA 2>")
 
 ```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L143-L165
 ```
+
+### Additional Notes
+To view the full script used in this page, see it on GitHub:
+- [how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py)
