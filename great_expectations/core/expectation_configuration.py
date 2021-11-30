@@ -1306,24 +1306,26 @@ class ExpectationConfiguration(SerializableDictDot):
                 )
                 continue
 
-            if not urn.get("metric_kwargs"):
-                nested_update(
-                    dependencies,
-                    {urn["expectation_suite_name"]: [urn["metric_name"]]},
-                )
-            else:
-                nested_update(
-                    dependencies,
-                    {
-                        urn["expectation_suite_name"]: [
-                            {
-                                "metric_kwargs_id": {
-                                    urn["metric_kwargs"]: [urn["metric_name"]]
+            # Should only conditionally update due to use-case with query store
+            if "expectation_suite_name" in urn and "metric_name" in urn:
+                if not urn.get("metric_kwargs"):
+                    nested_update(
+                        dependencies,
+                        {urn["expectation_suite_name"]: [urn["metric_name"]]},
+                    )
+                else:
+                    nested_update(
+                        dependencies,
+                        {
+                            urn["expectation_suite_name"]: [
+                                {
+                                    "metric_kwargs_id": {
+                                        urn["metric_kwargs"]: [urn["metric_name"]]
+                                    }
                                 }
-                            }
-                        ]
-                    },
-                )
+                            ]
+                        },
+                    )
 
         dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
