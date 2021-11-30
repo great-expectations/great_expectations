@@ -1284,9 +1284,9 @@ class ExpectationConfiguration(SerializableDictDot):
         )
         return myself
 
-    def get_evaluation_parameter_dependencies(self):
+    def get_evaluation_parameter_dependencies(self) -> dict:
         parsed_dependencies = {}
-        for key, value in self.kwargs.items():
+        for value in self.kwargs.values():
             if isinstance(value, dict) and "$PARAMETER" in value:
                 param_string_dependencies = find_evaluation_parameter_dependencies(
                     value["$PARAMETER"]
@@ -1306,7 +1306,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 )
                 continue
 
-            # Should only conditionally update due to use-case with query store
+            # Use-case with query store does not have the following fields so we skip `nested_update` entirely
             if "expectation_suite_name" in urn and "metric_name" in urn:
                 if not urn.get("metric_kwargs"):
                     nested_update(
