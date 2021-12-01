@@ -87,10 +87,15 @@ def test_all_expectations_using_test_definitions():
                     # This would be a good place to put a kwarg-to-arg converter
                     continue
 
-                # Attempt to render it
-                render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
-                    [fake_expectation]
-                ).to_json_dict()
+                try:
+                    # Attempt to render it
+                    render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
+                        [fake_expectation]
+                    ).to_json_dict()
+                except AttributeError:
+                    # Except when there is no expectation to render
+                    pytest.skip()
+
 
                 assert isinstance(render_result, dict)
                 assert "content_block_type" in render_result
