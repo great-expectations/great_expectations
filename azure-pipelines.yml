@@ -155,7 +155,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines pytest-testmon
-              pytest $(GE_pytest_opts) --testmon
+              pytest $(GE_pytest_opts) --testmon --napoleon-docstrings --junitxml=junit/test-results.xml
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -228,8 +228,8 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-testmon
-              pytest $(GE_pytest_opts) --testmon
+              pip install pytest pytest-azurepipelines pytest-testmon
+              pytest $(GE_pytest_opts) --testmon --napoleon-docstrings --junitxml=junit/test-results.xml
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -322,7 +322,7 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-azurepipelines pytest-testmon
-              pytest --testmon --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --testmon --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml
             displayName: 'pytest'
 
       - job: mssql
