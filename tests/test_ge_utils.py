@@ -7,7 +7,7 @@ import great_expectations as ge
 from great_expectations.core.util import nested_update
 from great_expectations.dataset.util import check_sql_engine_dialect
 from great_expectations.util import (
-    deep_filter_properties_dict,
+    deep_filter_properties_iterable,
     filter_properties_dict,
     get_currently_executing_function_call_arguments,
     hyphen,
@@ -378,7 +378,7 @@ def test_filter_properties_dict():
     assert d7_end == d7_end_expected
 
 
-def test_deep_filter_properties_dict():
+def test_deep_filter_properties_iterable():
     source_dict: dict = {
         "integer_zero": 0,
         "null": None,
@@ -422,7 +422,7 @@ def test_deep_filter_properties_dict():
     }
 
     d0_begin: dict = copy.deepcopy(source_dict)
-    deep_filter_properties_dict(
+    deep_filter_properties_iterable(
         properties=d0_begin,
         clean_falsy=True,
         inplace=True,
@@ -456,7 +456,7 @@ def test_deep_filter_properties_dict():
     assert d0_end == d0_end_expected
 
     d1_begin: dict = copy.deepcopy(source_dict)
-    d1_end: dict = deep_filter_properties_dict(
+    d1_end: dict = deep_filter_properties_iterable(
         properties=d1_begin,
         clean_falsy=True,
         keep_falsy_numerics=False,
