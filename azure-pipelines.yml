@@ -154,8 +154,8 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines pytest-testmon
-              pytest $(GE_pytest_opts) --testmon --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pip install pytest pytest-azurepipelines pytest-testmon
+              pytest $(GE_pytest_opts) --testmon --napoleon-docstrings --junitxml=junit/test-results.xml --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -228,8 +228,8 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines pytest-testmon
-              pytest $(GE_pytest_opts) --testmon --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pip install pytest pytest-azurepipelines pytest-testmon
+              pytest $(GE_pytest_opts) --testmon --napoleon-docstrings --junitxml=junit/test-results.xml --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -321,8 +321,8 @@ stages:
 
           - script: |
               pip install --requirement requirements.txt
-              pip install pytest pytest-cov pytest-azurepipelines pytest-testmon
-              pytest --testmon --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pip install pytest pytest-azurepipelines pytest-testmon
+              pytest --testmon --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
       - job: mssql
@@ -353,8 +353,8 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines pytest-testmon
-              pytest --testmon --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pip install pytest pytest-azurepipelines pytest-testmon
+              pytest --testmon --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
   - stage: cli_integration
