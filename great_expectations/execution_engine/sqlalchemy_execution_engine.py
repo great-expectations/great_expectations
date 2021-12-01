@@ -39,6 +39,7 @@ from great_expectations.util import (
     get_sqlalchemy_selectable,
     get_sqlalchemy_url,
     import_library_module,
+    import_make_url,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -46,11 +47,12 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+
+    make_url = import_make_url()
 except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.engine import make_url
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import TextClause, quoted_name

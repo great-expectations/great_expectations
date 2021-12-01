@@ -1211,3 +1211,15 @@ def get_sqlalchemy_domain_data(domain_data):
     # engine.get_domain_records returns a valid select object;
     # calling fetchall at execution is equivalent to a SELECT *
     return domain_data
+
+
+def import_make_url():
+    """
+    Beginning from SQLAlchemy 1.4, make_url is accessed from sqlalchemy.engine; earlier versions must
+    still be accessed from sqlalchemy.engine.url to avoid import errors.
+    """
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        from sqlalchemy.engine.url import make_url
+    else:
+        from sqlalchemy.engine import make_url
+    return make_url
