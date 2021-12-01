@@ -374,8 +374,9 @@ class Dataset(MetaDataset):
                 allow_relative_error=allow_relative_error,
             )
             iqr = _75 - _25
-            if iqr < 1e-10:  # Consider IQR 0 and do not use variance-based estimator
-                n_bins = sturges
+            if iqr < 1e-10:
+                # Consider IQR 0 and do not use variance-based estimator
+                n_bins = 1
             else:
                 fd = (2 * float(iqr)) / (nonnull_count ** (1 / 3))
                 n_bins = max(

@@ -143,8 +143,9 @@ def _get_column_partition_using_metrics(bins, n_bins, _metrics):
         sturges = np.log2(nonnull_count + 1)
         min_, _25, _75, max_ = _metrics["column.quantile_values"]
         iqr = _75 - _25
-        if iqr < 1e-10:  # Consider IQR 0 and do not use variance-based estimator
-            n_bins = int(np.ceil(sturges))
+        if iqr < 1e-10:
+            # Consider IQR 0 and do not use variance-based estimator
+            n_bins = 1
         else:
             fd = (2 * float(iqr)) / (nonnull_count ** (1 / 3))
             n_bins = max(int(np.ceil(sturges)), int(np.ceil(float(max_ - min_) / fd)))
