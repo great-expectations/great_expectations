@@ -1019,8 +1019,8 @@ def filter_properties_dict(
                     if not (
                         (keep_fields and key in keep_fields)
                         or (delete_fields and key in delete_fields)
+                        or is_truthy(value=value)
                         or is_numeric(value=value)
-                        or value
                     )
                 ]
             )
@@ -1032,7 +1032,7 @@ def filter_properties_dict(
                     if not (
                         (keep_fields and key in keep_fields)
                         or (delete_fields and key in delete_fields)
-                        or value
+                        or is_truthy(value=value)
                     )
                 ]
             )
@@ -1089,12 +1089,23 @@ def deep_filter_properties_dict(
     return properties
 
 
+def is_truthy(value: Any) -> bool:
+    try:
+        if value:
+            return True
+        else:
+            return False
+    except ValueError:
+        return False
+
+
 def is_numeric(value: Any) -> bool:
     return value is not None and (is_int(value=value) or is_float(value=value))
 
 
 def is_int(value: Any) -> bool:
     try:
+        # noinspection PyUnusedLocal
         num: int = int(value)
     except (TypeError, ValueError):
         return False
@@ -1103,6 +1114,7 @@ def is_int(value: Any) -> bool:
 
 def is_float(value: Any) -> bool:
     try:
+        # noinspection PyUnusedLocal
         num: float = float(value)
     except (TypeError, ValueError):
         return False

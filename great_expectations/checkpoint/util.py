@@ -13,6 +13,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
@@ -259,6 +260,13 @@ def get_runtime_batch_request(
         if len(batch_identifiers.keys()) == 0:
             batch_identifiers["timestamp"] = str(datetime.datetime.now())
             runtime_batch_request_dict["batch_identifiers"] = batch_identifiers
+
+    filter_properties_dict(
+        properties=runtime_batch_request_dict,
+        keep_fields=batch_request_class.field_names,
+        clean_nulls=False,
+        inplace=True,
+    )
 
     return batch_request_class(**runtime_batch_request_dict)
 

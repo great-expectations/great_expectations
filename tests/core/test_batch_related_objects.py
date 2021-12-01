@@ -1,6 +1,3 @@
-import copy
-import datetime
-
 import pandas as pd
 import pytest
 
@@ -11,7 +8,6 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchSpec,
     IDDict,
-    RuntimeBatchRequest,
 )
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.exceptions import InvalidBatchSpecError
