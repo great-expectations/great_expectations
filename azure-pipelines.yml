@@ -154,8 +154,8 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-testmon
-              pytest $(GE_pytest_opts) --testmon-forceselect
+              pip install pytest pytest-azurepipelines pytest-testmon
+              pytest $(GE_pytest_opts) --testmon-forceselect --napoleon-docstrings --junitxml=junit/test-results.xml
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -228,8 +228,8 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-testmon
-              pytest $(GE_pytest_opts) --testmon-forceselect
+              pip install pytest pytest-azurepipelines pytest-testmon
+              pytest $(GE_pytest_opts) --testmon-forceselect --napoleon-docstrings --junitxml=junit/test-results.xml
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -271,7 +271,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-testmon
+              pip install pytest pytest-azurepipelines pytest-testmon
               pytest --testmon-forceselect --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
             displayName: 'pytest'
 
@@ -321,8 +321,8 @@ stages:
 
           - script: |
               pip install --requirement requirements.txt
-              pip install pytest pytest-testmon
-              pytest --testmon-forceselect --mysql --no-postgresql --no-spark
+              pip install pytest pytest-azurepipelines pytest-testmon
+              pytest --testmon-forceselect --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml
             displayName: 'pytest'
 
       - job: mssql
@@ -353,7 +353,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-testmon
+              pip install pytest pytest-azurepipelines pytest-testmon
               pytest --testmon-forceselect --mssql --no-postgresql --no-spark
             displayName: 'pytest'
 
@@ -393,7 +393,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-testmon
+              pip install pytest pytest-azurepipelines pytest-testmon
               pytest --testmon-forceselect --aws-integration -v tests/cli
             displayName: 'pytest'
 
