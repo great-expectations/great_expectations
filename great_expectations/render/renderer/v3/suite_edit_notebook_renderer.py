@@ -5,11 +5,11 @@ import jinja2
 import nbformat
 
 from great_expectations import DataContext
-from great_expectations.cli.batch_request import (
+from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.batch import (
+    BatchRequest,
     standardize_batch_request_display_ordering,
 )
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.types.base import (
     NotebookConfig,

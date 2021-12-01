@@ -14,7 +14,10 @@ from great_expectations.cli.suite import (
     _process_suite_new_flags_and_prompt,
 )
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import (
+    BatchRequest,
+    standardize_batch_request_display_ordering,
+)
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.util import deep_filter_properties_dict, lint_code
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
@@ -22,10 +25,6 @@ from tests.render.test_util import (
     find_code_in_notebook,
     load_notebook_from_path,
     run_notebook,
-)
-
-from great_expectations.cli.batch_request import (  # isort:skip
-    standardize_batch_request_display_ordering,
 )
 
 

@@ -3,10 +3,10 @@ from typing import Any, Dict, List, Union
 import nbformat
 
 from great_expectations import DataContext
-from great_expectations.cli.batch_request import (
+from great_expectations.core.batch import (
+    BatchRequest,
     standardize_batch_request_display_ordering,
 )
-from great_expectations.core.batch import BatchRequest
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )

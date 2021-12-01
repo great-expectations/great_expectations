@@ -5,6 +5,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
     get_batch_request_from_acceptable_arguments,
+    standardize_batch_request_display_ordering,
 )
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.util import deep_filter_properties_dict
@@ -40,6 +41,9 @@ class BatchRequestAnonymizer(Anonymizer):
         anonymized_batch_request_dict: Optional[
             Union[str, dict]
         ] = self._anonymize_batch_request_properties(source=batch_request_dict)
+        anonymized_batch_request_dict = standardize_batch_request_display_ordering(
+            batch_request=anonymized_batch_request_dict
+        )
         deep_filter_properties_dict(
             properties=anonymized_batch_request_dict,
             clean_falsy=True,
@@ -58,6 +62,10 @@ class BatchRequestAnonymizer(Anonymizer):
             clean_falsy=True,
             inplace=True,
         )
+        self._batch_request_optional_top_level_keys.sort()
+        self._data_connector_query_keys.sort()
+        self._runtime_parameters_keys.sort()
+        self._batch_spec_passthrough_keys.sort()
         return anonymized_batch_request_keys_dict
 
     def _anonymize_batch_request_properties(

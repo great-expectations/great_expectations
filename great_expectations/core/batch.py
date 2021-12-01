@@ -2,7 +2,7 @@ import copy
 import datetime
 import json
 import logging
-from typing import Any, Callable, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
@@ -253,6 +253,8 @@ class BatchRequestBase(SerializableDictDot):
         for field_name in self.field_names:
             if hasattr(self, f"_{field_name}"):
                 dict_obj[field_name] = getattr(self, field_name)
+
+        dict_obj = standardize_batch_request_display_ordering(batch_request=dict_obj)
 
         return dict_obj
 
@@ -562,34 +564,25 @@ class Batch(SerializableDictDot):
     def batch_kwargs(self):
         return self._batch_kwargs
 
-    def to_json_dict(self) -> dict:
-        json_dict: dict = {
+    def to_dict(self) -> dict:
+        dict_obj: dict = {
             "data": str(self.data),
-            "batch_request": self.batch_request.to_json_dict(),
+            "batch_request": self.batch_request.to_dict(),
             "batch_definition": self.batch_definition.to_json_dict()
             if isinstance(self.batch_definition, BatchDefinition)
             else {},
-            "batch_spec": str(self.batch_spec),
-            "batch_markers": str(self.batch_markers),
+            "batch_spec": self.batch_spec,
+            "batch_markers": self.batch_markers,
         }
+        return dict_obj
+
+    def to_json_dict(self) -> dict:
+        json_dict: dict = self.to_dict()
         deep_filter_properties_dict(
             properties=json_dict["batch_request"],
             keep_falsy_numerics=True,
             inplace=True,
         )
-        datasource_name: str = json_dict["batch_request"]["datasource_name"]
-        data_connector_name: str = json_dict["batch_request"]["data_connector_name"]
-        data_asset_name: str = json_dict["batch_request"]["data_asset_name"]
-        json_dict["batch_request"].pop("datasource_name")
-        json_dict["batch_request"].pop("data_connector_name")
-        json_dict["batch_request"].pop("data_asset_name")
-        batch_request: dict = {
-            "datasource_name": datasource_name,
-            "data_connector_name": data_connector_name,
-            "data_asset_name": data_asset_name,
-            **json_dict["batch_request"],
-        }
-        json_dict["batch_request"] = batch_request
         return json_dict
 
     @property
@@ -980,3 +973,21 @@ is "{str(type(config))}", which is illegal).
                     val["batch_request"]["runtime_parameters"][
                         "batch_data"
                     ] = validations_batch_data_list[idx]
+
+
+def standardize_batch_request_display_ordering(
+    batch_request: Dict[str, Union[str, int, Dict[str, Any]]]
+) -> Dict[str, Union[str, Dict[str, Any]]]:
+    datasource_name: str = batch_request["datasource_name"]
+    data_connector_name: str = batch_request["data_connector_name"]
+    data_asset_name: str = batch_request["data_asset_name"]
+    batch_request.pop("datasource_name")
+    batch_request.pop("data_connector_name")
+    batch_request.pop("data_asset_name")
+    batch_request = {
+        "datasource_name": datasource_name,
+        "data_connector_name": data_connector_name,
+        "data_asset_name": data_asset_name,
+        **batch_request,
+    }
+    return batch_request
