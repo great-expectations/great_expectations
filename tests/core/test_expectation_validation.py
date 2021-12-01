@@ -20,7 +20,7 @@ def test_expectation_suite_extract_false_no_results(test_df):
 
     result = test_ds.validate()
 
-    failed_results = result.get_failed()
+    failed_results = result.get_failed_validation_results()
 
     assert isinstance(failed_results, ExpectationSuiteValidationResult)
     assert failed_results.statistics["evaluated_expectations"] == 0
@@ -35,7 +35,7 @@ def test_expectation_suite_extract_false_many_results(test_df):
 
     result = test_ds.validate()
 
-    failed_results = result.get_failed()
+    failed_results = result.get_failed_validation_results()
 
     assert isinstance(failed_results, ExpectationSuiteValidationResult)
     assert failed_results.statistics["evaluated_expectations"] == 2

@@ -371,7 +371,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             )
         )
 
-    def get_failed(self):
+    def get_failed_validation_results(self) -> "ExpectationSuiteValidationResult":
         validation_results = [result for result in self.results if not result.success]
 
         successful_expectations = sum(exp.success for exp in validation_results)
