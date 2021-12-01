@@ -155,7 +155,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines pytest-testmon
-              pytest $(GE_pytest_opts) --testmon --napoleon-docstrings --junitxml=junit/test-results.xml --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest $(GE_pytest_opts) --testmon
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -229,7 +229,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines pytest-testmon
-              pytest $(GE_pytest_opts) --testmon --junitxml=junit/test-results.xml --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest $(GE_pytest_opts) --testmon
             displayName: 'pytest'
 
           - task: PublishTestResults@2
