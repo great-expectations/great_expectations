@@ -155,7 +155,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines pytest-testmon
-              pytest $(GE_pytest_opts) --testmon-forceselect --napoleon-docstrings --junitxml=junit/test-results.xml
+              pytest $(GE_pytest_opts) --testmon --napoleon-docstrings --junitxml=junit/test-results.xml
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -229,7 +229,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines pytest-testmon
-              pytest $(GE_pytest_opts) --testmon-forceselect --napoleon-docstrings --junitxml=junit/test-results.xml
+              pytest $(GE_pytest_opts) --testmon --napoleon-docstrings --junitxml=junit/test-results.xml
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -272,7 +272,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines pytest-testmon
-              pytest --testmon-forceselect --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+              pytest --testmon --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
             displayName: 'pytest'
 
   - stage: db_integration
@@ -322,7 +322,7 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-azurepipelines pytest-testmon
-              pytest --testmon-forceselect --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml
+              pytest --testmon --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml
             displayName: 'pytest'
 
       - job: mssql
@@ -354,7 +354,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines pytest-testmon
-              pytest --testmon-forceselect --mssql --no-postgresql --no-spark
+              pytest --testmon --mssql --no-postgresql --no-spark
             displayName: 'pytest'
 
   - stage: cli_integration
@@ -394,7 +394,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines pytest-testmon
-              pytest --testmon-forceselect --aws-integration -v tests/cli
+              pytest --testmon --aws-integration -v tests/cli
             displayName: 'pytest'
 
   - stage: deploy_gallery
