@@ -89,13 +89,14 @@ def test_all_expectations_using_test_definitions():
 
                 try:
                     # Attempt to render it
-                    render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
-                        [fake_expectation]
-                    ).to_json_dict()
+                    render_result = (
+                        ExpectationSuiteBulletListContentBlockRenderer.render(
+                            [fake_expectation]
+                        ).to_json_dict()
+                    )
                 except AttributeError:
                     # Except when there is no expectation to render
                     pytest.skip()
-
 
                 assert isinstance(render_result, dict)
                 assert "content_block_type" in render_result
