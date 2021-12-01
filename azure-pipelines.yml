@@ -229,7 +229,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines pytest-testmon
-              ls
+              ls -af
               pytest $(GE_pytest_opts) --testmon --napoleon-docstrings --junitxml=junit/test-results.xml --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
