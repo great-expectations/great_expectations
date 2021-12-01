@@ -133,8 +133,10 @@ class Validator:
         **kwargs,
     ):
         """
-        Validators are responsible for running Expectation Suites against Batch Requests.
-        Additionally, note that Validators are used by Checkpoints under the hood.
+        Validator is the key object used to create Expectations, validate Expectations,
+        and get Metrics for Expectations.
+
+        Additionally, note that Validators are used by Checkpoints under-the-hood.
 
         :param execution_engine (ExecutionEngine):
         :param interactive_evaluation (bool):
