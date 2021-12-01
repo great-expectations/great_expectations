@@ -3,6 +3,8 @@ title: Changelog
 ---
 
 ### Develop
+* [DOCS] How to pass an in-memory DataFrame to a Checkpoint (#3756)
+* [FEATURE] Like and regex-based expectations in Athena dialect (#3761)
 
 ### 0.13.44
 * [FEATURE] Add new result_format to include unexpected_row_list (#3346)

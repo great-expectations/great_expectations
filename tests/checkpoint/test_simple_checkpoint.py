@@ -14,7 +14,6 @@ from great_expectations.checkpoint.checkpoint import (
 )
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import filter_properties_dict
 
@@ -812,7 +811,6 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
             runtime_kwargs=expected_runtime_kwargs
         )
     )
-    expected_runtime_kwargs.pop("template_name")
     assert filter_properties_dict(
         properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
     ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
@@ -968,7 +966,9 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
         store_eval_parameter_action,
         update_data_docs_action,
     ]
-    assert checkpoint_config.batch_request == {
+    assert filter_properties_dict(
+        properties=checkpoint_config.batch_request, clean_falsy=True
+    ) == {
         "batch_identifiers": {"pipeline_stage_name": "first"},
         "data_asset_name": "users",
         "data_connector_name": "my_runtime_data_connector",

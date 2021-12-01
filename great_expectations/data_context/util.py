@@ -462,40 +462,7 @@ def substitute_all_config_variables(
         data = DataContextConfigSchema().dump(data)
 
     if isinstance(data, CheckpointConfig):
-        if (
-            data.batch_request is not None
-            and data.batch_request.get("runtime_parameters") is not None
-            and data.batch_request["runtime_parameters"].get("batch_data") is not None
-        ):
-            batch_data = data.batch_request["runtime_parameters"].pop("batch_data")
-            data = CheckpointConfigSchema().dump(data)
-            data["batch_request"]["runtime_parameters"]["batch_data"] = batch_data
-        elif len(data.validations) > 0:
-            batch_data_list = []
-            for val in data["validations"]:
-                if (
-                    val.get("batch_request") is not None
-                    and val["batch_request"].get("runtime_parameters") is not None
-                    and val["batch_request"]["runtime_parameters"].get("batch_data")
-                    is not None
-                ):
-                    batch_data_list.append(
-                        val["batch_request"]["runtime_parameters"].pop("batch_data")
-                    )
-                else:
-                    batch_data_list.append(None)
-            data = CheckpointConfigSchema().dump(data)
-            for idx, val in enumerate(data["validations"]):
-                if (
-                    val.get("batch_request") is not None
-                    and val["batch_request"].get("runtime_parameters") is not None
-                    and batch_data_list[idx] is not None
-                ):
-                    val["batch_request"]["runtime_parameters"][
-                        "batch_data"
-                    ] = batch_data_list[idx]
-        else:
-            data = CheckpointConfigSchema().dump(data)
+        data = CheckpointConfigSchema().dump(data)
 
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {

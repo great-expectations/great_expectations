@@ -5,11 +5,11 @@ import jinja2
 import nbformat
 
 from great_expectations import DataContext
-from great_expectations.cli.batch_request import (
+from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.batch import (
+    BatchRequest,
     standardize_batch_request_display_ordering,
 )
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.types.base import (
     NotebookConfig,
@@ -21,7 +21,10 @@ from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    filter_properties_dict,
+)
 
 
 class SuiteEditNotebookRenderer(BaseNotebookRenderer):
@@ -401,6 +404,11 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         If batch_request dictionary is passed, its properties will override any found in suite citations.
         """
+        deep_filter_properties_iterable(
+            properties=batch_request,
+            keep_falsy_numerics=True,
+            inplace=True,
+        )
         self.render(
             suite=suite,
             batch_request=batch_request,

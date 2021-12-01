@@ -1105,8 +1105,8 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
                         "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
                     },
                     "batch_request_optional_top_level_keys": [
-                        "data_connector_query",
                         "batch_spec_passthrough",
+                        "data_connector_query",
                     ],
                     "data_connector_query_keys": ["index"],
                     "runtime_parameters_keys": ["path"],
@@ -2303,8 +2303,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
                         "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
                     },
                     "batch_request_optional_top_level_keys": [
-                        "data_connector_query",
                         "batch_spec_passthrough",
+                        "data_connector_query",
                     ],
                     "data_connector_query_keys": ["index"],
                     "batch_spec_passthrough_keys": ["reader_options"],
@@ -2797,8 +2797,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
                         "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
                     },
                     "batch_request_optional_top_level_keys": [
-                        "data_connector_query",
                         "batch_spec_passthrough",
+                        "data_connector_query",
                     ],
                     "data_connector_query_keys": ["index"],
                     "batch_spec_passthrough_keys": ["reader_options"],
