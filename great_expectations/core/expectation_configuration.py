@@ -1307,8 +1307,8 @@ class ExpectationConfiguration(SerializableDictDot):
                 )
                 continue
 
-            # Stores do not have "expectation_suite_name"
-            if urn.urn_type == "stores":
+            # Query stores do not have "expectation_suite_name"
+            if urn["urn_type"] == "stores" and "expectation_suite_name" not in urn:
                 pass
             else:
                 self._update_dependencies_with_expectation_suite_urn(dependencies, urn)
