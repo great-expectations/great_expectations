@@ -2337,6 +2337,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
         CheckpointConfig(
             name="my_nested_checkpoint",
             config_version=1,
+            template_name="my_nested_checkpoint_template_3",
             run_name_template="runtime_run_template",
             expectation_suite_name="runtime_suite_name",
             action_list=[
