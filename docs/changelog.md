@@ -3,6 +3,7 @@ title: Changelog
 ---
 
 ### Develop
+* [FEATURE] Like and regex-based expectations in Athena dialect (#3761)
 
 ### 0.13.44
 * [FEATURE] Add new result_format to include unexpected_row_list (#3346)
