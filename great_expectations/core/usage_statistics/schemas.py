@@ -347,10 +347,10 @@ anonymized_batch_request_schema = {
             "items": {
                 "type": "string",
                 "enum": [
-                    "data_connector_query",
-                    "runtime_parameters",
                     "batch_identifiers",
                     "batch_spec_passthrough",
+                    "data_connector_query",
+                    "runtime_parameters",
                 ],
             },
             "uniqueItems": True,
@@ -363,9 +363,9 @@ anonymized_batch_request_schema = {
                 "type": "string",
                 "enum": [
                     "batch_filter_parameters",
-                    "limit",
-                    "index",
                     "custom_filter_function",
+                    "index",
+                    "limit",
                 ],
             },
             "uniqueItems": True,
@@ -390,12 +390,12 @@ anonymized_batch_request_schema = {
             "items": {
                 "type": "string",
                 "enum": [
+                    "reader_method",
+                    "reader_options",
                     "sampling_method",
                     "sampling_kwargs",
                     "splitter_method",
                     "splitter_kwargs",
-                    "reader_method",
-                    "reader_options",
                 ],
             },
             "uniqueItems": True,
