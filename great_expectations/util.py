@@ -26,9 +26,10 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Set, Union
 
 from dateutil.parser import parse
+from packaging import version
 from pkg_resources import Distribution
 
 from great_expectations.core.expectation_suite import expectationSuiteSchema
@@ -46,9 +47,23 @@ except ModuleNotFoundError:
     # Fallback for python < 3.8
     import importlib_metadata
 
-
 logger = logging.getLogger(__name__)
 
+try:
+    import sqlalchemy as sa
+    from sqlalchemy import Table
+    from sqlalchemy.engine import reflection
+    from sqlalchemy.sql import Select
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    sa = None
+    reflection = None
+    Table = None
+    Select = None
+
+logger = logging.getLogger(__name__)
 
 SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "batch": "batches",
@@ -124,8 +139,8 @@ def underscore(word: str) -> str:
     return word.lower()
 
 
-def hyphen(input: str):
-    return input.replace("_", "-")
+def hyphen(txt: str):
+    return txt.replace("_", "-")
 
 
 def profile(func: Callable = None) -> Callable:
@@ -145,22 +160,30 @@ def profile(func: Callable = None) -> Callable:
     return profile_function_call
 
 
-def measure_execution_time(func: Callable = None) -> Callable:
-    @wraps(func)
-    def compute_delta_t(*args, **kwargs) -> Any:
-        time_begin: int = int(round(time.time() * 1000))
-        try:
-            return func(*args, **kwargs)
-        finally:
-            time_end: int = int(round(time.time() * 1000))
-            delta_t: int = time_end - time_begin
-            bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-            call_args: OrderedDict = bound_args.arguments
-            print(
-                f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
-            )
+def measure_execution_time(pretty_print: bool = False) -> Callable:
+    def execution_time_decorator(func: Callable) -> Callable:
+        func.execution_duration_milliseconds = 0
 
-    return compute_delta_t
+        @wraps(func)
+        def compute_delta_t(*args, **kwargs) -> Any:
+            time_begin: int = int(round(time.time() * 1000))
+            try:
+                return func(*args, **kwargs)
+            finally:
+                time_end: int = int(round(time.time() * 1000))
+                delta_t: int = time_end - time_begin
+                func.execution_duration_milliseconds = delta_t
+                bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
+                call_args: OrderedDict = bound_args.arguments
+
+                if pretty_print:
+                    print(
+                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
+                    )
+
+        return compute_delta_t
+
+    return execution_time_decorator
 
 
 # noinspection SpellCheckingInspection
@@ -892,6 +915,10 @@ def gen_directory_tree_str(startpath):
 
 def lint_code(code: str) -> str:
     """Lint strings of code passed in.  Optional dependency "black" must be installed."""
+
+    # NOTE: Chetan 20211111 - This import was failing in Azure with 20.8b1 so we bumped up the version to 21.8b0
+    # While this seems to resolve the issue, the root cause is yet to be determined.
+
     try:
         import black
 
@@ -913,13 +940,13 @@ def lint_code(code: str) -> str:
 
 
 def filter_properties_dict(
-    properties: dict,
-    keep_fields: Optional[list] = None,
-    delete_fields: Optional[list] = None,
-    clean_nulls: Optional[bool] = True,
-    clean_falsy: Optional[bool] = False,
-    keep_falsy_numerics: Optional[bool] = True,
-    inplace: Optional[bool] = False,
+    properties: Optional[dict] = None,
+    keep_fields: Optional[Set[str]] = None,
+    delete_fields: Optional[Set[str]] = None,
+    clean_nulls: bool = True,
+    clean_falsy: bool = False,
+    keep_falsy_numerics: bool = True,
+    inplace: bool = False,
 ) -> Optional[dict]:
     """Filter the entries of the source dictionary according to directives concerning the existing keys and values.
 
@@ -944,10 +971,21 @@ def filter_properties_dict(
     if clean_falsy:
         clean_nulls = True
 
+    if properties is None:
+        properties = {}
+
+    if not isinstance(properties, dict):
+        raise ValueError(
+            f'Source "properties" must be a dictionary (illegal type "{str(type(properties))}" detected).'
+        )
+
     if not inplace:
         properties = copy.deepcopy(properties)
 
     keys_for_deletion: list = []
+
+    key: str
+    value: Any
 
     if keep_fields:
         keys_for_deletion.extend(
@@ -981,8 +1019,8 @@ def filter_properties_dict(
                     if not (
                         (keep_fields and key in keep_fields)
                         or (delete_fields and key in delete_fields)
+                        or is_truthy(value=value)
                         or is_numeric(value=value)
-                        or value
                     )
                 ]
             )
@@ -994,7 +1032,7 @@ def filter_properties_dict(
                     if not (
                         (keep_fields and key in keep_fields)
                         or (delete_fields and key in delete_fields)
-                        or value
+                        or is_truthy(value=value)
                     )
                 ]
             )
@@ -1010,12 +1048,64 @@ def filter_properties_dict(
     return properties
 
 
+def deep_filter_properties_dict(
+    properties: Optional[dict] = None,
+    keep_fields: Optional[Set[str]] = None,
+    delete_fields: Optional[Set[str]] = None,
+    clean_nulls: bool = True,
+    clean_falsy: bool = False,
+    keep_falsy_numerics: bool = True,
+    inplace: bool = False,
+) -> Optional[dict]:
+    key: str
+    value: Any
+    if isinstance(properties, dict):
+        if not inplace:
+            properties = copy.deepcopy(properties)
+
+        filter_properties_dict(
+            properties=properties,
+            keep_fields=keep_fields,
+            delete_fields=delete_fields,
+            clean_nulls=clean_nulls,
+            clean_falsy=clean_falsy,
+            keep_falsy_numerics=keep_falsy_numerics,
+            inplace=True,
+        )
+        for key, value in properties.items():
+            deep_filter_properties_dict(
+                properties=value,
+                keep_fields=keep_fields,
+                delete_fields=delete_fields,
+                clean_nulls=clean_nulls,
+                clean_falsy=clean_falsy,
+                keep_falsy_numerics=keep_falsy_numerics,
+                inplace=True,
+            )
+
+    if inplace:
+        return None
+
+    return properties
+
+
+def is_truthy(value: Any) -> bool:
+    try:
+        if value:
+            return True
+        else:
+            return False
+    except ValueError:
+        return False
+
+
 def is_numeric(value: Any) -> bool:
     return value is not None and (is_int(value=value) or is_float(value=value))
 
 
 def is_int(value: Any) -> bool:
     try:
+        # noinspection PyUnusedLocal
         num: int = int(value)
     except (TypeError, ValueError):
         return False
@@ -1024,6 +1114,7 @@ def is_int(value: Any) -> bool:
 
 def is_float(value: Any) -> bool:
     try:
+        # noinspection PyUnusedLocal
         num: float = float(value)
     except (TypeError, ValueError):
         return False
@@ -1073,8 +1164,62 @@ def delete_blank_lines(text: str) -> str:
 
 
 def generate_temporary_table_name(
-    default_table_name_prefix: Optional[str] = "ge_temp_",
-    num_digits: Optional[int] = 8,
+    default_table_name_prefix: str = "ge_temp_",
+    num_digits: int = 8,
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
     return table_name
+
+
+def get_sqlalchemy_inspector(engine):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
+        insp = reflection.Inspector.from_engine(engine)
+    else:
+        insp = sa.inspect(engine)
+    return insp
+
+
+def get_sqlalchemy_url(drivername, **credentials):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Calling URL() deprecated since 1.4, URL.create() should be used instead
+        url = sa.engine.url.URL(drivername, **credentials)
+    else:
+        url = sa.engine.url.URL.create(drivername, **credentials)
+    return url
+
+
+def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, Select]:
+    """
+    Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
+    without explicitly turning the inner select() into a subquery first. This helper method ensures that this
+    conversion takes place.
+
+    https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
+    """
+    if version.parse(sa.__version__) >= version.parse("1.4"):
+        if isinstance(selectable, Select):
+            selectable = selectable.subquery()
+    return selectable
+
+
+def get_sqlalchemy_domain_data(domain_data):
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        # Implicit coercion of SELECT and SELECT constructs is deprecated since 1.4
+        # select(query).subquery() should be used instead
+        domain_data = sa.select(["*"]).select_from(domain_data)
+    # engine.get_domain_records returns a valid select object;
+    # calling fetchall at execution is equivalent to a SELECT *
+    return domain_data
+
+
+def import_make_url():
+    """
+    Beginning from SQLAlchemy 1.4, make_url is accessed from sqlalchemy.engine; earlier versions must
+    still be accessed from sqlalchemy.engine.url to avoid import errors.
+    """
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        from sqlalchemy.engine.url import make_url
+    else:
+        from sqlalchemy.engine import make_url
+    return make_url

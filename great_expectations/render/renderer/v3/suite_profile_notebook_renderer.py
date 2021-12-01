@@ -3,10 +3,14 @@ from typing import Any, Dict, List, Union
 import nbformat
 
 from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import (
+    BatchRequest,
+    standardize_batch_request_display_ordering,
+)
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
+from great_expectations.util import deep_filter_properties_dict
 
 
 class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
@@ -20,6 +24,16 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
 
         if batch_request is None:
             batch_request = {}
+
+        deep_filter_properties_dict(
+            properties=batch_request,
+            keep_falsy_numerics=True,
+            inplace=True,
+        )
+        batch_request = standardize_batch_request_display_ordering(
+            batch_request=batch_request
+        )
+
         self.batch_request = batch_request
 
         self.validator = context.get_validator(
@@ -72,7 +86,7 @@ validator.head(n_rows=5, fetch_all=False)
         column_names: List[str]
         column_name: str
         column_names = [
-            f'    "{column_name}"\n,' for column_name in self.validator.columns()
+            f'    "{column_name}",\n' for column_name in self.validator.columns()
         ]
         code: str = f'ignored_columns = [\n{"".join(column_names)}]'
         self.add_code_cell(code=code, lint=True)

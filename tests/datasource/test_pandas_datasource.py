@@ -152,12 +152,13 @@ def test_pandas_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite.create_expectation_suite(
         expectation_suite_name="test"
     )
-    batch = data_context_parameterized_expectation_suite.get_batch(
-        expectation_suite_name="test",
-        batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
-            datasource=name, batch_kwargs_generator="subdir_reader", name="test"
-        ),
-    )
+    with pytest.deprecated_call():  # "name being deprecated as a batch_parameter. Please use data_asset_name instead.
+        batch = data_context_parameterized_expectation_suite.get_batch(
+            expectation_suite_name="test",
+            batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
+                datasource=name, batch_kwargs_generator="subdir_reader", name="test"
+            ),
+        )
     assert type(batch).__name__ == "CustomPandasDataset"
     res = batch.expect_column_values_to_have_odd_lengths("col_2")
     assert res.success is True
@@ -305,14 +306,15 @@ def test_s3_pandas_source_read_parquet(
     data_context_parameterized_expectation_suite.create_expectation_suite(
         expectation_suite_name="test_parquet"
     )
-    batch = data_context_parameterized_expectation_suite.get_batch(
-        data_context_parameterized_expectation_suite.build_batch_kwargs(
-            "parquet_source",
-            "s3_reader",
-            "test_data",
-        ),
-        "test_parquet",
-    )
+    with pytest.deprecated_call():  # "Direct GE Support for the s3 BatchKwarg will be removed in a future release.
+        batch = data_context_parameterized_expectation_suite.get_batch(
+            data_context_parameterized_expectation_suite.build_batch_kwargs(
+                "parquet_source",
+                "s3_reader",
+                "test_data",
+            ),
+            "test_parquet",
+        )
     assert batch.columns == ["col_1"]
     assert batch["col_1"][4] == 5
 

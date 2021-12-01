@@ -192,7 +192,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "must be a number"
+            "traceback_substring": "must be a datetime (for datetime columns) or number"
           }
         },
         {
@@ -204,7 +204,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "must be a number"
+            "traceback_substring": "must be a datetime (for datetime columns) or number"
           }
         }]},
     {

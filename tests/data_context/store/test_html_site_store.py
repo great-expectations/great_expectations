@@ -8,6 +8,7 @@ from moto import mock_s3
 from great_expectations.data_context.store import HtmlSiteStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    RunIdentifier,
     SiteSectionIdentifier,
     ValidationResultIdentifier,
     validationResultIdentifierSchema,
@@ -122,7 +123,7 @@ def test_HtmlSiteStore_S3_backend():
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 expectation_suite_name="asset.quarantine",
             ),
-            run_id="20191007T151224.1234Z_prod_100",
+            run_id=RunIdentifier(run_name="20191007T151224.1234Z_prod_100"),
             batch_identifier="1234",
         ),
     )

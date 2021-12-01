@@ -26,8 +26,7 @@ The following guide gives an overview of creating an in-code Data Context includ
 The following guides will contain examples for each environment we have tested out:
 
 - [How to instantiate a Data Context on an EMR Spark cluster](./how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
-- [How to instantiate a Data Context on Databricks Spark cluster](./how_to_instantiate_a_data_context_on_databricks_spark_cluster)
-
+- [How to use Great Expectations in Databricks](/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)
 
 Step 2: Create Expectation Suites and add Expectations
 -------------------------------------------------------

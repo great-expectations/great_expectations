@@ -87,9 +87,9 @@ Of course this is purely an example, you may edit this to your heart's content.
 **My configuration is not so simple - are there more advanced options?**
 
 Glad you asked! Checkpoints are very versatile. For example, you can validate many Batches in a single Checkpoint, validate Batches against different Expectation Suites or against many Expectation Suites, control the specific post-validation actions based on Expectation Suite / Batch / results of validation among other features. Check out our documentation on Checkpoints for more details and for instructions on how to implement other more advanced features including using the **Checkpoint** class:
-- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html
-- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html
-- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html"""
+- https://docs.greatexpectations.io/docs/reference/checkpoints_and_actions
+- https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
+- https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config"""
         )
         try:
             first_datasource_with_asset = self._find_datasource_with_asset()
