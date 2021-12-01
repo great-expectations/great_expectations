@@ -55,10 +55,11 @@ If you use a different configuration and have ideas about how this guide can be 
 This Guide:
 
 NOTE: This guide recommends in-code data context use. For file based data contexts we may add parenthetical statements.
-NOTE: This guide recommends prototyping locally using sample data when possible.
+NOTE: This guide recommends prototyping locally using sample data when possible. TODO: Describe this more fully
 
 1. Install Great Expectations
    1. Show GCC docs for installing 3rd party libraries from pypi, maybe add screenshots: https://cloud.google.com/composer/docs/how-to/using/installing-python-dependencies#console. TODO: Recommend installing without version pin - but maybe <0.14.0 since we use minor versions for breaking changes?
+   2. Link to installing GE doc locally, describe again why this may help you speed up your dev loop
 2. Set up Great Expectations
    1. Show in-code context (using GCS default configs, GCS as metadata and data docs stores)
    2. Reference in expandable block that you can also use great_expectations.yml (in GCS) - see Rex's approach from last year. You'll need to configure this manually or via CLI. TODO: Try this approach - does this work easily if you can't access your datasources when you are configuring them?
