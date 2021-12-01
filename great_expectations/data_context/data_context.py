@@ -2428,7 +2428,7 @@ class BaseDataContext:
         )
         results_dict = selected_store.get(key)
 
-        return results_dict.get_failed() if failed_only else results_dict
+        return results_dict.get_failed_validation_results() if failed_only else results_dict
 
     def update_return_obj(self, data_asset, return_obj):
         """Helper called by data_asset.
