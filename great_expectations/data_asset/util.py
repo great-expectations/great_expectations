@@ -226,6 +226,5 @@ def ensure_row_condition_is_correct(row_condition_string):
         )
     if "\n" in row_condition_string:
         raise InvalidExpectationConfigurationError(
-            "%s cannot be serialized to json. Do not introduce \\n in configuration."
-            % (repr(row_condition_string))
+            f"{repr(row_condition_string)} cannot be serialized to json. Do not introduce \\n in configuration."
         )
