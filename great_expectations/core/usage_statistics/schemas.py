@@ -601,11 +601,11 @@ anonymized_checkpoint_run_schema = {
     },
     "type": "object",
     "properties": {
+        "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+        "anonymized_config_version": {"type": "number"},
         "anonymized_template_name": {"$ref": "#/definitions/anonymized_string"},
         "anonymized_run_name_template": {"$ref": "#/definitions/anonymized_string"},
-        "anonymized_expectation_suite_name": {
-            "$ref": "#/definitions/anonymized_string"
-        },
+        "anonymized_expectation_suite_name": {"$ref": "#/definitions/anonymized_string"},
         "anonymized_batch_request": {"$ref": "#/definitions/anonymized_batch_request"},
         "anonymized_action_list": {"$ref": "#/definitions/anonymized_action_list"},
         "anonymized_validations": {"$ref": "#/definitions/anonymized_validations"},
@@ -623,14 +623,15 @@ anonymized_checkpoint_run_schema = {
                 "type": "string",
                 "enum": [
                     "evaluation_parameters",
+                    "result_format",
                     "runtime_configuration",
                     "profilers",
-                    "result_format",
                 ],
             },
             "uniqueItems": True,
         },
     },
+    "required": ["anonymized_name, anonymized_config_version"],
     "additionalProperties": False,
 }
 
