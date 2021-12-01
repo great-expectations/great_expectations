@@ -29,9 +29,9 @@ class BatchRequestAnonymizer(Anonymizer):
 
         self._anonymized_batch_request_required_top_level_properties = {}
         self._batch_request_optional_top_level_keys = []
+        self._batch_spec_passthrough_keys = []
         self._data_connector_query_keys = []
         self._runtime_parameters_keys = []
-        self._batch_spec_passthrough_keys = []
 
     def anonymize_batch_request(self, *args, **kwargs) -> Dict[str, List[str]]:
         batch_request: Union[
@@ -52,9 +52,9 @@ class BatchRequestAnonymizer(Anonymizer):
         anonymized_batch_request_properties_dict: Dict[str, List[str]] = {
             "anonymized_batch_request_required_top_level_properties": self._anonymized_batch_request_required_top_level_properties,
             "batch_request_optional_top_level_keys": self._batch_request_optional_top_level_keys,
-            "data_connector_query_keys": self._data_connector_query_keys,
-            "runtime_parameters_keys": self._runtime_parameters_keys,
             "batch_spec_passthrough_keys": self._batch_spec_passthrough_keys,
+            "runtime_parameters_keys": self._runtime_parameters_keys,
+            "data_connector_query_keys": self._data_connector_query_keys,
         }
         self._build_anonymized_batch_request(source=anonymized_batch_request_dict)
         deep_filter_properties_iterable(
@@ -63,9 +63,9 @@ class BatchRequestAnonymizer(Anonymizer):
             inplace=True,
         )
         self._batch_request_optional_top_level_keys.sort()
+        self._batch_spec_passthrough_keys.sort()
         self._data_connector_query_keys.sort()
         self._runtime_parameters_keys.sort()
-        self._batch_spec_passthrough_keys.sort()
         return anonymized_batch_request_properties_dict
 
     def _anonymize_batch_request_properties(
@@ -116,12 +116,12 @@ class BatchRequestAnonymizer(Anonymizer):
                     ] = value
                 elif key in BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS:
                     self._batch_request_optional_top_level_keys.append(key)
+                elif key in BATCH_SPEC_PASSTHROUGH_KEYS:
+                    self._batch_spec_passthrough_keys.append(key)
                 elif key in DATA_CONNECTOR_QUERY_KEYS:
                     self._data_connector_query_keys.append(key)
                 elif key in RUNTIME_PARAMETERS_KEYS:
                     self._runtime_parameters_keys.append(key)
-                elif key in BATCH_SPEC_PASSTHROUGH_KEYS:
-                    self._batch_spec_passthrough_keys.append(key)
                 else:
                     pass
 
