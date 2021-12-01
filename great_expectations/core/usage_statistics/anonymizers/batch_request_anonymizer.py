@@ -8,7 +8,7 @@ from great_expectations.core.batch import (
     standardize_batch_request_display_ordering,
 )
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.util import deep_filter_properties_dict
+from great_expectations.util import deep_filter_properties_iterable
 
 from great_expectations.core.usage_statistics.anonymizers.types.base import (  # isort:skip
     GETTING_STARTED_DATASOURCE_NAME,
@@ -44,7 +44,7 @@ class BatchRequestAnonymizer(Anonymizer):
         anonymized_batch_request_dict = standardize_batch_request_display_ordering(
             batch_request=anonymized_batch_request_dict
         )
-        deep_filter_properties_dict(
+        deep_filter_properties_iterable(
             properties=anonymized_batch_request_dict,
             clean_falsy=True,
             inplace=True,
@@ -57,7 +57,7 @@ class BatchRequestAnonymizer(Anonymizer):
             "batch_spec_passthrough_keys": self._batch_spec_passthrough_keys,
         }
         self._build_anonymized_batch_request(source=anonymized_batch_request_dict)
-        deep_filter_properties_dict(
+        deep_filter_properties_iterable(
             properties=anonymized_batch_request_keys_dict,
             clean_falsy=True,
             inplace=True,

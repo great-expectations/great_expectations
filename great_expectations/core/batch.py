@@ -9,7 +9,7 @@ from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot
-from great_expectations.util import deep_filter_properties_dict
+from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -578,7 +578,7 @@ class Batch(SerializableDictDot):
 
     def to_json_dict(self) -> dict:
         json_dict: dict = self.to_dict()
-        deep_filter_properties_dict(
+        deep_filter_properties_iterable(
             properties=json_dict["batch_request"],
             keep_falsy_numerics=True,
             inplace=True,
