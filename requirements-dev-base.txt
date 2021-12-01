@@ -28,7 +28,7 @@ pyfakefs>=4.5.1 # all_tests
 pypd==1.1.0  # all_tests
 pytest>=5.3.5,<6.0.0  # all_tests
 pytest-benchmark>=3.4.1  # performance tests
-# pytest-order>=0.9.5 # all tests
+pytest-order>=0.9.5 # all tests
 pytest-testmon>=1.2.2 # identifies relevant tests
 pyupgrade==2.7.2  # lint
 requirements-parser>=0.2.0  # all_tests
