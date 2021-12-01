@@ -154,7 +154,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-testmon
+              pip install pytest pytest-azurepipelines pytest-testmon
               pytest $(GE_pytest_opts) --testmon
             displayName: 'pytest'
 
