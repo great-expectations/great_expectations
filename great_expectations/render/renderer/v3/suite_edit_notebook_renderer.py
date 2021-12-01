@@ -21,7 +21,10 @@ from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
-from great_expectations.util import deep_filter_properties_dict, filter_properties_dict
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    filter_properties_dict,
+)
 
 
 class SuiteEditNotebookRenderer(BaseNotebookRenderer):
@@ -401,7 +404,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         If batch_request dictionary is passed, its properties will override any found in suite citations.
         """
-        deep_filter_properties_dict(
+        deep_filter_properties_iterable(
             properties=batch_request,
             keep_falsy_numerics=True,
             inplace=True,

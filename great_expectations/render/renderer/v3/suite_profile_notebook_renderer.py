@@ -10,7 +10,7 @@ from great_expectations.core.batch import (
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
-from great_expectations.util import deep_filter_properties_dict
+from great_expectations.util import deep_filter_properties_iterable
 
 
 class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
@@ -25,7 +25,7 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
         if batch_request is None:
             batch_request = {}
 
-        deep_filter_properties_dict(
+        deep_filter_properties_iterable(
             properties=batch_request,
             keep_falsy_numerics=True,
             inplace=True,
