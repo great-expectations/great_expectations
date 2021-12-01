@@ -2428,15 +2428,11 @@ class BaseDataContext:
         )
         results_dict = selected_store.get(key)
 
-        # TODO: This should be a convenience method of ValidationResultSuite
-        if failed_only:
-            failed_results_list = [
-                result for result in results_dict.results if not result.success
-            ]
-            results_dict.results = failed_results_list
-            return results_dict
-        else:
-            return results_dict
+        return (
+            results_dict.get_failed_validation_results()
+            if failed_only
+            else results_dict
+        )
 
     def update_return_obj(self, data_asset, return_obj):
         """Helper called by data_asset.
