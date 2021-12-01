@@ -63,8 +63,6 @@ except ImportError:
     Table = None
     Select = None
 
-logger = logging.getLogger(__name__)
-
 SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "batch": "batches",
     "checkpoint": "checkpoints",
@@ -919,9 +917,7 @@ def lint_code(code: str) -> str:
     # NOTE: Chetan 20211111 - This import was failing in Azure with 20.8b1 so we bumped up the version to 21.8b0
     # While this seems to resolve the issue, the root cause is yet to be determined.
 
-    try:
-        import black
-
+    if has_black_formatter():
         black_file_mode = black.FileMode()
         if not isinstance(code, str):
             raise TypeError
@@ -932,11 +928,20 @@ def lint_code(code: str) -> str:
             return linted_code
         except (black.NothingChanged, RuntimeError):
             return code
+
+    return code
+
+
+def has_black_formatter() -> bool:
+    try:
+        import black
+
+        return True
     except ImportError:
         logger.warning(
             "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
         )
-        return code
+        return False
 
 
 def filter_properties_dict(

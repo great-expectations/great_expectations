@@ -5,6 +5,7 @@ import nbformat
 from great_expectations import DataContext
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
+from great_expectations.util import has_black_formatter
 
 
 class DatasourceNewNotebookRenderer(BaseNotebookRenderer):
@@ -71,14 +72,14 @@ context = ge.get_context()""",
     def _add_sql_credentials_cell(self):
         self.add_code_cell(self.sql_credentials_code_snippet)
 
-    def _add_template_cell(self):
+    def _add_template_cell(self, lint: bool = True) -> None:
         self.add_code_cell(
             f"""example_yaml = {self.datasource_yaml}
 print(example_yaml)""",
-            lint=True,
+            lint=lint,
         )
 
-    def _add_test_yaml_cells(self):
+    def _add_test_yaml_cells(self, lint: bool = True) -> None:
         self.add_markdown_cell(
             """\
 # Test Your Datasource Configuration
@@ -94,10 +95,10 @@ you can use `context.add_datasource()` and specify all the required parameters."
         )
         self.add_code_cell(
             "context.test_yaml_config(yaml_config=example_yaml)",
-            lint=True,
+            lint=lint,
         )
 
-    def _add_save_datasource_cell(self):
+    def _add_save_datasource_cell(self, lint: bool = True) -> None:
         self.add_markdown_cell(
             """## Save Your Datasource Configuration
 Here we will save your Datasource in your Data Context once you are satisfied with the configuration. Note that `overwrite_existing` defaults to False, but you may change it to True if you wish to overwrite. Please note that if you wish to include comments you must add them directly to your `great_expectations.yml`."""
@@ -105,7 +106,7 @@ Here we will save your Datasource in your Data Context once you are satisfied wi
         self.add_code_cell(
             """sanitize_yaml_and_save_datasource(context, example_yaml, overwrite_existing=False)
 context.list_datasources()""",
-            lint=True,
+            lint=lint,
         )
         self.add_markdown_cell("Now you can close this notebook and delete it!")
 
@@ -115,9 +116,12 @@ context.list_datasources()""",
         self._add_docs_cell()
         if self.datasource_type == DatasourceTypes.SQL:
             self._add_sql_credentials_cell()
-        self._add_template_cell()
-        self._add_test_yaml_cells()
-        self._add_save_datasource_cell()
+
+        lint = has_black_formatter()
+        self._add_template_cell(lint)
+        self._add_test_yaml_cells(lint)
+        self._add_save_datasource_cell(lint)
+
         return self._notebook
 
     def render_to_disk(
