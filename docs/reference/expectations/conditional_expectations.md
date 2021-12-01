@@ -99,7 +99,9 @@ This results in the following Expectation Suite:
 }
 ```
 
-Warning : you should not use simple quotes nor \\n inside the query. Otherwise it may introduce bug at reloading (great_expectations suite edit).
+:::warning
+You should not use single quotes nor \\n inside the specified `row_condition` (see examples below). Otherwise a bug may be introduced when running `great_expectations suite edit` from the CLI.
+:::
 
 ```python 
 row_condition="PClass=='1st'"  # never use simple quotes inside !!!
