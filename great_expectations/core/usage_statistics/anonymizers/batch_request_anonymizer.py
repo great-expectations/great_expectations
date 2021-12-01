@@ -44,7 +44,11 @@ class BatchRequestAnonymizer(Anonymizer):
         anonymized_batch_request_dict = standardize_batch_request_display_ordering(
             batch_request=anonymized_batch_request_dict
         )
+<<<<<<< HEAD
         deep_filter_properties_iterable(
+=======
+        deep_filter_properties_dict(
+>>>>>>> develop
             properties=anonymized_batch_request_dict,
             clean_falsy=True,
             inplace=True,
@@ -66,7 +70,11 @@ class BatchRequestAnonymizer(Anonymizer):
         self._data_connector_query_keys.sort()
         self._runtime_parameters_keys.sort()
         self._batch_spec_passthrough_keys.sort()
+<<<<<<< HEAD
         return anonymized_batch_request_properties_dict
+=======
+        return anonymized_batch_request_keys_dict
+>>>>>>> develop
 
     def _anonymize_batch_request_properties(
         self, source: Optional[Any] = None
