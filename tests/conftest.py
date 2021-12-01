@@ -2322,6 +2322,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
 def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
     tmp_path_factory,
     monkeypatch,
+    spark_session,
 ):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
@@ -3035,6 +3036,29 @@ def titanic_data_context(
 
 
 @pytest.fixture
+def titanic_data_context_clean(
+    tmp_path_factory,
+) -> DataContext:
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
+    data_path = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    titanic_yml_path = file_relative_path(
+        __file__, "./test_fixtures/great_expectations_v013clean_titanic.yml"
+    )
+    shutil.copy(
+        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+    )
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    shutil.copy(
+        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
 def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -3441,6 +3465,54 @@ def v20_project_directory(tmp_path_factory):
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/upgrade_helper/great_expectations_v2.yml"
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
+
+
+@pytest.fixture
+def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_factory):
+    """
+    GE config_version: 3 project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v30_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v20_project_with_v30_configuration_and_v20_checkpoints/",
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
+
+
+@pytest.fixture
+def v20_project_directory_with_v30_configuration_and_no_checkpoints(tmp_path_factory):
+    """
+    GE config_version: 3 project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v30_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v20_project_with_v30_configuration_and_no_checkpoints/",
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
         ),
         os.path.join(context_root_dir, "great_expectations.yml"),
     )
@@ -4037,9 +4109,10 @@ def titanic_profiled_name_column_expectations():
     ) as infile:
         titanic_profiled_expectations = expectationSuiteSchema.load(json.load(infile))
 
-    columns, ordered_columns = Renderer()._group_and_order_expectations_by_column(
-        titanic_profiled_expectations
-    )
+    (
+        columns,
+        ordered_columns,
+    ) = titanic_profiled_expectations.get_grouped_and_ordered_expectations_by_column()
     name_column_expectations = columns["Name"]
 
     return name_column_expectations
@@ -4532,7 +4605,7 @@ def yellow_trip_pandas_data_context(
             os.path.join(
                 "integration",
                 "fixtures",
-                "yellow_trip_data_pandas_fixture",
+                "yellow_tripdata_pandas_fixture",
                 "great_expectations",
                 "great_expectations.yml",
             ),
@@ -4544,13 +4617,13 @@ def yellow_trip_pandas_data_context(
             __file__,
             os.path.join(
                 "test_sets",
-                "taxi_yellow_trip_data_samples",
-                "yellow_trip_data_sample_2019-01.csv",
+                "taxi_yellow_tripdata_samples",
+                "yellow_tripdata_sample_2019-01.csv",
             ),
         ),
         str(
             os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-01.csv"
+                context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
             )
         ),
     )
@@ -4559,13 +4632,13 @@ def yellow_trip_pandas_data_context(
             __file__,
             os.path.join(
                 "test_sets",
-                "taxi_yellow_trip_data_samples",
-                "yellow_trip_data_sample_2019-02.csv",
+                "taxi_yellow_tripdata_samples",
+                "yellow_tripdata_sample_2019-02.csv",
             ),
         ),
         str(
             os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-02.csv"
+                context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
             )
         ),
     )
@@ -4574,13 +4647,13 @@ def yellow_trip_pandas_data_context(
             __file__,
             os.path.join(
                 "test_sets",
-                "taxi_yellow_trip_data_samples",
-                "yellow_trip_data_sample_2019-03.csv",
+                "taxi_yellow_tripdata_samples",
+                "yellow_tripdata_sample_2019-03.csv",
             ),
         ),
         str(
             os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-03.csv"
+                context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
             )
         ),
     )

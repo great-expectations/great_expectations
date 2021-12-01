@@ -23,16 +23,16 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         name: str,
         datasource_name: str,
         execution_engine: Optional[ExecutionEngine] = None,
-        data_asset_name_prefix: Optional[str] = "",
-        data_asset_name_suffix: Optional[str] = "",
-        include_schema_name: Optional[bool] = False,
+        data_asset_name_prefix: str = "",
+        data_asset_name_suffix: str = "",
+        include_schema_name: bool = False,
         splitter_method: Optional[str] = None,
         splitter_kwargs: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
         excluded_tables: Optional[list] = None,
         included_tables: Optional[list] = None,
-        skip_inapplicable_tables: Optional[bool] = True,
+        skip_inapplicable_tables: bool = True,
         introspection_directives: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -263,6 +263,29 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                                 "type": "view",
                             }
                         )
+
+        # SQLAlchemy's introspection does not list "external tables" in Redshift Spectrum (tables whose data is stored on S3).
+        # The following code fetches the names of external schemas and tables from a special table
+        # 'svv_external_tables'.
+        try:
+            if "redshift" == engine.dialect.name.lower():
+                result = engine.execute(
+                    "select schemaname, tablename from svv_external_tables"
+                ).fetchall()
+                for row in result:
+                    tables.append(
+                        {
+                            "schema_name": row[0],
+                            "table_name": row[1],
+                            "type": "table",
+                        }
+                    )
+
+        except Exception as e:
+            # Our testing shows that 'svv_external_tables' table is present in all Redshift clusters. This means that this
+            # exception is highly unlikely to fire.
+            if not "UndefinedTable" in str(e):
+                raise e
 
         return tables
 

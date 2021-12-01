@@ -7,8 +7,6 @@ This guide will help you instantiate a Data Context without a yml file, aka conf
 
 <Prerequisites>
 
-- [Followed the Getting Started tutorial and have a basic familiarity with the Great Expectations configuration](../../../tutorials/getting_started/intro.md)
-
 </Prerequisites>
 
 :::note
@@ -201,5 +199,4 @@ Additional resources
 --------------------
 
 - [How to instantiate a Data Context on an EMR Spark cluster](../../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to instantiate a Data Context on Databricks Spark cluster](../../../deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster.md)
-
+- [How to use Great Expectations in Databricks](/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)

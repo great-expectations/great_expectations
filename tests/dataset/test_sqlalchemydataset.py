@@ -368,7 +368,8 @@ def test_expect_compound_columns_to_be_unique_with_no_rows(sa):
     assert dataset.expect_compound_columns_to_be_unique(["col1", "col2"]).success
 
 
-def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
+@pytest.fixture
+def pyathena_dataset(sa):
     from pyathena import sqlalchemy_athena
 
     engine = sa.create_engine("sqlite://")
@@ -378,21 +379,22 @@ def test_expect_column_values_to_be_of_type_string_dialect_pyathena(sa):
     data.to_sql(name="test_sql_data", con=engine, index=False)
     dataset = SqlAlchemyDataset("test_sql_data", engine=engine)
     dataset.dialect = sqlalchemy_athena
+    return dataset
 
-    assert dataset.expect_column_values_to_be_of_type("col", type_="STRINGTYPE").success
+
+def test_expect_column_values_to_be_of_type_string_dialect_pyathena(pyathena_dataset):
+    assert pyathena_dataset.expect_column_values_to_be_of_type(
+        "col", type_="STRINGTYPE"
+    ).success
 
 
-def test_expect_column_values_to_be_in_type_list_pyathena(sa):
-    from pyathena import sqlalchemy_athena
-
-    engine = sa.create_engine("sqlite://")
-
-    data = pd.DataFrame({"col": ["test_val1", "test_val2"]})
-
-    data.to_sql(name="test_sql_data", con=engine, index=False)
-    dataset = SqlAlchemyDataset("test_sql_data", engine=engine)
-    dataset.dialect = sqlalchemy_athena
-
-    assert dataset.expect_column_values_to_be_in_type_list(
+def test_expect_column_values_to_be_in_type_list_pyathena(pyathena_dataset):
+    assert pyathena_dataset.expect_column_values_to_be_in_type_list(
         "col", type_list=["STRINGTYPE", "BOOLEAN"]
+    ).success
+
+
+def test_expect_column_values_to_match_like_pattern_pyathena(pyathena_dataset):
+    assert pyathena_dataset.expect_column_values_to_match_like_pattern(
+        "col", like_pattern="test%"
     ).success

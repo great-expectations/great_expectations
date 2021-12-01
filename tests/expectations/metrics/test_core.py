@@ -110,6 +110,120 @@ def test_stdev_metric_pd():
     assert results == {desired_metric.id: 1}
 
 
+def test_quantiles_metric_pd():
+    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 4]}))
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.quantile_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
+            "allow_relative_error": "linear",
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: [1.75, 2.5, 3.25]}
+
+
+def test_quantiles_metric_sa(sa):
+    engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4]}), sa)
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    partial_metric = MetricConfiguration(
+        metric_name="table.row_count.aggregate_fn",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(partial_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    table_row_count_metric = MetricConfiguration(
+        metric_name="table.row_count",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "metric_partial_fn": partial_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(table_row_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.quantile_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "table.row_count": table_row_count_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: [1.0, 2.0, 3.0]}
+
+
+def test_quantiles_metric_spark(spark_session):
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame({"a": [1, 2, 3, 4]}),
+        batch_id="my_id",
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.quantile_values",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=metrics
+    )
+    metrics.update(results)
+    assert results == {desired_metric.id: [1.0, 2.0, 3.0]}
+
+
 def test_max_metric_column_exists_pd():
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     batch = Batch(data=df)
@@ -366,7 +480,9 @@ def test_map_value_set_sa(sa):
         metric_name="column_values.in_set.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"metric_partial_fn": aggregate_partial},
+        metric_dependencies={
+            "metric_partial_fn": aggregate_partial,
+        },
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -440,7 +556,9 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
         metric_name="column_values.in_set.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"metric_partial_fn": aggregate_partial},
+        metric_dependencies={
+            "metric_partial_fn": aggregate_partial,
+        },
     )
 
     results = engine.resolve_metrics(
@@ -484,7 +602,9 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
         metric_name="column_values.in_set.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"metric_partial_fn": aggregate_partial},
+        metric_dependencies={
+            "metric_partial_fn": aggregate_partial,
+        },
     )
 
     results = engine.resolve_metrics(
@@ -521,6 +641,380 @@ def test_map_column_value_lengths_between_pd():
     ser_expected_lengths = pd.Series([1, 3, 4, 5])
     result_series, _, _ = results[desired_metric.id]
     assert ser_expected_lengths.equals(result_series)
+
+
+def test_map_column_values_increasing_pd():
+    engine = build_pandas_engine(
+        pd.DataFrame(
+            {
+                "a": [
+                    "2021-01-01",
+                    "2021-01-31",
+                    "2021-02-28",
+                    "2021-03-20",
+                    "2021-02-21",
+                    "2021-05-01",
+                    "2021-06-18",
+                ]
+            }
+        )
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.increasing.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "strictly": True,
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    with pytest.warns(DeprecationWarning) as record:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(condition_metric,),
+            metrics=metrics,
+        )
+        metrics.update(results)
+    assert len(record) == 1
+    assert (
+        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
+        in str(record.list[0].message)
+    )
+
+    unexpected_count_metric = MetricConfiguration(
+        metric_name="column_values.increasing.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert list(metrics[condition_metric.id][0]) == [
+        False,
+        False,
+        False,
+        False,
+        True,
+        False,
+        False,
+    ]
+    assert metrics[unexpected_count_metric.id] == 1
+
+    unexpected_rows_metric = MetricConfiguration(
+        metric_name="column_values.increasing.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
+        [4], dtype="int64"
+    )
+    assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-02-21"]
+
+
+def test_map_column_values_increasing_spark(spark_session):
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {
+                "a": [1, 2, 3.0, 4.5, 6, None, 3],
+            }
+        ),
+        batch_id="my_id",
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    table_column_types = MetricConfiguration(
+        metric_name="table.column_types",
+        metric_domain_kwargs={},
+        metric_value_kwargs={
+            "include_nested": True,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(table_column_types,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.increasing.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "strictly": True,
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "table.column_types": table_column_types,
+        },
+    )
+    with pytest.warns(DeprecationWarning) as record:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(condition_metric,),
+            metrics=metrics,
+        )
+        metrics.update(results)
+    assert len(record) == 1
+    assert (
+        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
+        in str(record.list[0].message)
+    )
+
+    unexpected_count_metric = MetricConfiguration(
+        metric_name="column_values.increasing.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_count_metric.id] == 1
+
+    unexpected_rows_metric = MetricConfiguration(
+        metric_name="column_values.increasing.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_rows_metric.id] == [
+        (3,),
+    ]
+
+
+def test_map_column_values_decreasing_pd():
+    engine = build_pandas_engine(
+        pd.DataFrame(
+            {
+                "a": [
+                    "2021-06-18",
+                    "2021-05-01",
+                    "2021-02-21",
+                    "2021-03-20",
+                    "2021-02-28",
+                    "2021-01-31",
+                    "2021-01-01",
+                ]
+            }
+        )
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.decreasing.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "strictly": True,
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    with pytest.warns(DeprecationWarning) as record:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(condition_metric,),
+            metrics=metrics,
+        )
+        metrics.update(results)
+    assert len(record) == 1
+    assert (
+        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
+        in str(record.list[0].message)
+    )
+
+    unexpected_count_metric = MetricConfiguration(
+        metric_name="column_values.decreasing.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert list(metrics[condition_metric.id][0]) == [
+        False,
+        False,
+        False,
+        True,
+        False,
+        False,
+        False,
+    ]
+    assert metrics[unexpected_count_metric.id] == 1
+
+    unexpected_rows_metric = MetricConfiguration(
+        metric_name="column_values.decreasing.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
+        [3], dtype="int64"
+    )
+    assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-03-20"]
+
+
+def test_map_column_values_decreasing_spark(spark_session):
+    engine: SparkDFExecutionEngine = build_spark_engine(
+        spark=spark_session,
+        df=pd.DataFrame(
+            {
+                "a": [3, None, 6, 4.5, 3.0, 2, 1],
+            }
+        ),
+        batch_id="my_id",
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    table_column_types = MetricConfiguration(
+        metric_name="table.column_types",
+        metric_domain_kwargs={},
+        metric_value_kwargs={
+            "include_nested": True,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(table_column_types,),
+        metrics=metrics,
+    )
+    metrics.update(results)
+
+    condition_metric = MetricConfiguration(
+        metric_name="column_values.decreasing.condition",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "strictly": True,
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+            "table.column_types": table_column_types,
+        },
+    )
+    with pytest.warns(DeprecationWarning) as record:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(condition_metric,),
+            metrics=metrics,
+        )
+        metrics.update(results)
+    assert len(record) == 1
+    assert (
+        'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
+        in str(record.list[0].message)
+    )
+
+    unexpected_count_metric = MetricConfiguration(
+        metric_name="column_values.decreasing.unexpected_count",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs=None,
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_count_metric.id] == 1
+
+    unexpected_rows_metric = MetricConfiguration(
+        metric_name="column_values.decreasing.unexpected_rows",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
+        },
+        metric_dependencies={
+            "unexpected_condition": condition_metric,
+            "table.columns": table_columns_metric,
+        },
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    assert metrics[unexpected_rows_metric.id] == [(6,)]
 
 
 def test_map_unique_column_exists_pd():
@@ -1015,7 +1509,9 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={"metric_partial_fn": mean},
+        metric_dependencies={
+            "metric_partial_fn": mean,
+        },
     )
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
@@ -1075,7 +1571,9 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_name="column_values.z_score.under_threshold.unexpected_count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"metric_partial_fn": desired_metric},
+        metric_dependencies={
+            "metric_partial_fn": desired_metric,
+        },
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -1328,7 +1826,9 @@ def test_table_metric_sa(sa):
         metric_name="table.row_count",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
-        metric_dependencies={"metric_partial_fn": desired_metric},
+        metric_dependencies={
+            "metric_partial_fn": desired_metric,
+        },
     )
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=results
@@ -2429,6 +2929,109 @@ def test_distinct_metric_pd():
     )
     metrics.update(results)
     assert results == {desired_metric.id: {1, 2, 3}}
+
+
+def test_batch_aggregate_metrics_pd():
+    import datetime
+
+    engine = build_pandas_engine(
+        pd.DataFrame(
+            {
+                "a": [
+                    "2021-01-01",
+                    "2021-01-31",
+                    "2021-02-28",
+                    "2021-03-20",
+                    "2021-02-21",
+                    "2021-05-01",
+                    "2021-06-18",
+                ],
+                "b": [
+                    "2021-06-18",
+                    "2021-05-01",
+                    "2021-02-21",
+                    "2021-03-20",
+                    "2021-02-28",
+                    "2021-01-31",
+                    "2021-01-01",
+                ],
+            }
+        )
+    )
+
+    metrics: dict = {}
+
+    table_columns_metric: MetricConfiguration
+    results: dict
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    desired_metric_1 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_2 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_3 = MetricConfiguration(
+        metric_name="column.max",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+    desired_metric_4 = MetricConfiguration(
+        metric_name="column.min",
+        metric_domain_kwargs={"column": "b"},
+        metric_value_kwargs={
+            "parse_strings_as_datetimes": True,
+        },
+        metric_dependencies={
+            "table.columns": table_columns_metric,
+        },
+    )
+
+    start = datetime.datetime.now()
+    with pytest.warns(DeprecationWarning) as records:
+        results = engine.resolve_metrics(
+            metrics_to_resolve=(
+                desired_metric_1,
+                desired_metric_2,
+                desired_metric_3,
+                desired_metric_4,
+            ),
+            metrics=metrics,
+        )
+        metrics.update(results)
+    assert len(records) == 4
+    for record in records:
+        assert (
+            'The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated'
+            in str(record.message)
+        )
+    end = datetime.datetime.now()
+    print(end - start)
+    assert results[desired_metric_1.id] == pd.Timestamp(year=2021, month=6, day=18)
+    assert results[desired_metric_2.id] == pd.Timestamp(year=2021, month=1, day=1)
+    assert results[desired_metric_3.id] == pd.Timestamp(year=2021, month=6, day=18)
+    assert results[desired_metric_4.id] == pd.Timestamp(year=2021, month=1, day=1)
 
 
 def test_batch_aggregate_metrics_sa(caplog, sa):

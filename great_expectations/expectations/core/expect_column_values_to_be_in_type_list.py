@@ -19,7 +19,10 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
 )
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.expectations.util import (
+    add_values_with_json_schema_from_list_in_params,
+    render_evaluation_parameter_string,
+)
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import (
@@ -133,6 +136,106 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         return True
 
     @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["column", "type_list", "mostly", "row_condition", "condition_parser"],
+        )
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "type_list": {
+                "schema": {"type": "array"},
+                "value": params.get("type_list"),
+            },
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
+
+        if params["type_list"] is not None:
+            for i, v in enumerate(params["type_list"]):
+                params["v__" + str(i)] = v
+            values_string = " ".join(
+                ["$v__" + str(i) for i, v in enumerate(params["type_list"])]
+            )
+
+            if params["mostly"] is not None:
+                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                if include_column_name:
+                    template_str = (
+                        "$column value types must belong to this set: "
+                        + values_string
+                        + ", at least $mostly_pct % of the time."
+                    )
+                else:
+                    template_str = (
+                        "value types must belong to this set: "
+                        + values_string
+                        + ", at least $mostly_pct % of the time."
+                    )
+            else:
+                if include_column_name:
+                    template_str = (
+                        "$column value types must belong to this set: "
+                        + values_string
+                        + "."
+                    )
+                else:
+                    template_str = (
+                        "value types must belong to this set: " + values_string + "."
+                    )
+        else:
+            if include_column_name:
+                template_str = "$column value types may be any value, but observed value will be reported"
+            else:
+                template_str = (
+                    "value types may be any value, but observed value will be reported"
+                )
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = conditional_template_str + ", then " + template_str
+            params_with_json_schema.update(conditional_params)
+
+        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
+            params=params,
+            params_with_json_schema=params_with_json_schema,
+            param_key_with_list="type_list",
+        )
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -141,7 +244,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)

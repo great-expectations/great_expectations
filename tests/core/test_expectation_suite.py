@@ -174,10 +174,10 @@ def profiler_config():
     # Profiler configuration is pulled from the Bobster use case in tests/rule_based_profiler/
     yaml_config = """
     # This profiler is meant to be used on the NYC taxi data:
-    # tests/test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_20(18|19|20)-*.csv
+    # tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_20(18|19|20)-*.csv
     variables:
       # BatchRequest yielding thirty five (35) batches (January, 2018 -- November, 2020 trip data)
-      jan_2018_thru_nov_2020_monthly_trip_data_batch_request:
+      jan_2018_thru_nov_2020_monthly_tripdata_batch_request:
         datasource_name: taxi_pandas
         data_connector_name: monthly
         data_asset_name: my_reports
@@ -193,7 +193,7 @@ def profiler_config():
         parameter_builders:
           - parameter_name: row_count_range
             class_name: NumericMetricRangeMultiBatchParameterBuilder
-            batch_request: $variables.jan_2018_thru_nov_2020_monthly_trip_data_batch_request
+            batch_request: $variables.jan_2018_thru_nov_2020_monthly_tripdata_batch_request
             metric_name: table.row_count
             confidence_level: $variables.confidence_level
             round_decimals: 0

@@ -2,7 +2,6 @@ import configparser
 import copy
 import datetime
 import errno
-import glob
 import itertools
 import json
 import logging
@@ -16,6 +15,7 @@ import webbrowser
 from collections import OrderedDict
 from typing import Any, Callable, Dict, List, Optional, Union, cast
 
+import requests
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
@@ -29,6 +29,8 @@ from great_expectations.core.batch import (
     BatchRequest,
     IDDict,
     RuntimeBatchRequest,
+    get_batch_request_dict,
+    get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
@@ -50,6 +52,7 @@ from great_expectations.core.usage_statistics.anonymizers.store_anonymizer impor
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
+    get_batch_list_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     send_usage_message,
@@ -57,14 +60,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.store import (
-    GeCloudStoreBackend,
-    Store,
-    TupleStoreBackend,
-)
+from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
-    DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
     PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED,
 )
@@ -104,7 +102,7 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.exceptions import DataContextError
+from great_expectations.exceptions import DataContextError, InvalidKeyError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -770,7 +768,7 @@ class BaseDataContext:
         self,
         resource_identifier: Optional[str] = None,
         site_name: Optional[str] = None,
-        only_if_exists: Optional[bool] = True,
+        only_if_exists: bool = True,
     ) -> None:
         """
         A stdlib cross-platform way to open a file in a browser.
@@ -843,14 +841,12 @@ class BaseDataContext:
             config_version: float = (
                 self.project_config_with_variables_substituted.config_version
             )
-            if self.root_directory and default_checkpoints_exist(
-                directory_path=self.root_directory
-            ):
+            if default_checkpoints_exist(directory_path=self.root_directory):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             if self.root_directory:
-                error_message: str = f'Attempted to access the "checkpoint_store_name" field with a legacy config version ({config_version}) and no `checkpoints` directory.\n  To continue using legacy config version ({config_version}), please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
+                error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
             else:
-                error_message: str = f'Attempted to access the "checkpoint_store_name" field with a legacy config version ({config_version}) and no `checkpoints` directory.\n  To continue using legacy config version ({config_version}), please create a `checkpoints` directory in your Great Expectations project " f"directory.\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
+                error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create a `checkpoints` directory in your Great Expectations project " f"directory.\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
             raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
     @property
@@ -862,11 +858,9 @@ class BaseDataContext:
             config_version: float = (
                 self.project_config_with_variables_substituted.config_version
             )
-            if self.root_directory and default_checkpoints_exist(
-                directory_path=self.root_directory
-            ):
+            if default_checkpoints_exist(directory_path=self.root_directory):
                 logger.warning(
-                    f'Detected legacy config version ({config_version}) so will try to use default Checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.'
+                    f'Checkpoint store named "{checkpoint_store_name}" is not a configured store, so will try to use default Checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
                 )
                 return self._build_store_from_config(
                     checkpoint_store_name,
@@ -915,16 +909,10 @@ class BaseDataContext:
 
     def _load_config_variables_file(self):
         """
-        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables are
-        loaded from a global great_expectations.conf file, located at one of the paths defined in
-        self.GLOBAL_CONFIG_PATHS (in order of search precedence).
+        Get all config variables from the default location. For Data Contexts in GE Cloud mode, config variables
+        have already been interpolated before being sent from the Cloud API.
         """
         if self.ge_cloud_mode:
-            for config_path in self.GLOBAL_CONFIG_PATHS:
-                if os.path.isfile(config_path):
-                    config = configparser.ConfigParser()
-                    config.read(config_path)
-                    return dict(config.items(section="ge_cloud_config"))
             return {}
         config_variables_file_path = self.get_config().config_variables_file_path
         if config_variables_file_path:
@@ -966,14 +954,11 @@ class BaseDataContext:
             self.DOLLAR_SIGN_ESCAPE_STRING,
         )
 
-        # for ge_cloud_mode: in most cases, self.ge_cloud_config will be a subset of substituted_config_variables,
-        # but if one or more ge_cloud_config values are passed in at runtime, they will be reflected in
-        # self.ge_cloud_config and will take precedence
+        # Substitutions should have already occurred for GE Cloud configs at this point
         substitutions = {
             **substituted_config_variables,
             **dict(os.environ),
             **self.runtime_environment,
-            **(self.ge_cloud_config.to_json_dict() if self.ge_cloud_mode else {}),
         }
 
         if self.ge_cloud_mode:
@@ -1398,7 +1383,11 @@ class BaseDataContext:
             assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
                 the list can be either batches, or a tuple that will allow the operator to fetch the batch:
                 (batch_kwargs, expectation_suite_name)
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: one of several supported formatting directives for expectation validation results
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
@@ -1573,6 +1562,10 @@ class BaseDataContext:
             batch_parameters=batch_parameters,
         )
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.get_batch_list",
+        args_payload_fn=get_batch_list_usage_statistics,
+    )
     def get_batch_list(
         self,
         datasource_name: Optional[str] = None,
@@ -1581,12 +1574,11 @@ class BaseDataContext:
         *,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
         batch_data: Optional[Any] = None,
-        data_connector_query: Optional[Union[IDDict, dict]] = None,
+        data_connector_query: Optional[dict] = None,
         batch_identifiers: Optional[dict] = None,
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
         custom_filter_function: Optional[Callable] = None,
-        batch_spec_passthrough: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
@@ -1595,6 +1587,7 @@ class BaseDataContext:
         query: Optional[str] = None,
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
         **kwargs,
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -1610,6 +1603,7 @@ class BaseDataContext:
             batch_request
             batch_data
             query
+            path
             runtime_parameters
             data_connector_query
             batch_identifiers
@@ -1639,125 +1633,30 @@ class BaseDataContext:
         This method attempts to return any number of batches, including an empty list.
         """
 
-        datasource_name: str
-        if batch_request:
-            if not isinstance(batch_request, BatchRequest):
-                raise TypeError(
-                    f"batch_request must be an instance of BatchRequest object, not {type(batch_request)}"
-                )
-            datasource_name = batch_request.datasource_name
-
-        # ensure that the first parameter is datasource_name, which should be a str. This check prevents users
-        # from passing in batch_request as an unnamed parameter.
-        if not isinstance(datasource_name, str):
-            raise ge_exceptions.GreatExpectationsTypeError(
-                f"the first parameter, datasource_name, must be a str, not {type(datasource_name)}"
-            )
+        batch_request = get_batch_request_from_acceptable_arguments(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            batch_data=batch_data,
+            data_connector_query=data_connector_query,
+            batch_identifiers=batch_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            runtime_parameters=runtime_parameters,
+            query=query,
+            path=path,
+            batch_filter_parameters=batch_filter_parameters,
+            batch_spec_passthrough=batch_spec_passthrough,
+            **kwargs,
+        )
+        datasource_name = batch_request.datasource_name
         datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
-
-        if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
-            raise ValueError("Must provide only one of batch_data, query, or path.")
-        if any(
-            [
-                batch_data is not None
-                and runtime_parameters
-                and "batch_data" in runtime_parameters,
-                query and runtime_parameters and "query" in runtime_parameters,
-                path and runtime_parameters and "path" in runtime_parameters,
-            ]
-        ):
-            raise ValueError(
-                "If batch_data, query, or path arguments are provided, the same keys cannot appear in the "
-                "runtime_parameters argument."
-            )
-
-        if batch_request:
-            # TODO: Raise a warning if any parameters besides batch_requests are specified
-            return datasource.get_batch_list_from_batch_request(
-                batch_request=batch_request
-            )
-        elif any([batch_data is not None, query, path, runtime_parameters]):
-            runtime_parameters = runtime_parameters or {}
-            if batch_data is not None:
-                runtime_parameters["batch_data"] = batch_data
-            elif query is not None:
-                runtime_parameters["query"] = query
-            elif path is not None:
-                runtime_parameters["path"] = path
-
-            if batch_identifiers is None:
-                batch_identifiers = kwargs
-            else:
-                # Raise a warning if kwargs exist
-                pass
-
-            batch_request = RuntimeBatchRequest(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                batch_spec_passthrough=batch_spec_passthrough,
-                runtime_parameters=runtime_parameters,
-                batch_identifiers=batch_identifiers,
-            )
-
-        else:
-            if data_connector_query is None:
-                if (
-                    batch_filter_parameters is not None
-                    and batch_identifiers is not None
-                ):
-                    raise ValueError(
-                        'Must provide either "batch_filter_parameters" or "batch_identifiers", not both.'
-                    )
-                elif batch_filter_parameters is None and batch_identifiers is not None:
-                    logger.warning(
-                        'Attempting to build data_connector_query but "batch_identifiers" was provided '
-                        'instead of "batch_filter_parameters". The "batch_identifiers" key on '
-                        'data_connector_query has been renamed to "batch_filter_parameters". Please update '
-                        'your code. Falling back on provided "batch_identifiers".'
-                    )
-                    batch_filter_parameters = batch_identifiers
-                elif batch_filter_parameters is None and batch_identifiers is None:
-                    batch_filter_parameters = kwargs
-                else:
-                    # Raise a warning if kwargs exist
-                    pass
-
-                data_connector_query_params: dict = {
-                    "batch_filter_parameters": batch_filter_parameters,
-                    "limit": limit,
-                    "index": index,
-                    "custom_filter_function": custom_filter_function,
-                }
-                data_connector_query = IDDict(data_connector_query_params)
-            else:
-                # Raise a warning if batch_filter_parameters or kwargs exist
-                data_connector_query = IDDict(data_connector_query)
-
-            if batch_spec_passthrough is None:
-                batch_spec_passthrough = {}
-                if sampling_method is not None:
-                    sampling_params: dict = {
-                        "sampling_method": sampling_method,
-                    }
-                    if sampling_kwargs is not None:
-                        sampling_params["sampling_kwargs"] = sampling_kwargs
-                    batch_spec_passthrough.update(sampling_params)
-                if splitter_method is not None:
-                    splitter_params: dict = {
-                        "splitter_method": splitter_method,
-                    }
-                    if splitter_kwargs is not None:
-                        splitter_params["splitter_kwargs"] = splitter_kwargs
-                    batch_spec_passthrough.update(splitter_params)
-
-            batch_request: BatchRequest = BatchRequest(
-                datasource_name=datasource_name,
-                data_connector_name=data_connector_name,
-                data_asset_name=data_asset_name,
-                data_connector_query=data_connector_query,
-                batch_spec_passthrough=batch_spec_passthrough,
-            )
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     def get_validator(
@@ -1776,10 +1675,6 @@ class BaseDataContext:
         limit: Optional[int] = None,
         index: Optional[Union[int, list, tuple, slice, str]] = None,
         custom_filter_function: Optional[Callable] = None,
-        expectation_suite_name: Optional[str] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        create_expectation_suite_with_name: Optional[str] = None,
-        batch_spec_passthrough: Optional[dict] = None,
         sampling_method: Optional[str] = None,
         sampling_kwargs: Optional[dict] = None,
         splitter_method: Optional[str] = None,
@@ -1789,6 +1684,10 @@ class BaseDataContext:
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        expectation_suite_name: Optional[str] = None,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        create_expectation_suite_with_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
         """
@@ -1850,7 +1749,6 @@ class BaseDataContext:
                     limit=limit,
                     index=index,
                     custom_filter_function=custom_filter_function,
-                    batch_spec_passthrough=batch_spec_passthrough,
                     sampling_method=sampling_method,
                     sampling_kwargs=sampling_kwargs,
                     splitter_method=splitter_method,
@@ -1859,6 +1757,7 @@ class BaseDataContext:
                     query=query,
                     path=path,
                     batch_filter_parameters=batch_filter_parameters,
+                    batch_spec_passthrough=batch_spec_passthrough,
                     **kwargs,
                 )
             )
@@ -2169,7 +2068,7 @@ class BaseDataContext:
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
-        overwrite_existing: Optional[bool] = False,
+        overwrite_existing: bool = False,
         ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> ExpectationSuite:
@@ -2297,7 +2196,7 @@ class BaseDataContext:
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
-        overwrite_existing: Optional[bool] = True,
+        overwrite_existing: bool = True,
         ge_cloud_id: Optional[str] = None,
         **kwargs,
     ):
@@ -2313,7 +2212,10 @@ class BaseDataContext:
         """
         if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="expectation_suite", ge_cloud_id=ge_cloud_id
+                resource_type="expectation_suite",
+                ge_cloud_id=ge_cloud_id
+                if ge_cloud_id is not None
+                else str(expectation_suite.ge_cloud_id),
             )
             if self.expectations_store.has_key(key) and not overwrite_existing:
                 raise ge_exceptions.DataContextError(
@@ -2420,14 +2322,7 @@ class BaseDataContext:
 
     def store_evaluation_parameters(self, validation_results, target_store_name=None):
         if not self._evaluation_parameter_dependencies_compiled:
-            # get the expectation suite if it exists, otherwise None
-            expectation_suite_name = validation_results.meta["expectation_suite_name"]
-            if expectation_suite_name in self.list_expectation_suite_names():
-                expectation_suite = self.get_expectation_suite(expectation_suite_name)
-            else:
-                expectation_suite = None
-
-            self._compile_evaluation_parameter_dependencies(expectation_suite)
+            self._compile_evaluation_parameter_dependencies()
 
         if target_store_name is None:
             target_store_name = self.evaluation_parameter_store_name
@@ -2456,17 +2351,15 @@ class BaseDataContext:
     def validations_store(self):
         return self.stores[self.validations_store_name]
 
-    def _compile_evaluation_parameter_dependencies(self, expectation_suite):
+    def _compile_evaluation_parameter_dependencies(self):
         self._evaluation_parameter_dependencies = {}
+        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
+        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
+        for key in self.expectations_store.list_keys():
+            expectation_suite = self.expectations_store.get(key)
+            if not expectation_suite:
+                continue
 
-        # only if we don't have an expectation suite do we do a key scan
-        if expectation_suite is None:
-            for key in self.expectations_store.list_keys():
-                expectation_suite = self.expectations_store.get(key)
-                if not expectation_suite:
-                    continue
-
-        if expectation_suite:
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
             if len(dependencies) > 0:
                 nested_update(self._evaluation_parameter_dependencies, dependencies)
@@ -2549,7 +2442,9 @@ class BaseDataContext:
         """
         return return_obj
 
-    @usage_statistics_enabled_method(event_name="data_context.build_data_docs")
+    @usage_statistics_enabled_method(
+        event_name="data_context.build_data_docs",
+    )
     def build_data_docs(
         self,
         site_names=None,
@@ -3137,6 +3032,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
 
+        batch_request, validations = get_batch_request_dict(batch_request, validations)
+
         checkpoint_config: Union[CheckpointConfig, dict]
 
         checkpoint_config = {
@@ -3165,11 +3062,35 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
+        # DataFrames shouldn't be saved to CheckpointStore
+        if checkpoint_config.get("validations") is not None:
+            for idx, val in enumerate(checkpoint_config["validations"]):
+                if (
+                    val.get("batch_request") is not None
+                    and val["batch_request"].get("runtime_parameters") is not None
+                    and val["batch_request"]["runtime_parameters"].get("batch_data")
+                    is not None
+                ):
+                    raise ge_exceptions.InvalidConfigError(
+                        f'batch_data found in validations at index {idx} cannot be saved to CheckpointStore "{self.checkpoint_store_name}"'
+                    )
+        elif (
+            checkpoint_config.get("batch_request") is not None
+            and checkpoint_config["batch_request"].get("runtime_parameters") is not None
+            and checkpoint_config["batch_request"]["runtime_parameters"].get(
+                "batch_data"
+            )
+            is not None
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f'batch_data found in batch_request cannot be saved to CheckpointStore "{self.checkpoint_store_name}"'
+            )
+
         checkpoint_config = filter_properties_dict(
             properties=checkpoint_config, clean_falsy=True
         )
         new_checkpoint: Union[
-            Checkpoint, LegacyCheckpoint
+            Checkpoint, SimpleCheckpoint, LegacyCheckpoint
         ] = instantiate_class_from_config(
             config=checkpoint_config,
             runtime_environment={
@@ -3179,6 +3100,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "module_name": "great_expectations.checkpoint.checkpoint",
             },
         )
+
         if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
                 resource_type="contract", ge_cloud_id=ge_cloud_id
@@ -3187,6 +3109,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             key: ConfigurationIdentifier = ConfigurationIdentifier(
                 configuration_key=name,
             )
+
         checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
         checkpoint_ref = self.checkpoint_store.set(key=key, value=checkpoint_config)
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):
@@ -3286,6 +3209,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         else:
             return [x.configuration_key for x in self.checkpoint_store.list_keys()]
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.run_checkpoint",
+    )
     def run_checkpoint(
         self,
         checkpoint_name: Optional[str] = None,
@@ -3310,23 +3236,31 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         Validate against a pre-defined Checkpoint. (Experimental)
         Args:
             checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
+            template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
+            run_name_template: The template to use for run_name
+            expectation_suite_name: Expectation suite to be used by Checkpoint run
+            batch_request: Batch request to be used by Checkpoint run
+            action_list: List of actions to be performed by the Checkpoint
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            runtime_configuration: Runtime configuration override parameters
+            validations: Validations to be performed by the Checkpoint run
+            profilers: Profilers to be used by the Checkpoint run
+            run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: One of several supported formatting directives for expectation validation results
+            ge_cloud_id: Great Expectations Cloud id for the checkpoint
+            expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
             CheckpointResult
         """
         # TODO mark experimental
-        batch_request = batch_request or {}
-        batch_identifiers = batch_request.get("batch_identifiers", {})
-        if self.ge_cloud_mode:
-            if len(batch_identifiers.keys()) == 0:
-                batch_identifiers["timestamp"] = str(datetime.datetime.now())
-                batch_request["batch_identifiers"] = batch_identifiers
-
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
-            name=checkpoint_name, ge_cloud_id=ge_cloud_id
-        )
+        batch_request, validations = get_batch_request_dict(batch_request, validations)
+        checkpoint: Union[
+            Checkpoint, SimpleCheckpoint, LegacyCheckpoint
+        ] = self.get_checkpoint(name=checkpoint_name, ge_cloud_id=ge_cloud_id)
         checkpoint_config_from_store: dict = checkpoint.config.to_json_dict()
 
         if (
@@ -3357,16 +3291,51 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
-        checkpoint_config = {
+        checkpoint_config: dict = {
             key: value
             for key, value in checkpoint_config_from_store.items()
             if key in checkpoint_config_from_call_args
         }
         checkpoint_config.update(checkpoint_config_from_call_args)
         if not self.ge_cloud_mode:
+            batch_data_list = []
+            batch_data = None
+            if checkpoint_config.get("validations") is not None:
+                for val in checkpoint_config["validations"]:
+                    if (
+                        val.get("batch_request") is not None
+                        and val["batch_request"].get("runtime_parameters") is not None
+                        and val["batch_request"]["runtime_parameters"].get("batch_data")
+                        is not None
+                    ):
+                        batch_data_list.append(
+                            val["batch_request"]["runtime_parameters"].pop("batch_data")
+                        )
+            elif (
+                checkpoint_config.get("batch_request") is not None
+                and checkpoint_config["batch_request"].get("runtime_parameters")
+                is not None
+                and checkpoint_config["batch_request"]["runtime_parameters"].get(
+                    "batch_data"
+                )
+                is not None
+            ):
+                batch_data = checkpoint_config["batch_request"][
+                    "runtime_parameters"
+                ].pop("batch_data")
             checkpoint_config = filter_properties_dict(
                 properties=checkpoint_config, clean_falsy=True
             )
+            if len(batch_data_list) > 0:
+                for idx, val in enumerate(checkpoint_config.get("validations")):
+                    if batch_data_list[idx] is not None:
+                        val["batch_request"]["runtime_parameters"][
+                            "batch_data"
+                        ] = batch_data_list[idx]
+            elif batch_data is not None:
+                checkpoint_config["batch_request"]["runtime_parameters"][
+                    "batch_data"
+                ] = batch_data
 
         checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
 
@@ -3377,6 +3346,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         yaml_config: str,
         name: Optional[str] = None,
         class_name: Optional[str] = None,
+        runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
         return_mode: str = "instantiated_class",
         shorten_tracebacks: bool = False,
@@ -3422,6 +3392,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         The returned object is determined by return_mode.
         """
+        if runtime_environment is None:
+            runtime_environment = {}
+
+        runtime_environment = {
+            **runtime_environment,
+            **self.runtime_environment,
+        }
+
         usage_stats_event_name: str = "data_context.test_yaml_config"
         usage_stats_event_payload: Dict[str, Union[str, List[str]]] = {}
 
@@ -3442,7 +3420,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             substitutions: dict = {
                 **substituted_config_variables,
                 **dict(os.environ),
-                **self.runtime_environment,
+                **runtime_environment,
             }
 
             config_str_with_substituted_variables: Union[
@@ -3567,7 +3545,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                         data_context=self, **checkpoint_config
                     )
 
-                checkpoint_anonymizer = CheckpointAnonymizer(self.data_context_id)
+                checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
+                    self.data_context_id
+                )
 
                 usage_stats_event_payload = (
                     checkpoint_anonymizer.anonymize_checkpoint_info(
@@ -3585,7 +3565,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 instantiated_class = instantiate_class_from_config(
                     config=config,
                     runtime_environment={
-                        "root_directory": self.root_directory,
+                        **runtime_environment,
+                        **{
+                            "root_directory": self.root_directory,
+                        },
                     },
                     config_defaults={},
                 )
@@ -3607,7 +3590,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 instantiated_class = instantiate_class_from_config(
                     config=config,
                     runtime_environment={
-                        "root_directory": self.root_directory,
+                        **runtime_environment,
+                        **{
+                            "root_directory": self.root_directory,
+                        },
                     },
                     config_defaults={},
                 )
@@ -3812,6 +3798,7 @@ class DataContext(BaseDataContext):
 
         Args:
             project_root_dir: path to the root directory in which to create a new great_expectations directory
+            usage_statistics_enabled: boolean directive specifying whether or not to gather usage statistics
             runtime_environment: a dictionary of config variables that
             override both those set in config_variables.yml and the environment
 
@@ -3892,7 +3879,8 @@ class DataContext(BaseDataContext):
     def scaffold_directories(cls, base_dir):
         """Safely create GE directories for a new project."""
         os.makedirs(base_dir, exist_ok=True)
-        open(os.path.join(base_dir, ".gitignore"), "w").write("uncommitted/")
+        with open(os.path.join(base_dir, ".gitignore"), "w") as f:
+            f.write("uncommitted/")
 
         for directory in cls.BASE_DIRECTORIES:
             if directory == "plugins":
@@ -4057,20 +4045,33 @@ class DataContext(BaseDataContext):
         ):
             self._save_project_config()
 
-    @property
-    def default_ge_cloud_data_context_config_template(self):
-        config_commented_map_from_yaml = yaml.load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
-        try:
-            return (
-                DataContextConfig(**config_commented_map_from_yaml)
-                if self.ge_cloud_mode
-                else DataContextConfig.from_commented_map(
-                    commented_map=config_commented_map_from_yaml
-                )
+    def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
+        """
+        Utilizes the GeCloudConfig instantiated in the constructor to create a request to the Cloud API.
+        Given proper authorization, the request retrieves a data context config that is pre-populated with
+        GE objects specific to the user's Cloud environment (datasources, data connectors, etc).
+
+        Please note that substitution for ${VAR} variables is performed in GE Cloud before being sent
+        over the wire.
+
+        :return: the configuration object retrieved from the Cloud API
+        """
+        ge_cloud_url = (
+            self.ge_cloud_config.base_url
+            + f"/accounts/{self.ge_cloud_config.account_id}/data-context-configuration"
+        )
+        auth_headers = {
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f"Bearer {self.ge_cloud_config.access_token}",
+        }
+
+        response = requests.get(ge_cloud_url, headers=auth_headers)
+        if response.status_code != 200:
+            raise ge_exceptions.GeCloudError(
+                f"Bad request made to GE Cloud; {response.json().get('message')}"
             )
-        except ge_exceptions.InvalidDataContextConfigError:
-            # Just to be explicit about what we intended to catch
-            raise
+        config = response.json()
+        return DataContextConfig(**config)
 
     def _load_project_config(self):
         """
@@ -4078,15 +4079,14 @@ class DataContext(BaseDataContext):
         The file may contain ${SOME_VARIABLE} variables - see self.project_config_with_variables_substituted
         for how these are substituted.
 
-        For Data Contexts in GE Cloud mode, a default configuration template with pre-defined ${
-        SOME_VARIABLE} variables is returned. (see
-        great_expectations.data_context.templates.DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG). These variables are
-        substituted later using the same process referenced above.
+        For Data Contexts in GE Cloud mode, a user-specific template is retrieved from the Cloud API
+        - see self._retrieve_data_context_config_from_ge_cloud for more details.
 
         :return: the configuration object read from the file or template
         """
         if self.ge_cloud_mode:
-            return self.default_ge_cloud_data_context_config_template
+            config = self._retrieve_data_context_config_from_ge_cloud()
+            return config
 
         path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
