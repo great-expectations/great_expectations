@@ -34,6 +34,7 @@ from great_expectations.marshmallow__shade import (
     pre_dump,
 )
 from great_expectations.types import SerializableDictDot
+from great_expectations.types.base import DotDict
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +51,7 @@ class ExpectationSuite(SerializableDictDot):
     def __init__(
         self,
         expectation_suite_name,
+        data_context=None,
         expectations=None,
         evaluation_parameters=None,
         data_asset_type=None,
@@ -59,6 +61,7 @@ class ExpectationSuite(SerializableDictDot):
     ):
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
+        self.data_context = data_context
         if expectations is None:
             expectations = []
         self.expectations = [
@@ -175,6 +178,21 @@ class ExpectationSuite(SerializableDictDot):
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
+
+    def __deepcopy__(self, memo):
+        attributes = [
+            "expectation_suite_name",
+            "ge_cloud_id",
+            "expectations",
+            "evaluation_parameters",
+            "data_asset_type",
+            "meta",
+        ]
+        copied_dict = DotDict()
+        for k in attributes:
+            setattr(copied_dict, k, deepcopy(getattr(self, k)))
+        new_suite = ExpectationSuite(**copied_dict)
+        return new_suite
 
     def to_json_dict(self):
         myself = expectationSuiteSchema.dump(self)

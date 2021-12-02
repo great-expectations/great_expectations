@@ -2086,7 +2086,7 @@ class BaseDataContext:
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
         expectation_suite: ExpectationSuite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name
+            expectation_suite_name=expectation_suite_name, data_context=self
         )
         if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
@@ -2166,7 +2166,10 @@ class BaseDataContext:
             )
 
         if self.expectations_store.has_key(key):
-            return self.expectations_store.get(key)
+            expectation_suite: ExpectationSuite = self.expectations_store.get(key)
+            # set the reference to data_context before returning
+            expectation_suite.data_context = self
+            return expectation_suite
         else:
             raise ge_exceptions.DataContextError(
                 "expectation_suite %s not found" % expectation_suite_name
