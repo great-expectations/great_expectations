@@ -91,7 +91,7 @@ Run the following code to set up a [Data Context](../reference/data_context.md) 
 
 <details>
   <summary>What is an "in code" Data Context?</summary>
-When you don't have easy access to a file system, instead of defining your Data Context via great_expectations.yml you can do so by instantiating a BaseDataContext with a config. Take a look at our how-to guide to learn more: <a href="../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file">How to instantiate a Data Context without a yml file</a>. In Databricks, you can do either since you have access to a filesystem - we've simply shown the in code version here for simplicity.
+When you don't have easy access to a file system, instead of defining your Data Context via great_expectations.yml you can do so by instantiating a BaseDataContext with a config. Take a look at our how-to guide to learn more: <a href="../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file">How to instantiate a Data Context without a yml file</a>. In Databricks, you can do either since you have access to a filesystem - we've shown the in code version here for simplicity.
 </details>
 
 <details>
@@ -543,7 +543,7 @@ Since we used a `SimpleCheckpoint`, our Checkpoint already contained an `UpdateD
 <summary>How do I customize these actions?</summary>
   Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
   
-  Also, to see the full Checkpoint configuration, you can run: `print(my_checkpoint.get_substituted_config().to_yaml_str())`
+  Also, to see the full Checkpoint configuration, you can run: <code>print(my_checkpoint.get_substituted_config().to_yaml_str())</code>
 </details>
 
 Since we used DBFS for our Data Docs store, we need to download our data docs locally to view them. If you use a different store, you can host your data docs in a place where they can be accessed directly by your team. To learn more, see our documentation on Data Docs for other locations e.g. [filesystem](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md), [s3](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md), [GCS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md), [ABS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md).
