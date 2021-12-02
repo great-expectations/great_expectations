@@ -835,6 +835,46 @@ def get_batch_request_dict(
     return batch_request, validations
 
 
+"""
+The mechanism for serializing configuration objects that contain non-serializable values, such as Pandas and Spark
+dataframes consists of the following steps:
+1) Scan the original configuration object and mark the specified attributes (that reference non-serializable values)
+with temporary unique hexadecimal value strings, while maintaining the reference map between these temporary labels and
+the original (i.e., attributed as non-serializable) values.
+2) The updated configuration object should now be entirely serializable, because all the attributed non-serializable
+values have been temporarily replaced by their corresponding unique string labels.
+3) Restore the original configuration object and any copies thereof using the reference map built in the first step.
+
+Example:
+        reference_map: Dict[str, Dict[str, Any]] = {}
+        mark_and_replace_non_serializable_references_in_config(
+            config=obj,
+            attribute_names={"batch_data},
+            reference_map=reference_map,
+        )
+        data: dict = super().dump(obj=obj, many=many)  #  or: data: dict = copy.deepcopy(self.to_dict()) -- etc.
+        restore_non_serializable_references_into_config(
+            config=obj,
+            attribute_names={"batch_data},
+            reference_map=reference_map,
+        )
+        restore_non_serializable_references_into_config(
+            config=data,
+            attribute_names={"batch_data},
+            reference_map=reference_map,
+        )
+
+        and as part of a "__repr()__" method also add:
+            restore_non_serializable_references_into_config(
+                config=data,
+                attribute_names={"batch_data},
+                reference_map=reference_map,
+                replace_value_with_type_string=True,
+            )
+            return json.dumps(data, indent=2)
+"""
+
+
 def mark_and_replace_non_serializable_references_in_config(
     config: Any,
     attribute_names: Union[List[str], Set[str]],
@@ -874,7 +914,9 @@ is illegal).
     if isinstance(config, (DictDot, dict)):
         for key, value in config.items():
             if key in attribute_names:
-                serializable_value = hashlib.md5(key.encode("utf-8")).hexdigest()
+                serializable_value = (
+                    f'{key}_{hashlib.md5(key.encode("utf-8")).hexdigest()}'
+                )
                 reference_map[key][serializable_value] = value
                 config[key] = serializable_value
             elif isinstance(value, Iterable) and not isinstance(value, str):

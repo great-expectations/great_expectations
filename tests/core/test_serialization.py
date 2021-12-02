@@ -355,7 +355,7 @@ def test_mark_and_replace_non_serializable_references_in_config(
     assert len(reference_map) == 1
     assert "batch_data" in reference_map
     assert len(reference_map["batch_data"]) == 1
-    assert re.compile(r"^\w{32}$").match(
+    assert re.compile(r"^batch_data_\w{32}$").match(
         list(reference_map["batch_data"].keys())[0]
     )  # hashlib md5 "utf-8" hexdigest
     assert str(type(list(reference_map["batch_data"].values())[0])) == str(
