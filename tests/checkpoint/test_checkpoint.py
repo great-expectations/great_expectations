@@ -667,6 +667,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
 
     data_context.create_expectation_suite(expectation_suite_name="users.delivery")
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+    print(f'\n[ALEX_TEST] [TEST_CHECKPOINT] TEST_RUN_STARTING')
     result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.config.name,
         batch_request={
@@ -679,6 +680,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
         },
         run_name="airflow_run_1234567890",
     )
+    print(f'\n[ALEX_TEST] [TEST_CHECKPOINT] TEST_RUN_FINISHED')
     assert len(result.list_validation_results()) == 1
     assert len(data_context.validations_store.list_keys()) == 1
     assert result.success

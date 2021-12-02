@@ -825,6 +825,7 @@ def get_batch_request_dict(
 def get_runtime_parameters_batch_data_references_from_config(
     config: Union[DictDot, dict]
 ) -> Tuple[Optional[Any], Optional[List[Any]]]:
+    # print(f'\n[ALEX_TEST] [BATCH.PY::GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] CONFIG: ; TYPE: {str(type(config))}')
     if not isinstance(config, (DictDot, dict)):
         raise TypeError(
             f"""The Checkpoint configuraiton argument must have the type "dict" or "DictDot" (the type given \
@@ -832,43 +833,92 @@ is "{str(type(config))}", which is illegal).
 """
         )
 
+    # print(f'\n[ALEX_TEST] [BATCH.PY::GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] CONFIG: {config} ; TYPE: {str(type(config))}')
+    # print(f'\n[ALEX_TEST] [BATCH.PY::GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] CONFIG: ; TYPE: {str(type(config))}')
     default_batch_data: Optional[Any] = None
     validations_batch_data_list: Optional[List[Any]] = None
 
-    if (
-        ("batch_request" in config or hasattr(config, "batch_request"))
-        and config["batch_request"] is not None
-        and config["batch_request"].get("runtime_parameters") is not None
-        and config["batch_request"]["runtime_parameters"].get("batch_data") is not None
-        and default_batch_data is None
-    ):
-        default_batch_data = config["batch_request"]["runtime_parameters"]["batch_data"]
-    else:
+    # TODO: <Alex>ALEX</Alex>
+    # if (
+    #     ("batch_request" in config or hasattr(config, "batch_request"))
+    #     and config["batch_request"] is not None
+    #     and config["batch_request"].get("runtime_parameters") is not None
+    #     and config["batch_request"]["runtime_parameters"].get("batch_data") is not None
+    #     and default_batch_data is None
+    # ):
+    #     default_batch_data = config["batch_request"]["runtime_parameters"]["batch_data"]
+    # else:
+    #     if (
+    #         ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
+    #         and config["runtime_parameters"] is not None
+    #         and config["runtime_parameters"].get("batch_data") is not None
+    #         and default_batch_data is None
+    #     ):
+    #         default_batch_data = config["runtime_parameters"]["batch_data"]
+    #
+    # if ("validations" in config or hasattr(config, "validations")) and config[
+    #     "validations"
+    # ]:
+    #     validations_batch_data_list = []
+    #     for val in config["validations"]:
+    #         if (
+    #             val.get("batch_request") is not None
+    #             and val["batch_request"].get("runtime_parameters") is not None
+    #             and val["batch_request"]["runtime_parameters"].get("batch_data")
+    #             is not None
+    #         ):
+    #             validations_batch_data_list.append(
+    #                 val["batch_request"]["runtime_parameters"]["batch_data"]
+    #             )
+    #         else:
+    #             validations_batch_data_list.append(None)
+    # TODO: <Alex>ALEX</Alex>
+
+
+    # TODO: <Alex>ALEX</Alex>
+    try:
         if (
-            ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
-            and config["runtime_parameters"] is not None
-            and config["runtime_parameters"].get("batch_data") is not None
+            ("batch_request" in config or hasattr(config, "batch_request"))
+            and config["batch_request"] is not None
+            and ("runtime_parameters" in config["batch_request"] or hasattr(config["batch_request"], "runtime_parameters"))
+            and config["batch_request"]["runtime_parameters"] is not None
+            and ("batch_data" in config["batch_request"]["runtime_parameters"] or hasattr(config["batch_request"]["runtime_parameters"], "batch_data"))
+            and config["batch_request"]["runtime_parameters"]["batch_data"] is not None
             and default_batch_data is None
         ):
-            default_batch_data = config["runtime_parameters"]["batch_data"]
-
-    if ("validations" in config or hasattr(config, "validations")) and config[
-        "validations"
-    ]:
-        validations_batch_data_list = []
-        for val in config["validations"]:
+            default_batch_data = config["batch_request"]["runtime_parameters"]["batch_data"]
+        else:
             if (
-                val.get("batch_request") is not None
-                and val["batch_request"].get("runtime_parameters") is not None
-                and val["batch_request"]["runtime_parameters"].get("batch_data")
-                is not None
+                ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
+                and config["runtime_parameters"] is not None
+                and ("batch_data" in config["runtime_parameters"] or hasattr(config["runtime_parameters"], "batch_data"))
+                and config["runtime_parameters"]["batch_data"] is not None
+                and default_batch_data is None
             ):
-                validations_batch_data_list.append(
-                    val["batch_request"]["runtime_parameters"]["batch_data"]
-                )
-            else:
-                validations_batch_data_list.append(None)
+                default_batch_data = config["runtime_parameters"]["batch_data"]
 
+        if ("validations" in config or hasattr(config, "validations")) and config["validations"]:
+            validations_batch_data_list = []
+            for val in config["validations"]:
+                if (
+                    ("batch_request" in val or hasattr(val, "batch_request"))
+                    and val["batch_request"] is not None
+                    and ("runtime_parameters" in val["batch_request"] or hasattr(val["batch_request"], "runtime_parameters"))
+                    and val["batch_request"]["runtime_parameters"] is not None
+                    and ("batch_data" in val["batch_request"]["runtime_parameters"] or hasattr(val["batch_request"]["runtime_parameters"], "batch_data"))
+                    and val["batch_request"]["runtime_parameters"]["batch_data"] is not None
+                ):
+                    validations_batch_data_list.append(
+                        val["batch_request"]["runtime_parameters"]["batch_data"]
+                    )
+                else:
+                    validations_batch_data_list.append(None)
+    except Exception as e:
+        print(f'\n[ALEX_TEST] [BATCH.PY::GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] EXCEPTION!!!!!: {e} ; TYPE: {str(type(e))}')
+    # TODO: <Alex>ALEX</Alex>
+
+    # print(f'\n[ALEX_TEST] [BATCH.PY::GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] DEFAULT_BATCH_DATA: {default_batch_data} ; TYPE: {str(type(default_batch_data))}')
+    # print(f'\n[ALEX_TEST] [BATCH.PY::GET_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] VALIDATIONS_BATCH_DATA_LIST: {validations_batch_data_list} ; TYPE: {str(type(validations_batch_data_list))}')
     return default_batch_data, validations_batch_data_list
 
 
@@ -882,35 +932,114 @@ is "{str(type(config))}", which is illegal).
 """
         )
 
-    if (
-        ("batch_request" in config or hasattr(config, "batch_request"))
-        and config["batch_request"] is not None
-        and config["batch_request"].get("runtime_parameters") is not None
-        and "batch_data" in config["batch_request"]["runtime_parameters"]
-    ):
-        config["batch_request"]["runtime_parameters"].pop("batch_data")
-    else:
+    # TODO: <Alex>ALEX</Alex>
+    # if (
+    #     ("batch_request" in config or hasattr(config, "batch_request"))
+    #     and config["batch_request"] is not None
+    #     and config["batch_request"].get("runtime_parameters") is not None
+    #     and "batch_data" in config["batch_request"]["runtime_parameters"]
+    # ):
+    #     config["batch_request"]["runtime_parameters"].pop("batch_data")
+    # else:
+    #     if (
+    #         ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
+    #         and config["runtime_parameters"] is not None
+    #         and "batch_data" in config["runtime_parameters"]
+    #     ):
+    #         config["runtime_parameters"].pop("batch_data")
+    #
+    # if ("validations" in config or hasattr(config, "validations")) and config[
+    #     "validations"
+    # ]:
+    #     for val in config["validations"]:
+    #         if (
+    #             val.get("batch_request") is not None
+    #             and val["batch_request"].get("runtime_parameters") is not None
+    #             and "batch_data"
+    #             in val["batch_request"]["runtime_parameters"]
+    #             is not None
+    #         ):
+    #             val["batch_request"]["runtime_parameters"].pop("batch_data")
+    # TODO: <Alex>ALEX</Alex>
+
+    # TODO: <Alex>ALEX</Alex>
+    # try:
+    #     if (
+    #         ("batch_request" in config or hasattr(config, "batch_request"))
+    #         and config["batch_request"] is not None
+    #         and config["batch_request"].get("runtime_parameters") is not None
+    #         and "batch_data" in config["batch_request"]["runtime_parameters"]
+    #     ):
+    #         config["batch_request"]["runtime_parameters"].pop("batch_data")
+    #     else:
+    #         if (
+    #             ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
+    #             and config["runtime_parameters"] is not None
+    #             and "batch_data" in config["runtime_parameters"]
+    #         ):
+    #             config["runtime_parameters"].pop("batch_data")
+    #
+    #     if ("validations" in config or hasattr(config, "validations")) and config[
+    #         "validations"
+    #     ]:
+    #         for val in config["validations"]:
+    #             if (
+    #                 val.get("batch_request") is not None
+    #                 and val["batch_request"].get("runtime_parameters") is not None
+    #                 and "batch_data"
+    #                 in val["batch_request"]["runtime_parameters"]
+    #                 is not None
+    #             ):
+    #                 val["batch_request"]["runtime_parameters"].pop("batch_data")
+    # except Exception as e:
+    #     print(f'\n[ALEX_TEST] [BATCH.PY::DELETE_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] EXCEPTION!*********!!!!: {e} ; TYPE: {str(type(e))}')
+    # TODO: <Alex>ALEX</Alex>
+
+
+
+    # TODO: <Alex>ALEX</Alex>
+    try:
         if (
-            ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
-            and config["runtime_parameters"] is not None
-            and "batch_data" in config["runtime_parameters"]
+            ("batch_request" in config or hasattr(config, "batch_request"))
+            and config["batch_request"] is not None
+            and ("runtime_parameters" in config["batch_request"] or hasattr(config["batch_request"], "runtime_parameters"))
+            and config["batch_request"]["runtime_parameters"] is not None
+            and ("batch_data" in config["batch_request"]["runtime_parameters"] or hasattr(config["batch_request"]["runtime_parameters"], "batch_data"))
         ):
-            config["runtime_parameters"].pop("batch_data")
-
-    if ("validations" in config or hasattr(config, "validations")) and config[
-        "validations"
-    ]:
-        for val in config["validations"]:
+            if hasattr(config["batch_request"]["runtime_parameters"], "batch_data"):
+                delattr(config["batch_request"]["runtime_parameters"], "batch_data")
+            else:
+                config["batch_request"]["runtime_parameters"].pop("batch_data")
+        else:
             if (
-                val.get("batch_request") is not None
-                and val["batch_request"].get("runtime_parameters") is not None
-                and "batch_data"
-                in val["batch_request"]["runtime_parameters"]
-                is not None
+                ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
+                and config["runtime_parameters"] is not None
+                and ("batch_data" in config["runtime_parameters"] or hasattr(config["runtime_parameters"], "batch_data"))
             ):
-                val["batch_request"]["runtime_parameters"].pop("batch_data")
+                if hasattr(config["runtime_parameters"], "batch_data"):
+                    delattr(config["runtime_parameters"], "batch_data")
+                else:
+                    config["runtime_parameters"].pop("batch_data")
+
+        if ("validations" in config or hasattr(config, "validations")) and config["validations"]:
+            for val in config["validations"]:
+                if (
+                    ("batch_request" in val or hasattr(val, "batch_request"))
+                    and val["batch_request"] is not None
+                    and ("runtime_parameters" in val["batch_request"] or hasattr(val["batch_request"], "runtime_parameters"))
+                    and val["batch_request"]["runtime_parameters"] is not None
+                    and ("batch_data" in val["batch_request"]["runtime_parameters"] or hasattr(val["batch_request"]["runtime_parameters"], "batch_data"))
+                ):
+                    if hasattr(val["batch_request"]["runtime_parameters"], "batch_data"):
+                        delattr(val["batch_request"]["runtime_parameters"], "batch_data")
+                    else:
+                        val["batch_request"]["runtime_parameters"].pop("batch_data")
+    except Exception as e:
+        print(f'\n[ALEX_TEST] [BATCH.PY::DELETE_RUNTIME_PARAMETERS_BATCH_DATA_REFERENCES_FROM_CONFIG] EXCEPTION!*********!!!!: {e} ; TYPE: {str(type(e))}')
+    # TODO: <Alex>ALEX</Alex>
 
 
+# TODO: <Alex>ALEX</Alex>
 def restore_runtime_parameters_batch_data_references_into_config(
     config: Union[DictDot, dict],
     batch_data_references: Tuple[Optional[Any], Optional[List[Any]]],
@@ -929,7 +1058,8 @@ is "{str(type(config))}", which is illegal).
     if (
         ("batch_request" in config or hasattr(config, "batch_request"))
         and config["batch_request"] is not None
-        and config["batch_request"].get("runtime_parameters") is not None
+        and ("runtime_parameters" in config["batch_request"] or hasattr(config["batch_request"], "runtime_parameters"))
+        and config["batch_request"]["runtime_parameters"] is not None
         and default_batch_data is not None
     ):
         if replace_value_with_type_string:
@@ -960,9 +1090,12 @@ is "{str(type(config))}", which is illegal).
     ):
         for idx, val in enumerate(config["validations"]):
             if (
-                val.get("batch_request") is not None
-                and val["batch_request"].get("runtime_parameters") is not None
-                and val["batch_request"]["runtime_parameters"].get("batch_data") is None
+                ("batch_request" in val or hasattr(val, "batch_request"))
+                and val["batch_request"] is not None
+                and ("runtime_parameters" in val["batch_request"] or hasattr(val["batch_request"], "runtime_parameters"))
+                and val["batch_request"]["runtime_parameters"] is not None
+                and ("batch_data" in val["batch_request"]["runtime_parameters"] or hasattr(val["batch_request"]["runtime_parameters"], "batch_data"))
+                and val["batch_request"]["runtime_parameters"]["batch_data"] is None
                 and validations_batch_data_list[idx] is not None
             ):
                 if replace_value_with_type_string:
@@ -973,6 +1106,7 @@ is "{str(type(config))}", which is illegal).
                     val["batch_request"]["runtime_parameters"][
                         "batch_data"
                     ] = validations_batch_data_list[idx]
+# TODO: <Alex>ALEX</Alex>
 
 
 def standardize_batch_request_display_ordering(

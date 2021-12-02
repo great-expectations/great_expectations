@@ -3,13 +3,19 @@ import datetime
 import json
 import logging
 import os
-from typing import Dict, List, Optional, Union
+# TODO: <Alex>ALEX</Alex>
+from typing import Dict, List, Optional, Union, Tuple
+# TODO: <Alex>ALEX</Alex>
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import get_substituted_validation_dict
+from great_expectations.core.usage_statistics.usage_statistics import (
+    get_checkpoint_run_usage_statistics,
+    usage_statistics_enabled_method,
+)
 from great_expectations.core import RunIdentifier
 from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
 from great_expectations.core.batch import BatchRequest, get_batch_request_dict
@@ -73,6 +79,11 @@ class Checkpoint:
         # Note the gross typechecking to avoid a circular import
         if "DataContext" not in str(type(data_context)):
             raise TypeError("A Checkpoint requires a valid DataContext")
+
+        # TODO: <Alex>ALEX</Alex>
+        self._usage_statistics_handler = data_context._usage_statistics_handler
+        # TODO: <Alex>ALEX</Alex>
+
         self._data_context = data_context
 
         checkpoint_config: CheckpointConfig = CheckpointConfig(
@@ -119,6 +130,147 @@ class Checkpoint:
     @property
     def ge_cloud_id(self) -> UUID:
         return self._config.ge_cloud_id
+
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # noinspection PyUnusedLocal
+    # TODO: <Alex>ALEX</Alex>
+    def resolve_config_using_acceptable_arguments(
+        self,
+        template_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[Union[dict, BatchRequest]] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        run_id: Optional[Union[str, RunIdentifier]] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[Union[str, datetime.datetime]] = None,
+        # TODO: <Alex>ALEX</Alex>
+        result_format: Optional[Union[str, dict]] = None,
+        # TODO: <Alex>ALEX</Alex>
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+    ) -> CheckpointConfig: #) -> Tuple[dict, CheckpointConfig]:
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] BATCH_REQUEST:\n{batch_request} ; TYPE: {str(type(batch_request))}')
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] SELF-0: {self} ; TYPE: {str(type(self))}')
+        assert not (run_id and run_name) and not (
+            run_id and run_time
+        ), "Please provide either a run_id or run_name and/or run_time."
+
+        run_time = run_time or datetime.datetime.now()
+        runtime_configuration = runtime_configuration or {}
+        # TODO: <Alex>ALEX</Alex>
+        # result_format = result_format or runtime_configuration.get("result_format")
+        # TODO: <Alex>ALEX</Alex>
+
+        batch_request, validations = get_batch_request_dict(
+            batch_request=batch_request, validations=validations
+        )
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] BATCH_REQUEST-UPDATED:\n{batch_request} ; TYPE: {str(type(batch_request))}')
+
+        runtime_kwargs: dict = {
+            "template_name": template_name,
+            "run_name_template": run_name_template,
+            "expectation_suite_name": expectation_suite_name,
+            "batch_request": batch_request,
+            "action_list": action_list,
+            "evaluation_parameters": evaluation_parameters,
+            "runtime_configuration": runtime_configuration,
+            "validations": validations,
+            "profilers": profilers,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+        }
+        # TODO: <Alex>ALEX</Alex>
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] BATCH_REQUEST-BEFORE_SUBSTITUTION:\n{batch_request} ; TYPE: {str(type(batch_request))}')
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] SELF-1.SUBSTITUTED_CONFIG:\n{self._substituted_config} ; TYPE: {str(type(self._substituted_config))}')
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] SELF-1: {self} ; TYPE: {str(type(self))}')
+        substituted_runtime_config: CheckpointConfig = self.get_substituted_config(
+            runtime_kwargs=runtime_kwargs
+        )
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] BATCH_REQUEST-RIGHT_AFTER_SUBSTITUTION:\n{batch_request} ; TYPE: {str(type(batch_request))}')
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] SUBSTITUTED_CONFIG:\n{substituted_runtime_config} ; TYPE: {str(type(substituted_runtime_config))}')
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] BATCH_REQUEST-RIGHT_AFTER_SUBSTITUTED_CONFIG:\n{batch_request} ; TYPE: {str(type(batch_request))}')
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] SELF-2.SUBSTITUTED_CONFIG:\n{self._substituted_config} ; TYPE: {str(type(self._substituted_config))}')
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] SELF-2: {self} ; TYPE: {str(type(self))}')
+        # TODO: <Alex>ALEX</Alex>
+        run_name_template = substituted_runtime_config.run_name_template
+        validations = substituted_runtime_config.validations
+        batch_request = substituted_runtime_config.batch_request
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] BATCH_REQUEST-SUBSTITUTED:\n{batch_request} ; TYPE: {str(type(batch_request))}')
+        if len(validations) == 0 and not batch_request:
+            raise ge_exceptions.CheckpointError(
+                f'Checkpoint "{self.name}" must contain either a batch_request or validations.'
+            )
+
+        if run_name is None and run_name_template is not None:
+            run_name = get_datetime_string_from_strftime_format(
+                format_str=run_name_template, datetime_obj=run_time
+            )
+
+        run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
+
+        validation_dict: dict
+
+        for validation_dict in validations:
+            substituted_validation_dict: dict = get_substituted_validation_dict(
+                substituted_runtime_config=substituted_runtime_config,
+                validation_dict=validation_dict,
+            )
+            validation_batch_request: BatchRequest = substituted_validation_dict.get(
+                "batch_request"
+            )
+            validation_dict["batch_request"] = validation_batch_request
+            validation_expectation_suite_name: str = substituted_validation_dict.get(
+                "expectation_suite_name"
+            )
+            validation_dict["expectation_suite_name"] = validation_expectation_suite_name
+            validation_expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
+                "expectation_suite_ge_cloud_id"
+            )
+            validation_dict["expectation_suite_ge_cloud_id"] = validation_expectation_suite_ge_cloud_id
+            validation_action_list: list = substituted_validation_dict.get("action_list")
+            validation_dict["action_list"] = validation_action_list
+
+        runtime_kwargs.update(
+            {
+                "run_name_template": run_name_template,
+                "batch_request": batch_request,
+                "validations": validations,
+                "run_id": run_id,
+                # TODO: <Alex>ALEX</Alex>
+                "run_name": run_name,
+                "run_time": run_time,
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                # "result_format": result_format,
+                # TODO: <Alex>ALEX</Alex>
+            }
+        )
+        print(f"\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] RUN_ID: {run_id} ; TYPE: {str(type(run_id))}")
+        print(f"\n[ALX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] RUN_NAME: {run_name} ; TYPE: {str(type(run_name))}")
+        print(f"\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] RUN_TIME: {run_time} ; TYPE: {str(type(run_time))}")
+
+        print(f"\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] RUNTIME_KWARGS:\n{runtime_kwargs} ; TYPE: {str(type(runtime_kwargs))}")
+        # deep_filter_properties_iterable(
+        #     properties=runtime_kwargs,
+        #     clean_falsy=True,
+        #     inplace=True,
+        # )
+        # print(f"\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] RUNTIME_KWARGS-DEEP_CLEANED:\n{runtime_kwargs} ; TYPE: {str(type(runtime_kwargs))}")
+
+        # TODO: <Alex>ALEX</Alex>
+        # runtime_kwargs["substituted_runtime_config"] = substituted_runtime_config
+        # TODO: <Alex>ALEX</Alex>
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] BATCH_REQUEST-AT_RETURN:\n{runtime_kwargs["batch_request"]} ; TYPE: {str(type(runtime_kwargs["batch_request"]))}')
+
+        # TODO: <Alex>ALEX</Alex>
+        # return runtime_kwargs, substituted_runtime_config
+        # TODO: <Alex>ALEX</Alex>
+        return substituted_runtime_config
+    # TODO: <Alex>ALEX</Alex>
 
     def get_substituted_config(
         self,
@@ -294,6 +446,10 @@ class Checkpoint:
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
     #  while run_name_template also undergoes strftime datetime substitution
+    @usage_statistics_enabled_method(
+        event_name="checkpoint.run",
+        args_payload_fn=get_checkpoint_run_usage_statistics,
+    )
     def run(
         self,
         template_name: Optional[str] = None,

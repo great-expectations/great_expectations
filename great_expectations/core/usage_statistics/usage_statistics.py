@@ -23,6 +23,9 @@ from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer impor
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
     BatchRequestAnonymizer,
 )
+from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
+    CheckpointRunAnonymizer,
+)
 from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
     DataDocsSiteAnonymizer,
 )
@@ -42,9 +45,10 @@ from great_expectations.core.usage_statistics.anonymizers.validation_operator_an
     ValidationOperatorAnonymizer,
 )
 from great_expectations.core.usage_statistics.schemas import (
-    usage_statistics_record_schema,
+    anonymized_usage_statistics_record_schema,
 )
-from great_expectations.core.util import nested_update
+from great_expectations.core.util import nested_update, get_datetime_string_from_strftime_format
+from great_expectations.data_context.types.base import CheckpointConfig
 
 STOP_SIGNAL = object()
 
@@ -75,6 +79,7 @@ class UsageStatisticsHandler:
         self._batch_request_anonymizer = BatchRequestAnonymizer(data_context_id)
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
+        self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
         try:
             self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
         except ValueError:
@@ -223,7 +228,7 @@ class UsageStatisticsHandler:
                 message["event_payload"] = self.build_init_payload()
             message = self.build_envelope(message=message)
             if not self.validate_message(
-                message, schema=usage_statistics_record_schema
+                message, schema=anonymized_usage_statistics_record_schema
             ):
                 return
             self._message_queue.put(message)
@@ -471,10 +476,231 @@ def get_batch_list_usage_statistics(data_context, *args, **kwargs):
             payload = batch_request_anonymizer.anonymize_batch_request(*args, **kwargs)
         except Exception:
             logger.debug(
-                "get_batch_list_usage_statistics: Unable to create anonymized_batch_request_keys payload field"
+                "get_batch_list_usage_statistics: Unable to create anonymized_batch_request payload field"
             )
 
     return payload
+
+
+def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
+    print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT_OBJ-0: {checkpoint} ; TYPE: {str(type(checkpoint))}')
+    # TODO: <Alex>ALEX</Alex>
+    a = hasattr(checkpoint, "_substituted_config")
+    # TODO: <Alex>ALEX</Alex>
+    print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT.SUBSTITUTED_CONFIG_EXISTS-0: {a} ; TYPE: {str(type(a))}')
+    try:
+        data_context_id = checkpoint.data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+    anonymizer = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+    payload = {}
+
+    if checkpoint._usage_statistics_handler:
+        # noinspection PyBroadException
+        try:
+            checkpoint_run_anonymizer: CheckpointRunAnonymizer = (
+                checkpoint._usage_statistics_handler._checkpoint_run_anonymizer
+            )
+            # TODO: <Alex>ALEX</Alex>
+            # args = args + (checkpoint,)
+            # TODO: <Alex>ALEX</Alex>
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] ARGS-BEFORE-BEFORE-BEFORE-BEFORE-BEFORE: {args} ; TYPE: {str(type(args))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] KWARGS-BEFORE-BEFORE-BEFORE-BEFORE-BEFORE: {kwargs} ; TYPE: {str(type(kwargs))}')
+            # TODO: <Alex>ALEX</Alex>
+            # pos_args: tuple = copy.deepcopy(args)
+            # kw_args: dict = copy.deepcopy(kwargs)
+            # resolved_runtime_kwargs: dict = (
+            #     checkpoint.resolve_config_using_acceptable_arguments(*pos_args, **kw_args)
+            # )
+            # TODO: <Alex>ALEX</Alex>
+            # resolved_runtime_kwargs: dict
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # substituted_runtime_config: CheckpointConfig
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # resolved_runtime_kwargs, substituted_runtime_config = checkpoint.resolve_config_using_acceptable_arguments(*args, **kwargs)
+            # TODO: <Alex>ALEX</Alex>
+            substituted_runtime_config: CheckpointConfig = checkpoint.resolve_config_using_acceptable_arguments(*args, **kwargs)
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG-COMPUTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!****************')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG: ; TYPE: {str(type(substituted_runtime_config))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG.TO_JSON_DICT():\n{substituted_runtime_config.to_json_dict()}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG:\n{substituted_runtime_config} ; TYPE: {str(type(substituted_runtime_config))}')
+            resolved_runtime_kwargs: dict = substituted_runtime_config.to_json_dict()
+            # TODO: <Alex>ALEX</Alex>
+            # print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_CONFIG: {substituted_runtime_config} ; TYPE: {str(type(substituted_runtime_config))}')
+            # TODO: <Alex>ALEX</Alex>
+            # resolved_runtime_kwargs, substituted_runtime_config = resolve_checkpoint_config(*args, **kwargs)
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] RESOLVED_RUNTIME_KWARGS-COMPUTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!****************')
+            print( f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT_OBJ-1: {checkpoint} ; TYPE: {str(type(checkpoint))}')
+            # TODO: <Alex>ALEX</Alex>
+            # resolved_runtime_kwargs: dict = {}
+            # TODO: <Alex>ALEX</Alex>
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] RESOLVED_RUNTIME_KWARGS: {resolved_runtime_kwargs} ; TYPE: {str(type(resolved_runtime_kwargs))}')
+            # print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG: {substituted_runtime_config} ; TYPE: {str(type(substituted_runtime_config))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT.SUBSTITUTED_CONFIG: {checkpoint._substituted_config} ; TYPE: {str(type(checkpoint._substituted_config))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT_OBJ-2: {checkpoint} ; TYPE: {str(type(checkpoint))}')
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            a = hasattr(checkpoint, "_substituted_config")
+            # TODO: <Alex>ALEX</Alex>
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT.SUBSTITUTED_CONFIG_EXISTS-1: {a} ; TYPE: {str(type(a))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG: ; TYPE: {str(type(substituted_runtime_config))}')
+            # print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG.TO_JSON_DICT: {substituted_runtime_config.to_json_dict()} ; TYPE: {str(type(substituted_runtime_config.to_json_dict()))}')
+            # print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG: {substituted_runtime_config} ; TYPE: {str(type(substituted_runtime_config))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT.SUBSTITUTED_CONFIG: ; TYPE: {str(type(checkpoint._substituted_config))}')
+            print( f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT_OBJ-3: {checkpoint} ; TYPE: {str(type(checkpoint))}')
+            # print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT.SUBSTITUTED_CONFIG: {checkpoint._substituted_config} ; TYPE: {str(type(checkpoint._substituted_config))}')
+            # TODO: <Alex>ALEX</Alex>
+            # checkpoint._substituted_config.update(other_config=substituted_runtime_config)
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            payload = checkpoint_run_anonymizer.anonymize_checkpoint_run(
+                *(checkpoint,), **resolved_runtime_kwargs
+            )
+            # TODO: <Alex>ALEX</Alex>
+            # payload = checkpoint_run_anonymizer.anonymize_checkpoint_run(
+            #     *args, **kwargs
+            # )
+            # TODO: <Alex>ALEX</Alex>
+            # kwargs.update(resolved_runtime_kwargs)
+            # TODO: <Alex>ALEX</Alex>
+            # checkpoint._substituted_config = substituted_runtime_config
+            # TODO: <Alex>ALEX</Alex>
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] PAYLOAD-COMPUTED!!!-AFTER-AFTER-AFTER-AFTER:\n{payload} ; TYPE: {str(type(payload))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] ARGS-AFTER-AFTER-AFTER-AFTER-AFTER: {args} ; TYPE: {str(type(args))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] KWARGS-AFTER-AFTER-AFTER-AFTER: {kwargs} ; TYPE: {str(type(kwargs))}')
+            # TODO: <Alex>ALEX</Alex>
+        except Exception:
+            logger.debug(
+                "get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
+            )
+
+    print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] PAYLOAD-RETURNING!!!-AFTER-AFTER-AFTER-AFTER:\n{payload} ; TYPE: {str(type(payload))}')
+    return payload
+
+
+# # TODO: <Alex>ALEX</Alex>
+# def resolve_checkpoint_config(
+#     checkpoint: Checkpoint,
+#     template_name: Optional[str] = None,
+#     run_name_template: Optional[str] = None,
+#     expectation_suite_name: Optional[str] = None,
+#     batch_request: Optional[Union[dict, BatchRequest]] = None,
+#     action_list: Optional[List[dict]] = None,
+#     evaluation_parameters: Optional[dict] = None,
+#     runtime_configuration: Optional[dict] = None,
+#     validations: Optional[List[dict]] = None,
+#     profilers: Optional[List[dict]] = None,
+#     run_id: Optional[Union[str, RunIdentifier]] = None,
+#     run_name: Optional[str] = None,
+#     run_time: Optional[Union[str, datetime.datetime]] = None,
+#     result_format: Optional[Union[str, dict]] = None,
+#     expectation_suite_ge_cloud_id: Optional[str] = None,
+# ) -> Tuple[dict, CheckpointConfig]:
+#     print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] BATCH_REQUEST:\n{batch_request} ; TYPE: {str(type(batch_request))}')
+#     assert not (run_id and run_name) and not (
+#         run_id and run_time
+#     ), "Please provide either a run_id or run_name and/or run_time."
+#
+#     run_time = run_time or datetime.datetime.now()
+#     runtime_configuration = runtime_configuration or {}
+#     result_format = result_format or runtime_configuration.get("result_format")
+#
+#     batch_request, validations = get_batch_request_dict(
+#         batch_request=batch_request, validations=validations
+#     )
+#     print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] BATCH_REQUEST-UPDATED:\n{batch_request} ; TYPE: {str(type(batch_request))}')
+#
+#     runtime_kwargs: dict = {
+#         "template_name": template_name,
+#         "run_name_template": run_name_template,
+#         "expectation_suite_name": expectation_suite_name,
+#         "batch_request": batch_request,
+#         "action_list": action_list,
+#         "evaluation_parameters": evaluation_parameters,
+#         "runtime_configuration": runtime_configuration,
+#         "validations": validations,
+#         "profilers": profilers,
+#         "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
+#     }
+#     # TODO: <Alex>ALEX</Alex>
+#     substituted_runtime_config: CheckpointConfig = checkpoint.get_substituted_config(
+#         runtime_kwargs=runtime_kwargs
+#     )
+#     # TODO: <Alex>ALEX</Alex>
+#     run_name_template = substituted_runtime_config.run_name_template
+#     validations = substituted_runtime_config.validations
+#     batch_request = substituted_runtime_config.batch_request
+#     print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] BATCH_REQUEST-SUBSTITUTED:\n{batch_request} ; TYPE: {str(type(batch_request))}')
+#     if len(validations) == 0 and not batch_request:
+#         raise ge_exceptions.CheckpointError(
+#             f'Checkpoint "{checkpoint.name}" must contain either a batch_request or validations.'
+#         )
+#
+#     if run_name is None and run_name_template is not None:
+#         run_name = get_datetime_string_from_strftime_format(
+#             format_str=run_name_template, datetime_obj=run_time
+#         )
+#
+#     run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
+#
+#     validation_dict: dict
+#
+#     for validation_dict in validations:
+#         substituted_validation_dict: dict = get_substituted_validation_dict(
+#             substituted_runtime_config=substituted_runtime_config,
+#             validation_dict=validation_dict,
+#         )
+#         validation_batch_request: BatchRequest = substituted_validation_dict.get(
+#             "batch_request"
+#         )
+#         validation_dict["batch_request"] = validation_batch_request
+#         validation_expectation_suite_name: str = substituted_validation_dict.get(
+#             "expectation_suite_name"
+#         )
+#         validation_dict["expectation_suite_name"] = validation_expectation_suite_name
+#         validation_expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
+#             "expectation_suite_ge_cloud_id"
+#         )
+#         validation_dict["expectation_suite_ge_cloud_id"] = validation_expectation_suite_ge_cloud_id
+#         validation_action_list: list = substituted_validation_dict.get("action_list")
+#         validation_dict["action_list"] = validation_action_list
+#
+#     runtime_kwargs.update(
+#         {
+#             "run_name_template": run_name_template,
+#             "batch_request": batch_request,
+#             "validations": validations,
+#             "run_id": run_id,
+#             # TODO: <Alex>ALEX</Alex>
+#             # "run_name": run_name,
+#             # "run_time": run_time,
+#             # TODO: <Alex>ALEX</Alex>
+#             "result_format": result_format,
+#         }
+#     )
+#     print(f"\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] RUN_ID: {run_id} ; TYPE: {str(type(run_id))}")
+#     print(f"\n[ALX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] RUN_NAME: {run_name} ; TYPE: {str(type(run_name))}")
+#     print(f"\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] RUN_TIME: {run_time} ; TYPE: {str(type(run_time))}")
+#
+#     print(f"\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] RUNTIME_KWARGS:\n{runtime_kwargs} ; TYPE: {str(type(runtime_kwargs))}")
+#     # deep_filter_properties_iterable(
+#     #     properties=runtime_kwargs,
+#     #     clean_falsy=True,
+#     #     inplace=True,
+#     # )
+#     # print(f"\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] RUNTIME_KWARGS-DEEP_CLEANED:\n{runtime_kwargs} ; TYPE: {str(type(runtime_kwargs))}")
+#
+#     # TODO: <Alex>ALEX</Alex>
+#     # runtime_kwargs["substituted_runtime_config"] = substituted_runtime_config
+#     # TODO: <Alex>ALEX</Alex>
+#     print(f'\n[ALEX_TEST] [CHECKPOINT.RESOLVE_CONFIG_USING_ACCEPTABLE_ARGUMENTS] BATCH_REQUEST-AT_RETURN:\n{runtime_kwargs["batch_request"]} ; TYPE: {str(type(runtime_kwargs["batch_request"]))}')
+#
+#     return runtime_kwargs, substituted_runtime_config
 
 
 def send_usage_message(

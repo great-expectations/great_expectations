@@ -36,36 +36,56 @@ class Anonymizer:
         object_=None,
         object_class=None,
         object_config=None,
+        runtime_environment=None,
     ) -> dict:
+        print(f'\n[ALEX_TEST] [ANONYMIZER.ANONYMIZE_OBJECT_INFO] WOUTPUT-0')
         assert (
             object_ or object_class or object_config
         ), "Must pass either object_ or object_class or object_config."
 
+        if runtime_environment is None:
+            runtime_environment = {}
+        print(f'\n[ALEX_TEST] [ANONYMIZER.ANONYMIZE_OBJECT_INFO] WOUTPUT-1')
+
         object_class_name: Optional[str] = None
+        # TODO: <Alex>ALEX</Alex>
+        # noinspection PyBroadException
+        # TODO: <Alex>ALEX</Alex>
         try:
             if object_class is None and object_ is not None:
+                print(f'\n[ALEX_TEST] [ANONYMIZER.ANONYMIZE_OBJECT_INFO] WOUTPUT-2')
                 object_class = object_.__class__
             elif object_class is None and object_config is not None:
+                print(f'\n[ALEX_TEST] [ANONYMIZER.ANONYMIZE_OBJECT_INFO] WOUTPUT-3')
                 object_class_name = object_config.get("class_name")
-                object_module_name = object_config.get("module_name")
+                object_module_name = object_config.get("module_name") or runtime_environment.get("module_name")
                 object_class = load_class(object_class_name, object_module_name)
             object_class_name = object_class.__name__
+            print(f'\n[ALEX_TEST] [ANONYMIZER.ANONYMIZE_OBJECT_INFO] WOUTPUT-4')
 
             for ge_class in ge_classes:
+                print(f'\n[ALEX_TEST] [ANONYMIZER.ANONYMIZE_OBJECT_INFO] WOUTPUT-5')
                 if issubclass(object_class, ge_class):
-                    anonymized_info_dict["parent_class"] = ge_class.__name__
+                    print(f'\n[ALEX_TEST] [ANONYMIZER.ANONYMIZE_OBJECT_INFO] WOUTPUT-6')
+                    if issubclass(object_class, ge_class):
+                        print(f'\n[ALEX_TEST] [ANONYMIZER.ANONYMIZE_OBJECT_INFO] WOUTPUT-7')
+                        anonymized_info_dict["parent_class"] = ge_class.__name__
                     if not object_class == ge_class:
+                        print(f'\n[ALEX_TEST] [ANONYMIZER.ANONYMIZE_OBJECT_INFO] WOUTPUT-8')
                         anonymized_info_dict["anonymized_class"] = self.anonymize(
                             object_class_name
                         )
                     break
 
             if not anonymized_info_dict.get("parent_class"):
+                print(f'\n[ALEX_TEST] [ANONYMIZER.ANONYMIZE_OBJECT_INFO] WOUTPUT-9')
                 anonymized_info_dict["parent_class"] = "__not_recognized__"
                 anonymized_info_dict["anonymized_class"] = self.anonymize(
                     object_class_name
                 )
-        except AttributeError:
+        # except AttributeError:
+        except Exception:
+            print(f'\n[ALEX_TEST] EXCEPTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!**************************')
             anonymized_info_dict["parent_class"] = "__not_recognized__"
             anonymized_info_dict["anonymized_class"] = self.anonymize(object_class_name)
 
