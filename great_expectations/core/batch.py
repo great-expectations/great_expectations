@@ -849,25 +849,25 @@ Example:
         reference_map: Dict[str, Dict[str, Any]] = {}
         mark_and_replace_non_serializable_references_in_config(
             config=obj,
-            attribute_names={"batch_data},
+            attribute_names={"batch_data"},
             reference_map=reference_map,
         )
         data: dict = super().dump(obj=obj, many=many)  #  or: data: dict = copy.deepcopy(self.to_dict()) -- etc.
         restore_non_serializable_references_into_config(
             config=obj,
-            attribute_names={"batch_data},
+            attribute_names={"batch_data"},
             reference_map=reference_map,
         )
         restore_non_serializable_references_into_config(
             config=data,
-            attribute_names={"batch_data},
+            attribute_names={"batch_data"},
             reference_map=reference_map,
         )
 
         and as part of a "__repr()__" method also add:
             restore_non_serializable_references_into_config(
                 config=data,
-                attribute_names={"batch_data},
+                attribute_names={"batch_data"},
                 reference_map=reference_map,
                 replace_value_with_type_string=True,
             )
