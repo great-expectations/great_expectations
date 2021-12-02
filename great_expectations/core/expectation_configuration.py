@@ -1386,9 +1386,14 @@ class ExpectationConfigurationSchema(Schema):
     @post_dump
     def remove_null_values(self, data: dict, **kwargs):
         # Will remove `ge_cloud_id` if not used
+        to_delete = []
         for key, value in data.items():
             if value is None:
-                del data[key]
+                to_delete.append(key)
+
+        for key in to_delete:
+            del data[key]
+
         return data
 
     # noinspection PyUnusedLocal
