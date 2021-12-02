@@ -19,7 +19,7 @@ from great_expectations.core.util import (
     requires_lossy_conversion,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.util import deep_filter_properties_dict
+from great_expectations.util import deep_filter_properties_iterable
 
 
 def test_lossy_serialization_warning(caplog):
@@ -92,10 +92,10 @@ def test_batch_request_deepcopy():
     )
 
     batch_request_copy: BatchRequest = copy.deepcopy(batch_request)
-    assert deep_filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=batch_request_copy.to_dict(),
         clean_falsy=True,
-    ) == deep_filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=batch_request.to_dict(),
         clean_falsy=True,
     )
@@ -220,10 +220,10 @@ def test_checkpoint_config_deepcopy(
     checkpoint_config_copy: CheckpointConfig = copy.deepcopy(
         substituted_config_template_and_runtime_kwargs
     )
-    assert deep_filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint_config_copy.to_json_dict(),
         clean_falsy=True,
-    ) == deep_filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=substituted_config_template_and_runtime_kwargs.to_json_dict(),
         clean_falsy=True,
     )
@@ -575,10 +575,10 @@ def test_delete_runtime_parameters_batch_data_references_from_config(
     delete_runtime_parameters_batch_data_references_from_config(
         config=substituted_config_template_and_runtime_kwargs
     )
-    assert deep_filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=substituted_config_template_and_runtime_kwargs.to_json_dict(),
         clean_falsy=True,
-    ) == deep_filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict(),
         clean_falsy=True,
     )
@@ -813,10 +813,10 @@ def test_restore_runtime_parameters_batch_data_references_into_config(
         config=substituted_config_template_and_runtime_kwargs,
         batch_data_references=batch_data_references,
     )
-    assert deep_filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=substituted_config_template_and_runtime_kwargs.to_json_dict(),
         clean_falsy=True,
-    ) == deep_filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict(),
         clean_falsy=True,
     )
