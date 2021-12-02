@@ -101,6 +101,16 @@ def single_expectation_suite(exp1):
 
 
 @pytest.fixture
+def single_expectation_suite_with_data_context(empty_data_context, exp1):
+    return ExpectationSuite(
+        expectation_suite_name="warning",
+        data_context=empty_data_context,
+        expectations=[exp1],
+        meta={"notes": "This is an expectation suite."},
+    )
+
+
+@pytest.fixture
 def suite_with_table_and_column_expectations(
     exp1, exp2, exp3, exp4, column_pair_expectation, table_exp1, table_exp2, table_exp3
 ):
@@ -328,6 +338,30 @@ def test_expectation_suite_deepcopy(baseline_suite):
     suite_deepcopy.expectations[0].meta["notes"] = "a different note"
     # deepcopy on deep attributes does not propagate
     assert baseline_suite.expectations[0].meta["notes"] == "This is an expectation."
+
+
+def test_expectation_suite_deepcopy_with_data_context(
+    single_expectation_suite_with_data_context,
+):
+    copied_suite = deepcopy(single_expectation_suite_with_data_context)
+    # data_context not copied over
+    assert copied_suite.data_context is None
+    assert single_expectation_suite_with_data_context is not None
+
+    # they are still equivalent (At the Expectation-level)
+    assert copied_suite.isEquivalentTo(single_expectation_suite_with_data_context)
+
+    # other behavior intact
+    copied_suite.data_asset_type = "blarg!"
+    assert (
+        single_expectation_suite_with_data_context.data_asset_type != "blarg"
+    )  # copy on primitive properties shouldn't propagate
+    copied_suite.expectations[0].meta["notes"] = "a different note"
+    # deepcopy on deep attributes does not propagate
+    assert (
+        single_expectation_suite_with_data_context.expectations[0].meta["notes"]
+        == "This is an expectation."
+    )
 
 
 def test_suite_without_metadata_includes_ge_version_metadata_if_none_is_provided():
