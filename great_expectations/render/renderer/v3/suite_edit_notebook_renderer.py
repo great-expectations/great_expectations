@@ -151,7 +151,6 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         notebook_config: Optional[NotebookTemplateConfig],
         default_file_name: str,
-        sanitize_nulls: bool = True,
         **default_kwargs,
     ):
         template: jinja2.Template
