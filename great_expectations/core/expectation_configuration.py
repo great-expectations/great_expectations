@@ -81,12 +81,6 @@ class ExpectationContext(SerializableDictDot):
 class ExpectationContextSchema(Schema):
     description = fields.String(required=False, allow_none=True)
 
-    @post_dump
-    def remove_null_values(self, data, **kwargs):
-        if "description" in data and data["description"] is None:
-            del data["description"]
-        return data
-
     @post_load
     def make_expectation_context(self, data, **kwargs):
         return ExpectationContext(**data)
@@ -1391,14 +1385,16 @@ class ExpectationConfigurationSchema(Schema):
     expectation_context = fields.Nested(lambda: ExpectationContextSchema)
 
     @post_dump
-    def remove_null_values(self, data, **kwargs):
-        if "ge_cloud_id" in data and data["ge_cloud_id"] is None:
-            del data["ge_cloud_id"]
+    def remove_null_values(self, data: dict, **kwargs):
+        # Will remove `ge_cloud_id` if not used
+        for key, value in data.items():
+            if value is None:
+                del data[key]
         return data
 
     # noinspection PyUnusedLocal
     @post_load
-    def make_expectation_configuration(self, data, **kwargs):
+    def make_expectation_configuration(self, data: dict, **kwargs):
         return ExpectationConfiguration(**data)
 
 
