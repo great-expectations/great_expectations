@@ -2428,15 +2428,11 @@ class BaseDataContext:
         )
         results_dict = selected_store.get(key)
 
-        # TODO: This should be a convenience method of ValidationResultSuite
-        if failed_only:
-            failed_results_list = [
-                result for result in results_dict.results if not result.success
-            ]
-            results_dict.results = failed_results_list
-            return results_dict
-        else:
-            return results_dict
+        return (
+            results_dict.get_failed_validation_results()
+            if failed_only
+            else results_dict
+        )
 
     def update_return_obj(self, data_asset, return_obj):
         """Helper called by data_asset.
@@ -3244,7 +3240,21 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         Validate against a pre-defined Checkpoint. (Experimental)
         Args:
             checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
+            template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
+            run_name_template: The template to use for run_name
+            expectation_suite_name: Expectation suite to be used by Checkpoint run
+            batch_request: Batch request to be used by Checkpoint run
+            action_list: List of actions to be performed by the Checkpoint
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            runtime_configuration: Runtime configuration override parameters
+            validations: Validations to be performed by the Checkpoint run
+            profilers: Profilers to be used by the Checkpoint run
+            run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: One of several supported formatting directives for expectation validation results
+            ge_cloud_id: Great Expectations Cloud id for the checkpoint
+            expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:

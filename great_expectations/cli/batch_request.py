@@ -1,7 +1,7 @@
 import logging
 import os
 import uuid
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 from great_expectations.util import get_sqlalchemy_inspector
 
@@ -13,9 +13,7 @@ except ImportError:
 
 import click
 
-from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
-from great_expectations.cli import toolkit
 from great_expectations.datasource import (
     BaseDatasource,
     Datasource,
@@ -320,21 +318,3 @@ def _get_batch_spec_passthrough(
         )
 
     return batch_spec_passthrough
-
-
-def standardize_batch_request_display_ordering(
-    batch_request: Dict[str, Union[str, int, Dict[str, Any]]]
-) -> Dict[str, Union[str, Dict[str, Any]]]:
-    datasource_name: str = batch_request["datasource_name"]
-    data_connector_name: str = batch_request["data_connector_name"]
-    data_asset_name: str = batch_request["data_asset_name"]
-    batch_request.pop("datasource_name")
-    batch_request.pop("data_connector_name")
-    batch_request.pop("data_asset_name")
-    batch_request = {
-        "datasource_name": datasource_name,
-        "data_connector_name": data_connector_name,
-        "data_asset_name": data_asset_name,
-        **batch_request,
-    }
-    return batch_request

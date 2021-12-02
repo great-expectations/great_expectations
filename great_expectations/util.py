@@ -1019,8 +1019,8 @@ def filter_properties_dict(
                     if not (
                         (keep_fields and key in keep_fields)
                         or (delete_fields and key in delete_fields)
+                        or is_truthy(value=value)
                         or is_numeric(value=value)
-                        or value
                     )
                 ]
             )
@@ -1032,7 +1032,7 @@ def filter_properties_dict(
                     if not (
                         (keep_fields and key in keep_fields)
                         or (delete_fields and key in delete_fields)
-                        or value
+                        or is_truthy(value=value)
                     )
                 ]
             )
@@ -1048,17 +1048,15 @@ def filter_properties_dict(
     return properties
 
 
-def deep_filter_properties_dict(
-    properties: Optional[dict] = None,
+def deep_filter_properties_iterable(
+    properties: Optional[Union[dict, list, set]] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
     clean_falsy: bool = False,
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
-) -> Optional[dict]:
-    key: str
-    value: Any
+) -> Optional[Union[dict, list, set]]:
     if isinstance(properties, dict):
         if not inplace:
             properties = copy.deepcopy(properties)
@@ -1072,8 +1070,27 @@ def deep_filter_properties_dict(
             keep_falsy_numerics=keep_falsy_numerics,
             inplace=True,
         )
+
+        key: str
+        value: Any
         for key, value in properties.items():
-            deep_filter_properties_dict(
+            deep_filter_properties_iterable(
+                properties=value,
+                keep_fields=keep_fields,
+                delete_fields=delete_fields,
+                clean_nulls=clean_nulls,
+                clean_falsy=clean_falsy,
+                keep_falsy_numerics=keep_falsy_numerics,
+                inplace=True,
+            )
+
+    elif isinstance(properties, (list, set)):
+        if not inplace:
+            properties = copy.deepcopy(properties)
+
+        value: Any
+        for value in properties:
+            deep_filter_properties_iterable(
                 properties=value,
                 keep_fields=keep_fields,
                 delete_fields=delete_fields,
@@ -1089,12 +1106,23 @@ def deep_filter_properties_dict(
     return properties
 
 
+def is_truthy(value: Any) -> bool:
+    try:
+        if value:
+            return True
+        else:
+            return False
+    except ValueError:
+        return False
+
+
 def is_numeric(value: Any) -> bool:
     return value is not None and (is_int(value=value) or is_float(value=value))
 
 
 def is_int(value: Any) -> bool:
     try:
+        # noinspection PyUnusedLocal
         num: int = int(value)
     except (TypeError, ValueError):
         return False
@@ -1103,6 +1131,7 @@ def is_int(value: Any) -> bool:
 
 def is_float(value: Any) -> bool:
     try:
+        # noinspection PyUnusedLocal
         num: float = float(value)
     except (TypeError, ValueError):
         return False
