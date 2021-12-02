@@ -27,6 +27,7 @@ from great_expectations.marshmallow__shade import (
     Schema,
     ValidationError,
     fields,
+    post_dump,
     post_load,
 )
 from great_expectations.types import SerializableDictDot
@@ -77,6 +78,12 @@ class ExpectationContext(SerializableDictDot):
 
 class ExpectationContextSchema(Schema):
     description = fields.String(required=False, allow_none=True)
+
+    @post_dump
+    def remove_null_values(self, data, **kwargs):
+        if "description" in data and data["description"] is None:
+            del data["description"]
+        return data
 
     @post_load
     def make_expectation_context(self, data, **kwargs):
@@ -966,9 +973,7 @@ class ExpectationConfiguration(SerializableDictDot):
         ensure_json_serializable(meta)
         self.meta = meta
         self.success_on_last_run = success_on_last_run
-
-        if ge_cloud_id is not None:
-            self._ge_cloud_id = ge_cloud_id
+        self._ge_cloud_id = ge_cloud_id
 
         if expectation_context is None:
             expectation_context = ExpectationContext()
@@ -1036,10 +1041,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
     @property
     def ge_cloud_id(self):
-        if hasattr(self, "_ge_cloud_id"):
-            return self._ge_cloud_id
-        else:
-            return None
+        return self._ge_cloud_id
 
     @ge_cloud_id.setter
     def ge_cloud_id(self, value):
@@ -1047,10 +1049,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
     @property
     def expectation_context(self):
-        if hasattr(self, "_expectation_context"):
-            return self._expectation_context
-        else:
-            return None
+        return self._expectation_context
 
     @expectation_context.setter
     def expectation_context(self, value):
@@ -1377,6 +1376,12 @@ class ExpectationConfigurationSchema(Schema):
     meta = fields.Dict()
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(lambda: ExpectationContextSchema)
+
+    @post_dump
+    def remove_null_values(self, data, **kwargs):
+        if "ge_cloud_id" in data and data["ge_cloud_id"] is None:
+            del data["ge_cloud_id"]
+        return data
 
     # noinspection PyUnusedLocal
     @post_load
