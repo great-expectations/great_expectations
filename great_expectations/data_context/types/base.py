@@ -79,11 +79,9 @@ class BaseYamlConfig(SerializableDictDot):
             if schema_instance is None:
                 cls.get_config_class()._schema_instance = (cls.get_schema_class())()
             else:
-                # print(f'\n[ALEX_TEST] [BASE.PY::BaseYamlConfig._GET_SCHEMA_INSTANCE()] SCHEMA_INSTANCE_CASE_0: {schema_instance} ; TYPE: {str(type(schema_instance))}')
                 return schema_instance
         else:
             cls.get_config_class().schema_instance = (cls.get_schema_class())()
-            # print(f'\n[ALEX_TEST] [BASE.PY::BaseYamlConfig._GET_SCHEMA_INSTANCE()] SCHEMA_INSTANCE_CASE_1: {cls.get_config_class().schema_instance} ; TYPE: {str(type(cls.get_config_class().schema_instance))}')
             return cls.get_config_class().schema_instance
 
     @classmethod
@@ -101,11 +99,8 @@ class BaseYamlConfig(SerializableDictDot):
             raise
 
     def _get_schema_validated_updated_commented_map(self) -> CommentedMap:
-        # print(f'\n[ALEX_TEST] [BASE.PY::BaseYamlConfig._GET_SCHEMA_VALIDATED_UPDATED_COMMENTED_MAP()] SELF._COMMENTED_MAP: {self._commented_map} ; TYPE: {str(type(self._commented_map))}')
         commented_map: CommentedMap = copy.deepcopy(self._commented_map)
-        # print(f'\n[ALEX_TEST] [BASE.PY::BaseYamlConfig._GET_SCHEMA_VALIDATED_UPDATED_COMMENTED_MAP()] COMMENTED_MAP_COPIED: {commented_map} ; TYPE: {str(type(commented_map))}')
         commented_map.update(self._get_schema_instance().dump(self))
-        # print(f'\n[ALEX_TEST] [BASE.PY::BaseYamlConfig._GET_SCHEMA_VALIDATED_UPDATED_COMMENTED_MAP()] COMMENTED_MAP_UPDATED: {commented_map} ; TYPE: {str(type(commented_map))}')
         return commented_map
 
     def to_yaml(self, outfile):
@@ -124,14 +119,11 @@ class BaseYamlConfig(SerializableDictDot):
         """
         :returns a JSON-serialiable dict containing the project configuration
         """
-        # print(f'\n[ALEX_TEST] [BASE.PY::BaseYamlConfig.TO_JSON_DICT] WOUTPUT-0')
         commented_map: CommentedMap = self.commented_map
-        # print(f'\n[ALEX_TEST] [BASE.PY::BaseYamlConfig.TO_JSON_DICT] COMMENTED_MAP: {commented_map} ; TYPE: {str(type(commented_map))}')
         return convert_to_json_serializable(data=commented_map)
 
     @property
     def commented_map(self) -> CommentedMap:
-        # print(f'\n[ALEX_TEST] [BASE.PY::BaseYamlConfig.COMMENTED_MAP()] ENTERED')
         return self._get_schema_validated_updated_commented_map()
 
     @classmethod
@@ -1972,23 +1964,17 @@ class CheckpointConfigSchema(Schema):
         return data
 
     def dump(self, obj: Any, *, many: Optional[bool] = None) -> dict:
-        # print(f'\n[ALEX_TEST] [BASE.PY::CHECKPOINT_CONFIG_SCHEMA.DUMP()] OBJ: {obj} ; TYPE: {str(type(obj))}')
-        # print(f'\n[ALEX_TEST] [BASE.PY::CHECKPOINT_CONFIG_SCHEMA.DUMP()] OBJ: ; TYPE: {str(type(obj))}')
         batch_data_references: Tuple[
             Optional[Any], Optional[List[Any]]
         ] = get_runtime_parameters_batch_data_references_from_config(config=obj)
-        # print(f'\n[ALEX_TEST] [BASE.PY::CHECKPOINT_CONFIG_SCHEMA.DUMP()] BATCH_DATA_REFERENCES: {batch_data_references} ; TYPE: {str(type(batch_data_references))}')
         delete_runtime_parameters_batch_data_references_from_config(config=obj)
-        # print(f'\n[ALEX_TEST] [BASE.PY::CHECKPOINT_CONFIG_SCHEMA.DUMP()] DELETION_ACCOMPLISHED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         data: dict = super().dump(obj=obj, many=many)
-        # print(f'\n[ALEX_TEST] [BASE.PY::CHECKPOINT_CONFIG_SCHEMA.DUMP()] DATA_FROM_SUPER_DUMP: {data} ; TYPE: {str(type(data))}')
         restore_runtime_parameters_batch_data_references_into_config(
             config=obj, batch_data_references=batch_data_references
         )
         restore_runtime_parameters_batch_data_references_into_config(
             config=data, batch_data_references=batch_data_references
         )
-        # print(f'\n[ALEX_TEST] [BASE.PY::CHECKPOINT_CONFIG_SCHEMA.DUMP()] DATA_FROM_SUPER_DUMP_BATCH_DATA_REFERENCES_RESTORED: {data} ; TYPE: {str(type(data))}')
         return data
 
 

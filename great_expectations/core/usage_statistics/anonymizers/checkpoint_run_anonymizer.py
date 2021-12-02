@@ -1,7 +1,7 @@
 import datetime
 import logging
-from typing import Any, Dict, List, Optional, Union
 from numbers import Number
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core import RunIdentifier
 from great_expectations.core.batch import BatchRequest
@@ -12,6 +12,7 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
     BatchRequestAnonymizer,
 )
+
 # TODO: <Alex>ALEX</Alex>
 # from great_expectations.validation_operators import (
 #     MicrosoftTeamsNotificationAction,
@@ -27,6 +28,7 @@ from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymiz
 # TODO: <Alex>ALEX</Alex>
 # TODO: <Alex>ALEX</Alex>
 from great_expectations.util import deep_filter_properties_iterable
+
 # TODO: <Alex>ALEX</Alex>
 
 logger = logging.getLogger(__name__)
@@ -54,8 +56,12 @@ class CheckpointRunAnonymizer(Anonymizer):
         # TODO: <Alex>ALEX</Alex>
 
     def anonymize_checkpoint_run(self, *args, **kwargs) -> Dict[str, List[str]]:
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ARGS: {args} ; TYPE: {str(type(args))}")
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] KWARGS: {kwargs} ; TYPE: {str(type(kwargs))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ARGS: {args} ; TYPE: {str(type(args))}"
+        )
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] KWARGS: {kwargs} ; TYPE: {str(type(kwargs))}"
+        )
         batch_request_anonymizer: BatchRequestAnonymizer = BatchRequestAnonymizer(
             self._salt
         )
@@ -71,31 +77,43 @@ class CheckpointRunAnonymizer(Anonymizer):
         action_obj: dict
 
         name: Optional[str] = kwargs.get("name")
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] NAME: {name} ; TYPE: {str(type(name))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] NAME: {name} ; TYPE: {str(type(name))}"
+        )
         anonymized_name: Optional[str]
         if name is None:
             anonymized_name = None
         else:
             anonymized_name = self.anonymize(name)
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_NAME: {anonymized_name} ; TYPE: {str(type(anonymized_name))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_NAME: {anonymized_name} ; TYPE: {str(type(anonymized_name))}"
+        )
 
         config_version: Optional[Number] = kwargs.get("config_version")
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] CONFIG_VERSION: {config_version} ; TYPE: {str(type(config_version))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] CONFIG_VERSION: {config_version} ; TYPE: {str(type(config_version))}"
+        )
         anonymized_config_version: Optional[str]
         if config_version is None:
             anonymized_config_version = None
         else:
             anonymized_config_version = self.anonymize(str(config_version))
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_CONFIG_VERSION: {anonymized_config_version} ; TYPE: {str(type(anonymized_config_version))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_CONFIG_VERSION: {anonymized_config_version} ; TYPE: {str(type(anonymized_config_version))}"
+        )
 
         template_name: Optional[str] = kwargs.get("template_name")
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] TEMPLATE_NAME: {template_name} ; TYPE: {str(type(template_name))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] TEMPLATE_NAME: {template_name} ; TYPE: {str(type(template_name))}"
+        )
         anonymized_template_name: Optional[str]
         if template_name is None:
             anonymized_template_name = None
         else:
             anonymized_template_name = self.anonymize(template_name)
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_TEMPLATE_NAME: {anonymized_template_name} ; TYPE: {str(type(anonymized_template_name))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_TEMPLATE_NAME: {anonymized_template_name} ; TYPE: {str(type(anonymized_template_name))}"
+        )
 
         run_name_template: Optional[str] = kwargs.get("run_name_template")
         anonymized_run_name_template: Optional[str]
@@ -105,43 +123,53 @@ class CheckpointRunAnonymizer(Anonymizer):
             anonymized_run_name_template = self.anonymize(run_name_template)
 
         expectation_suite_name: Optional[str] = kwargs.get("expectation_suite_name")
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] EXPECTATION_SUITE_NAME: {expectation_suite_name} ; TYPE: {str(type(expectation_suite_name))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] EXPECTATION_SUITE_NAME: {expectation_suite_name} ; TYPE: {str(type(expectation_suite_name))}"
+        )
         anonymized_expectation_suite_name: Optional[str]
         if expectation_suite_name is None:
             anonymized_expectation_suite_name = None
         else:
             anonymized_expectation_suite_name = self.anonymize(expectation_suite_name)
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_EXPECTATION_SUITE_NAME: {anonymized_expectation_suite_name} ; TYPE: {str(type(anonymized_expectation_suite_name))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_EXPECTATION_SUITE_NAME: {anonymized_expectation_suite_name} ; TYPE: {str(type(anonymized_expectation_suite_name))}"
+        )
 
         batch_request: Optional[Union[BatchRequest, dict]] = kwargs.get("batch_request")
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] BATCH_REQUEST: {batch_request} ; TYPE: {str(type(batch_request))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] BATCH_REQUEST: {batch_request} ; TYPE: {str(type(batch_request))}"
+        )
         anonymized_batch_request: Optional[Dict[str, List[str]]] = None
         if batch_request:
             # noinspection PyBroadException
             try:
-                anonymized_batch_request = (
-                    batch_request_anonymizer.anonymize_batch_request(
-                        *(),
-                        **batch_request
-                        # TODO: <Alex>ALEX</Alex>
-                        # **{
-                        #     "batch_request": batch_request,
-                        # },
-                        # TODO: <Alex>ALEX</Alex>
-                    )
+                anonymized_batch_request = batch_request_anonymizer.anonymize_batch_request(
+                    *(),
+                    **batch_request
+                    # TODO: <Alex>ALEX</Alex>
+                    # **{
+                    #     "batch_request": batch_request,
+                    # },
+                    # TODO: <Alex>ALEX</Alex>
                 )
             except Exception:
-                print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_BATCH_REQUEST: GODDAMMIT!!!!!!!!!!")
+                print(
+                    f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_BATCH_REQUEST: GODDAMMIT!!!!!!!!!!"
+                )
                 logger.debug(
                     "anonymize_checkpoint_run: Unable to create anonymized_batch_request payload field"
                 )
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_BATCH_REQUEST: {anonymized_batch_request} ; TYPE: {str(type(anonymized_batch_request))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_BATCH_REQUEST: {anonymized_batch_request} ; TYPE: {str(type(anonymized_batch_request))}"
+        )
 
         include_anonymized_batch_request: bool = anonymized_batch_request is not None
 
         action_list: Optional[List[dict]] = kwargs.get("action_list")
         anonymized_action_list: Optional[List[dict]] = None
-        print(f'\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ACTION_LIST: {action_list} ; TYPE: {str(type(action_list))}')
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ACTION_LIST: {action_list} ; TYPE: {str(type(action_list))}"
+        )
         if action_list:
             # TODO: <Alex>ALEX</Alex>
             # # noinspection PyBroadException
@@ -162,7 +190,8 @@ class CheckpointRunAnonymizer(Anonymizer):
             try:
                 anonymized_action_list = [
                     action_anonymizer.anonymize_action_info(
-                        action_name=action_config_dict["name"], action_config=action_config_dict["action"]
+                        action_name=action_config_dict["name"],
+                        action_config=action_config_dict["action"],
                     )
                     for action_config_dict in action_list
                     # for action_name, action_obj in action_config_dict.items()
@@ -185,12 +214,18 @@ class CheckpointRunAnonymizer(Anonymizer):
 
                 effective_batch_request: dict
                 if isinstance(batch_request, BatchRequest):
-                    effective_batch_request = dict(batch_request.to_json_dict(), **validations_batch_request)
+                    effective_batch_request = dict(
+                        batch_request.to_json_dict(), **validations_batch_request
+                    )
                 else:
-                    effective_batch_request = dict(batch_request, **validations_batch_request)
+                    effective_batch_request = dict(
+                        batch_request, **validations_batch_request
+                    )
 
                 validations_batch_request = effective_batch_request
-                print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] VALIDATION_BATCH_REQUEST: {validations_batch_request} ; TYPE: {str(type(validations_batch_request))}")
+                print(
+                    f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] VALIDATION_BATCH_REQUEST: {validations_batch_request} ; TYPE: {str(type(validations_batch_request))}"
+                )
 
                 anonymized_validation_batch_request: Optional[
                     Dict[str, List[str]]
@@ -207,9 +242,13 @@ class CheckpointRunAnonymizer(Anonymizer):
                             # },
                             # TODO: <Alex>ALEX</Alex>
                         )
-                        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_VALIDATION_BATCH_REQUEST: {anonymized_validation_batch_request} ; TYPE: {str(type(anonymized_validation_batch_request))}")
+                        print(
+                            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_VALIDATION_BATCH_REQUEST: {anonymized_validation_batch_request} ; TYPE: {str(type(anonymized_validation_batch_request))}"
+                        )
                     except Exception:
-                        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_VALIDATION_BATCH_REQUEST: GODDAMMIT!!!!!!!!!!")
+                        print(
+                            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_VALIDATION_BATCH_REQUEST: GODDAMMIT!!!!!!!!!!"
+                        )
                         logger.debug(
                             "anonymize_checkpoint_run: Unable to create anonymized_batch_request payload field"
                         )
@@ -229,7 +268,9 @@ class CheckpointRunAnonymizer(Anonymizer):
                     "action_list"
                 )
                 anonymized_validations_action_list: Optional[List[dict]] = None
-                print(f'\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] VALIDATION_ACTION_LIST: {validations_action_list} ; TYPE: {str(type(validations_action_list))}')
+                print(
+                    f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] VALIDATION_ACTION_LIST: {validations_action_list} ; TYPE: {str(type(validations_action_list))}"
+                )
                 # TODO: <Alex>ALEX</Alex>
                 # if validations_action_list:
                 #     # noinspection PyBroadException
@@ -251,7 +292,8 @@ class CheckpointRunAnonymizer(Anonymizer):
                     try:
                         anonymized_validations_action_list = [
                             action_anonymizer.anonymize_action_info(
-                                action_name=action_config_dict["name"], action_config=action_config_dict["action"]
+                                action_name=action_config_dict["name"],
+                                action_config=action_config_dict["action"],
                             )
                             for action_config_dict in validations_action_list
                             # for action_name, action_obj in action_config_dict.items()
@@ -261,19 +303,33 @@ class CheckpointRunAnonymizer(Anonymizer):
                             "anonymize_checkpoint_run: Unable to create anonymized_validation_action_list payload field"
                         )
 
-                anonymized_validation: Dict[str, Union[str, Dict[str, Any], List[Dict[str, Any]]]] = {}
+                anonymized_validation: Dict[
+                    str, Union[str, Dict[str, Any], List[Dict[str, Any]]]
+                ] = {}
 
                 if anonymized_validation_batch_request:
-                    anonymized_validation["anonymized_batch_request"] = anonymized_validation_batch_request
+                    anonymized_validation[
+                        "anonymized_batch_request"
+                    ] = anonymized_validation_batch_request
 
                 if anonymized_validations_expectation_suite_name:
-                    anonymized_validation["anonymized_expectation_suite_name"] = anonymized_validations_expectation_suite_name
+                    anonymized_validation[
+                        "anonymized_expectation_suite_name"
+                    ] = anonymized_validations_expectation_suite_name
 
                 if anonymized_validations_action_list:
-                    anonymized_validation["anonymized_action_list"] = anonymized_validations_action_list
+                    anonymized_validation[
+                        "anonymized_action_list"
+                    ] = anonymized_validations_action_list
 
             anonymized_validation: Dict[str, Dict[str, Any]]
-            num_anonymized_validation_batch_requests: int = len([anonymized_validation for anonymized_validation in anonymized_validations if "anonymized_batch_request" in anonymized_validation])
+            num_anonymized_validation_batch_requests: int = len(
+                [
+                    anonymized_validation
+                    for anonymized_validation in anonymized_validations
+                    if "anonymized_batch_request" in anonymized_validation
+                ]
+            )
             if num_anonymized_validation_batch_requests == len(validations):
                 include_anonymized_batch_request = True
 
@@ -318,10 +374,14 @@ class CheckpointRunAnonymizer(Anonymizer):
             checkpoint_run_optional_top_level_keys.append("runtime_configuration")
 
         result_format: Optional[Union[str, dict]] = kwargs.get("result_format")
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] RESULT_FORMAT: {result_format} ; TYPE: {str(type(result_format))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] RESULT_FORMAT: {result_format} ; TYPE: {str(type(result_format))}"
+        )
         if result_format:
             checkpoint_run_optional_top_level_keys.append("result_format")
-            print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] APPENDED_RESULT_FORMAT: {checkpoint_run_optional_top_level_keys} ; TYPE: {str(type(checkpoint_run_optional_top_level_keys))}")
+            print(
+                f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] APPENDED_RESULT_FORMAT: {checkpoint_run_optional_top_level_keys} ; TYPE: {str(type(checkpoint_run_optional_top_level_keys))}"
+            )
 
         profilers: Optional[List[dict]] = kwargs.get("profilers")
         if profilers:
@@ -343,8 +403,12 @@ class CheckpointRunAnonymizer(Anonymizer):
             "checkpoint_run_optional_top_level_keys": checkpoint_run_optional_top_level_keys,
         }
         if not include_anonymized_batch_request:
-            anonymized_checkpoint_run_properties_dict.pop("anonymized_batch_request", None)
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_CHECKPOINT_RUN_PROPERTIES_DICT:\n{anonymized_checkpoint_run_properties_dict} ; TYPE: {str(type(anonymized_checkpoint_run_properties_dict))}")
+            anonymized_checkpoint_run_properties_dict.pop(
+                "anonymized_batch_request", None
+            )
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_CHECKPOINT_RUN_PROPERTIES_DICT:\n{anonymized_checkpoint_run_properties_dict} ; TYPE: {str(type(anonymized_checkpoint_run_properties_dict))}"
+        )
 
         # TODO: <Alex>ALEX</Alex>
         # deep_filter_properties_iterable(
@@ -356,7 +420,9 @@ class CheckpointRunAnonymizer(Anonymizer):
         # print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ANONYMIZED_CHECKPOINT_RUN_PROPERTIES_DICT-CLEANED:\n{anonymized_checkpoint_run_properties_dict} ; TYPE: {str(type(anonymized_checkpoint_run_properties_dict))}")
         # TODO: <Alex>ALEX</Alex>
 
-        print(f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ORIGINAL_BATCH_REQUEST-AT_RETURN: {batch_request} ; TYPE: {str(type(batch_request))}")
+        print(
+            f"\n[ALEX_TEST] [CheckpointRunAnonymizer.ANONYMIZE_CHECKPOINT_RUN] ORIGINAL_BATCH_REQUEST-AT_RETURN: {batch_request} ; TYPE: {str(type(batch_request))}"
+        )
         # TODO: <Alex>ALEX</Alex>
         return anonymized_checkpoint_run_properties_dict
         # TODO: <Alex>ALEX</Alex>

@@ -141,11 +141,6 @@ def convert_to_json_serializable(data):
 
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
-    # TODO: <Alex>ALEX</Alex>
-    from ruamel.yaml.comments import CommentedMap
-    # if isinstance(data, CommentedMap):
-    #     print(f'\n[ALEX_TEST] [CONVERT_TO_JSON_SERIALIZABLE] COMMENTED_MAP_DATA: {data} ; TYPE: {str(type(data))}')
-    # TODO: <Alex>ALEX</Alex>
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
 
@@ -158,19 +153,11 @@ def convert_to_json_serializable(data):
         return data
 
     if isinstance(data, dict):
-        # TODO: <Alex>ALEX</Alex>
-        # if isinstance(data, CommentedMap):
-        #     print(f'\n[ALEX_TEST] [CONVERT_TO_JSON_SERIALIZABLE] DETECTED_COMMENTED_MAP_DATA_AS_DICT: {data} ; TYPE: {str(type(data))}')
-        # TODO: <Alex>ALEX</Alex>
         new_dict = {}
         for key in data:
             # A pandas index can be numeric, and a dict key can be numeric, but a json key must be a string
             new_dict[str(key)] = convert_to_json_serializable(data[key])
 
-        # TODO: <Alex>ALEX</Alex>
-        # if isinstance(data, CommentedMap):
-        #     print(f'\n[ALEX_TEST] [CONVERT_TO_JSON_SERIALIZABLE] RETURNING_SERIALIZED_DETECTED_COMMENTED_MAP_DATA_AS_DICT: {new_dict} ; TYPE: {str(type(new_dict))}')
-        # TODO: <Alex>ALEX</Alex>
         return new_dict
 
     if isinstance(data, (list, tuple, set)):
