@@ -34,7 +34,7 @@ Before we get started, here is a glossary of some key acronyms used in this guid
 </Prerequisites>
 
 # TODO: Flesh out this OUTLINE 
-Universal Map:
+This outline follows our Universal Map:
 1. Set Up Great Expectations
 2. Connect to your Data
 3. Create Expectations
@@ -49,7 +49,7 @@ Our recommended approach to using Great Expectations in a purely Google Cloud Pl
 - Google Cloud Storage for storing metadata (Expectation Suites, Validation Results, Data Docs)
 - Google App Engine for hosting and controlling access to Data Docs
 
-# TODO: Improve this diagram
+# TODO: Improve this diagram (at least clean it up and get higher res output)
 
 ![Screenshot of Data Docs](../deployment_patterns/images/ge_and_gcp_diagram_draft.png)
 
