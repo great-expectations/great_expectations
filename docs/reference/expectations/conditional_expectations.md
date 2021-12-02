@@ -99,6 +99,20 @@ This results in the following Expectation Suite:
 }
 ```
 
+:::warning
+You should not use single quotes nor \\n inside the specified `row_condition` (see examples below). Otherwise a bug may be introduced when running `great_expectations suite edit` from the CLI.
+:::
+
+```python 
+row_condition="PClass=='1st'"  # never use simple quotes inside !!!
+```
+
+```python 
+row_condition="""
+PClass=="1st"
+"""  # never use \\n inside !!!
+```
+
 ## Data Docs and Conditional Expectations
 
 Conditional Expectations are displayed differently from standard Expectations in the Data Docs. Each Conditional

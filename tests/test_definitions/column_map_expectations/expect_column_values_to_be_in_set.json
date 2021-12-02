@@ -124,7 +124,7 @@
         "column": "z",
         "value_set": ["hello"],
         "catch_exceptions": true,
-       "row_condition": "x == '1'",
+       "row_condition": "x == \"1\"",
         "condition_parser": "pandas"
       },
       "out": {
