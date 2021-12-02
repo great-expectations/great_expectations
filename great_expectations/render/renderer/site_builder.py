@@ -2,6 +2,7 @@ import logging
 import os
 import traceback
 from collections import OrderedDict
+from typing import Any, List, Optional, Tuple
 
 import great_expectations.exceptions as exceptions
 from great_expectations.core.util import nested_update
@@ -433,9 +434,7 @@ class DefaultSiteSectionBuilder:
             if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
                 logger.debug(
-                    "        Rendering expectation suite {}".format(
-                        expectation_suite_name
-                    )
+                    f"        Rendering expectation suite {expectation_suite_name}"
                 )
             elif isinstance(resource_key, ValidationResultIdentifier):
                 run_id = resource_key.run_id
@@ -446,19 +445,12 @@ class DefaultSiteSectionBuilder:
                 )
                 if self.name == "profiling":
                     logger.debug(
-                        "        Rendering profiling for batch {}".format(
-                            resource_key.batch_identifier
-                        )
+                        f"        Rendering profiling for batch {resource_key.batch_identifier}"
                     )
                 else:
 
                     logger.debug(
-                        "        Rendering validation: run name: {}, run time: {}, suite {} for batch {}".format(
-                            run_name,
-                            run_time,
-                            expectation_suite_name,
-                            resource_key.batch_identifier,
-                        )
+                        f"        Rendering validation: run name: {run_name}, run time: {run_time}, suite {expectation_suite_name} for batch {resource_key.batch_identifier}"
                     )
 
             try:
@@ -717,7 +709,9 @@ class DefaultSiteIndexBuilder:
         return results
 
     # TODO: deprecate dual batch api support
-    def build(self, skip_and_clean_missing=True, build_index: bool = True):
+    def build(
+        self, skip_and_clean_missing=True, build_index: bool = True
+    ) -> Tuple[Any, Optional[OrderedDict]]:
         """
         :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will
         be skipped and removed from the target store
@@ -737,10 +731,48 @@ class DefaultSiteIndexBuilder:
         if self.show_how_to_buttons:
             index_links_dict["cta_object"] = self.get_calls_to_action()
 
+        self._add_expectations_info_to_index_links(
+            skip_and_clean_missing, index_links_dict
+        )
+        validation_and_profiling_result_site_keys = (
+            self._build_validation_and_profiling_result_site_keys(
+                skip_and_clean_missing
+            )
+        )
+        self._add_profiling_info_to_index_links(
+            index_links_dict, validation_and_profiling_result_site_keys
+        )
+        self._add_validations_to_index_links(
+            index_links_dict, validation_and_profiling_result_site_keys
+        )
+
+        viewable_content = ""
+        try:
+            rendered_content = self.renderer_class.render(index_links_dict)
+            viewable_content = self.view_class.render(
+                rendered_content,
+                data_context_id=self.data_context_id,
+                show_how_to_buttons=self.show_how_to_buttons,
+            )
+        except Exception as e:
+            exception_message = f"""\
+An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
+not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+diagnose and repair the underlying issue.  Detailed information follows:
+            """
+            exception_traceback = traceback.format_exc()
+            exception_message += (
+                f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+            )
+            logger.error(exception_message)
+
+        return self.target_store.write_index_page(viewable_content), index_links_dict
+
+    def _add_expectations_info_to_index_links(
+        self, skip_and_clean_missing: bool, index_links_dict: OrderedDict
+    ) -> None:
         if (
-            # TODO why is this duplicated?
             self.site_section_builders_config.get("expectations", "None")
-            and self.site_section_builders_config.get("expectations", "None")
             not in FALSEY_YAML_STRINGS
         ):
             expectation_suite_source_keys = self.data_context.stores[
@@ -772,14 +804,15 @@ class DefaultSiteIndexBuilder:
                     section_name="expectations",
                 )
 
+    def _build_validation_and_profiling_result_site_keys(
+        self, skip_and_clean_missing: bool
+    ) -> List[ValidationResultIdentifier]:
         validation_and_profiling_result_site_keys = []
         if (
-            # TODO why is this duplicated?
             self.site_section_builders_config.get("validations", "None")
-            and self.site_section_builders_config.get("validations", "None")
             not in FALSEY_YAML_STRINGS
-            or self.site_section_builders_config.get("profiling", "None")
-            and self.site_section_builders_config.get("profiling", "None")
+        ) or (
+            self.site_section_builders_config.get("profiling", "None")
             not in FALSEY_YAML_STRINGS
         ):
             source_store = (
@@ -815,10 +848,15 @@ class DefaultSiteIndexBuilder:
                         cleaned_keys.append(validation_result_site_key)
                 validation_and_profiling_result_site_keys = cleaned_keys
 
+        return validation_and_profiling_result_site_keys
+
+    def _add_profiling_info_to_index_links(
+        self,
+        index_links_dict: OrderedDict,
+        validation_and_profiling_result_site_keys: List[ValidationResultIdentifier],
+    ) -> None:
         if (
-            # TODO why is this duplicated?
             self.site_section_builders_config.get("profiling", "None")
-            and self.site_section_builders_config.get("profiling", "None")
             not in FALSEY_YAML_STRINGS
         ):
             profiling_run_name_filter = self.site_section_builders_config["profiling"][
@@ -857,15 +895,16 @@ class DefaultSiteIndexBuilder:
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = "Profiling result not found: {:s} - skipping".format(
-                        str(profiling_result_key.to_tuple())
-                    )
+                    error_msg = f"Profiling result not found: {str(profiling_result_key.to_tuple()):s} - skipping"
                     logger.warning(error_msg)
 
+    def _add_validations_to_index_links(
+        self,
+        index_links_dict: OrderedDict,
+        validation_and_profiling_result_site_keys: List[ValidationResultIdentifier],
+    ) -> None:
         if (
-            # TODO why is this duplicated?
             self.site_section_builders_config.get("validations", "None")
-            and self.site_section_builders_config.get("validations", "None")
             not in FALSEY_YAML_STRINGS
         ):
             validations_run_name_filter = self.site_section_builders_config[
@@ -915,32 +954,8 @@ class DefaultSiteIndexBuilder:
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = "Validation result not found: {:s} - skipping".format(
-                        str(validation_result_key.to_tuple())
-                    )
+                    error_msg = f"Validation result not found: {str(validation_result_key.to_tuple()):s} - skipping"
                     logger.warning(error_msg)
-
-        viewable_content = ""
-        try:
-            rendered_content = self.renderer_class.render(index_links_dict)
-            viewable_content = self.view_class.render(
-                rendered_content,
-                data_context_id=self.data_context_id,
-                show_how_to_buttons=self.show_how_to_buttons,
-            )
-        except Exception as e:
-            exception_message = f"""\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:
-            """
-            exception_traceback = traceback.format_exc()
-            exception_message += (
-                f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
-            )
-            logger.error(exception_message)
-
-        return self.target_store.write_index_page(viewable_content), index_links_dict
 
 
 class CallToActionButton:
