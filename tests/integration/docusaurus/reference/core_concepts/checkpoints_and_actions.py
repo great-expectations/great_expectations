@@ -1,7 +1,5 @@
-import copy
 import os
 
-import pandas as pd
 from ruamel import yaml
 
 import great_expectations as ge
@@ -41,6 +39,7 @@ context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 context.create_expectation_suite("my_expectation_suite")
+context.create_expectation_suite("my_other_expectation_suite")
 
 # Add a Checkpoint
 checkpoint_yaml = """
@@ -155,7 +154,8 @@ validations:
         partial_unexpected_count: 20
 """
 context.add_checkpoint(**yaml.load(no_nesting))
-context.run_checkpoint(checkpoint_name="my_checkpoint")
+results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+assert results.success == True
 
 nesting_with_defaults = """
 name: my_checkpoint
@@ -195,7 +195,8 @@ runtime_configuration:
     partial_unexpected_count: 20
 """
 context.add_checkpoint(**yaml.load(nesting_with_defaults))
-context.run_checkpoint(checkpoint_name="my_checkpoint")
+results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+assert results.success == True
 
 keys_passed_at_runtime = """
 name: my_base_checkpoint
@@ -221,7 +222,7 @@ runtime_configuration:
     partial_unexpected_count: 20
 """
 context.add_checkpoint(**yaml.load(keys_passed_at_runtime))
-context.run_checkpoint(
+results = context.run_checkpoint(
     checkpoint_name="my_base_checkpoint",
     validations=[
         {
@@ -240,10 +241,12 @@ context.run_checkpoint(
                 "data_asset_name": "yellow_tripdata_sample_2019-02",
                 "data_connector_query": {"index": -1},
             },
-            "expectation_suite_name": "my_expectation_suite",
+            "expectation_suite_name": "my_other_expectation_suite",
         },
     ],
 )
+assert results.checkpoint_config.validations[0]["expectation_suite_name"] == "my_expectation_suite"
+assert results.checkpoint_config.validations[1]["expectation_suite_name"] == "my_other_expectation_suite"
 
 using_template = """
 name: my_checkpoint
@@ -264,10 +267,11 @@ validations:
       data_asset_name: yellow_tripdata_sample_2019-02
       data_connector_query:
         index: -1
-    expectation_suite_name: my_expectation_suite
+    expectation_suite_name: my_other_expectation_suite
 """
 context.add_checkpoint(**yaml.load(using_template))
-context.run_checkpoint(checkpoint_name="my_checkpoint")
+results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+assert results.success == True
 
 using_simple_checkpoint = """
 name: my_checkpoint
@@ -290,7 +294,8 @@ using_simple_checkpoint = using_simple_checkpoint.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
 context.add_checkpoint(**yaml.load(using_simple_checkpoint))
-context.run_checkpoint(checkpoint_name="my_checkpoint")
+results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+assert results.success == True
 
 equivalent_using_checkpoint = """
 name: my_checkpoint
@@ -328,4 +333,5 @@ equivalent_using_checkpoint = equivalent_using_checkpoint.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
 context.add_checkpoint(**yaml.load(equivalent_using_checkpoint))
-context.run_checkpoint(checkpoint_name="my_checkpoint")
+results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+assert results.success == True
