@@ -22,6 +22,6 @@ jobs:
         with:
           context: ./
           file: ./docker/Dockerfile
-          build_args: PYTHON_DOCKER_TAG=3.7-buster
+          build-args: PYTHON_DOCKER_TAG=3.7-buster
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/great_expectations:$(date +%s)
+          tags: great_expectations:latest
