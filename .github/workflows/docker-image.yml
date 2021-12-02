@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
-      run: docker build . --file docker/Dockerfile --build-arg PYTHON_DOCKER_TAGS=3.7-buster --tag great_expectations:$(date +%s)
+      run: docker build . --file docker/Dockerfile --build-arg PYTHON_DOCKER_TAG=3.7-buster --tag great_expectations:$(date +%s)
