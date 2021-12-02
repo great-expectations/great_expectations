@@ -3,6 +3,9 @@ title: Changelog
 ---
 
 ### Develop
+* [DOCS] How to pass an in-memory DataFrame to a Checkpoint (#3756)
+* [FEATURE] Like and regex-based expectations in Athena dialect (#3761)
+* [BUGFIX] Conditional expectations in pandas now report the correct index in unexpected_index_list (Df.reset_index is no longer used) (#3666)
 
 ### 0.13.41
 * [FEATURE] Support median calculation in AWS Athena (#3596) (thanks @persiyanov)
