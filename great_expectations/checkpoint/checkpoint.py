@@ -12,11 +12,7 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
 from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
-from great_expectations.core.batch import (
-    BatchRequest,
-    RuntimeBatchRequest,
-    get_batch_request_dict,
-)
+from great_expectations.core.batch import BatchRequest, get_batch_request_dict
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -124,7 +120,6 @@ class Checkpoint:
     def ge_cloud_id(self) -> UUID:
         return self._config.ge_cloud_id
 
-    # TODO: (Rob) should we type the big validation dicts for better validation/prevent duplication
     def get_substituted_config(
         self,
         config: Optional[Union[CheckpointConfig, dict]] = None,
@@ -136,67 +131,20 @@ class Checkpoint:
         if isinstance(config, dict):
             config = CheckpointConfig(**config)
 
+        if any(runtime_kwargs.values()):
+            config.update(runtime_kwargs=runtime_kwargs)
+
         substituted_config: Union[CheckpointConfig, dict]
-        template_name = runtime_kwargs.get("template_name") or config.template_name
 
+        template_name = config.template_name
         if not template_name:
-            if (
-                config.batch_request is not None
-                and config.batch_request.get("runtime_parameters") is not None
-                and config.batch_request["runtime_parameters"].get("batch_data")
-                is not None
-            ):
-                batch_data = config.batch_request["runtime_parameters"].pop(
-                    "batch_data"
-                )
-                substituted_config = copy.deepcopy(config)
-                substituted_config.batch_request["runtime_parameters"][
-                    "batch_data"
-                ] = batch_data
-            elif len(config.validations) > 0:
-                batch_data_list = []
-                for val in config.validations:
-                    if (
-                        val.get("batch_request") is not None
-                        and val["batch_request"].get("runtime_parameters") is not None
-                        and val["batch_request"]["runtime_parameters"].get("batch_data")
-                        is not None
-                    ):
-                        batch_data_list.append(
-                            val["batch_request"]["runtime_parameters"].pop("batch_data")
-                        )
-                    else:
-                        batch_data_list.append(None)
-                substituted_config = copy.deepcopy(config)
-                for idx, val in enumerate(substituted_config.validations):
-                    if (
-                        val.get("batch_request") is not None
-                        and val["batch_request"].get("runtime_parameters") is not None
-                        and batch_data_list[idx] is not None
-                    ):
-                        val["batch_request"]["runtime_parameters"][
-                            "batch_data"
-                        ] = batch_data_list[idx]
-
-                for idx, val in enumerate(config.validations):
-                    if (
-                        val.get("batch_request") is not None
-                        and val["batch_request"].get("runtime_parameters") is not None
-                        and batch_data_list[idx] is not None
-                    ):
-                        val["batch_request"]["runtime_parameters"][
-                            "batch_data"
-                        ] = batch_data_list[idx]
-            else:
-                substituted_config = copy.deepcopy(config)
-
-            if any(runtime_kwargs.values()):
-                substituted_config.update(runtime_kwargs=runtime_kwargs)
-
+            substituted_config = copy.deepcopy(config)
             self._substituted_config = substituted_config
         else:
-            checkpoint = self.data_context.get_checkpoint(name=template_name)
-            template_config = checkpoint.config
+            checkpoint: Checkpoint = self.data_context.get_checkpoint(
+                name=template_name
+            )
+            template_config: CheckpointConfig = checkpoint.config
 
             if template_config.config_version != config.config_version:
                 raise ge_exceptions.CheckpointError(
@@ -207,7 +155,7 @@ class Checkpoint:
             if template_config.template_name is not None:
                 substituted_config = self.get_substituted_config(config=template_config)
             else:
-                substituted_config = template_config
+                substituted_config = copy.deepcopy(template_config)
 
             # merge template with config
             substituted_config.update(
@@ -217,8 +165,10 @@ class Checkpoint:
             # don't replace _substituted_config if already exists
             if self._substituted_config is None:
                 self._substituted_config = substituted_config
+
         if self.data_context.ge_cloud_mode:
             return substituted_config
+
         return self._substitute_config_variables(config=substituted_config)
 
     def _substitute_config_variables(
@@ -250,23 +200,25 @@ class Checkpoint:
         result_format: Optional[dict],
         run_id: Optional[Union[str, RunIdentifier]],
         idx: Optional[int] = 0,
-        validation_dict: Optional[dict] = {},
+        validation_dict: Optional[dict] = None,
     ):
+        if validation_dict is None:
+            validation_dict = {}
+
         try:
             substituted_validation_dict: dict = get_substituted_validation_dict(
                 substituted_runtime_config=substituted_runtime_config,
                 validation_dict=validation_dict,
             )
-            batch_request: Union[
-                BatchRequest, RuntimeBatchRequest
-            ] = substituted_validation_dict.get("batch_request")
+            batch_request: BatchRequest = substituted_validation_dict.get(
+                "batch_request"
+            )
             expectation_suite_name: str = substituted_validation_dict.get(
                 "expectation_suite_name"
             )
             expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
                 "expectation_suite_ge_cloud_id"
             )
-            action_list: list = substituted_validation_dict.get("action_list")
 
             validator: Validator = self.data_context.get_validator(
                 batch_request=batch_request,
@@ -341,7 +293,7 @@ class Checkpoint:
     # TODO: Add eval param processing using new TBD parser syntax and updated EvaluationParameterParser and
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
-    # while run_name_template also undergoes strftime datetime substitution
+    #  while run_name_template also undergoes strftime datetime substitution
     def run(
         self,
         template_name: Optional[str] = None,
@@ -356,47 +308,46 @@ class Checkpoint:
         run_id: Optional[Union[str, RunIdentifier]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[str] = None,
+        result_format: Optional[Union[str, dict]] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
-        **kwargs,
     ) -> CheckpointResult:
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
 
         run_time = run_time or datetime.datetime.now()
-        runtime_configuration: dict = runtime_configuration or {}
-        result_format: Optional[dict] = result_format or runtime_configuration.get(
-            "result_format"
+        runtime_configuration = runtime_configuration or {}
+        result_format = result_format or runtime_configuration.get("result_format")
+
+        batch_request, validations = get_batch_request_dict(
+            batch_request=batch_request, validations=validations
         )
 
-        batch_request, validations = get_batch_request_dict(batch_request, validations)
-
-        runtime_kwargs = {
+        runtime_kwargs: dict = {
             "template_name": template_name,
             "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
             "batch_request": batch_request,
             "action_list": action_list,
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,
             "validations": validations,
             "profilers": profilers,
+            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
         substituted_runtime_config: CheckpointConfig = self.get_substituted_config(
             runtime_kwargs=runtime_kwargs
         )
-        run_name_template: Optional[str] = substituted_runtime_config.run_name_template
-        validations: list = substituted_runtime_config.validations
-        batch_request: BatchRequest = substituted_runtime_config.batch_request
+        run_name_template = substituted_runtime_config.run_name_template
+        validations = substituted_runtime_config.validations
+        batch_request = substituted_runtime_config.batch_request
         if len(validations) == 0 and not batch_request:
             raise ge_exceptions.CheckpointError(
                 f'Checkpoint "{self.name}" must contain either a batch_request or validations.'
             )
 
         if run_name is None and run_name_template is not None:
-            run_name: str = get_datetime_string_from_strftime_format(
+            run_name = get_datetime_string_from_strftime_format(
                 format_str=run_name_template, datetime_obj=run_time
             )
 
@@ -409,10 +360,11 @@ class Checkpoint:
         with AsyncExecutor(
             self.data_context.concurrency, max_workers=len(validations)
         ) as async_executor:
+            # noinspection PyUnresolvedReferences
             async_validation_operator_results: List[
                 AsyncResult[ValidationOperatorResult]
             ] = []
-            if len(validations) != 0:
+            if len(validations) > 0:
                 for idx, validation_dict in enumerate(validations):
                     self._run_validation(
                         substituted_runtime_config=substituted_runtime_config,
@@ -632,7 +584,7 @@ class LegacyCheckpoint(Checkpoint):
         evaluation_parameters: Optional[dict] = None,
         run_name: Optional[str] = None,
         run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Union[str, dict] = {"result_format": "SUMMARY"},
+        result_format: Optional[Union[str, dict]] = None,
     ):
         result_format = result_format or {"result_format": "SUMMARY"}
 
@@ -788,8 +740,6 @@ class SimpleCheckpoint(Checkpoint):
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         profilers: Optional[List[dict]] = None,
-        validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
         ge_cloud_id: Optional[UUID] = None,
         # the following four arguments are used by SimpleCheckpointConfigurator
         site_names: Union[str, List[str]] = "all",
@@ -862,7 +812,6 @@ class SimpleCheckpoint(Checkpoint):
         notify_on: str = "all",
         notify_with: Union[str, List[str]] = "all",
         expectation_suite_ge_cloud_id: Optional[str] = None,
-        **kwargs,
     ) -> CheckpointResult:
         new_baseline_config = None
 
@@ -897,5 +846,4 @@ class SimpleCheckpoint(Checkpoint):
             run_time=run_time,
             result_format=result_format,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
-            **kwargs,
         )

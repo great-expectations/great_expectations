@@ -5,7 +5,7 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Optional
+from typing import Optional, Union
 
 import requests
 
@@ -13,6 +13,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
@@ -207,25 +208,10 @@ def send_email(
 # TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_runtime_batch_request(
     substituted_runtime_config: CheckpointConfig,
-    validation_batch_request: Optional[dict] = None,
+    validation_batch_request: Optional[Union[dict, BatchRequest]] = None,
     ge_cloud_mode: bool = False,
 ) -> Optional[BatchRequest]:
     runtime_config_batch_request = substituted_runtime_config.batch_request
-
-    if (
-        (
-            runtime_config_batch_request is not None
-            and "runtime_parameters" in runtime_config_batch_request
-        )
-        or (
-            validation_batch_request is not None
-            and "runtime_parameters" in validation_batch_request
-        )
-        or (isinstance(validation_batch_request, RuntimeBatchRequest))
-    ):
-        batch_request_class = RuntimeBatchRequest
-    else:
-        batch_request_class = BatchRequest
 
     if runtime_config_batch_request is None and validation_batch_request is None:
         return None
@@ -235,6 +221,16 @@ def get_runtime_batch_request(
 
     if validation_batch_request is None:
         validation_batch_request = {}
+
+    effective_batch_request: dict = dict(
+        **runtime_config_batch_request, **validation_batch_request
+    )
+    if "runtime_parameters" in effective_batch_request or isinstance(
+        validation_batch_request, RuntimeBatchRequest
+    ):
+        batch_request_class = RuntimeBatchRequest
+    else:
+        batch_request_class = BatchRequest
 
     if (
         validation_batch_request.get("runtime_parameters") is not None
@@ -264,6 +260,13 @@ def get_runtime_batch_request(
         if len(batch_identifiers.keys()) == 0:
             batch_identifiers["timestamp"] = str(datetime.datetime.now())
             runtime_batch_request_dict["batch_identifiers"] = batch_identifiers
+
+    filter_properties_dict(
+        properties=runtime_batch_request_dict,
+        keep_fields=batch_request_class.field_names,
+        clean_nulls=False,
+        inplace=True,
+    )
 
     return batch_request_class(**runtime_batch_request_dict)
 

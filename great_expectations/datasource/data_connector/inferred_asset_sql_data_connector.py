@@ -264,6 +264,29 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                             }
                         )
 
+        # SQLAlchemy's introspection does not list "external tables" in Redshift Spectrum (tables whose data is stored on S3).
+        # The following code fetches the names of external schemas and tables from a special table
+        # 'svv_external_tables'.
+        try:
+            if "redshift" == engine.dialect.name.lower():
+                result = engine.execute(
+                    "select schemaname, tablename from svv_external_tables"
+                ).fetchall()
+                for row in result:
+                    tables.append(
+                        {
+                            "schema_name": row[0],
+                            "table_name": row[1],
+                            "type": "table",
+                        }
+                    )
+
+        except Exception as e:
+            # Our testing shows that 'svv_external_tables' table is present in all Redshift clusters. This means that this
+            # exception is highly unlikely to fire.
+            if not "UndefinedTable" in str(e):
+                raise e
+
         return tables
 
     def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:

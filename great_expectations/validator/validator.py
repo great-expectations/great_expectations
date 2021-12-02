@@ -8,13 +8,13 @@ import traceback
 import warnings
 from collections import defaultdict, namedtuple
 from collections.abc import Hashable
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from dateutil.parser import parse
 from tqdm.auto import tqdm
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch, BatchDefinition, BatchMarkers
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -84,7 +84,9 @@ ValidationStatistics = namedtuple(
 )
 
 
-def _calc_validation_statistics(validation_results):
+def _calc_validation_statistics(
+    validation_results: List[ExpectationValidationResult],
+) -> ValidationStatistics:
     """
     Calculate summary statistics for the validation results and
     return ``ExpectationStatistics``.
@@ -120,25 +122,28 @@ class Validator:
     # noinspection PyUnusedLocal
     def __init__(
         self,
-        execution_engine,
-        interactive_evaluation=True,
-        expectation_suite=None,
-        expectation_suite_name=None,
-        data_context=None,
-        batches=None,
+        execution_engine: ExecutionEngine,
+        interactive_evaluation: bool = True,
+        expectation_suite: Optional[ExpectationSuite] = None,
+        expectation_suite_name: Optional[str] = None,
+        data_context: Optional[
+            Any
+        ] = None,  # Cannot type DataContext due to circular import
+        batches: Optional[List[Batch]] = None,
         **kwargs,
     ):
         """
-        Initialize the DataAsset.
+        Validator is the key object used to create Expectations, validate Expectations,
+        and get Metrics for Expectations.
 
-        :param profiler (profiler class) = None: The profiler that should be run on the data_asset to
-            build a baseline expectation suite.
+        Additionally, note that Validators are used by Checkpoints under-the-hood.
 
-        Note: DataAsset is designed to support multiple inheritance (e.g. PandasDataset inherits from both a
-        Pandas DataFrame and Dataset which inherits from DataAsset), so it accepts generic *args and **kwargs arguments
-        so that they can also be passed to other parent classes. In python 2, there isn't a clean way to include all of
-        *args, **kwargs, and a named kwarg...so we use the inelegant solution of popping from kwargs, leaving the
-        support for the profiler parameter not obvious from the signature.
+        :param execution_engine (ExecutionEngine):
+        :param interactive_evaluation (bool):
+        :param expectation_suite (Optional[ExpectationSuite]):
+        :param expectation_suite_name (Optional[str]):
+        :param data_context (Optional[DataContext]):
+        :param batches (Optional[List[Batch]]):
 
         """
 
@@ -148,7 +153,7 @@ class Validator:
         self._validator_config = {}
 
         if batches is None:
-            batches = tuple()
+            batches = []
 
         self._batches = {}
         self._active_batch_id = None
@@ -208,11 +213,11 @@ class Validator:
         return list(combined_dir)
 
     @property
-    def expose_dataframe_methods(self):
+    def expose_dataframe_methods(self) -> bool:
         return self._expose_dataframe_methods
 
     @expose_dataframe_methods.setter
-    def expose_dataframe_methods(self, value: bool):
+    def expose_dataframe_methods(self, value: bool) -> None:
         self._expose_dataframe_methods = value
 
     def __getattr__(self, name):
@@ -230,7 +235,7 @@ class Validator:
                 f"'{type(self).__name__}'  object has no attribute '{name}'"
             )
 
-    def validate_expectation(self, name):
+    def validate_expectation(self, name: str):
         """
         Given the name of an Expectation, obtains the Class-first Expectation implementation and utilizes the
                 expectation's validate method to obtain a validation result. Also adds in the runtime configuration
@@ -345,11 +350,11 @@ class Validator:
         return inst_expectation
 
     @property
-    def execution_engine(self):
+    def execution_engine(self) -> ExecutionEngine:
         """Returns the execution engine being used by the validator at the given time"""
         return self._execution_engine
 
-    def list_available_expectation_types(self):
+    def list_available_expectation_types(self) -> List[str]:
         """Returns a list of all expectations available to the validator"""
         keys = dir(self)
         return [
@@ -762,7 +767,7 @@ aborting graph resolution.
 
         return aborted_metrics_info
 
-    def append_expectation(self, expectation_config):
+    def append_expectation(self, expectation_config: ExpectationConfiguration) -> None:
         """This method is a thin wrapper for ExpectationSuite.append_expectation"""
         warnings.warn(
             "append_expectation is deprecated, and will be removed in a future release. "
@@ -811,12 +816,7 @@ aborting graph resolution.
         remove_multiple_matches: bool = False,
         ge_cloud_id: Optional[str] = None,
     ) -> List[ExpectationConfiguration]:
-        """This method is a thin wrapper for ExpectationSuite.remove()"""
-        warnings.warn(
-            "DataAsset.remove_expectations is deprecated, and will be removed in a future release. "
-            + "Please use ExpectationSuite.remove_expectation instead.",
-            DeprecationWarning,
-        )
+
         return self._expectation_suite.remove_expectation(
             expectation_configuration=expectation_configuration,
             match_type=match_type,
@@ -824,7 +824,7 @@ aborting graph resolution.
             ge_cloud_id=ge_cloud_id,
         )
 
-    def set_config_value(self, key, value):
+    def set_config_value(self, key, value) -> None:
         """Setter for config value"""
         self._validator_config[key] = value
 
@@ -832,7 +832,7 @@ aborting graph resolution.
         """Getter for config value"""
         return self._validator_config.get(key)
 
-    def load_batch_list(self, batch_list: List[Batch]):
+    def load_batch_list(self, batch_list: List[Batch]) -> List[Batch]:
         for batch in batch_list:
             try:
                 assert isinstance(
@@ -858,10 +858,12 @@ aborting graph resolution.
         return self.execution_engine.loaded_batch_data_ids
 
     @property
-    def active_batch(self) -> Batch:
+    def active_batch(self) -> Optional[Batch]:
         """Getter for active batch"""
-        active_batch_id: str = self.active_batch_id
-        batch: Batch = self.batches.get(active_batch_id) if active_batch_id else None
+        active_batch_id: Optional[str] = self.active_batch_id
+        batch: Optional[Batch] = (
+            self.batches.get(active_batch_id) if active_batch_id else None
+        )
         return batch
 
     @property
@@ -873,7 +875,7 @@ aborting graph resolution.
             return self.active_batch.batch_spec
 
     @property
-    def active_batch_id(self) -> str:
+    def active_batch_id(self) -> Optional[str]:
         """Getter for active batch id"""
         active_engine_batch_id = self._execution_engine.active_batch_data_id
         if active_engine_batch_id != self._active_batch_id:
@@ -883,7 +885,7 @@ aborting graph resolution.
         return self._active_batch_id
 
     @active_batch_id.setter
-    def active_batch_id(self, batch_id):
+    def active_batch_id(self, batch_id: str) -> None:
         assert set(self.batches.keys()).issubset(set(self.loaded_batch_ids))
         available_batch_ids: Set[str] = set(self.batches.keys()).union(
             set(self.loaded_batch_ids)
@@ -898,7 +900,7 @@ set as active.
             self._active_batch_id = batch_id
 
     @property
-    def active_batch_markers(self):
+    def active_batch_markers(self) -> Optional[BatchMarkers]:
         """Getter for active batch's batch markers"""
         if not self.active_batch:
             return None
@@ -906,14 +908,14 @@ set as active.
             return self.active_batch.batch_markers
 
     @property
-    def active_batch_definition(self):
+    def active_batch_definition(self) -> Optional[BatchDefinition]:
         """Getter for the active batch's batch definition"""
         if not self.active_batch:
             return None
         else:
             return self.active_batch.batch_definition
 
-    def discard_failing_expectations(self):
+    def discard_failing_expectations(self) -> None:
         """Removes any expectations from the validator where the validation has failed"""
         res = self.validate(only_return_failures=True).results
         if any(res):
@@ -924,7 +926,7 @@ set as active.
                 )
             warnings.warn("Removed %s expectations that were 'False'" % len(res))
 
-    def get_default_expectation_arguments(self):
+    def get_default_expectation_arguments(self) -> dict:
         """Fetch default expectation arguments for this data_asset
 
         Returns:
@@ -948,14 +950,16 @@ set as active.
         """
         Wrapper around ge_cloud_mode property of associated Data Context
         """
-        return self._data_context.ge_cloud_mode
+        if self._data_context:
+            return self._data_context.ge_cloud_mode
+        return False
 
     @property
-    def default_expectation_args(self):
+    def default_expectation_args(self) -> dict:
         """A getter for default Expectation arguments"""
         return self._default_expectation_args
 
-    def set_default_expectation_argument(self, argument, value):
+    def set_default_expectation_argument(self, argument: str, value) -> None:
         """
         Set a default expectation argument for this data_asset
 
@@ -974,12 +978,12 @@ set as active.
 
     def get_expectations_config(
         self,
-        discard_failed_expectations=True,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-        suppress_warnings=False,
-    ):
+        discard_failed_expectations: bool = True,
+        discard_result_format_kwargs: bool = True,
+        discard_include_config_kwargs: bool = True,
+        discard_catch_exceptions_kwargs: bool = True,
+        suppress_warnings: bool = False,
+    ) -> ExpectationSuite:
         """
         Returns an expectation configuration, providing an option to discard failed expectation and discard/ include'
         different result aspects, such as exceptions and result format.
@@ -999,13 +1003,13 @@ set as active.
 
     def get_expectation_suite(
         self,
-        discard_failed_expectations=True,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-        suppress_warnings=False,
-        suppress_logging=False,
-    ):
+        discard_failed_expectations: bool = True,
+        discard_result_format_kwargs: bool = True,
+        discard_include_config_kwargs: bool = True,
+        discard_catch_exceptions_kwargs: bool = True,
+        suppress_warnings: bool = False,
+        suppress_logging: bool = False,
+    ) -> ExpectationSuite:
         """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
 
         Args:
@@ -1104,13 +1108,13 @@ set as active.
 
     def save_expectation_suite(
         self,
-        filepath=None,
-        discard_failed_expectations=True,
-        discard_result_format_kwargs=True,
-        discard_include_config_kwargs=True,
-        discard_catch_exceptions_kwargs=True,
-        suppress_warnings=False,
-    ):
+        filepath: Optional[str] = None,
+        discard_failed_expectations: bool = True,
+        discard_result_format_kwargs: bool = True,
+        discard_include_config_kwargs: bool = True,
+        discard_catch_exceptions_kwargs: bool = True,
+        suppress_warnings: bool = False,
+    ) -> None:
         """Writes ``_expectation_config`` to a JSON file.
 
            Writes the DataAsset's expectation config to the specified JSON ``filepath``. Failing expectations \
@@ -1134,8 +1138,8 @@ set as active.
                    If True, the :ref:`catch_exceptions` attribute for each expectation is not written to the JSON \
                    config file.
                suppress_warnings (boolean): \
-                  It True, all warnings raised by Great Expectations, as a result of dropped expectations, are \
-                  suppressed.
+                    If True, all warnings raised by Great Expectations, as a result of dropped expectations, are \
+                    suppressed.
 
         """
         expectation_suite = self.get_expectation_suite(
@@ -1170,14 +1174,16 @@ set as active.
         self,
         expectation_suite=None,
         run_id=None,
-        data_context=None,
-        evaluation_parameters=None,
-        catch_exceptions=True,
-        result_format=None,
-        only_return_failures=False,
-        run_name=None,
-        run_time=None,
-    ):
+        data_context: Optional[
+            Any
+        ] = None,  # Cannot type DataContext due to circular import
+        evaluation_parameters: Optional[dict] = None,
+        catch_exceptions: bool = True,
+        result_format: Optional[str] = None,
+        only_return_failures: bool = False,
+        run_name: Optional[str] = None,
+        run_time: Optional[str] = None,
+    ) -> Union[ExpectationValidationResult, ExpectationSuiteValidationResult]:
         # noinspection SpellCheckingInspection
         """Generates a JSON-formatted report describing the outcome of all expectations.
 
@@ -1476,12 +1482,12 @@ set as active.
 
     def add_citation(
         self,
-        comment,
-        batch_spec=None,
-        batch_markers=None,
-        batch_definition=None,
-        citation_date=None,
-    ):
+        comment: str,
+        batch_spec: Optional[dict] = None,
+        batch_markers: Optional[dict] = None,
+        batch_definition: Optional[dict] = None,
+        citation_date: Optional[str] = None,
+    ) -> None:
         """Adds a citation to an existing Expectation Suite within the validator"""
         if batch_spec is None:
             batch_spec = self.batch_spec
@@ -1498,16 +1504,18 @@ set as active.
         )
 
     @property
-    def expectation_suite_name(self):
+    def expectation_suite_name(self) -> str:
         """Gets the current expectation_suite name of this data_asset as stored in the expectations configuration."""
         return self._expectation_suite.expectation_suite_name
 
     @expectation_suite_name.setter
-    def expectation_suite_name(self, expectation_suite_name):
+    def expectation_suite_name(self, expectation_suite_name: str) -> None:
         """Sets the expectation_suite name of this data_asset as stored in the expectations configuration."""
         self._expectation_suite.expectation_suite_name = expectation_suite_name
 
-    def test_expectation_function(self, function, *args, **kwargs):
+    def test_expectation_function(
+        self, function: Callable, *args, **kwargs
+    ) -> Callable:
         """Test a generic expectation function
 
         Args:

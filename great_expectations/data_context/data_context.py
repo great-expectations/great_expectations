@@ -2428,15 +2428,11 @@ class BaseDataContext:
         )
         results_dict = selected_store.get(key)
 
-        # TODO: This should be a convenience method of ValidationResultSuite
-        if failed_only:
-            failed_results_list = [
-                result for result in results_dict.results if not result.success
-            ]
-            results_dict.results = failed_results_list
-            return results_dict
-        else:
-            return results_dict
+        return (
+            results_dict.get_failed_validation_results()
+            if failed_only
+            else results_dict
+        )
 
     def update_return_obj(self, data_asset, return_obj):
         """Helper called by data_asset.
@@ -3070,18 +3066,17 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
-        batch_data_list = []
-        batch_data = None
+        # DataFrames shouldn't be saved to CheckpointStore
         if checkpoint_config.get("validations") is not None:
-            for val in checkpoint_config["validations"]:
+            for idx, val in enumerate(checkpoint_config["validations"]):
                 if (
                     val.get("batch_request") is not None
                     and val["batch_request"].get("runtime_parameters") is not None
                     and val["batch_request"]["runtime_parameters"].get("batch_data")
                     is not None
                 ):
-                    batch_data_list.append(
-                        val["batch_request"]["runtime_parameters"].pop("batch_data")
+                    raise ge_exceptions.InvalidConfigError(
+                        f'batch_data found in validations at index {idx} cannot be saved to CheckpointStore "{self.checkpoint_store_name}"'
                     )
         elif (
             checkpoint_config.get("batch_request") is not None
@@ -3091,23 +3086,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             is not None
         ):
-            batch_data = checkpoint_config["batch_request"]["runtime_parameters"].pop(
-                "batch_data"
+            raise ge_exceptions.InvalidConfigError(
+                f'batch_data found in batch_request cannot be saved to CheckpointStore "{self.checkpoint_store_name}"'
             )
+
         checkpoint_config = filter_properties_dict(
             properties=checkpoint_config, clean_falsy=True
         )
-        if len(batch_data_list) > 0:
-            for idx, val in enumerate(checkpoint_config.get("validations")):
-                if batch_data_list[idx] is not None:
-                    val["batch_request"]["runtime_parameters"][
-                        "batch_data"
-                    ] = batch_data_list[idx]
-        elif batch_data is not None:
-            checkpoint_config["batch_request"]["runtime_parameters"][
-                "batch_data"
-            ] = batch_data
-
         new_checkpoint: Union[
             Checkpoint, SimpleCheckpoint, LegacyCheckpoint
         ] = instantiate_class_from_config(
@@ -3119,6 +3104,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "module_name": "great_expectations.checkpoint.checkpoint",
             },
         )
+
         if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
                 resource_type="contract", ge_cloud_id=ge_cloud_id
@@ -3127,6 +3113,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             key: ConfigurationIdentifier = ConfigurationIdentifier(
                 configuration_key=name,
             )
+
         checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
         checkpoint_ref = self.checkpoint_store.set(key=key, value=checkpoint_config)
         if isinstance(checkpoint_ref, GeCloudIdAwareRef):
@@ -3253,7 +3240,21 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         Validate against a pre-defined Checkpoint. (Experimental)
         Args:
             checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
+            template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
+            run_name_template: The template to use for run_name
+            expectation_suite_name: Expectation suite to be used by Checkpoint run
+            batch_request: Batch request to be used by Checkpoint run
+            action_list: List of actions to be performed by the Checkpoint
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            runtime_configuration: Runtime configuration override parameters
+            validations: Validations to be performed by the Checkpoint run
+            profilers: Profilers to be used by the Checkpoint run
+            run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: One of several supported formatting directives for expectation validation results
+            ge_cloud_id: Great Expectations Cloud id for the checkpoint
+            expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
@@ -3294,7 +3295,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
 
-        checkpoint_config = {
+        checkpoint_config: dict = {
             key: value
             for key, value in checkpoint_config_from_store.items()
             if key in checkpoint_config_from_call_args

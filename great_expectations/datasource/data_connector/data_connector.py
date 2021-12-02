@@ -3,7 +3,12 @@ from copy import deepcopy
 from typing import Any, List, Optional, Tuple
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition, BatchMarkers, BatchRequest
+from great_expectations.core.batch import (
+    BatchDefinition,
+    BatchMarkers,
+    BatchRequest,
+    BatchRequestBase,
+)
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -400,7 +405,7 @@ class DataConnector:
             "n_rows": n_rows,
         }
 
-    def _validate_batch_request(self, batch_request: BatchRequest):
+    def _validate_batch_request(self, batch_request: BatchRequestBase):
         """
         Validate batch_request by checking:
             1. if configured datasource_name matches batch_request's datasource_name

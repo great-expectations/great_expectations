@@ -101,7 +101,7 @@ module.exports = {
                 'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
                 'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
                 'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
-                'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource',
+                'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource'
               ]
             },
             {
@@ -159,7 +159,7 @@ module.exports = {
               items: [
                 'guides/connecting_to_your_data/advanced/database_credentials',
                 'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store',
-                'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql',
+                'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql'
                 // 'guides/connecting_to_your_data/advanced/how_to_create_a_batch_from_a_sql_query',
                 // 'guides/connecting_to_your_data/advanced/how_to_create_a_lightweight_data_catalog_by_applying_a_descriptive_profiler_to_a_configured_datasource',
                 // 'guides/connecting_to_your_data/advanced/how_to_explore_changes_in_data_over_time_using_a_configured_datasource'
@@ -233,7 +233,8 @@ module.exports = {
               items: [
                 'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
                 'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
-                'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config'
+                'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
+                'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
               ]
             },
             {
@@ -381,9 +382,9 @@ module.exports = {
           items: [
             { type: 'doc', id: 'contributing/style_guides/docs_style' },
             { type: 'doc', id: 'contributing/style_guides/code_style' },
-            { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' },
+            { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' }
           ]
-        },
+        }
       ]
     },
     {
