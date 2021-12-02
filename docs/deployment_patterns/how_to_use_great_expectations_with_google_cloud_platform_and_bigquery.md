@@ -40,15 +40,18 @@ Universal Map:
 3. Create Expectations
 4. Validate your Data
 
-Our recommended approach to using Great Expectations in a purely Google Cloud Platform environment use the following services:
-- Google Cloud Composer (which is backed by Airflow) for managing workflow orchestration including running Checkpoints. TODO: Steer toward Airflow 2.0? Use Airflow GE operator? 
+Our recommended approach to using Great Expectations in a purely Google Cloud Platform environment is to use the following services:
+- Google Cloud Composer (which is backed by Airflow) for managing workflow orchestration including running Checkpoints. TODO: Steer toward Airflow 2.0? TODO: Use Airflow GE operator? No, not yet updated for v3. Maybe mention it.
   - TODO: (Potential TODO) Investigate and Mention other options
       1. "Workflows" https://cloud.google.com/workflows automate serverless workflows
       2. "Dataflow" https://cloud.google.com/dataflow "Fully managed data processing service" - NO this does not do scheduling, but consider mentioning it if it's possible to use to run GE, kicked off from another service.
 - BigQuery or Google Cloud Storage as your datasource
 - Google Cloud Storage for storing metadata (Expectation Suites, Validation Results, Data Docs)
 - Google App Engine for hosting and controlling access to Data Docs
-# TODO: Insert Diagram
+
+# TODO: Improve this diagram
+
+![Screenshot of Data Docs](../deployment_patterns/images/ge_and_gcp_diagram_draft.png)
 
 If you use a different configuration and have ideas about how this guide can be improved, please connect with us on slack or submit a PR - we love to make things better. 
 
@@ -58,8 +61,8 @@ NOTE: This guide recommends in-code data context use. For file based data contex
 NOTE: This guide recommends prototyping locally using sample data when possible. TODO: Describe this more fully
 
 1. Install Great Expectations
-   1. Show GCC docs for installing 3rd party libraries from pypi, maybe add screenshots: https://cloud.google.com/composer/docs/how-to/using/installing-python-dependencies#console. TODO: Recommend installing without version pin - but maybe <0.14.0 since we use minor versions for breaking changes?
-   2. Link to installing GE doc locally, describe again why this may help you speed up your dev loop
+   1. Show GCC docs for installing 3rd party libraries from pypi, maybe add screenshots: https://cloud.google.com/composer/docs/how-to/using/installing-python-dependencies#console. TODO: Recommend installing without version pin - but maybe <0.14.0 since we use minor versions for breaking changes? Mention other ways of running GE, but this is recommended.
+   2. Link to installing GE doc locally, describe again why this may help you speed up your dev loop. Explain how to set up your metadata stores in your local env to push expectation suites to your prod env.
 2. Set up Great Expectations
    1. Show in-code context (using GCS default configs, GCS as metadata and data docs stores)
    2. Reference in expandable block that you can also use great_expectations.yml (in GCS) - see Rex's approach from last year. You'll need to configure this manually or via CLI. TODO: Try this approach - does this work easily if you can't access your datasources when you are configuring them?
