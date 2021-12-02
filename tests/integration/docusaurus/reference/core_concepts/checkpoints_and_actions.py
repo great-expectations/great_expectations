@@ -2,8 +2,13 @@ import pandas as pd
 from ruamel import yaml
 
 import great_expectations as ge
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+)
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationResultIdentifier,
+)
 from great_expectations.data_context.types.base import CheckpointConfig
 
 context = ge.get_context()
@@ -64,14 +69,15 @@ context.add_checkpoint(**yaml.load(checkpoint_yaml))
 assert context.list_checkpoints() == ["my_checkpoint"]
 
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+assert results.success == True
 run_id_type = type(results.run_id)
 assert run_id_type == RunIdentifier
 validation_result_id_type_set = set(type(k) for k in results.run_results.keys())
 assert len(validation_result_id_type_set) == 1
 validation_result_id_type = next(iter(validation_result_id_type_set))
 assert validation_result_id_type == ValidationResultIdentifier
-print(results.run_results)
-validation_result_id = results.run_results[k for k in results.run_results.keys][0]
-assert results.run_results == ""
+validation_result_id = results.run_results[[k for k in results.run_results.keys()][0]]
+assert (
+    type(validation_result_id["validation_result"]) == ExpectationSuiteValidationResult
+)
 assert type(results.checkpoint_config) == CheckpointConfig
-assert results.success == True
