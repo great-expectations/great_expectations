@@ -838,16 +838,8 @@ is "{str(type(config))}", which is illegal).
     if (
         ("batch_request" in config or hasattr(config, "batch_request"))
         and config["batch_request"] is not None
-        and (
-            "runtime_parameters" in config["batch_request"]
-            or hasattr(config["batch_request"], "runtime_parameters")
-        )
-        and config["batch_request"]["runtime_parameters"] is not None
-        and (
-            "batch_data" in config["batch_request"]["runtime_parameters"]
-            or hasattr(config["batch_request"]["runtime_parameters"], "batch_data")
-        )
-        and config["batch_request"]["runtime_parameters"]["batch_data"] is not None
+        and config["batch_request"].get("runtime_parameters") is not None
+        and config["batch_request"]["runtime_parameters"].get("batch_data") is not None
         and default_batch_data is None
     ):
         default_batch_data = config["batch_request"]["runtime_parameters"]["batch_data"]
@@ -855,11 +847,7 @@ is "{str(type(config))}", which is illegal).
         if (
             ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
             and config["runtime_parameters"] is not None
-            and (
-                "batch_data" in config["runtime_parameters"]
-                or hasattr(config["runtime_parameters"], "batch_data")
-            )
-            and config["runtime_parameters"]["batch_data"] is not None
+            and config["runtime_parameters"].get("batch_data") is not None
             and default_batch_data is None
         ):
             default_batch_data = config["runtime_parameters"]["batch_data"]
@@ -870,18 +858,10 @@ is "{str(type(config))}", which is illegal).
         validations_batch_data_list = []
         for val in config["validations"]:
             if (
-                ("batch_request" in val or hasattr(val, "batch_request"))
-                and val["batch_request"] is not None
-                and (
-                    "runtime_parameters" in val["batch_request"]
-                    or hasattr(val["batch_request"], "runtime_parameters")
-                )
-                and val["batch_request"]["runtime_parameters"] is not None
-                and (
-                    "batch_data" in val["batch_request"]["runtime_parameters"]
-                    or hasattr(val["batch_request"]["runtime_parameters"], "batch_data")
-                )
-                and val["batch_request"]["runtime_parameters"]["batch_data"] is not None
+                val.get("batch_request") is not None
+                and val["batch_request"].get("runtime_parameters") is not None
+                and val["batch_request"]["runtime_parameters"].get("batch_data")
+                is not None
             ):
                 validations_batch_data_list.append(
                     val["batch_request"]["runtime_parameters"]["batch_data"]
@@ -905,55 +885,30 @@ is "{str(type(config))}", which is illegal).
     if (
         ("batch_request" in config or hasattr(config, "batch_request"))
         and config["batch_request"] is not None
-        and (
-            "runtime_parameters" in config["batch_request"]
-            or hasattr(config["batch_request"], "runtime_parameters")
-        )
-        and config["batch_request"]["runtime_parameters"] is not None
-        and (
-            "batch_data" in config["batch_request"]["runtime_parameters"]
-            or hasattr(config["batch_request"]["runtime_parameters"], "batch_data")
-        )
+        and config["batch_request"].get("runtime_parameters") is not None
+        and "batch_data" in config["batch_request"]["runtime_parameters"]
     ):
-        if hasattr(config["batch_request"]["runtime_parameters"], "batch_data"):
-            delattr(config["batch_request"]["runtime_parameters"], "batch_data")
-        else:
-            config["batch_request"]["runtime_parameters"].pop("batch_data")
+        config["batch_request"]["runtime_parameters"].pop("batch_data")
     else:
         if (
             ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
             and config["runtime_parameters"] is not None
-            and (
-                "batch_data" in config["runtime_parameters"]
-                or hasattr(config["runtime_parameters"], "batch_data")
-            )
+            and "batch_data" in config["runtime_parameters"]
         ):
-            if hasattr(config["runtime_parameters"], "batch_data"):
-                delattr(config["runtime_parameters"], "batch_data")
-            else:
-                config["runtime_parameters"].pop("batch_data")
+            config["runtime_parameters"].pop("batch_data")
 
     if ("validations" in config or hasattr(config, "validations")) and config[
         "validations"
     ]:
         for val in config["validations"]:
             if (
-                ("batch_request" in val or hasattr(val, "batch_request"))
-                and val["batch_request"] is not None
-                and (
-                    "runtime_parameters" in val["batch_request"]
-                    or hasattr(val["batch_request"], "runtime_parameters")
-                )
-                and val["batch_request"]["runtime_parameters"] is not None
-                and (
-                    "batch_data" in val["batch_request"]["runtime_parameters"]
-                    or hasattr(val["batch_request"]["runtime_parameters"], "batch_data")
-                )
+                val.get("batch_request") is not None
+                and val["batch_request"].get("runtime_parameters") is not None
+                and "batch_data"
+                in val["batch_request"]["runtime_parameters"]
+                is not None
             ):
-                if hasattr(val["batch_request"]["runtime_parameters"], "batch_data"):
-                    delattr(val["batch_request"]["runtime_parameters"], "batch_data")
-                else:
-                    val["batch_request"]["runtime_parameters"].pop("batch_data")
+                val["batch_request"]["runtime_parameters"].pop("batch_data")
 
 
 def restore_runtime_parameters_batch_data_references_into_config(
@@ -974,11 +929,7 @@ is "{str(type(config))}", which is illegal).
     if (
         ("batch_request" in config or hasattr(config, "batch_request"))
         and config["batch_request"] is not None
-        and (
-            "runtime_parameters" in config["batch_request"]
-            or hasattr(config["batch_request"], "runtime_parameters")
-        )
-        and config["batch_request"]["runtime_parameters"] is not None
+        and config["batch_request"].get("runtime_parameters") is not None
         and default_batch_data is not None
     ):
         if replace_value_with_type_string:
@@ -1009,18 +960,9 @@ is "{str(type(config))}", which is illegal).
     ):
         for idx, val in enumerate(config["validations"]):
             if (
-                ("batch_request" in val or hasattr(val, "batch_request"))
-                and val["batch_request"] is not None
-                and (
-                    "runtime_parameters" in val["batch_request"]
-                    or hasattr(val["batch_request"], "runtime_parameters")
-                )
-                and val["batch_request"]["runtime_parameters"] is not None
-                and (
-                    "batch_data" in val["batch_request"]["runtime_parameters"]
-                    or hasattr(val["batch_request"]["runtime_parameters"], "batch_data")
-                )
-                and val["batch_request"]["runtime_parameters"]["batch_data"] is None
+                val.get("batch_request") is not None
+                and val["batch_request"].get("runtime_parameters") is not None
+                and val["batch_request"]["runtime_parameters"].get("batch_data") is None
                 and validations_batch_data_list[idx] is not None
             ):
                 if replace_value_with_type_string:
