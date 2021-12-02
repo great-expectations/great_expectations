@@ -2,7 +2,8 @@ import copy
 import datetime
 import json
 import logging
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+import uuid
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
@@ -822,6 +823,181 @@ def get_batch_request_dict(
     return batch_request, validations
 
 
+# TODO: <Alex>ALEX</Alex>
+def build_non_serializable_reference_map_from_config(
+    config: Any,
+    attribute_names: Union[List[str], Set[str]],
+    reference_map: Optional[Dict[str, Dict[str, Any]]] = None,
+    # TODO: <Alex>ALEX</Alex>
+    # ) -> Dict[str, Dict[str, Any]]:
+    # TODO: <Alex>ALEX</Alex>
+):
+    # TODO: <Alex>ALEX</Alex>
+    #     if not (config and isinstance(config, Iterable)):
+    #         raise TypeError(
+    #             f"""The "configuraiton" argument must have an iterable type (the type given is "{str(type(config))}", \
+    # which cannot be iterated over).
+    # """
+    #         )
+    # TODO: <Alex>ALEX</Alex>
+
+    if not (config and attribute_names):
+        return
+
+    if not isinstance(attribute_names, (list, set)):
+        raise TypeError(
+            f"""The "attribute_names" argument must have the type "list" or "set" (the type given is \
+"{str(type(config))}", which is illegal).
+"""
+        )
+
+    if isinstance(attribute_names, list):
+        attribute_names = set(attribute_names)
+
+    attribute_name: str
+
+    if reference_map is None:
+        reference_map = {}
+        for attribute_name in attribute_names:
+            reference_map[attribute_name] = {}
+
+    key: str
+    value: Any
+
+    serializable_value: str
+
+    if isinstance(config, (DictDot, dict)):
+        for key, value in config.items():
+            for attribute_name in attribute_names:
+                if key == attribute_name:
+                    serializable_value = f"{attribute_name}_{str(uuid.uuid4())[:8]}"
+                    reference_map[attribute_name][serializable_value] = value
+                    config[key] = serializable_value
+            if (
+                config[key] == value
+                and isinstance(value, Iterable)
+                and not isinstance(value, str)
+            ):
+                build_non_serializable_reference_map_from_config(
+                    config=value,
+                    attribute_names=attribute_names,
+                    reference_map=reference_map,
+                )
+    elif isinstance(config, Iterable) and not isinstance(config, str):
+        for value in config:
+            build_non_serializable_reference_map_from_config(
+                config=value,
+                attribute_names=attribute_names,
+                reference_map=reference_map,
+            )
+
+
+# TODO: <Alex>ALEX</Alex>
+
+
+# TODO: <Alex>ALEX</Alex>
+def delete_non_serializable_references_from_config(
+    config: Any, attribute_names: Union[List[str], Set[str]]
+):
+    if not (config and attribute_names):
+        return
+
+    if not isinstance(attribute_names, (list, set)):
+        raise TypeError(
+            f"""The "attribute_names" argument must have the type "list" or "set" (the type given is \
+"{str(type(config))}", which is illegal).
+"""
+        )
+
+    if isinstance(attribute_names, list):
+        attribute_names = set(attribute_names)
+
+    attribute_name: str
+
+    key: str
+    value: Any
+
+    serializable_value: str
+
+    if isinstance(config, (DictDot, dict)):
+        for key, value in config.items():
+            for attribute_name in attribute_names:
+                if key == attribute_name:
+                    config.pop(key)
+            if (
+                key in config
+                and isinstance(value, Iterable)
+                and not isinstance(value, str)
+            ):
+                delete_non_serializable_references_from_config(
+                    config=value,
+                    attribute_names=attribute_names,
+                )
+    elif isinstance(config, Iterable) and not isinstance(config, str):
+        for value in config:
+            delete_non_serializable_references_from_config(
+                config=value,
+                attribute_names=attribute_names,
+            )
+
+
+# TODO: <Alex>ALEX</Alex>
+
+
+# TODO: <Alex>ALEX</Alex>
+def restore_non_serializable_references_into_config(
+    config: Any,
+    attribute_names: Union[List[str], Set[str]],
+    reference_map: Optional[Dict[str, Dict[str, Any]]] = None,
+    # TODO: <Alex>ALEX</Alex>
+    # ) -> Dict[str, Dict[str, Any]]:
+    # TODO: <Alex>ALEX</Alex>
+):
+    if not (config and attribute_names and reference_map):
+        return
+
+    if not isinstance(attribute_names, (list, set)):
+        raise TypeError(
+            f"""The "attribute_names" argument must have the type "list" or "set" (the type given is \
+"{str(type(config))}", which is illegal).
+"""
+        )
+
+    if isinstance(attribute_names, list):
+        attribute_names = set(attribute_names)
+
+    attribute_name: str
+
+    key: str
+    value: Any
+
+    if isinstance(config, (DictDot, dict)):
+        for key, value in config.items():
+            for attribute_name in attribute_names:
+                if key == attribute_name:
+                    config[key] = reference_map[attribute_name][value]
+            if (
+                config[key] == value
+                and isinstance(config[key], Iterable)
+                and not isinstance(config[key], str)
+            ):
+                restore_non_serializable_references_into_config(
+                    config=value,
+                    attribute_names=attribute_names,
+                    reference_map=reference_map,
+                )
+    elif isinstance(config, Iterable) and not isinstance(config, str):
+        for value in config:
+            restore_non_serializable_references_into_config(
+                config=value,
+                attribute_names=attribute_names,
+                reference_map=reference_map,
+            )
+
+
+# TODO: <Alex>ALEX</Alex>
+
+
 def get_runtime_parameters_batch_data_references_from_config(
     config: Union[DictDot, dict]
 ) -> Tuple[Optional[Any], Optional[List[Any]]]:
@@ -838,8 +1014,16 @@ is "{str(type(config))}", which is illegal).
     if (
         ("batch_request" in config or hasattr(config, "batch_request"))
         and config["batch_request"] is not None
-        and config["batch_request"].get("runtime_parameters") is not None
-        and config["batch_request"]["runtime_parameters"].get("batch_data") is not None
+        and (
+            "runtime_parameters" in config["batch_request"]
+            or hasattr(config["batch_request"], "runtime_parameters")
+        )
+        and config["batch_request"]["runtime_parameters"] is not None
+        and (
+            "batch_data" in config["batch_request"]["runtime_parameters"]
+            or hasattr(config["batch_request"]["runtime_parameters"], "batch_data")
+        )
+        and config["batch_request"]["runtime_parameters"]["batch_data"] is not None
         and default_batch_data is None
     ):
         default_batch_data = config["batch_request"]["runtime_parameters"]["batch_data"]
@@ -847,7 +1031,11 @@ is "{str(type(config))}", which is illegal).
         if (
             ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
             and config["runtime_parameters"] is not None
-            and config["runtime_parameters"].get("batch_data") is not None
+            and (
+                "batch_data" in config["runtime_parameters"]
+                or hasattr(config["runtime_parameters"], "batch_data")
+            )
+            and config["runtime_parameters"]["batch_data"] is not None
             and default_batch_data is None
         ):
             default_batch_data = config["runtime_parameters"]["batch_data"]
@@ -858,10 +1046,18 @@ is "{str(type(config))}", which is illegal).
         validations_batch_data_list = []
         for val in config["validations"]:
             if (
-                val.get("batch_request") is not None
-                and val["batch_request"].get("runtime_parameters") is not None
-                and val["batch_request"]["runtime_parameters"].get("batch_data")
-                is not None
+                ("batch_request" in val or hasattr(val, "batch_request"))
+                and val["batch_request"] is not None
+                and (
+                    "runtime_parameters" in val["batch_request"]
+                    or hasattr(val["batch_request"], "runtime_parameters")
+                )
+                and val["batch_request"]["runtime_parameters"] is not None
+                and (
+                    "batch_data" in val["batch_request"]["runtime_parameters"]
+                    or hasattr(val["batch_request"]["runtime_parameters"], "batch_data")
+                )
+                and val["batch_request"]["runtime_parameters"]["batch_data"] is not None
             ):
                 validations_batch_data_list.append(
                     val["batch_request"]["runtime_parameters"]["batch_data"]
@@ -885,30 +1081,55 @@ is "{str(type(config))}", which is illegal).
     if (
         ("batch_request" in config or hasattr(config, "batch_request"))
         and config["batch_request"] is not None
-        and config["batch_request"].get("runtime_parameters") is not None
-        and "batch_data" in config["batch_request"]["runtime_parameters"]
+        and (
+            "runtime_parameters" in config["batch_request"]
+            or hasattr(config["batch_request"], "runtime_parameters")
+        )
+        and config["batch_request"]["runtime_parameters"] is not None
+        and (
+            "batch_data" in config["batch_request"]["runtime_parameters"]
+            or hasattr(config["batch_request"]["runtime_parameters"], "batch_data")
+        )
     ):
-        config["batch_request"]["runtime_parameters"].pop("batch_data")
+        if hasattr(config["batch_request"]["runtime_parameters"], "batch_data"):
+            delattr(config["batch_request"]["runtime_parameters"], "batch_data")
+        else:
+            config["batch_request"]["runtime_parameters"].pop("batch_data")
     else:
         if (
             ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
             and config["runtime_parameters"] is not None
-            and "batch_data" in config["runtime_parameters"]
+            and (
+                "batch_data" in config["runtime_parameters"]
+                or hasattr(config["runtime_parameters"], "batch_data")
+            )
         ):
-            config["runtime_parameters"].pop("batch_data")
+            if hasattr(config["runtime_parameters"], "batch_data"):
+                delattr(config["runtime_parameters"], "batch_data")
+            else:
+                config["runtime_parameters"].pop("batch_data")
 
     if ("validations" in config or hasattr(config, "validations")) and config[
         "validations"
     ]:
         for val in config["validations"]:
             if (
-                val.get("batch_request") is not None
-                and val["batch_request"].get("runtime_parameters") is not None
-                and "batch_data"
-                in val["batch_request"]["runtime_parameters"]
-                is not None
+                ("batch_request" in val or hasattr(val, "batch_request"))
+                and val["batch_request"] is not None
+                and (
+                    "runtime_parameters" in val["batch_request"]
+                    or hasattr(val["batch_request"], "runtime_parameters")
+                )
+                and val["batch_request"]["runtime_parameters"] is not None
+                and (
+                    "batch_data" in val["batch_request"]["runtime_parameters"]
+                    or hasattr(val["batch_request"]["runtime_parameters"], "batch_data")
+                )
             ):
-                val["batch_request"]["runtime_parameters"].pop("batch_data")
+                if hasattr(val["batch_request"]["runtime_parameters"], "batch_data"):
+                    delattr(val["batch_request"]["runtime_parameters"], "batch_data")
+                else:
+                    val["batch_request"]["runtime_parameters"].pop("batch_data")
 
 
 def restore_runtime_parameters_batch_data_references_into_config(
@@ -929,7 +1150,11 @@ is "{str(type(config))}", which is illegal).
     if (
         ("batch_request" in config or hasattr(config, "batch_request"))
         and config["batch_request"] is not None
-        and config["batch_request"].get("runtime_parameters") is not None
+        and (
+            "runtime_parameters" in config["batch_request"]
+            or hasattr(config["batch_request"], "runtime_parameters")
+        )
+        and config["batch_request"]["runtime_parameters"] is not None
         and default_batch_data is not None
     ):
         if replace_value_with_type_string:
@@ -960,9 +1185,18 @@ is "{str(type(config))}", which is illegal).
     ):
         for idx, val in enumerate(config["validations"]):
             if (
-                val.get("batch_request") is not None
-                and val["batch_request"].get("runtime_parameters") is not None
-                and val["batch_request"]["runtime_parameters"].get("batch_data") is None
+                ("batch_request" in val or hasattr(val, "batch_request"))
+                and val["batch_request"] is not None
+                and (
+                    "runtime_parameters" in val["batch_request"]
+                    or hasattr(val["batch_request"], "runtime_parameters")
+                )
+                and val["batch_request"]["runtime_parameters"] is not None
+                and (
+                    "batch_data" in val["batch_request"]["runtime_parameters"]
+                    or hasattr(val["batch_request"]["runtime_parameters"], "batch_data")
+                )
+                and val["batch_request"]["runtime_parameters"]["batch_data"] is None
                 and validations_batch_data_list[idx] is not None
             ):
                 if replace_value_with_type_string:
