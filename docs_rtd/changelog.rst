@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [FEATURE] Added get_failed to ExpectationSuiteValidationResult. (#3531)
 
 0.13.44
 -----------------
