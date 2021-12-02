@@ -1,7 +1,7 @@
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 import jsonpatch
 from pyparsing import ParseResults
@@ -17,7 +17,6 @@ from great_expectations.core.util import (
     ensure_json_serializable,
     nested_update,
 )
-from great_expectations.data_context import DataContext
 from great_expectations.exceptions import (
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
@@ -32,7 +31,6 @@ from great_expectations.marshmallow__shade import (
     post_load,
 )
 from great_expectations.types import SerializableDictDot
-from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -979,7 +977,9 @@ class ExpectationConfiguration(SerializableDictDot):
         self,
         evaluation_parameters,
         interactive_evaluation: bool = True,
-        data_context: Optional[DataContext] = None,
+        data_context: Optional[
+            Any
+        ] = None,  # Can't type as DataContext due to import cycle
     ) -> None:
         if self._raw_kwargs is not None:
             logger.debug(
@@ -1212,9 +1212,7 @@ class ExpectationConfiguration(SerializableDictDot):
     def isEquivalentTo(
         self,
         other: Union[dict, "ExpectationConfiguration"],
-        match_type: Union[
-            Literal["success"], Literal["domain"], Literal["runtime"]
-        ] = "success",
+        match_type: str = "success",
     ) -> bool:
         """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
         if not isinstance(other, self.__class__):
@@ -1253,6 +1251,7 @@ class ExpectationConfiguration(SerializableDictDot):
                     self.kwargs == other.kwargs,
                 )
             )
+        return False
 
     def __eq__(self, other):
         """ExpectationConfiguration equality does include meta, but ignores instance identity."""
@@ -1349,7 +1348,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def validate(
         self,
-        validator: Validator,
+        validator: Any,  # Can't type as Validator due to import cycle
         runtime_configuration=None,
     ):
         expectation_impl = self._get_expectation_impl()
