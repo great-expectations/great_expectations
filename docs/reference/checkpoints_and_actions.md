@@ -140,22 +140,7 @@ Checkpoint results easier. You can learn more about these methods in the documen
 
 #### Example CheckpointResult:
 
-```python
-{
-    "run_id": run_identifier_object,
-    "run_results": {
-        validation_result_identifier_object: {
-            "validation_result": expectation_suite_validation_result_object,
-            "actions_results": {
-                "my_action_name_that_stores_validation_results": {
-                    "class": "StoreValidationResultAction"
-                }
-            }
-        }
-    }
-    "checkpoint_config": my_checkpoint_config_object,
-    "success": True
-}
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
 ```
 
 ## Checkpoint configuration examples

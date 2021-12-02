@@ -56,13 +56,13 @@ validations:
         index: -1
     expectation_suite_name: my_expectation_suite
     action_list:
-      - name: store_validation_result
+      - name: <ACTION NAME FOR STORING VALIDATION RESULTS>
         action:
           class_name: StoreValidationResultAction
-      - name: store_evaluation_params
+      - name: <ACTION NAME FOR STORING EVALUATION PARAMETERS>
         action:
           class_name: StoreEvaluationParametersAction
-      - name: update_data_docs
+      - name: <ACTION NAME FOR UPDATING DATA DOCS>
         action:
           class_name: UpdateDataDocsAction
 """
@@ -84,5 +84,38 @@ assert (
 )
 assert type(results.checkpoint_config) == CheckpointConfig
 
-expected_results = copy.deepcopy(results)
+typed_results = \
+{
+    "run_id": run_id_type,
+    "run_results": {
+        validation_result_id_type: {
+            "validation_result": type(validation_result_id["validation_result"]),
+            "actions_results": {
+                "<ACTION NAME FOR STORING VALIDATION RESULTS>": {
+                    "class": "StoreValidationResultAction"
+                }
+            }
+        }
+    },
+    "checkpoint_config": CheckpointConfig,
+    "success": True
+}
 
+documentation_results = \
+{
+    "run_id": RunIdentifier,
+    "run_results": {
+        ValidationResultIdentifier: {
+            "validation_result": ExpectationSuiteValidationResult,
+            "actions_results": {
+                "<ACTION NAME FOR STORING VALIDATION RESULTS>": {
+                    "class": "StoreValidationResultAction"
+                }
+            }
+        }
+    },
+    "checkpoint_config": CheckpointConfig,
+    "success": True
+}
+
+assert typed_results == documentation_results
