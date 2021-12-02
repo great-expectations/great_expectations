@@ -939,8 +939,11 @@ def lint_code(code: str) -> str:
 
 
 def convert_nulls_to_None(code: str) -> str:
-    if "null" not in code:
-        return code
+    """
+    Substitute instances of 'null' with 'None' in string representations of Python dictionaries.
+
+    Designed to provide security when serializing GE objects and writing them to Jupyter Notebooks.
+    """
     pattern = r'"([a-zA-Z0-9_]+)": null'
     return re.sub(pattern, r'"\1": None', code)
 
