@@ -900,14 +900,12 @@ is illegal).
     if isinstance(attribute_names, list):
         attribute_names = set(attribute_names)
 
-    attribute_name: str
-
-    if not reference_map:
-        for attribute_name in attribute_names:
-            reference_map[attribute_name] = {}
-
     key: str
     value: Any
+
+    if not reference_map:
+        for key in attribute_names:
+            reference_map[key] = {}
 
     serializable_value: str
 
@@ -959,8 +957,6 @@ is illegal).
 
     if isinstance(attribute_names, list):
         attribute_names = set(attribute_names)
-
-    attribute_name: str
 
     key: str
     value: Any
