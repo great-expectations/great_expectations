@@ -710,7 +710,7 @@ class DefaultSiteIndexBuilder:
 
     # TODO: deprecate dual batch api support
     def build(
-        self, skip_and_clean_missing=True, build_index: bool = True
+        self, skip_and_clean_missing: bool = True, build_index: bool = True
     ) -> Tuple[Any, Optional[OrderedDict]]:
         """
         :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will
