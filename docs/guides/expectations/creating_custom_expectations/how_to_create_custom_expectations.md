@@ -6,7 +6,7 @@ This document provides examples that walk through several methods for building a
 
 Beginning in version 0.13, we have introduced a new API focused on enabling Modular Expectations that are defined in individual classes.
 
-This guide will walk you through the process of creating your own Modular Expectations in 6 simple steps!
+This guide will walk you through the process of creating your own Modular Expectations in a few simple steps!
 
 See also this [complete example](https://github.com/superconductive/ge_tutorials/tree/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py).
 
@@ -27,11 +27,9 @@ Once you’ve decided on an Expectation to implement, think of the different agg
 
 Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is possible you will find that the Metric you’d like to implement already exists within the GE framework and can be readily deployed.
 
-If your Expectation requires creating a custom Metric, it will be defined in a separate class in the next section [how to create a custom Metric](how_to_create_a_custom_metric).
+If your Expectation requires creating a custom Metric, it will be defined in a separate class in the next section [how to create a custom Metric](how_to_create_custom_metrics).
 
 #### 2. Define Parameters
-
-We have already reached the point where we can start building our Expectation!
 
 The structure of a Modular Expectation now exists within its own specialized class - indicating it will usually exist in a separate file from the Metric. This structure has 3 fundamental components: Metric Dependencies, Configuration Validation, and Expectation Validation. In this step, we will address setting up our parameters.
 

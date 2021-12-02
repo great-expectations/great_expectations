@@ -74,7 +74,7 @@ If you have never used Python Decorators and don’t know what they are and how 
 
 Find the following code snippet in your Metric Provider class:
 
-````console
+````python
 @column_condition_partial(engine=PandasExecutionPandasExecutionEngineEngine)
 def _pandas(cls, column, **kwargs):
     return column == 3
@@ -94,13 +94,13 @@ Here is how you could modify expect_column_values_to_equal_three to expect_colum
 
 Find the snippet success_keys = ("mostly",) in the class that implements your Expectation. Add your arguments to success_keys
 
-````console
+````python
 success_keys = ("integer", "mostly")
 ````
 Success keys are arguments that determine the values of the Expectation’s metrics and when the Expectation will succeed.
 
 In the class that implements Metric Provider set the variable condition_value_keys to a tuple of your arguments:
-````console
+````python
 condition_value_keys = ("integer",)
 ````
 
@@ -112,7 +112,7 @@ For a map Metric producing a yes/no question answer, you use condition_value_key
 
 * Add named arguments to the methods that compute the Metric for each backend in your Metric Provider class:
 
-````console
+````python
 @column_condition_partial(engine=PandasExecutionEngine)
 def _pandas(cls, column, integer=None, **kwargs):
     return column == integer
@@ -133,7 +133,7 @@ The Expectation declares “column_values.z_score.under_threshold” as its `con
 
 The `ColumnValuesZScore` Metric Provider class that computes this Metric declares an additional metric:
 
-````console
+````python
 function_metric_name = "column_values.z_score"
 ````
 

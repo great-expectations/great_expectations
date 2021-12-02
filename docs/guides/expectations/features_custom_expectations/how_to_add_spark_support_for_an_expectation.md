@@ -52,15 +52,16 @@ If we need a builtin function from `pyspark.sql.functions`, usually aliased to F
 handles the case when PySpark is not installed. 
 
 `F.udf` also allows us to apply a Python function as a Spark UDF, so another way of expressing the above is as: 
+
+```python
 @column_condition_partial(engine=SparkDFExecutionEngine)
 def _spark(cls, column, strftime_format, **kwargs):
-    # Below is a simple validation that the provided format can both format and parse a datetime object.
-    # %D is an example of a format that can format but not parse, e.g.
     def is_equal_to_three(val):
         return (val == 3)
 
     success_udf = F.udf(is_equal_to_three, sparktypes.BooleanType())
     return success_udf(column)
+```
     
 Or, for example, a column aggregate metric that returns the maximum value could be written as: 
 ```python
