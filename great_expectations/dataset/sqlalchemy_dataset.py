@@ -2148,6 +2148,23 @@ WHERE
         except (AttributeError, TypeError):
             pass
 
+        try:
+            # Athena
+            if isinstance(
+                self.sql_engine_dialect, pyathena.sqlalchemy_athena.AthenaDialect
+            ):
+                if positive:
+                    return sa.func.REGEXP_LIKE(sa.column(column), literal(regex))
+                else:
+                    return sa.not_(
+                        sa.func.REGEXP_LIKE(sa.column(column), literal(regex))
+                    )
+        except (
+            AttributeError,
+            TypeError,
+        ):  # TypeError can occur if the driver was not installed and so is None
+            pass
+
         return None
 
     @MetaSqlAlchemyDataset.column_map_expectation
@@ -2303,6 +2320,14 @@ WHERE
         try:
             if isinstance(
                 self.sql_engine_dialect, teradatasqlalchemy.dialect.TeradataDialect
+            ):
+                dialect_supported = True
+        except (AttributeError, TypeError):
+            pass
+
+        try:
+            if isinstance(
+                self.sql_engine_dialect, pyathena.sqlalchemy_athena.AthenaDialect
             ):
                 dialect_supported = True
         except (AttributeError, TypeError):
