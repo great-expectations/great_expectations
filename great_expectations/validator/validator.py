@@ -1138,8 +1138,8 @@ set as active.
                    If True, the :ref:`catch_exceptions` attribute for each expectation is not written to the JSON \
                    config file.
                suppress_warnings (boolean): \
-                  It True, all warnings raised by Great Expectations, as a result of dropped expectations, are \
-                  suppressed.
+                    If True, all warnings raised by Great Expectations, as a result of dropped expectations, are \
+                    suppressed.
 
         """
         expectation_suite = self.get_expectation_suite(
