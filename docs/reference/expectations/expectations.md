@@ -1,5 +1,5 @@
 ---
-title: Expectations
+title: What is an Expectation?
 ---
 
 
