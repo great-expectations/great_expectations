@@ -67,7 +67,6 @@ validations:
         action:
           class_name: UpdateDataDocsAction
 """
-context.test_yaml_config(checkpoint_yaml)
 context.add_checkpoint(**yaml.load(checkpoint_yaml))
 assert context.list_checkpoints() == ["test_checkpoint"]
 
@@ -131,12 +130,12 @@ class_name: Checkpoint
 run_name_template: "%Y-%M-foo-bar-template-$VAR"
 validations:
   - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: my_special_data_connector
-      data_asset_name: users
+      datasource_name: taxi_datasource
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: yellow_tripdata_sample_2019-01
       data_connector_query:
         index: -1
-    expectation_suite_name: users.delivery
+    expectation_suite_name: my_expectation_suite
     action_list:
       - name: store_validation_result
         action:
@@ -155,7 +154,8 @@ validations:
         result_format: BASIC
         partial_unexpected_count: 20
 """
-context.test_yaml_config(no_nesting)
+context.add_checkpoint(**yaml.load(no_nesting))
+context.run_checkpoint(checkpoint_name="my_checkpoint")
 
 nesting_with_defaults = """
 name: my_checkpoint
@@ -164,18 +164,18 @@ class_name: Checkpoint
 run_name_template: "%Y-%M-foo-bar-template-$VAR"
 validations:
   - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: my_special_data_connector
-      data_asset_name: users
+      datasource_name: taxi_datasource
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: yellow_tripdata_sample_2019-01
       data_connector_query:
         index: -1
   - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: my_other_data_connector
-      data_asset_name: users
+      datasource_name: taxi_datasource
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: yellow_tripdata_sample_2019-02
       data_connector_query:
-        index: -2
-expectation_suite_name: users.delivery
+        index: -1
+expectation_suite_name: my_expectation_suite
 action_list:
   - name: store_validation_result
     action:
@@ -194,10 +194,11 @@ runtime_configuration:
     result_format: BASIC
     partial_unexpected_count: 20
 """
-context.test_yaml_config(nesting_with_defaults)
+context.add_checkpoint(**yaml.load(nesting_with_defaults))
+context.run_checkpoint(checkpoint_name="my_checkpoint")
 
 keys_passed_at_runtime = """
-name: my_checkpoint
+name: my_base_checkpoint
 config_version: 1
 class_name: Checkpoint
 run_name_template: "%Y-%M-foo-bar-template-$VAR"
@@ -219,7 +220,30 @@ runtime_configuration:
     result_format: BASIC
     partial_unexpected_count: 20
 """
-context.test_yaml_config(keys_passed_at_runtime)
+context.add_checkpoint(**yaml.load(keys_passed_at_runtime))
+context.run_checkpoint(
+    checkpoint_name="my_base_checkpoint",
+    validations=[
+        {
+            "batch_request": {
+                "datasource_name": "taxi_datasource",
+                "data_connector_name": "default_inferred_data_connector_name",
+                "data_asset_name": "yellow_tripdata_sample_2019-01",
+                "data_connector_query": {"index": -1},
+            },
+            "expectation_suite_name": "my_expectation_suite",
+        },
+        {
+            "batch_request": {
+                "datasource_name": "taxi_datasource",
+                "data_connector_name": "default_inferred_data_connector_name",
+                "data_asset_name": "yellow_tripdata_sample_2019-02",
+                "data_connector_query": {"index": -1},
+            },
+            "expectation_suite_name": "my_expectation_suite",
+        },
+    ],
+)
 
 using_template = """
 name: my_checkpoint
@@ -228,21 +252,22 @@ class_name: Checkpoint
 template_name: my_base_checkpoint
 validations:
   - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: my_special_data_connector
-      data_asset_name: users
+      datasource_name: taxi_datasource
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: yellow_tripdata_sample_2019-01
       data_connector_query:
         index: -1
-    expectation_suite_name: users.delivery
+    expectation_suite_name: my_expectation_suite
   - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: my_other_data_connector
-      data_asset_name: users
+      datasource_name: taxi_datasource
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: yellow_tripdata_sample_2019-02
       data_connector_query:
-        index: -2
-    expectation_suite_name: users.diagnostic
+        index: -1
+    expectation_suite_name: my_expectation_suite
 """
-context.test_yaml_config(using_template)
+context.add_checkpoint(**yaml.load(using_template))
+context.run_checkpoint(checkpoint_name="my_checkpoint")
 
 using_simple_checkpoint = """
 name: my_checkpoint
@@ -250,20 +275,22 @@ config_version: 1
 class_name: SimpleCheckpoint
 validations:
   - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: my_data_connector
-      data_asset_name: MyDataAsset
+      datasource_name: taxi_datasource
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: yellow_tripdata_sample_2019-01
       data_connector_query:
         index: -1
-    expectation_suite_name: my_suite
-site_names:
-  - my_diagnostic_data_docs_site
-slack_webhook: http://my_slack_webhook.com
+    expectation_suite_name: my_expectation_suite
+site_names: all
+slack_webhook: <YOUR SLACK WEBHOOK URL>
 notify_on: failure
-notify_with:
-  - my_diagnostic_data_docs_site
+notify_with: all
 """
-context.test_yaml_config(using_simple_checkpoint)
+using_simple_checkpoint = using_simple_checkpoint.replace(
+    "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
+)
+context.add_checkpoint(**yaml.load(using_simple_checkpoint))
+context.run_checkpoint(checkpoint_name="my_checkpoint")
 
 equivalent_using_checkpoint = """
 name: my_checkpoint
@@ -271,12 +298,12 @@ config_version: 1
 class_name: Checkpoint
 validations:
   - batch_request:
-      datasource_name: my_datasource
-      data_connector_name: my_data_connector
-      data_asset_name: MyDataAsset
+      datasource_name: taxi_datasource
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: yellow_tripdata_sample_2019-01
       data_connector_query:
         index: -1
-    expectation_suite_name: my_suite
+    expectation_suite_name: my_expectation_suite
 action_list:
   - name: store_validation_result
     action:
@@ -287,17 +314,18 @@ action_list:
   - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction
-      site_names:
-        - my_diagnostic_data_docs_site
   - name: send_slack_notification
     action:
       class_name: SlackNotificationAction
-      slack_webhook: http://my_slack_webhook.com
+      slack_webhook: <YOUR SLACK WEBHOOK URL>
       notify_on: failure
-      notify_with:
-        - my_diagnostic_data_docs_site
+      notify_with: all
       renderer:
         module_name: great_expectations.render.renderer.slack_renderer
         class_name: SlackRenderer
 """
-context.test_yaml_config(equivalent_using_checkpoint)
+equivalent_using_checkpoint = equivalent_using_checkpoint.replace(
+    "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
+)
+context.add_checkpoint(**yaml.load(equivalent_using_checkpoint))
+context.run_checkpoint(checkpoint_name="my_checkpoint")
