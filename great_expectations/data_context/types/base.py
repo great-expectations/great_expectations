@@ -4,7 +4,7 @@ import itertools
 import json
 import logging
 import uuid
-from typing import Any, Dict, List, MutableMapping, Optional, Tuple, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
 from ruamel.yaml import YAML
@@ -14,10 +14,10 @@ from ruamel.yaml.compat import StringIO
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchRequest,
-    delete_runtime_parameters_batch_data_references_from_config,
+    BatchRequestBase,
     get_batch_request_dict,
-    get_runtime_parameters_batch_data_references_from_config,
-    restore_runtime_parameters_batch_data_references_into_config,
+    mark_and_replace_non_serializable_references_in_config,
+    restore_non_serializable_references_into_config,
 )
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.marshmallow__shade import (
@@ -1964,16 +1964,22 @@ class CheckpointConfigSchema(Schema):
         return data
 
     def dump(self, obj: Any, *, many: Optional[bool] = None) -> dict:
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=obj)
-        delete_runtime_parameters_batch_data_references_from_config(config=obj)
-        data: dict = super().dump(obj=obj, many=many)
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=obj, batch_data_references=batch_data_references
+        reference_map: Dict[str, Dict[str, Any]] = {}
+        mark_and_replace_non_serializable_references_in_config(
+            config=obj,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=data, batch_data_references=batch_data_references
+        data: dict = super().dump(obj=obj, many=many)
+        restore_non_serializable_references_into_config(
+            config=obj,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
+        )
+        restore_non_serializable_references_into_config(
+            config=data,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
         return data
 
@@ -2352,10 +2358,12 @@ class CheckpointConfig(BaseYamlConfig):
         self._runtime_configuration = value
 
     def __deepcopy__(self, memo):
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
-        delete_runtime_parameters_batch_data_references_from_config(config=self)
+        reference_map: Dict[str, Dict[str, Any]] = {}
+        mark_and_replace_non_serializable_references_in_config(
+            config=self,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
+        )
 
         cls = self.__class__
         result = cls.__new__(cls)
@@ -2368,27 +2376,36 @@ class CheckpointConfig(BaseYamlConfig):
                 value_copy = copy.deepcopy(value, memo)
                 setattr(result, key, value_copy)
 
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=self, batch_data_references=batch_data_references
+        restore_non_serializable_references_into_config(
+            config=self,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=result, batch_data_references=batch_data_references
+        restore_non_serializable_references_into_config(
+            config=result,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
 
         return result
 
     def __repr__(self) -> str:
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
-        delete_runtime_parameters_batch_data_references_from_config(config=self)
-        config: dict = self.to_json_dict()
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=self, batch_data_references=batch_data_references
+        reference_map: Dict[str, Dict[str, Any]] = {}
+        mark_and_replace_non_serializable_references_in_config(
+            config=self,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
-        restore_runtime_parameters_batch_data_references_into_config(
+        config: dict = self.to_json_dict()
+        restore_non_serializable_references_into_config(
+            config=self,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
+        )
+        restore_non_serializable_references_into_config(
             config=config,
-            batch_data_references=batch_data_references,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
             replace_value_with_type_string=True,
         )
         return json.dumps(config, indent=2)
@@ -2400,20 +2417,22 @@ class CheckpointConfig(BaseYamlConfig):
         if batch_request is None:
             return None
 
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(
-            config=batch_request
-        )
-        delete_runtime_parameters_batch_data_references_from_config(
-            config=batch_request
+        reference_map: Dict[str, Dict[str, Any]] = {}
+        mark_and_replace_non_serializable_references_in_config(
+            config=batch_request,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
         result = copy.deepcopy(batch_request)
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=batch_request, batch_data_references=batch_data_references
+        restore_non_serializable_references_into_config(
+            config=batch_request,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=result, batch_data_references=batch_data_references
+        restore_non_serializable_references_into_config(
+            config=result,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
         return result
 

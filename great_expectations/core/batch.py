@@ -1,8 +1,9 @@
 import copy
 import datetime
+import hashlib
 import json
 import logging
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
@@ -159,6 +160,8 @@ class BatchRequestBase(SerializableDictDot):
     validation (described above plus additional attribute validation) so as to formally validate user specified fields.
     """
 
+    NON_SERIALIZABLE_ATTRIBUTE_NAMES: Set[str] = {"batch_data"}
+
     field_names: Set[str] = set()
 
     def __init__(
@@ -259,18 +262,22 @@ class BatchRequestBase(SerializableDictDot):
         return dict_obj
 
     def to_json_dict(self) -> dict:
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
-        delete_runtime_parameters_batch_data_references_from_config(config=self)
-        json_dict: dict = copy.deepcopy(self.to_dict())
-        restore_runtime_parameters_batch_data_references_into_config(
+        reference_map: Dict[str, Dict[str, Any]] = {}
+        mark_and_replace_non_serializable_references_in_config(
             config=self,
-            batch_data_references=batch_data_references,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
-        restore_runtime_parameters_batch_data_references_into_config(
+        json_dict: dict = copy.deepcopy(self.to_dict())
+        restore_non_serializable_references_into_config(
+            config=self,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
+        )
+        restore_non_serializable_references_into_config(
             config=json_dict,
-            batch_data_references=batch_data_references,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
             replace_value_with_type_string=True,
         )
 
@@ -280,10 +287,12 @@ class BatchRequestBase(SerializableDictDot):
         return json.dumps(self.to_json_dict(), indent=2)
 
     def __deepcopy__(self, memo):
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
-        delete_runtime_parameters_batch_data_references_from_config(config=self)
+        reference_map: Dict[str, Dict[str, Any]] = {}
+        mark_and_replace_non_serializable_references_in_config(
+            config=self,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
+        )
 
         cls = self.__class__
         result = cls.__new__(cls)
@@ -295,11 +304,15 @@ class BatchRequestBase(SerializableDictDot):
                 value_copy = copy.deepcopy(value, memo)
                 setattr(result, key, value_copy)
 
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=self, batch_data_references=batch_data_references
+        restore_non_serializable_references_into_config(
+            config=self,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=result, batch_data_references=batch_data_references
+        restore_non_serializable_references_into_config(
+            config=result,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
 
         return result
@@ -822,157 +835,116 @@ def get_batch_request_dict(
     return batch_request, validations
 
 
-def get_runtime_parameters_batch_data_references_from_config(
-    config: Union[DictDot, dict]
-) -> Tuple[Optional[Any], Optional[List[Any]]]:
-    if not isinstance(config, (DictDot, dict)):
-        raise TypeError(
-            f"""The Checkpoint configuraiton argument must have the type "dict" or "DictDot" (the type given \
-is "{str(type(config))}", which is illegal).
-"""
-        )
-
-    default_batch_data: Optional[Any] = None
-    validations_batch_data_list: Optional[List[Any]] = None
-
-    if (
-        ("batch_request" in config or hasattr(config, "batch_request"))
-        and config["batch_request"] is not None
-        and config["batch_request"].get("runtime_parameters") is not None
-        and config["batch_request"]["runtime_parameters"].get("batch_data") is not None
-        and default_batch_data is None
-    ):
-        default_batch_data = config["batch_request"]["runtime_parameters"]["batch_data"]
-    else:
-        if (
-            ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
-            and config["runtime_parameters"] is not None
-            and config["runtime_parameters"].get("batch_data") is not None
-            and default_batch_data is None
-        ):
-            default_batch_data = config["runtime_parameters"]["batch_data"]
-
-    if ("validations" in config or hasattr(config, "validations")) and config[
-        "validations"
-    ]:
-        validations_batch_data_list = []
-        for val in config["validations"]:
-            if (
-                val.get("batch_request") is not None
-                and val["batch_request"].get("runtime_parameters") is not None
-                and val["batch_request"]["runtime_parameters"].get("batch_data")
-                is not None
-            ):
-                validations_batch_data_list.append(
-                    val["batch_request"]["runtime_parameters"]["batch_data"]
-                )
-            else:
-                validations_batch_data_list.append(None)
-
-    return default_batch_data, validations_batch_data_list
-
-
-def delete_runtime_parameters_batch_data_references_from_config(
-    config: Union[DictDot, dict]
+def mark_and_replace_non_serializable_references_in_config(
+    config: Any,
+    attribute_names: Union[List[str], Set[str]],
+    reference_map: Dict[str, Dict[str, Any]],
 ):
-    if not isinstance(config, (DictDot, dict)):
+    if not isinstance(reference_map, dict):
         raise TypeError(
-            f"""The Checkpoint configuraiton argument must have the type "dict" or "DictDot" (the type given \
-is "{str(type(config))}", which is illegal).
+            f"""The "reference_map" argument must have the type "dict" (the type given is "{str(type(config))}", which \
+is illegal).
 """
         )
 
-    if (
-        ("batch_request" in config or hasattr(config, "batch_request"))
-        and config["batch_request"] is not None
-        and config["batch_request"].get("runtime_parameters") is not None
-        and "batch_data" in config["batch_request"]["runtime_parameters"]
-    ):
-        config["batch_request"]["runtime_parameters"].pop("batch_data")
-    else:
-        if (
-            ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
-            and config["runtime_parameters"] is not None
-            and "batch_data" in config["runtime_parameters"]
-        ):
-            config["runtime_parameters"].pop("batch_data")
+    if not (config and attribute_names):
+        return
 
-    if ("validations" in config or hasattr(config, "validations")) and config[
-        "validations"
-    ]:
-        for val in config["validations"]:
-            if (
-                val.get("batch_request") is not None
-                and val["batch_request"].get("runtime_parameters") is not None
-                and "batch_data"
-                in val["batch_request"]["runtime_parameters"]
-                is not None
-            ):
-                val["batch_request"]["runtime_parameters"].pop("batch_data")
+    if not isinstance(attribute_names, (list, set)):
+        raise TypeError(
+            f"""The "attribute_names" argument must have the type "list" or "set" (the type given is \
+"{str(type(config))}", which is illegal).
+"""
+        )
+
+    if isinstance(attribute_names, list):
+        attribute_names = set(attribute_names)
+
+    attribute_name: str
+
+    if not reference_map:
+        for attribute_name in attribute_names:
+            reference_map[attribute_name] = {}
+
+    key: str
+    value: Any
+
+    serializable_value: str
+
+    if isinstance(config, (DictDot, dict)):
+        for key, value in config.items():
+            if key in attribute_names:
+                serializable_value = hashlib.md5(key.encode("utf-8")).hexdigest()
+                reference_map[key][serializable_value] = value
+                config[key] = serializable_value
+            elif isinstance(value, Iterable) and not isinstance(value, str):
+                mark_and_replace_non_serializable_references_in_config(
+                    config=value,
+                    attribute_names=attribute_names,
+                    reference_map=reference_map,
+                )
+    elif isinstance(config, Iterable) and not isinstance(config, str):
+        for value in config:
+            mark_and_replace_non_serializable_references_in_config(
+                config=value,
+                attribute_names=attribute_names,
+                reference_map=reference_map,
+            )
 
 
-def restore_runtime_parameters_batch_data_references_into_config(
-    config: Union[DictDot, dict],
-    batch_data_references: Tuple[Optional[Any], Optional[List[Any]]],
+def restore_non_serializable_references_into_config(
+    config: Any,
+    attribute_names: Union[List[str], Set[str]],
+    reference_map: Dict[str, Dict[str, Any]],
     replace_value_with_type_string: bool = False,
 ):
-    if not isinstance(config, (DictDot, dict)):
+    if not (config and attribute_names and reference_map):
+        return
+
+    if not isinstance(attribute_names, (list, set)):
         raise TypeError(
-            f"""The Checkpoint configuraiton argument must have the type "dict" or "DictDot" (the type given \
-is "{str(type(config))}", which is illegal).
+            f"""The "attribute_names" argument must have the type "list" or "set" (the type given is \
+"{str(type(config))}", which is illegal).
 """
         )
 
-    default_batch_data: Optional[Any] = batch_data_references[0]
-    validations_batch_data_list: Optional[List[Any]] = batch_data_references[1]
+    if not isinstance(reference_map, dict):
+        raise TypeError(
+            f"""The "reference_map" argument must have the type "dict" (the type given is "{str(type(config))}", which \
+is illegal).
+"""
+        )
 
-    if (
-        ("batch_request" in config or hasattr(config, "batch_request"))
-        and config["batch_request"] is not None
-        and config["batch_request"].get("runtime_parameters") is not None
-        and default_batch_data is not None
-    ):
-        if replace_value_with_type_string:
-            config["batch_request"]["runtime_parameters"]["batch_data"] = str(
-                type(default_batch_data)
-            )
-        else:
-            config["batch_request"]["runtime_parameters"][
-                "batch_data"
-            ] = default_batch_data
-    else:
-        if (
-            ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
-            and config["runtime_parameters"] is not None
-            and default_batch_data is not None
-        ):
-            if replace_value_with_type_string:
-                config["runtime_parameters"]["batch_data"] = str(
-                    type(default_batch_data)
-                )
-            else:
-                config["runtime_parameters"]["batch_data"] = default_batch_data
+    if isinstance(attribute_names, list):
+        attribute_names = set(attribute_names)
 
-    if (
-        ("validations" in config or hasattr(config, "validations"))
-        and config["validations"]
-        and validations_batch_data_list is not None
-    ):
-        for idx, val in enumerate(config["validations"]):
-            if (
-                val.get("batch_request") is not None
-                and val["batch_request"].get("runtime_parameters") is not None
-                and val["batch_request"]["runtime_parameters"].get("batch_data") is None
-                and validations_batch_data_list[idx] is not None
-            ):
+    attribute_name: str
+
+    key: str
+    value: Any
+
+    if isinstance(config, (DictDot, dict)):
+        for key, value in config.items():
+            if key in attribute_names:
                 if replace_value_with_type_string:
-                    val["batch_request"]["runtime_parameters"]["batch_data"] = str(
-                        type(validations_batch_data_list[idx])
-                    )
+                    config[key] = str(type(reference_map[key][value]))
                 else:
-                    val["batch_request"]["runtime_parameters"][
-                        "batch_data"
-                    ] = validations_batch_data_list[idx]
+                    config[key] = reference_map[key][value]
+            elif isinstance(config[key], Iterable) and not isinstance(config[key], str):
+                restore_non_serializable_references_into_config(
+                    config=value,
+                    attribute_names=attribute_names,
+                    reference_map=reference_map,
+                    replace_value_with_type_string=replace_value_with_type_string,
+                )
+    elif isinstance(config, Iterable) and not isinstance(config, str):
+        for value in config:
+            restore_non_serializable_references_into_config(
+                config=value,
+                attribute_names=attribute_names,
+                reference_map=reference_map,
+                replace_value_with_type_string=replace_value_with_type_string,
+            )
 
 
 def standardize_batch_request_display_ordering(

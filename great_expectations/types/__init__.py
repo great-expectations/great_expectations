@@ -13,6 +13,12 @@ class DictDot:
     def __delitem__(self, key):
         delattr(self, key)
 
+    def __iter__(self):
+        return iter(vars(self).keys())
+
+    def items(self):
+        return iter(vars(self).items())
+
 
 class SerializableDictDot(DictDot):
     def to_json_dict(self) -> dict:

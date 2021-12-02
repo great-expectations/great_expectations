@@ -1,11 +1,11 @@
 import json
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core.batch import (
-    delete_runtime_parameters_batch_data_references_from_config,
-    get_runtime_parameters_batch_data_references_from_config,
-    restore_runtime_parameters_batch_data_references_into_config,
+    BatchRequestBase,
+    mark_and_replace_non_serializable_references_in_config,
+    restore_non_serializable_references_into_config,
 )
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -292,22 +292,22 @@ class CheckpointResult(DictDot):
         return checkpointResultSchema.dump(self)
 
     def __repr__(self):
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(
-            config=self["checkpoint_config"]
-        )
-        delete_runtime_parameters_batch_data_references_from_config(
-            config=self["checkpoint_config"]
+        reference_map: Dict[str, Dict[str, Any]] = {}
+        mark_and_replace_non_serializable_references_in_config(
+            config=self["checkpoint_config"],
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
         serializeable_dict: dict = self.to_json_dict()
-        restore_runtime_parameters_batch_data_references_into_config(
+        restore_non_serializable_references_into_config(
             config=self["checkpoint_config"],
-            batch_data_references=batch_data_references,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
         )
-        restore_runtime_parameters_batch_data_references_into_config(
+        restore_non_serializable_references_into_config(
             config=serializeable_dict["checkpoint_config"],
-            batch_data_references=batch_data_references,
+            attribute_names=BatchRequestBase.NON_SERIALIZABLE_ATTRIBUTE_NAMES,
+            reference_map=reference_map,
             replace_value_with_type_string=True,
         )
         return json.dumps(serializeable_dict, indent=2)
