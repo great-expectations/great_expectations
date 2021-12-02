@@ -151,6 +151,23 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies():
     } == dependencies
 
 
+def test_expectation_configuration_get_evaluation_parameter_dependencies_with_query_store_formatted_urns():
+    ec = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "genre_id",
+            "value_set": {
+                "$PARAMETER": "urn:great_expectations:stores:query_store:get_pet_names"
+            },
+            "result_format": "COMPLETE",
+        },
+    )
+
+    # Should fully skip `nested_update` calls in method due to lacking an "expectation_suite_name" key
+    dependencies = ec.get_evaluation_parameter_dependencies()
+    assert dependencies == {}
+
+
 def test_expectation_configuration_patch(config4, config5, config6, config7):
     assert not config5.isEquivalentTo(config4, match_type="runtime")
     assert config5.patch("replace", "/value_set", [1, 2, 3]).isEquivalentTo(
