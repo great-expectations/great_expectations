@@ -1,4 +1,5 @@
 import copy
+import os
 
 import pandas as pd
 from ruamel import yaml
@@ -117,3 +118,186 @@ documentation_results = {
 }
 
 assert typed_results == documentation_results
+
+# A few different Checkpoint examples
+os.environ["VAR"] = "ge"
+os.environ["MY_PARAM"] = "1000"
+os.environ["OLD_PARAM"] = "500"
+
+no_nesting = """
+name: my_checkpoint
+config_version: 1
+class_name: Checkpoint
+run_name_template: "%Y-%M-foo-bar-template-$VAR"
+validations:
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_special_data_connector
+      data_asset_name: users
+      data_connector_query:
+        index: -1
+    expectation_suite_name: users.delivery
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+    evaluation_parameters:
+      param1: $MY_PARAM
+      param2: 1 + $OLD_PARAM
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
+"""
+context.test_yaml_config(no_nesting)
+
+nesting_with_defaults = """
+name: my_checkpoint
+config_version: 1
+class_name: Checkpoint
+run_name_template: "%Y-%M-foo-bar-template-$VAR"
+validations:
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_special_data_connector
+      data_asset_name: users
+      data_connector_query:
+        index: -1
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_other_data_connector
+      data_asset_name: users
+      data_connector_query:
+        index: -2
+expectation_suite_name: users.delivery
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+evaluation_parameters:
+  param1: $MY_PARAM
+  param2: 1 + $OLD_PARAM
+runtime_configuration:
+  result_format:
+    result_format: BASIC
+    partial_unexpected_count: 20
+"""
+context.test_yaml_config(nesting_with_defaults)
+
+keys_passed_at_runtime = """
+name: my_checkpoint
+config_version: 1
+class_name: Checkpoint
+run_name_template: "%Y-%M-foo-bar-template-$VAR"
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+evaluation_parameters:
+  param1: $MY_PARAM
+  param2: 1 + $OLD_PARAM
+runtime_configuration:
+  result_format:
+    result_format: BASIC
+    partial_unexpected_count: 20
+"""
+context.test_yaml_config(keys_passed_at_runtime)
+
+using_template = """
+name: my_checkpoint
+config_version: 1
+class_name: Checkpoint
+template_name: my_base_checkpoint
+validations:
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_special_data_connector
+      data_asset_name: users
+      data_connector_query:
+        index: -1
+    expectation_suite_name: users.delivery
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_other_data_connector
+      data_asset_name: users
+      data_connector_query:
+        index: -2
+    expectation_suite_name: users.diagnostic
+"""
+context.test_yaml_config(using_template)
+
+using_simple_checkpoint = """
+name: my_checkpoint
+config_version: 1
+class_name: SimpleCheckpoint
+validations:
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_data_connector
+      data_asset_name: MyDataAsset
+      data_connector_query:
+        index: -1
+    expectation_suite_name: my_suite
+site_names:
+  - my_diagnostic_data_docs_site
+slack_webhook: http://my_slack_webhook.com
+notify_on: failure
+notify_with:
+  - my_diagnostic_data_docs_site
+"""
+context.test_yaml_config(using_simple_checkpoint)
+
+equivalent_using_checkpoint = """
+name: my_checkpoint
+config_version: 1
+class_name: Checkpoint
+validations:
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_data_connector
+      data_asset_name: MyDataAsset
+      data_connector_query:
+        index: -1
+    expectation_suite_name: my_suite
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names:
+        - my_diagnostic_data_docs_site
+  - name: send_slack_notification
+    action:
+      class_name: SlackNotificationAction
+      slack_webhook: http://my_slack_webhook.com
+      notify_on: failure
+      notify_with:
+        - my_diagnostic_data_docs_site
+      renderer:
+        module_name: great_expectations.render.renderer.slack_renderer
+        class_name: SlackRenderer
+"""
+context.test_yaml_config(equivalent_using_checkpoint)
