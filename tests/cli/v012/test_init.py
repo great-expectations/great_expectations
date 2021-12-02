@@ -14,6 +14,9 @@ from tests.cli.v012.test_cli import yaml
 from tests.cli.v012.utils import assert_no_logging_messages_or_tracebacks
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them(
     mock_webbrowser,
@@ -90,6 +93,9 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     mock_webbrowser,
@@ -163,7 +169,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
     result = runner.invoke(
         cli,
         ["init"],
-        input="\n\n2\n6\nmy_db\nsqlite:////not_a_real.db\n\nn\n",
+        input="\n\n2\n6\nmy_db\nsqlite:////subfolder_thats_not_real/not_a_real.db\n\nn\n",
         catch_exceptions=False,
     )
     stdout = result.output
@@ -206,7 +212,9 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
         ge_dir, DataContext.GE_UNCOMMITTED_DIR, "config_variables.yml"
     )
     config = yaml.load(open(config_path))
-    assert config["my_db"] == {"url": "sqlite:////not_a_real.db"}
+    assert config["my_db"] == {
+        "url": "sqlite:////subfolder_thats_not_real/not_a_real.db"
+    }
 
     obs_tree = gen_directory_tree_str(os.path.join(root_dir, "great_expectations"))
     assert (

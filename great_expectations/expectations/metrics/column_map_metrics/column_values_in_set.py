@@ -19,7 +19,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 class ColumnValuesInSet(ColumnMapMetricProvider):
     condition_metric_name = "column_values.in_set"
-    condition_value_keys = ("value_set",)
+    condition_value_keys = ("value_set", "parse_strings_as_datetimes")
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(
@@ -29,7 +29,7 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
         **kwargs,
     ):
         # no need to parse as datetime; just compare the strings as is
-        parse_strings_as_datetimes: Optional[bool] = (
+        parse_strings_as_datetimes: bool = (
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
@@ -54,7 +54,7 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
         **kwargs,
     ):
         # no need to parse as datetime; just compare the strings as is
-        parse_strings_as_datetimes: Optional[bool] = (
+        parse_strings_as_datetimes: bool = (
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
@@ -82,7 +82,7 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
         **kwargs,
     ):
         # no need to parse as datetime; just compare the strings as is
-        parse_strings_as_datetimes: Optional[bool] = (
+        parse_strings_as_datetimes: bool = (
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:

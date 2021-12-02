@@ -117,6 +117,22 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
             configuration.kwargs,
             ["column", "mostly", "row_condition", "condition_parser"],
         )
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
 
         if include_column_name:
             template_str = "$column values must be unique"
@@ -124,7 +140,7 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
             template_str = "values must be unique"
 
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
@@ -136,22 +152,11 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
             template_str = conditional_template_str + ", then " + template_str
-            params.update(conditional_params)
-
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+            params_with_json_schema.update(conditional_params)
 
         return (template_str, params_with_json_schema, styling)
 

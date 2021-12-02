@@ -151,33 +151,6 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
             configuration.kwargs,
             ["column", "regex", "mostly", "row_condition", "condition_parser"],
         )
-
-        if not params.get("regex"):
-            template_str = (
-                "values must match a regular expression but none was specified."
-            )
-        else:
-            template_str = "values must match this regular expression: $regex"
-            if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
-                )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                template_str += ", at least $mostly_pct % of the time."
-            else:
-                template_str += "."
-
-        if include_column_name:
-            template_str = "$column " + template_str
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
-            params.update(conditional_params)
-
         params_with_json_schema = {
             "column": {"schema": {"type": "string"}, "value": params.get("column")},
             "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
@@ -195,6 +168,35 @@ class ExpectColumnValuesToMatchRegex(ColumnMapExpectation):
                 "value": params.get("condition_parser"),
             },
         }
+
+        if not params.get("regex"):
+            template_str = (
+                "values must match a regular expression but none was specified."
+            )
+        else:
+            template_str = "values must match this regular expression: $regex"
+            if params["mostly"] is not None:
+                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+                template_str += ", at least $mostly_pct % of the time."
+            else:
+                template_str += "."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = conditional_template_str + ", then " + template_str
+            params_with_json_schema.update(conditional_params)
+
         return (template_str, params_with_json_schema, styling)
 
     @classmethod

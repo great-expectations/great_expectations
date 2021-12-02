@@ -3,7 +3,6 @@ import os
 from typing import Dict, List
 from unittest import mock
 
-import click
 import pytest
 from _pytest.capture import CaptureResult
 from click.testing import CliRunner, Result
@@ -15,9 +14,12 @@ from great_expectations.cli.suite import (
     _process_suite_new_flags_and_prompt,
 )
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import (
+    BatchRequest,
+    standardize_batch_request_display_ordering,
+)
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.util import lint_code
+from great_expectations.util import deep_filter_properties_iterable, lint_code
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 from tests.render.test_util import (
     find_code_in_notebook,
@@ -28,6 +30,7 @@ from tests.render.test_util import (
 
 def test_suite_help_output(caplog):
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(cli, ["--v3-api", "suite"], catch_exceptions=False)
     assert result.exit_code == 0
     stdout: str = result.stdout
@@ -66,6 +69,7 @@ def test_suite_demo_deprecation_message(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite demo",
@@ -127,6 +131,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
     expectation_suite_name: str = "warning"
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite new",
@@ -226,6 +231,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     expectation_suite_name: str = "test_suite_name"
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite new",
@@ -325,6 +331,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
     expectation_suite_name: str = "test_suite_name"
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite new --expectation-suite {expectation_suite_name}",
@@ -422,6 +429,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
     expectation_suite_name: str = "test_suite_name"
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite new --expectation-suite {expectation_suite_name} --no-jupyter",
@@ -518,6 +526,7 @@ def test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error(
     expectation_suite_name: str = "test_suite_name"
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
@@ -593,6 +602,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
         json_file.write("not_proper_json")
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
@@ -675,6 +685,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
         json.dump(batch_request, json_file)
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
@@ -697,11 +708,20 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
     )
     assert os.path.isfile(expected_notebook_path)
 
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
@@ -794,6 +814,7 @@ def test_suite_edit_without_suite_name_raises_error(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(cli, "--v3-api suite edit", catch_exceptions=False)
     assert result.exit_code == 2
 
@@ -841,6 +862,7 @@ def test_suite_edit_datasource_and_batch_request_error(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite edit {expectation_suite_name} --datasource-name some_datasource_name --batch-request some_file.json --interactive",
@@ -902,6 +924,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite edit not_a_real_suite",
@@ -978,6 +1001,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite edit {expectation_suite_name} --interactive --datasource-name not_real",
@@ -1066,15 +1090,25 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
         "data_asset_name": "Titanic_1911",
         "limit": 1000,
     }
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         [
@@ -1115,6 +1149,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
+    # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
         [
@@ -1291,15 +1326,25 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
         "data_asset_name": "Titanic_1911",
         "limit": 1000,
     }
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         [
@@ -1336,6 +1381,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
+    # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
         [
@@ -1496,15 +1542,25 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
         "data_asset_name": "titanic",
         "limit": 1000,
     }
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         [
@@ -1545,6 +1601,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
+    # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
         [
@@ -1721,15 +1778,25 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
         "data_asset_name": "titanic",
         "limit": 1000,
     }
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         [
@@ -1766,6 +1833,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
+    # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
         [
@@ -1925,6 +1993,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
         json.dump(batch_request, json_file)
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"""--v3-api suite edit {expectation_suite_name} --interactive --batch-request
@@ -1988,6 +2057,7 @@ def test_suite_list_with_zero_suites(
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite list",
@@ -2049,6 +2119,7 @@ def test_suite_list_with_one_suite(
     )
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite list",
@@ -2115,6 +2186,7 @@ def test_suite_list_with_multiple_suites(
     assert os.path.exists(config_file_path)
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite list",
@@ -2165,6 +2237,7 @@ def test_suite_delete_with_zero_suites(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite delete not_a_suite",
@@ -2225,6 +2298,7 @@ def test_suite_delete_with_non_existent_suite(
     mock_emit.reset_mock()
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite delete not_a_suite",
@@ -2295,6 +2369,7 @@ def test_suite_delete_with_one_suite(
     assert os.path.isfile(suite_path)
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
@@ -2371,6 +2446,7 @@ def test_suite_delete_canceled_with_one_suite(
     assert os.path.isfile(suite_path)
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
@@ -2440,6 +2516,7 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     assert os.path.isfile(suite_path)
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         f"--v3-api --assume-yes suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
@@ -2485,6 +2562,7 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
         click_result=result,
     )
 
+    # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
         f"--v3-api suite list",
@@ -2522,6 +2600,7 @@ def test_suite_new_profile_on_context_with_no_datasource_raises_error(
     expectation_suite_name: str = "test_suite_name"
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         [
@@ -2617,6 +2696,7 @@ def test_suite_new_profile_on_existing_suite_raises_error(
     mock_emit.reset_mock()
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         [
@@ -2715,6 +2795,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     mock_emit.reset_mock()
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         [
@@ -2753,11 +2834,20 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     )
     assert os.path.isfile(expected_notebook_path)
 
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
@@ -2843,7 +2933,7 @@ suite = profiler.build_suite()"""
 
     assert mock_webbroser.call_count == 0
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -2868,6 +2958,19 @@ suite = profiler.build_suite()"""
             {
                 "event": "cli.suite.new.end",
                 "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                        "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                    },
+                },
                 "success": True,
             }
         ),
@@ -2925,6 +3028,7 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     mock_emit.reset_mock()
 
     runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
         [
@@ -2958,11 +3062,20 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     )
     assert os.path.isfile(expected_notebook_path)
 
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
@@ -3052,7 +3165,7 @@ suite = profiler.build_suite()"""
 
     assert mock_webbroser.call_count == 0
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -3077,6 +3190,19 @@ suite = profiler.build_suite()"""
             {
                 "event": "cli.suite.new.end",
                 "event_payload": {"api_version": "v3"},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                        "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                    },
+                },
                 "success": True,
             }
         ),

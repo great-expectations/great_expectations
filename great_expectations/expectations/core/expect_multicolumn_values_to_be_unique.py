@@ -100,39 +100,6 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
                 "mostly",
             ],
         )
-
-        if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
-            )
-        mostly_str = (
-            ""
-            if params.get("mostly") is None
-            else ", at least $mostly_pct % of the time"
-        )
-
-        template_str = f"Values must always be unique across columns{mostly_str}: "
-        for idx in range(len(params["column_list"]) - 1):
-            template_str += "$column_list_" + str(idx) + ", "
-            params["column_list_" + str(idx)] = params["column_list"][idx]
-
-        last_idx = len(params["column_list"]) - 1
-        template_str += "$column_list_" + str(last_idx)
-        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = (
-                conditional_template_str
-                + ", then "
-                + template_str[0].lower()
-                + template_str[1:]
-            )
-            params.update(conditional_params)
-
         params_with_json_schema = {
             "column_list": {
                 "schema": {"type": "array"},
@@ -154,7 +121,46 @@ class ExpectMulticolumnValuesToBeUnique(ColumnMapExpectation):
                 "schema": {"type": "number"},
                 "value": params.get("mostly"),
             },
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
         }
+
+        if params["mostly"] is not None:
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+        mostly_str = (
+            ""
+            if params.get("mostly") is None
+            else ", at least $mostly_pct % of the time"
+        )
+
+        template_str = f"Values must always be unique across columns{mostly_str}: "
+        for idx in range(len(params["column_list"]) - 1):
+            template_str += "$column_list_" + str(idx) + ", "
+            params["column_list_" + str(idx)] = params["column_list"][idx]
+
+        last_idx = len(params["column_list"]) - 1
+        template_str += "$column_list_" + str(last_idx)
+        params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = (
+                conditional_template_str
+                + ", then "
+                + template_str[0].lower()
+                + template_str[1:]
+            )
+            params_with_json_schema.update(conditional_params)
+
         params_with_json_schema = add_values_with_json_schema_from_list_in_params(
             params=params,
             params_with_json_schema=params_with_json_schema,

@@ -24,7 +24,7 @@ main parameters - `expectation_configuration` and `match_type`.
 To add an Expectation to a Suite, you can use
 
 ```python
-suite.add_Expectation(
+suite.add_expectation(
     expectation_configuration, 
     match_type, 
     overwrite_existing
@@ -39,10 +39,10 @@ suite.add_Expectation(
 
 ## Removing Expectations
 
-To remove an Expectation from a Suite, you can use
+To remove an Expectation from an Expectation Suite, you can use
 
 ```python
-suite.remove_Expectation(
+suite.remove_expectation(
     expectation_configuration, 
     match_type, 
     remove_multiple_matches
@@ -53,3 +53,14 @@ suite.remove_Expectation(
 * If it finds more than one matching Expectation, it will throw an error, unless `remove_multiple_matches` is set to
   True, in which case it will remove all matching Expectations.
 * If this finds no matching Expectations, it will throw an error.
+
+If you are interactively working with an Expectation Suite using a Validator, you can access this functionality by
+directly calling 
+
+```python
+validator.remove_expectation(
+    expectation_configuration, 
+    match_type, 
+    remove_multiple_matches
+)
+```

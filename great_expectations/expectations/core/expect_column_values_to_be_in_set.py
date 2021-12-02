@@ -136,6 +136,30 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
                 "condition_parser",
             ],
         )
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "value_set": {
+                "schema": {"type": "array"},
+                "value": params.get("value_set"),
+            },
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
+            "parse_strings_as_datetimes": {
+                "schema": {"type": "boolean"},
+                "value": params.get("parse_strings_as_datetimes"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
 
         if params["value_set"] is None or len(params["value_set"]) == 0:
             values_string = "[ ]"
@@ -150,7 +174,7 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         template_str = "values must belong to this set: " + values_string
 
         if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
                 params["mostly"] * 100, precision=15, no_scientific=True
             )
             # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
@@ -168,30 +192,12 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
             template_str = conditional_template_str + ", then " + template_str
-            params.update(conditional_params)
+            params_with_json_schema.update(conditional_params)
 
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "value_set": {
-                "schema": {"type": "array"},
-                "value": params.get("value_set"),
-            },
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "parse_strings_as_datetimes": {
-                "schema": {"type": "boolean"},
-                "value": params.get("parse_strings_as_datetimes"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
         params_with_json_schema = add_values_with_json_schema_from_list_in_params(
             params=params,
             params_with_json_schema=params_with_json_schema,

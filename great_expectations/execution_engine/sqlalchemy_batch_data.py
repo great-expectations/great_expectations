@@ -123,13 +123,13 @@ class SqlAlchemyBatchData(BatchData):
                 self._selectable = sa.Table(
                     table_name,
                     sa.MetaData(),
-                    schema_name=None,
+                    schema=None,
                 )
             else:
                 self._selectable = sa.Table(
                     table_name,
                     sa.MetaData(),
-                    schema_name=schema_name,
+                    schema=schema_name,
                 )
 
         elif create_temp_table:
@@ -158,7 +158,7 @@ class SqlAlchemyBatchData(BatchData):
             self._selectable = sa.Table(
                 generated_table_name,
                 sa.MetaData(),
-                schema_name=temp_table_schema_name,
+                schema=temp_table_schema_name,
             )
         else:
             if query:
@@ -200,6 +200,10 @@ class SqlAlchemyBatchData(BatchData):
         """
         if self.sql_engine_dialect.name.lower() == "bigquery":
             stmt = "CREATE OR REPLACE TABLE `{temp_table_name}` AS {query}".format(
+                temp_table_name=temp_table_name, query=query
+            )
+        elif self.sql_engine_dialect.name.lower() == "dremio":
+            stmt = "CREATE OR REPLACE VDS {temp_table_name} AS {query}".format(
                 temp_table_name=temp_table_name, query=query
             )
         elif self.sql_engine_dialect.name.lower() == "snowflake":
@@ -244,6 +248,11 @@ class SqlAlchemyBatchData(BatchData):
             # prior to oracle 18c only GLOBAL temp tables existed and only the data is transient
             # this means an empty table will persist after the db session
             stmt_2 = "CREATE GLOBAL TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}".format(
+                temp_table_name=temp_table_name, query=query
+            )
+        # Please note that Teradata is currently experimental (as of 0.13.43)
+        elif self.sql_engine_dialect.name.lower() == "teradatasql":
+            stmt = 'CREATE VOLATILE TABLE "{temp_table_name}" AS ({query}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 temp_table_name=temp_table_name, query=query
             )
         else:

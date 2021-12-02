@@ -99,7 +99,7 @@ def validation_result_suite():
 def validation_result_suite_id():
     return ValidationResultIdentifier(
         expectation_suite_identifier=ExpectationSuiteIdentifier("asset.default"),
-        run_id="test_100",
+        run_id=RunIdentifier(run_name="test_100"),
         batch_identifier="1234",
     )
 

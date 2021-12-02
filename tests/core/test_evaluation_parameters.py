@@ -1,10 +1,13 @@
+import math
+from datetime import datetime, timedelta
 from timeit import timeit
 
+import dateutil
 import pandas
 import pytest
 
 from great_expectations.core import ExpectationValidationResult
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     find_evaluation_parameter_dependencies,
@@ -125,6 +128,37 @@ def test_parser_timing():
             number=100,
         )
         < 1
+    )
+
+
+def test_math_evaluation_paramaters():
+    assert parse_evaluation_parameter("sin(2*PI)") == math.sin(math.pi * 2)
+    assert parse_evaluation_parameter("cos(2*PI)") == math.cos(math.pi * 2)
+    assert parse_evaluation_parameter("tan(2*PI)") == math.tan(math.pi * 2)
+
+
+def test_temporal_evaluation_parameters():
+    # allow 1 second for "now" tolerance
+    now = datetime.now()
+    assert (
+        (now - timedelta(weeks=1, seconds=3))
+        < dateutil.parser.parse(
+            parse_evaluation_parameter("now() - timedelta(weeks=1, seconds=2)")
+        )
+        < now - timedelta(weeks=1, seconds=1)
+    )
+
+
+def test_temporal_evaluation_parameters_complex():
+    # allow 1 second for "now" tolerance
+    now = datetime.now()
+    # Choosing "2*3" == 6 weeks shows we can parse an expression inside a kwarg.
+    assert (
+        (now - timedelta(weeks=2 * 3, seconds=3))
+        < dateutil.parser.parse(
+            parse_evaluation_parameter("now() - timedelta(weeks=2*3, seconds=2)")
+        )
+        < now - timedelta(weeks=2 * 3, seconds=1)
     )
 
 
@@ -274,3 +308,25 @@ def test_evaluation_parameters_for_between_expectations_parse_correctly(
             "result": {"observed_value": 3},
         }
     )
+
+
+def test_now_evaluation_parameter():
+    """
+    now() is unique in the fact that it is the only evaluation param built-in that has zero arity (takes no arguments).
+    The following tests ensure that it is properly parsed and evaluated in a variety of contexts.
+    """
+    # By itself
+    res = parse_evaluation_parameter("now()")
+    assert dateutil.parser.parse(
+        res
+    ), "Provided evaluation parameter is not dateutil-parseable"
+
+    # In conjunction with timedelta
+    res = parse_evaluation_parameter("now() - timedelta(weeks=1)")
+    assert dateutil.parser.parse(
+        res
+    ), "Provided evaluation parameter is not dateutil-parseable"
+
+    # Require parens to actually invoke
+    with pytest.raises(EvaluationParameterError):
+        parse_evaluation_parameter("now")
