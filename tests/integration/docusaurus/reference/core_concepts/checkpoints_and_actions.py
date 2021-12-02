@@ -43,7 +43,7 @@ context.create_expectation_suite("my_expectation_suite")
 
 # Add a Checkpoint
 checkpoint_yaml = """
-name: my_checkpoint
+name: test_checkpoint
 config_version: 1
 class_name: Checkpoint
 run_name_template: "%Y-%M-foo-bar-template"
@@ -68,9 +68,9 @@ validations:
 """
 context.test_yaml_config(checkpoint_yaml)
 context.add_checkpoint(**yaml.load(checkpoint_yaml))
-assert context.list_checkpoints() == ["my_checkpoint"]
+assert context.list_checkpoints() == ["test_checkpoint"]
 
-results = context.run_checkpoint(checkpoint_name="my_checkpoint")
+results = context.run_checkpoint(checkpoint_name="test_checkpoint")
 assert results.success == True
 run_id_type = type(results.run_id)
 assert run_id_type == RunIdentifier
@@ -84,8 +84,7 @@ assert (
 )
 assert type(results.checkpoint_config) == CheckpointConfig
 
-typed_results = \
-{
+typed_results = {
     "run_id": run_id_type,
     "run_results": {
         validation_result_id_type: {
@@ -94,15 +93,14 @@ typed_results = \
                 "<ACTION NAME FOR STORING VALIDATION RESULTS>": {
                     "class": "StoreValidationResultAction"
                 }
-            }
+            },
         }
     },
     "checkpoint_config": CheckpointConfig,
-    "success": True
+    "success": True,
 }
 
-documentation_results = \
-{
+documentation_results = {
     "run_id": RunIdentifier,
     "run_results": {
         ValidationResultIdentifier: {
@@ -111,11 +109,11 @@ documentation_results = \
                 "<ACTION NAME FOR STORING VALIDATION RESULTS>": {
                     "class": "StoreValidationResultAction"
                 }
-            }
+            },
         }
     },
     "checkpoint_config": CheckpointConfig,
-    "success": True
+    "success": True,
 }
 
 assert typed_results == documentation_results
