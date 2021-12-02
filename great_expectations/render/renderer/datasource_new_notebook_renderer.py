@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 import nbformat
@@ -10,6 +11,8 @@ try:
     import black
 except ImportError:
     black = None
+
+logger = logging.getLogger(__name__)
 
 
 class DatasourceNewNotebookRenderer(BaseNotebookRenderer):
@@ -122,6 +125,10 @@ context.list_datasources()""",
             self._add_sql_credentials_cell()
 
         lint = black is not None
+        if not lint:
+            logger.warning(
+                "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
+            )
         self._add_template_cell(lint)
         self._add_test_yaml_cells(lint)
         self._add_save_datasource_cell(lint)

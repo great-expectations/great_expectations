@@ -932,6 +932,9 @@ def lint_code(code: str) -> str:
             )
             return linted_code
         except (black.NothingChanged, RuntimeError):
+            logger.warning(
+                "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
+            )
             return code
 
     return code
