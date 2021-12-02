@@ -939,8 +939,10 @@ def lint_code(code: str) -> str:
 
 
 def convert_nulls_to_None(code: str) -> str:
-    pattern = r'["^"": ]null'
-    return re.sub(pattern, " None", code)
+    if "null" not in code:
+        return code
+    pattern = r'"([a-zA-Z0-9_]+)": null'
+    return re.sub(pattern, r'"\1": None', code)
 
 
 def filter_properties_dict(
