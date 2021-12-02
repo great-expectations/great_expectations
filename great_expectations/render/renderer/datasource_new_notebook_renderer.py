@@ -5,7 +5,11 @@ import nbformat
 from great_expectations import DataContext
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
-from great_expectations.util import has_black_formatter
+
+try:
+    import black
+except ImportError:
+    black = None
 
 
 class DatasourceNewNotebookRenderer(BaseNotebookRenderer):
@@ -117,7 +121,7 @@ context.list_datasources()""",
         if self.datasource_type == DatasourceTypes.SQL:
             self._add_sql_credentials_cell()
 
-        lint = has_black_formatter()
+        lint = black is not None
         self._add_template_cell(lint)
         self._add_test_yaml_cells(lint)
         self._add_save_datasource_cell(lint)

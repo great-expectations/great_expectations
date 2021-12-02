@@ -41,6 +41,11 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.registry import _registered_expectations
 
 try:
+    import black
+except ImportError:
+    black = None
+
+try:
     # This library moved in python 3.8
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
@@ -917,7 +922,7 @@ def lint_code(code: str) -> str:
     # NOTE: Chetan 20211111 - This import was failing in Azure with 20.8b1 so we bumped up the version to 21.8b0
     # While this seems to resolve the issue, the root cause is yet to be determined.
 
-    if has_black_formatter():
+    if black is not None:
         black_file_mode = black.FileMode()
         if not isinstance(code, str):
             raise TypeError
@@ -930,18 +935,6 @@ def lint_code(code: str) -> str:
             return code
 
     return code
-
-
-def has_black_formatter() -> bool:
-    try:
-        import black
-
-        return True
-    except ImportError:
-        logger.warning(
-            "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
-        )
-        return False
 
 
 def filter_properties_dict(
