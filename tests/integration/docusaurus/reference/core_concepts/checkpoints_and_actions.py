@@ -1,3 +1,5 @@
+import copy
+
 import pandas as pd
 from ruamel import yaml
 
@@ -6,10 +8,10 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
-from great_expectations.data_context.types.base import CheckpointConfig
 
 context = ge.get_context()
 
@@ -81,3 +83,6 @@ assert (
     type(validation_result_id["validation_result"]) == ExpectationSuiteValidationResult
 )
 assert type(results.checkpoint_config) == CheckpointConfig
+
+expected_results = copy.deepcopy(results)
+
