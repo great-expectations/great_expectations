@@ -129,12 +129,14 @@ Notes:
             try:
                 credentials = None  # If configured with gcloud CLI / env vars
                 if "filename" in gcs_options:
+                    filename = gcs_options.pop("filename")
                     credentials = service_account.Credentials.from_service_account_file(
-                        **gcs_options
+                        filename=filename
                     )
                 elif "info" in gcs_options:
+                    info = gcs_options.pop("info")
                     credentials = service_account.Credentials.from_service_account_info(
-                        **gcs_options
+                        info=info
                     )
                 self._gcs = storage.Client(credentials=credentials, **gcs_options)
             except (TypeError, AttributeError):
@@ -430,9 +432,7 @@ Please check your config."""
                 )
             else:
                 # Querying row condition
-                data = data.query(row_condition, parser=condition_parser).reset_index(
-                    drop=True
-                )
+                data = data.query(row_condition, parser=condition_parser)
 
         if "column" in domain_kwargs:
             return data

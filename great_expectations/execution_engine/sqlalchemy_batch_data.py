@@ -202,6 +202,10 @@ class SqlAlchemyBatchData(BatchData):
             stmt = "CREATE OR REPLACE TABLE `{temp_table_name}` AS {query}".format(
                 temp_table_name=temp_table_name, query=query
             )
+        elif self.sql_engine_dialect.name.lower() == "dremio":
+            stmt = "CREATE OR REPLACE VDS {temp_table_name} AS {query}".format(
+                temp_table_name=temp_table_name, query=query
+            )
         elif self.sql_engine_dialect.name.lower() == "snowflake":
             if temp_table_schema_name is not None:
                 temp_table_name = temp_table_schema_name + "." + temp_table_name

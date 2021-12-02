@@ -41,7 +41,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         column,
         **kwargs,
     ):
-        parse_strings_as_datetimes: Optional[bool] = (
+        parse_strings_as_datetimes: bool = (
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
@@ -67,7 +67,7 @@ future release.  Please update code accordingly.
         else:
             series_diff[series_diff.isnull()] = -1
 
-        strictly: Optional[bool] = kwargs.get("strictly") or False
+        strictly: bool = kwargs.get("strictly") or False
         if strictly:
             if parse_strings_as_datetimes:
                 return series_diff.dt.total_seconds() < 0.0
@@ -90,7 +90,7 @@ future release.  Please update code accordingly.
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
-        parse_strings_as_datetimes: Optional[bool] = (
+        parse_strings_as_datetimes: bool = (
             metric_value_kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:

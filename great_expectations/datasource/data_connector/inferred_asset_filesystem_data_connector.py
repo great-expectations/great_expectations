@@ -34,7 +34,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         base_directory: str,
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
-        glob_directive: Optional[str] = "*",
+        glob_directive: str = "*",
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):

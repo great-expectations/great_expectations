@@ -51,10 +51,10 @@ class SimpleCheckpointConfigurator:
         self,
         name: str,
         data_context,
-        site_names: Optional[Union[str, List[str]]] = "all",
+        site_names: Union[str, List[str]] = "all",
         slack_webhook: Optional[str] = None,
-        notify_on: Optional[str] = "all",
-        notify_with: Optional[Union[str, List[str]]] = "all",
+        notify_on: str = "all",
+        notify_with: Union[str, List[str]] = "all",
         **kwargs,
     ):
         """
@@ -139,12 +139,28 @@ class SimpleCheckpointConfigurator:
             )
             # Necessary when using RuntimeDataConnector with SimpleCheckpoint
             if isinstance(other_config.batch_request, BatchRequest):
-                other_config.batch_request = other_config.batch_request.to_json_dict()
+                if (
+                    other_config.batch_request.runtime_parameters.get("batch_data")
+                    is not None
+                ):
+                    batch_data = other_config.batch_request.runtime_parameters.get(
+                        "batch_data"
+                    )
+                    other_config.batch_request = (
+                        other_config.batch_request.to_json_dict()
+                    )
+                    other_config.batch_request["runtime_parameters"][
+                        "batch_data"
+                    ] = batch_data
+                else:
+                    other_config.batch_request = (
+                        other_config.batch_request.to_json_dict()
+                    )
             checkpoint_config.update(other_config=other_config)
 
         logger.debug(
             f"SimpleCheckpointConfigurator built this CheckpointConfig:"
-            f" {json.dumps(checkpoint_config.to_json_dict(), indent=4)}"
+            f" {print(checkpoint_config)}"
         )
         return checkpoint_config
 
