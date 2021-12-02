@@ -1099,7 +1099,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
-                    "batch_request_required_top_level_properties": {
+                    "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                         "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
                         "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
@@ -1465,7 +1465,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
-                    "batch_request_required_top_level_properties": {
+                    "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                         "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
                         "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
@@ -1634,7 +1634,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
-                    "batch_request_required_top_level_properties": {
+                    "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
                         "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
                         "anonymized_data_asset_name": "c30b60089ede018ad9680153ba85adaf",
@@ -1805,7 +1805,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
-                    "batch_request_required_top_level_properties": {
+                    "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
                         "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
                         "anonymized_data_asset_name": "9104abd890c05a364f379443b9f43825",
@@ -1976,7 +1976,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
-                    "batch_request_required_top_level_properties": {
+                    "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                         "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
                         "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
@@ -2135,7 +2135,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
-                    "batch_request_required_top_level_properties": {
+                    "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
                         "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
                         "anonymized_data_asset_name": "61b23df5338c9164d0f9514847cba679",
@@ -2297,7 +2297,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
-                    "batch_request_required_top_level_properties": {
+                    "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
                         "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
                         "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
@@ -2472,7 +2472,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
-                    "batch_request_required_top_level_properties": {
+                    "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                         "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
                         "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
@@ -2627,7 +2627,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
-                    "batch_request_required_top_level_properties": {
+                    "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
                         "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
                         "anonymized_data_asset_name": "96a15275c07d53de6b4a9464704b12d8",
@@ -2791,7 +2791,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
-                    "batch_request_required_top_level_properties": {
+                    "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
                         "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
                         "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
