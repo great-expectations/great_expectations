@@ -2,7 +2,7 @@ import logging
 import os
 import traceback
 from collections import OrderedDict
-from typing import List
+from typing import Any, List, Optional, Tuple
 
 import great_expectations.exceptions as exceptions
 from great_expectations.core.util import nested_update
@@ -299,7 +299,7 @@ class SiteBuilder:
         """
 
         # copy static assets
-        for site_section, site_section_builder in self.site_section_builders.items():
+        for site_section_builder in self.site_section_builders.values():
             site_section_builder.build(resource_identifiers=resource_identifiers)
 
         # GE Cloud supports JSON Site Data Docs
@@ -309,9 +309,7 @@ class SiteBuilder:
 
         self.target_store.copy_static_assets()
 
-        index_page_url, index_links_dict = self.site_index_builder.build(
-            build_index=build_index
-        )
+        _, index_links_dict = self.site_index_builder.build(build_index=build_index)
         return (
             self.get_resource_url(only_if_exists=False),
             index_links_dict,
@@ -709,7 +707,9 @@ class DefaultSiteIndexBuilder:
         return results
 
     # TODO: deprecate dual batch api support
-    def build(self, skip_and_clean_missing=True, build_index: bool = True):
+    def build(
+        self, skip_and_clean_missing=True, build_index: bool = True
+    ) -> Tuple[Any, Optional[OrderedDict]]:
         """
         :param skip_and_clean_missing: if True, target html store keys without corresponding source store keys will
         be skipped and removed from the target store
