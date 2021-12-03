@@ -180,7 +180,7 @@ class ExpectationSuite(SerializableDictDot):
         return json.dumps(self.to_json_dict(), indent=2)
 
     def __deepcopy__(self, memo):
-        attributes = [
+        attributes_to_copy = [
             "expectation_suite_name",
             "ge_cloud_id",
             "expectations",
@@ -188,11 +188,10 @@ class ExpectationSuite(SerializableDictDot):
             "data_asset_type",
             "meta",
         ]
-        copied_dict = DotDict()
-        for k in attributes:
-            setattr(copied_dict, k, deepcopy(getattr(self, k)))
-        new_suite = ExpectationSuite(**copied_dict)
-        return new_suite
+        attributes_as_dot_dict: DotDict = DotDict()
+        for k in attributes_to_copy:
+            setattr(attributes_as_dot_dict, k, deepcopy(getattr(self, k)))
+        return ExpectationSuite(**attributes_as_dot_dict)
 
     def to_json_dict(self):
         myself = expectationSuiteSchema.dump(self)
