@@ -230,3 +230,85 @@ This configuration omits the `validations` key from the YAML, which means a `val
 </Tabs>
 
 ## Checkpoint configuration default and override behavior
+
+<Tabs defaultValue="tab0"
+values={[
+{label: 'No nesting', value: 'tab0'}, {label: 'Nesting with defaults', value: 'tab1'}, {label: 'Keys passed at runtime', value: 'tab2'}, {label: 'Using template', value: 'tab3'}, {label: 'Using SimpleCheckpoint', value: 'tab4'}
+]}>
+
+<TabItem value="tab0">
+This configuration specifies full validation dictionaries - no nesting (defaults) are used. When run, this Checkpoint will perform one validation of a single batch of data, against a single Expectation Suite ("my_expectation_suite").
+
+#### YAML:
+
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L126-L154
+```
+
+#### runtime:
+
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L157
+```
+
+  </TabItem>
+  <TabItem value="tab1">
+  This configuration specifies four top-level keys (`expectation_suite_name`, `action_list`, `evaluation_parameters`, and `runtime_configuration`) that can serve as defaults for each validation, allowing the keys to be omitted from the validation dictionaries. When run, this Checkpoint will perform two validations of two different batches of data, both against the same Expectation Suite ("users.delivery"). Each validation will trigger the same set of actions and use the same evaluation parameters and runtime configuration.
+
+#### YAML:
+
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L161-L195
+```
+
+#### runtime:
+
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L198
+```
+
+  </TabItem>
+  <TabItem value="tab2">
+This configuration omits the `validations` key from the YAML, which means a `validations` list must be provided when the Checkpoint is run. Because `action_list`, `evaluation_parameters`, and `runtime_configuration` appear as top-level keys in the YAML configuration, these keys may be omitted from the validation dictionaries, unless a non-default value is desired. When run, this Checkpoint will perform two validations of two different batches of data, with each batch of data validated against a different Expectation Suite ("users.delivery" and "users.diagnostic", respectively). Each validation will trigger the same set of actions and use the same evaluation parameters and runtime configuration.
+
+#### YAML:
+
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L202-L222
+```
+
+#### runtime:
+
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L225-L247
+```
+
+  </TabItem>
+  <TabItem value="tab3">
+  This configuration references the Checkpoint detailed in the previous example ("Keys passed at runtime"), allowing the runtime call to `run_checkpoint` to be much slimmer.
+
+#### YAML:
+
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L252-L270
+```
+
+#### runtime:
+
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L273
+```
+
+  </TabItem>
+  <TabItem value="tab4">
+  This configuration specifies the SimpleCheckpoint class under the `class_name` key, allowing for a much slimmer configuration.
+
+#### YAML, using SimpleCheckpoint:
+
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L277-L291
+```
+
+#### Equivalent YAML, using Checkpoint:
+
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L301-L330
+```
+
+#### runtime:
+
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L336
+```
+
+  </TabItem>
+</Tabs>
