@@ -1,16 +1,24 @@
 import datetime
 import logging
 from itertools import chain
-from typing import Optional
 
 import ipywidgets as widgets
-from IPython.display import display
 
 logger = logging.getLogger(__name__)
+
+try:
+    import ipywidgets as widgets
+except ImportError:
+    widgets = None
 
 
 class ExpectationExplorer:
     def __init__(self):
+        if widgets is None:
+            raise ImportError(
+                "Please install the optional dependency 'ipywidgets' to enable the ExpectationExplorer."
+            )
+
         self.state = {"data_assets": {}}
         self.expectation_kwarg_field_names = {
             "expect_column_values_to_be_unique": ["mostly"],

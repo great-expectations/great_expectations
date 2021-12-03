@@ -4311,7 +4311,9 @@ class DataContext(BaseDataContext):
 
 
 class ExplorerDataContext(DataContext):
-    def __init__(self, context_root_dir=None, expectation_explorer=True):
+    def __init__(
+        self, context_root_dir: Optional[str] = None, expectation_explorer: bool = True
+    ):
         """
             expectation_explorer: If True, load the expectation explorer manager, which will modify GE return objects \
             to include ipython notebook widgets.
