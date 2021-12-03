@@ -170,3 +170,7 @@
 
 # Redirects for old style guides
 /docs/contributing/contributing_style https://docs.greatexpectations.io/docs/contributing/style_guides/docs_style
+
+# Redirects for consolidated pages
+/docs/why_use_ge https://docs.greatexpectations.io/docs
+/docs/community https://docs.greatexpectations.io/docs
