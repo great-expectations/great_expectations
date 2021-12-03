@@ -434,9 +434,7 @@ class DefaultSiteSectionBuilder:
             if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
                 logger.debug(
-                    "        Rendering expectation suite {}".format(
-                        expectation_suite_name
-                    )
+                    f"        Rendering expectation suite {expectation_suite_name}"
                 )
             elif isinstance(resource_key, ValidationResultIdentifier):
                 run_id = resource_key.run_id
@@ -447,19 +445,12 @@ class DefaultSiteSectionBuilder:
                 )
                 if self.name == "profiling":
                     logger.debug(
-                        "        Rendering profiling for batch {}".format(
-                            resource_key.batch_identifier
-                        )
+                        f"        Rendering profiling for batch {resource_key.batch_identifier}"
                     )
                 else:
 
                     logger.debug(
-                        "        Rendering validation: run name: {}, run time: {}, suite {} for batch {}".format(
-                            run_name,
-                            run_time,
-                            expectation_suite_name,
-                            resource_key.batch_identifier,
-                        )
+                        f"        Rendering validation: run name: {run_name}, run time: {run_time}, suite {expectation_suite_name} for batch {resource_key.batch_identifier}"
                     )
 
             try:
@@ -907,9 +898,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = "Profiling result not found: {:s} - skipping".format(
-                        str(profiling_result_key.to_tuple())
-                    )
+                    error_msg = f"Profiling result not found: {str(profiling_result_key.to_tuple()):s} - skipping"
                     logger.warning(error_msg)
 
     def _add_validations_to_index_links(
@@ -970,9 +959,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         batch_spec=batch_spec,
                     )
                 except Exception:
-                    error_msg = "Validation result not found: {:s} - skipping".format(
-                        str(validation_result_key.to_tuple())
-                    )
+                    error_msg = f"Validation result not found: {str(validation_result_key.to_tuple()):s} - skipping"
                     logger.warning(error_msg)
 
 
