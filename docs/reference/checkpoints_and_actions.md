@@ -138,6 +138,8 @@ expectation_suite_severity_level" to indicate if the suite is at either a "warni
 CheckpointResult objects include many convenience methods (e.g. `list_data_asset_names`) that make working with
 Checkpoint results easier. You can learn more about these methods in the documentation for class: `great_expectations.checkpoint.types.checkpoint_result.CheckpointResult`.
 
+Below is an example of a `CheckpointResult` object which itself contains `ValidationResult`, `ExpectationSuiteValidationResult`, and `CheckpointConfig` objects.
+
 #### Example CheckpointResult:
 
 ```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
@@ -155,12 +157,12 @@ This configuration specifies full validation dictionaries - no nesting (defaults
 
 #### YAML:
 
-```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L126-L154
 ```
 
 #### runtime:
 
-```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L157
 ```
 
   </TabItem>
@@ -169,12 +171,12 @@ This configuration specifies full validation dictionaries - no nesting (defaults
 
 #### YAML:
 
-```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L161-L195
 ```
 
 #### runtime:
 
-```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L198
 ```
 
   </TabItem>
@@ -183,12 +185,12 @@ This configuration omits the `validations` key from the YAML, which means a `val
 
 #### YAML:
 
-```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L202-L222
 ```
 
 #### runtime:
 
-```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L225-L247
 ```
 
   </TabItem>
@@ -197,12 +199,12 @@ This configuration omits the `validations` key from the YAML, which means a `val
 
 #### YAML:
 
-```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L252-L270
 ```
 
 #### runtime:
 
-```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L273
 ```
 
   </TabItem>
@@ -211,21 +213,20 @@ This configuration omits the `validations` key from the YAML, which means a `val
 
 #### YAML, using SimpleCheckpoint:
 
-```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L277-L291
 ```
 
 #### Equivalent YAML, using Checkpoint:
 
-```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L301-L330
 ```
 
 #### runtime:
 
-  ```python
-  context.run_checkpoint(
-    checkpoint_name="my_checkpoint"
-)
-  ```
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L336
+```
 
   </TabItem>
 </Tabs>
+
+## Checkpoint configuration default and override behavior
