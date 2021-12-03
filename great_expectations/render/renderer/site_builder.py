@@ -767,12 +767,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
     def _add_expectations_to_index_links(
         self, index_links_dict: OrderedDict, skip_and_clean_missing: bool
     ) -> None:
-        if (
-            # TODO why is this duplicated?
-            self.site_section_builders_config.get("expectations", "None")
-            and self.site_section_builders_config.get("expectations", "None")
-            not in FALSEY_YAML_STRINGS
-        ):
+        expectations = self.site_section_builders_config.get("expectations", "None")
+        if expectations and expectations not in FALSEY_YAML_STRINGS:
             expectation_suite_source_keys = self.data_context.stores[
                 self.site_section_builders_config["expectations"].get(
                     "source_store_name"
@@ -806,21 +802,14 @@ diagnose and repair the underlying issue.  Detailed information follows:
         self, skip_and_clean_missing: bool
     ) -> List[ValidationResultIdentifier]:
         validation_and_profiling_result_site_keys = []
-        if (
-            # TODO why is this duplicated?
-            self.site_section_builders_config.get("validations", "None")
-            and self.site_section_builders_config.get("validations", "None")
-            not in FALSEY_YAML_STRINGS
-            or self.site_section_builders_config.get("profiling", "None")
-            and self.site_section_builders_config.get("profiling", "None")
-            not in FALSEY_YAML_STRINGS
+        validations = self.site_section_builders_config.get("validations", "None")
+        profiling = self.site_section_builders_config.get("profiling", "None")
+        if (validations and validations not in FALSEY_YAML_STRINGS) or (
+            profiling and profiling not in FALSEY_YAML_STRINGS
         ):
             source_store = (
                 "validations"
-                # TODO why is this duplicated?
-                if self.site_section_builders_config.get("validations", "None")
-                and self.site_section_builders_config.get("validations", "None")
-                not in FALSEY_YAML_STRINGS
+                if (validations and validations not in FALSEY_YAML_STRINGS)
                 else "profiling"
             )
             validation_and_profiling_result_source_keys = self.data_context.stores[
@@ -855,13 +844,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
         index_links_dict: OrderedDict,
         validation_and_profiling_result_site_keys: List[ValidationResultIdentifier],
     ) -> None:
-
-        if (
-            # TODO why is this duplicated?
-            self.site_section_builders_config.get("profiling", "None")
-            and self.site_section_builders_config.get("profiling", "None")
-            not in FALSEY_YAML_STRINGS
-        ):
+        profiling = self.site_section_builders_config.get("profiling", "None")
+        if profiling and profiling not in FALSEY_YAML_STRINGS:
             profiling_run_name_filter = self.site_section_builders_config["profiling"][
                 "run_name_filter"
             ]
@@ -906,12 +890,8 @@ diagnose and repair the underlying issue.  Detailed information follows:
         index_links_dict: OrderedDict,
         validation_and_profiling_result_site_keys: List[ValidationResultIdentifier],
     ) -> None:
-        if (
-            # TODO why is this duplicated?
-            self.site_section_builders_config.get("validations", "None")
-            and self.site_section_builders_config.get("validations", "None")
-            not in FALSEY_YAML_STRINGS
-        ):
+        validations = self.site_section_builders_config.get("validations", "None")
+        if validations and validations not in FALSEY_YAML_STRINGS:
             validations_run_name_filter = self.site_section_builders_config[
                 "validations"
             ]["run_name_filter"]
