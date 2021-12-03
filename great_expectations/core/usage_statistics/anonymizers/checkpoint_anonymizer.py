@@ -15,12 +15,10 @@ class CheckpointAnonymizer(Anonymizer):
         anonymized_info_dict: dict = {
             "anonymized_name": self.anonymize(name),
         }
-        anonymized_info_dict.update(
-            self.anonymize_object_info(
-                anonymized_info_dict=anonymized_info_dict,
-                ge_classes=self._ge_classes,
-                object_config=config,
-            )
+        self.anonymize_object_info(
+            anonymized_info_dict=anonymized_info_dict,
+            ge_classes=self._ge_classes,
+            object_config=config,
         )
         return anonymized_info_dict
 
