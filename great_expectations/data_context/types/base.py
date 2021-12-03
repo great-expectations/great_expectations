@@ -2363,17 +2363,9 @@ class CheckpointConfig(BaseYamlConfig):
 
         memo[id(self)] = result
         for key, value in self.to_json_dict().items():
-            # TODO: <Alex>ALEX</Alex>
-            # if value is not None:
-            #     # noinspection PyArgumentList
-            #     value_copy = copy.deepcopy(value, memo)
-            #     setattr(result, key, value_copy)
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
             # noinspection PyArgumentList
             value_copy = copy.deepcopy(value, memo)
             setattr(result, key, value_copy)
-            # TODO: <Alex>ALEX</Alex>
 
         restore_runtime_parameters_batch_data_references_into_config(
             config=self, batch_data_references=batch_data_references
