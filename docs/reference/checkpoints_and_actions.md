@@ -151,49 +151,17 @@ values={[
 ]}>
 
 <TabItem value="tab0">
-This configuration specifies full validation dictionaries - no nesting (defaults) are used. When run, this Checkpoint will perform one validation of a single batch of data, against a single Expectation Suite ("users.delivery").
+This configuration specifies full validation dictionaries - no nesting (defaults) are used. When run, this Checkpoint will perform one validation of a single batch of data, against a single Expectation Suite ("my_expectation_suite").
 
 #### YAML:
 
-  ```yaml
-  name: my_fancy_checkpoint
-  config_version: 1
-  class_name: Checkpoint
-  run_name_template: %Y-%M-foo-bar-template-$VAR
-  validations:
-    - batch_request:
-        datasource_name: my_datasource
-        data_connector_name: my_special_data_connector
-        data_asset_name: users
-        data_connector_query:
-          index: -1
-      expectation_suite_name: users.delivery
-      action_list:
-        - name: store_validation_result
-          action:
-            class_name: StoreValidationResultAction
-        - name: store_evaluation_params
-          action:
-            class_name: StoreEvaluationParametersAction
-        - name: update_data_docs
-          action:
-            class_name: UpdateDataDocsAction
-      evaluation_parameters:
-        param1: $MY_PARAM
-        param2: 1 + $OLD_PARAM
-      runtime_configuration:
-        result_format:
-          result_format: BASIC
-          partial_unexpected_count: 20
-  ```
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```
 
 #### runtime:
 
-  ```python
-  context.run_checkpoint(
-    checkpoint_name="my_fancy_checkpoint"
-)
-  ```
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```
 
   </TabItem>
   <TabItem value="tab1">
@@ -201,51 +169,13 @@ This configuration specifies full validation dictionaries - no nesting (defaults
 
 #### YAML:
 
-  ```yaml
-  name: my_fancy_checkpoint
-  config_version: 1
-  class_name: Checkpoint
-  run_name_template: %Y-%M-foo-bar-template-$VAR
-  validations:
-    - batch_request:
-        datasource_name: my_datasource
-        data_connector_name: my_special_data_connector
-        data_asset_name: users
-        data_connector_query:
-          index: -1
-    - batch_request:
-        datasource_name: my_datasource
-        data_connector_name: my_other_data_connector
-        data_asset_name: users
-        data_connector_query:
-          index: -2
-  expectation_suite_name: users.delivery
-  action_list:
-    - name: store_validation_result
-      action:
-        class_name: StoreValidationResultAction
-    - name: store_evaluation_params
-      action:
-        class_name: StoreEvaluationParametersAction
-    - name: update_data_docs
-      action:
-        class_name: UpdateDataDocsAction
-  evaluation_parameters:
-    param1: $MY_PARAM
-    param2: 1 + $OLD_PARAM
-  runtime_configuration:
-    result_format:
-      result_format: BASIC
-      partial_unexpected_count: 20
-  ```
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```
 
 #### runtime:
 
-  ```python
-  context.run_checkpoint(
-    checkpoint_name="my_fancy_checkpoint"
-)
-  ```
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```
 
   </TabItem>
   <TabItem value="tab2">
@@ -253,61 +183,13 @@ This configuration omits the `validations` key from the YAML, which means a `val
 
 #### YAML:
 
-  ```yaml
-  name: my_base_checkpoint
-  config_version: 1
-  class_name: Checkpoint
-  run_name_template: %Y-%M-foo-bar-template-$VAR
-  action_list:
-    - name: store_validation_result
-      action:
-        class_name: StoreValidationResultAction
-    - name: store_evaluation_params
-      action:
-        class_name: StoreEvaluationParametersAction
-    - name: update_data_docs
-      action:
-        class_name: UpdateDataDocsAction
-  evaluation_parameters:
-    param1: $MY_PARAM
-    param2: 1 + $OLD_PARAM
-  runtime_configuration:
-    result_format:
-      result_format: BASIC
-      partial_unexpected_count: 20
-  ```
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```
 
 #### runtime:
 
-  ```python
-  context.run_checkpoint(
-    checkpoint_name="my_base_checkpoint",
-    validations=[
-        {
-            "batch_request": {
-                "datasource_name": "my_datasource"
-                                   "data_connector_name": "my_special_data_connector"
-                                                          "data_asset_name": "users"
-                                                                             "data_connector_query": {
-    "index": -1
-}
-},
-"expectation_suite_name": "users.delivery"
-},
-{
-    "batch_request": {
-        "datasource_name": "my_datasource"
-                           "data_connector_name": "my_other_data_connector"
-                                                  "data_asset_name": "users"
-                                                                     "data_connector_query": {
-    "index": -2
-}
-},
-"expectation_suite_name": "users.diagnostic"
-}
-]
-)
-  ```
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```
 
   </TabItem>
   <TabItem value="tab3">
@@ -315,36 +197,13 @@ This configuration omits the `validations` key from the YAML, which means a `val
 
 #### YAML:
 
-  ```yaml
-  name: my_fancy_checkpoint
-  config_version: 1
-  class_name: Checkpoint
-  template_name: my_base_checkpoint
-  validations:
-    - batch_request:
-        datasource_name: my_datasource
-        data_connector_name: my_special_data_connector
-        data_asset_name: users
-        data_connector_query:
-          index: -1
-      expectation_suite_name: users.delivery
-    - batch_request:
-        datasource_name: my_datasource
-        data_connector_name: my_other_data_connector
-        data_asset_name: users
-        data_connector_query:
-          index: -2
-      expectation_suite_name: users.diagnostic
-  ```
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```
 
 #### runtime:
 
-  ```python
-  # Same as the parameterized run of previous "my_base_checkpoint" example
-context.run_checkpoint(
-    checkpoint_name="my_fancy_checkpoint"
-)
-  ```
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```
 
   </TabItem>
   <TabItem value="tab4">
@@ -352,63 +211,13 @@ context.run_checkpoint(
 
 #### YAML, using SimpleCheckpoint:
 
-  ```yaml
-  name: my_checkpoint
-  config_version: 1
-  class_name: SimpleCheckpoint
-  validations:
-    - batch_request:
-        datasource_name: my_datasource
-        data_connector_name: my_data_connector
-        data_asset_name: MyDataAsset
-        data_connector_query:
-          index: -1
-      expectation_suite_name: my_suite
-  site_names:
-    - my_diagnostic_data_docs_site
-  slack_webhook: http://my_slack_webhook.com
-  notify_on: failure
-  notify_with:
-    - my_diagnostic_data_docs_site
-  ```
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```
 
 #### Equivalent YAML, using Checkpoint:
 
-  ```yaml
-  name: my_checkpoint
-  config_version: 1
-  class_name: Checkpoint
-  validations:
-    - batch_request:
-        datasource_name: my_datasource
-        data_connector_name: my_data_connector
-        data_asset_name: MyDataAsset
-        data_connector_query:
-          index: -1
-      expectation_suite_name: my_suite
-  action_list:
-    - name: store_validation_result
-      action:
-        class_name: StoreValidationResultAction
-    - name: store_evaluation_params
-      action:
-        class_name: StoreEvaluationParametersAction
-    - name: update_data_docs
-      action:
-        class_name: UpdateDataDocsAction
-        site_names:
-          - my_diagnostic_data_docs_site
-    - name: send_slack_notification
-      action:
-        class_name: SlackNotificationAction
-        slack_webhook: http://my_slack_webhook.com
-        notify_on: failure
-        notify_with:
-          - my_diagnostic_data_docs_site
-        renderer:
-          module_name: great_expectations.render.renderer.slack_renderer
-          class_name: SlackRenderer
-  ```
+```python file=file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L105-L119
+```
 
 #### runtime:
 
