@@ -1082,6 +1082,15 @@ class NotebooksConfigSchema(Schema):
         return NotebooksConfig(**data)
 
 
+class ProgressBarsConfig(DictDot):
+    def __init__(self, enabled: bool = True):
+        self._enabled = enabled
+
+
+class ProgressBarsConfigSchema(Schema):
+    enabled = fields.Boolean(default=True)
+
+
 class ConcurrencyConfig(DictDot):
     """WARNING: This class is experimental."""
 
@@ -1173,6 +1182,7 @@ class DataContextConfigSchema(Schema):
     )
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
+    progress_bars = fields.Nested(ProgressBarsConfigSchema)
     concurrency = fields.Nested(ConcurrencyConfigSchema)
 
     # noinspection PyMethodMayBeStatic
@@ -1783,6 +1793,7 @@ class DataContextConfig(BaseYamlConfig):
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
+        progress_bars: Optional[ProgressBarsConfig] = None,
     ):
         # Set defaults
         if config_version is None:
@@ -1834,6 +1845,10 @@ class DataContextConfig(BaseYamlConfig):
         elif isinstance(concurrency, dict):
             concurrency = ConcurrencyConfig(**concurrency)
         self.concurrency: ConcurrencyConfig = concurrency
+
+        if progress_bars is None:
+            progress_bars = ProgressBarsConfig()
+        self.progress_bars = progress_bars
 
         super().__init__(commented_map=commented_map)
 
@@ -2436,3 +2451,4 @@ anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
+progressBarsConfigSchema = ProgressBarsConfigSchema()

@@ -694,7 +694,6 @@ class Validator:
                 pbar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
                     desc="Calculating Metrics",
-                    disable=len(graph.edges) < 3,
                 )
                 pbar.update(0)
 

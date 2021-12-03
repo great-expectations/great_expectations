@@ -77,6 +77,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     DatasourceConfig,
     GeCloudConfig,
+    ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
@@ -102,12 +103,13 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.exceptions import DataContextError, InvalidKeyError
+from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import (
     filter_properties_dict,
+    silence_progress_bars,
     verify_dynamic_loading_support,
 )
 from great_expectations.validator.validator import BridgeValidator, Validator
@@ -818,6 +820,10 @@ class BaseDataContext:
     @property
     def concurrency(self) -> ConcurrencyConfig:
         return self.project_config_with_variables_substituted.concurrency
+
+    @property
+    def progress_bars(self) -> ProgressBarsConfig:
+        return self.project_config_with_variables_substituted.progress_bars
 
     @property
     def notebooks(self):
@@ -4040,6 +4046,9 @@ class DataContext(BaseDataContext):
             ge_cloud_mode=ge_cloud_mode,
             ge_cloud_config=ge_cloud_config,
         )
+
+        if self.progress_bars and not self.progress_bars["enabled"]:
+            silence_progress_bars()
 
         # save project config if data_context_id auto-generated or global config values applied
         project_config_dict = dataContextConfigSchema.dump(project_config)
