@@ -2,6 +2,7 @@ import logging
 import os
 import traceback
 from collections import OrderedDict
+from typing import List
 
 import great_expectations.exceptions as exceptions
 from great_expectations.core.util import nested_update
@@ -737,6 +738,44 @@ class DefaultSiteIndexBuilder:
         if self.show_how_to_buttons:
             index_links_dict["cta_object"] = self.get_calls_to_action()
 
+        self._add_expectations_to_index_links(index_links_dict, skip_and_clean_missing)
+        validation_and_profiling_result_site_keys = (
+            self._build_validation_and_profiling_result_site_keys(
+                skip_and_clean_missing
+            )
+        )
+        self._add_profiling_to_index_links(
+            index_links_dict, validation_and_profiling_result_site_keys
+        )
+        self._add_validations_to_index_links(
+            index_links_dict, validation_and_profiling_result_site_keys
+        )
+
+        viewable_content = ""
+        try:
+            rendered_content = self.renderer_class.render(index_links_dict)
+            viewable_content = self.view_class.render(
+                rendered_content,
+                data_context_id=self.data_context_id,
+                show_how_to_buttons=self.show_how_to_buttons,
+            )
+        except Exception as e:
+            exception_message = f"""\
+An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
+not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
+diagnose and repair the underlying issue.  Detailed information follows:
+            """
+            exception_traceback = traceback.format_exc()
+            exception_message += (
+                f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
+            )
+            logger.error(exception_message)
+
+        return self.target_store.write_index_page(viewable_content), index_links_dict
+
+    def _add_expectations_to_index_links(
+        self, index_links_dict: OrderedDict, skip_and_clean_missing: bool
+    ) -> None:
         if (
             # TODO why is this duplicated?
             self.site_section_builders_config.get("expectations", "None")
@@ -772,6 +811,9 @@ class DefaultSiteIndexBuilder:
                     section_name="expectations",
                 )
 
+    def _build_validation_and_profiling_result_site_keys(
+        self, skip_and_clean_missing: bool
+    ) -> List[ValidationResultIdentifier]:
         validation_and_profiling_result_site_keys = []
         if (
             # TODO why is this duplicated?
@@ -814,6 +856,14 @@ class DefaultSiteIndexBuilder:
                     else:
                         cleaned_keys.append(validation_result_site_key)
                 validation_and_profiling_result_site_keys = cleaned_keys
+
+        return validation_and_profiling_result_site_keys
+
+    def _add_profiling_to_index_links(
+        self,
+        index_links_dict: OrderedDict,
+        validation_and_profiling_result_site_keys: List[ValidationResultIdentifier],
+    ) -> None:
 
         if (
             # TODO why is this duplicated?
@@ -862,6 +912,11 @@ class DefaultSiteIndexBuilder:
                     )
                     logger.warning(error_msg)
 
+    def _add_validations_to_index_links(
+        self,
+        index_links_dict: OrderedDict,
+        validation_and_profiling_result_site_keys: List[ValidationResultIdentifier],
+    ) -> None:
         if (
             # TODO why is this duplicated?
             self.site_section_builders_config.get("validations", "None")
@@ -919,28 +974,6 @@ class DefaultSiteIndexBuilder:
                         str(validation_result_key.to_tuple())
                     )
                     logger.warning(error_msg)
-
-        viewable_content = ""
-        try:
-            rendered_content = self.renderer_class.render(index_links_dict)
-            viewable_content = self.view_class.render(
-                rendered_content,
-                data_context_id=self.data_context_id,
-                show_how_to_buttons=self.show_how_to_buttons,
-            )
-        except Exception as e:
-            exception_message = f"""\
-An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
-not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
-diagnose and repair the underlying issue.  Detailed information follows:
-            """
-            exception_traceback = traceback.format_exc()
-            exception_message += (
-                f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
-            )
-            logger.error(exception_message)
-
-        return self.target_store.write_index_page(viewable_content), index_links_dict
 
 
 class CallToActionButton:
