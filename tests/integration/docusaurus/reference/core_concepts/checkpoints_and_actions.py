@@ -197,6 +197,31 @@ runtime_configuration:
 context.add_checkpoint(**yaml.load(nesting_with_defaults))
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 assert results.success == True
+first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
+second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
+
+first_expectation_suite = first_validation_result["meta"]["expectation_suite_name"]
+first_data_asset = first_validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+second_expectation_suite = second_validation_result["meta"]["expectation_suite_name"]
+second_data_asset = second_validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+assert first_expectation_suite == "my_expectation_suite"
+assert first_data_asset == "yellow_tripdata_sample_2019-01"
+assert second_expectation_suite == "my_expectation_suite"
+assert second_data_asset == "yellow_tripdata_sample_2019-02"
+documentation_results = """
+print(first_expectation_suite)
+my_expectation_suite
+
+print(first_data_asset)
+yellow_tripdata_sample_2019-01
+
+print(second_expectation_suite)
+my_expectation_suite
+
+print(second_data_asset)
+yellow_tripdata_sample_2019-02
+"""
+
 
 keys_passed_at_runtime = """
 name: my_base_checkpoint
@@ -245,8 +270,31 @@ results = context.run_checkpoint(
         },
     ],
 )
-assert results.checkpoint_config.validations[0]["expectation_suite_name"] == "my_expectation_suite"
-assert results.checkpoint_config.validations[1]["expectation_suite_name"] == "my_other_expectation_suite"
+assert results.success == True
+first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
+second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
+
+first_expectation_suite = first_validation_result["meta"]["expectation_suite_name"]
+first_data_asset = first_validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+second_expectation_suite = second_validation_result["meta"]["expectation_suite_name"]
+second_data_asset = second_validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+assert first_expectation_suite == "my_expectation_suite"
+assert first_data_asset == "yellow_tripdata_sample_2019-01"
+assert second_expectation_suite == "my_other_expectation_suite"
+assert second_data_asset == "yellow_tripdata_sample_2019-02"
+documentation_results = """
+print(first_expectation_suite)
+my_expectation_suite
+
+print(first_data_asset)
+yellow_tripdata_sample_2019-01
+
+print(second_expectation_suite)
+my_other_expectation_suite
+
+print(second_data_asset)
+yellow_tripdata_sample_2019-02
+"""
 
 using_template = """
 name: my_checkpoint
@@ -272,6 +320,30 @@ validations:
 context.add_checkpoint(**yaml.load(using_template))
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 assert results.success == True
+first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
+second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
+
+first_expectation_suite = first_validation_result["meta"]["expectation_suite_name"]
+first_data_asset = first_validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+second_expectation_suite = second_validation_result["meta"]["expectation_suite_name"]
+second_data_asset = second_validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+assert first_expectation_suite == "my_expectation_suite"
+assert first_data_asset == "yellow_tripdata_sample_2019-01"
+assert second_expectation_suite == "my_other_expectation_suite"
+assert second_data_asset == "yellow_tripdata_sample_2019-02"
+documentation_results = """
+print(first_expectation_suite)
+my_expectation_suite
+
+print(first_data_asset)
+yellow_tripdata_sample_2019-01
+
+print(second_expectation_suite)
+my_other_expectation_suite
+
+print(second_data_asset)
+yellow_tripdata_sample_2019-02
+"""
 
 using_simple_checkpoint = """
 name: my_checkpoint
@@ -335,3 +407,16 @@ equivalent_using_checkpoint = equivalent_using_checkpoint.replace(
 context.add_checkpoint(**yaml.load(equivalent_using_checkpoint))
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 assert results.success == True
+validation_result = list(results.run_results.items())[0][1]["validation_result"]
+
+expectation_suite = validation_result["meta"]["expectation_suite_name"]
+data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+assert expectation_suite == "my_expectation_suite"
+assert data_asset == "yellow_tripdata_sample_2019-01"
+documentation_results = """
+print(expectation_suite)
+my_expectation_suite
+
+print(data_asset)
+yellow_tripdata_sample_2019-01
+"""
