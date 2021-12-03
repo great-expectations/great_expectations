@@ -2042,6 +2042,9 @@ class CheckpointConfig(BaseYamlConfig):
         self._class_name = class_name
 
         super().__init__(commented_map=commented_map)
+        # TODO: <Alex>ALEX</Alex>
+        # assert "_config_version" in self, "ALEX_TEST_FAIL"
+        # TODO: <Alex>ALEX</Alex>
 
     def update(
         self,
