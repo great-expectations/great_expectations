@@ -188,10 +188,10 @@ class ExpectationSuite(SerializableDictDot):
             "data_asset_type",
             "meta",
         ]
-        attributes_as_dot_dict: DotDict = DotDict()
-        for k in attributes_to_copy:
-            setattr(attributes_as_dot_dict, k, deepcopy(getattr(self, k)))
-        return ExpectationSuite(**attributes_as_dot_dict)
+        new_suite_as_dot_dict: DotDict = DotDict()
+        for key in attributes_to_copy:
+            setattr(new_suite_as_dot_dict, key, deepcopy(getattr(self, key)))
+        return ExpectationSuite(**new_suite_as_dot_dict)
 
     def to_json_dict(self):
         myself = expectationSuiteSchema.dump(self)
