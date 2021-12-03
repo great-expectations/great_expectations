@@ -41,6 +41,11 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.registry import _registered_expectations
 
 try:
+    import black
+except ImportError:
+    black = None
+
+try:
     # This library moved in python 3.8
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
@@ -62,8 +67,6 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
-
-logger = logging.getLogger(__name__)
 
 SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "batch": "batches",
@@ -919,23 +922,19 @@ def lint_code(code: str) -> str:
     # NOTE: Chetan 20211111 - This import was failing in Azure with 20.8b1 so we bumped up the version to 21.8b0
     # While this seems to resolve the issue, the root cause is yet to be determined.
 
-    try:
-        import black
-
-        black_file_mode = black.FileMode()
-        if not isinstance(code, str):
-            raise TypeError
-        try:
-            linted_code = black.format_file_contents(
-                code, fast=True, mode=black_file_mode
-            )
-            return linted_code
-        except (black.NothingChanged, RuntimeError):
-            return code
-    except ImportError:
+    if black is None:
         logger.warning(
             "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
         )
+        return code
+
+    black_file_mode = black.FileMode()
+    if not isinstance(code, str):
+        raise TypeError
+    try:
+        linted_code = black.format_file_contents(code, fast=True, mode=black_file_mode)
+        return linted_code
+    except (black.NothingChanged, RuntimeError):
         return code
 
 
