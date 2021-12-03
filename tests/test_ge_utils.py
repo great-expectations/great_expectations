@@ -1,4 +1,5 @@
 import copy
+import logging
 import os
 
 import pytest
@@ -256,18 +257,28 @@ def test_convert_nulls_to_None_no_match():
     assert res == text
 
 
-def test_convert_nulls_to_None_with_match():
+def test_convert_nulls_to_None_with_match(caplog):
     text = """
     "ge_cloud_id": null,
     "expectation_context": {"description": null},
     """
-    res = convert_nulls_to_None(text)
-
     expected = """
     "ge_cloud_id": None,
     "expectation_context": {"description": None},
     """
+
+    with caplog.at_level(logging.INFO):
+        res = convert_nulls_to_None(text)
+
     assert res == expected
+    assert (
+        "Replaced 'ge_cloud_id: null' with 'ge_cloud_id: None' before writing to file"
+        in caplog.text
+    )
+    assert (
+        "Replaced 'description: null' with 'description: None' before writing to file"
+        in caplog.text
+    )
 
 
 def test_get_currently_executing_function_call_arguments(a=None, *args, **kwargs):

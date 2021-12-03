@@ -1,3 +1,4 @@
+import copy
 import json
 import logging
 from copy import deepcopy
@@ -1383,17 +1384,14 @@ class ExpectationConfigurationSchema(Schema):
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(lambda: ExpectationContextSchema)
 
+    REMOVE_KEYS_IF_NONE = ["ge_cloud_id"]
+
     @post_dump
-    def remove_null_values(self, data: dict, **kwargs):
-        # Will remove `ge_cloud_id` if not used
-        to_delete = []
-        for key, value in data.items():
-            if value is None:
-                to_delete.append(key)
-
-        for key in to_delete:
-            del data[key]
-
+    def clean_null_attrs(self, data: dict, **kwargs):
+        data = copy.deepcopy(data)
+        for key in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
         return data
 
     # noinspection PyUnusedLocal
