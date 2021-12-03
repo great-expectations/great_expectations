@@ -179,7 +179,24 @@ def test_get_existing_expectation_suite(data_context_parameterized_expectation_s
     assert len(expectation_suite.expectations) == 2
 
 
-def test_get_new_expectation_suite(data_context_parameterized_expectation_suite):
+def test_get_existing_expectation_suite_with_data_context(
+    data_context_parameterized_expectation_suite,
+):
+    expectation_suite = (
+        data_context_parameterized_expectation_suite.get_expectation_suite(
+            parameterized_expectation_suite_name
+        )
+    )
+    assert (
+        expectation_suite.expectation_suite_name == parameterized_expectation_suite_name
+    )
+    assert (
+        expectation_suite.data_context is data_context_parameterized_expectation_suite
+    )
+    assert len(expectation_suite.expectations) == 2
+
+
+def test_create_new_expectation_suite(data_context_parameterized_expectation_suite):
     expectation_suite = (
         data_context_parameterized_expectation_suite.create_expectation_suite(
             "this_data_asset_does_not_exist.default"
@@ -188,6 +205,25 @@ def test_get_new_expectation_suite(data_context_parameterized_expectation_suite)
     assert (
         expectation_suite.expectation_suite_name
         == "this_data_asset_does_not_exist.default"
+    )
+    assert len(expectation_suite.expectations) == 0
+
+
+def test_create_new_expectation_suite_with_reference_to_data_context(
+    data_context_parameterized_expectation_suite,
+):
+    expectation_suite = (
+        data_context_parameterized_expectation_suite.create_expectation_suite(
+            expectation_suite_name="this_data_asset_does_not_exist.default",
+            data_context=data_context_parameterized_expectation_suite,
+        )
+    )
+    assert (
+        expectation_suite.expectation_suite_name
+        == "this_data_asset_does_not_exist.default"
+    )
+    assert (
+        expectation_suite.data_context is data_context_parameterized_expectation_suite
     )
     assert len(expectation_suite.expectations) == 0
 
