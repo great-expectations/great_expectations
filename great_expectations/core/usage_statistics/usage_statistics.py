@@ -23,6 +23,9 @@ from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer impor
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
     BatchRequestAnonymizer,
 )
+from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
+    CheckpointRunAnonymizer,
+)
 from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
     DataDocsSiteAnonymizer,
 )
@@ -44,7 +47,8 @@ from great_expectations.core.usage_statistics.anonymizers.validation_operator_an
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
 )
-from great_expectations.core.util import nested_update
+from great_expectations.core.util import nested_update, get_datetime_string_from_strftime_format
+from great_expectations.data_context.types.base import CheckpointConfig
 
 STOP_SIGNAL = object()
 
@@ -75,6 +79,7 @@ class UsageStatisticsHandler:
         self._batch_request_anonymizer = BatchRequestAnonymizer(data_context_id)
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
+        self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
         try:
             self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
         except ValueError:
@@ -474,6 +479,107 @@ def get_batch_list_usage_statistics(data_context, *args, **kwargs):
                 "get_batch_list_usage_statistics: Unable to create anonymized_batch_request payload field"
             )
 
+    return payload
+
+
+def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
+    print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT_OBJ-0: {checkpoint} ; TYPE: {str(type(checkpoint))}')
+    # TODO: <Alex>ALEX</Alex>
+    a = hasattr(checkpoint, "_substituted_config")
+    # TODO: <Alex>ALEX</Alex>
+    print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT.SUBSTITUTED_CONFIG_EXISTS-0: {a} ; TYPE: {str(type(a))}')
+    try:
+        data_context_id = checkpoint.data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+    anonymizer = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+    payload = {}
+
+    if checkpoint._usage_statistics_handler:
+        # noinspection PyBroadException
+        try:
+            checkpoint_run_anonymizer: CheckpointRunAnonymizer = (
+                checkpoint._usage_statistics_handler._checkpoint_run_anonymizer
+            )
+            # TODO: <Alex>ALEX</Alex>
+            # args = args + (checkpoint,)
+            # TODO: <Alex>ALEX</Alex>
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] *****************************************ARGS-BEFORE-BEFORE-BEFORE-BEFORE-BEFORE: {args} ; TYPE: {str(type(args))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] *****************************************KWARGS-BEFORE-BEFORE-BEFORE-BEFORE-BEFORE: {kwargs} ; TYPE: {str(type(kwargs))}')
+            # TODO: <Alex>ALEX</Alex>
+            # pos_args: tuple = copy.deepcopy(args)
+            # kw_args: dict = copy.deepcopy(kwargs)
+            # resolved_runtime_kwargs: dict = (
+            #     checkpoint.resolve_config_using_acceptable_arguments(*pos_args, **kw_args)
+            # )
+            # TODO: <Alex>ALEX</Alex>
+            # resolved_runtime_kwargs: dict
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # substituted_runtime_config: CheckpointConfig
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # resolved_runtime_kwargs, substituted_runtime_config = checkpoint.resolve_config_using_acceptable_arguments(*args, **kwargs)
+            # TODO: <Alex>ALEX</Alex>
+            substituted_runtime_config: CheckpointConfig = checkpoint.resolve_config_using_acceptable_arguments(*args, **kwargs)
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG-COMPUTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!****************')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG: ; TYPE: {str(type(substituted_runtime_config))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG.TO_JSON_DICT():\n{substituted_runtime_config.to_json_dict()}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG:\n{substituted_runtime_config} ; TYPE: {str(type(substituted_runtime_config))}')
+            resolved_runtime_kwargs: dict = substituted_runtime_config.to_json_dict()
+            # TODO: <Alex>ALEX</Alex>
+            # print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_CONFIG: {substituted_runtime_config} ; TYPE: {str(type(substituted_runtime_config))}')
+            # TODO: <Alex>ALEX</Alex>
+            # resolved_runtime_kwargs, substituted_runtime_config = resolve_checkpoint_config(*args, **kwargs)
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] RESOLVED_RUNTIME_KWARGS-COMPUTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!****************')
+            print( f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT_OBJ-1: {checkpoint} ; TYPE: {str(type(checkpoint))}')
+            # TODO: <Alex>ALEX</Alex>
+            # resolved_runtime_kwargs: dict = {}
+            # TODO: <Alex>ALEX</Alex>
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] RESOLVED_RUNTIME_KWARGS: {resolved_runtime_kwargs} ; TYPE: {str(type(resolved_runtime_kwargs))}')
+            # print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG: {substituted_runtime_config} ; TYPE: {str(type(substituted_runtime_config))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT.SUBSTITUTED_CONFIG: {checkpoint._substituted_config} ; TYPE: {str(type(checkpoint._substituted_config))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT_OBJ-2: {checkpoint} ; TYPE: {str(type(checkpoint))}')
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            a = hasattr(checkpoint, "_substituted_config")
+            # TODO: <Alex>ALEX</Alex>
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT.SUBSTITUTED_CONFIG_EXISTS-1: {a} ; TYPE: {str(type(a))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG: ; TYPE: {str(type(substituted_runtime_config))}')
+            # print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG.TO_JSON_DICT: {substituted_runtime_config.to_json_dict()} ; TYPE: {str(type(substituted_runtime_config.to_json_dict()))}')
+            # print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG: {substituted_runtime_config} ; TYPE: {str(type(substituted_runtime_config))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT.SUBSTITUTED_CONFIG: ; TYPE: {str(type(checkpoint._substituted_config))}')
+            print( f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT_OBJ-3: {checkpoint} ; TYPE: {str(type(checkpoint))}')
+            # print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT.SUBSTITUTED_CONFIG: {checkpoint._substituted_config} ; TYPE: {str(type(checkpoint._substituted_config))}')
+            # TODO: <Alex>ALEX</Alex>
+            # checkpoint._substituted_config.update(other_config=substituted_runtime_config)
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            payload = checkpoint_run_anonymizer.anonymize_checkpoint_run(
+                *(checkpoint,), **resolved_runtime_kwargs
+            )
+            # TODO: <Alex>ALEX</Alex>
+            # payload = checkpoint_run_anonymizer.anonymize_checkpoint_run(
+            #     *args, **kwargs
+            # )
+            # TODO: <Alex>ALEX</Alex>
+            # kwargs.update(resolved_runtime_kwargs)
+            # TODO: <Alex>ALEX</Alex>
+            # checkpoint._substituted_config = substituted_runtime_config
+            # TODO: <Alex>ALEX</Alex>
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] *****************************************PAYLOAD-COMPUTED!!!-AFTER-AFTER-AFTER-AFTER:\n{payload} ; TYPE: {str(type(payload))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] *****************************************ARGS-AFTER-AFTER-AFTER-AFTER-AFTER: {args} ; TYPE: {str(type(args))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] *****************************************KWARGS-AFTER-AFTER-AFTER-AFTER: {kwargs} ; TYPE: {str(type(kwargs))}')
+            # TODO: <Alex>ALEX</Alex>
+        except Exception:
+            logger.debug(
+                "get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
+            )
+
+    print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] *****************************************PAYLOAD-RETURNING!!!-AFTER-AFTER-AFTER-AFTER:\n{payload} ; TYPE: {str(type(payload))}')
     return payload
 
 
