@@ -102,7 +102,7 @@ from great_expectations.data_context.util import (
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.exceptions import DataContextError, InvalidKeyError
+from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
