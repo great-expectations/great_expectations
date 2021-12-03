@@ -855,7 +855,9 @@ is "{str(type(config))}", which is illegal).
         ):
             default_batch_data = config["runtime_parameters"]["batch_data"]
 
-    if ("validations" in config or hasattr(config, "validations")) and config["validations"]:
+    if ("validations" in config or hasattr(config, "validations")) and config[
+        "validations"
+    ]:
         validations_batch_data_list = []
         for val in config["validations"]:
             if (
@@ -907,7 +909,9 @@ is "{str(type(config))}", which is illegal).
             else:
                 delattr(config["runtime_parameters"], "batch_data")
 
-    if ("validations" in config or hasattr(config, "validations")) and config["validations"]:
+    if ("validations" in config or hasattr(config, "validations")) and config[
+        "validations"
+    ]:
         for val in config["validations"]:
             if (
                 "batch_request" in val
@@ -946,9 +950,13 @@ is "{str(type(config))}", which is illegal).
         and default_batch_data is not None
     ):
         if replace_value_with_type_string:
-            config["batch_request"]["runtime_parameters"]["batch_data"] = str(type(default_batch_data))
+            config["batch_request"]["runtime_parameters"]["batch_data"] = str(
+                type(default_batch_data)
+            )
         else:
-            config["batch_request"]["runtime_parameters"]["batch_data"] = default_batch_data
+            config["batch_request"]["runtime_parameters"][
+                "batch_data"
+            ] = default_batch_data
     else:
         if (
             ("runtime_parameters" in config or hasattr(config, "runtime_parameters"))
@@ -956,7 +964,9 @@ is "{str(type(config))}", which is illegal).
             and default_batch_data is not None
         ):
             if replace_value_with_type_string:
-                config["runtime_parameters"]["batch_data"] = str(type(default_batch_data))
+                config["runtime_parameters"]["batch_data"] = str(
+                    type(default_batch_data)
+                )
             else:
                 config["runtime_parameters"]["batch_data"] = default_batch_data
 
@@ -971,13 +981,20 @@ is "{str(type(config))}", which is illegal).
                 and val["batch_request"] is not None
                 and "runtime_parameters" in val["batch_request"]
                 and val["batch_request"]["runtime_parameters"] is not None
-                and ("batch_data" not in val["batch_request"]["runtime_parameters"] or val["batch_request"]["runtime_parameters"]["batch_data"] is None)
+                and (
+                    "batch_data" not in val["batch_request"]["runtime_parameters"]
+                    or val["batch_request"]["runtime_parameters"]["batch_data"] is None
+                )
                 and validations_batch_data_list[idx] is not None
             ):
                 if replace_value_with_type_string:
-                    val["batch_request"]["runtime_parameters"]["batch_data"] = str(type(validations_batch_data_list[idx]))
+                    val["batch_request"]["runtime_parameters"]["batch_data"] = str(
+                        type(validations_batch_data_list[idx])
+                    )
                 else:
-                    val["batch_request"]["runtime_parameters"]["batch_data"] = validations_batch_data_list[idx]
+                    val["batch_request"]["runtime_parameters"][
+                        "batch_data"
+                    ] = validations_batch_data_list[idx]
 
 
 def standardize_batch_request_display_ordering(
