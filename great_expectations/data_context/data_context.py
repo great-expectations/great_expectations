@@ -3343,6 +3343,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
 
+        print(f'\n[ALEX_TEST] [DATA_CONTEXT.RUN_CHECKPOINT()] CHECKPOINT_RUN_ARGUMENTS: {checkpoint_run_arguments} ; TYPE: {str(type(checkpoint_run_arguments))}')
         return checkpoint.run(**checkpoint_run_arguments)
 
     def test_yaml_config(

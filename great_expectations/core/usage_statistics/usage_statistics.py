@@ -1,4 +1,5 @@
 import atexit
+import copy
 import datetime
 import json
 import logging
@@ -488,6 +489,9 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
     a = hasattr(checkpoint, "_substituted_config")
     # TODO: <Alex>ALEX</Alex>
     print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] CHECKPOINT.SUBSTITUTED_CONFIG_EXISTS-0: {a} ; TYPE: {str(type(a))}')
+    # TODO: <Alex>ALEX</Alex>
+    checkpoint_config: CheckpointConfig = copy.deepcopy(checkpoint.config)
+    # TODO: <Alex>ALEX</Alex>
     try:
         data_context_id = checkpoint.data_context.data_context_id
     except AttributeError:
@@ -524,7 +528,8 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
             # TODO: <Alex>ALEX</Alex>
             # resolved_runtime_kwargs, substituted_runtime_config = checkpoint.resolve_config_using_acceptable_arguments(*args, **kwargs)
             # TODO: <Alex>ALEX</Alex>
-            substituted_runtime_config: CheckpointConfig = checkpoint.resolve_config_using_acceptable_arguments(*args, **kwargs)
+            # substituted_runtime_config: CheckpointConfig = checkpoint.resolve_config_using_acceptable_arguments(*args, **kwargs)
+            substituted_runtime_config: CheckpointConfig = checkpoint_run_anonymizer.resolve_config_using_acceptable_arguments(*(checkpoint,), **kwargs)
             print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG-COMPUTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!****************')
             print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG: ; TYPE: {str(type(substituted_runtime_config))}')
             print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] SUBSTITUTED_RUNTIME_CONFIG.TO_JSON_DICT():\n{substituted_runtime_config.to_json_dict()}')
@@ -558,6 +563,10 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
             # checkpoint._substituted_config.update(other_config=substituted_runtime_config)
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX</Alex>
+            # checkpoint._substituted_config = None
+            checkpoint._config = checkpoint_config
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
             payload = checkpoint_run_anonymizer.anonymize_checkpoint_run(
                 *(checkpoint,), **resolved_runtime_kwargs
             )
@@ -570,7 +579,7 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
             # TODO: <Alex>ALEX</Alex>
             # checkpoint._substituted_config = substituted_runtime_config
             # TODO: <Alex>ALEX</Alex>
-            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] *****************************************PAYLOAD-COMPUTED!!!-AFTER-AFTER-AFTER-AFTER:\n{payload} ; TYPE: {str(type(payload))}')
+            print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] *****************************************PAYLOAD-COMPUTED!!!-AFTER-AFTER-AFTER-AFTER:\n{payload} ; TYPE: {str(type(payload))} ; YAY!!!!*********************THIS_IS_FINAL_PAYLOAD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] *****************************************ARGS-AFTER-AFTER-AFTER-AFTER-AFTER: {args} ; TYPE: {str(type(args))}')
             print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] *****************************************KWARGS-AFTER-AFTER-AFTER-AFTER: {kwargs} ; TYPE: {str(type(kwargs))}')
             # TODO: <Alex>ALEX</Alex>
@@ -579,7 +588,7 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
                 "get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
             )
 
-    print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] *****************************************PAYLOAD-RETURNING!!!-AFTER-AFTER-AFTER-AFTER:\n{payload} ; TYPE: {str(type(payload))}')
+    print(f'\n[ALEX_TEST] [GET_CHECKPOINT_RUN_USAGE_STATISTICS] *****************************************PAYLOAD-RETURNING!!!-AFTER-AFTER-AFTER-AFTER:\n{payload}  ; YAY-HOORAY!!!!!!!!!!!*********************THIS_IS_FINAL_PAYLOAD-RETURNING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!; TYPE: {str(type(payload))}')
     return payload
 
 

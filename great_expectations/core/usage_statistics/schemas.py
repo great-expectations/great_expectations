@@ -625,7 +625,9 @@ anonymized_checkpoint_run_schema = {
                 "type": "string",
                 "enum": [
                     "evaluation_parameters",
-                    "result_format",
+                    # TODO: <Alex>ALEX</Alex>
+                    # "result_format",
+                    # TODO: <Alex>ALEX</Alex>
                     "runtime_configuration",
                     "profilers",
                 ],
