@@ -552,7 +552,7 @@
           "max_value": 10,
           "min_value": 10,
           "strict_max": false,
-          "row_condition": "y == 'abc'",
+          "row_condition": "y == \"abc\"",
           "condition_parser": "pandas"
         },
         "out": {
@@ -574,7 +574,7 @@
         },
         "out": {
           "unexpected_list": [9],
-          "unexpected_index_list": [0],
+          "unexpected_index_list": [8],
           "success": false
         }
       },{
