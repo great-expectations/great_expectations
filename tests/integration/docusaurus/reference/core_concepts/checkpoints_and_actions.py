@@ -201,9 +201,13 @@ first_validation_result = list(results.run_results.items())[0][1]["validation_re
 second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
 
 first_expectation_suite = first_validation_result["meta"]["expectation_suite_name"]
-first_data_asset = first_validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+first_data_asset = first_validation_result["meta"]["active_batch_definition"][
+    "data_asset_name"
+]
 second_expectation_suite = second_validation_result["meta"]["expectation_suite_name"]
-second_data_asset = second_validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+second_data_asset = second_validation_result["meta"]["active_batch_definition"][
+    "data_asset_name"
+]
 assert first_expectation_suite == "my_expectation_suite"
 assert first_data_asset == "yellow_tripdata_sample_2019-01"
 assert second_expectation_suite == "my_expectation_suite"
@@ -275,9 +279,13 @@ first_validation_result = list(results.run_results.items())[0][1]["validation_re
 second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
 
 first_expectation_suite = first_validation_result["meta"]["expectation_suite_name"]
-first_data_asset = first_validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+first_data_asset = first_validation_result["meta"]["active_batch_definition"][
+    "data_asset_name"
+]
 second_expectation_suite = second_validation_result["meta"]["expectation_suite_name"]
-second_data_asset = second_validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+second_data_asset = second_validation_result["meta"]["active_batch_definition"][
+    "data_asset_name"
+]
 assert first_expectation_suite == "my_expectation_suite"
 assert first_data_asset == "yellow_tripdata_sample_2019-01"
 assert second_expectation_suite == "my_other_expectation_suite"
@@ -324,9 +332,13 @@ first_validation_result = list(results.run_results.items())[0][1]["validation_re
 second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
 
 first_expectation_suite = first_validation_result["meta"]["expectation_suite_name"]
-first_data_asset = first_validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+first_data_asset = first_validation_result["meta"]["active_batch_definition"][
+    "data_asset_name"
+]
 second_expectation_suite = second_validation_result["meta"]["expectation_suite_name"]
-second_data_asset = second_validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+second_data_asset = second_validation_result["meta"]["active_batch_definition"][
+    "data_asset_name"
+]
 assert first_expectation_suite == "my_expectation_suite"
 assert first_data_asset == "yellow_tripdata_sample_2019-01"
 assert second_expectation_suite == "my_other_expectation_suite"
