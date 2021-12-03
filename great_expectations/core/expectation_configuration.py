@@ -27,7 +27,6 @@ from great_expectations.marshmallow__shade import (
     Schema,
     ValidationError,
     fields,
-    post_dump,
     post_load,
 )
 from great_expectations.types import SerializableDictDot
@@ -943,11 +942,11 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def __init__(
         self,
-        expectation_type: str,
-        kwargs: dict,
-        meta: Optional[dict] = None,
-        success_on_last_run: Optional[bool] = None,
-        ge_cloud_id: Optional[str] = None,
+        expectation_type,
+        kwargs,
+        meta=None,
+        success_on_last_run=None,
+        ge_cloud_id=None,
         expectation_context: Optional[ExpectationContext] = None,
     ):
         if not isinstance(expectation_type, str):
@@ -967,20 +966,17 @@ class ExpectationConfiguration(SerializableDictDot):
         ensure_json_serializable(meta)
         self.meta = meta
         self.success_on_last_run = success_on_last_run
-        self._ge_cloud_id = ge_cloud_id
+
+        if ge_cloud_id is not None:
+            self._ge_cloud_id = ge_cloud_id
 
         if expectation_context is None:
             expectation_context = ExpectationContext()
         self._expectation_context = expectation_context
 
     def process_evaluation_parameters(
-        self,
-        evaluation_parameters,
-        interactive_evaluation: bool = True,
-        data_context: Optional[
-            Any
-        ] = None,  # Can't type as DataContext due to import cycle
-    ) -> None:
+        self, evaluation_parameters, interactive_evaluation=True, data_context=None
+    ):
         if self._raw_kwargs is not None:
             logger.debug(
                 "evaluation_parameters have already been built on this expectation"
@@ -998,7 +994,7 @@ class ExpectationConfiguration(SerializableDictDot):
         if len(substituted_parameters) > 0:
             self.meta["substituted_parameters"] = substituted_parameters
 
-    def get_raw_configuration(self) -> "ExpectationConfiguration":
+    def get_raw_configuration(self):
         # return configuration without substituted evaluation parameters
         raw_config = deepcopy(self)
         if raw_config._raw_kwargs is not None:
@@ -1039,30 +1035,36 @@ class ExpectationConfiguration(SerializableDictDot):
         return self
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
-        return self._ge_cloud_id
+    def ge_cloud_id(self):
+        if hasattr(self, "_ge_cloud_id"):
+            return self._ge_cloud_id
+        else:
+            return None
 
     @ge_cloud_id.setter
-    def ge_cloud_id(self, value: str) -> None:
+    def ge_cloud_id(self, value):
         self._ge_cloud_id = value
 
     @property
-    def expectation_context(self) -> ExpectationContext:
-        return self._expectation_context
+    def expectation_context(self):
+        if hasattr(self, "_expectation_context"):
+            return self._expectation_context
+        else:
+            return None
 
     @expectation_context.setter
-    def expectation_context(self, value: ExpectationContext) -> None:
+    def expectation_context(self, value):
         self._expectation_context = value
 
     @property
-    def expectation_type(self) -> str:
+    def expectation_type(self):
         return self._expectation_type
 
     @property
-    def kwargs(self) -> dict:
+    def kwargs(self):
         return self._kwargs
 
-    def _get_default_custom_kwargs(self) -> dict:
+    def _get_default_custom_kwargs(self):
         # NOTE: this is a holdover until class-first expectations control their
         # defaults, and so defaults are inherited.
         if self.expectation_type.startswith("expect_column_pair"):
@@ -1102,7 +1104,7 @@ class ExpectationConfiguration(SerializableDictDot):
             "default_kwarg_values": {},
         }
 
-    def get_domain_kwargs(self) -> dict:
+    def get_domain_kwargs(self):
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
@@ -1133,7 +1135,7 @@ class ExpectationConfiguration(SerializableDictDot):
             )
         return domain_kwargs
 
-    def get_success_kwargs(self) -> dict:
+    def get_success_kwargs(self):
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
@@ -1161,7 +1163,7 @@ class ExpectationConfiguration(SerializableDictDot):
         success_kwargs.update(domain_kwargs)
         return success_kwargs
 
-    def get_runtime_kwargs(self, runtime_configuration: Optional[dict] = None) -> dict:
+    def get_runtime_kwargs(self, runtime_configuration=None):
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
@@ -1196,9 +1198,7 @@ class ExpectationConfiguration(SerializableDictDot):
         runtime_kwargs.update(success_kwargs)
         return runtime_kwargs
 
-    def applies_to_same_domain(
-        self, other_expectation_configuration: "ExpectationConfiguration"
-    ) -> bool:
+    def applies_to_same_domain(self, other_expectation_configuration):
         if (
             not self.expectation_type
             == other_expectation_configuration.expectation_type
@@ -1209,11 +1209,7 @@ class ExpectationConfiguration(SerializableDictDot):
             == other_expectation_configuration.get_domain_kwargs()
         )
 
-    def isEquivalentTo(
-        self,
-        other: Union[dict, "ExpectationConfiguration"],
-        match_type: str = "success",
-    ) -> bool:
+    def isEquivalentTo(self, other, match_type="success"):
         """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
@@ -1251,7 +1247,6 @@ class ExpectationConfiguration(SerializableDictDot):
                     self.kwargs == other.kwargs,
                 )
             )
-        return False
 
     def __eq__(self, other):
         """ExpectationConfiguration equality does include meta, but ignores instance identity."""
@@ -1280,7 +1275,7 @@ class ExpectationConfiguration(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def to_json_dict(self) -> dict:
+    def to_json_dict(self):
         myself = expectationConfigurationSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
@@ -1348,7 +1343,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
     def validate(
         self,
-        validator: Any,  # Can't type as Validator due to import cycle
+        validator,
         runtime_configuration=None,
     ):
         expectation_impl = self._get_expectation_impl()
@@ -1383,22 +1378,9 @@ class ExpectationConfigurationSchema(Schema):
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(lambda: ExpectationContextSchema)
 
-    @post_dump
-    def remove_null_values(self, data: dict, **kwargs):
-        # Will remove `ge_cloud_id` if not used
-        to_delete = []
-        for key, value in data.items():
-            if value is None:
-                to_delete.append(key)
-
-        for key in to_delete:
-            del data[key]
-
-        return data
-
     # noinspection PyUnusedLocal
     @post_load
-    def make_expectation_configuration(self, data: dict, **kwargs):
+    def make_expectation_configuration(self, data, **kwargs):
         return ExpectationConfiguration(**data)
 
 
