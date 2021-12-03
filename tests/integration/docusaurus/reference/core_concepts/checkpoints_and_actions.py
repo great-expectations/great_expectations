@@ -99,7 +99,7 @@ typed_results = {
     "success": True,
 }
 
-documentation_results = {
+results = {
     "run_id": RunIdentifier,
     "run_results": {
         ValidationResultIdentifier: {
@@ -115,7 +115,7 @@ documentation_results = {
     "success": True,
 }
 
-assert typed_results == documentation_results
+assert typed_results == results
 
 # A few different Checkpoint examples
 os.environ["VAR"] = "ge"
