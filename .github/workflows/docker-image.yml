@@ -3,7 +3,10 @@ name: Docker Image CI
 on:
   push:
     branches: [ develop ]
-
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,12 +19,26 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
 
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: ./
+          context: .
           file: ./docker/Dockerfile
           build-args: PYTHON_DOCKER_TAG=3.7-buster
-          push: true
-          tags: great_expectations:latest
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
