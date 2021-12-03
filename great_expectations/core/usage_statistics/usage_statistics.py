@@ -42,7 +42,7 @@ from great_expectations.core.usage_statistics.anonymizers.validation_operator_an
     ValidationOperatorAnonymizer,
 )
 from great_expectations.core.usage_statistics.schemas import (
-    usage_statistics_record_schema,
+    anonymized_usage_statistics_record_schema,
 )
 from great_expectations.core.util import nested_update
 
@@ -223,7 +223,7 @@ class UsageStatisticsHandler:
                 message["event_payload"] = self.build_init_payload()
             message = self.build_envelope(message=message)
             if not self.validate_message(
-                message, schema=usage_statistics_record_schema
+                message, schema=anonymized_usage_statistics_record_schema
             ):
                 return
             self._message_queue.put(message)
