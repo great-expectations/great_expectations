@@ -2065,6 +2065,9 @@ class BaseDataContext:
             validation_operators.append(value)
         return validation_operators
 
+    def send_usage_message(self, event, event_payload, success):
+        send_usage_message(self, event, event_payload, success)
+
     def create_expectation_suite(
         self,
         expectation_suite_name: str,

@@ -62,6 +62,7 @@ def test_comprehensive_list_of_messages():
         "data_context.save_expectation_suite",
         "data_context.test_yaml_config",
         "datasource.sqlalchemy.connect",
+        "expectation_suite.add_expectation",
     }
 
 
@@ -237,6 +238,22 @@ def test_usage_stats_empty_payload_messages():
         "data_context.build_data_docs",
         "data_context.open_data_docs",
         "data_context.run_checkpoint",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            jsonschema.validate(
+                message,
+                usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                empty_payload_schema,
+            )
+
+
+def test_usage_stats_expectation_suite_messages():
+    usage_stats_records_messages = [
+        "expectation_suite.add_expectation",
     ]
     for message_type in usage_stats_records_messages:
         for message in valid_usage_statistics_messages[message_type]:

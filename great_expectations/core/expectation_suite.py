@@ -530,6 +530,14 @@ class ExpectationSuite(SerializableDictDot):
             More than one match
             One match if overwrite_existing = False
         """
+        if self.data_context:
+            usage_stats_event_name: str = "expectation_suite.add_expectation"
+            usage_stats_event_payload: dict = {}
+            self.data_context.send_usage_message(
+                event=usage_stats_event_name,
+                event_payload=usage_stats_event_payload,
+                success=False,
+            )
         found_expectation_indexes = self.find_expectation_indexes(
             expectation_configuration, match_type
         )
