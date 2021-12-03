@@ -5,9 +5,9 @@ from .batch_kwargs import *
 
 # noinspection SpellCheckingInspection
 class DatasourceTypes(enum.Enum):
-    PANDAS = "pandas"
-    SPARK = "spark"
-    SQL = "sqlalchemy"
+    PANDAS = "Pandas"
+    SPARK = "Spark"
+    SQL = "SQLAlchemy"
 
 
 # noinspection SpellCheckingInspection
