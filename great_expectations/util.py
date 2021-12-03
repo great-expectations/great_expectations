@@ -945,6 +945,11 @@ def convert_nulls_to_None(code: str) -> str:
     Designed to provide security when serializing GE objects and writing them to Jupyter Notebooks.
     """
     pattern = r'"([a-zA-Z0-9_]+)": null'
+    result = re.search(pattern, code)
+    if result:
+        for match in result.groups():
+            code = code.replace(f'"{match}": null', f'"{match}": None')
+            logger.info(f"Replaced '{match}: null' with '{match}: None'")
     return re.sub(pattern, r'"\1": None', code)
 
 
