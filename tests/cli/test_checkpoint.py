@@ -941,7 +941,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     stdout: str = result.stdout
     assert "expectation_suite suite_from_template_1 not found" in stdout
 
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -953,6 +953,65 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
                 "event": "cli.checkpoint.run.begin",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "48533197103a407af37326b0224a97df",
+                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
+                    "anonymized_expectation_suite_name": "4987b41d9e7012f6a86a8b3939739eff",
+                    "anonymized_action_list": [
+                        {
+                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                            "parent_class": "StoreValidationResultAction",
+                        },
+                        {
+                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                            "parent_class": "StoreEvaluationParametersAction",
+                        },
+                        {
+                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                            "parent_class": "UpdateDataDocsAction",
+                        },
+                    ],
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "41cc60fba42f099f878a4bb295dc08c9",
+                                    "anonymized_data_connector_name": "4cffb49069fa5fececc8032aa41ff791",
+                                    "anonymized_data_asset_name": "5dce9f4b8abd8adbb4f719e05fceecab",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "data_connector_query"
+                                ],
+                            },
+                            "anonymized_expectation_suite_name": "4987b41d9e7012f6a86a8b3939739eff",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        }
+                    ],
+                    "checkpoint_run_optional_top_level_keys": [
+                        "evaluation_parameters",
+                        "runtime_configuration",
+                    ],
+                },
+                "success": False,
             }
         ),
         mock.call(
@@ -1072,7 +1131,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     # assert "No such file or directory" in stdout
     assert ("No such file or directory" in stdout) or ("does not exist" in stdout)
 
-    assert mock_emit.call_count == 6
+    assert mock_emit.call_count == 7
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -1111,6 +1170,40 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
                     "data_connector_query_keys": ["index"],
                     "runtime_parameters_keys": ["path"],
                     "batch_spec_passthrough_keys": ["reader_method"],
+                },
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "ca68117150c32e08330af3cebad565ce",
+                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                                    "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "batch_spec_passthrough",
+                                    "data_connector_query",
+                                ],
+                                "batch_spec_passthrough_keys": ["reader_method"],
+                                "runtime_parameters_keys": ["path"],
+                                "data_connector_query_keys": ["index"],
+                            },
+                            "anonymized_expectation_suite_name": "f6e1151b49fceb15ae3de4eb60f62be4",
+                        }
+                    ],
+                    "checkpoint_run_optional_top_level_keys": [
+                        "evaluation_parameters",
+                        "runtime_configuration",
+                    ],
                 },
                 "success": False,
             }
@@ -1214,7 +1307,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         in stdout
     )
 
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -1228,8 +1321,15 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         ),
         mock.call(
             {
+                "event": "checkpoint.run",
                 "event_payload": {},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
                 "event": "data_context.run_checkpoint",
+                "event_payload": {},
                 "success": False,
             }
         ),
@@ -1314,7 +1414,7 @@ def test_checkpoint_run_on_non_existent_validations(
         in stdout
     )
 
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
     assert mock_emit.call_args_list == [
         mock.call(
             {"event_payload": {}, "event": "data_context.__init__", "success": True}
@@ -1324,6 +1424,13 @@ def test_checkpoint_run_on_non_existent_validations(
                 "event": "cli.checkpoint.run.begin",
                 "event_payload": {"api_version": "v3"},
                 "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {},
+                "success": False,
             }
         ),
         mock.call(
@@ -1434,7 +1541,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
         ]
     )
 
-    assert mock_emit.call_count == 8
+    assert mock_emit.call_count == 9
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -1491,6 +1598,37 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
             {
                 "event": "data_context.build_data_docs",
                 "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
+                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                                    "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "data_connector_query"
+                                ],
+                                "data_connector_query_keys": ["index"],
+                            },
+                            "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                        }
+                    ],
+                    "checkpoint_run_optional_top_level_keys": [
+                        "evaluation_parameters",
+                        "runtime_configuration",
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -1603,7 +1741,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
         ]
     )
 
-    assert mock_emit.call_count == 8
+    assert mock_emit.call_count == 9
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -1658,6 +1796,36 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
             {
                 "event_payload": {},
                 "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
+                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
+                                    "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
+                                    "anonymized_data_asset_name": "c30b60089ede018ad9680153ba85adaf",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "data_connector_query"
+                                ],
+                            },
+                            "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                        }
+                    ],
+                    "checkpoint_run_optional_top_level_keys": [
+                        "evaluation_parameters",
+                        "runtime_configuration",
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -1774,7 +1942,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
         ]
     )
 
-    assert mock_emit.call_count == 8
+    assert mock_emit.call_count == 9
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -1831,6 +1999,38 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
             {
                 "event": "data_context.build_data_docs",
                 "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
+                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "getting_started_datasource",
+                                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                                    "anonymized_data_asset_name": "9104abd890c05a364f379443b9f43825",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "batch_spec_passthrough",
+                                    "data_connector_query",
+                                ],
+                                "batch_spec_passthrough_keys": ["reader_options"],
+                            },
+                            "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                        }
+                    ],
+                    "checkpoint_run_optional_top_level_keys": [
+                        "evaluation_parameters",
+                        "runtime_configuration",
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -1945,7 +2145,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     stdout: str = result.stdout
     assert "Validation failed!" in stdout
 
-    assert mock_emit.call_count == 8
+    assert mock_emit.call_count == 9
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -2002,6 +2202,37 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
             {
                 "event": "data_context.build_data_docs",
                 "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
+                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                                    "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "data_connector_query"
+                                ],
+                                "data_connector_query_keys": ["index"],
+                            },
+                            "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                        }
+                    ],
+                    "checkpoint_run_optional_top_level_keys": [
+                        "evaluation_parameters",
+                        "runtime_configuration",
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -2104,7 +2335,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
     stdout: str = result.stdout
     assert "Validation failed!" in stdout
 
-    assert mock_emit.call_count == 8
+    assert mock_emit.call_count == 9
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -2159,6 +2390,36 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
             {
                 "event_payload": {},
                 "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
+                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
+                                    "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
+                                    "anonymized_data_asset_name": "61b23df5338c9164d0f9514847cba679",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "data_connector_query"
+                                ],
+                            },
+                            "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                        }
+                    ],
+                    "checkpoint_run_optional_top_level_keys": [
+                        "evaluation_parameters",
+                        "runtime_configuration",
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -2266,7 +2527,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     stdout: str = result.stdout
     assert "Validation failed!" in stdout
 
-    assert mock_emit.call_count == 8
+    assert mock_emit.call_count == 9
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -2327,6 +2588,39 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
             {
                 "event_payload": {},
                 "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
+                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "getting_started_datasource",
+                                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "batch_spec_passthrough",
+                                    "data_connector_query",
+                                ],
+                                "batch_spec_passthrough_keys": ["reader_options"],
+                                "data_connector_query_keys": ["index"],
+                            },
+                            "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                        }
+                    ],
+                    "checkpoint_run_optional_top_level_keys": [
+                        "evaluation_parameters",
+                        "runtime_configuration",
+                    ],
+                },
                 "success": True,
             }
         ),
@@ -2441,7 +2735,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
     assert "Exception occurred while running Checkpoint." in stdout
     assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
-    assert mock_emit.call_count == 7
+    assert mock_emit.call_count == 8
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -2490,6 +2784,37 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
                     "anonymized_batch_kwarg_keys": [],
                     "anonymized_expectation_suite_name": "__not_found__",
                     "anonymized_datasource_name": "__not_found__",
+                },
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
+                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                                    "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "data_connector_query"
+                                ],
+                                "data_connector_query_keys": ["index"],
+                            },
+                            "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                        }
+                    ],
+                    "checkpoint_run_optional_top_level_keys": [
+                        "evaluation_parameters",
+                        "runtime_configuration",
+                    ],
                 },
                 "success": False,
             }
@@ -2596,7 +2921,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     assert "Exception occurred while running Checkpoint." in stdout
     assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
-    assert mock_emit.call_count == 7
+    assert mock_emit.call_count == 8
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -2643,6 +2968,36 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
                     "anonymized_batch_kwarg_keys": [],
                     "anonymized_expectation_suite_name": "__not_found__",
                     "anonymized_datasource_name": "__not_found__",
+                },
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
+                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
+                                    "anonymized_data_connector_name": "6a6c3e6d98f688927f5434b7c19bfb05",
+                                    "anonymized_data_asset_name": "96a15275c07d53de6b4a9464704b12d8",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "data_connector_query"
+                                ],
+                            },
+                            "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                        }
+                    ],
+                    "checkpoint_run_optional_top_level_keys": [
+                        "evaluation_parameters",
+                        "runtime_configuration",
+                    ],
                 },
                 "success": False,
             }
@@ -2760,7 +3115,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     assert "Exception occurred while running Checkpoint." in stdout
     assert 'Error: The column "Name" in BatchData does not exist...' in stdout
 
-    assert mock_emit.call_count == 7
+    assert mock_emit.call_count == 8
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call] = [
@@ -2813,6 +3168,39 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
                     "anonymized_batch_kwarg_keys": [],
                     "anonymized_expectation_suite_name": "__not_found__",
                     "anonymized_datasource_name": "__not_found__",
+                },
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
+                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "getting_started_datasource",
+                                    "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                                    "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "batch_spec_passthrough",
+                                    "data_connector_query",
+                                ],
+                                "batch_spec_passthrough_keys": ["reader_options"],
+                                "data_connector_query_keys": ["index"],
+                            },
+                            "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                        }
+                    ],
+                    "checkpoint_run_optional_top_level_keys": [
+                        "evaluation_parameters",
+                        "runtime_configuration",
+                    ],
                 },
                 "success": False,
             }
