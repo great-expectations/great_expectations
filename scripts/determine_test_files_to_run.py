@@ -48,6 +48,7 @@ import ast
 import glob
 import os
 import subprocess
+import sys
 from collections import namedtuple
 from typing import Dict, List, Tuple
 
@@ -182,21 +183,21 @@ def traverse_graph(root: str, graph: Dict[str, List[str]], depth: int) -> List[s
     return sorted(seen)
 
 
-def determine_relevant_source_files(changed_files: List[str], depth: int) -> List[str]:
+def determine_relevant_source_files(
+    ge_graph, changed_file: str, depth: int
+) -> List[str]:
     """
     Perform graph traversal on all changed files to determine which source files are possibly influenced by the commit.
     Using a dependency graph from the `great_expectations/` directory, we can perform graph traversal for all changed files.
     """
-    ge_graph = create_dependency_graph("great_expectations")
     res = set()
-    for file in changed_files:
-        deps = traverse_graph(file, ge_graph, depth)
-        res.update(deps)
+    deps = traverse_graph(changed_file, ge_graph, depth)
+    res.update(deps)
     return sorted(res)
 
 
 def determine_files_to_test(
-    source_files: List[str], changed_test_files: List[str]
+    tests_graph, source_files: List[str], changed_test_files: List[str]
 ) -> List[str]:
     """
     Perform graph traversal on all source files to determine which test files need to be run.
@@ -204,7 +205,6 @@ def determine_files_to_test(
     Use a dependency graph of our `tests/` directory, we're able to map relevant source file to all tests that use
     that file as an import.
     """
-    tests_graph = create_dependency_graph("tests")
     res = {
         file for file in changed_test_files
     }  # Ensure we include test files that were caught by `get_changed_files()`
@@ -217,12 +217,42 @@ def determine_files_to_test(
     return sorted(res)
 
 
+def get_test_map():
+    with open("tests_per_test_file.txt") as f:
+        lines = f.readlines()
+
+    mapping = {}
+    for line in lines:
+        name, count = line.split(" ")
+        name = name.strip()[:-1]
+        count = int(count.strip())
+        mapping[name] = count
+
+    return mapping
+
+
 def main():
-    changed_source_files, changed_test_files = get_changed_files()
-    relevant_files = determine_relevant_source_files(changed_source_files, depth=2)
-    files_to_test = determine_files_to_test(relevant_files, changed_test_files)
-    for file in files_to_test:
-        print(file)
+    test_map = get_test_map()
+    ge_graph = create_dependency_graph("great_expectations")
+    tests_graph = create_dependency_graph("tests")
+
+    def _helper(n):
+        for changed_file in glob.glob(f"great_expectations/**/*.py", recursive=True):
+            relevant_files = determine_relevant_source_files(
+                ge_graph, changed_file, depth=n
+            )
+            files_to_test = determine_files_to_test(tests_graph, relevant_files, [])
+            count = 0
+            for file in files_to_test:
+                count += test_map.get(file, 0)
+
+            print(f"D{n}", changed_file, count)
+
+    _helper(1)
+    _helper(2)
+    _helper(3)
+    _helper(4)
+    _helper(5)
 
 
 if __name__ == "__main__":
