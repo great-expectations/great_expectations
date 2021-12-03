@@ -222,39 +222,19 @@ def get_runtime_batch_request(
     if validation_batch_request is None:
         validation_batch_request = {}
 
-    print(f'\n[ALEX_TEST] [GET_RUNTIME_BATCH_REQUEST] VALIDATION_BATCH_REQUEST-0: {validation_batch_request} ; TYPE: {str(type(validation_batch_request))}')
     if isinstance(validation_batch_request, BatchRequest):
         validation_batch_request = validation_batch_request.to_dict()
-    print(f'\n[ALEX_TEST] [GET_RUNTIME_BATCH_REQUEST] VALIDATION_BATCH_REQUEST-1: {validation_batch_request} ; TYPE: {str(type(validation_batch_request))}')
 
-    print(f'\n[ALEX_TEST] [GET_RUNTIME_BATCH_REQUEST] RUNTIME_CONFIG_BATCH_REQUEST-0: {runtime_config_batch_request} ; TYPE: {str(type(runtime_config_batch_request))}')
     if isinstance(runtime_config_batch_request, BatchRequest):
         runtime_config_batch_request = runtime_config_batch_request.to_dict()
-    print(f'\n[ALEX_TEST] [GET_RUNTIME_BATCH_REQUEST] RUNTIME_CONFIG_BATCH_REQUEST-1: {runtime_config_batch_request} ; TYPE: {str(type(runtime_config_batch_request))}')
 
-    # TODO: <Alex>ALEX</Alex>
-    # validation_batch_request.update(runtime_config_batch_request)
-    # TODO: <Alex>ALEX</Alex>
-
-    # TODO: <Alex>ALEX</Alex>
     effective_batch_request: dict = dict(
         **runtime_config_batch_request, **validation_batch_request
     )
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # if "runtime_parameters" in effective_batch_request or isinstance(
-    #         validation_batch_request, RuntimeBatchRequest
-    # ):
-    #     batch_request_class = RuntimeBatchRequest
-    # else:
-    #     batch_request_class = BatchRequest
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     if "runtime_parameters" in effective_batch_request:
         batch_request_class = RuntimeBatchRequest
     else:
         batch_request_class = BatchRequest
-    # TODO: <Alex>ALEX</Alex>
 
     if (
         validation_batch_request.get("runtime_parameters") is not None
