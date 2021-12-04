@@ -1288,7 +1288,6 @@ def test_return_all_batch_definitions_too_many_sorters(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-# TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
 def test_get_full_file_path_pandas(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
@@ -1363,7 +1362,6 @@ azure_options:
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-# TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
 def test_get_full_file_path_spark(
     mock_azure_conn,
     mock_list_keys,
@@ -1442,7 +1440,6 @@ azure_options:
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-# TODO: <Alex>ALEX -- Remove this test once dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated  dependency of "DataConnector._get_full_file_path()" on ExecutionEngine type is eliminated.</Alex>
 def test_get_full_file_path_bad_execution_engine(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
