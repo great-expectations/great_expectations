@@ -15,6 +15,7 @@ import jsonschema
 import requests
 
 from great_expectations import __version__ as ge_version
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
     BatchAnonymizer,
@@ -379,7 +380,7 @@ def save_expectation_suite_usage_statistics(
     payload = {}
 
     if expectation_suite_name is None:
-        if isinstance(expectation_suite, "ExpectationSuite"):
+        if isinstance(expectation_suite, ExpectationSuite):
             expectation_suite_name = expectation_suite.expectation_suite_name
         elif isinstance(expectation_suite, dict):
             expectation_suite_name = expectation_suite.get("expectation_suite_name")
