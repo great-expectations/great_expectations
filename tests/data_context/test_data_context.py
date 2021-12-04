@@ -199,7 +199,7 @@ def test_add_expectation_to_expectation_suite(
             {
                 "event": "expectation_suite.add_expectation",
                 "event_payload": {},
-                "success": False,
+                "success": True,
             }
         )
     ]
