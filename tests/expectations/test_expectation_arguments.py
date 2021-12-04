@@ -1,5 +1,6 @@
 import logging
 from typing import List
+from unittest import mock
 
 import pandas as pd
 import pytest
@@ -100,7 +101,12 @@ def test_spark_df(test_pandas_df, spark_session):
     return df
 
 
-def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_catch_exceptions_no_exceptions(
+    mock_emit, in_memory_runtime_context, test_spark_df
+):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict = {
         "result_format": "SUMMARY",
@@ -111,7 +117,9 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
     }
 
     suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
+        expectation_suite_name="test_suite",
+        data_context=in_memory_runtime_context,
+        overwrite_existing=True,
     )
 
     expectation_configuration: ExpectationConfiguration
@@ -205,9 +213,16 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
     result = validator.expect_table_row_count_to_equal(**expectation_parameters)
     assert result.success
 
+    # DataContext used in the test is in-memory Context with no usage_statistics_handler configured
+    # Therefore there are no usage events that are triggered
+    assert mock_emit.call_count == 0
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_catch_exceptions_exception_occurred_catch_exceptions_false(
-    in_memory_runtime_context, test_spark_df
+    mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict = {
@@ -316,9 +331,16 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     )
     assert result.success
 
+    # DataContext used in the test is in-memory Context with no usage_statistics_handler configured
+    # Therefore there are no usage events that are triggered
+    assert mock_emit.call_count == 0
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_catch_exceptions_exception_occurred_catch_exceptions_true(
-    in_memory_runtime_context, test_spark_df
+    mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = True  # expect exceptions to be caught
     result_format: dict = {
@@ -459,9 +481,16 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         "exception_message" not in result.exception_info
     ) or not result.exception_info["exception_message"]
 
+    # DataContext used in the test is in-memory Context with no usage_statistics_handler configured
+    # Therefore there are no usage events that are triggered
+    assert mock_emit.call_count == 0
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_result_format_configured_no_set_default_override(
-    in_memory_runtime_context, test_spark_df
+    mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict
@@ -685,9 +714,16 @@ def test_result_format_configured_no_set_default_override(
     assert len(result.result.keys()) == 0
     assert result.result == {}
 
+    # DataContext used in the test is in-memory Context with no usage_statistics_handler configured
+    # Therefore there are no usage events that are triggered
+    assert mock_emit.call_count == 0
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_result_format_configured_with_set_default_override(
-    in_memory_runtime_context, test_spark_df
+    mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict
@@ -855,3 +891,7 @@ def test_result_format_configured_with_set_default_override(
     }
     assert len(result.result.keys()) == 0
     assert result.result == {}
+
+    # DataContext used in the test is in-memory Context with no usage_statistics_handler configured
+    # Therefore there are no usage events that are triggered
+    assert mock_emit.call_count == 0

@@ -2931,6 +2931,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_
         checkpoint.run(batch_request=batch_request)
 
 
+# MARKER
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     sa,
@@ -3031,6 +3032,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
 
+# MARKER
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     sa,
@@ -3145,6 +3147,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
 
+# MARKER
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     sa,
@@ -3246,6 +3249,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
 
+# MARKER
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     sa,

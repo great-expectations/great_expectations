@@ -530,19 +530,30 @@ class ExpectationSuite(SerializableDictDot):
             More than one match
             One match if overwrite_existing = False
         """
-        if self.data_context:
-            usage_stats_event_name: str = "expectation_suite.add_expectation"
-            usage_stats_event_payload: dict = {}
-            self.data_context.send_usage_message(
-                event=usage_stats_event_name,
-                event_payload=usage_stats_event_payload,
-                success=False,
+        try:
+            found_expectation_indexes = self.find_expectation_indexes(
+                expectation_configuration, match_type
             )
-        found_expectation_indexes = self.find_expectation_indexes(
-            expectation_configuration, match_type
-        )
+        except (TypeError, InvalidExpectationConfigurationError) as e:
+            if self.data_context:
+                usage_stats_event_name: str = "expectation_suite.add_expectation"
+                usage_stats_event_payload: dict = {}
+                self.data_context.send_usage_message(
+                    event=usage_stats_event_name,
+                    event_payload=usage_stats_event_payload,
+                    success=False,
+                )
+            raise e
 
         if len(found_expectation_indexes) > 1:
+            if self.data_context:
+                usage_stats_event_name: str = "expectation_suite.add_expectation"
+                usage_stats_event_payload: dict = {}
+                self.data_context.send_usage_message(
+                    event=usage_stats_event_name,
+                    event_payload=usage_stats_event_payload,
+                    success=False,
+                )
             raise ValueError(
                 "More than one matching expectation was found. Please be more specific with your search "
                 "criteria"
@@ -566,6 +577,14 @@ class ExpectationSuite(SerializableDictDot):
                     found_expectation_indexes[0]
                 ] = expectation_configuration
             else:
+                if self.data_context:
+                    usage_stats_event_name: str = "expectation_suite.add_expectation"
+                    usage_stats_event_payload: dict = {}
+                    self.data_context.send_usage_message(
+                        event=usage_stats_event_name,
+                        event_payload=usage_stats_event_payload,
+                        success=False,
+                    )
                 raise DataContextError(
                     "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
                     "ExpectationConfiguration, set overwrite_existing=True"
@@ -573,6 +592,14 @@ class ExpectationSuite(SerializableDictDot):
         else:
             self.append_expectation(expectation_configuration)
 
+        if self.data_context:
+            usage_stats_event_name: str = "expectation_suite.add_expectation"
+            usage_stats_event_payload: dict = {}
+            self.data_context.send_usage_message(
+                event=usage_stats_event_name,
+                event_payload=usage_stats_event_payload,
+                success=True,
+            )
         return expectation_configuration
 
     def get_grouped_and_ordered_expectations_by_column(

@@ -666,6 +666,9 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 
 
 @mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch(
     "great_expectations.data_context.data_context.BaseDataContext.save_expectation_suite"
 )
 @mock.patch(
@@ -674,6 +677,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_context_get_suite,
     mock_context_save_suite,
+    mock_emit,
     multi_batch_taxi_validator_ge_cloud_mode,
 ):
     """
@@ -682,6 +686,8 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GE Cloud
     :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GE Cloud
     """
+    # monkeypatch.delenv("GE_USAGE_STATS")
+
     mock_suite = ExpectationSuite(
         expectation_suite_name="validating_taxi_data",
         expectations=[
@@ -710,6 +716,8 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
         multi_batch_taxi_validator_ge_cloud_mode.get_expectation_suite().to_json_dict()
         == mock_suite.to_json_dict()
     )
+    # ensure that adding Expectation through Validator does not emit usage statistics event
+    assert mock_emit.call_count == 0
 
 
 def test_validator_can_instantiate_with_a_multi_batch_request(

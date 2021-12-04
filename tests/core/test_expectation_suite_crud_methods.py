@@ -1,4 +1,5 @@
 from copy import deepcopy
+from unittest import mock
 from uuid import UUID
 
 import pytest
@@ -138,16 +139,19 @@ def column_pair_expectation():
 
 
 @pytest.fixture
-def single_expectation_suite(exp1):
+def single_expectation_suite(exp1, empty_data_context_stats_enabled):
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1],
         meta={"notes": "This is an expectation suite."},
+        data_context=empty_data_context_stats_enabled,
     )
 
 
 @pytest.fixture
-def single_expectation_suite_with_expectation_ge_cloud_id(exp1):
+def single_expectation_suite_with_expectation_ge_cloud_id(
+    exp1, empty_data_context_stats_enabled
+):
     exp1_with_ge_cloud_id = deepcopy(exp1)
     exp1_with_ge_cloud_id.ge_cloud_id = UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774")
 
@@ -155,6 +159,7 @@ def single_expectation_suite_with_expectation_ge_cloud_id(exp1):
         expectation_suite_name="warning",
         expectations=[exp1_with_ge_cloud_id],
         meta={"notes": "This is an expectation suite."},
+        data_context=empty_data_context_stats_enabled,
     )
 
 
@@ -450,7 +455,11 @@ def test_patch_expectation_remove(exp5, exp8, domain_success_runtime_suite):
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_add_expectation(
+    mock_emit,
     exp1,
     exp2,
     exp4,
@@ -459,6 +468,7 @@ def test_add_expectation(
     different_suite,
     domain_success_runtime_suite,
 ):
+
     assert len(single_expectation_suite.expectations) == 1
     assert not single_expectation_suite.isEquivalentTo(baseline_suite)
     single_expectation_suite.add_expectation(
@@ -493,8 +503,44 @@ def test_add_expectation(
     # with pytest.raises(TypeError):
     #     single_expectation_suite.append_expectation(exp1.to_json_dict())
 
+    assert mock_emit.call_count == 4
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": False,
+            }
+        ),
+    ]
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_add_expectation_with_ge_cloud_id(
+    mock_emit,
     single_expectation_suite_with_expectation_ge_cloud_id,
 ):
     """
@@ -528,6 +574,18 @@ def test_add_expectation_with_ge_cloud_id(
     assert single_expectation_suite_with_expectation_ge_cloud_id.expectations[0].kwargs[
         "value_set"
     ] == [11, 22, 33, 44, 55]
+
+    # ensure usage statistics are being emitted correctly
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        )
+    ]
 
 
 def test_remove_all_expectations_of_type(
