@@ -50,11 +50,9 @@ class CheckpointRunAnonymizer(Anonymizer):
             anonymized_name = self.anonymize(name)
 
         config_version: Optional[Number] = kwargs.get("config_version")
-        anonymized_config_version: Optional[str]
+        config_version: Optional[str]
         if config_version is None:
-            anonymized_config_version = None
-        else:
-            anonymized_config_version = self.anonymize(str(config_version))
+            config_version = 1
 
         template_name: Optional[str] = kwargs.get("template_name")
         anonymized_template_name: Optional[str]
@@ -259,7 +257,7 @@ class CheckpointRunAnonymizer(Anonymizer):
 
         anonymized_checkpoint_run_properties_dict: Dict[str, List[str]] = {
             "anonymized_name": anonymized_name,
-            "anonymized_config_version": anonymized_config_version,
+            "config_version": config_version,
             "anonymized_template_name": anonymized_template_name,
             "anonymized_run_name_template": anonymized_run_name_template,
             "anonymized_expectation_suite_name": anonymized_expectation_suite_name,

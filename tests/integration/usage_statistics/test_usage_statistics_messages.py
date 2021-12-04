@@ -390,7 +390,7 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
-                "batch_request_required_top_level_properties": {
+                "anonymized_batch_request_required_top_level_properties": {
                     "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
                     "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
                     "anonymized_data_asset_name": "9104abd890c05a364f379443b9f43825",
@@ -407,7 +407,7 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
-                "batch_request_required_top_level_properties": {
+                "anonymized_batch_request_required_top_level_properties": {
                     "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
                     "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
                     "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
@@ -426,7 +426,7 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
-                "batch_request_required_top_level_properties": {
+                "anonymized_batch_request_required_top_level_properties": {
                     "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
                     "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
                     "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
@@ -445,7 +445,7 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
-                "batch_request_required_top_level_properties": {
+                "anonymized_batch_request_required_top_level_properties": {
                     "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                     "anonymized_data_connector_name": "e475f70ca0bcbaf2748b93da5e9867ec",
                     "anonymized_data_asset_name": "2621a5230efeef1973ff373dd12b1ac4",
@@ -454,8 +454,8 @@ valid_usage_statistics_messages = {
                     "data_connector_query",
                     "batch_spec_passthrough",
                 ],
-                "data_connector_query_keys": ["index"],
                 "batch_spec_passthrough_keys": ["reader_options"],
+                "data_connector_query_keys": ["index"],
             },
             "success": True,
             "version": "1.0.0",
@@ -468,7 +468,7 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
-                "batch_request_required_top_level_properties": {
+                "anonymized_batch_request_required_top_level_properties": {
                     "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                     "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
                     "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
@@ -477,9 +477,9 @@ valid_usage_statistics_messages = {
                     "data_connector_query",
                     "batch_spec_passthrough",
                 ],
+                "batch_spec_passthrough_keys": ["reader_method"],
                 "data_connector_query_keys": ["index"],
                 "runtime_parameters_keys": ["path"],
-                "batch_spec_passthrough_keys": ["reader_method"],
             },
             "success": False,
             "version": "1.0.0",
@@ -492,18 +492,18 @@ valid_usage_statistics_messages = {
         {
             "event": "data_context.get_batch_list",
             "event_payload": {
-                "batch_request_required_top_level_properties": {
+                "anonymized_batch_request_required_top_level_properties": {
                     "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                     "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
                     "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
                 },
                 "batch_request_optional_top_level_keys": [
-                    "data_connector_query",
                     "batch_spec_passthrough",
+                    "data_connector_query",
                 ],
                 "data_connector_query_keys": ["index"],
                 "runtime_parameters_keys": ["path"],
-                "batch_spec_passthrough_keys": ["reader_options", "reader_method"],
+                "batch_spec_passthrough_keys": ["reader_method", "reader_options"],
             },
             "success": False,
             "version": "1.0.0",
@@ -542,8 +542,8 @@ valid_usage_statistics_messages = {
     ],
     "data_context.run_checkpoint": [
         {
-            "event_payload": {},
             "event": "data_context.run_checkpoint",
+            "event_payload": {},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:28.070Z",
@@ -553,8 +553,8 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
         {
-            "event_payload": {},
             "event": "data_context.run_checkpoint",
+            "event_payload": {},
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:28.070Z",
@@ -565,19 +565,74 @@ valid_usage_statistics_messages = {
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
         },
     ],
-    "data_context.run_checkpoint": [
+    # TODO: <Alex>ALEX</Alex>
+    "checkpoint.run": [
         {
-            "event_payload": {},
-            "event": "data_context.run_checkpoint",
-            "success": True,
+            "event": "checkpoint.run",
+            "event_payload": {
+                "anonymized_name": "48533197103a407af37326b0224a97df",
+                "config_version": 1,
+                "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
+                "anonymized_expectation_suite_name": "4987b41d9e7012f6a86a8b3939739eff",
+                "anonymized_action_list": [
+                    {
+                        "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                        "parent_class": "StoreValidationResultAction",
+                    },
+                    {
+                        "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                        "parent_class": "StoreEvaluationParametersAction",
+                    },
+                    {
+                        "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                        "parent_class": "UpdateDataDocsAction",
+                    },
+                ],
+                "anonymized_validations": [
+                    {
+                        "anonymized_batch_request": {
+                            "anonymized_batch_request_required_top_level_properties": {
+                                "anonymized_datasource_name": "41cc60fba42f099f878a4bb295dc08c9",
+                                "anonymized_data_connector_name": "4cffb49069fa5fececc8032aa41ff791",
+                                "anonymized_data_asset_name": "5dce9f4b8abd8adbb4f719e05fceecab",
+                            },
+                            "batch_request_optional_top_level_keys": [
+                                "data_connector_query"
+                            ],
+                        },
+                        "anonymized_expectation_suite_name": "4987b41d9e7012f6a86a8b3939739eff",
+                        "anonymized_action_list": [
+                            {
+                                "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                "parent_class": "StoreValidationResultAction",
+                            },
+                            {
+                                "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                "parent_class": "StoreEvaluationParametersAction",
+                            },
+                            {
+                                "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                "parent_class": "UpdateDataDocsAction",
+                            },
+                        ],
+                    }
+                ],
+                "checkpoint_run_optional_top_level_keys": [
+                    "evaluation_parameters",
+                    "runtime_configuration",
+                ],
+            },
+            "success": False,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:28.070Z",
+            "event_duration": 123,
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
             "x-forwarded-for": "00.000.00.000, 00.000.000.000",
-        }
+        },
     ],
+    # TODO: <Alex>ALEX</Alex>
     "data_context.save_expectation_suite": [
         {
             "event_payload": {
@@ -1759,7 +1814,9 @@ for message_type, messages in valid_usage_statistics_messages.items():
         message_test_ids += [f"{message_type}_{idx}"]
 
 
-@pytest.mark.aws_integration
+# TODO: <Alex>ALEX</Alex>
+# @pytest.mark.aws_integration
+# TODO: <Alex>ALEX</Alex>
 @pytest.mark.parametrize("message", test_messages, ids=message_test_ids)
 def test_usage_statistics_message(message):
     """known message formats should be valid"""

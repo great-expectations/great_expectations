@@ -960,7 +960,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "48533197103a407af37326b0224a97df",
-                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "config_version": 1,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_expectation_suite_name": "4987b41d9e7012f6a86a8b3939739eff",
                     "anonymized_action_list": [
@@ -1179,7 +1179,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "ca68117150c32e08330af3cebad565ce",
-                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "config_version": 1,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -1606,7 +1606,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "config_version": 1,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -1804,7 +1804,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "config_version": 1,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -2007,7 +2007,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "config_version": 1,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -2210,7 +2210,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "config_version": 1,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -2398,7 +2398,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "config_version": 1,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -2596,7 +2596,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "config_version": 1,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -2793,7 +2793,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "config_version": 1,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -2977,7 +2977,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "config_version": 1,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -3177,7 +3177,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "anonymized_config_version": "8da69bb002134bf79ac529d45556e5be",
+                    "config_version": 1,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {

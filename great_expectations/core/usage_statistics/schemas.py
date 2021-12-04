@@ -457,9 +457,9 @@ anonymized_run_validation_operator_payload_schema = {
     "additionalProperties": False,
 }
 
-anonymized_validations_schema = {
+anonymized_validation_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "anonymized-validations",
+    "title": "anonymized-validation",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_batch_request": anonymized_batch_request_schema,
@@ -474,6 +474,15 @@ anonymized_validations_schema = {
         "anonymized_action_list": {"$ref": "#/definitions/anonymized_action_list"},
     },
     "additionalProperties": False,
+}
+
+anonymized_validations_list_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-validations",
+    "definitions": {"anonymized_validation": anonymized_validation_schema},
+    "type": "array",
+    "maxItems": 1000,
+    "items": {"$ref": "#/definitions/anonymized_validation"},
 }
 
 anonymized_save_or_edit_expectation_suite_payload_schema = {
@@ -594,15 +603,18 @@ anonymized_checkpoint_run_schema = {
     "title": "anonymized-checkpoint-run-payload",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
         "anonymized_run_time": anonymized_run_time_schema,
         "anonymized_batch_request": anonymized_batch_request_schema,
+        "anonymized_action": anonymized_action_schema,
         "anonymized_action_list": anonymized_action_list_schema,
-        "anonymized_validations": anonymized_validations_schema,
+        "anonymized_validation": anonymized_validation_schema,
+        "anonymized_validations": anonymized_validations_list_schema,
     },
     "type": "object",
     "properties": {
         "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
-        "anonymized_config_version": {"type": "number"},
+        "config_version": {"type": "number"},
         "anonymized_template_name": {"$ref": "#/definitions/anonymized_string"},
         "anonymized_run_name_template": {"$ref": "#/definitions/anonymized_string"},
         "anonymized_expectation_suite_name": {
@@ -625,9 +637,6 @@ anonymized_checkpoint_run_schema = {
                 "type": "string",
                 "enum": [
                     "evaluation_parameters",
-                    # TODO: <Alex>ALEX</Alex>
-                    # "result_format",
-                    # TODO: <Alex>ALEX</Alex>
                     "runtime_configuration",
                     "profilers",
                 ],
@@ -635,7 +644,7 @@ anonymized_checkpoint_run_schema = {
             "uniqueItems": True,
         },
     },
-    "required": ["anonymized_name, anonymized_config_version"],
+    "required": ["anonymized_name", "config_version"],
     "additionalProperties": False,
 }
 
@@ -664,6 +673,8 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_cli_new_ds_choice_payload": anonymized_cli_new_ds_choice_payload_schema,
         "anonymized_datasource_sqlalchemy_connect_payload": anonymized_datasource_sqlalchemy_connect_payload_schema,
         "anonymized_test_yaml_config_payload": anonymized_test_yaml_config_payload_schema,
+        "anonymized_validation": anonymized_validation_schema,
+        "anonymized_validations": anonymized_validations_list_schema,
         "anonymized_checkpoint_run": anonymized_checkpoint_run_schema,
     },
     "type": "object",

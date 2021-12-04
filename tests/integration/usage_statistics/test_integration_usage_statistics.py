@@ -11,7 +11,10 @@ import requests
 from great_expectations.data_context.util import file_relative_path
 
 USAGE_STATISTICS_QA_URL = (
-    "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+    # TODO: <Alex>ALEX</Alex>
+    # "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+    # TODO: <Alex>ALEX</Alex>
+    "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 )
 
 logGroupName = "/great_expectations/usage_statistics/qa"
