@@ -2,7 +2,7 @@
   {% set expectation_suite_name_dot_count = expectation_suite_name.count(".") -%}
 {% endif %}
 
-{% set glossary_url = "https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=walkthrough&utm_medium=glossary" %}
+{% set glossary_url = "https://greatexpectations.io/expectations" %}
 
 {% if "ValidationResults" in renderer_type or "ProfilingResults" in renderer_type %}
   {% set static_images_dir = ((expectation_suite_name_dot_count + 4) * "../") + "static/images/" -%}
