@@ -1,10 +1,10 @@
 """
-Usage: `python determine_test_files_to_run.py`
+Usage: `python determine_tests_to_run.py <DEPTH>`
 Output: A list of '\n' delimited file paths that represent relevant test files to run
         (using `xargs`, we can feed in this list to `pytest` in our Azure config)
 
 This script is used in our Azure pipeline (azure-pipelines.yml) to determine which test files to run in CI/CD.
-Rather than test all tests each time, the test files that are selected are based on which source files that have changed;
+Rather than test all tests each time, the test files that are selected are based on which source files have changed;
 the specific method in which this is done is explained in detail below.
 
 The script takes the following steps:
@@ -48,19 +48,21 @@ import ast
 import glob
 import os
 import subprocess
+import sys
 from collections import namedtuple
 from typing import Dict, List, Tuple
 
 Import = namedtuple("Import", ["source", "module", "name", "alias"])
 
 
-def get_changed_files() -> Tuple[List[str], List[str]]:
+def get_changed_files(branch: str) -> Tuple[List[str], List[str]]:
     """
-    Standard git diff against `develop` to determine list of changed files.
-    Filters out anything that isn't in `great_expectations/`.
+    Standard git diff against a given branch to determine list of changed files.
+
+    Ensure that any changed tests are picked up and run (regardless of the file changes in 'great_expectations/')
     """
     process = subprocess.run(
-        ["git", "diff", "HEAD", "origin/develop", "--name-only"], stdout=subprocess.PIPE
+        ["git", "diff", "HEAD", branch, "--name-only"], stdout=subprocess.PIPE
     )
     files = [f.decode("utf-8") for f in process.stdout.splitlines()]
     test_files = [f for f in files if f.startswith("tests")]
@@ -140,6 +142,16 @@ def create_dependency_graph(directory: str) -> Dict[str, List[str]]:
       * key: the dependency or import in the current file
       * val: the path of the current file
 
+    Example:
+      ```
+      # great_expectations/data_context/data_context.py
+      from great_expectations.checkpoint import Checkpoint
+      from great_expectations.core.batch import Batch
+      ```
+    The following edges are added to the graph:
+      `checkpoint` --> `data_context`
+      `batch` --> `data_context`
+
     This allows us to traverse from a changed file to all files that use the origin file as a dependency.
     If we ever see a change in a given module, we immediately know which files are related and possibly impacted by the change.
     """
@@ -153,8 +165,9 @@ def create_dependency_graph(directory: str) -> Dict[str, List[str]]:
                 graph[path] = set()
             graph[path].add(file)
 
-    for k, v in graph.items():
-        graph[k] = sorted(v)
+    for key, value in graph.items():
+        graph[key] = sorted(value)
+
     return graph
 
 
@@ -182,21 +195,24 @@ def traverse_graph(root: str, graph: Dict[str, List[str]], depth: int) -> List[s
     return sorted(seen)
 
 
-def determine_relevant_source_files(changed_files: List[str], depth: int) -> List[str]:
+def determine_relevant_source_files(
+    ge_dependency_graph: Dict[str, List[str]], changed_files: List[str], depth: int
+) -> List[str]:
     """
     Perform graph traversal on all changed files to determine which source files are possibly influenced by the commit.
     Using a dependency graph from the `great_expectations/` directory, we can perform graph traversal for all changed files.
     """
-    ge_graph = create_dependency_graph("great_expectations")
     res = set()
     for file in changed_files:
-        deps = traverse_graph(file, ge_graph, depth)
+        deps = traverse_graph(file, ge_dependency_graph, depth)
         res.update(deps)
     return sorted(res)
 
 
 def determine_files_to_test(
-    source_files: List[str], changed_test_files: List[str]
+    tests_dependency_graph: Dict[str, List[str]],
+    source_files: List[str],
+    changed_test_files: List[str],
 ) -> List[str]:
     """
     Perform graph traversal on all source files to determine which test files need to be run.
@@ -204,12 +220,10 @@ def determine_files_to_test(
     Use a dependency graph of our `tests/` directory, we're able to map relevant source file to all tests that use
     that file as an import.
     """
-    tests_graph = create_dependency_graph("tests")
-    res = {
-        file for file in changed_test_files
-    }  # Ensure we include test files that were caught by `get_changed_files()`
+    # Ensure we include test files that were caught by `get_changed_files()`
+    res = {file for file in changed_test_files}
     for file in source_files:
-        for test in tests_graph.get(file, []):
+        for test in tests_dependency_graph.get(file, []):
             # Some basic filtering is necessary to remove things like conftest.py
             test_filename = test.split("/")[-1]
             if test_filename.startswith("test_"):
@@ -218,9 +232,22 @@ def determine_files_to_test(
 
 
 def main():
-    changed_source_files, changed_test_files = get_changed_files()
-    relevant_files = determine_relevant_source_files(changed_source_files, depth=2)
-    files_to_test = determine_files_to_test(relevant_files, changed_test_files)
+    if len(sys.argv) != 3 and not sys.argv[2].isnumeric():
+        print("Usage: `python determine_tests_to_run.py <DEPTH>`")
+        return
+
+    depth = int(sys.argv[2])
+    changed_source_files, changed_test_files = get_changed_files("origin/develop")
+
+    ge_dependency_graph = create_dependency_graph("great_expectations")
+    relevant_files = determine_relevant_source_files(
+        ge_dependency_graph, changed_source_files, depth=depth
+    )
+
+    tests_dependency_graph = create_dependency_graph("tests")
+    files_to_test = determine_files_to_test(
+        tests_dependency_graph, relevant_files, changed_test_files
+    )
     for file in files_to_test:
         print(file)
 
