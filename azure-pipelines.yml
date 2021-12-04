@@ -155,7 +155,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              python scripts/determine_test_files_to_run.py | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              python scripts/determine_tests_to_run.py | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -229,7 +229,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              python scripts/determine_test_files_to_run.py | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              python scripts/determine_tests_to_run.py | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -322,7 +322,7 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              python scripts/determine_test_files_to_run.py | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              python scripts/determine_tests_to_run.py | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
       - job: mssql
@@ -354,7 +354,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              python scripts/determine_test_files_to_run.py | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              python scripts/determine_tests_to_run.py | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
   - stage: cli_integration
