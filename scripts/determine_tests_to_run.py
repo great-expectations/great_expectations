@@ -232,17 +232,22 @@ def determine_files_to_test(
     return sorted(res)
 
 
-def get_user_args():
+def get_user_args() -> Tuple[int, str]:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--depth", help="Maximum depth reached in graph traversal", required=True
     )
+    parser.add_argument(
+        "--filter", help="Filter test results by prefix", required=False
+    )
     args = parser.parse_args()
-    return args.depth
+    depth = int(args.depth)
+    filter = args.filter or ""
+    return depth, filter
 
 
 def main():
-    depth = int(get_user_args())
+    depth, filter = get_user_args()
     changed_source_files, changed_test_files = get_changed_files("origin/develop")
 
     ge_dependency_graph = create_dependency_graph("great_expectations")
@@ -255,7 +260,8 @@ def main():
         tests_dependency_graph, relevant_files, changed_test_files
     )
     for file in files_to_test:
-        print(file)
+        if file.startswith(filter):
+            print(file)
 
 
 if __name__ == "__main__":
