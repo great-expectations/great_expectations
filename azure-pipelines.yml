@@ -394,7 +394,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines
-              python pytest --aws-integration -v tests/cli
+              pytest --aws-integration -v tests/cli
             displayName: 'pytest'
 
   - stage: deploy_gallery
