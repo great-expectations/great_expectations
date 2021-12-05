@@ -238,7 +238,7 @@ class CheckpointRunAnonymizer(Anonymizer):
                 str(expectation_suite_ge_cloud_id)
             )
 
-        for attribute_name in CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS:
+        for attribute_name in sorted(CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS):
             attribute_value = kwargs.get(attribute_name)
             if attribute_value:
                 checkpoint_optional_top_level_keys.append(attribute_name)
