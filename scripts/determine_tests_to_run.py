@@ -232,11 +232,11 @@ def determine_files_to_test(
 
 
 def main():
-    if len(sys.argv) != 3 or not sys.argv[2].isnumeric():
+    if len(sys.argv) != 2 or not sys.argv[1].isnumeric():
         print("Usage: `python determine_tests_to_run.py <DEPTH>`")
         return
 
-    depth = int(sys.argv[2])
+    depth = int(sys.argv[1])
     changed_source_files, changed_test_files = get_changed_files("origin/develop")
 
     ge_dependency_graph = create_dependency_graph("great_expectations")
