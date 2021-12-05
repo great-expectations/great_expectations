@@ -47,6 +47,6 @@ BATCH_REQUEST_FLATTENED_KEYS: Set[str] = set().union(
 )
 CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS: Set[str] = {
     "evaluation_parameters",
-    "runtime_configuration",
     "profilers",
+    "runtime_configuration",
 }
