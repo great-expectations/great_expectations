@@ -640,7 +640,7 @@ anonymized_checkpoint_run_schema = {
                 "anonymized_expectation_suite_ge_cloud_id": {
                     "$ref": "#/definitions/anonymized_string"
                 },
-                "checkpoint_run_optional_top_level_keys": {
+                "checkpoint_optional_top_level_keys": {
                     "type": "array",
                     "minItems": 1,
                     "maxItems": 4,

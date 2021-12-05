@@ -1006,7 +1006,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
                             ],
                         }
                     ],
-                    "checkpoint_run_optional_top_level_keys": [
+                    "checkpoint_optional_top_level_keys": [
                         "evaluation_parameters",
                         "runtime_configuration",
                     ],
@@ -1214,7 +1214,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
                             ],
                         }
                     ],
-                    "checkpoint_run_optional_top_level_keys": [
+                    "checkpoint_optional_top_level_keys": [
                         "evaluation_parameters",
                         "runtime_configuration",
                     ],
@@ -1652,7 +1652,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
                             ],
                         }
                     ],
-                    "checkpoint_run_optional_top_level_keys": [
+                    "checkpoint_optional_top_level_keys": [
                         "evaluation_parameters",
                         "runtime_configuration",
                     ],
@@ -1863,7 +1863,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
                             ],
                         }
                     ],
-                    "checkpoint_run_optional_top_level_keys": [
+                    "checkpoint_optional_top_level_keys": [
                         "evaluation_parameters",
                         "runtime_configuration",
                     ],
@@ -2082,7 +2082,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
                             ],
                         }
                     ],
-                    "checkpoint_run_optional_top_level_keys": [
+                    "checkpoint_optional_top_level_keys": [
                         "evaluation_parameters",
                         "runtime_configuration",
                     ],
@@ -2298,7 +2298,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
                             ],
                         }
                     ],
-                    "checkpoint_run_optional_top_level_keys": [
+                    "checkpoint_optional_top_level_keys": [
                         "evaluation_parameters",
                         "runtime_configuration",
                     ],
@@ -2499,7 +2499,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
                             ],
                         }
                     ],
-                    "checkpoint_run_optional_top_level_keys": [
+                    "checkpoint_optional_top_level_keys": [
                         "evaluation_parameters",
                         "runtime_configuration",
                     ],
@@ -2714,7 +2714,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
                             ],
                         }
                     ],
-                    "checkpoint_run_optional_top_level_keys": [
+                    "checkpoint_optional_top_level_keys": [
                         "evaluation_parameters",
                         "runtime_configuration",
                     ],
@@ -2923,7 +2923,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
                             ],
                         }
                     ],
-                    "checkpoint_run_optional_top_level_keys": [
+                    "checkpoint_optional_top_level_keys": [
                         "evaluation_parameters",
                         "runtime_configuration",
                     ],
@@ -3120,7 +3120,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
                             ],
                         }
                     ],
-                    "checkpoint_run_optional_top_level_keys": [
+                    "checkpoint_optional_top_level_keys": [
                         "evaluation_parameters",
                         "runtime_configuration",
                     ],
@@ -3337,7 +3337,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
                             ],
                         }
                     ],
-                    "checkpoint_run_optional_top_level_keys": [
+                    "checkpoint_optional_top_level_keys": [
                         "evaluation_parameters",
                         "runtime_configuration",
                     ],

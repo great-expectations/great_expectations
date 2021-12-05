@@ -55,7 +55,7 @@ class Checkpoint:
     def __init__(
         self,
         name: str,
-        data_context,
+        data_context: "DataContext",  # noqa: F821
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,

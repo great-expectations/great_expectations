@@ -14,6 +14,9 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
     BatchRequestAnonymizer,
 )
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS,
+)
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import deep_filter_properties_iterable
@@ -29,19 +32,23 @@ class CheckpointRunAnonymizer(Anonymizer):
 
     # noinspection PyUnusedLocal
     def anonymize_checkpoint_run(self, *args, **kwargs) -> Dict[str, List[str]]:
+        """
+        Traverse the entire Checkpoint configuration structure (as per its formal, validated Marshmallow schema) and
+        anonymize every field that can be customized by a user (public fields are recorded as their original names).
+        """
         batch_request_anonymizer: BatchRequestAnonymizer = BatchRequestAnonymizer(
             self._salt
         )
-
-        checkpoint_run_optional_top_level_keys: List[str] = []
-
-        validation_obj: dict
-
         action_anonymizer: ActionAnonymizer = ActionAnonymizer(self._salt)
 
+        attribute_name: str
+        attribute_value: Optional[Union[str, dict]]
+        validation_obj: dict
         action_config_dict: dict
         action_name: str
         action_obj: dict
+
+        checkpoint_optional_top_level_keys: List[str] = []
 
         name: Optional[str] = kwargs.get("name")
         anonymized_name: Optional[str]
@@ -231,17 +238,10 @@ class CheckpointRunAnonymizer(Anonymizer):
                 str(expectation_suite_ge_cloud_id)
             )
 
-        evaluation_parameters: Optional[dict] = kwargs.get("evaluation_parameters")
-        if evaluation_parameters:
-            checkpoint_run_optional_top_level_keys.append("evaluation_parameters")
-
-        runtime_configuration: Optional[dict] = kwargs.get("runtime_configuration")
-        if runtime_configuration:
-            checkpoint_run_optional_top_level_keys.append("runtime_configuration")
-
-        profilers: Optional[List[dict]] = kwargs.get("profilers")
-        if profilers:
-            checkpoint_run_optional_top_level_keys.append("profilers")
+        for attribute_name in CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS:
+            attribute_value = kwargs.get(attribute_name)
+            if attribute_value:
+                checkpoint_optional_top_level_keys.append(attribute_name)
 
         anonymized_checkpoint_run_properties_dict: Dict[str, List[str]] = {
             "anonymized_name": anonymized_name,
@@ -256,7 +256,7 @@ class CheckpointRunAnonymizer(Anonymizer):
             "anonymized_run_name": anonymized_run_name,
             "anonymized_run_time": anonymized_run_time,
             "anonymized_expectation_suite_ge_cloud_id": anonymized_expectation_suite_ge_cloud_id,
-            "checkpoint_run_optional_top_level_keys": checkpoint_run_optional_top_level_keys,
+            "checkpoint_optional_top_level_keys": checkpoint_optional_top_level_keys,
         }
 
         deep_filter_properties_iterable(
@@ -286,6 +286,16 @@ class CheckpointRunAnonymizer(Anonymizer):
         result_format: Optional[Union[str, dict]] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> CheckpointConfig:
+        """
+        This method reconciles the Checkpoint configuration (e.g., obtained from the Checkpoint store) with dynamically
+        supplied arguments in order to obtain that Checkpoint specification that is ready for running validation on it.
+        This procedure is necessecitated by the fact that the Checkpoint configuration is hierarchical in its form,
+        which was established for the purposes of making the specification of different Checkpoint capabilities easy.
+        In particular, entities, such as BatchRequest, expectation_suite_name, and action_list, can be specified at the
+        top Checkpoint level with the suitable ovverrides provided at lower levels (e.g., in the validations section).
+        Reconciling and normalizing the Checkpoint configuration is essential for usage statistics, because the exact
+        values of the entities in their formally validated form (e.g., BatchRequest) is the required level of detail.
+        """
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."

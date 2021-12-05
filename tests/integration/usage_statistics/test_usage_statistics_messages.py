@@ -628,7 +628,7 @@ valid_usage_statistics_messages = {
                         ],
                     }
                 ],
-                "checkpoint_run_optional_top_level_keys": [
+                "checkpoint_optional_top_level_keys": [
                     "evaluation_parameters",
                     "runtime_configuration",
                 ],
@@ -678,7 +678,7 @@ valid_usage_statistics_messages = {
                         ],
                     }
                 ],
-                "checkpoint_run_optional_top_level_keys": [
+                "checkpoint_optional_top_level_keys": [
                     "evaluation_parameters",
                     "runtime_configuration",
                 ],
@@ -729,7 +729,7 @@ valid_usage_statistics_messages = {
                         ],
                     }
                 ],
-                "checkpoint_run_optional_top_level_keys": [
+                "checkpoint_optional_top_level_keys": [
                     "evaluation_parameters",
                     "runtime_configuration",
                 ],

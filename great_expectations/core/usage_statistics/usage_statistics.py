@@ -483,6 +483,7 @@ def get_batch_list_usage_statistics(data_context, *args, **kwargs):
     return payload
 
 
+# noinspection PyUnusedLocal
 def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
     try:
         data_context_id = checkpoint.data_context.data_context_id
