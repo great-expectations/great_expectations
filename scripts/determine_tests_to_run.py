@@ -44,6 +44,7 @@ the dependency graph has so many ingoing and outgoing connections. This treatmen
 over the most important and used parts of our codebase.
 
 """
+import argparse
 import ast
 import glob
 import os
@@ -231,12 +232,17 @@ def determine_files_to_test(
     return sorted(res)
 
 
-def main():
-    if len(sys.argv) != 2 or not sys.argv[1].isnumeric():
-        print("Usage: `python determine_tests_to_run.py <DEPTH>`")
-        return
+def get_user_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--depth", help="Maximum depth reached in graph traversal", required=True
+    )
+    args = parser.parse_args()
+    return args.depth
 
-    depth = int(sys.argv[1])
+
+def main():
+    depth = int(get_user_args())
     changed_source_files, changed_test_files = get_changed_files("origin/develop")
 
     ge_dependency_graph = create_dependency_graph("great_expectations")
