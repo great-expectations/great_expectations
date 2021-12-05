@@ -49,7 +49,6 @@ import ast
 import glob
 import os
 import subprocess
-import sys
 from collections import namedtuple
 from typing import Dict, List, Tuple
 
@@ -232,22 +231,18 @@ def determine_files_to_test(
     return sorted(res)
 
 
-def get_user_args() -> Tuple[int, str]:
+def get_user_args() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--depth", help="Maximum depth reached in graph traversal", required=True
     )
-    parser.add_argument(
-        "--filter", help="Filter test results by prefix", required=False
-    )
     args = parser.parse_args()
     depth = int(args.depth)
-    filter = args.filter or ""
-    return depth, filter
+    return depth
 
 
 def main():
-    depth, filter = get_user_args()
+    depth = get_user_args()
     changed_source_files, changed_test_files = get_changed_files("origin/develop")
 
     ge_dependency_graph = create_dependency_graph("great_expectations")
@@ -260,8 +255,7 @@ def main():
         tests_dependency_graph, relevant_files, changed_test_files
     )
     for file in files_to_test:
-        if file.startswith(filter):
-            print(file)
+        print(file)
 
 
 if __name__ == "__main__":
