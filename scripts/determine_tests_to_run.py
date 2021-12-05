@@ -113,14 +113,17 @@ def get_import_paths(imports: List[Import]) -> List[str]:
     for imp in imports:
         if "great_expectations" not in imp.module:
             continue
-        path = ""
+        path: str
         if len(imp.module) == 1:
+            name = imp.name[0]
             # `from great_expectations import DataContext`
-            if "DataContext" in imp.name:
-                path = "great_expectations/data_context/data_context"
+            if name == "DataContext":
+                path = "great_expectations/data_context/data_context.py"
             # `from great_expectations import exceptions as ge_exceptions`
-            elif "exceptions" in imp.name:
-                path = "great_expectations/exceptions/exceptions"
+            elif name == "exceptions":
+                path = "great_expectations/exceptions/exceptions.py"
+            else:
+                continue
         else:
             path = "/".join(x for x in imp.module)
 
