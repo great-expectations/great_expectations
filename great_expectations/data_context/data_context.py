@@ -2065,7 +2065,19 @@ class BaseDataContext:
             validation_operators.append(value)
         return validation_operators
 
-    def send_usage_message(self, event, event_payload, success):
+    def send_usage_message(
+        self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
+    ):
+        """helper method to send a usage method using DataContext. Used when sending usage events from
+            classes like ExpectationSuite.
+            event
+        Args:
+            event (str): str representation of event
+            event_payload (dict): optional event payload
+            success (bool): optional success param
+        Returns:
+            None
+        """
         send_usage_message(self, event, event_payload, success)
 
     def create_expectation_suite(
