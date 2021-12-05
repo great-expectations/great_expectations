@@ -1179,7 +1179,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "ca68117150c32e08330af3cebad565ce",
-                    "config_version": 1,
+                    "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -1198,6 +1198,20 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
                                 "data_connector_query_keys": ["index"],
                             },
                             "anonymized_expectation_suite_name": "f6e1151b49fceb15ae3de4eb60f62be4",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
                         }
                     ],
                     "checkpoint_run_optional_top_level_keys": [
@@ -1606,7 +1620,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "config_version": 1,
+                    "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -1622,6 +1636,20 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
                                 "data_connector_query_keys": ["index"],
                             },
                             "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
                         }
                     ],
                     "checkpoint_run_optional_top_level_keys": [
@@ -1804,7 +1832,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "config_version": 1,
+                    "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -1819,6 +1847,20 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
                                 ],
                             },
                             "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
                         }
                     ],
                     "checkpoint_run_optional_top_level_keys": [
@@ -2007,7 +2049,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "config_version": 1,
+                    "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -2024,6 +2066,20 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
                                 "batch_spec_passthrough_keys": ["reader_options"],
                             },
                             "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
                         }
                     ],
                     "checkpoint_run_optional_top_level_keys": [
@@ -2210,7 +2266,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "config_version": 1,
+                    "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -2226,6 +2282,20 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
                                 "data_connector_query_keys": ["index"],
                             },
                             "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
                         }
                     ],
                     "checkpoint_run_optional_top_level_keys": [
@@ -2398,7 +2468,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "config_version": 1,
+                    "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -2413,6 +2483,20 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
                                 ],
                             },
                             "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
                         }
                     ],
                     "checkpoint_run_optional_top_level_keys": [
@@ -2596,7 +2680,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "config_version": 1,
+                    "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -2614,6 +2698,20 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
                                 "data_connector_query_keys": ["index"],
                             },
                             "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
                         }
                     ],
                     "checkpoint_run_optional_top_level_keys": [
@@ -2793,7 +2891,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "config_version": 1,
+                    "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -2809,6 +2907,20 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
                                 "data_connector_query_keys": ["index"],
                             },
                             "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
                         }
                     ],
                     "checkpoint_run_optional_top_level_keys": [
@@ -2977,7 +3089,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "config_version": 1,
+                    "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -2992,6 +3104,20 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
                                 ],
                             },
                             "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
                         }
                     ],
                     "checkpoint_run_optional_top_level_keys": [
@@ -3177,7 +3303,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
                 "event": "checkpoint.run",
                 "event_payload": {
                     "anonymized_name": "eb2d802f924a3e764afc605de3495c5c",
-                    "config_version": 1,
+                    "config_version": 1.0,
                     "anonymized_run_name_template": "21e9677f05fd2b0d83bb9285a688d5c5",
                     "anonymized_validations": [
                         {
@@ -3195,6 +3321,20 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
                                 "data_connector_query_keys": ["index"],
                             },
                             "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
                         }
                     ],
                     "checkpoint_run_optional_top_level_keys": [

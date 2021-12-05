@@ -602,6 +602,7 @@ anonymized_checkpoint_run_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-checkpoint-run-payload",
     "definitions": {
+        "empty_payload": empty_payload_schema,
         "anonymized_string": anonymized_string_schema,
         "anonymized_datasource_name": anonymized_datasource_name_schema,
         "anonymized_run_time": anonymized_run_time_schema,
@@ -611,41 +612,54 @@ anonymized_checkpoint_run_schema = {
         "anonymized_validation": anonymized_validation_schema,
         "anonymized_validations": anonymized_validations_list_schema,
     },
-    "type": "object",
-    "properties": {
-        "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
-        "config_version": {"type": "number"},
-        "anonymized_template_name": {"$ref": "#/definitions/anonymized_string"},
-        "anonymized_run_name_template": {"$ref": "#/definitions/anonymized_string"},
-        "anonymized_expectation_suite_name": {
-            "$ref": "#/definitions/anonymized_string"
-        },
-        "anonymized_batch_request": {"$ref": "#/definitions/anonymized_batch_request"},
-        "anonymized_action_list": {"$ref": "#/definitions/anonymized_action_list"},
-        "anonymized_validations": {"$ref": "#/definitions/anonymized_validations"},
-        "anonymized_run_id": {"$ref": "#/definitions/anonymized_string"},
-        "anonymized_run_name": {"$ref": "#/definitions/anonymized_run_name"},
-        "anonymized_run_time": {"$ref": "#/definitions/anonymized_run_time"},
-        "anonymized_expectation_suite_ge_cloud_id": {
-            "$ref": "#/definitions/anonymized_string"
-        },
-        "checkpoint_run_optional_top_level_keys": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 4,
-            "items": {
-                "type": "string",
-                "enum": [
-                    "evaluation_parameters",
-                    "runtime_configuration",
-                    "profilers",
-                ],
+    "oneOf": [
+        {
+            "type": "object",
+            "properties": {
+                "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+                "config_version": {"type": "number", "minimum": 1},
+                "anonymized_template_name": {"$ref": "#/definitions/anonymized_string"},
+                "anonymized_run_name_template": {
+                    "$ref": "#/definitions/anonymized_string"
+                },
+                "anonymized_expectation_suite_name": {
+                    "$ref": "#/definitions/anonymized_string"
+                },
+                "anonymized_batch_request": {
+                    "$ref": "#/definitions/anonymized_batch_request"
+                },
+                "anonymized_action_list": {
+                    "$ref": "#/definitions/anonymized_action_list"
+                },
+                "anonymized_validations": {
+                    "$ref": "#/definitions/anonymized_validations"
+                },
+                "anonymized_run_id": {"$ref": "#/definitions/anonymized_string"},
+                "anonymized_run_name": {"$ref": "#/definitions/anonymized_run_name"},
+                "anonymized_run_time": {"$ref": "#/definitions/anonymized_run_time"},
+                "anonymized_expectation_suite_ge_cloud_id": {
+                    "$ref": "#/definitions/anonymized_string"
+                },
+                "checkpoint_run_optional_top_level_keys": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "evaluation_parameters",
+                            "runtime_configuration",
+                            "profilers",
+                        ],
+                    },
+                    "uniqueItems": True,
+                },
             },
-            "uniqueItems": True,
+            "required": ["anonymized_name", "config_version"],
+            "additionalProperties": False,
         },
-    },
-    "required": ["anonymized_name", "config_version"],
-    "additionalProperties": False,
+        {"$ref": "#/definitions/empty_payload"},
+    ],
 }
 
 anonymized_usage_statistics_record_schema = {

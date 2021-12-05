@@ -27,6 +27,7 @@ class CheckpointRunAnonymizer(Anonymizer):
 
         self._salt = salt
 
+    # noinspection PyUnusedLocal
     def anonymize_checkpoint_run(self, *args, **kwargs) -> Dict[str, List[str]]:
         batch_request_anonymizer: BatchRequestAnonymizer = BatchRequestAnonymizer(
             self._salt
@@ -93,8 +94,6 @@ class CheckpointRunAnonymizer(Anonymizer):
                 logger.debug(
                     "anonymize_checkpoint_run: Unable to create anonymized_batch_request payload field"
                 )
-
-        include_anonymized_batch_request: bool = anonymized_batch_request is not None
 
         action_list: Optional[List[dict]] = kwargs.get("action_list")
         anonymized_action_list: Optional[List[dict]] = None
@@ -167,7 +166,6 @@ class CheckpointRunAnonymizer(Anonymizer):
                                 action_config=action_config_dict["action"],
                             )
                             for action_config_dict in validation_action_list
-                            # for action_name, action_obj in action_config_dict.items()
                         ]
                     except Exception:
                         logger.debug(
@@ -196,20 +194,10 @@ class CheckpointRunAnonymizer(Anonymizer):
                 anonymized_validation: Dict[str, Dict[str, Any]] = {
                     "anonymized_batch_request": anonymized_validation_batch_request,
                     "anonymized_expectation_suite_name": anonymized_validation_expectation_suite_name,
-                    "anonymized_action_list": anonymized_action_list,
+                    "anonymized_action_list": anonymized_validation_action_list,
                 }
 
                 anonymized_validations.append(anonymized_validation)
-
-            num_anonymized_validation_batch_requests: int = len(
-                [
-                    anonymized_validation
-                    for anonymized_validation in anonymized_validations
-                    if "anonymized_batch_request" in anonymized_validation
-                ]
-            )
-            if num_anonymized_validation_batch_requests == len(validations):
-                include_anonymized_batch_request = True
 
         run_id: Optional[Union[str, RunIdentifier]] = kwargs.get("run_id")
         anonymized_run_id: Optional[Union[str, RunIdentifier]]
@@ -270,10 +258,6 @@ class CheckpointRunAnonymizer(Anonymizer):
             "anonymized_expectation_suite_ge_cloud_id": anonymized_expectation_suite_ge_cloud_id,
             "checkpoint_run_optional_top_level_keys": checkpoint_run_optional_top_level_keys,
         }
-        if not include_anonymized_batch_request:
-            anonymized_checkpoint_run_properties_dict.pop(
-                "anonymized_batch_request", None
-            )
 
         deep_filter_properties_iterable(
             properties=anonymized_checkpoint_run_properties_dict,
@@ -283,10 +267,10 @@ class CheckpointRunAnonymizer(Anonymizer):
 
         return anonymized_checkpoint_run_properties_dict
 
-    # noinspection PyUnusedLocal
+    # noinspection PyUnusedLocal,PyUnresolvedReferences
+    @staticmethod
     def resolve_config_using_acceptable_arguments(
-        self,
-        checkpoint: "Checkpoint",
+        checkpoint: "Checkpoint",  # noqa: F821
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
