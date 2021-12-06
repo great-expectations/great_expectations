@@ -119,12 +119,26 @@ assert typed_results == results
 # A few different Checkpoint examples
 os.environ["VAR"] = "ge"
 
-batch_request = BatchRequest(datasource_name="taxi_datasource", data_connector_name="default_inferred_data_connector_name", data_asset_name="yellow_tripdata_sample_2019-01")
-validator = context.get_validator(batch_request=batch_request, expectation_suite_name="my_expectation_suite")
-validator.expect_table_row_count_to_be_between(min_value={"$PARAMETER": "GT_PARAM", "$PARAMETER.GT_PARAM": 0}, max_value={"$PARAMETER": "LT_PARAM", "$PARAMETER.LT_PARAM": 1000000})
+batch_request = BatchRequest(
+    datasource_name="taxi_datasource",
+    data_connector_name="default_inferred_data_connector_name",
+    data_asset_name="yellow_tripdata_sample_2019-01",
+)
+validator = context.get_validator(
+    batch_request=batch_request, expectation_suite_name="my_expectation_suite"
+)
+validator.expect_table_row_count_to_be_between(
+    min_value={"$PARAMETER": "GT_PARAM", "$PARAMETER.GT_PARAM": 0},
+    max_value={"$PARAMETER": "LT_PARAM", "$PARAMETER.LT_PARAM": 1000000},
+)
 validator.save_expectation_suite(discard_failed_expectations=False)
-validator = context.get_validator(batch_request=batch_request, expectation_suite_name="my_other_expectation_suite")
-validator.expect_table_row_count_to_be_between(min_value={"$PARAMETER": "GT_PARAM", "$PARAMETER.GT_PARAM": 0}, max_value={"$PARAMETER": "LT_PARAM", "$PARAMETER.LT_PARAM": 1000000})
+validator = context.get_validator(
+    batch_request=batch_request, expectation_suite_name="my_other_expectation_suite"
+)
+validator.expect_table_row_count_to_be_between(
+    min_value={"$PARAMETER": "GT_PARAM", "$PARAMETER.GT_PARAM": 0},
+    max_value={"$PARAMETER": "LT_PARAM", "$PARAMETER.LT_PARAM": 1000000},
+)
 validator.save_expectation_suite(discard_failed_expectations=False)
 
 no_nesting = f"""
@@ -159,8 +173,18 @@ validations:
 context.add_checkpoint(**yaml.load(no_nesting))
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 assert results.success == True
-assert list(results.run_results.items())[0][1]["validation_result"]["results"][0]["expectation_config"]["kwargs"]["max_value"] == 50000
-assert list(results.run_results.items())[0][1]["validation_result"]["results"][0]["expectation_config"]["kwargs"]["min_value"] == 1000
+assert (
+    list(results.run_results.items())[0][1]["validation_result"]["results"][0][
+        "expectation_config"
+    ]["kwargs"]["max_value"]
+    == 50000
+)
+assert (
+    list(results.run_results.items())[0][1]["validation_result"]["results"][0][
+        "expectation_config"
+    ]["kwargs"]["min_value"]
+    == 1000
+)
 
 nesting_with_defaults = """
 name: my_checkpoint
