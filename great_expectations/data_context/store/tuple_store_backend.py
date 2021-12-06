@@ -5,8 +5,9 @@ import random
 import re
 import shutil
 from abc import ABCMeta
-from typing import List, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
+from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
 from great_expectations.util import filter_properties_dict
@@ -25,16 +26,16 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
     def __init__(
         self,
-        filepath_template=None,
-        filepath_prefix=None,
-        filepath_suffix=None,
-        forbidden_substrings=None,
-        platform_specific_separator=True,
-        fixed_length_key=False,
-        suppress_store_backend_id=False,
+        filepath_template: Optional[str] = None,
+        filepath_prefix: Optional[str] = None,
+        filepath_suffix: Optional[str] = None,
+        forbidden_substrings: Optional[List[str]] = None,
+        platform_specific_separator: bool = True,
+        fixed_length_key: bool = False,
+        suppress_store_backend_id: bool = False,
         manually_initialize_store_backend_id: str = "",
-        base_public_path=None,
-        store_name=None,
+        base_public_path: Optional[str] = None,
+        store_name: Optional[str] = None,
     ):
         super().__init__(
             fixed_length_key=fixed_length_key,
@@ -72,7 +73,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             self.verify_that_key_to_filepath_operation_is_reversible()
             self._fixed_length_key = True
 
-    def _validate_key(self, key):
+    def _validate_key(self, key: Tuple) -> None:
         super()._validate_key(key)
 
         for key_element in key:
@@ -86,7 +87,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                         )
                     )
 
-    def _validate_value(self, value):
+    def _validate_value(self, value: Union[str, bytes]) -> None:
         if not isinstance(value, str) and not isinstance(value, bytes):
             raise TypeError(
                 "Values in {} must be instances of {} or {}, not {}".format(
@@ -97,7 +98,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 )
             )
 
-    def _convert_key_to_filepath(self, key):
+    def _convert_key_to_filepath(self, key: Tuple) -> str:
         # NOTE: This method uses a hard-coded forward slash as a separator,
         # and then replaces that with a platform-specific separator if requested (the default)
         self._validate_key(key)
@@ -109,6 +110,15 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 if not self.platform_specific_separator
                 else os.path.normpath(filepath)
             )
+
+        # TODO(cdkini): Move to separate method
+        new_key = []
+        for x in key:
+            y = x.replace(".", "/")
+            new_key.append(y)
+        key = tuple(new_key)
+        # -------------------------------------
+
         if self.filepath_template:
             converted_string = self.filepath_template.format(*list(key))
         else:
@@ -123,7 +133,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         return converted_string
 
-    def _convert_filepath_to_key(self, filepath):
+    def _convert_filepath_to_key(self, filepath: str) -> Optional[Tuple]:
         if filepath == self.STORE_BACKEND_ID_KEY[0]:
             return self.STORE_BACKEND_ID_KEY
         if self.platform_specific_separator:
@@ -195,7 +205,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             new_key = tuple(filepath.split(os.sep))
         return new_key
 
-    def verify_that_key_to_filepath_operation_is_reversible(self):
+    def verify_that_key_to_filepath_operation_is_reversible(self) -> None:
         def get_random_hex(size=4):
             return "".join(
                 [random.choice(list("ABCDEF0123456789")) for _ in range(size)]
@@ -229,18 +239,18 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
     def __init__(
         self,
-        base_directory,
-        filepath_template=None,
-        filepath_prefix=None,
-        filepath_suffix=None,
-        forbidden_substrings=None,
-        platform_specific_separator=True,
-        root_directory=None,
-        fixed_length_key=False,
-        suppress_store_backend_id=False,
+        base_directory: str,
+        filepath_template: Optional[str] = None,
+        filepath_prefix: Optional[str] = None,
+        filepath_suffix: Optional[str] = None,
+        forbidden_substrings: Optional[List[str]] = None,
+        platform_specific_separator: bool = True,
+        root_directory: bool = None,
+        fixed_length_key: bool = False,
+        suppress_store_backend_id: bool = False,
         manually_initialize_store_backend_id: str = "",
-        base_public_path=None,
-        store_name=None,
+        base_public_path: Optional[str] = None,
+        store_name: Optional[str] = None,
     ):
         super().__init__(
             filepath_template=filepath_template,
@@ -295,7 +305,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def _get(self, key):
+    def _get(self, key: Tuple) -> str:
         filepath: str = os.path.join(
             self.full_base_directory, self._convert_key_to_filepath(key)
         )
@@ -309,7 +319,12 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return contents
 
-    def _set(self, key, value, **kwargs):
+    def _set(
+        self,
+        key: Union[Tuple, DataContextKey],
+        value: Union[str, DataContextKey],
+        **kwargs,
+    ) -> str:
         if not isinstance(key, tuple):
             key = key.to_tuple()
         filepath = os.path.join(
@@ -325,7 +340,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 outfile.write(value)
         return filepath
 
-    def _move(self, source_key, dest_key, **kwargs):
+    def _move(self, source_key: Tuple, dest_key: Tuple, **kwargs) -> Union[Tuple, bool]:
         source_path = os.path.join(
             self.full_base_directory, self._convert_key_to_filepath(source_key)
         )
@@ -333,7 +348,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         dest_path = os.path.join(
             self.full_base_directory, self._convert_key_to_filepath(dest_key)
         )
-        dest_dir, dest_filename = os.path.split(dest_path)
+        dest_dir, _ = os.path.split(dest_path)
 
         if os.path.exists(source_path):
             os.makedirs(dest_dir, exist_ok=True)
@@ -344,9 +359,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         key_list = []
-        for root, dirs, files in os.walk(
-            os.path.join(self.full_base_directory, *prefix)
-        ):
+        for root, _, files in os.walk(os.path.join(self.full_base_directory, *prefix)):
             for file_ in files:
                 full_path, file_name = os.path.split(os.path.join(root, file_))
                 relative_path = os.path.relpath(
@@ -372,7 +385,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return key_list
 
-    def rrmdir(self, mroot, curpath):
+    def rrmdir(self, mroot: str, curpath: str) -> None:
         """
         recursively removes empty dirs between curpath and mroot inclusive
         """
@@ -386,7 +399,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         except (NotADirectoryError, FileNotFoundError):
             pass
 
-    def remove_key(self, key):
+    def remove_key(self, key: Union[Tuple, DataContextKey]) -> bool:
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
@@ -401,7 +414,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             return True
         return False
 
-    def get_url_for_key(self, key, protocol=None):
+    def get_url_for_key(self, key: Tuple, protocol: Optional[str] = None) -> str:
         path = self._convert_key_to_filepath(key)
         full_path = os.path.join(self.full_base_directory, path)
 
@@ -410,7 +423,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         url = protocol + "//" + full_path
         return url
 
-    def get_public_url_for_key(self, key, protocol=None):
+    def get_public_url_for_key(self, key: Tuple, protocol: Optional[str] = None) -> str:
         if not self.base_public_path:
             raise StoreBackendError(
                 f"""Error: No base_public_path was configured!
@@ -421,7 +434,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         public_url = self.base_public_path + path
         return public_url
 
-    def _has_key(self, key):
+    def _has_key(self, key: Tuple) -> bool:
         return os.path.isfile(
             os.path.join(self.full_base_directory, self._convert_key_to_filepath(key))
         )
