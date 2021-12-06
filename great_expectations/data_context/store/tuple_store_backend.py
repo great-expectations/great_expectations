@@ -103,7 +103,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
         # Substitute dot notation with file-path separators to ensure access to nested directories
-        key = self._substitute_key_separators(key)
+        key = self._substitute_key_separators(key, ".", os.sep)
 
         if self.filepath_template:
             converted_string = self.filepath_template.format(*list(key))
@@ -118,13 +118,6 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             converted_string = os.path.normpath(converted_string)
 
         return converted_string
-
-    def _substitute_key_separators(self, key: Tuple) -> Tuple:
-        tmp = []
-        for component in key:
-            tmp.append(component.replace(".", "/"))
-        key = tuple(tmp)
-        return key
 
     def _convert_filepath_to_key(self, filepath: str) -> Optional[Tuple]:
         if filepath == self.STORE_BACKEND_ID_KEY[0]:
@@ -194,6 +187,16 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         else:
             filepath = os.path.normpath(filepath)
             new_key = tuple(filepath.split(os.sep))
+
+        return self._substitute_key_separators(new_key, os.sep, ".")
+
+    def _substitute_key_separators(
+        self, new_key: Tuple, to_replace: str, replace_with: str
+    ) -> Tuple:
+        tmp = []
+        for component in new_key:
+            tmp.append(component.replace(to_replace, replace_with))
+        new_key = tuple(tmp)
         return new_key
 
     def verify_that_key_to_filepath_operation_is_reversible(self) -> None:
