@@ -9,16 +9,13 @@ logger = logging.getLogger(__name__)
 try:
     import ipywidgets as widgets
 except ImportError:
-    widgets = None
+    raise ImportError(
+        "ExpectationExplorer requires 'ipywidgets' in order to run. Please use pip or conda to install ipywidgets and try again"
+    )
 
 
 class ExpectationExplorer:
     def __init__(self):
-        if widgets is None:
-            raise ImportError(
-                "Please install the optional dependency 'ipywidgets' to enable the ExpectationExplorer."
-            )
-
         self.state = {"data_assets": {}}
         self.expectation_kwarg_field_names = {
             "expect_column_values_to_be_unique": ["mostly"],
