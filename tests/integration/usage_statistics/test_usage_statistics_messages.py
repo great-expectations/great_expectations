@@ -418,6 +418,7 @@ valid_usage_statistics_messages = {
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
+            "event_duration": 123,
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
@@ -437,6 +438,7 @@ valid_usage_statistics_messages = {
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
+            "event_duration": 123,
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
@@ -460,6 +462,7 @@ valid_usage_statistics_messages = {
             "success": True,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
+            "event_duration": 123,
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
@@ -508,6 +511,53 @@ valid_usage_statistics_messages = {
             "success": False,
             "version": "1.0.0",
             "event_time": "2020-06-25T16:08:16.030Z",
+            "event_duration": 123,
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "data_context.get_batch_list",
+            "event_payload": {
+                "anonymized_batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
+                    "anonymized_data_connector_name": "d52d7bff3226a7f94dd3510c1040de78",
+                    "anonymized_data_asset_name": "556e8c06239d09fc66f424eabb9ca491",
+                },
+                "batch_request_optional_top_level_keys": [
+                    "batch_identifiers",
+                    "runtime_parameters",
+                ],
+                "runtime_parameters_keys": ["batch_data"],
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:28.070Z",
+            "event_duration": 123,
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "data_context.get_batch_list",
+            "event_payload": {
+                "anonymized_batch_request_required_top_level_properties": {
+                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                    "anonymized_data_connector_name": "d52d7bff3226a7f94dd3510c1040de78",
+                    "anonymized_data_asset_name": "556e8c06239d09fc66f424eabb9ca491",
+                },
+                "batch_request_optional_top_level_keys": [
+                    "batch_identifiers",
+                    "runtime_parameters",
+                ],
+                "runtime_parameters_keys": ["batch_data"],
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:28.070Z",
+            "event_duration": 123,
             "data_context_id": "00000000-0000-0000-0000-000000000002",
             "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
             "ge_version": "0.11.9.manual_testing",
@@ -732,6 +782,266 @@ valid_usage_statistics_messages = {
                 "checkpoint_optional_top_level_keys": [
                     "evaluation_parameters",
                     "runtime_configuration",
+                ],
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:28.070Z",
+            "event_duration": 123,
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "checkpoint.run",
+            "event_payload": {
+                "anonymized_name": "f563d9aa1604e16099bb7dff7b203319",
+                "config_version": 1.0,
+                "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff",
+                "anonymized_action_list": [
+                    {
+                        "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                        "parent_class": "StoreValidationResultAction",
+                    },
+                    {
+                        "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                        "parent_class": "StoreEvaluationParametersAction",
+                    },
+                    {
+                        "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                        "parent_class": "UpdateDataDocsAction",
+                    },
+                ],
+                "anonymized_validations": [
+                    {
+                        "anonymized_batch_request": {
+                            "anonymized_batch_request_required_top_level_properties": {
+                                "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                "anonymized_data_connector_name": "d52d7bff3226a7f94dd3510c1040de78",
+                                "anonymized_data_asset_name": "556e8c06239d09fc66f424eabb9ca491",
+                            },
+                            "batch_request_optional_top_level_keys": [
+                                "batch_identifiers",
+                                "runtime_parameters",
+                            ],
+                            "runtime_parameters_keys": ["batch_data"],
+                        },
+                        "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff",
+                        "anonymized_action_list": [
+                            {
+                                "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                "parent_class": "StoreValidationResultAction",
+                            },
+                            {
+                                "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                "parent_class": "StoreEvaluationParametersAction",
+                            },
+                            {
+                                "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                "parent_class": "UpdateDataDocsAction",
+                            },
+                        ],
+                    },
+                ],
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:28.070Z",
+            "event_duration": 123,
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "checkpoint.run",
+            "event_payload": {
+                "anonymized_name": "f563d9aa1604e16099bb7dff7b203319",
+                "config_version": 1.0,
+                "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff",
+                "anonymized_action_list": [
+                    {
+                        "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                        "parent_class": "StoreValidationResultAction",
+                    },
+                    {
+                        "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                        "parent_class": "StoreEvaluationParametersAction",
+                    },
+                    {
+                        "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                        "parent_class": "UpdateDataDocsAction",
+                    },
+                ],
+                "anonymized_validations": [
+                    {
+                        "anonymized_batch_request": {
+                            "anonymized_batch_request_required_top_level_properties": {
+                                "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
+                                "anonymized_data_connector_name": "d52d7bff3226a7f94dd3510c1040de78",
+                                "anonymized_data_asset_name": "556e8c06239d09fc66f424eabb9ca491",
+                            },
+                            "batch_request_optional_top_level_keys": [
+                                "batch_identifiers",
+                                "runtime_parameters",
+                            ],
+                            "runtime_parameters_keys": ["batch_data"],
+                        },
+                        "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff",
+                        "anonymized_action_list": [
+                            {
+                                "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                "parent_class": "StoreValidationResultAction",
+                            },
+                            {
+                                "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                "parent_class": "StoreEvaluationParametersAction",
+                            },
+                            {
+                                "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                "parent_class": "UpdateDataDocsAction",
+                            },
+                        ],
+                    },
+                ],
+            },
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:28.070Z",
+            "event_duration": 123,
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "checkpoint.run",
+            "event_payload": {
+                "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
+                "config_version": 1.0,
+                "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
+                "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                "anonymized_action_list": [
+                    {
+                        "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                        "parent_class": "StoreValidationResultAction",
+                    },
+                    {
+                        "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                        "parent_class": "StoreEvaluationParametersAction",
+                    },
+                    {
+                        "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                        "parent_class": "UpdateDataDocsAction",
+                    },
+                ],
+                "anonymized_validations": [
+                    {
+                        "anonymized_batch_request": {
+                            "anonymized_batch_request_required_top_level_properties": {
+                                "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                                "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                            },
+                            "batch_request_optional_top_level_keys": [
+                                "batch_identifiers",
+                                "data_connector_query",
+                                "runtime_parameters",
+                            ],
+                            "runtime_parameters_keys": ["batch_data"],
+                        },
+                        "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                        "anonymized_action_list": [
+                            {
+                                "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                "parent_class": "StoreValidationResultAction",
+                            },
+                            {
+                                "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                "parent_class": "StoreEvaluationParametersAction",
+                            },
+                            {
+                                "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                "parent_class": "UpdateDataDocsAction",
+                            },
+                        ],
+                    },
+                    {
+                        "anonymized_batch_request": {
+                            "anonymized_batch_request_required_top_level_properties": {
+                                "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                                "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                            },
+                            "batch_request_optional_top_level_keys": [
+                                "batch_identifiers",
+                                "data_connector_query",
+                                "runtime_parameters",
+                            ],
+                            "runtime_parameters_keys": ["batch_data"],
+                        },
+                        "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                        "anonymized_action_list": [
+                            {
+                                "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                "parent_class": "StoreValidationResultAction",
+                            },
+                            {
+                                "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                "parent_class": "StoreEvaluationParametersAction",
+                            },
+                            {
+                                "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                "parent_class": "UpdateDataDocsAction",
+                            },
+                        ],
+                    },
+                ],
+            },
+            "success": False,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:28.070Z",
+            "event_duration": 123,
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.11.9.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        },
+        {
+            "event": "checkpoint.run",
+            "event_payload": {
+                "anonymized_name": "f563d9aa1604e16099bb7dff7b203319",
+                "config_version": 1.0,
+                "anonymized_validations": [
+                    {
+                        "anonymized_batch_request": {
+                            "anonymized_batch_request_required_top_level_properties": {
+                                "anonymized_datasource_name": GETTING_STARTED_DATASOURCE_NAME,
+                                "anonymized_data_connector_name": "d52d7bff3226a7f94dd3510c1040de78",
+                                "anonymized_data_asset_name": "556e8c06239d09fc66f424eabb9ca491",
+                            },
+                            "batch_request_optional_top_level_keys": [
+                                "runtime_parameters",
+                            ],
+                            "runtime_parameters_keys": ["query"],
+                        },
+                        "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff",
+                        "anonymized_action_list": [
+                            {
+                                "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                "parent_class": "StoreValidationResultAction",
+                            },
+                            {
+                                "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                "parent_class": "StoreEvaluationParametersAction",
+                            },
+                            {
+                                "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                "parent_class": "UpdateDataDocsAction",
+                            },
+                        ],
+                    },
                 ],
             },
             "success": True,
