@@ -26,6 +26,15 @@ class Anonymizer:
         return self._salt
 
     def anonymize(self, string_):
+        if string_ is None:
+            return None
+
+        if not isinstance(string_, str):
+            raise TypeError(
+                f"""The type of the "string_" argument must be a string (Python "str").  The type given is
+"{str(type(string_))}", which is illegal.
+            """
+            )
         salted = self._salt + string_
         return md5(salted.encode("utf-8")).hexdigest()
 
