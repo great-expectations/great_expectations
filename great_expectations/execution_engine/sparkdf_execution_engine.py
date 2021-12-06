@@ -175,7 +175,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self.spark = spark
 
         azure_options: dict = kwargs.pop("azure_options", {})
+        boto3_options: dict = kwargs.pop("boto3_options", {})
         self._azure_options = azure_options
+        self._boto3_options = boto3_options
 
         super().__init__(*args, **kwargs)
 
@@ -184,6 +186,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 "persist": self._persist,
                 "spark_config": spark_config,
                 "azure_options": azure_options,
+                "boto3_options": boto3_options,
             }
         )
 
