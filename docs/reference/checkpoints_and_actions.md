@@ -265,3 +265,7 @@ This configuration specifies the SimpleCheckpoint class under the "class_name" k
 
 </TabItem>
 </Tabs>
+
+### Additional Notes
+To view the full script used in this page, see it on GitHub:
+- [checkpoints_and_actions.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py)
