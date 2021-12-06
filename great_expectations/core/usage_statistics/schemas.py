@@ -643,7 +643,7 @@ anonymized_checkpoint_run_schema = {
                 "checkpoint_optional_top_level_keys": {
                     "type": "array",
                     "minItems": 1,
-                    "maxItems": 4,
+                    "maxItems": 3,
                     "items": {
                         "type": "string",
                         "enum": [
