@@ -52,8 +52,6 @@ validations:
       datasource_name: taxi_datasource
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-01
-      data_connector_query:
-        index: -1
     expectation_suite_name: my_expectation_suite
     action_list:
       - name: <ACTION NAME FOR STORING VALIDATION RESULTS>
@@ -132,8 +130,6 @@ validations:
       datasource_name: taxi_datasource
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-01
-      data_connector_query:
-        index: -1
     expectation_suite_name: my_expectation_suite
     action_list:
       - name: store_validation_result
@@ -167,14 +163,10 @@ validations:
       datasource_name: taxi_datasource
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-01
-      data_connector_query:
-        index: -1
   - batch_request:
       datasource_name: taxi_datasource
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-02
-      data_connector_query:
-        index: -1
 expectation_suite_name: my_expectation_suite
 action_list:
   - name: store_validation_result
@@ -314,15 +306,11 @@ validations:
       datasource_name: taxi_datasource
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-01
-      data_connector_query:
-        index: -1
     expectation_suite_name: my_expectation_suite
   - batch_request:
       datasource_name: taxi_datasource
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-02
-      data_connector_query:
-        index: -1
     expectation_suite_name: my_other_expectation_suite
 """
 context.add_checkpoint(**yaml.load(using_template))
@@ -366,8 +354,6 @@ validations:
       datasource_name: taxi_datasource
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-01
-      data_connector_query:
-        index: -1
     expectation_suite_name: my_expectation_suite
 site_names: all
 slack_webhook: <YOUR SLACK WEBHOOK URL>
@@ -390,8 +376,6 @@ validations:
       datasource_name: taxi_datasource
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-01
-      data_connector_query:
-        index: -1
     expectation_suite_name: my_expectation_suite
 action_list:
   - name: store_validation_result
