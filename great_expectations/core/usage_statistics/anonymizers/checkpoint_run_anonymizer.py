@@ -51,11 +51,7 @@ class CheckpointRunAnonymizer(Anonymizer):
         checkpoint_optional_top_level_keys: List[str] = []
 
         name: Optional[str] = kwargs.get("name")
-        anonymized_name: Optional[str]
-        if name is None:
-            anonymized_name = None
-        else:
-            anonymized_name = self.anonymize(name)
+        anonymized_name: Optional[str] = self.anonymize(name)
 
         config_version: Optional[Number] = kwargs.get("config_version")
         config_version: Optional[str]
@@ -63,44 +59,23 @@ class CheckpointRunAnonymizer(Anonymizer):
             config_version = 1
 
         template_name: Optional[str] = kwargs.get("template_name")
-        anonymized_template_name: Optional[str]
-        if template_name is None:
-            anonymized_template_name = None
-        else:
-            anonymized_template_name = self.anonymize(template_name)
+        anonymized_template_name: Optional[str] = self.anonymize(template_name)
 
         run_name_template: Optional[str] = kwargs.get("run_name_template")
-        anonymized_run_name_template: Optional[str]
-        if run_name_template is None:
-            anonymized_run_name_template = None
-        else:
-            anonymized_run_name_template = self.anonymize(run_name_template)
+        anonymized_run_name_template: Optional[str] = self.anonymize(run_name_template)
 
         expectation_suite_name: Optional[str] = kwargs.get("expectation_suite_name")
-        anonymized_expectation_suite_name: Optional[str]
-        if expectation_suite_name is None:
-            anonymized_expectation_suite_name = None
-        else:
-            anonymized_expectation_suite_name = self.anonymize(expectation_suite_name)
+        anonymized_expectation_suite_name: Optional[str] = self.anonymize(
+            expectation_suite_name
+        )
 
         batch_request: Optional[Union[BatchRequest, dict]] = kwargs.get("batch_request")
         if batch_request is None:
             batch_request = {}
 
-        anonymized_batch_request: Optional[Dict[str, List[str]]] = None
-
-        if batch_request:
-            # noinspection PyBroadException
-            try:
-                anonymized_batch_request = (
-                    batch_request_anonymizer.anonymize_batch_request(
-                        *(), **batch_request
-                    )
-                )
-            except Exception:
-                logger.debug(
-                    "anonymize_checkpoint_run: Unable to create anonymized_batch_request payload field"
-                )
+        anonymized_batch_request: Optional[
+            Dict[str, List[str]]
+        ] = batch_request_anonymizer.anonymize_batch_request(*(), **batch_request)
 
         action_list: Optional[List[dict]] = kwargs.get("action_list")
         anonymized_action_list: Optional[List[dict]] = None
@@ -113,7 +88,6 @@ class CheckpointRunAnonymizer(Anonymizer):
                         action_config=action_config_dict["action"],
                     )
                     for action_config_dict in action_list
-                    # for action_name, action_obj in action_config_dict.items()
                 ]
             except Exception:
                 logger.debug(
@@ -134,31 +108,17 @@ class CheckpointRunAnonymizer(Anonymizer):
                     validation_batch_request = validation_batch_request.to_dict()
 
                 anonymized_validation_batch_request: Optional[
-                    Dict[str, List[str]]
-                ] = None
-                if validation_batch_request:
-                    # noinspection PyBroadException
-                    try:
-                        anonymized_validation_batch_request = (
-                            batch_request_anonymizer.anonymize_batch_request(
-                                *(), **validation_batch_request
-                            )
-                        )
-                    except Exception:
-                        logger.debug(
-                            "anonymize_checkpoint_run: Unable to create anonymized_batch_request payload field"
-                        )
+                    Optional[Dict[str, List[str]]]
+                ] = batch_request_anonymizer.anonymize_batch_request(
+                    *(), **validation_batch_request
+                )
 
                 validation_expectation_suite_name: Optional[str] = validation_obj.get(
                     "expectation_suite_name"
                 )
-                anonymized_validation_expectation_suite_name: Optional[str]
-                if validation_expectation_suite_name is None:
-                    anonymized_validation_expectation_suite_name = None
-                else:
-                    anonymized_validation_expectation_suite_name = self.anonymize(
-                        validation_expectation_suite_name
-                    )
+                anonymized_validation_expectation_suite_name: Optional[
+                    str
+                ] = self.anonymize(validation_expectation_suite_name)
 
                 validation_action_list: Optional[List[dict]] = validation_obj.get(
                     "action_list"
