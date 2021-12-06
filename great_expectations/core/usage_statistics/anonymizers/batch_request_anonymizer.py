@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional, Set, Union
 
 from great_expectations.core.batch import (
     BatchRequest,
-    RuntimeBatchRequest,
     get_batch_request_from_acceptable_arguments,
     standardize_batch_request_display_ordering,
 )
@@ -35,7 +34,7 @@ class BatchRequestAnonymizer(Anonymizer):
 
     def anonymize_batch_request(self, *args, **kwargs) -> Dict[str, List[str]]:
         batch_request: Union[
-            BatchRequest, RuntimeBatchRequest
+            BatchRequest
         ] = get_batch_request_from_acceptable_arguments(*args, **kwargs)
         batch_request_dict: dict = batch_request.to_json_dict()
         anonymized_batch_request_dict: Optional[
