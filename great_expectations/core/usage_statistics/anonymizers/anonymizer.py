@@ -35,6 +35,7 @@ class Anonymizer:
 "{str(type(string_))}", which is illegal.
             """
             )
+
         salted = self._salt + string_
         return md5(salted.encode("utf-8")).hexdigest()
 
