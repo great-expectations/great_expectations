@@ -14,7 +14,6 @@ from typing import Optional
 import jsonschema
 import requests
 
-from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
@@ -479,7 +478,7 @@ def get_batch_list_usage_statistics(data_context, *args, **kwargs):
 
 
 def send_usage_message(
-    data_context: DataContext,
+    data_context: "DataContext",  # noqa: F821
     event: str,
     event_payload: Optional[dict] = None,
     success: Optional[bool] = None,
