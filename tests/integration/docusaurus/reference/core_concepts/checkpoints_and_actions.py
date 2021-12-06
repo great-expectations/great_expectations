@@ -3,6 +3,7 @@ import os
 from ruamel import yaml
 
 import great_expectations as ge
+from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -117,10 +118,16 @@ assert typed_results == results
 
 # A few different Checkpoint examples
 os.environ["VAR"] = "ge"
-os.environ["MY_PARAM"] = "1000"
-os.environ["OLD_PARAM"] = "500"
 
-no_nesting = """
+batch_request = BatchRequest(datasource_name="taxi_datasource", data_connector_name="default_inferred_data_connector_name", data_asset_name="yellow_tripdata_sample_2019-01")
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="my_expectation_suite")
+validator.expect_table_row_count_to_be_between(min_value={"$PARAMETER": "GT_PARAM", "$PARAMETER.GT_PARAM": 0}, max_value={"$PARAMETER": "LT_PARAM", "$PARAMETER.LT_PARAM": 1000000})
+validator.save_expectation_suite(discard_failed_expectations=False)
+validator = context.get_validator(batch_request=batch_request, expectation_suite_name="my_other_expectation_suite")
+validator.expect_table_row_count_to_be_between(min_value={"$PARAMETER": "GT_PARAM", "$PARAMETER.GT_PARAM": 0}, max_value={"$PARAMETER": "LT_PARAM", "$PARAMETER.LT_PARAM": 1000000})
+validator.save_expectation_suite(discard_failed_expectations=False)
+
+no_nesting = f"""
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -142,8 +149,8 @@ validations:
         action:
           class_name: UpdateDataDocsAction
     evaluation_parameters:
-      param1: $MY_PARAM
-      param2: 1 + $OLD_PARAM
+      GT_PARAM: 1000
+      LT_PARAM: 50000
     runtime_configuration:
       result_format:
         result_format: BASIC
@@ -152,6 +159,8 @@ validations:
 context.add_checkpoint(**yaml.load(no_nesting))
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 assert results.success == True
+assert list(results.run_results.items())[0][1]["validation_result"]["results"][0]["expectation_config"]["kwargs"]["max_value"] == 50000
+assert list(results.run_results.items())[0][1]["validation_result"]["results"][0]["expectation_config"]["kwargs"]["min_value"] == 1000
 
 nesting_with_defaults = """
 name: my_checkpoint
@@ -179,8 +188,8 @@ action_list:
     action:
       class_name: UpdateDataDocsAction
 evaluation_parameters:
-  param1: $MY_PARAM
-  param2: 1 + $OLD_PARAM
+  GT_PARAM: 1000
+  LT_PARAM: 50000
 runtime_configuration:
   result_format:
     result_format: BASIC
@@ -235,8 +244,8 @@ action_list:
     action:
       class_name: UpdateDataDocsAction
 evaluation_parameters:
-  param1: $MY_PARAM
-  param2: 1 + $OLD_PARAM
+  GT_PARAM: 1000
+  LT_PARAM: 50000
 runtime_configuration:
   result_format:
     result_format: BASIC
@@ -251,7 +260,6 @@ results = context.run_checkpoint(
                 "datasource_name": "taxi_datasource",
                 "data_connector_name": "default_inferred_data_connector_name",
                 "data_asset_name": "yellow_tripdata_sample_2019-01",
-                "data_connector_query": {"index": -1},
             },
             "expectation_suite_name": "my_expectation_suite",
         },
@@ -260,7 +268,6 @@ results = context.run_checkpoint(
                 "datasource_name": "taxi_datasource",
                 "data_connector_name": "default_inferred_data_connector_name",
                 "data_asset_name": "yellow_tripdata_sample_2019-02",
-                "data_connector_query": {"index": -1},
             },
             "expectation_suite_name": "my_other_expectation_suite",
         },
@@ -295,6 +302,9 @@ my_other_expectation_suite
 print(second_data_asset)
 yellow_tripdata_sample_2019-02
 """
+
+context.create_expectation_suite("my_expectation_suite", overwrite_existing=True)
+context.create_expectation_suite("my_other_expectation_suite", overwrite_existing=True)
 
 using_template = """
 name: my_checkpoint
