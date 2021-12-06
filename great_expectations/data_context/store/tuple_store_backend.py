@@ -5,7 +5,7 @@ import random
 import re
 import shutil
 from abc import ABCMeta
-from typing import Any, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -80,22 +80,13 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             for substring in self.forbidden_substrings:
                 if substring in key_element:
                     raise ValueError(
-                        "Keys in {} must not contain substrings in {} : {}".format(
-                            self.__class__.__name__,
-                            self.forbidden_substrings,
-                            key,
-                        )
+                        f"Keys in {self.__class__.__name__} must not contain substrings in {self.forbidden_substrings} : {key}"
                     )
 
     def _validate_value(self, value: Union[str, bytes]) -> None:
         if not isinstance(value, str) and not isinstance(value, bytes):
             raise TypeError(
-                "Values in {} must be instances of {} or {}, not {}".format(
-                    self.__class__.__name__,
-                    str,
-                    bytes,
-                    type(value),
-                )
+                f"Values in {self.__class__.__name__} must be instances of {str} or {bytes}, not {type(value)}"
             )
 
     def _convert_key_to_filepath(self, key: Tuple) -> str:
@@ -111,13 +102,8 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 else os.path.normpath(filepath)
             )
 
-        # TODO(cdkini): Move to separate method
-        new_key = []
-        for x in key:
-            y = x.replace(".", "/")
-            new_key.append(y)
-        key = tuple(new_key)
-        # -------------------------------------
+        # Substitute dot notation with file-path separators to ensure access to nested directories
+        key = self._substitute_key_separators(key)
 
         if self.filepath_template:
             converted_string = self.filepath_template.format(*list(key))
@@ -132,6 +118,13 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             converted_string = os.path.normpath(converted_string)
 
         return converted_string
+
+    def _substitute_key_separators(self, key: Tuple) -> Tuple:
+        tmp = []
+        for component in key:
+            tmp.append(component.replace(".", "/"))
+        key = tuple(tmp)
+        return key
 
     def _convert_filepath_to_key(self, filepath: str) -> Optional[Tuple]:
         if filepath == self.STORE_BACKEND_ID_KEY[0]:
@@ -175,9 +168,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             # Convert the template to a regex
             indexed_string_substitutions = re.findall(r"{\d+}", filepath_template)
             tuple_index_list = [
-                "(?P<tuple_index_{}>.*)".format(
-                    i,
-                )
+                f"(?P<tuple_index_{i}>.*)"
                 for i in range(len(indexed_string_substitutions))
             ]
             intermediate_filepath_regex = re.sub(
@@ -216,12 +207,8 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
         new_key = self._convert_filepath_to_key(filepath)
         if key != new_key:
             raise ValueError(
-                "filepath template {} for class {} is not reversible for a tuple of length {}. "
-                "Have you included all elements in the key tuple?".format(
-                    self.filepath_template,
-                    self.__class__.__name__,
-                    self.key_length,
-                )
+                f"filepath template {self.filepath_template} for class {self.__class__.__name__} is not reversible for a tuple of length {self.key_length}. "
+                "Have you included all elements in the key tuple?"
             )
 
     @property
@@ -273,9 +260,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                 )
             elif not os.path.isabs(root_directory):
                 raise ValueError(
-                    "root_directory must be an absolute path. Got {} instead.".format(
-                        root_directory
-                    )
+                    f"root_directory must be an absolute path. Got {root_directory} instead."
                 )
             else:
                 self.full_base_directory = os.path.join(root_directory, base_directory)
@@ -1085,10 +1070,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         az_blob_key = self._convert_key_to_filepath(key)
         az_blob_path = os.path.join(self.container, self.prefix, az_blob_key)
 
-        return "https://{}.blob.core.windows.net/{}".format(
-            self._get_container_client().account_name,
-            az_blob_path,
-        )
+        return f"https://{self._get_container_client().account_name}.blob.core.windows.net/{az_blob_path}"
 
     def _has_key(self, key):
         all_keys = self.list_keys()
