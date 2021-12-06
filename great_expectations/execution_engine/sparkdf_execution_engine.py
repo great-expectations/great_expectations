@@ -15,9 +15,14 @@ from great_expectations.core.batch_spec import (
     BatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
+    S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
-from great_expectations.core.util import AzureUrl, get_or_create_spark_application
+from great_expectations.core.util import (
+    AzureUrl,
+    S3Url,
+    get_or_create_spark_application,
+)
 from great_expectations.exceptions import exceptions as ge_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -40,12 +45,10 @@ try:
 
     # noinspection SpellCheckingInspection
     import pyspark.sql.types as sparktypes
-    from pyspark import SparkContext
     from pyspark.sql import DataFrame, SparkSession
     from pyspark.sql.readwriter import DataFrameReader
 except ImportError:
     pyspark = None
-    SparkContext = None
     SparkSession = None
     DataFrame = None
     DataFrameReader = None
@@ -264,6 +267,24 @@ Please check your config."""
                     """
                     Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine.
                     """
+                )
+
+        elif isinstance(batch_spec, S3BatchSpec):
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options or {}
+            path: str = batch_spec.path
+            s3_url = S3Url(path)
+            try:
+                reader: DataFrameReader = self.spark.read.options(**reader_options)
+                reader_fn: Callable = self._get_reader_fn(
+                    reader=reader,
+                    reader_method=reader_method,
+                    path=s3_url.key,
+                )
+                batch_data = reader_fn(path)
+            except AttributeError:
+                raise ExecutionEngineError(
+                    "Unable to load pyspark. Pyspark is required for SparkDFExecutionEngine."
                 )
 
         elif isinstance(batch_spec, PathBatchSpec):
