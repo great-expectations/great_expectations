@@ -1,7 +1,8 @@
 import logging
 import os
-import unittest.mock as mock
-from typing import Union
+import unittest
+from typing import List, Union
+from unittest import mock
 
 import pandas as pd
 import pytest
@@ -80,7 +81,13 @@ def test_basic_checkpoint_config_validation(
             name="my_erroneous_checkpoint",
         )
     assert mock_emit.call_count == 1
-    expected_call_args_list = [
+
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call]
+
+    expected_events = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
@@ -89,7 +96,8 @@ def test_basic_checkpoint_config_validation(
             }
         ),
     ]
-    assert mock_emit.call_args_list == expected_call_args_list
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     yaml_config_erroneous = f"""
     config_version: 1
@@ -107,20 +115,25 @@ def test_basic_checkpoint_config_validation(
             name="my_erroneous_checkpoint",
         )
     assert mock_emit.call_count == 2
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.test_yaml_config",
-                    "event_payload": {
-                        "diagnostic_info": ["__class_name_not_provided__"]
-                    },
-                    "success": False,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     with pytest.raises(ge_exceptions.InvalidConfigError):
         # noinspection PyUnusedLocal
@@ -130,18 +143,32 @@ def test_basic_checkpoint_config_validation(
             class_name="Checkpoint",
         )
     assert mock_emit.call_count == 3
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.test_yaml_config",
-                    "event_payload": {"parent_class": "Checkpoint"},
-                    "success": False,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"parent_class": "Checkpoint"},
+                "success": False,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     yaml_config_erroneous = f"""
     config_version: 1
@@ -171,24 +198,44 @@ def test_basic_checkpoint_config_validation(
     )
     assert mock_emit.call_count == 4
     # Substitute anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[3][0][0]["event_payload"][
+    anonymized_name_0 = mock_emit.call_args_list[3][0][0]["event_payload"][
         "anonymized_name"
     ]
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.test_yaml_config",
-                    "event_payload": {
-                        "anonymized_name": anonymized_name,
-                        "parent_class": "Checkpoint",
-                    },
-                    "success": True,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
+    expected_events = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"parent_class": "Checkpoint"},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name_0,
+                    "parent_class": "Checkpoint",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     assert len(context.list_checkpoints()) == 0
     context.add_checkpoint(**yaml.load(yaml_config_erroneous))
@@ -271,24 +318,55 @@ def test_basic_checkpoint_config_validation(
     )
     assert mock_emit.call_count == 5
     # Substitute anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[4][0][0]["event_payload"][
+    anonymized_name_1 = mock_emit.call_args_list[4][0][0]["event_payload"][
         "anonymized_name"
     ]
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.test_yaml_config",
-                    "event_payload": {
-                        "anonymized_name": anonymized_name,
-                        "parent_class": "Checkpoint",
-                    },
-                    "success": True,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"parent_class": "Checkpoint"},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name_0,
+                    "parent_class": "Checkpoint",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name_1,
+                    "parent_class": "Checkpoint",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     assert len(context.list_checkpoints()) == 1
     context.add_checkpoint(**yaml.load(yaml_config))
@@ -424,7 +502,9 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     anonymized_checkpoint_name = mock_emit.call_args_list[0][0][0]["event_payload"][
         "anonymized_name"
     ]
-    assert mock_emit.call_args_list == [
+
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call] = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
@@ -436,6 +516,9 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
             }
         )
     ]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     assert len(data_context.list_checkpoints()) == 0
     data_context.add_checkpoint(**yaml.load(yaml_config))
