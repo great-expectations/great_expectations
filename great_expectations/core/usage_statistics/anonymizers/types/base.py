@@ -69,6 +69,10 @@ class CLISuiteInteractiveFlagCombinations(Enum):
 
     UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE = {
         "interactive_flag": True,
+        "interactive_attribution": "unprompted_override_interactive_absent_manual_absent_profile_present",
+    }
+    UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE = {
+        "interactive_flag": True,
         "interactive_attribution": "unprompted_override_interactive_present_manual_absent_profile_present",
     }
     UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE = {

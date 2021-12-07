@@ -221,6 +221,10 @@ def _process_suite_new_flags_and_prompt(
             interactive_mode = (
                 CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE
             )
+        elif profile and interactive_mode.value["interactive_flag"] is True:
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE
+            )
         elif profile and interactive_mode.value["interactive_flag"] is False:
             cli_message(
                 "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag</yellow>"
