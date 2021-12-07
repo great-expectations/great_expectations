@@ -6,7 +6,7 @@ import Congratulations from '/docs/guides/setup/components/install_congrats.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you Install Great Expectations on a Spark EMR cluster.
+This guide will help you Install Great Expectations without a file system.
 
 ## Steps
 
