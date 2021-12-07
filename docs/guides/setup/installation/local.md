@@ -47,12 +47,32 @@ You can use either pip or Anaconda to install Great Expectations.
   ]}>
 <TabItem value="pip">
 
-Once you have confirmed that Python 3 is installed locally, you will run two commands that will:
+Once you have confirmed that Python 3 is installed locally, you can create a virutal environment with venv.
 
-1. Ensure that pip is installed and upgraded to the latest version
-2. Install Great Expectations using pip
+<details>
+<summary>Python Virtual Environments</summary>
+We have chosen to use venv for virtual environments in this guide, because it is included with Python 3. You are not limited to using venv, and can just as easily install Great Expectations into virtual environments with tools such as virtualenv, pyenv, etc.
+</details>
 
 Depending on whether you found that you needed to run `python` or `python3` in the previous step, you will run either:
+
+```console
+python -m venv venv
+```
+
+or
+
+```console
+python3 -m venv venv
+```
+
+This command will create a new directory called `venv` where your virtual environment is located. In order to activate the virtual environment run:
+
+```console
+source venv/bin/activate
+```
+
+Finally, you can ensure the latest version of pip is installed, and install Great Expectations, by running the appropriate pair of `python` commands below:
 
 ```console
 python -m ensurepip --upgrade
@@ -77,7 +97,7 @@ conda --version
 
 If no version number is printed, [you can download Anaconda here](https://www.anaconda.com/products/individual).
 
-Once Anaconda is installed, you can create and activate a new environment by running:
+Once Anaconda is installed, you can create and activate a new virtual environment by running:
 
 ```console
 conda create --name YOUR_ENVIRONMENT_NAME
