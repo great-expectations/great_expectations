@@ -6,7 +6,7 @@ import Congratulations from '/docs/guides/setup/components/install_congrats.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-Great Expectations can be deployed in environments such as Databricks, AWS EMR, Google Cloud Composer, and others. This guide will provide resources to successfully install Great Expectations in a hosted environment.
+Great Expectations can be deployed in environments such as Databricks, AWS EMR, Google Cloud Composer, and others. These environments do not always have a typical file system where Great Expectations can be installed. This guide will provide tool-specific resources to successfully install Great Expectations in a hosted environment.
 
 ## Install Great Expectations
 
