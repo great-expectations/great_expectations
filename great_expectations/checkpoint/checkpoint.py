@@ -13,6 +13,10 @@ from great_expectations.checkpoint.util import get_substituted_validation_dict
 from great_expectations.core import RunIdentifier
 from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
 from great_expectations.core.batch import BatchRequest, get_batch_request_dict
+from great_expectations.core.usage_statistics.usage_statistics import (
+    get_checkpoint_run_usage_statistics,
+    usage_statistics_enabled_method,
+)
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
@@ -51,7 +55,7 @@ class Checkpoint:
     def __init__(
         self,
         name: str,
-        data_context,
+        data_context: "DataContext",  # noqa: F821
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
@@ -73,6 +77,9 @@ class Checkpoint:
         # Note the gross typechecking to avoid a circular import
         if "DataContext" not in str(type(data_context)):
             raise TypeError("A Checkpoint requires a valid DataContext")
+
+        self._usage_statistics_handler = data_context._usage_statistics_handler
+
         self._data_context = data_context
 
         checkpoint_config: CheckpointConfig = CheckpointConfig(
@@ -294,6 +301,10 @@ class Checkpoint:
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
     #  while run_name_template also undergoes strftime datetime substitution
+    @usage_statistics_enabled_method(
+        event_name="checkpoint.run",
+        args_payload_fn=get_checkpoint_run_usage_statistics,
+    )
     def run(
         self,
         template_name: Optional[str] = None,
@@ -339,8 +350,11 @@ class Checkpoint:
             runtime_kwargs=runtime_kwargs
         )
         run_name_template = substituted_runtime_config.run_name_template
+
         validations = substituted_runtime_config.validations
+
         batch_request = substituted_runtime_config.batch_request
+
         if len(validations) == 0 and not batch_request:
             raise ge_exceptions.CheckpointError(
                 f'Checkpoint "{self.name}" must contain either a batch_request or validations.'
@@ -724,6 +738,7 @@ class LegacyCheckpoint(Checkpoint):
 class SimpleCheckpoint(Checkpoint):
     _configurator_class = SimpleCheckpointConfigurator
 
+    # noinspection PyUnusedLocal
     def __init__(
         self,
         name: str,

@@ -26,6 +26,16 @@ class Anonymizer:
         return self._salt
 
     def anonymize(self, string_):
+        if string_ is None:
+            return None
+
+        if not isinstance(string_, str):
+            raise TypeError(
+                f"""The type of the "string_" argument must be a string (Python "str").  The type given is
+"{str(type(string_))}", which is illegal.
+            """
+            )
+
         salted = self._salt + string_
         return md5(salted.encode("utf-8")).hexdigest()
 
@@ -36,10 +46,14 @@ class Anonymizer:
         object_=None,
         object_class=None,
         object_config=None,
+        runtime_environment=None,
     ) -> dict:
         assert (
             object_ or object_class or object_config
         ), "Must pass either object_ or object_class or object_config."
+
+        if runtime_environment is None:
+            runtime_environment = {}
 
         object_class_name: Optional[str] = None
         try:
@@ -47,7 +61,9 @@ class Anonymizer:
                 object_class = object_.__class__
             elif object_class is None and object_config is not None:
                 object_class_name = object_config.get("class_name")
-                object_module_name = object_config.get("module_name")
+                object_module_name = object_config.get(
+                    "module_name"
+                ) or runtime_environment.get("module_name")
                 object_class = load_class(object_class_name, object_module_name)
             object_class_name = object_class.__name__
 

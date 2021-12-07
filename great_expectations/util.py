@@ -41,6 +41,11 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.registry import _registered_expectations
 
 try:
+    import black
+except ImportError:
+    black = None
+
+try:
     # This library moved in python 3.8
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
@@ -62,8 +67,6 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
-
-logger = logging.getLogger(__name__)
 
 SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "batch": "batches",
@@ -919,23 +922,19 @@ def lint_code(code: str) -> str:
     # NOTE: Chetan 20211111 - This import was failing in Azure with 20.8b1 so we bumped up the version to 21.8b0
     # While this seems to resolve the issue, the root cause is yet to be determined.
 
-    try:
-        import black
-
-        black_file_mode = black.FileMode()
-        if not isinstance(code, str):
-            raise TypeError
-        try:
-            linted_code = black.format_file_contents(
-                code, fast=True, mode=black_file_mode
-            )
-            return linted_code
-        except (black.NothingChanged, RuntimeError):
-            return code
-    except ImportError:
+    if black is None:
         logger.warning(
             "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
         )
+        return code
+
+    black_file_mode = black.FileMode()
+    if not isinstance(code, str):
+        raise TypeError
+    try:
+        linted_code = black.format_file_contents(code, fast=True, mode=black_file_mode)
+        return linted_code
+    except (black.NothingChanged, RuntimeError):
         return code
 
 
@@ -1048,17 +1047,15 @@ def filter_properties_dict(
     return properties
 
 
-def deep_filter_properties_dict(
-    properties: Optional[dict] = None,
+def deep_filter_properties_iterable(
+    properties: Optional[Union[dict, list, set]] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
     clean_falsy: bool = False,
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
-) -> Optional[dict]:
-    key: str
-    value: Any
+) -> Optional[Union[dict, list, set]]:
     if isinstance(properties, dict):
         if not inplace:
             properties = copy.deepcopy(properties)
@@ -1072,8 +1069,27 @@ def deep_filter_properties_dict(
             keep_falsy_numerics=keep_falsy_numerics,
             inplace=True,
         )
+
+        key: str
+        value: Any
         for key, value in properties.items():
-            deep_filter_properties_dict(
+            deep_filter_properties_iterable(
+                properties=value,
+                keep_fields=keep_fields,
+                delete_fields=delete_fields,
+                clean_nulls=clean_nulls,
+                clean_falsy=clean_falsy,
+                keep_falsy_numerics=keep_falsy_numerics,
+                inplace=True,
+            )
+
+    elif isinstance(properties, (list, set)):
+        if not inplace:
+            properties = copy.deepcopy(properties)
+
+        value: Any
+        for value in properties:
+            deep_filter_properties_iterable(
                 properties=value,
                 keep_fields=keep_fields,
                 delete_fields=delete_fields,
