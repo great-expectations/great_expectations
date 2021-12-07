@@ -587,6 +587,10 @@ options can be used.
                 interactive_mode = (
                     CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_DATASOURCE_SPECIFIED
                 )
+            elif interactive_mode.value["interactive_flag"] is True:
+                interactive_mode = (
+                    CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_DATASOURCE_SPECIFIED
+                )
             elif interactive_mode.value["interactive_flag"] is False:
                 cli_message(
                     "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --datasource-name flag</yellow>"

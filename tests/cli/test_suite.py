@@ -1139,7 +1139,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
                 "event": "cli.suite.edit.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_interactive_present_manual_absent",
+                    "interactive_attribution": "unprompted_override_interactive_present_manual_absent_datasource_specified",
                     "api_version": "v3",
                 },
                 "success": False,
@@ -3907,7 +3907,7 @@ options can be used.
             None,
             False,
             None,
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_DATASOURCE_SPECIFIED,
             "no_msg",
             "no_msg",
             id="--interactive --datasource-name",
