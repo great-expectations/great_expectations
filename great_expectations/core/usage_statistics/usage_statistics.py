@@ -410,7 +410,7 @@ def save_expectation_suite_usage_statistics(
 def edit_expectation_suite_usage_statistics(
     data_context: "DataContext",  # noqa: F821
     expectation_suite_name: str,
-    interactive_mode: CLISuiteInteractiveFlagCombinations,
+    interactive_mode: Optional[CLISuiteInteractiveFlagCombinations] = None,
 ):
     try:
         data_context_id = data_context.data_context_id
@@ -420,7 +420,11 @@ def edit_expectation_suite_usage_statistics(
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
-    payload = copy.deepcopy(interactive_mode.value)
+
+    if interactive_mode is None:
+        payload = {}
+    else:
+        payload = copy.deepcopy(interactive_mode.value)
 
     # noinspection PyBroadException
     try:
