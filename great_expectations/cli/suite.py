@@ -175,7 +175,9 @@ def _process_suite_new_flags_and_prompt(
     interactive_mode: Optional[CLISuiteInteractiveFlagCombinations]
     if interactive_flag is True and manual_flag is True:
         error_message = """Please choose either --interactive or --manual, you may not choose both."""
-        interactive_mode = CLISuiteInteractiveFlagCombinations.ERROR
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
+        )
     elif interactive_flag is False and manual_flag is False:
         interactive_mode = (
             CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
@@ -527,7 +529,9 @@ def _process_suite_edit_flags_and_prompt(
     # Convert interactive / no-interactive flags to interactive
     if interactive_flag is True and manual_flag is True:
         error_message = """Please choose either --interactive or --manual, you may not choose both."""
-        interactive_mode = CLISuiteInteractiveFlagCombinations.ERROR
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
+        )
     elif interactive_flag is False and manual_flag is False:
         interactive_mode = (
             CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
@@ -538,7 +542,7 @@ def _process_suite_edit_flags_and_prompt(
         )
     elif interactive_flag is False and manual_flag is True:
         interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_FALSE_INTERACTIVE_FALSE_MANUAL_TRUE
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE
         )
     else:
         interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
@@ -547,6 +551,9 @@ def _process_suite_edit_flags_and_prompt(
         error_message = """Only one of --datasource-name DATASOURCE_NAME and --batch-request <path to JSON file> \
 options can be used.
 """
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.ERROR_DATASOURCE_SPECIFIED_BATCH_REQUEST_SPECIFIED
+        )
 
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
@@ -613,7 +620,7 @@ How would you like to edit your Expectation Suite?
         # Default option
         if suite_edit_method == "":
             interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE_DEFAULT
+                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
             )
         if suite_edit_method == "1":
             interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE

@@ -517,54 +517,8 @@ anonymized_cli_suite_expectation_suite_payload_schema = {
         },
         "interactive_attribution": {
             "enum": [
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_DATASOURCE_SPECIFIED.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_DATASOURCE_SPECIFIED.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_FALSE.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_TRUE.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.UNKNOWN.value[
-                    "interactive_attribution"
-                ],
-                CLISuiteInteractiveFlagCombinations.ERROR.value[
-                    "interactive_attribution"
-                ],
+                element.value["interactive_attribution"]
+                for element in CLISuiteInteractiveFlagCombinations
             ],
         },
         "api_version": {"type": "string", "maxLength": 256},

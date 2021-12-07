@@ -87,6 +87,10 @@ class CLISuiteInteractiveFlagCombinations(Enum):
         "interactive_flag": True,
         "interactive_attribution": "unprompted_override_interactive_absent_manual_absent_datasource_specified",
     }
+    UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_DATASOURCE_SPECIFIED = {
+        "interactive_flag": True,
+        "interactive_attribution": "unprompted_override_interactive_present_manual_absent_datasource_specified",
+    }
     UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_DATASOURCE_SPECIFIED = {
         "interactive_flag": True,
         "interactive_attribution": "unprompted_override_interactive_absent_manual_present_datasource_specified",
@@ -113,11 +117,16 @@ class CLISuiteInteractiveFlagCombinations(Enum):
         "interactive_attribution": "prompted_choice_true",
     }
 
+    ERROR_INTERACTIVE_TRUE_MANUAL_TRUE = {
+        "interactive_flag": None,
+        "interactive_attribution": "error_interactive_present_manual_present",
+    }
+    ERROR_DATASOURCE_SPECIFIED_BATCH_REQUEST_SPECIFIED = {
+        "interactive_flag": None,
+        "interactive_attribution": "error_datasource_specified_batch_request_specified",
+    }
+
     UNKNOWN = {
         "interactive_flag": None,
         "interactive_attribution": "unknown",
-    }
-    ERROR = {
-        "interactive_flag": None,
-        "interactive_attribution": "error",
     }
