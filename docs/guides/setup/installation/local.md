@@ -71,7 +71,14 @@ conda --version
 
 If no version number is printed, [you can download Anaconda here](https://www.anaconda.com/products/individual).
 
-Once Anaconda is installed, you can run this:
+Once Anaconda is installed, you can create and activate a new environment by running:
+
+```console
+conda create --name YOUR_ENVIRONMENT_NAME
+conda activate YOUR_ENVIRONMENT_NAME
+```
+
+Replace "YOUR_ENVIRONMENT_NAME" with the name you wish you use for your environment. Finally, you can install Great Expectations by running:
 
 ```console
 conda install -c conda-forge great-expectations
