@@ -209,8 +209,7 @@ def _process_suite_new_flags_and_prompt(
         )
     )
 
-    # Note - explicit check for boolean or None for `interactive: Optional[bool]` is necessary because None indicates
-    #  that a user did not supply either flag.
+    # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
     if user_provided_any_flag_skip_prompt:
         # Assume batch needed if user passes --profile
         if profile and interactive_mode.value["interactive_flag"] is None:
@@ -349,7 +348,10 @@ def _suite_new_workflow(
         )
 
         toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=True
+            data_context=context,
+            event=usage_event,
+            event_payload=interactive_mode.value,
+            success=True,
         )
 
         if batch_request:
@@ -381,12 +383,18 @@ def _suite_new_workflow(
     ) as e:
         cli_message(string=f"<red>{e}</red>")
         toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+            data_context=context,
+            event=usage_event,
+            event_payload=interactive_mode.value,
+            success=False,
         )
         sys.exit(1)
     except Exception as e:
         toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+            data_context=context,
+            event=usage_event,
+            event_payload=interactive_mode.value,
+            success=False,
         )
         raise e
 
@@ -517,7 +525,6 @@ def _process_suite_edit_flags_and_prompt(
     interactive_mode: CLISuiteInteractiveFlagCombinations
 
     # Convert interactive / no-interactive flags to interactive
-    interactive: Optional[bool] = None
     if interactive_flag is True and manual_flag is True:
         error_message = """Please choose either --interactive or --manual, you may not choose both."""
         interactive_mode = CLISuiteInteractiveFlagCombinations.ERROR
@@ -544,20 +551,22 @@ options can be used.
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
         toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=False
+            data_context=context,
+            event=usage_event_end,
+            event_payload=interactive_mode.value,
+            success=False,
         )
         sys.exit(1)
 
     user_provided_any_flag_skip_prompt: bool = any(
         (
-            (interactive is not None),
+            (interactive_mode.value["interactive_flag"] is not None),
             (datasource_name is not None),
             (batch_request is not None),
         )
     )
 
-    # Note - explicit check for boolean or None for `interactive: Optional[bool]` is necessary because None indicates
-    #  that a user did not supply either flag.
+    # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
     if user_provided_any_flag_skip_prompt:
         if datasource_name is not None:
             if interactive_mode.value["interactive_flag"] is None:
@@ -753,14 +762,20 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         cli_message(string=f"<red>{e}</red>")
         if not suppress_usage_message:
             toolkit.send_usage_message(
-                data_context=context, event=usage_event, success=False
+                data_context=context,
+                event=usage_event,
+                event_payload=interactive_mode.value,
+                success=False,
             )
         sys.exit(1)
 
     except Exception as e:
         if not suppress_usage_message:
             toolkit.send_usage_message(
-                data_context=context, event=usage_event, success=False
+                data_context=context,
+                event=usage_event,
+                event_payload=interactive_mode.value,
+                success=False,
             )
         raise e
 

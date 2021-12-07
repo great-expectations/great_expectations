@@ -1703,14 +1703,14 @@ valid_usage_statistics_messages = {
         },
         message_stubs=[
             {
-                "event": "cli.suite.edit",
+                "event": "cli.suite.new",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e"
                 },
                 "ge_version": "0.11.9.manual_testing",
             },
             {
-                "event": "cli.suite.edit",
+                "event": "cli.suite.new",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
                     "api_version": "v2",
@@ -1718,7 +1718,7 @@ valid_usage_statistics_messages = {
                 "ge_version": "0.13.0.manual_testing",
             },
             {
-                "event": "cli.suite.edit",
+                "event": "cli.suite.new",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
                     "api_version": "v3",
@@ -1726,7 +1726,7 @@ valid_usage_statistics_messages = {
                 "ge_version": "0.13.0.manual_testing",
             },
             {
-                "event": "cli.suite.edit.begin",
+                "event": "cli.suite.new.begin",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
                     "api_version": "v3",
@@ -1734,7 +1734,7 @@ valid_usage_statistics_messages = {
                 "ge_version": "0.13.18.manual_testing",
             },
             {
-                "event": "cli.suite.edit.end",
+                "event": "cli.suite.new.end",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
                     "api_version": "v3",
@@ -1742,7 +1742,7 @@ valid_usage_statistics_messages = {
                 "ge_version": "0.13.18.manual_testing",
             },
             {
-                "event": "cli.suite.edit.end",
+                "event": "cli.suite.new.end",
                 "success": False,
                 "event_payload": {
                     "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
@@ -1751,7 +1751,7 @@ valid_usage_statistics_messages = {
                 "ge_version": "0.13.18.manual_testing",
             },
             {
-                "event": "cli.suite.edit.end",
+                "event": "cli.suite.new.end",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
                     **CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_TRUE.value,
