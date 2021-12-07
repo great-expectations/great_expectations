@@ -1,5 +1,5 @@
 ---
-title: How to install Great Expectations in the cloud
+title: How to install Great Expectations without a file system
 ---
 import NextSteps from '/docs/guides/setup/components/install_nextsteps.md'
 import Congratulations from '/docs/guides/setup/components/install_congrats.md'
