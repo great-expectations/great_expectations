@@ -14,7 +14,7 @@ This guide will help you Install Great Expectations locally for use with Python.
 - Great Expectations requires Python 3. For details on how to download and install Python on your platform, see [python.org](https://www.python.org/downloads/).
 :::
 
-### 1. Check Python version and upgrade pip
+### 1. Check Python version
 
 First, check that you have Python 3 with pip installed. You can check your version of Python by running:
 
@@ -28,34 +28,59 @@ If this command returns something other than a Python 3 version number (like Pyt
 python3 --version
 ```
 
-Once you have confirmed that Python 3 is installed locally. You will want to ensure that pip is installed and upgraded to the latest version. Depending on whether you found that you needed to run `python` or `python3` in the previous step, you will run either:
+### 2. Install Great Expectations
 
-```bash
-python -m ensurepip --upgrade
+You can use either pip or Anaconda to install Great Expectations.
+
+<Tabs
+  groupId="pip-or-conda"
+  defaultValue='pip'
+  values={[
+  {label: 'pip', value:'pip'},
+  {label: 'conda', value:'conda'},
+  ]}>
+<TabItem value="pip">
+
+Once you have confirmed that Python 3 is installed locally, you will run two commands that will:
+
+1. Ensure that pip is installed and upgraded to the latest version
+2. Install Great Expectations using pip
+
+Depending on whether you found that you needed to run `python` or `python3` in the previous step, you will run either:
+
+```python file=../../../../tests/integration/docusaurus/setup/installation/local.py#L2-L3
 ```
 
 or
 
-```bash
-python3 -m ensurepip --upgrade
+```python file=../../../../tests/integration/docusaurus/setup/installation/local.py#L7-L8
 ```
 
-This command installs pip if it is not already installed, and upgrades to the latest version.
+</TabItem>
+<TabItem value="conda">
 
-### 2. Install Great Expectations
+Once you have confirmed that Python 3 is installed locally, you will want to ensure that Anaconda is installed by running:
 
-Use pip to install Great Expectations.
-
-```bash
-# if python is version 3
-python -m pip install great_expectations
-
-# or if multiple versions of Python installed
-python3 -m pip install great_expectations
+```python file=../../../../tests/integration/docusaurus/setup/installation/local.py#L12
 ```
+
+If no version number is printed, [you can download Anaconda here](https://www.anaconda.com/products/individual).
+
+Depending on whether you found that you needed to run `python` or `python3` in the previous step, you will run either:
+
+```python file=../../../../tests/integration/docusaurus/setup/installation/local.py#L13
+```
+
+or
+
+```python file=../../../../tests/integration/docusaurus/setup/installation/local.py#L18
+```
+
+</TabItem>
+</Tabs>
 
 You can confirm that great_expectations was successfully installed with:
-```console
+```bash
 great_expectations --version
 ```
 
