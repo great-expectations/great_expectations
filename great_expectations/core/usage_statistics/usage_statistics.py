@@ -42,7 +42,9 @@ from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anon
 from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
     StoreAnonymizer,
 )
-from great_expectations.core.usage_statistics.anonymizers.types.base import InteractiveFlagAttributions
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    CLISuiteInteractiveFlagCombinations,
+)
 from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
     ValidationOperatorAnonymizer,
 )
@@ -408,8 +410,7 @@ def save_expectation_suite_usage_statistics(
 def edit_expectation_suite_usage_statistics(
     data_context: "DataContext",  # noqa: F821
     expectation_suite_name: str,
-    interactive: bool,
-    interactive_mode_attribution: InteractiveFlagAttributions,
+    interactive_mode: CLISuiteInteractiveFlagCombinations,
 ):
     try:
         data_context_id = data_context.data_context_id
@@ -419,10 +420,7 @@ def edit_expectation_suite_usage_statistics(
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
-    payload = {
-        "interactive": interactive,
-        "interactive_mode_attribution": interactive_mode_attribution,
-    }
+    payload = copy.deepcopy(interactive_mode.value)
 
     # noinspection PyBroadException
     try:

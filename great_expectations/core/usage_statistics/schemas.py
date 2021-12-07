@@ -5,7 +5,9 @@
 
 
 # An anonymized string *must* be an md5 hash, so must have exactly 32 characters
-from great_expectations.core.usage_statistics.anonymizers.types.base import InteractiveFlagAttributions
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    CLISuiteInteractiveFlagCombinations,
+)
 
 anonymized_string_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -510,27 +512,59 @@ anonymized_cli_suite_expectation_suite_payload_schema = {
         "anonymized_expectation_suite_name": {
             "$ref": "#/definitions/anonymized_string"
         },
-        "interactive": {
+        "interactive_flag": {
             "type": ["boolean", "null"],
         },
-        "interactive_mode_attribution": {
+        "interactive_attribution": {
             "enum": [
-                InteractiveFlagAttributions.UNPROMPTED_NULL_INTERACTIVE_FALSE_MANUAL_FALSE.value,
-                InteractiveFlagAttributions.UNPROMPTED_TRUE_INTERACTIVE_TRUE_MANUAL_FALSE.value,
-                InteractiveFlagAttributions.UNPROMPTED_FALSE_INTERACTIVE_FALSE_MANUAL_TRUE.value,
-                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE.value,
-                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE.value,
-                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED.value,
-                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED.value,
-                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_DATASOURCE_SPECIFIED.value,
-                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_DATASOURCE_SPECIFIED.value,
-                InteractiveFlagAttributions.PROMPTED_CHOICE_FALSE_DEFAULT.value,
-                InteractiveFlagAttributions.PROMPTED_CHOICE_FALSE.value,
-                InteractiveFlagAttributions.PROMPTED_CHOICE_TRUE_PROFILE_FALSE.value,
-                InteractiveFlagAttributions.PROMPTED_CHOICE_TRUE_PROFILE_TRUE.value,
-                InteractiveFlagAttributions.PROMPTED_CHOICE_TRUE.value,
-                InteractiveFlagAttributions.UNKNOWN.value,
-                InteractiveFlagAttributions.ERROR.value,
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_DATASOURCE_SPECIFIED.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_DATASOURCE_SPECIFIED.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_FALSE.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_TRUE.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.UNKNOWN.value[
+                    "interactive_attribution"
+                ],
+                CLISuiteInteractiveFlagCombinations.ERROR.value[
+                    "interactive_attribution"
+                ],
             ],
         },
         "api_version": {"type": "string", "maxLength": 256},

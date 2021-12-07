@@ -1,5 +1,5 @@
-from typing import Set
 from enum import Enum
+from typing import Set
 
 GETTING_STARTED_DATASOURCE_NAME: str = "getting_started_datasource"
 GETTING_STARTED_EXPECTATION_SUITE_NAME: str = (
@@ -53,35 +53,71 @@ CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS: Set[str] = {
 }
 
 
-class InteractiveFlagAttributions(Enum):
-    UNPROMPTED_NULL_INTERACTIVE_FALSE_MANUAL_FALSE = (
-        "unprompted_null_interactive_absent_manual_absent"
-    )
-    UNPROMPTED_TRUE_INTERACTIVE_TRUE_MANUAL_FALSE = (
-        "unprompted_true_interactive_present_manual_absent"
-    )
-    UNPROMPTED_FALSE_INTERACTIVE_FALSE_MANUAL_TRUE = (
-        "unprompted_false_interactive_absent_manual_present"
-    )
+class CLISuiteInteractiveFlagCombinations(Enum):
+    UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE = {
+        "interactive_flag": None,
+        "interactive_attribution": "unprompted_interactive_absent_manual_absent",
+    }
+    UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE = {
+        "interactive_flag": True,
+        "interactive_attribution": "unprompted_interactive_present_manual_absent",
+    }
+    UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE = {
+        "interactive_flag": False,
+        "interactive_attribution": "unprompted_interactive_absent_manual_present",
+    }
 
-    UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE = (
-        "unprompted_true_override_interactive_present_manual_absent_profile_present"
-    )
-    UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE = (
-        "unprompted_true_override_interactive_absent_manual_present_profile_present"
-    )
-    UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED = "unprompted_true_override_interactive_absent_manual_absent_batch_request_specified"
-    UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED = "unprompted_true_override_interactive_absent_manual_present_batch_request_specified"
-    UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_DATASOURCE_SPECIFIED = (
-        "unprompted_true_override_interactive_absent_manual_absent_datasource_specified"
-    )
-    UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_DATASOURCE_SPECIFIED = "unprompted_true_override_interactive_absent_manual_present_datasource_specified"
+    UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE = {
+        "interactive_flag": True,
+        "interactive_attribution": "unprompted_override_interactive_present_manual_absent_profile_present",
+    }
+    UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE = {
+        "interactive_flag": True,
+        "interactive_attribution": "unprompted_override_interactive_absent_manual_present_profile_present",
+    }
+    UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED = {
+        "interactive_flag": True,
+        "interactive_attribution": "unprompted_override_interactive_absent_manual_absent_batch_request_specified",
+    }
+    UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED = {
+        "interactive_flag": True,
+        "interactive_attribution": "unprompted_override_interactive_absent_manual_present_batch_request_specified",
+    }
+    UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_DATASOURCE_SPECIFIED = {
+        "interactive_flag": True,
+        "interactive_attribution": "unprompted_override_interactive_absent_manual_absent_datasource_specified",
+    }
+    UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_DATASOURCE_SPECIFIED = {
+        "interactive_flag": True,
+        "interactive_attribution": "unprompted_override_interactive_absent_manual_present_datasource_specified",
+    }
 
-    PROMPTED_CHOICE_FALSE_DEFAULT = "propmpted_choice_false_default"
-    PROMPTED_CHOICE_FALSE = "prompted_choice_false"
-    PROMPTED_CHOICE_TRUE_PROFILE_FALSE = "prompted_choice_true_profile_false"
-    PROMPTED_CHOICE_TRUE_PROFILE_TRUE = "prompted_choice_true_profile_true"
-    PROMPTED_CHOICE_TRUE = "prompted_choice_true"
+    PROMPTED_CHOICE_DEFAULT = {
+        "interactive_flag": False,
+        "interactive_attribution": "propmpted_choice_false_default",
+    }
+    PROMPTED_CHOICE_FALSE = {
+        "interactive_flag": False,
+        "interactive_attribution": "prompted_choice_false",
+    }
+    PROMPTED_CHOICE_TRUE_PROFILE_FALSE = {
+        "interactive_flag": True,
+        "interactive_attribution": "prompted_choice_true_profile_false",
+    }
+    PROMPTED_CHOICE_TRUE_PROFILE_TRUE = {
+        "interactive_flag": True,
+        "interactive_attribution": "prompted_choice_true_profile_true",
+    }
+    PROMPTED_CHOICE_TRUE = {
+        "interactive_flag": True,
+        "interactive_attribution": "prompted_choice_true",
+    }
 
-    UNKNOWN = "unknown"
-    ERROR = "error"
+    UNKNOWN = {
+        "interactive_flag": None,
+        "interactive_attribution": "unknown",
+    }
+    ERROR = {
+        "interactive_flag": None,
+        "interactive_attribution": "error",
+    }

@@ -6,7 +6,8 @@ import pytest
 import requests
 
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
-    GETTING_STARTED_DATASOURCE_NAME, InteractiveFlagAttributions,
+    GETTING_STARTED_DATASOURCE_NAME,
+    CLISuiteInteractiveFlagCombinations,
 )
 from great_expectations.data_context import BaseDataContext
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -1753,8 +1754,7 @@ valid_usage_statistics_messages = {
                 "event": "cli.suite.edit.end",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
-                    "interactive": True,
-                    "interactive_mode_attribution": InteractiveFlagAttributions.PROMPTED_CHOICE_TRUE_PROFILE_TRUE.value,
+                    **CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_TRUE.value,
                     "api_version": "v3",
                 },
                 "ge_version": "0.13.18.manual_testing",
@@ -1822,8 +1822,7 @@ valid_usage_statistics_messages = {
                 "event": "cli.suite.edit.end",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
-                    "interactive": False,
-                    "interactive_mode_attribution": InteractiveFlagAttributions.PROMPTED_CHOICE_FALSE_DEFAULT.value,
+                    **CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT.value,
                     "api_version": "v3",
                 },
                 "ge_version": "0.13.18.manual_testing",
