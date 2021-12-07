@@ -523,11 +523,11 @@ def _process_suite_edit_flags_and_prompt(
         interactive_mode = CLISuiteInteractiveFlagCombinations.ERROR
     elif interactive_flag is False and manual_flag is False:
         interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_NULL_INTERACTIVE_FALSE_MANUAL_FALSE
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
         )
     elif interactive_flag is True and manual_flag is False:
         interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_TRUE_INTERACTIVE_TRUE_MANUAL_FALSE
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE
         )
     elif interactive_flag is False and manual_flag is True:
         interactive_mode = (
