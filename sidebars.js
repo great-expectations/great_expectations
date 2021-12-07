@@ -34,7 +34,7 @@ module.exports = {
               label: 'Installation',
               items: [
                 'guides/setup/installation/local',
-                'guides/setup/installation/no_file_system'
+                'guides/setup/installation/hosted_environment'
               ]
             },
             {
