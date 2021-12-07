@@ -401,7 +401,7 @@ def parse_evaluation_parameter(
     return result
 
 
-def _deduplicate_evaluation_parameter_dependencies(dependencies):
+def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
     deduplicated = {}
     for suite_name, required_metrics in dependencies.items():
         deduplicated[suite_name] = []

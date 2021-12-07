@@ -8,6 +8,29 @@ Changelog
 develop
 -----------------
 
+0.13.45
+-----------------
+* [FEATURE] Feature/render validation metadata (#3397) (thanks @vshind1)
+* [FEATURE] Added expectation expect_column_values_to_not_contain_special_characters() (#2849, #3771) (thanks @jaibirsingh)
+* [FEATURE] Like and regex-based expectations in Athena dialect (#3762) (thanks @josges)
+* [FEATURE] Rename `deep_filter_properties_dict()` to `deep_filter_properties_iterable()`
+* [FEATURE] Extract validation result failures (#3552) (thanks @BenGale93)
+* [BUGFIX] Allow now() eval parameter to be used by itself (#3719)
+* [BUGFIX] Fixing broken logo for legacy RTD docs (#3769)
+* [BUGFIX] Adds version-handling to sqlalchemy make_url imports (#3768)
+* [BUGFIX] Integration test to avoid regression of simple PandasExecutionEngine workflow (#3770)
+* [BUGFIX] Fix copying of CheckpointConfig for substitution and printing purposes (#3759)
+* [BUGFIX] Fix evaluation parameter usage with Query Store (#3763)
+* [BUGFIX] Feature/fix row condition quotes (#3676) (thanks @benoitLebreton-perso)
+* [BUGFIX] Fix incorrect filling out of anonymized event payload (#3780)
+* [BUGFIX] Don't reset_index for conditional expectations (#3667) (thanks @abekfenn)
+* [DOCS] Update expectations gallery link in V3 notebook documentation (#3747)
+* [DOCS] Correct V3 documentation link in V2 notebooks to point to V2 documentation (#3750)
+* [DOCS] How to pass an in-memory DataFrame to a Checkpoint (#3756)
+* [MAINTENANCE] Fix typo in Getting Started Guide (#3749)
+* [MAINTENANCE] Add proper docstring and type hints to Validator (#3767)
+* [MAINTENANCE] Clean up duplicate logging statements about optional `black` dep (#3778)
+
 0.13.44
 -----------------
 * [FEATURE] Add new result_format to include unexpected_row_list (#3346)

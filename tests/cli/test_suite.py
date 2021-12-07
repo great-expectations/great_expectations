@@ -19,7 +19,7 @@ from great_expectations.core.batch import (
     standardize_batch_request_display_ordering,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.util import deep_filter_properties_dict, lint_code
+from great_expectations.util import deep_filter_properties_iterable, lint_code
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 from tests.render.test_util import (
     find_code_in_notebook,
@@ -709,7 +709,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
     assert os.path.isfile(expected_notebook_path)
 
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
-    batch_request = deep_filter_properties_dict(
+    batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
         keep_falsy_numerics=True,
     )
@@ -1091,7 +1091,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
         "limit": 1000,
     }
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
-    batch_request = deep_filter_properties_dict(
+    batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
         keep_falsy_numerics=True,
     )
@@ -1327,7 +1327,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
         "limit": 1000,
     }
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
-    batch_request = deep_filter_properties_dict(
+    batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
         keep_falsy_numerics=True,
     )
@@ -1543,7 +1543,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
         "limit": 1000,
     }
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
-    batch_request = deep_filter_properties_dict(
+    batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
         keep_falsy_numerics=True,
     )
@@ -1779,7 +1779,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
         "limit": 1000,
     }
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
-    batch_request = deep_filter_properties_dict(
+    batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
         keep_falsy_numerics=True,
     )
@@ -2835,7 +2835,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     assert os.path.isfile(expected_notebook_path)
 
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
-    batch_request = deep_filter_properties_dict(
+    batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
         keep_falsy_numerics=True,
     )
@@ -2965,7 +2965,7 @@ suite = profiler.build_suite()"""
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
-                    "batch_request_required_top_level_properties": {
+                    "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                         "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
                         "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
@@ -3063,7 +3063,7 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     assert os.path.isfile(expected_notebook_path)
 
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
-    batch_request = deep_filter_properties_dict(
+    batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
         keep_falsy_numerics=True,
     )
@@ -3197,7 +3197,7 @@ suite = profiler.build_suite()"""
             {
                 "event": "data_context.get_batch_list",
                 "event_payload": {
-                    "batch_request_required_top_level_properties": {
+                    "anonymized_batch_request_required_top_level_properties": {
                         "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                         "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
                         "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
