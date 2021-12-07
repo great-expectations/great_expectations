@@ -43,7 +43,7 @@ Expectations are assertions for data. They are the workhorse abstraction in Grea
 - `expect_column_values_to_match_strftime_format`
 - `expect_table_row_count_to_be_between`
 - `expect_column_median_to_be_between`
-- ...and [many more](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html)
+- ...and [many more](https://greatexpectations.io/expectations)
 
 Expectations are <!--[declarative, flexible and extensible]()--> declarative, flexible and extensible.
 <!--To test out Expectations on your own data, check out the [<<step-1 tutorial>>]().-->
