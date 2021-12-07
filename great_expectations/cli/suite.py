@@ -14,6 +14,7 @@ from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.usage_statistics.anonymizers.types.base import InteractiveFlagAttributions
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
@@ -121,7 +122,9 @@ def suite_new(
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
-    processed_flags: Dict[str, Optional[bool]] = _process_suite_new_flags_and_prompt(
+    processed_flags: Dict[
+        str, Optional[Union[bool, InteractiveFlagAttributions]]
+    ] = _process_suite_new_flags_and_prompt(
         context=context,
         usage_event_end=usage_event_end,
         interactive_flag=interactive_flag,
@@ -134,6 +137,7 @@ def suite_new(
         context=context,
         expectation_suite_name=expectation_suite,
         interactive=processed_flags["interactive"],
+        interactive_mode_attribution=processed_flags["interactive_mode_attribution"],
         profile=processed_flags["profile"],
         no_jupyter=no_jupyter,
         usage_event=usage_event_end,
@@ -148,7 +152,7 @@ def _process_suite_new_flags_and_prompt(
     manual_flag: bool,
     profile: bool,
     batch_request: Optional[str] = None,
-) -> Dict[str, Optional[bool]]:
+) -> Dict[str, Optional[Union[bool, InteractiveFlagAttributions]]]:
     """
     Process various optional suite new flags and prompt if there is not enough information from the flags.
     Args:
@@ -166,16 +170,30 @@ def _process_suite_new_flags_and_prompt(
 
     error_message: Optional[str] = None
 
+    interactive_mode_attribution: InteractiveFlagAttributions
+
     # Convert interactive / no-interactive flags to interactive
     interactive: Optional[bool] = None
     if interactive_flag is True and manual_flag is True:
         error_message = """Please choose either --interactive or --manual, you may not choose both."""
+        interactive_mode_attribution = InteractiveFlagAttributions.ERROR
     elif interactive_flag is False and manual_flag is False:
         interactive = None
+        interactive_mode_attribution = (
+            InteractiveFlagAttributions.UNPROMPTED_NULL_INTERACTIVE_FALSE_MANUAL_FALSE
+        )
     elif interactive_flag is True and manual_flag is False:
         interactive = True
+        interactive_mode_attribution = (
+            InteractiveFlagAttributions.UNPROMPTED_TRUE_INTERACTIVE_TRUE_MANUAL_FALSE
+        )
     elif interactive_flag is False and manual_flag is True:
         interactive = False
+        interactive_mode_attribution = (
+            InteractiveFlagAttributions.UNPROMPTED_FALSE_INTERACTIVE_FALSE_MANUAL_TRUE
+        )
+    else:
+        interactive_mode_attribution = InteractiveFlagAttributions.UNKNOWN
 
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
@@ -197,22 +215,34 @@ def _process_suite_new_flags_and_prompt(
                 "<green>Entering interactive mode since you passed the --profile flag</green>"
             )
             interactive = True
+            interactive_mode_attribution = (
+                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE
+            )
         elif profile and interactive is False:
             cli_message(
                 "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag</yellow>"
             )
             interactive = True
+            interactive_mode_attribution = (
+                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE
+            )
         # Assume batch needed if user passes --batch-request
         elif (batch_request is not None) and (interactive is None):
             cli_message(
                 "<green>Entering interactive mode since you passed the --batch-request flag</green>"
             )
             interactive = True
+            interactive_mode_attribution = (
+                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
+            )
         elif (batch_request is not None) and (interactive is False):
             cli_message(
                 "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
             )
             interactive = True
+            interactive_mode_attribution = (
+                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
+            )
     else:
         suite_create_method: str = click.prompt(
             """
@@ -230,23 +260,42 @@ How would you like to create your Expectation Suite?
         if suite_create_method == "":
             interactive = False
             profile = False
+            interactive_mode_attribution = (
+                InteractiveFlagAttributions.PROMPTED_CHOICE_FALSE_DEFAULT
+            )
         elif suite_create_method == "1":
             interactive = False
             profile = False
+            interactive_mode_attribution = (
+                InteractiveFlagAttributions.PROMPTED_CHOICE_FALSE
+            )
         elif suite_create_method == "2":
             interactive = True
             profile = False
+            interactive_mode_attribution = (
+                InteractiveFlagAttributions.PROMPTED_CHOICE_TRUE_PROFILE_FALSE
+            )
         elif suite_create_method == "3":
             interactive = True
             profile = True
+            interactive_mode_attribution = (
+                InteractiveFlagAttributions.PROMPTED_CHOICE_TRUE_PROFILE_TRUE
+            )
+        else:
+            interactive_mode_attribution = InteractiveFlagAttributions.UNKNOWN
 
-    return {"interactive": interactive, "profile": profile}
+    return {
+        "interactive": interactive,
+        "profile": profile,
+        "interactive_mode_attribution": interactive_mode_attribution,
+    }
 
 
 def _suite_new_workflow(
     context: DataContext,
     expectation_suite_name: str,
     interactive: bool,
+    interactive_mode_attribution: InteractiveFlagAttributions,
     profile: bool,
     no_jupyter: bool,
     usage_event: str,
@@ -320,6 +369,7 @@ def _suite_new_workflow(
             profile=profile,
             usage_event=usage_event,
             interactive=interactive,
+            interactive_mode_attribution=interactive_mode_attribution,
             no_jupyter=no_jupyter,
             create_if_not_exist=True,
             datasource_name=datasource_name,
@@ -415,7 +465,9 @@ def suite_edit(
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
-    interactive: bool = _process_suite_edit_flags_and_prompt(
+    processed_flags: Dict[
+        str, Optional[Union[bool, InteractiveFlagAttributions]]
+    ] = _process_suite_edit_flags_and_prompt(
         context=context,
         usage_event_end=usage_event_end,
         interactive_flag=interactive_flag,
@@ -433,7 +485,8 @@ def suite_edit(
         expectation_suite_name=expectation_suite,
         profile=False,
         usage_event=usage_event_end,
-        interactive=interactive,
+        interactive=processed_flags["interactive"],
+        interactive_mode_attribution=processed_flags["interactive_mode_attribution"],
         no_jupyter=no_jupyter,
         create_if_not_exist=False,
         datasource_name=datasource_name,
@@ -451,7 +504,7 @@ def _process_suite_edit_flags_and_prompt(
     manual_flag: bool,
     datasource_name: Optional[str] = None,
     batch_request: Optional[str] = None,
-) -> bool:
+) -> Dict[str, Optional[Union[bool, InteractiveFlagAttributions]]]:
     """
     Process various optional suite edit flags and prompt if there is not enough information from the flags.
     Args:
@@ -468,16 +521,30 @@ def _process_suite_edit_flags_and_prompt(
 
     error_message: Optional[str] = None
 
+    interactive_mode_attribution: InteractiveFlagAttributions
+
     # Convert interactive / no-interactive flags to interactive
     interactive: Optional[bool] = None
     if interactive_flag is True and manual_flag is True:
         error_message = """Please choose either --interactive or --manual, you may not choose both."""
+        interactive_mode_attribution = InteractiveFlagAttributions.ERROR
     elif interactive_flag is False and manual_flag is False:
         interactive = None
+        interactive_mode_attribution = (
+            InteractiveFlagAttributions.UNPROMPTED_NULL_INTERACTIVE_FALSE_MANUAL_FALSE
+        )
     elif interactive_flag is True and manual_flag is False:
         interactive = True
+        interactive_mode_attribution = (
+            InteractiveFlagAttributions.UNPROMPTED_TRUE_INTERACTIVE_TRUE_MANUAL_FALSE
+        )
     elif interactive_flag is False and manual_flag is True:
         interactive = False
+        interactive_mode_attribution = (
+            InteractiveFlagAttributions.UNPROMPTED_FALSE_INTERACTIVE_FALSE_MANUAL_TRUE
+        )
+    else:
+        interactive_mode_attribution = InteractiveFlagAttributions.UNKNOWN
 
     if (datasource_name is not None) and (batch_request is not None):
         error_message = """Only one of --datasource-name DATASOURCE_NAME and --batch-request <path to JSON file> \
@@ -507,9 +574,15 @@ options can be used.
                 cli_message(
                     "<green>Entering interactive mode since you passed the --datasource-name flag</green>"
                 )
+                interactive_mode_attribution = (
+                    InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_DATASOURCE_SPECIFIED
+                )
             elif interactive is False:
                 cli_message(
                     "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --datasource-name flag</yellow>"
+                )
+                interactive_mode_attribution = (
+                    InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_DATASOURCE_SPECIFIED
                 )
             interactive = True
         elif batch_request is not None:
@@ -517,9 +590,15 @@ options can be used.
                 cli_message(
                     "<green>Entering interactive mode since you passed the --batch-request flag</green>"
                 )
+                interactive_mode_attribution = (
+                    InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
+                )
             elif interactive is False:
                 cli_message(
                     "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
+                )
+                interactive_mode_attribution = (
+                    InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
                 )
             interactive = True
     else:
@@ -537,12 +616,24 @@ How would you like to edit your Expectation Suite?
         # Default option
         if suite_edit_method == "":
             interactive = False
+            interactive_mode_attribution = (
+                InteractiveFlagAttributions.PROMPTED_CHOICE_FALSE_DEFAULT
+            )
         if suite_edit_method == "1":
             interactive = False
+            interactive_mode_attribution = (
+                InteractiveFlagAttributions.PROMPTED_CHOICE_FALSE
+            )
         elif suite_edit_method == "2":
             interactive = True
+            interactive_mode_attribution = (
+                InteractiveFlagAttributions.PROMPTED_CHOICE_TRUE
+            )
 
-    return interactive
+    return {
+        "interactive": interactive,
+        "interactive_mode_attribution": interactive_mode_attribution,
+    }
 
 
 def _suite_edit_workflow(
@@ -551,6 +642,7 @@ def _suite_edit_workflow(
     profile: bool,
     usage_event: str,
     interactive: bool,
+    interactive_mode_attribution: InteractiveFlagAttributions,
     no_jupyter: bool,
     create_if_not_exist: bool = False,
     datasource_name: Optional[str] = None,
@@ -658,7 +750,10 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             )
 
         payload: dict = edit_expectation_suite_usage_statistics(
-            data_context=context, expectation_suite_name=suite.expectation_suite_name
+            data_context=context,
+            expectation_suite_name=suite.expectation_suite_name,
+            interactive=interactive,
+            interactive_mode_attribution=interactive_mode_attribution.value,
         )
 
         if not suppress_usage_message:

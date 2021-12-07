@@ -5,6 +5,8 @@
 
 
 # An anonymized string *must* be an md5 hash, so must have exactly 32 characters
+from great_expectations.core.usage_statistics.anonymizers.types.base import InteractiveFlagAttributions
+
 anonymized_string_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-string",
@@ -508,6 +510,29 @@ anonymized_cli_suite_expectation_suite_payload_schema = {
         "anonymized_expectation_suite_name": {
             "$ref": "#/definitions/anonymized_string"
         },
+        "interactive": {
+            "type": ["boolean", "null"],
+        },
+        "interactive_mode_attribution": {
+            "enum": [
+                InteractiveFlagAttributions.UNPROMPTED_NULL_INTERACTIVE_FALSE_MANUAL_FALSE.value,
+                InteractiveFlagAttributions.UNPROMPTED_TRUE_INTERACTIVE_TRUE_MANUAL_FALSE.value,
+                InteractiveFlagAttributions.UNPROMPTED_FALSE_INTERACTIVE_FALSE_MANUAL_TRUE.value,
+                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE.value,
+                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE.value,
+                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED.value,
+                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED.value,
+                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_DATASOURCE_SPECIFIED.value,
+                InteractiveFlagAttributions.UNPROMPTED_TRUE_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_DATASOURCE_SPECIFIED.value,
+                InteractiveFlagAttributions.PROMPTED_CHOICE_FALSE_DEFAULT.value,
+                InteractiveFlagAttributions.PROMPTED_CHOICE_FALSE.value,
+                InteractiveFlagAttributions.PROMPTED_CHOICE_TRUE_PROFILE_FALSE.value,
+                InteractiveFlagAttributions.PROMPTED_CHOICE_TRUE_PROFILE_TRUE.value,
+                InteractiveFlagAttributions.PROMPTED_CHOICE_TRUE.value,
+                InteractiveFlagAttributions.UNKNOWN.value,
+                InteractiveFlagAttributions.ERROR.value,
+            ],
+        },
         "api_version": {"type": "string", "maxLength": 256},
         "cancelled": {
             "type": ["boolean", "null"],
@@ -796,6 +821,9 @@ anonymized_usage_statistics_record_schema = {
             "properties": {
                 "event": {
                     "enum": [
+                        "cli.suite.new",
+                        "cli.suite.new.begin",
+                        "cli.suite.new.end",
                         "cli.suite.edit",
                         "cli.suite.edit.begin",
                         "cli.suite.edit.end",
@@ -870,9 +898,6 @@ anonymized_usage_statistics_record_schema = {
                         "cli.suite.list",
                         "cli.suite.list.begin",
                         "cli.suite.list.end",
-                        "cli.suite.new",
-                        "cli.suite.new.begin",
-                        "cli.suite.new.end",
                         "cli.suite.scaffold",
                         "cli.validation_operator.list",
                         "cli.validation_operator.run",

@@ -42,6 +42,7 @@ from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anon
 from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
     StoreAnonymizer,
 )
+from great_expectations.core.usage_statistics.anonymizers.types.base import InteractiveFlagAttributions
 from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
     ValidationOperatorAnonymizer,
 )
@@ -404,7 +405,12 @@ def save_expectation_suite_usage_statistics(
     return payload
 
 
-def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name):
+def edit_expectation_suite_usage_statistics(
+    data_context: "DataContext",  # noqa: F821
+    expectation_suite_name: str,
+    interactive: bool,
+    interactive_mode_attribution: InteractiveFlagAttributions,
+):
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -413,7 +419,10 @@ def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
-    payload = {}
+    payload = {
+        "interactive": interactive,
+        "interactive_mode_attribution": interactive_mode_attribution,
+    }
 
     # noinspection PyBroadException
     try:
