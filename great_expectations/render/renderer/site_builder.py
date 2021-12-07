@@ -4,6 +4,7 @@ import traceback
 from collections import OrderedDict
 
 import great_expectations.exceptions as exceptions
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
@@ -359,6 +360,7 @@ class DefaultSiteSectionBuilder:
         self.data_context_id = data_context_id
         self.show_how_to_buttons = show_how_to_buttons
         self.ge_cloud_mode = ge_cloud_mode
+        self._data_context = data_context
         if renderer is None:
             raise exceptions.InvalidConfigError(
                 "SiteSectionBuilder requires a renderer configuration "
@@ -424,6 +426,11 @@ class DefaultSiteSectionBuilder:
                     continue
             try:
                 resource = self.source_store.get(resource_key)
+                # the only situation where it would come from a store not fully hydrated is if it is an ExpectationSuite. We can hydrate it here.
+                if isinstance(resource, dict):
+                    resource = ExpectationSuite(
+                        **resource, data_context=self._data_context
+                    )
             except exceptions.InvalidKeyError:
                 logger.warning(
                     f"Object with Key: {str(resource_key)} could not be retrieved. Skipping..."
@@ -462,8 +469,6 @@ class DefaultSiteSectionBuilder:
                     )
 
             try:
-                if isinstance(resource, dict):
-                    print("HELLO")
                 rendered_content = self.renderer_class.render(resource)
 
                 if self.ge_cloud_mode:
