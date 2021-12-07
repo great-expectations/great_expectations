@@ -49,15 +49,15 @@ Once you have confirmed that Python 3 is installed locally, you will run two com
 Depending on whether you found that you needed to run `python` or `python3` in the previous step, you will run either:
 
 ```console
-python -m pip install great_expectations
 python -m ensurepip --upgrade
+python -m pip install great_expectations
 ```
 
 or
 
 ```console
-python3 -m pip install great_expectations
 python3 -m ensurepip --upgrade
+python3 -m pip install great_expectations
 ```
 
 </TabItem>
@@ -78,13 +78,13 @@ conda create --name YOUR_ENVIRONMENT_NAME
 conda activate YOUR_ENVIRONMENT_NAME
 ```
 
-Replace "YOUR_ENVIRONMENT_NAME" with the name you wish you use for your environment. Finally, you can install Great Expectations by running:
+Replace "YOUR_ENVIRONMENT_NAME" with the name you wish you use for your environment.
+
+Finally, you can install Great Expectations by running:
 
 ```console
 conda install -c conda-forge great-expectations
 ```
-
-to install Great Expectations.
 
 </TabItem>
 </Tabs>
