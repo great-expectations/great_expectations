@@ -18,13 +18,13 @@ This guide will help you Install Great Expectations locally for use with Python.
 
 First, check that you have Python 3 installed. You can check your version of Python by running:
 
-```bash
+```console
 python --version
 ```
 
 If this command returns something other than a Python 3 version number (like Python 3.X.X), you may need to try this:
 
-```bash
+```console
 python3 --version
 ```
 
@@ -48,14 +48,14 @@ Once you have confirmed that Python 3 is installed locally, you will run two com
 
 Depending on whether you found that you needed to run `python` or `python3` in the previous step, you will run either:
 
-```bash
+```console
 python -m pip install great_expectations
 python -m ensurepip --upgrade
 ```
 
 or
 
-```bash
+```console
 python3 -m pip install great_expectations
 python3 -m ensurepip --upgrade
 ```
@@ -65,7 +65,7 @@ python3 -m ensurepip --upgrade
 
 Once you have confirmed that Python 3 is installed locally, you will want to ensure that Anaconda is installed by running:
 
-```bash
+```console
 conda --version
 ```
 
@@ -73,7 +73,7 @@ If no version number is printed, [you can download Anaconda here](https://www.an
 
 Once Anaconda is installed, you can run this:
 
-```bash
+```console
 conda install -c conda-forge great-expectations
 ```
 
@@ -83,7 +83,8 @@ to install Great Expectations.
 </Tabs>
 
 You can confirm that great_expectations was successfully installed with:
-```bash
+
+```console
 great_expectations --version
 ```
 
