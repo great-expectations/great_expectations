@@ -83,20 +83,22 @@ def table_exp3():
 
 
 @pytest.fixture
-def empty_suite():
+def empty_suite(empty_data_context):
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[],
         meta={"notes": "This is an expectation suite."},
+        data_context=empty_data_context,
     )
 
 
 @pytest.fixture
-def single_expectation_suite(exp1):
+def single_expectation_suite(exp1, empty_data_context):
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1],
         meta={"notes": "This is an expectation suite."},
+        data_context=empty_data_context,
     )
 
 
@@ -112,7 +114,15 @@ def single_expectation_suite_with_data_context(empty_data_context, exp1):
 
 @pytest.fixture
 def suite_with_table_and_column_expectations(
-    exp1, exp2, exp3, exp4, column_pair_expectation, table_exp1, table_exp2, table_exp3
+    exp1,
+    exp2,
+    exp3,
+    exp4,
+    column_pair_expectation,
+    table_exp1,
+    table_exp2,
+    table_exp3,
+    empty_data_context,
 ):
     suite = ExpectationSuite(
         expectation_suite_name="warning",
@@ -127,6 +137,7 @@ def suite_with_table_and_column_expectations(
             table_exp3,
         ],
         meta={"notes": "This is an expectation suite."},
+        data_context=empty_data_context,
     )
     assert suite.expectations == [
         exp1,
@@ -142,40 +153,44 @@ def suite_with_table_and_column_expectations(
 
 
 @pytest.fixture
-def baseline_suite(exp1, exp2):
+def baseline_suite(exp1, exp2, empty_data_context):
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp2],
         meta={"notes": "This is an expectation suite."},
+        data_context=empty_data_context,
     )
 
 
 @pytest.fixture
-def identical_suite(exp1, exp3):
+def identical_suite(exp1, exp3, empty_data_context):
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp3],
         meta={"notes": "This is an expectation suite."},
+        data_context=empty_data_context,
     )
 
 
 @pytest.fixture
-def equivalent_suite(exp1, exp3):
+def equivalent_suite(exp1, exp3, empty_data_context):
     return ExpectationSuite(
         expectation_suite_name="danger",
         expectations=[exp1, exp3],
         meta={
             "notes": "This is another expectation suite, with a different name and meta"
         },
+        data_context=empty_data_context,
     )
 
 
 @pytest.fixture
-def different_suite(exp1, exp4):
+def different_suite(exp1, exp4, empty_data_context):
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp4],
         meta={"notes": "This is an expectation suite."},
+        data_context=empty_data_context,
     )
 
 
@@ -345,7 +360,7 @@ def test_expectation_suite_deepcopy_with_data_context(
 ):
     copied_suite = deepcopy(single_expectation_suite_with_data_context)
     # data_context not copied over
-    assert copied_suite.data_context is None
+    assert copied_suite.data_context is not None
     assert single_expectation_suite_with_data_context is not None
 
     # they are still equivalent (At the Expectation-level)
@@ -364,13 +379,21 @@ def test_expectation_suite_deepcopy_with_data_context(
     )
 
 
-def test_suite_without_metadata_includes_ge_version_metadata_if_none_is_provided():
-    suite = ExpectationSuite("foo")
+def test_suite_without_metadata_includes_ge_version_metadata_if_none_is_provided(
+    empty_data_context,
+):
+    suite = ExpectationSuite(
+        expectation_suite_name="foo", data_context=empty_data_context
+    )
     assert "great_expectations_version" in suite.meta.keys()
 
 
-def test_suite_does_not_overwrite_existing_version_metadata():
-    suite = ExpectationSuite("foo", meta={"great_expectations_version": "0.0.0"})
+def test_suite_does_not_overwrite_existing_version_metadata(empty_data_context):
+    suite = ExpectationSuite(
+        expectation_suite_name="foo",
+        meta={"great_expectations_version": "0.0.0"},
+        data_context=empty_data_context,
+    )
     assert "great_expectations_version" in suite.meta.keys()
     assert suite.meta["great_expectations_version"] == "0.0.0"
 

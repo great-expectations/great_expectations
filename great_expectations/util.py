@@ -32,7 +32,10 @@ from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
 
-from great_expectations.core.expectation_suite import expectationSuiteSchema
+from great_expectations.core.expectation_suite import (
+    ExpectationSuite,
+    expectationSuiteSchema,
+)
 from great_expectations.exceptions import (
     GreatExpectationsError,
     PluginClassNotFoundError,
@@ -821,7 +824,12 @@ def validate(
         )
     else:
         if isinstance(expectation_suite, dict):
-            expectation_suite = expectationSuiteSchema.load(expectation_suite)
+            expectation_suite_dict: dict = expectationSuiteSchema.load(
+                expectation_suite
+            )
+            expectation_suite: ExpectationSuite = ExpectationSuite(
+                **expectation_suite_dict, data_context=data_context
+            )
         if data_asset_name is not None:
             raise ValueError(
                 "When providing an expectation suite, data_asset_name cannot also be provided."

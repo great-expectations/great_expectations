@@ -748,11 +748,14 @@ def test_base_class_expectation():
 
 
 @freeze_time("11/05/1955")
-def test_validate():
+def test_validate(empty_data_context):
     with open(
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite: ExpectationSuite = ExpectationSuite(
+            **my_expectation_suite_dict, data_context=empty_data_context
+        )
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -832,12 +835,16 @@ def test_validate():
     "great_expectations.core.ExpectationValidationResult.validate_result_dict",
     return_value=False,
 )
-def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dict):
+def test_validate_with_invalid_result_catch_exceptions_false(
+    validate_result_dict, empty_data_context
+):
     with open(
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read())
-
+        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite: ExpectationSuite = ExpectationSuite(
+            **my_expectation_suite_dict, data_context=empty_data_context
+        )
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
         my_df = ge.read_csv(
@@ -856,11 +863,14 @@ def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dic
     "great_expectations.core.ExpectationValidationResult.validate_result_dict",
     return_value=False,
 )
-def test_validate_with_invalid_result(validate_result_dict):
+def test_validate_with_invalid_result(validate_result_dict, empty_data_context):
     with open(
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite: ExpectationSuite = ExpectationSuite(
+            **my_expectation_suite_dict, data_context=empty_data_context
+        )
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -889,7 +899,7 @@ def test_validate_with_invalid_result(validate_result_dict):
     assert results.to_json_dict() == expected_results.to_json_dict()
 
 
-def test_validate_catch_non_existent_expectation():
+def test_validate_catch_non_existent_expectation(empty_data_context):
     df = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
 
     validation_config_non_existent_expectation = ExpectationSuite(
@@ -900,6 +910,7 @@ def test_validate_catch_non_existent_expectation():
                 expectation_type="non_existent_expectation", kwargs={"column": "x"}
             )
         ],
+        data_context=empty_data_context,
     )
 
     results = df.validate(expectation_suite=validation_config_non_existent_expectation)
@@ -910,7 +921,7 @@ def test_validate_catch_non_existent_expectation():
     )
 
 
-def test_validate_catch_invalid_parameter():
+def test_validate_catch_invalid_parameter(empty_data_context):
     df = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
 
     validation_config_invalid_parameter = ExpectationSuite(
@@ -922,6 +933,7 @@ def test_validate_catch_invalid_parameter():
                 kwargs={"column": "x", "min_value": 6, "max_value": 5},
             )
         ],
+        data_context=empty_data_context,
     )
 
     result = df.validate(expectation_suite=validation_config_invalid_parameter)

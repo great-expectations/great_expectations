@@ -139,7 +139,7 @@ def validation_operators_data_context(
 
 
 @pytest.fixture()
-def parameterized_expectation_suite():
+def parameterized_expectation_suite(empty_data_context):
     fixture_path = file_relative_path(
         __file__,
         "../../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
@@ -147,7 +147,11 @@ def parameterized_expectation_suite():
     with open(
         fixture_path,
     ) as suite:
-        return expectationSuiteSchema.load(json.load(suite))
+        expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(suite))
+        expectation_suite: ExpectationSuite = ExpectationSuite(
+            **expectation_suite_dict, data_context=empty_data_context
+        )
+        return expectation_suite
 
 
 def test_StoreBackendValidation():

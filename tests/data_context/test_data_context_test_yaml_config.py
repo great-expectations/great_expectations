@@ -708,7 +708,9 @@ introspection:
         datasource_name="my_datasource",
         data_connector_name="whole_table_with_limits",
         data_asset_name="test_df",
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
     )
     my_evr = my_validator.expect_table_columns_to_match_set(column_set=[])
     print(my_evr)
@@ -879,7 +881,9 @@ data_connectors:
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="D",
         data_connector_query={"batch_filter_parameters": {"number": "3"}},
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {

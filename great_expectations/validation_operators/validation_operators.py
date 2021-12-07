@@ -21,6 +21,7 @@ from great_expectations.validation_operators.types.validation_operator_result im
     ValidationOperatorResult,
 )
 
+from ..core import ExpectationSuite
 from ..core.run_identifier import RunIdentifier
 
 logger = logging.getLogger(__name__)
@@ -875,9 +876,14 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
             warning_expectation_suite = None
             try:
-                warning_expectation_suite = self.data_context.stores[
+                warning_expectation_suite_dict: dict = self.data_context.stores[
                     self.data_context.expectations_store_name
                 ].get(warning_expectation_suite_identifier)
+                warning_expectation_suite_identifier: ExpectationSuite = (
+                    ExpectationSuite(
+                        **warning_expectation_suite_dict, data_context=self.data_context
+                    )
+                )
             except Exception:
                 logger.debug(
                     "Warning expectation suite not found: {}".format(

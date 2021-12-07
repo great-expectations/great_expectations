@@ -649,6 +649,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
             )
         ],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
     multi_batch_request: BatchRequest = BatchRequest(
@@ -675,6 +676,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_context_get_suite,
     mock_context_save_suite,
     multi_batch_taxi_validator_ge_cloud_mode,
+    empty_data_context_stats_enabled,
 ):
     """
     This checks that Validator in ge_cloud_mode properly updates underlying Expectation Suite on save.
@@ -682,6 +684,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GE Cloud
     :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GE Cloud
     """
+    data_context = empty_data_context_stats_enabled
     mock_suite = ExpectationSuite(
         expectation_suite_name="validating_taxi_data",
         expectations=[
@@ -699,6 +702,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
             ),
         ],
         meta={"notes": "This is an expectation suite."},
+        data_context=data_context,
     )
     mock_context_save_suite.return_value = True
     mock_context_get_suite.return_value = mock_suite

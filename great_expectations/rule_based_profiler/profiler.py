@@ -216,7 +216,8 @@ class Profiler:
             )
 
         expectation_suite: ExpectationSuite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name
+            expectation_suite_name=expectation_suite_name,
+            data_context=self._data_context,
         )
 
         if include_citation:

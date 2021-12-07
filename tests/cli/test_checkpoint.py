@@ -1363,10 +1363,11 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     monkeypatch.setenv("OLD_PARAM", "2")
 
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    context.save_expectation_suite(
+    res = context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
     )
+    print(res)
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
     checkpoint_file_path: str = os.path.join(

@@ -107,7 +107,12 @@ class JsonSchemaProfiler(Profiler):
                     "content": [f"### Description:\n{description}"],
                 }
             }
-        suite = ExpectationSuite(suite_name, expectations=expectations, meta=meta)
+        suite = ExpectationSuite(
+            suite_name,
+            expectations=expectations,
+            meta=meta,
+            data_context=self._data_context,
+        )
         suite.add_citation(
             comment=f"This suite was built by the {self.__class__.__name__}",
         )

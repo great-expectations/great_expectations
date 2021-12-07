@@ -59,6 +59,7 @@ class UserConfigurableProfiler:
     def __init__(
         self,
         profile_dataset,
+        data_context: "DataContext" = None,
         excluded_expectations: list = None,
         ignored_columns: list = None,
         not_null_only: bool = False,
@@ -106,6 +107,7 @@ class UserConfigurableProfiler:
         """
         self.column_info = {}
         self.profile_dataset = profile_dataset
+        self._data_context = data_context
         assert isinstance(self.profile_dataset, (Dataset, Validator, Batch))
 
         if isinstance(self.profile_dataset, Batch):
@@ -204,7 +206,9 @@ class UserConfigurableProfiler:
         if len(self.profile_dataset.get_expectation_suite().expectations) > 0:
             # noinspection PyProtectedMember
             suite_name = self.profile_dataset._expectation_suite.expectation_suite_name
-            self.profile_dataset._expectation_suite = ExpectationSuite(suite_name)
+            self.profile_dataset._expectation_suite = ExpectationSuite(
+                expectation_suite_name=suite_name, data_context=self._data_context
+            )
 
         if self.semantic_types_dict:
             return self._build_expectation_suite_from_semantic_types_dict()

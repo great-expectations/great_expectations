@@ -51,7 +51,7 @@ class ExpectationSuite(SerializableDictDot):
     def __init__(
         self,
         expectation_suite_name,
-        data_context=None,
+        data_context,
         expectations=None,
         evaluation_parameters=None,
         data_asset_type=None,
@@ -136,7 +136,10 @@ class ExpectationSuite(SerializableDictDot):
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
-                    other = expectationSuiteSchema.load(other)
+                    other_suite_dict: dict = expectationSuiteSchema.load(other)
+                    other: ExpectationSuite = ExpectationSuite(
+                        **other_suite_dict, data_context=self.data_context
+                    )
                 except ValidationError:
                     logger.debug(
                         "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
@@ -184,7 +187,7 @@ class ExpectationSuite(SerializableDictDot):
         new_suite_as_dot_dict: DotDict = DotDict()
         for key in attributes_to_copy:
             setattr(new_suite_as_dot_dict, key, deepcopy(getattr(self, key)))
-        return ExpectationSuite(**new_suite_as_dot_dict)
+        return ExpectationSuite(**new_suite_as_dot_dict, data_context=self.data_context)
 
     def to_json_dict(self):
         myself = expectationSuiteSchema.dump(self)
@@ -658,7 +661,7 @@ class ExpectationSuiteSchema(Schema):
     # noinspection PyUnusedLocal
     @post_load
     def make_expectation_suite(self, data, **kwargs):
-        return ExpectationSuite(**data)
+        return data
 
 
 expectationSuiteSchema = ExpectationSuiteSchema()

@@ -462,6 +462,8 @@ class DefaultSiteSectionBuilder:
                     )
 
             try:
+                if isinstance(resource, dict):
+                    print("HELLO")
                 rendered_content = self.renderer_class.render(resource)
 
                 if self.ge_cloud_mode:

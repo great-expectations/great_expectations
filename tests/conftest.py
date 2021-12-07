@@ -269,7 +269,7 @@ def empty_expectation_suite():
 
 
 @pytest.fixture
-def basic_expectation_suite():
+def basic_expectation_suite(empty_data_context):
     expectation_suite = ExpectationSuite(
         expectation_suite_name="default",
         meta={},
@@ -289,6 +289,7 @@ def basic_expectation_suite():
                 kwargs={"column": "naturals"},
             ),
         ],
+        data_context=empty_data_context,
     )
     return expectation_suite
 
@@ -3222,7 +3223,7 @@ def titanic_sqlite_db(sa):
 
 
 @pytest.fixture
-def titanic_expectation_suite():
+def titanic_expectation_suite(empty_data_context):
     return ExpectationSuite(
         expectation_suite_name="Titanic.warning",
         meta={},
@@ -3240,6 +3241,7 @@ def titanic_expectation_suite():
                 kwargs={"value": 1313},
             ),
         ],
+        data_context=empty_data_context,
     )
 
 
@@ -4089,17 +4091,21 @@ def titanic_profiled_name_column_evrs():
 
 
 @pytest.fixture
-def titanic_profiled_expectations_1():
+def titanic_profiled_expectations_1(empty_data_context):
     with open(
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
         ),
     ) as infile:
-        return expectationSuiteSchema.load(json.load(infile))
+        expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(infile))
+        expectation_suite: ExpectationSuite = ExpectationSuite(
+            **expectation_suite_dict, data_context=empty_data_context
+        )
+        return expectation_suite
 
 
 @pytest.fixture
-def titanic_profiled_name_column_expectations():
+def titanic_profiled_name_column_expectations(empty_data_context):
     from great_expectations.render.renderer.renderer import Renderer
 
     with open(
@@ -4107,8 +4113,12 @@ def titanic_profiled_name_column_expectations():
             __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
         ),
     ) as infile:
-        titanic_profiled_expectations = expectationSuiteSchema.load(json.load(infile))
-
+        titanic_profiled_expectations_dict: dict = expectationSuiteSchema.load(
+            json.load(infile)
+        )
+        titanic_profiled_expectations: ExpectationSuite = ExpectationSuite(
+            **titanic_profiled_expectations_dict, data_context=empty_data_context
+        )
     (
         columns,
         ordered_columns,

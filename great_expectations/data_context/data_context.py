@@ -2166,9 +2166,10 @@ class BaseDataContext:
             )
 
         if self.expectations_store.has_key(key):
-            expectation_suite: ExpectationSuite = self.expectations_store.get(key)
-            # set the reference to data_context before returning
-            expectation_suite.data_context = self
+            expectation_suite_dict: dict = self.expectations_store.get(key)
+            expectation_suite: ExpectationSuite = ExpectationSuite(
+                **expectation_suite_dict, data_context=self
+            )
             return expectation_suite
         else:
             raise ge_exceptions.DataContextError(
@@ -2359,7 +2360,10 @@ class BaseDataContext:
         # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
         # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
         for key in self.expectations_store.list_keys():
-            expectation_suite = self.expectations_store.get(key)
+            expectation_suite_dict: dict = self.expectations_store.get(key)
+            expectation_suite: ExpectationSuite = ExpectationSuite(
+                **expectation_suite_dict, data_context=self
+            )
             if not expectation_suite:
                 continue
 

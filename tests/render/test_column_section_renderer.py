@@ -5,6 +5,7 @@ import pytest
 
 from great_expectations.core import (
     ExpectationConfiguration,
+    ExpectationSuite,
     expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
 )
@@ -26,13 +27,17 @@ from great_expectations.render.renderer.content_block import (
 
 
 @pytest.fixture(scope="module")
-def titanic_expectations():
+def titanic_expectations(empty_data_context):
     with open(
         file_relative_path(__file__, "../test_sets/titanic_expectations.json")
     ) as infile:
-        return expectationSuiteSchema.load(
+        expectation_suite_dict: dict = expectationSuiteSchema.load(
             json.load(infile, object_pairs_hook=OrderedDict)
         )
+        expectation_suite: ExpectationSuite = ExpectationSuite(
+            **expectation_suite_dict, data_context=empty_data_context
+        )
+        return expectation_suite
 
 
 @pytest.mark.smoketest

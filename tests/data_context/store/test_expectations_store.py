@@ -13,22 +13,27 @@ from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import gen_directory_tree_str
 
 
-def test_expectations_store():
+def test_expectations_store(empty_data_context):
     my_store = ExpectationsStore()
 
     with pytest.raises(TypeError):
         my_store.set("not_a_ValidationResultIdentifier")
 
     ns_1 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.warning"))
-    my_store.set(ns_1, ExpectationSuite(expectation_suite_name="a.b.c.warning"))
+    my_store.set(
+        ns_1,
+        ExpectationSuite(
+            expectation_suite_name="a.b.c.warning", data_context=empty_data_context
+        ),
+    )
     assert my_store.get(ns_1) == ExpectationSuite(
-        expectation_suite_name="a.b.c.warning"
+        expectation_suite_name="a.b.c.warning", data_context=empty_data_context
     )
 
     ns_2 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.failure"))
     my_store.set(ns_2, ExpectationSuite(expectation_suite_name="a.b.c.failure"))
     assert my_store.get(ns_2) == ExpectationSuite(
-        expectation_suite_name="a.b.c.failure"
+        expectation_suite_name="a.b.c.failure", data_context=empty_data_context
     )
 
     assert set(my_store.list_keys()) == {
@@ -37,7 +42,7 @@ def test_expectations_store():
     }
 
 
-def test_ExpectationsStore_with_DatabaseStoreBackend(sa):
+def test_ExpectationsStore_with_DatabaseStoreBackend(sa, empty_data_context):
     # Use sqlite so we don't require postgres for this test.
     connection_kwargs = {"drivername": "sqlite"}
 
@@ -56,6 +61,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa):
         expectation_suite_name="a.b.c.warning",
         meta={"test_meta_key": "test_meta_value"},
         expectations=[],
+        data_context=empty_data_context,
     )
 
     ns_1 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.warning"))
@@ -65,6 +71,7 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa):
         expectation_suite_name="a.b.c.warning",
         meta={"test_meta_key": "test_meta_value"},
         expectations=[],
+        data_context=empty_data_context,
     )
 
     # update suite and check if new value exists
@@ -72,18 +79,20 @@ def test_ExpectationsStore_with_DatabaseStoreBackend(sa):
         expectation_suite_name="a.b.c.warning",
         meta={"test_meta_key": "test_new_meta_value"},
         expectations=[],
+        data_context=empty_data_context,
     )
     my_store.set(ns_1, updated_suite)
     assert my_store.get(ns_1) == ExpectationSuite(
         expectation_suite_name="a.b.c.warning",
         meta={"test_meta_key": "test_new_meta_value"},
         expectations=[],
+        data_context=empty_data_context,
     )
 
     ns_2 = ExpectationSuiteIdentifier.from_tuple(tuple("a.b.c.failure"))
     my_store.set(ns_2, ExpectationSuite(expectation_suite_name="a.b.c.failure"))
     assert my_store.get(ns_2) == ExpectationSuite(
-        expectation_suite_name="a.b.c.failure"
+        expectation_suite_name="a.b.c.failure", data_context=empty_data_context
     )
 
     assert set(my_store.list_keys()) == {

@@ -13,7 +13,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 
 
-def test_get_and_save_expectation_suite(tmp_path_factory):
+def test_get_and_save_expectation_suite(tmp_path_factory, empty_data_context):
     directory_name = str(
         tmp_path_factory.mktemp("test_get_and_save_expectation_config")
     )
@@ -57,13 +57,17 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         expectation_suite_name="default",
         data_asset_type="Dataset",
         meta={"great_expectations_version": ge.__version__},
+        data_context=empty_data_context,
     )
 
     assert output_config == df.get_expectation_suite()
 
     df.save_expectation_suite(directory_name + "/temp1.json")
     with open(directory_name + "/temp1.json") as infile:
-        loaded_config = expectationSuiteSchema.loads(infile.read())
+        loaded_config_dict: dict = expectationSuiteSchema.loads(infile.read())
+        loaded_config: ExpectationSuite = ExpectationSuite(
+            **loaded_config_dict, data_context=empty_data_context
+        )
     assert output_config == loaded_config
 
     ### Second test set ###
@@ -94,6 +98,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         expectation_suite_name="default",
         data_asset_type="Dataset",
         meta={"great_expectations_version": ge.__version__},
+        data_context=empty_data_context,
     )
 
     assert output_config == df.get_expectation_suite(discard_failed_expectations=False)
@@ -101,7 +106,10 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         directory_name + "/temp2.json", discard_failed_expectations=False
     )
     with open(directory_name + "/temp2.json") as infile:
-        loaded_suite = expectationSuiteSchema.loads(infile.read())
+        loaded_suite_dict: dict = expectationSuiteSchema.loads(infile.read())
+        loaded_suite: ExpectationSuite = ExpectationSuite(
+            **loaded_suite_dict, data_context=empty_data_context
+        )
     assert output_config == loaded_suite
 
     ### Third test set ###
@@ -132,6 +140,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         expectation_suite_name="default",
         data_asset_type="Dataset",
         meta={"great_expectations_version": ge.__version__},
+        data_context=empty_data_context,
     )
     assert output_config == df.get_expectation_suite(
         discard_result_format_kwargs=False,
@@ -145,7 +154,10 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         discard_catch_exceptions_kwargs=False,
     )
     with open(directory_name + "/temp3.json") as infile:
-        loaded_suite = expectationSuiteSchema.loads(infile.read())
+        loaded_suite_dict: dict = expectationSuiteSchema.loads(infile.read())
+        loaded_suite: ExpectationSuite = ExpectationSuite(
+            **loaded_suite_dict, data_context=empty_data_context
+        )
     assert output_config == loaded_suite
 
 

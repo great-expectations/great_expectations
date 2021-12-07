@@ -1357,7 +1357,9 @@ Would you like to continue?"""
         batch_kwargs.update(temp_table_kwargs)
         BridgeValidator(
             batch=datasource.get_batch(batch_kwargs),
-            expectation_suite=ExpectationSuite("throwaway"),
+            expectation_suite=ExpectationSuite(
+                expectation_suite_name="throwaway", data_context=context
+            ),
         ).get_dataset()
 
     batch_kwargs["data_asset_name"] = data_asset_name

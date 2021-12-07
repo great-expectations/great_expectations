@@ -422,7 +422,7 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
 
 
 def test_spark_datasource_processes_dataset_options(
-    test_folder_connection_path_csv, test_backends
+    test_folder_connection_path_csv, test_backends, empty_data_context
 ):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
@@ -440,7 +440,10 @@ def test_spark_datasource_processes_dataset_options(
     )
     batch_kwargs["dataset_options"] = {"caching": False, "persist": False}
     batch = datasource.get_batch(batch_kwargs)
-    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(
+        batch,
+        ExpectationSuite(expectation_suite_name="foo", data_context=empty_data_context),
+    )
     dataset = validator.get_dataset()
     assert dataset.caching is False
     assert dataset._persist is False

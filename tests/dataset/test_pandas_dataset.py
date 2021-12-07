@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.self_check.util import (
@@ -530,7 +531,7 @@ def test_ge_pandas_merging():
     assert df.get_expectation_suite().expectations == exp_m
 
 
-def test_ge_pandas_sampling():
+def test_ge_pandas_sampling(empty_data_context):
     df = ge.dataset.PandasDataset(
         {
             "A": [1, 2, 3, 4],
@@ -567,7 +568,7 @@ def test_ge_pandas_sampling():
     # in the sample.
     df.expect_column_values_to_be_in_set("D", ["e", "f", "g", "x"])
     samp1 = df.sample(n=2)
-    exp1 = expectationSuiteSchema.load(
+    exp1_dict = expectationSuiteSchema.load(
         {
             "expectation_suite_name": "test",
             "expectations": [
@@ -606,6 +607,8 @@ def test_ge_pandas_sampling():
             ],
         }
     )
+    exp1 = ExpectationSuite(**exp1_dict, data_context=empty_data_context)
+
     assert (
         samp1.get_expectation_suite(discard_failed_expectations=False).expectations
         == exp1.expectations

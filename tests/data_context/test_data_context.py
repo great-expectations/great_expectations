@@ -880,7 +880,11 @@ def test_data_context_updates_expectation_suite_names(
             "a_new_new_suite_name.json",
         ),
     ) as suite_file:
-        loaded_suite = expectationSuiteSchema.load(json.load(suite_file))
+        loaded_suite_dict: dict = expectationSuiteSchema.load(json.load(suite_file))
+        loaded_suite: ExpectationSuite = ExpectationSuite(
+            **loaded_suite_dict,
+            data_context=data_context_parameterized_expectation_suite,
+        )
         assert loaded_suite.expectation_suite_name == "a_new_new_suite_name"
 
     #   3. Using the new name but having the context draw that from the suite
@@ -1688,7 +1692,9 @@ data_connectors:
         batch_identifiers={
             "alphanumeric": "some_file",
         },
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
     )
     assert my_validator.expectation_suite_name == "my_expectation_suite"
 
