@@ -194,7 +194,10 @@ def _process_suite_new_flags_and_prompt(
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
         toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=False
+            data_context=context,
+            event=usage_event_end,
+            event_payload=interactive_mode.value,
+            success=False,
         )
         sys.exit(1)
 
