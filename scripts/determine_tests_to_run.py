@@ -1,5 +1,5 @@
 """
-Usage: `python determine_tests_to_run.py <DEPTH>`
+Usage: `python determine_tests_to_run.py --depth <DEPTH>`
 Output: A list of '\n' delimited file paths that represent relevant test files to run
         (using `xargs`, we can feed in this list to `pytest` in our Azure config)
 
