@@ -1,5 +1,5 @@
 ---
-title: How to install Great Expectations on a Spark EMR Cluster
+title: How to install Great Expectations in the cloud
 ---
 import NextSteps from '/docs/guides/setup/components/install_nextsteps.md'
 import Congratulations from '/docs/guides/setup/components/install_congrats.md'

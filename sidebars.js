@@ -34,8 +34,7 @@ module.exports = {
               label: 'Installation',
               items: [
                 'guides/setup/installation/local',
-                // 'guides/setup/installation/databricks',
-                'guides/setup/installation/spark_emr'
+                'guides/setup/installation/cloud'
               ]
             },
             {
