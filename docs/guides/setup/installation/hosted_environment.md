@@ -14,4 +14,3 @@ The following guides provide instructions for installing Great Expectations in t
 
 - [How to Use Great Expectations in Databricks](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)
 - [How to instantiate a Data Context oun an EMR Spark cluster](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
-
