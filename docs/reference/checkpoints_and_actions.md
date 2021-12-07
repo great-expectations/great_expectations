@@ -142,7 +142,7 @@ Below is an example of a `CheckpointResult` object which itself contains `Valida
 
 #### Example CheckpointResult:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L101-L115
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L101-L115
 ```
 
 ## Checkpoint configuration default and override behavior
@@ -162,12 +162,12 @@ This configuration specifies full validation dictionaries - no nesting (defaults
 
 **YAML**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L145-L171
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L145-L171
 ```
 
 **runtime**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L174
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L174
 ```
 
 </TabItem>
@@ -176,20 +176,20 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 
 **YAML**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L190-L220
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L190-L220
 ```
 
 **Runtime**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L223
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L223
 ```
 
 **Results**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L225-L235
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L225-L235
 ```
 
-```console file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L241-L251
+```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L241-L251
 ```
 
 </TabItem>
@@ -198,20 +198,20 @@ This configuration omits the "validations" key from the YAML, which means a "val
 
 **YAML**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L256-L276
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L256-L276
 ```
 
 **Runtime**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L279-L299
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L279-L299
 ```
 
 **Results**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L301-L311
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L301-L311
 ```
 
-```console file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L317-L327
+```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L317-L327
 ```
 
 </TabItem>
@@ -220,20 +220,20 @@ This configuration references the Checkpoint detailed in the previous example ("
 
 **YAML**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L334-L348
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L334-L348
 ```
 
 **Runtime**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L351
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L351
 ```
 
 **Results**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L353-L363
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L353-L363
 ```
 
-```console file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L369-L379
+```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L369-L379
 ```
 
 </TabItem>
@@ -242,25 +242,25 @@ This configuration specifies the SimpleCheckpoint class under the "class_name" k
 
 **YAML, using SimpleCheckpoint**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L383-L395
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L383-L395
 ```
 
 **Equivalent YAML, using Checkpoint**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L405-L432
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L405-L432
 ```
 
 **Runtime**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L438
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L438
 ```
 
 **Results**:
 
-```python file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L440-L443
+```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L440-L443
 ```
 
-```console file=../../../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L447-L451
+```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L447-L451
 ```
 
 </TabItem>
