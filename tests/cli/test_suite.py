@@ -207,7 +207,9 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
                 "event": "cli.suite.new.end",
                 "event_payload": {
                     "interactive_flag": False,
-                    "interactive_attribution": "prompted_choice_false",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": True,
@@ -319,7 +321,9 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
                 "event": "cli.suite.new.end",
                 "event_payload": {
                     "interactive_flag": False,
-                    "interactive_attribution": "prompted_choice_false",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": True,
@@ -429,7 +433,9 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
                 "event": "cli.suite.new.end",
                 "event_payload": {
                     "interactive_flag": False,
-                    "interactive_attribution": "prompted_choice_false",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": True,
@@ -539,7 +545,9 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
                 "event": "cli.suite.new.end",
                 "event_payload": {
                     "interactive_flag": False,
-                    "interactive_attribution": "prompted_choice_false",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": True,
@@ -863,7 +871,9 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
                 "event": "cli.suite.new.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_interactive_present_manual_absent",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": True,
@@ -984,7 +994,9 @@ def test_suite_edit_datasource_and_batch_request_error(
                 "event": "cli.suite.edit.end",
                 "event_payload": {
                     "interactive_flag": None,
-                    "interactive_attribution": "error_datasource_specified_batch_request_specified",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.ERROR_DATASOURCE_SPECIFIED_BATCH_REQUEST_SPECIFIED.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": False,
@@ -1139,7 +1151,9 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
                 "event": "cli.suite.edit.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_override_interactive_present_manual_absent_datasource_specified",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_DATASOURCE_SPECIFIED.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": False,
@@ -1342,7 +1356,9 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
                 "event": "cli.suite.new.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_interactive_present_manual_absent",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": True,
@@ -1392,7 +1408,9 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
                 "event": "cli.suite.edit.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_interactive_present_manual_absent",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
                     "api_version": "v3",
                 },
@@ -1591,7 +1609,9 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
                 "event": "cli.suite.new.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_interactive_present_manual_absent",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": True,
@@ -1623,7 +1643,9 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
                 "event": "cli.suite.edit.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_interactive_present_manual_absent",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
                 },
@@ -1830,7 +1852,9 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
                 "event": "cli.suite.new.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_interactive_present_manual_absent",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": True,
@@ -1880,7 +1904,9 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
                 "event": "cli.suite.edit.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_interactive_present_manual_absent",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
                     "api_version": "v3",
                 },
@@ -2079,7 +2105,9 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
                 "event": "cli.suite.new.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_interactive_present_manual_absent",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": True,
@@ -2111,7 +2139,9 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
                 "event": "cli.suite.edit.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_interactive_present_manual_absent",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
                     "api_version": "v3",
                 },
@@ -3183,7 +3213,9 @@ suite = profiler.build_suite()"""
                 "event": "cli.suite.new.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_override_interactive_present_manual_absent_profile_present",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": True,
@@ -3427,7 +3459,9 @@ suite = profiler.build_suite()"""
                 "event": "cli.suite.new.end",
                 "event_payload": {
                     "interactive_flag": True,
-                    "interactive_attribution": "unprompted_override_interactive_present_manual_absent_profile_present",
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
                 },
                 "success": True,
