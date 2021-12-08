@@ -1,6 +1,6 @@
 import logging
 import math
-from typing import Callable, Union, cast
+from typing import Callable, Dict, List, Optional, Union, cast
 
 from dateutil.parser import parse
 from tqdm.auto import tqdm
@@ -58,12 +58,12 @@ class UserConfigurableProfiler:
 
     def __init__(
         self,
-        profile_dataset,
-        excluded_expectations: list = None,
-        ignored_columns: list = None,
+        profile_dataset: Union[Dataset, Validator, Batch],
+        excluded_expectations: Optional[List[ExpectationConfiguration]] = None,
+        ignored_columns: Optional[List[str]] = None,
         not_null_only: bool = False,
-        primary_or_compound_key: list = False,
-        semantic_types_dict: dict = None,
+        primary_or_compound_key: Optional[List[str]] = None,
+        semantic_types_dict: Optional[Dict[str, List[str]]] = None,
         table_expectations_only: bool = False,
         value_set_threshold: str = "MANY",
     ):
@@ -194,7 +194,7 @@ class UserConfigurableProfiler:
             "BOOLEAN": self._build_expectations_value_set,
         }
 
-    def build_suite(self):
+    def build_suite(self) -> ExpectationSuite:
         """
         User-facing expectation-suite building function. Works with an instantiated UserConfigurableProfiler object.
         Args:
@@ -286,7 +286,9 @@ class UserConfigurableProfiler:
                 profile_dataset=self.profile_dataset,
                 column_list=self.primary_or_compound_key,
             )
+
         self._build_expectations_table(profile_dataset=self.profile_dataset)
+
         with tqdm(desc="Profiling", total=len(self.column_info), delay=5) as pbar:
             for column_name, column_info in self.column_info.items():
                 pbar.set_postfix_str(f"Column={column_name}")
