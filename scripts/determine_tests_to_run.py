@@ -48,6 +48,7 @@ import ast
 import glob
 import os
 import subprocess
+import sys
 from collections import namedtuple
 from typing import Dict, List, Tuple
 
@@ -291,7 +292,7 @@ def main():
         print(file)
 
     if test_count == 0:
-        print("N/A")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
