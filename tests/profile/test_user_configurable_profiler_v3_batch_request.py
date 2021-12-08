@@ -627,8 +627,9 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
             primary_or_compound_key=["col_unique", "col_that_does_not_exist"],
         )
     assert e.value.args[0] == (
-        f"Column col_that_does_not_exist not found. Please ensure that this column is in the Validator if "
-        f"you would like to use it as a primary_or_compound_key."
+        """Column col_that_does_not_exist not found. Please ensure that this column is in the Validator if you would \
+like to use it as a primary_or_compound_key.
+"""
     )
 
     # key includes a column that exists, but is in ignored_columns, should pass
