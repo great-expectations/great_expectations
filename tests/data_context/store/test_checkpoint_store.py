@@ -209,7 +209,7 @@ def test_checkpoint_store(empty_data_context):
                 "suppress_store_backend_id": False,
                 "module_name": "great_expectations.data_context.store.tuple_store_backend",
                 "class_name": "TupleFilesystemStoreBackend",
-                "filepath_template": "{0}.yml",
+                "filepath_suffix": ".yml",
             },
         },
     }
