@@ -91,7 +91,7 @@ def titanic_data_context_with_spark_datasource(
     monkeypatch,
 ):
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")

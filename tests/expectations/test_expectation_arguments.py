@@ -892,6 +892,4 @@ def test_result_format_configured_with_set_default_override(
     assert len(result.result.keys()) == 0
     assert result.result == {}
 
-    # DataContext used in the test is in-memory Context with no usage_statistics_handler configured
-    # Therefore there are no usage events that are triggered
     assert mock_emit.call_count == 0

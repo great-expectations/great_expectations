@@ -2101,7 +2101,7 @@ class BaseDataContext:
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
         expectation_suite: ExpectationSuite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name, data_context=self
+            expectation_suite_name=expectation_suite_name
         )
         if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(

@@ -283,16 +283,12 @@ def test_create_new_expectation_suite_with_reference_to_data_context(
 ):
     expectation_suite = (
         data_context_parameterized_expectation_suite.create_expectation_suite(
-            expectation_suite_name="this_data_asset_does_not_exist.default",
-            data_context=data_context_parameterized_expectation_suite,
+            expectation_suite_name="this_data_asset_does_not_exist.default"
         )
     )
     assert (
         expectation_suite.expectation_suite_name
         == "this_data_asset_does_not_exist.default"
-    )
-    assert (
-        expectation_suite.data_context is data_context_parameterized_expectation_suite
     )
     assert len(expectation_suite.expectations) == 0
 

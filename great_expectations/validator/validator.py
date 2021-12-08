@@ -315,7 +315,7 @@ class Validator:
                 else:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite.add_expectation(
-                        configuration.get_raw_configuration()
+                        configuration.get_raw_configuration(), usage_event=False
                     )
 
                 # If there was no interactive evaluation, success will not have been computed.

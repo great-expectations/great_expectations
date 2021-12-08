@@ -36,7 +36,7 @@ def test_project_check_on_valid_project_says_so(
     mock_emit, caplog, monkeypatch, titanic_data_context_clean
 ):
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
 
     context = titanic_data_context_clean
     runner = CliRunner(mix_stderr=False)
@@ -77,7 +77,7 @@ def test_project_check_on_project_with_v2_datasources_and_validation_operators(
     mock_emit, caplog, monkeypatch, titanic_data_context
 ):
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
 
     context = titanic_data_context
     runner = CliRunner(mix_stderr=False)

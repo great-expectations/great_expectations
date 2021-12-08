@@ -10,6 +10,7 @@ from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 
 
+# MARKER
 @pytest.fixture
 @freeze_time("09/26/2019 13:42:41")
 def alice_columnar_table_single_batch():

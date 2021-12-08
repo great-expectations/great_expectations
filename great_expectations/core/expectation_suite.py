@@ -34,7 +34,6 @@ from great_expectations.marshmallow__shade import (
     pre_dump,
 )
 from great_expectations.types import SerializableDictDot
-from great_expectations.types.base import DotDict
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +50,6 @@ class ExpectationSuite(SerializableDictDot):
     def __init__(
         self,
         expectation_suite_name,
-        data_context=None,
         expectations=None,
         evaluation_parameters=None,
         data_asset_type=None,
@@ -61,7 +59,6 @@ class ExpectationSuite(SerializableDictDot):
     ):
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
-        self.data_context = data_context
         if expectations is None:
             expectations = []
         self.expectations = [
@@ -178,13 +175,6 @@ class ExpectationSuite(SerializableDictDot):
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
-
-    def __deepcopy__(self, memo):
-        attributes_to_copy = list(ExpectationSuiteSchema().fields.keys())
-        new_suite_as_dot_dict: DotDict = DotDict()
-        for key in attributes_to_copy:
-            setattr(new_suite_as_dot_dict, key, deepcopy(getattr(self, key)))
-        return ExpectationSuite(**new_suite_as_dot_dict)
 
     def to_json_dict(self):
         myself = expectationSuiteSchema.dump(self)
@@ -515,6 +505,7 @@ class ExpectationSuite(SerializableDictDot):
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
         overwrite_existing: bool = True,
+        usage_event: bool = True,
     ) -> ExpectationConfiguration:
         """
 
@@ -530,15 +521,18 @@ class ExpectationSuite(SerializableDictDot):
             More than one match
             One match if overwrite_existing = False
         """
+        if usage_event:
+            data_context_reference_for_usage_stats = ge.DataContext.get_data_context()
+
         try:
             found_expectation_indexes = self.find_expectation_indexes(
                 expectation_configuration, match_type
             )
         except (TypeError, InvalidExpectationConfigurationError) as e:
-            if self.data_context:
+            if usage_event:
                 usage_stats_event_name: str = "expectation_suite.add_expectation"
                 usage_stats_event_payload: dict = {}
-                self.data_context.send_usage_message(
+                data_context_reference_for_usage_stats.send_usage_message(
                     event=usage_stats_event_name,
                     event_payload=usage_stats_event_payload,
                     success=False,
@@ -546,10 +540,10 @@ class ExpectationSuite(SerializableDictDot):
             raise e
 
         if len(found_expectation_indexes) > 1:
-            if self.data_context:
+            if usage_event:
                 usage_stats_event_name: str = "expectation_suite.add_expectation"
                 usage_stats_event_payload: dict = {}
-                self.data_context.send_usage_message(
+                data_context_reference_for_usage_stats.send_usage_message(
                     event=usage_stats_event_name,
                     event_payload=usage_stats_event_payload,
                     success=False,
@@ -577,10 +571,10 @@ class ExpectationSuite(SerializableDictDot):
                     found_expectation_indexes[0]
                 ] = expectation_configuration
             else:
-                if self.data_context:
+                if usage_event:
                     usage_stats_event_name: str = "expectation_suite.add_expectation"
                     usage_stats_event_payload: dict = {}
-                    self.data_context.send_usage_message(
+                    data_context_reference_for_usage_stats.send_usage_message(
                         event=usage_stats_event_name,
                         event_payload=usage_stats_event_payload,
                         success=False,
@@ -592,10 +586,10 @@ class ExpectationSuite(SerializableDictDot):
         else:
             self.append_expectation(expectation_configuration)
 
-        if self.data_context:
+        if usage_event:
             usage_stats_event_name: str = "expectation_suite.add_expectation"
             usage_stats_event_payload: dict = {}
-            self.data_context.send_usage_message(
+            data_context_reference_for_usage_stats.send_usage_message(
                 event=usage_stats_event_name,
                 event_payload=usage_stats_event_payload,
                 success=True,

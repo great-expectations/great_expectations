@@ -679,6 +679,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     mock_context_save_suite,
     mock_emit,
     multi_batch_taxi_validator_ge_cloud_mode,
+    monkeypatch,
 ):
     """
     This checks that Validator in ge_cloud_mode properly updates underlying Expectation Suite on save.
@@ -686,7 +687,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GE Cloud
     :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GE Cloud
     """
-    # monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
 
     mock_suite = ExpectationSuite(
         expectation_suite_name="validating_taxi_data",
