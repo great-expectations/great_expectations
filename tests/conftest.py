@@ -2315,6 +2315,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     # noinspection PyProtectedMember
     context._save_project_config()
+
     return context
 
 

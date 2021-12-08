@@ -10,6 +10,9 @@ from great_expectations.core import (
     ExpectationSuite,
     ExpectationSuiteValidationResult,
 )
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    CLISuiteInteractiveFlagCombinations,
+)
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 from tests.render.test_util import run_notebook
 
@@ -134,7 +137,7 @@ def test_notebook_execution_with_pandas_backend(
         expectation_suite_name=expectation_suite_name,
         profile=True,
         usage_event="test_notebook_execution",
-        interactive=False,
+        interactive_mode=CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE,
         no_jupyter=True,
         create_if_not_exist=False,
         datasource_name=None,

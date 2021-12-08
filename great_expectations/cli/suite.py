@@ -14,6 +14,9 @@ from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    CLISuiteInteractiveFlagCombinations,
+)
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
@@ -121,7 +124,9 @@ def suite_new(
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
-    processed_flags: Dict[str, Optional[bool]] = _process_suite_new_flags_and_prompt(
+    processed_flags: Dict[
+        str, Optional[Union[bool, CLISuiteInteractiveFlagCombinations]]
+    ] = _process_suite_new_flags_and_prompt(
         context=context,
         usage_event_end=usage_event_end,
         interactive_flag=interactive_flag,
@@ -133,7 +138,7 @@ def suite_new(
     _suite_new_workflow(
         context=context,
         expectation_suite_name=expectation_suite,
-        interactive=processed_flags["interactive"],
+        interactive_mode=processed_flags["interactive_mode"],
         profile=processed_flags["profile"],
         no_jupyter=no_jupyter,
         usage_event=usage_event_end,
@@ -148,7 +153,7 @@ def _process_suite_new_flags_and_prompt(
     manual_flag: bool,
     profile: bool,
     batch_request: Optional[str] = None,
-) -> Dict[str, Optional[bool]]:
+) -> Dict[str, Optional[Union[bool, CLISuiteInteractiveFlagCombinations]]]:
     """
     Process various optional suite new flags and prompt if there is not enough information from the flags.
     Args:
@@ -166,53 +171,86 @@ def _process_suite_new_flags_and_prompt(
 
     error_message: Optional[str] = None
 
-    # Convert interactive / no-interactive flags to interactive
-    interactive: Optional[bool] = None
+    # Convert interactive / no-interactive flags to interactive_mode
+    interactive_mode: Optional[CLISuiteInteractiveFlagCombinations]
     if interactive_flag is True and manual_flag is True:
         error_message = """Please choose either --interactive or --manual, you may not choose both."""
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
+        )
     elif interactive_flag is False and manual_flag is False:
-        interactive = None
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
+        )
     elif interactive_flag is True and manual_flag is False:
-        interactive = True
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE
+        )
     elif interactive_flag is False and manual_flag is True:
-        interactive = False
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE
+        )
+    else:
+        interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
 
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
         toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=False
+            data_context=context,
+            event=usage_event_end,
+            event_payload=interactive_mode.value,
+            success=False,
         )
         sys.exit(1)
 
     user_provided_any_flag_skip_prompt: bool = any(
-        ((interactive is not None), (profile is True), (batch_request is not None))
+        (
+            (interactive_mode.value["interactive_flag"] is not None),
+            (profile is True),
+            (batch_request is not None),
+        )
     )
 
-    # Note - explicit check for boolean or None for `interactive: Optional[bool]` is necessary because None indicates
-    #  that a user did not supply either flag.
+    # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
     if user_provided_any_flag_skip_prompt:
         # Assume batch needed if user passes --profile
-        if profile and interactive is None:
+        if profile and interactive_mode.value["interactive_flag"] is None:
             cli_message(
                 "<green>Entering interactive mode since you passed the --profile flag</green>"
             )
-            interactive = True
-        elif profile and interactive is False:
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE
+            )
+        elif profile and interactive_mode.value["interactive_flag"] is True:
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE
+            )
+        elif profile and interactive_mode.value["interactive_flag"] is False:
             cli_message(
                 "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag</yellow>"
             )
-            interactive = True
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE
+            )
         # Assume batch needed if user passes --batch-request
-        elif (batch_request is not None) and (interactive is None):
+        elif (batch_request is not None) and (
+            interactive_mode.value["interactive_flag"] is None
+        ):
             cli_message(
                 "<green>Entering interactive mode since you passed the --batch-request flag</green>"
             )
-            interactive = True
-        elif (batch_request is not None) and (interactive is False):
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
+            )
+        elif (batch_request is not None) and (
+            interactive_mode.value["interactive_flag"] is False
+        ):
             cli_message(
                 "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
             )
-            interactive = True
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
+            )
     else:
         suite_create_method: str = click.prompt(
             """
@@ -228,25 +266,36 @@ How would you like to create your Expectation Suite?
         )
         # Default option
         if suite_create_method == "":
-            interactive = False
             profile = False
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
+            )
         elif suite_create_method == "1":
-            interactive = False
             profile = False
+            interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE
         elif suite_create_method == "2":
-            interactive = True
             profile = False
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_FALSE
+            )
         elif suite_create_method == "3":
-            interactive = True
             profile = True
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_TRUE
+            )
+        else:
+            interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
 
-    return {"interactive": interactive, "profile": profile}
+    return {
+        "interactive_mode": interactive_mode,
+        "profile": profile,
+    }
 
 
 def _suite_new_workflow(
     context: DataContext,
     expectation_suite_name: str,
-    interactive: bool,
+    interactive_mode: CLISuiteInteractiveFlagCombinations,
     profile: bool,
     no_jupyter: bool,
     usage_event: str,
@@ -262,7 +311,7 @@ def _suite_new_workflow(
             Dict[str, Union[str, int, Dict[str, Any]]]
         ] = {"limit": 1000}
 
-        if interactive:
+        if interactive_mode.value["interactive_flag"]:
             if batch_request is not None and isinstance(batch_request, str):
                 batch_request = toolkit.get_batch_request_from_json_file(
                     batch_request_json_file_path=batch_request,
@@ -305,7 +354,10 @@ def _suite_new_workflow(
         )
 
         toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=True
+            data_context=context,
+            event=usage_event,
+            event_payload=interactive_mode.value,
+            success=True,
         )
 
         if batch_request:
@@ -319,7 +371,7 @@ def _suite_new_workflow(
             expectation_suite_name=expectation_suite_name,
             profile=profile,
             usage_event=usage_event,
-            interactive=interactive,
+            interactive_mode=interactive_mode,
             no_jupyter=no_jupyter,
             create_if_not_exist=True,
             datasource_name=datasource_name,
@@ -337,12 +389,18 @@ def _suite_new_workflow(
     ) as e:
         cli_message(string=f"<red>{e}</red>")
         toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+            data_context=context,
+            event=usage_event,
+            event_payload=interactive_mode.value,
+            success=False,
         )
         sys.exit(1)
     except Exception as e:
         toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+            data_context=context,
+            event=usage_event,
+            event_payload=interactive_mode.value,
+            success=False,
         )
         raise e
 
@@ -415,13 +473,15 @@ def suite_edit(
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
-    interactive: bool = _process_suite_edit_flags_and_prompt(
-        context=context,
-        usage_event_end=usage_event_end,
-        interactive_flag=interactive_flag,
-        manual_flag=manual_flag,
-        datasource_name=datasource_name,
-        batch_request=batch_request,
+    interactive_mode: CLISuiteInteractiveFlagCombinations = (
+        _process_suite_edit_flags_and_prompt(
+            context=context,
+            usage_event_end=usage_event_end,
+            interactive_flag=interactive_flag,
+            manual_flag=manual_flag,
+            datasource_name=datasource_name,
+            batch_request=batch_request,
+        )
     )
 
     additional_batch_request_args: Optional[
@@ -433,7 +493,7 @@ def suite_edit(
         expectation_suite_name=expectation_suite,
         profile=False,
         usage_event=usage_event_end,
-        interactive=interactive,
+        interactive_mode=interactive_mode,
         no_jupyter=no_jupyter,
         create_if_not_exist=False,
         datasource_name=datasource_name,
@@ -451,7 +511,7 @@ def _process_suite_edit_flags_and_prompt(
     manual_flag: bool,
     datasource_name: Optional[str] = None,
     batch_request: Optional[str] = None,
-) -> bool:
+) -> CLISuiteInteractiveFlagCombinations:
     """
     Process various optional suite edit flags and prompt if there is not enough information from the flags.
     Args:
@@ -468,60 +528,91 @@ def _process_suite_edit_flags_and_prompt(
 
     error_message: Optional[str] = None
 
+    interactive_mode: CLISuiteInteractiveFlagCombinations
+
     # Convert interactive / no-interactive flags to interactive
-    interactive: Optional[bool] = None
     if interactive_flag is True and manual_flag is True:
         error_message = """Please choose either --interactive or --manual, you may not choose both."""
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
+        )
     elif interactive_flag is False and manual_flag is False:
-        interactive = None
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
+        )
     elif interactive_flag is True and manual_flag is False:
-        interactive = True
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE
+        )
     elif interactive_flag is False and manual_flag is True:
-        interactive = False
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE
+        )
+    else:
+        interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
 
     if (datasource_name is not None) and (batch_request is not None):
         error_message = """Only one of --datasource-name DATASOURCE_NAME and --batch-request <path to JSON file> \
 options can be used.
 """
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.ERROR_DATASOURCE_SPECIFIED_BATCH_REQUEST_SPECIFIED
+        )
 
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
         toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=False
+            data_context=context,
+            event=usage_event_end,
+            event_payload=interactive_mode.value,
+            success=False,
         )
         sys.exit(1)
 
     user_provided_any_flag_skip_prompt: bool = any(
         (
-            (interactive is not None),
+            (interactive_mode.value["interactive_flag"] is not None),
             (datasource_name is not None),
             (batch_request is not None),
         )
     )
 
-    # Note - explicit check for boolean or None for `interactive: Optional[bool]` is necessary because None indicates
-    #  that a user did not supply either flag.
+    # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
     if user_provided_any_flag_skip_prompt:
         if datasource_name is not None:
-            if interactive is None:
+            if interactive_mode.value["interactive_flag"] is None:
                 cli_message(
                     "<green>Entering interactive mode since you passed the --datasource-name flag</green>"
                 )
-            elif interactive is False:
+                interactive_mode = (
+                    CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_DATASOURCE_SPECIFIED
+                )
+            elif interactive_mode.value["interactive_flag"] is True:
+                interactive_mode = (
+                    CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_DATASOURCE_SPECIFIED
+                )
+            elif interactive_mode.value["interactive_flag"] is False:
                 cli_message(
                     "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --datasource-name flag</yellow>"
                 )
-            interactive = True
+                interactive_mode = (
+                    CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_DATASOURCE_SPECIFIED
+                )
         elif batch_request is not None:
-            if interactive is None:
+            if interactive_mode.value["interactive_flag"] is None:
                 cli_message(
                     "<green>Entering interactive mode since you passed the --batch-request flag</green>"
                 )
-            elif interactive is False:
+                interactive_mode = (
+                    CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
+                )
+            elif interactive_mode.value["interactive_flag"] is False:
                 cli_message(
                     "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
                 )
-            interactive = True
+                interactive_mode = (
+                    CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
+                )
     else:
         suite_edit_method: str = click.prompt(
             """
@@ -536,13 +627,15 @@ How would you like to edit your Expectation Suite?
         )
         # Default option
         if suite_edit_method == "":
-            interactive = False
+            interactive_mode = (
+                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
+            )
         if suite_edit_method == "1":
-            interactive = False
+            interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE
         elif suite_edit_method == "2":
-            interactive = True
+            interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE
 
-    return interactive
+    return interactive_mode
 
 
 def _suite_edit_workflow(
@@ -550,7 +643,7 @@ def _suite_edit_workflow(
     expectation_suite_name: str,
     profile: bool,
     usage_event: str,
-    interactive: bool,
+    interactive_mode: CLISuiteInteractiveFlagCombinations,
     no_jupyter: bool,
     create_if_not_exist: bool = False,
     datasource_name: Optional[str] = None,
@@ -577,7 +670,7 @@ def _suite_edit_workflow(
     )
 
     try:
-        if interactive or profile:
+        if interactive_mode.value["interactive_flag"] or profile:
             batch_request_from_citation_is_up_to_date: bool = True
 
             batch_request_from_citation: Optional[
@@ -658,7 +751,9 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             )
 
         payload: dict = edit_expectation_suite_usage_statistics(
-            data_context=context, expectation_suite_name=suite.expectation_suite_name
+            data_context=context,
+            expectation_suite_name=suite.expectation_suite_name,
+            interactive_mode=interactive_mode,
         )
 
         if not suppress_usage_message:
@@ -682,14 +777,20 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         cli_message(string=f"<red>{e}</red>")
         if not suppress_usage_message:
             toolkit.send_usage_message(
-                data_context=context, event=usage_event, success=False
+                data_context=context,
+                event=usage_event,
+                event_payload=interactive_mode.value,
+                success=False,
             )
         sys.exit(1)
 
     except Exception as e:
         if not suppress_usage_message:
             toolkit.send_usage_message(
-                data_context=context, event=usage_event, success=False
+                data_context=context,
+                event=usage_event,
+                event_payload=interactive_mode.value,
+                success=False,
             )
         raise e
 
