@@ -18,9 +18,9 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
+    ProfilerSemanticTypes,
     ProfilerTypeMapping,
     profiler_data_types_with_mapping,
-    profiler_semantic_types,
 )
 from great_expectations.util import is_nan
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -59,7 +59,7 @@ class UserConfigurableProfiler:
     def __init__(
         self,
         profile_dataset: Union[Dataset, Validator, Batch],
-        excluded_expectations: Optional[List[ExpectationConfiguration]] = None,
+        excluded_expectations: Optional[List[str]] = None,
         ignored_columns: Optional[List[str]] = None,
         not_null_only: bool = False,
         primary_or_compound_key: Optional[List[str]] = None,
@@ -88,7 +88,7 @@ class UserConfigurableProfiler:
                         `expect_compound_columns_to_be_unique` expectation. This will occur even if one or more of the
                         primary_or_compound_key columns are specified in ignored_columns
                     semantic_types_dict: A dictionary where the keys are available semantic_types
-                        (see profiler.base.profiler_semantic_types) and the values are lists of columns for which you
+                        (see profiler.base.ProfilerSemanticTypes) and the values are lists of columns for which you
                         would like to create semantic_type specific expectations e.g.:
                         "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
                     table_expectations_only: Boolean, default False. If True, this will only create the two table level
@@ -350,10 +350,15 @@ class UserConfigurableProfiler:
                 "Entries in semantic type dict must be lists of column names e.g. "
                 "{'semantic_types': {'numeric': ['number_of_transactions']}}"
             )
-            if k.upper() not in profiler_semantic_types:
+            if not any(
+                [
+                    k.upper() == semantic_type.value
+                    for semantic_type in ProfilerSemanticTypes
+                ]
+            ):
                 raise ValueError(
                     f"{k} is not a recognized semantic_type. Please only include one of "
-                    f"{profiler_semantic_types}"
+                    f"{[semantic_type.value for semantic_type in ProfilerSemanticTypes]}"
                 )
 
         selected_columns = [

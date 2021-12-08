@@ -16,7 +16,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
-    profiler_semantic_types,
+    ProfilerSemanticTypes,
 )
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
@@ -110,6 +110,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
 ):
     sa_engine_name = "postgresql"
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    # noinspection PyUnresolvedReferences
     try:
         engine = connection_manager.get_engine(
             f"postgresql://postgres@{db_hostname}/test_ci"
@@ -171,7 +172,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
     )
     batch = Batch(data=batch_data)
 
-    return Validator(execution_engine=execution_engine, batches=(batch,))
+    return Validator(execution_engine=execution_engine, batches=[batch])
 
 
 @pytest.fixture
@@ -260,7 +261,7 @@ def cardinality_validator(titanic_data_context_modular_api):
             # TODO: Uncomment assertions that use col_none when proportion_of_unique_values bug is fixed for columns
             #  that are all NULL/None
             # "col_none": [None for i in range(0, 1000)],
-            "col_one": [0 for i in range(0, 1000)],
+            "col_one": [0 for _ in range(0, 1000)],
             "col_two": [i % 2 for i in range(0, 1000)],
             "col_very_few": [i % 10 for i in range(0, 1000)],
             "col_few": [i % 50 for i in range(0, 1000)],
@@ -408,10 +409,12 @@ def test__validate_config(cardinality_validator):
     """
 
     with pytest.raises(AssertionError) as e:
+        # noinspection PyTypeChecker
         UserConfigurableProfiler(cardinality_validator, ignored_columns="col_name")
     assert e.typename == "AssertionError"
 
     with pytest.raises(AssertionError) as e:
+        # noinspection PyTypeChecker
         UserConfigurableProfiler(cardinality_validator, table_expectations_only="True")
     assert e.typename == "AssertionError"
 
@@ -424,6 +427,7 @@ def test__validate_semantic_types_dict(cardinality_validator):
 
     bad_semantic_types_dict_type = {"value_set": "col_few"}
     with pytest.raises(AssertionError) as e:
+        # noinspection PyTypeChecker
         UserConfigurableProfiler(
             cardinality_validator, semantic_types_dict=bad_semantic_types_dict_type
         )
@@ -439,7 +443,7 @@ def test__validate_semantic_types_dict(cardinality_validator):
         )
     assert e.value.args[0] == (
         f"incorrect_type is not a recognized semantic_type. Please only include one of "
-        f"{profiler_semantic_types}"
+        f"{[semantic_type.value for semantic_type in ProfilerSemanticTypes]}"
     )
 
     # Error if column is specified for both semantic_types and ignored
@@ -622,6 +626,7 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
 
     # key includes a non-existent column, should fail
     with pytest.raises(ValueError) as e:
+        # noinspection PyUnusedLocal
         bad_key_profiler = UserConfigurableProfiler(
             cardinality_validator,
             primary_or_compound_key=["col_unique", "col_that_does_not_exist"],
@@ -641,9 +646,7 @@ like to use it as a primary_or_compound_key.
     assert ignored_column_profiler.primary_or_compound_key == ["col_unique", "col_one"]
 
 
-def test_config_with_not_null_only(
-    titanic_data_context_modular_api, nulls_validator, possible_expectations_set
-):
+def test_config_with_not_null_only(nulls_validator, possible_expectations_set):
     """
     What does this test do and why?
     Confirms that the not_null_only key in config works as expected.

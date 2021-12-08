@@ -232,14 +232,14 @@ profiler_data_types_with_mapping = {
     "UNKNOWN": ["unknown"],
 }
 
-profiler_semantic_types = {
-    "DATETIME",
-    "NUMERIC",
-    "STRING",
-    "VALUE_SET",
-    "BOOLEAN",
-    "OTHER",
-}
+
+class ProfilerSemanticTypes(Enum):
+    DATETIME = "DATETIME"
+    NUMERIC = "NUMERIC"
+    STRING = "STRING"
+    VALUE_SET = "VALUE_SET"
+    BOOLEAN = "BOOLEAN"
+    OTHER = "OTHER"
 
 
 class Profiler(metaclass=abc.ABCMeta):
