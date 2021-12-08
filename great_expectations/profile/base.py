@@ -50,7 +50,9 @@ class OrderedProfilerCardinality(OrderedEnum):
     UNIQUE = 7
 
     @classmethod
-    def get_basic_column_cardinality(cls, num_unique=0, pct_unique=0):
+    def get_basic_column_cardinality(
+        cls, num_unique=0, pct_unique=0
+    ) -> "OrderedProfilerCardinality":  # noqa: F821
         """
         Takes the number and percentage of unique values in a column and returns the column cardinality.
         If you are unexpectedly returning a cardinality of "None", ensure that you are passing in values for both

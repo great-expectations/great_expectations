@@ -58,7 +58,7 @@ class UserConfigurableProfiler:
 
     def __init__(
         self,
-        profile_dataset: Union[Dataset, Validator, Batch],
+        profile_dataset: Union[Batch, Dataset, Validator],
         excluded_expectations: Optional[List[str]] = None,
         ignored_columns: Optional[List[str]] = None,
         not_null_only: bool = False,
@@ -351,10 +351,8 @@ class UserConfigurableProfiler:
                 "{'semantic_types': {'numeric': ['number_of_transactions']}}"
             )
             if not any(
-                [
-                    k.upper() == semantic_type.value
-                    for semantic_type in ProfilerSemanticTypes
-                ]
+                k.upper() == semantic_type.value
+                for semantic_type in ProfilerSemanticTypes
             ):
                 raise ValueError(
                     f"{k} is not a recognized semantic_type. Please only include one of "
@@ -424,7 +422,7 @@ class UserConfigurableProfiler:
         return column_type
 
     @staticmethod
-    def _get_column_type(profile_dataset, column):
+    def _get_column_type(profile_dataset, column) -> str:
         """
         Determines the data type of a column by evaluating the success of `expect_column_values_to_be_in_type_list`.
         In the case of type Decimal, this data type is returned as NUMERIC, which contains the type lists for both INTs
@@ -537,7 +535,7 @@ class UserConfigurableProfiler:
         return column_cardinality
 
     @staticmethod
-    def _get_column_cardinality(profile_dataset, column):
+    def _get_column_cardinality(profile_dataset, column) -> OrderedProfilerCardinality:
         """
         Determines the cardinality of a column using the get_basic_column_cardinality method from
         OrderedProfilerCardinality
@@ -568,8 +566,10 @@ class UserConfigurableProfiler:
             )
         # Previously, if we had 25 possible categories out of 1000 rows, this would comes up as many, because of its
         #  percentage, so it was tweaked here, but is still experimental.
-        cardinality = OrderedProfilerCardinality.get_basic_column_cardinality(
-            num_unique, pct_unique
+        cardinality: OrderedProfilerCardinality = (
+            OrderedProfilerCardinality.get_basic_column_cardinality(
+                num_unique, pct_unique
+            )
         )
 
         return cardinality.name
