@@ -1,3 +1,4 @@
+import copy
 import json
 import logging
 from copy import deepcopy
@@ -27,6 +28,7 @@ from great_expectations.marshmallow__shade import (
     Schema,
     ValidationError,
     fields,
+    post_dump,
     post_load,
 )
 from great_expectations.types import SerializableDictDot
@@ -1381,6 +1383,16 @@ class ExpectationConfigurationSchema(Schema):
     meta = fields.Dict()
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(lambda: ExpectationContextSchema)
+
+    REMOVE_KEYS_IF_NONE = ["ge_cloud_id"]
+
+    @post_dump
+    def clean_null_attrs(self, data: dict, **kwargs):
+        data = copy.deepcopy(data)
+        for key in ExpectationConfigurationSchema.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
 
     # noinspection PyUnusedLocal
     @post_load
