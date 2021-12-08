@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import configparser
 import copy
 import datetime
@@ -3787,6 +3789,16 @@ class DataContext(BaseDataContext):
     Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
     """
 
+    _data_context = None
+
+    @classmethod
+    def get_data_context(cls) -> DataContext:
+        return cls._data_context
+
+    @classmethod
+    def set_data_context(cls, data_context: DataContext):
+        cls._data_context = data_context
+
     @classmethod
     def create(
         cls,
@@ -4048,6 +4060,7 @@ class DataContext(BaseDataContext):
             or project_config_dict != dataContextConfigSchema.dump(self._project_config)
         ):
             self._save_project_config()
+        DataContext.set_data_context(self)
 
     def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
         """
