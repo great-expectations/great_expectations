@@ -1,7 +1,8 @@
 import logging
 import os
-import unittest.mock as mock
-from typing import Union
+import unittest
+from typing import List, Union
+from unittest import mock
 
 import pandas as pd
 import pytest
@@ -79,8 +80,15 @@ def test_basic_checkpoint_config_validation(
             yaml_config=yaml_config_erroneous,
             name="my_erroneous_checkpoint",
         )
+
     assert mock_emit.call_count == 1
-    expected_call_args_list = [
+
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call]
+
+    expected_events = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
@@ -89,7 +97,8 @@ def test_basic_checkpoint_config_validation(
             }
         ),
     ]
-    assert mock_emit.call_args_list == expected_call_args_list
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     yaml_config_erroneous = f"""
     config_version: 1
@@ -106,21 +115,27 @@ def test_basic_checkpoint_config_validation(
             yaml_config=yaml_config_erroneous,
             name="my_erroneous_checkpoint",
         )
+
     assert mock_emit.call_count == 2
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.test_yaml_config",
-                    "event_payload": {
-                        "diagnostic_info": ["__class_name_not_provided__"]
-                    },
-                    "success": False,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     with pytest.raises(ge_exceptions.InvalidConfigError):
         # noinspection PyUnusedLocal
@@ -129,19 +144,34 @@ def test_basic_checkpoint_config_validation(
             name="my_erroneous_checkpoint",
             class_name="Checkpoint",
         )
+
     assert mock_emit.call_count == 3
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.test_yaml_config",
-                    "event_payload": {"parent_class": "Checkpoint"},
-                    "success": False,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"parent_class": "Checkpoint"},
+                "success": False,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     yaml_config_erroneous = f"""
     config_version: 1
@@ -169,26 +199,49 @@ def test_basic_checkpoint_config_validation(
             for message in [caplog.text, captured.out]
         ]
     )
+
     assert mock_emit.call_count == 4
+
     # Substitute anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[3][0][0]["event_payload"][
+    anonymized_name_0 = mock_emit.call_args_list[3][0][0]["event_payload"][
         "anonymized_name"
     ]
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.test_yaml_config",
-                    "event_payload": {
-                        "anonymized_name": anonymized_name,
-                        "parent_class": "Checkpoint",
-                    },
-                    "success": True,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"parent_class": "Checkpoint"},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name_0,
+                    "parent_class": "Checkpoint",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     assert len(context.list_checkpoints()) == 0
     context.add_checkpoint(**yaml.load(yaml_config_erroneous))
@@ -269,26 +322,59 @@ def test_basic_checkpoint_config_validation(
         )
         == expected_checkpoint_config
     )
+
     assert mock_emit.call_count == 5
+
     # Substitute anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[4][0][0]["event_payload"][
+    anonymized_name_1 = mock_emit.call_args_list[4][0][0]["event_payload"][
         "anonymized_name"
     ]
-    expected_call_args_list.extend(
-        [
-            mock.call(
-                {
-                    "event": "data_context.test_yaml_config",
-                    "event_payload": {
-                        "anonymized_name": anonymized_name,
-                        "parent_class": "Checkpoint",
-                    },
-                    "success": True,
-                }
-            ),
-        ]
-    )
-    assert mock_emit.call_args_list == expected_call_args_list
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"diagnostic_info": ["__class_name_not_provided__"]},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {"parent_class": "Checkpoint"},
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name_0,
+                    "parent_class": "Checkpoint",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name_1,
+                    "parent_class": "Checkpoint",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     assert len(context.list_checkpoints()) == 1
     context.add_checkpoint(**yaml.load(yaml_config))
@@ -420,11 +506,14 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
 
     # Test usage stats messages
     assert mock_emit.call_count == 1
+
     # Substitute current anonymized name since it changes for each run
     anonymized_checkpoint_name = mock_emit.call_args_list[0][0][0]["event_payload"][
         "anonymized_name"
     ]
-    assert mock_emit.call_args_list == [
+
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call] = [
         mock.call(
             {
                 "event": "data_context.test_yaml_config",
@@ -434,8 +523,11 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
                 },
                 "success": True,
             }
-        )
+        ),
     ]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     assert len(data_context.list_checkpoints()) == 0
     data_context.add_checkpoint(**yaml.load(yaml_config))
@@ -583,7 +675,11 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     assert len(data_context.list_checkpoints()) == 0
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_yaml_config(
+    mock_emit,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     checkpoint: Checkpoint
@@ -682,6 +778,124 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     assert len(result.list_validation_results()) == 1
     assert len(data_context.validations_store.list_keys()) == 1
     assert result.success
+
+    assert mock_emit.call_count == 6
+
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": "f563d9aa1604e16099bb7dff7b203319",
+                    "parent_class": "Checkpoint",
+                },
+                "success": True,
+            },
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "anonymized_batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "d52d7bff3226a7f94dd3510c1040de78",
+                        "anonymized_data_asset_name": "556e8c06239d09fc66f424eabb9ca491",
+                    },
+                    "batch_request_optional_top_level_keys": [
+                        "batch_identifiers",
+                        "runtime_parameters",
+                    ],
+                    "runtime_parameters_keys": ["batch_data"],
+                },
+                "success": True,
+            },
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.build_data_docs",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "f563d9aa1604e16099bb7dff7b203319",
+                    "config_version": 1.0,
+                    "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff",
+                    "anonymized_action_list": [
+                        {
+                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                            "parent_class": "StoreValidationResultAction",
+                        },
+                        {
+                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                            "parent_class": "StoreEvaluationParametersAction",
+                        },
+                        {
+                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                            "parent_class": "UpdateDataDocsAction",
+                        },
+                    ],
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "d52d7bff3226a7f94dd3510c1040de78",
+                                    "anonymized_data_asset_name": "556e8c06239d09fc66f424eabb9ca491",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "batch_identifiers",
+                                    "runtime_parameters",
+                                ],
+                                "runtime_parameters_keys": ["batch_data"],
+                            },
+                            "anonymized_expectation_suite_name": "6a04fc37da0d43a4c21429f6788d2cff",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                    ],
+                },
+                "success": True,
+            },
+        ),
+        mock.call(
+            {
+                "event": "data_context.run_checkpoint",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+    ]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert actual_events == expected_events
 
     data_context.delete_checkpoint(name="airflow_checkpoint")
     assert len(data_context.list_checkpoints()) == 0
@@ -1158,7 +1372,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object(
@@ -1213,7 +1427,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_pandasdf(
@@ -1271,7 +1485,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_sparkdf(
@@ -1330,10 +1544,14 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_pandasdf(
+    mock_emit,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     sa,
 ):
@@ -1402,7 +1620,264 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 2
-    assert results["success"] == True
+    assert results["success"]
+
+    assert mock_emit.call_count == 8
+
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call] = [
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
+                    "config_version": 1.0,
+                    "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                    "anonymized_action_list": [
+                        {
+                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                            "parent_class": "StoreValidationResultAction",
+                        },
+                        {
+                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                            "parent_class": "StoreEvaluationParametersAction",
+                        },
+                        {
+                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                            "parent_class": "UpdateDataDocsAction",
+                        },
+                    ],
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "batch_identifiers",
+                                    "data_connector_query",
+                                    "runtime_parameters",
+                                ],
+                                "runtime_parameters_keys": ["batch_data"],
+                            },
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "batch_identifiers",
+                                    "data_connector_query",
+                                    "runtime_parameters",
+                                ],
+                                "runtime_parameters_keys": ["batch_data"],
+                            },
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                    ],
+                },
+                "success": False,
+            },
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "anonymized_batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "d52d7bff3226a7f94dd3510c1040de78",
+                        "anonymized_data_asset_name": "7e60092b1b9b96327196fdba39029b9e",
+                    },
+                    "batch_request_optional_top_level_keys": [
+                        "batch_identifiers",
+                        "runtime_parameters",
+                    ],
+                    "runtime_parameters_keys": ["batch_data"],
+                },
+                "success": True,
+            },
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": True,
+            },
+        ),
+        mock.call(
+            {
+                "event": "data_context.build_data_docs",
+                "event_payload": {},
+                "success": True,
+            },
+        ),
+        mock.call(
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "anonymized_batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                        "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                    },
+                    "batch_request_optional_top_level_keys": [
+                        "batch_identifiers",
+                        "runtime_parameters",
+                    ],
+                    "runtime_parameters_keys": ["batch_data"],
+                },
+                "success": True,
+            },
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "__not_found__",
+                    "anonymized_datasource_name": "__not_found__",
+                },
+                "success": True,
+            },
+        ),
+        mock.call(
+            {
+                "event": "data_context.build_data_docs",
+                "event_payload": {},
+                "success": True,
+            },
+        ),
+        mock.call(
+            {
+                "event": "checkpoint.run",
+                "event_payload": {
+                    "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
+                    "config_version": 1.0,
+                    "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                    "anonymized_action_list": [
+                        {
+                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                            "parent_class": "StoreValidationResultAction",
+                        },
+                        {
+                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                            "parent_class": "StoreEvaluationParametersAction",
+                        },
+                        {
+                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                            "parent_class": "UpdateDataDocsAction",
+                        },
+                    ],
+                    "anonymized_validations": [
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "batch_identifiers",
+                                    "data_connector_query",
+                                    "runtime_parameters",
+                                ],
+                                "runtime_parameters_keys": ["batch_data"],
+                            },
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_batch_request": {
+                                "anonymized_batch_request_required_top_level_properties": {
+                                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                                },
+                                "batch_request_optional_top_level_keys": [
+                                    "batch_identifiers",
+                                    "data_connector_query",
+                                    "runtime_parameters",
+                                ],
+                                "runtime_parameters_keys": ["batch_data"],
+                            },
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                    ],
+                },
+                "success": True,
+            },
+        ),
+    ]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
+    assert actual_events == expected_events
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_sparkdf(
@@ -1477,7 +1952,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 2
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_query_in_validations(
@@ -1534,7 +2009,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_multiple_runtime_batch_request_query_in_validations(
@@ -1607,7 +2082,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_raise_error_when_run_when_missing_batch_request_and_validations(
@@ -1708,7 +2183,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_pandas(
@@ -1764,7 +2239,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_spark(
@@ -1822,7 +2297,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_pandas(
@@ -1886,7 +2361,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_spark(
@@ -1951,7 +2426,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_config_substitution_simple(
@@ -2549,7 +3024,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_pandas(
@@ -2604,7 +3079,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_spark(
@@ -2660,7 +3135,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_query_in_checkpoint_run(
@@ -2716,7 +3191,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_checkpoint_run_pandas(
@@ -2771,7 +3246,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_checkpoint_run_spark(
@@ -2827,7 +3302,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     results = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_pandas(
@@ -2892,7 +3367,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_spark(
@@ -2958,7 +3433,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_pandas(
@@ -3023,7 +3498,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_checkpoint_run_spark(
@@ -3089,7 +3564,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_context_run_checkpoint(
@@ -3149,7 +3624,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_context_run_checkpoint_pandas(
@@ -3208,7 +3683,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_context_run_checkpoint_spark(
@@ -3268,7 +3743,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_query_in_context_run_checkpoint(
@@ -3328,7 +3803,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_context_run_checkpoint_pandas(
@@ -3387,7 +3862,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_context_run_checkpoint_spark(
@@ -3447,7 +3922,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_pandas(
@@ -3514,7 +3989,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_spark(
@@ -3582,7 +4057,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_pandas(
@@ -3650,7 +4125,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_context_run_checkpoint_spark(
@@ -3719,7 +4194,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_data(
@@ -3949,7 +4424,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
     results = checkpoint.run(batch_request=runtime_batch_request)
-    assert results["success"] == True
+    assert results["success"]
     assert (
         list(results.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
@@ -4166,7 +4641,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     results = context.run_checkpoint(
         checkpoint_name="my_checkpoint", batch_request=runtime_batch_request
     )
-    assert results["success"] == True
+    assert results["success"]
     assert (
         list(results.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
