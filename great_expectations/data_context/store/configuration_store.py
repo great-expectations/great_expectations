@@ -63,8 +63,8 @@ class ConfigurationStore(Store):
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, TupleStoreBackend):
                 # Provide defaults for this common case
-                store_backend["filepath_template"] = store_backend.get(
-                    "filepath_template", "{0}.yml"
+                store_backend["filepath_suffix"] = store_backend.get(
+                    "filepath_suffix", ".yml"
                 )
 
         super().__init__(

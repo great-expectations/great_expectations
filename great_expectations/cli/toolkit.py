@@ -353,7 +353,9 @@ def select_datasource(
         data_sources: List[BaseDatasource] = cast(
             List[BaseDatasource],
             list(
-                sorted(context.datasources.values(), key=lambda x: x.name),
+                sorted(
+                    context.datasources.values(), key=lambda x: (len(x.name), x.name)
+                ),
             ),
         )
         if len(data_sources) == 0:
