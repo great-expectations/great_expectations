@@ -1,7 +1,6 @@
 import logging
 import math
 
-import numpy as np
 from dateutil.parser import parse
 
 from great_expectations.core import ExpectationSuite
@@ -21,6 +20,7 @@ from great_expectations.profile.base import (
     profiler_data_types_with_mapping,
     profiler_semantic_types,
 )
+from great_expectations.util import is_nan
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -731,7 +731,7 @@ class UserConfigurableProfiler:
             observed_min = profile_dataset.expect_column_min_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not self._is_nan(observed_min):
+            if not is_nan(observed_min):
 
                 profile_dataset.expect_column_min_to_be_between(
                     column,
@@ -756,7 +756,7 @@ class UserConfigurableProfiler:
             observed_max = profile_dataset.expect_column_max_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not self._is_nan(observed_max):
+            if not is_nan(observed_max):
                 profile_dataset.expect_column_max_to_be_between(
                     column,
                     min_value=observed_max,
@@ -780,7 +780,7 @@ class UserConfigurableProfiler:
             observed_mean = profile_dataset.expect_column_mean_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not self._is_nan(observed_mean):
+            if not is_nan(observed_mean):
                 profile_dataset.expect_column_mean_to_be_between(
                     column,
                     min_value=observed_mean,
@@ -804,7 +804,7 @@ class UserConfigurableProfiler:
             observed_median = profile_dataset.expect_column_median_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not self._is_nan(observed_median):
+            if not is_nan(observed_median):
 
                 profile_dataset.expect_column_median_to_be_between(
                     column,
@@ -1070,7 +1070,7 @@ class UserConfigurableProfiler:
                 ).result["observed_value"]
             )
 
-            if not self._is_nan(pct_unique):
+            if not is_nan(pct_unique):
                 profile_dataset.expect_column_proportion_of_unique_values_to_be_between(
                     column, min_value=pct_unique, max_value=pct_unique
                 )
@@ -1129,18 +1129,3 @@ class UserConfigurableProfiler:
             profile_dataset.expect_table_row_count_to_be_between(
                 min_value=min_value, max_value=max_value
             )
-
-    def _is_nan(self, value):
-        """
-        If value is an array, test element-wise for NaN and return result as a boolean array.
-        If value is a scalar, return boolean.
-        Args:
-            value: The value to test
-
-        Returns:
-            The results of the test
-        """
-        try:
-            return np.isnan(value)
-        except TypeError:
-            return True
