@@ -282,17 +282,12 @@ def main():
         tests_dependency_graph, relevant_files, changed_test_files
     )
 
-    test_count = 0
     for file in files_to_test:
         if any(file.startswith(path) for path in user_args.ignore):
             continue
         if user_args.filter and not file.startswith(user_args.filter):
             continue
-        test_count += 1
         print(file)
-
-    if test_count == 0:
-        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -161,7 +161,11 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              echo "Tests identified by dependency graph test runner [dgtr]:"
+              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtr
+              if [ -s .dgtr ]; then
+                cat .dgtr | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              fi
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -237,7 +241,11 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              echo "Tests identified by dependency graph test runner [dgtr]:"
+              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtr
+              if [ -s .dgtr ]; then
+                cat .dgtr | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              fi
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -299,7 +307,11 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics'| xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              echo "Tests identified by dependency graph test runner [dgtr]:"
+              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtr
+              if [ -s .dgtr ]; then
+                cat .dgtr | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              fi
             displayName: 'pytest'
 
       - job: mssql
@@ -331,7 +343,11 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              echo "Tests identified by dependency graph test runner [dgtr]:"
+              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtr
+              if [ -s .dgtr ]; then
+                cat .dgtr | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              fi
             displayName: 'pytest'
 
   - stage: cli_integration
@@ -371,5 +387,9 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines
-              python scripts/determine_tests_to_run.py --filter 'tests/cli' --depth 3 | pytest --aws-integration -v
+              echo "Tests identified by dependency graph test runner [dgtr]:"
+              python scripts/determine_tests_to_run.py --filter 'tests/cli' --depth 3 | tee .dgtr
+              if [ -s .dgtr ]; then
+                cat .dgtr | xargs pytest --aws-integration -v
+              fi
             displayName: 'pytest'
