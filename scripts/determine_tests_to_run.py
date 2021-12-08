@@ -239,10 +239,9 @@ def _get_user_args() -> argparse.Namespace:
         "--source",
         help="The relative path to your source files",
         default="great_expectations",
-        type=str,
     )
     parser.add_argument(
-        "--tests", help="The relative path to your tests", default="tests", type=str
+        "--tests", help="The relative path to your tests", default="tests"
     )
     parser.add_argument(
         "--depth", help="Maximum depth reached in graph traversal", default=3, type=int
@@ -252,6 +251,10 @@ def _get_user_args() -> argparse.Namespace:
         help="Exclude files that start with a given path prefix",
         default=[],
         nargs="+",
+    )
+    parser.add_argument(
+        "--filter",
+        help="Filter test runs by a given path prefix",
     )
     parser.add_argument(
         "--branch",
@@ -277,10 +280,18 @@ def main():
     files_to_test = determine_files_to_test(
         tests_dependency_graph, relevant_files, changed_test_files
     )
+
+    test_count = 0
     for file in files_to_test:
         if any(file.startswith(path) for path in user_args.ignore):
             continue
+        if user_args.filter and not file.startswith(user_args.filter):
+            continue
+        test_count += 1
         print(file)
+
+    if test_count == 0:
+        print("N/A")
 
 
 if __name__ == "__main__":
