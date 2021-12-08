@@ -10,7 +10,6 @@ from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 
 
-# MARKER
 @pytest.fixture
 @freeze_time("09/26/2019 13:42:41")
 def bobby_columnar_table_multi_batch():
@@ -669,8 +668,10 @@ def bobby_columnar_table_multi_batch():
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
+        # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
+        # called within a fixture, and we will prevent it from sending a usage_event.
         expected_expectation_suite_oneshot_sampling_method.add_expectation(
-            expectation_configuration
+            expectation_configuration, send_usage_event=False
         )
 
     yaml = YAML()

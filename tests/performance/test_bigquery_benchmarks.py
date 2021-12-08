@@ -9,6 +9,7 @@ import os
 import sys
 from collections.abc import Mapping
 from pathlib import Path
+from unittest import mock
 
 import _pytest.config
 import py.path
@@ -31,7 +32,11 @@ patch_https_connection_pool(taxi_benchmark_util.concurrency_config())
 )
 @pytest.mark.parametrize("write_data_docs", [False, True])
 @pytest.mark.parametrize("number_of_tables", [1, 2, 4, 8, 16, 100])
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_taxi_trips_benchmark(
+    mock_emit,
     benchmark: BenchmarkFixture,
     tmpdir: py.path.local,
     pytestconfig: _pytest.config.Config,
@@ -127,6 +132,45 @@ def test_taxi_trips_benchmark(
             _recursively_assert_actual_result_matches_expected_result_keys(
                 expected_result, actual_result, description_for_error_reporting
             )
+
+    assert mock_emit.call_count == 5
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        ),
+    ]
 
 
 def _recursively_assert_actual_result_matches_expected_result_keys(

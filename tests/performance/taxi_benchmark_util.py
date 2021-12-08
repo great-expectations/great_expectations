@@ -350,7 +350,6 @@ def _add_checkpoint(
         raise ValueError(f"Unsupported backend_api {backend_api}")
 
 
-# MARKER
 def _add_expectation_configuration(context: BaseDataContext, suite_name: str):
     suite = context.create_expectation_suite(expectation_suite_name=suite_name)
     suite.add_expectation(

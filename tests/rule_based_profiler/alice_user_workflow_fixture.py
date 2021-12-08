@@ -10,7 +10,6 @@ from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 
 
-# MARKER
 @pytest.fixture
 @freeze_time("09/26/2019 13:42:41")
 def alice_columnar_table_single_batch():
@@ -177,7 +176,9 @@ def alice_columnar_table_single_batch():
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
-        expected_expectation_suite.add_expectation(expectation_configuration)
+        # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
+        # called within a fixture, and we will prevent it from sending a usage_event.
+        expected_expectation_suite.add_expectation(expectation_configuration, send_usage_event=False)
 
     # NOTE that this expectation suite should fail when validated on the data in "sample_data_relative_path"
     # because the device_ts is ahead of the event_ts for the latest event
