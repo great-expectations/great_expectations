@@ -48,6 +48,7 @@ import ast
 import glob
 import os
 import subprocess
+import sys
 from collections import namedtuple
 from typing import Dict, List, Tuple
 
@@ -233,31 +234,61 @@ def determine_files_to_test(
     return sorted(res)
 
 
-def _get_user_args() -> int:
+def _get_user_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--depth", help="Maximum depth reached in graph traversal", required=True
+        "--source",
+        help="The relative path to your source files",
+        default="great_expectations",
     )
-    args = parser.parse_args()
-    depth = int(args.depth)
-    return depth
+    parser.add_argument(
+        "--tests", help="The relative path to your tests", default="tests"
+    )
+    parser.add_argument(
+        "--depth", help="Maximum depth reached in graph traversal", default=3, type=int
+    )
+    parser.add_argument(
+        "--ignore",
+        help="Exclude files that start with a given path prefix",
+        default=[],
+        nargs="+",
+    )
+    parser.add_argument(
+        "--filter",
+        help="Filter test runs by a given path prefix",
+    )
+    parser.add_argument(
+        "--branch",
+        help="The specific branch to diff against",
+        default="origin/develop",
+        type=str,
+    )
+    parsed = parser.parse_args()
+    return parsed
 
 
 def main():
-    depth = _get_user_args()
-    changed_source_files, changed_test_files = get_changed_files("origin/develop")
+    user_args = _get_user_args()
+    changed_source_files, changed_test_files = get_changed_files(user_args.branch)
 
-    ge_dependency_graph = create_dependency_graph("great_expectations")
+    ge_dependency_graph = create_dependency_graph(user_args.source)
     relevant_files = determine_relevant_source_files(
-        ge_dependency_graph, changed_source_files, depth=depth
+        ge_dependency_graph, changed_source_files, depth=user_args.depth
     )
 
     # TODO(cdkini): Parsing of conftest.py will need to eventually be added to this step to raise accuracy
-    tests_dependency_graph = create_dependency_graph("tests")
+    tests_dependency_graph = create_dependency_graph(user_args.tests)
     files_to_test = determine_files_to_test(
         tests_dependency_graph, relevant_files, changed_test_files
     )
+
     for file in files_to_test:
+        # Throw out files that are in our ignore list
+        if any(file.startswith(path) for path in user_args.ignore):
+            continue
+        # Throw out files that aren't explicitly part of a filter (if supplied)
+        if user_args.filter and not file.startswith(user_args.filter):
+            continue
         print(file)
 
 
