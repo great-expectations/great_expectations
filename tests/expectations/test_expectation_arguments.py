@@ -1,5 +1,6 @@
 import logging
 from typing import List
+from unittest import mock
 
 import pandas as pd
 import pytest
@@ -100,8 +101,12 @@ def test_spark_df(test_pandas_df, spark_session):
     return df
 
 
-# MARKER
-def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_catch_exceptions_no_exceptions(
+    mock_emit, in_memory_runtime_context, test_spark_df
+):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict = {
         "result_format": "SUMMARY",
@@ -205,6 +210,8 @@ def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df
     )
     result = validator.expect_table_row_count_to_equal(**expectation_parameters)
     assert result.success
+
+    assert mock_emit.call_count == 0
 
 
 def test_catch_exceptions_exception_occurred_catch_exceptions_false(
