@@ -66,14 +66,14 @@ def test_get_data_context_no_context_instantiated():
     """
     What does this test and why?
 
-    The get_data_context() and set_data_context() methods were added as part of PR #3812 which introduces a registry
-    for DataContext. This PR introduces a registry for DataContext so that it is accessible throughout GE. The next 3 tests test this functionality.
+    The get_data_context() and set_data_context() methods were added as part of PR #3812 and which introduces a registry
+    for BaseDataContext. This PR introduces a registry for DataContext so that it is accessible throughout GE. The next 3 tests test this functionality.
 
-    This test tests whether the correct error is raised if we try to retrieve a DataContext from a registry that has not been instantiated (set to None)
+    This test tests whether the correct error is raised if we try to retrieve a BaseDataContext from a registry that has not been instantiated (set to None)
     """
-    DataContext.set_data_context(None)
+    BaseDataContext.set_data_context(None)
     with pytest.raises(ge_exceptions.DataContextError) as e:
-        DataContext.get_data_context()
+        BaseDataContext.get_data_context()
 
     assert (
         "Could not retrieve DataContext from empty registry. Please instantiate DataContext before calling "
@@ -85,7 +85,7 @@ def test_get_data_context(titanic_data_context):
     """
     This test tests whether the registry contains the identical data_context to the only that was passed in as a param.
     """
-    my_data_context: DataContext = DataContext.get_data_context()
+    my_data_context: BaseDataContext = BaseDataContext.get_data_context()
     assert my_data_context is not None
     assert my_data_context is titanic_data_context
 
@@ -96,12 +96,12 @@ def test_set_data_context(
     """
     This test tests whether the registry contains only the most recent data_context object.
     """
-    my_data_context: DataContext = DataContext.get_data_context()
+    my_data_context: BaseDataContext = BaseDataContext.get_data_context()
     assert my_data_context is empty_data_context_with_config_variables
 
     # set as previous context
     DataContext.set_data_context(titanic_data_context)
-    my_data_context: DataContext = DataContext.get_data_context()
+    my_data_context: BaseDataContext = DataContext.get_data_context()
     assert my_data_context is titanic_data_context
 
 
