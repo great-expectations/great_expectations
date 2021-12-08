@@ -298,7 +298,7 @@ class DataAsset:
                 else:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite.add_expectation(
-                        expectation_config
+                        expectation_config, send_usage_event=False
                     )
 
                 if include_config:

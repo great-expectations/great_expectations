@@ -100,6 +100,7 @@ def test_spark_df(test_pandas_df, spark_session):
     return df
 
 
+# MARKER
 def test_catch_exceptions_no_exceptions(in_memory_runtime_context, test_spark_df):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict = {
@@ -317,6 +318,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     assert result.success
 
 
+# MARKER
 def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     in_memory_runtime_context, test_spark_df
 ):
@@ -460,6 +462,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
     ) or not result.exception_info["exception_message"]
 
 
+# MARKER
 def test_result_format_configured_no_set_default_override(
     in_memory_runtime_context, test_spark_df
 ):
@@ -686,6 +689,7 @@ def test_result_format_configured_no_set_default_override(
     assert result.result == {}
 
 
+# MARKER
 def test_result_format_configured_with_set_default_override(
     in_memory_runtime_context, test_spark_df
 ):
