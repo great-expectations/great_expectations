@@ -66,7 +66,7 @@ def test_get_data_context_no_context_instantiated():
     """
     What does this test and why?
 
-    The get_data_context() and set_data_context() methods were added as part of PR #3812 and which introduces a registry
+    The get_data_context() and set_data_context() methods were added as part of PR #3812 and #3819 which introduces a registry
     for BaseDataContext. This PR introduces a registry for DataContext so that it is accessible throughout GE. The next 3 tests test this functionality.
 
     This test tests whether the correct error is raised if we try to retrieve a BaseDataContext from a registry that has not been instantiated (set to None)
