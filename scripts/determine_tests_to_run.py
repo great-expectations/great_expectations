@@ -283,8 +283,10 @@ def main():
     )
 
     for file in files_to_test:
+        # Throw out files that are in our ignore list
         if any(file.startswith(path) for path in user_args.ignore):
             continue
+        # Throw out files that aren't explicitly part of a filter (if supplied)
         if user_args.filter and not file.startswith(user_args.filter):
             continue
         print(file)
