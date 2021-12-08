@@ -117,10 +117,10 @@ def get_import_paths(imports: List[Import]) -> List[str]:
             name = imp.name[0]
             # `from great_expectations import DataContext`
             if name == "DataContext":
-                path = "great_expectations/data_context/data_context.py"
+                path = "great_expectations/data_context/data_context"
             # `from great_expectations import exceptions as ge_exceptions`
             elif name == "exceptions":
-                path = "great_expectations/exceptions/exceptions.py"
+                path = "great_expectations/exceptions/exceptions"
             else:
                 continue
         else:
