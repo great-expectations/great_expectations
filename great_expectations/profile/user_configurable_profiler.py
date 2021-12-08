@@ -205,7 +205,9 @@ class UserConfigurableProfiler:
         """
         if len(self.profile_dataset.get_expectation_suite().expectations) > 0:
             # noinspection PyProtectedMember
-            suite_name = self.profile_dataset._expectation_suite.expectation_suite_name
+            suite_name: str = (
+                self.profile_dataset._expectation_suite.expectation_suite_name
+            )
             self.profile_dataset._expectation_suite = ExpectationSuite(suite_name)
 
         if self.semantic_types_dict:
@@ -225,6 +227,7 @@ class UserConfigurableProfiler:
             raise ValueError(
                 "A config with a semantic_types dict must be included in order to use this profiler."
             )
+
         self._build_expectations_table(self.profile_dataset)
 
         if self.value_set_threshold:
@@ -265,7 +268,9 @@ class UserConfigurableProfiler:
         expectation_suite = self._build_column_description_metadata(
             self.profile_dataset
         )
+
         self._display_suite_by_column(suite=expectation_suite)
+
         return expectation_suite
 
     def _profile_and_build_expectation_suite(self):
@@ -316,9 +321,11 @@ class UserConfigurableProfiler:
         expectation_suite = self._build_column_description_metadata(
             self.profile_dataset
         )
+
         self._display_suite_by_column(
             suite=expectation_suite
         )  # include in the actual profiler
+
         return expectation_suite
 
     def _validate_semantic_types_dict(self):
@@ -379,6 +386,7 @@ class UserConfigurableProfiler:
 {processed_column.get('type')}"""
                 elif semantic_type in ("STRING", "VALUE_SET"):
                     pass
+
         return self.semantic_types_dict
 
     def _add_column_type_to_column_info(self, profile_dataset, column_name):
@@ -482,6 +490,7 @@ class UserConfigurableProfiler:
                 kwargs={"column": column},
             )
         )
+
         return type_
 
     def _add_column_cardinality_to_column_info(self, profile_dataset, column_name):
@@ -721,6 +730,7 @@ class UserConfigurableProfiler:
             profile_dataset.expect_column_values_to_be_in_set(
                 column, value_set=value_set
             )
+
         return profile_dataset
 
     def _build_expectations_numeric(self, profile_dataset, column):
@@ -904,6 +914,7 @@ class UserConfigurableProfiler:
                     },
                     allow_relative_error=allow_relative_error,
                 )
+
         return profile_dataset
 
     def _build_expectations_primary_or_compound_key(self, profile_dataset, column_list):
@@ -930,6 +941,7 @@ class UserConfigurableProfiler:
             [column] = column_list
             if "expect_column_values_to_be_unique" not in self.excluded_expectations:
                 profile_dataset.expect_column_values_to_be_unique(column)
+
         return profile_dataset
 
     # noinspection PyUnusedLocal
@@ -952,6 +964,7 @@ class UserConfigurableProfiler:
         ):
 
             pass
+
         return profile_dataset
 
     def _build_expectations_datetime(self, profile_dataset, column):
@@ -1015,6 +1028,7 @@ class UserConfigurableProfiler:
                     max_value=max_value,
                     parse_strings_as_datetimes=True,
                 )
+
         return profile_dataset
 
     def _build_expectations_for_all_column_types(self, profile_dataset, column):
