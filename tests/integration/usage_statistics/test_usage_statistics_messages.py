@@ -7,6 +7,7 @@ import requests
 
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     GETTING_STARTED_DATASOURCE_NAME,
+    CLISuiteInteractiveFlagCombinations,
 )
 from great_expectations.data_context import BaseDataContext
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -1703,33 +1704,59 @@ valid_usage_statistics_messages = {
         message_stubs=[
             {
                 "event": "cli.suite.new",
-                "event_payload": {},
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e"
+                },
                 "ge_version": "0.11.9.manual_testing",
             },
             {
                 "event": "cli.suite.new",
-                "event_payload": {"api_version": "v2"},
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v2",
+                },
                 "ge_version": "0.13.0.manual_testing",
             },
             {
                 "event": "cli.suite.new",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v3",
+                },
                 "ge_version": "0.13.0.manual_testing",
             },
             {
                 "event": "cli.suite.new.begin",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v3",
+                },
                 "ge_version": "0.13.18.manual_testing",
             },
             {
                 "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v3",
+                },
                 "ge_version": "0.13.18.manual_testing",
             },
             {
                 "event": "cli.suite.new.end",
                 "success": False,
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v3",
+                },
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.new.end",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    **CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_TRUE.value,
+                    "api_version": "v3",
+                },
                 "ge_version": "0.13.18.manual_testing",
             },
         ],
@@ -1787,6 +1814,15 @@ valid_usage_statistics_messages = {
                 "success": False,
                 "event_payload": {
                     "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    "api_version": "v3",
+                },
+                "ge_version": "0.13.18.manual_testing",
+            },
+            {
+                "event": "cli.suite.edit.end",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "0604e6a8f5a1da77e0438aa3b543846e",
+                    **CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT.value,
                     "api_version": "v3",
                 },
                 "ge_version": "0.13.18.manual_testing",

@@ -218,6 +218,23 @@ def test_cli_new_ds_choice_message():
             )
 
 
+def test_cli_suite_new_message():
+    usage_stats_records_messages = [
+        "cli.suite.new",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            # record itself
+            jsonschema.validate(
+                message,
+                anonymized_usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                anonymized_cli_suite_expectation_suite_payload_schema,
+            )
+
+
 def test_cli_suite_edit_message():
     usage_stats_records_messages = [
         "cli.suite.edit",

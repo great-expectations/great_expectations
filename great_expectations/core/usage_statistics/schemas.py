@@ -5,6 +5,10 @@
 
 
 # An anonymized string *must* be an md5 hash, so must have exactly 32 characters
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    CLISuiteInteractiveFlagCombinations,
+)
+
 anonymized_string_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-string",
@@ -505,16 +509,57 @@ anonymized_cli_suite_expectation_suite_payload_schema = {
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
-        "anonymized_expectation_suite_name": {
-            "$ref": "#/definitions/anonymized_string"
+        "interactive_flag": {
+            "type": ["boolean", "null"],
+        },
+        "interactive_attribution": {
+            "enum": [
+                element.value["interactive_attribution"]
+                for element in CLISuiteInteractiveFlagCombinations
+            ],
         },
         "api_version": {"type": "string", "maxLength": 256},
         "cancelled": {
             "type": ["boolean", "null"],
         },
     },
-    "required": ["anonymized_expectation_suite_name"],
-    "additionalProperties": False,
+}
+
+anonymized_cli_suite_new_expectation_suite_payload_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-cli-suite-new-expectation-suite-payload",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_cli_suite_expectation_suite_payload": anonymized_cli_suite_expectation_suite_payload_schema,
+    },
+    "items": {
+        "$ref": "#/definitions/anonymized_cli_suite_expectation_suite_payload",
+        "properties": {
+            "anonymized_expectation_suite_name": {
+                "$ref": "#/definitions/anonymized_string"
+            },
+        },
+        "additionalProperties": False,
+    },
+}
+
+anonymized_cli_suite_edit_expectation_suite_payload_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-cli-suite-edit-expectation-suite-payload",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_cli_suite_expectation_suite_payload": anonymized_cli_suite_expectation_suite_payload_schema,
+    },
+    "items": {
+        "$ref": "#/definitions/anonymized_cli_suite_expectation_suite_payload",
+        "properties": {
+            "anonymized_expectation_suite_name": {
+                "$ref": "#/definitions/anonymized_string"
+            },
+        },
+        "required": ["anonymized_expectation_suite_name"],
+        "additionalProperties": False,
+    },
 }
 
 anonymized_cli_payload_schema = {
@@ -683,6 +728,8 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
         "anonymized_save_or_edit_expectation_suite_payload": anonymized_save_or_edit_expectation_suite_payload_schema,
         "anonymized_cli_suite_expectation_suite_payload": anonymized_cli_suite_expectation_suite_payload_schema,
+        "anonymized_cli_suite_new_expectation_suite_payload": anonymized_cli_suite_new_expectation_suite_payload_schema,
+        "anonymized_cli_suite_edit_expectation_suite_payload": anonymized_cli_suite_edit_expectation_suite_payload_schema,
         "anonymized_cli_payload": anonymized_cli_payload_schema,
         "anonymized_cli_new_ds_choice_payload": anonymized_cli_new_ds_choice_payload_schema,
         "anonymized_datasource_sqlalchemy_connect_payload": anonymized_datasource_sqlalchemy_connect_payload_schema,
@@ -807,13 +854,28 @@ anonymized_usage_statistics_record_schema = {
             "properties": {
                 "event": {
                     "enum": [
+                        "cli.suite.new",
+                        "cli.suite.new.begin",
+                        "cli.suite.new.end",
+                    ],
+                },
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_cli_suite_new_expectation_suite_payload"
+                },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": [
                         "cli.suite.edit",
                         "cli.suite.edit.begin",
                         "cli.suite.edit.end",
                     ],
                 },
                 "event_payload": {
-                    "$ref": "#/definitions/anonymized_cli_suite_expectation_suite_payload"
+                    "$ref": "#/definitions/anonymized_cli_suite_edit_expectation_suite_payload"
                 },
             },
         },
@@ -881,9 +943,6 @@ anonymized_usage_statistics_record_schema = {
                         "cli.suite.list",
                         "cli.suite.list.begin",
                         "cli.suite.list.end",
-                        "cli.suite.new",
-                        "cli.suite.new.begin",
-                        "cli.suite.new.end",
                         "cli.suite.scaffold",
                         "cli.validation_operator.list",
                         "cli.validation_operator.run",
