@@ -72,8 +72,13 @@ def test_get_data_context_no_context_instantiated():
     This test tests whether the correct error is raised if we try to retrieve a DataContext from a registry that has not been instantiated (set to None)
     """
     DataContext.set_data_context(None)
-    with pytest.raises(ge_exceptions.DataContextError):
+    with pytest.raises(ge_exceptions.DataContextError) as e:
         DataContext.get_data_context()
+
+    assert (
+        "Could not retrieve DataContext from empty registry. Please instantiate DataContext before calling "
+        "get_data_context()" in str(e.value)
+    )
 
 
 def test_get_data_context(titanic_data_context):
@@ -82,7 +87,7 @@ def test_get_data_context(titanic_data_context):
     """
     my_data_context: DataContext = DataContext.get_data_context()
     assert my_data_context is not None
-    assert my_data_context == titanic_data_context
+    assert my_data_context is titanic_data_context
 
 
 def test_set_data_context(
