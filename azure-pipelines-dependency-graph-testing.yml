@@ -160,6 +160,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
+              # NOTE(cdkini): This should eventually be run just once and stored in an Azure variable
               python scripts/determine_tests_to_run.py --depth 3 | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 

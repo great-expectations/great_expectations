@@ -3,16 +3,16 @@ Usage: `python determine_tests_to_run.py --depth <DEPTH>`
 Output: A list of '\n' delimited file paths that represent relevant test files to run
         (using `xargs`, we can feed in this list to `pytest` in our Azure config)
 
-This script is used in our Azure pipeline (azure-pipelines.yml) to determine which test files to run in CI/CD.
+This script is used in our Azure pipeline (azure-pipelines-dependency-graph-testing.yml) to determine which test files to run in CI/CD.
 Rather than test all tests each time, the test files that are selected are based on which source files have changed;
 the specific method in which this is done is explained in detail below.
 
 The script takes the following steps:
-    1. Determine which files have changed in the last commit (when compared to `develop`)
+    1. Determine which files have changed in the last commit (when compared to `origin/develop`)
     2. For each changed file, find which files depend on it (i.e. "relevant source files")
     3. For each relevant source file, determine the associated test files and run them.
 
-By determining which files are related to which other files, we're able to create a directed, acyclic graph from our codebase.
+By determining which files are related to which other files, we're able to create a directed graph from our codebase.
 
 Let's look at the following example:
   ```
@@ -20,7 +20,6 @@ Let's look at the following example:
   from great_expectations.checkpoint import Checkpoint
   from great_expectations.core.batch import Batch
   ```
-The module `data_context` depends on `checkpoint` and `batch` so the following links are created in the dependency graph:
   `checkpoint` --> `data_context`
   `batch` --> `data_context`
 Now that we know that `data_context`, `checkpoint`, and `batch` are strongly coupled, we want our testing strategy to reflect that.
@@ -139,7 +138,7 @@ def get_import_paths(imports: List[Import]) -> List[str]:
 
 def create_dependency_graph(directory: str) -> Dict[str, List[str]]:
     """
-    Traverse a given directory, parse all imports, and create a DAG linking source files to dependencies.
+    Traverse a given directory, parse all imports, and create a directed graph linking source files to dependencies.
 
     The output dictionary has the following structure:
       * key: the dependency or import in the current file
@@ -234,7 +233,7 @@ def determine_files_to_test(
     return sorted(res)
 
 
-def get_user_args() -> int:
+def _get_user_args() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--depth", help="Maximum depth reached in graph traversal", required=True
@@ -245,7 +244,7 @@ def get_user_args() -> int:
 
 
 def main():
-    depth = get_user_args()
+    depth = _get_user_args()
     changed_source_files, changed_test_files = get_changed_files("origin/develop")
 
     ge_dependency_graph = create_dependency_graph("great_expectations")
@@ -253,6 +252,7 @@ def main():
         ge_dependency_graph, changed_source_files, depth=depth
     )
 
+    # TODO(cdkini): Parsing of conftest.py will need to eventually be added to this step to raise accuracy
     tests_dependency_graph = create_dependency_graph("tests")
     files_to_test = determine_files_to_test(
         tests_dependency_graph, relevant_files, changed_test_files
