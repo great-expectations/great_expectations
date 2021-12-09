@@ -1,4 +1,3 @@
-# Test change
 import copy
 import os
 
@@ -166,7 +165,7 @@ def test_validate_invalid_parameters(
 
 
 def test_gen_directory_tree_str(tmpdir):
-    project_dir = tmpdir.mkdir("project_dir")
+    project_dir = str(tmpdir.mkdir("project_dir"))
     os.mkdir(os.path.join(project_dir, "BBB"))
     with open(os.path.join(project_dir, "BBB", "bbb.txt"), "w") as f:
         f.write("hello")
@@ -175,13 +174,14 @@ def test_gen_directory_tree_str(tmpdir):
 
     os.mkdir(os.path.join(project_dir, "AAA"))
 
-    print(ge.util.gen_directory_tree_str(project_dir))
+    res = ge.util.gen_directory_tree_str(project_dir)
+    print(res)
 
     # Note: files and directories are sorteds alphabetically, so that this method can be used for testing.
     assert (
-        ge.util.gen_directory_tree_str(project_dir)
+        res
         == """\
-project_dir0/
+project_dir/
     AAA/
     BBB/
         aaa.txt
