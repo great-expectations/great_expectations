@@ -1,4 +1,3 @@
-# Test change
 import atexit
 import copy
 import datetime
@@ -537,7 +536,7 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
 
 
 def send_usage_message(
-    data_context: "DataContext",  # noqa: F821
+    data_context,
     event: str,
     event_payload: Optional[dict] = None,
     success: Optional[bool] = None,

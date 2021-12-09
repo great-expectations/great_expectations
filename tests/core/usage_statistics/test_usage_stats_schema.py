@@ -1,4 +1,3 @@
-# Test change
 import jsonschema
 
 from great_expectations.core.usage_statistics.schemas import (
@@ -10,7 +9,6 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_datasource_schema,
     anonymized_datasource_sqlalchemy_connect_payload_schema,
     anonymized_init_payload_schema,
-    anonymized_legacy_profiler_build_suite_payload_schema,
     anonymized_save_or_edit_expectation_suite_payload_schema,
     anonymized_test_yaml_config_payload_schema,
     anonymized_usage_statistics_record_schema,
@@ -66,7 +64,6 @@ def test_comprehensive_list_of_messages():
         "data_context.test_yaml_config",
         "datasource.sqlalchemy.connect",
         "checkpoint.run",
-        "legacy_profiler.build_suite",
     }
 
 
@@ -158,23 +155,6 @@ def test_checkpoint_run_message():
             )
 
 
-def test_legacy_profiler_build_suite_message():
-    usage_stats_records_messages = [
-        "legacy_profiler.build_suite",
-    ]
-    for message_type in usage_stats_records_messages:
-        for message in valid_usage_statistics_messages[message_type]:
-            # record itself
-            jsonschema.validate(
-                message,
-                anonymized_usage_statistics_record_schema,
-            )
-            jsonschema.validate(
-                message["event_payload"],
-                anonymized_legacy_profiler_build_suite_payload_schema,
-            )
-
-
 def test_data_context_save_expectation_suite_message():
     usage_stats_records_messages = [
         "data_context.save_expectation_suite",
@@ -210,6 +190,7 @@ def test_datasource_sqlalchemy_connect_message():
 
 
 def test_cli_data_asset_validate():
+
     usage_stats_records_messages = [
         "data_asset.validate",
     ]
