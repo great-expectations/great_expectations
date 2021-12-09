@@ -389,30 +389,14 @@ class HtmlSiteStore:
                 __file__, os.path.join("..", "..", "render", "view", "static")
             )
 
-        # If `static_assets_source_absdir` contains the string ".zip/" (unix) or ".zip\" (win)
-        # then we check if Great Expectations has been installed inside a zip file (see PEP 273)
-        # If so, we need to extract all the static files and run this function again
-        static_assets_source_absdir = os.path.abspath(static_assets_source_dir)
-        zip_re = re.match(
-            f"(.+[.]zip){re.escape(os.sep)}(.+)",
-            static_assets_source_absdir,
-            flags=re.IGNORECASE,
-        )
-
-        if zip_re:
-            zip_filename = zip_re.groups()[0]  # e.g.: /home/joe/libs/my_python_libs.zip
-            path_in_zip = zip_re.groups()[1]  # great_expectations/render/view/static
-            unzip_destination = tempfile.mkdtemp()
-
-            if is_zipfile(zip_filename):
-                with ZipFile(zip_filename) as zipfile:
-                    static_files_to_extract = [
-                        file
-                        for file in zipfile.namelist()
-                        if file.startswith(path_in_zip)
-                    ]
-                    zipfile.extractall(unzip_destination, static_files_to_extract)
-                return self.copy_static_assets(unzip_destination)
+        # If `static_assets_source_absdir` contains the string ".zip", then we try to extract (unzip)
+        # the static files. If the unzipping is successful, that means that Great Expectations is
+        # installed into a zip file (see PEP 273) and we need to run this function again
+        if ".zip" in static_assets_source_dir.lower():
+            unzip_destdir = tempfile.mkdtemp()
+            unzipped_ok = self._unzip_assets(static_assets_source_dir, unzip_destdir)
+            if unzipped_ok:
+                return self.copy_static_assets(unzip_destdir)
 
         for item in os.listdir(static_assets_source_dir):
             # Directory
@@ -456,6 +440,40 @@ class HtmlSiteStore:
                             content_encoding=content_encoding,
                             content_type=content_type,
                         )
+
+    def _unzip_assets(self, assets_full_path: str, unzip_directory: str) -> bool:
+        """
+        This function receives an `assets_full_path` parameter,
+        (e.g. "/home/joe/libs/my_python_libs.zip/great_expectations/render/view/static")
+        and an `unzip_directory` parameter (e.g. "/tmp/extract_statics_here")
+
+        If `assets_full_path` is a folder inside a zip, then said folder is extracted
+        (unzipped) to the `unzip_directory` and this function returns True.
+        Otherwise, this function returns False
+        """
+
+        static_assets_source_absdir = os.path.abspath(assets_full_path)
+
+        zip_re = re.match(
+            f"(.+[.]zip){re.escape(os.sep)}(.+)",
+            static_assets_source_absdir,
+            flags=re.IGNORECASE,
+        )
+
+        if zip_re:
+            zip_filename = zip_re.groups()[0]  # e.g.: /home/joe/libs/my_python_libs.zip
+            path_in_zip = zip_re.groups()[1]  # great_expectations/render/view/static
+            if is_zipfile(zip_filename):
+                with ZipFile(zip_filename) as zipfile:
+                    static_files_to_extract = [
+                        file
+                        for file in zipfile.namelist()
+                        if file.startswith(path_in_zip)
+                    ]
+                    zipfile.extractall(unzip_directory, static_files_to_extract)
+                return True
+
+        return False
 
     @property
     def config(self) -> dict:
