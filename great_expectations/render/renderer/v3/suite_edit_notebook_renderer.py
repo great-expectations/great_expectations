@@ -153,15 +153,17 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         default_file_name: str,
         **default_kwargs,
     ):
+        template: jinja2.Template
         rendered: str
         if notebook_config:
-            rendered = self.template_env.get_template(
-                name=notebook_config.file_name
-            ).render(**{**default_kwargs, **notebook_config.template_kwargs})
-        else:
-            rendered = self.template_env.get_template(name=default_file_name).render(
-                **default_kwargs
+            template = self.template_env.get_template(name=notebook_config.file_name)
+            rendered = template.render(
+                **{**default_kwargs, **notebook_config.template_kwargs}
             )
+        else:
+            template = self.template_env.get_template(name=default_file_name)
+            rendered = template.render(**default_kwargs)
+
         return rendered
 
     def add_header(
