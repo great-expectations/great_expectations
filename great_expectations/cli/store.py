@@ -3,6 +3,7 @@ import click
 from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
+from great_expectations.core.usage_statistics.util import send_usage_message
 
 
 @click.group()
@@ -20,9 +21,9 @@ def store(ctx):
     ctx.obj.data_context = context
 
     usage_stats_prefix = f"cli.store.{ctx.invoked_subcommand}"
-    toolkit.send_usage_message(
-        data_context=context,
+    send_usage_message(
         event=f"{usage_stats_prefix}.begin",
+        data_context=context,
         success=True,
     )
     ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
@@ -41,8 +42,10 @@ def store_list(ctx):
             cli_message("")
             cli_message_dict(store)
 
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=True
+        send_usage_message(
+            event=usage_event_end,
+            data_context=context,
+            success=True,
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
