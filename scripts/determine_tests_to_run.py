@@ -278,18 +278,26 @@ def main():
 
     # TODO(cdkini): Parsing of conftest.py will need to eventually be added to this step to raise accuracy
     tests_dependency_graph = create_dependency_graph(user_args.tests)
-    files_to_test = determine_files_to_test(
+    test_candidates = determine_files_to_test(
         tests_dependency_graph, relevant_files, changed_test_files
     )
 
-    for file in files_to_test:
+    files_to_test = []
+    for file in test_candidates:
         # Throw out files that are in our ignore list
         if any(file.startswith(path) for path in user_args.ignore):
             continue
         # Throw out files that aren't explicitly part of a filter (if supplied)
         if user_args.filter and not file.startswith(user_args.filter):
             continue
-        print(file)
+        files_to_test.append(file)
+
+    if len(files_to_test) == 0:
+        # Return code is important as it let's us know whether or not to pipe to pytest
+        sys.exit(1)
+
+    # If we successfully get here, the return code is 0 and the output files are tested
+    print("\n".join(files_to_test))
 
 
 if __name__ == "__main__":
