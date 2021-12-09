@@ -536,7 +536,7 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
 
 
 def send_usage_message(
-    data_context,
+    data_context: "DataContext",  # noqa: F821
     event: str,
     event_payload: Optional[dict] = None,
     success: Optional[bool] = None,

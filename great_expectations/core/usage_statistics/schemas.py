@@ -831,6 +831,17 @@ anonymized_usage_statistics_record_schema = {
             "type": "object",
             "properties": {
                 "event": {
+                    "enum": [
+                        "expectation_suite.add_expectation",
+                    ],
+                },
+                "event_payload": {"$ref": "#/definitions/empty_payload"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
                     "enum": ["data_context.test_yaml_config"],
                 },
                 "event_payload": {

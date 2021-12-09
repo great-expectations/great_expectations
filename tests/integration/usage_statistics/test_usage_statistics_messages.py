@@ -2306,6 +2306,19 @@ valid_usage_statistics_messages = {
             },
         ],
     ),
+    "expectation_suite.add_expectation": [
+        {
+            "event_payload": {},
+            "event": "expectation_suite.add_expectation",
+            "success": True,
+            "version": "1.0.0",
+            "event_time": "2020-06-25T16:08:28.070Z",
+            "data_context_id": "00000000-0000-0000-0000-000000000002",
+            "data_context_instance_id": "10000000-0000-0000-0000-000000000002",
+            "ge_version": "0.13.18.manual_testing",
+            "x-forwarded-for": "00.000.00.000, 00.000.000.000",
+        }
+    ],
 }
 
 test_messages = []
