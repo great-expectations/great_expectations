@@ -4,6 +4,29 @@ title: Changelog
 
 ### Develop
 
+### 0.13.46
+* [FEATURE] Instrument Runtime DataConnector for Usage Statistics: Add "checkpoint.run" Event Schema (#3797)
+* [FEATURE] Add suite creation type field to CLI SUITE "new" and "edit" Usage Statistics events (#3810)
+* [FEATURE] [EXPERIMENTAL] Dependency graph based testing strategy and related pipeline (#3738, #3815, #3818)
+* [FEATURE] BaseDataContext registry (#3812, #3819)
+* [FEATURE] Add usage statistics instrumentation to Legacy UserConfigurableProfiler execution (#3828)
+* [BUGFIX] CheckpointConfig.__deepcopy__() must copy all fields, including the null-valued fields (#3793)
+* [BUGFIX] Fix issue where configuration store didn't allow nesting (#3811)
+* [BUGFIX] Fix Minor Bugs in and Clean Up UserConfigurableProfiler (#3822)
+* [BUGFIX] Ensure proper replacement of nulls in Jupyter Notebooks (#3782)
+* [BUGFIX] Fix issue where configuration store didn't allow nesting (#3811)
+* [DOCS] Clean up TOC (#3783)
+* [DOCS] Update Checkpoint and Actions Reference with testing (#3787)
+* [DOCS] Update How to install Great Expectations locally (#3805)
+* [DOCS] How to install Great Expectations in a hosted environment (#3808)
+* [MAINTENANCE] Make BatchData Serialization More Robust (#3791)
+* [MAINTENANCE] Refactor SiteIndexBuilder.build() (#3789)
+* [MAINTENANCE] Update ref to ge-cla-bot in PR template (#3799)
+* [MAINTENANCE] Anonymizer clean up and refactor (#3801)
+* [MAINTENANCE] Certify the expectation "expect_table_row_count_to_equal_other_table" for V3 API (#3803)
+* [MAINTENANCE] Refactor to enable broader use of event emitting method for usage statistics (#3825)
+* [MAINTENANCE] Clean up temp file after CI/CD run (#3823)
+
 ### 0.13.45
 * [FEATURE] Feature/render validation metadata (#3397) (thanks @vshind1)
 * [FEATURE] Added expectation expect_column_values_to_not_contain_special_characters() (#2849, #3771) (thanks @jaibirsingh)
