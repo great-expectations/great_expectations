@@ -188,9 +188,9 @@ def test_get_changed_source_files(diffed_files):
 
 def test_get_changed_test_files(diffed_files):
     res = get_changed_test_files(files=diffed_files, tests_path="tests")
-    assert res == [
-        "tests/integration/test_script_runner.py",
+    assert sorted(res) == [
         "tests/datasource/test_datasource.py",
+        "tests/integration/test_script_runner.py",
     ]
 
 
@@ -254,29 +254,29 @@ from great_expectations import exceptions as ge_exceptions
 
 def test_get_import_paths(parsed_imports):
     paths = get_import_paths(parsed_imports)
-    assert paths == [
-        "great_expectations/checkpoint/checkpoint.py",
-        "great_expectations/checkpoint/util.py",
-        "great_expectations/checkpoint/actions.py",
+    assert sorted(paths) == [
         "great_expectations/checkpoint/__init__.py",
+        "great_expectations/checkpoint/__init__.py",
+        "great_expectations/checkpoint/__init__.py",
+        "great_expectations/checkpoint/actions.py",
+        "great_expectations/checkpoint/actions.py",
+        "great_expectations/checkpoint/actions.py",
+        "great_expectations/checkpoint/checkpoint.py",
+        "great_expectations/checkpoint/checkpoint.py",
+        "great_expectations/checkpoint/checkpoint.py",
+        "great_expectations/checkpoint/configurator.py",
+        "great_expectations/checkpoint/configurator.py",
         "great_expectations/checkpoint/configurator.py",
         "great_expectations/checkpoint/types/__init__.py",
-        "great_expectations/checkpoint/types/checkpoint_result.py",
-        "great_expectations/checkpoint/checkpoint.py",
-        "great_expectations/checkpoint/util.py",
-        "great_expectations/checkpoint/actions.py",
-        "great_expectations/checkpoint/__init__.py",
-        "great_expectations/checkpoint/configurator.py",
         "great_expectations/checkpoint/types/__init__.py",
-        "great_expectations/checkpoint/types/checkpoint_result.py",
-        "great_expectations/checkpoint/checkpoint.py",
-        "great_expectations/checkpoint/util.py",
-        "great_expectations/checkpoint/actions.py",
-        "great_expectations/checkpoint/__init__.py",
-        "great_expectations/checkpoint/configurator.py",
         "great_expectations/checkpoint/types/__init__.py",
         "great_expectations/checkpoint/types/checkpoint_result.py",
         "great_expectations/checkpoint/types/checkpoint_result.py",
+        "great_expectations/checkpoint/types/checkpoint_result.py",
+        "great_expectations/checkpoint/types/checkpoint_result.py",
+        "great_expectations/checkpoint/util.py",
+        "great_expectations/checkpoint/util.py",
+        "great_expectations/checkpoint/util.py",
         "great_expectations/core/batch.py",
         "great_expectations/core/batch.py",
         "great_expectations/core/batch.py",
