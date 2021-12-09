@@ -153,6 +153,7 @@ stages:
               if [ -s .dgtr ]; then
                 cat .dgtr | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
               fi
+              rm .dgtr
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -219,6 +220,7 @@ stages:
               if [ -s .dgtr ]; then
                 cat .dgtr | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
               fi
+              rm .dgtr
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -285,6 +287,7 @@ stages:
               if [ -s .dgtr ]; then
                 cat .dgtr | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
               fi
+              rm .dgtr
             displayName: 'pytest'
 
       - job: mssql
@@ -321,6 +324,7 @@ stages:
               if [ -s .dgtr ]; then
                 cat .dgtr | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
               fi
+              rm .dgtr
             displayName: 'pytest'
 
   - stage: cli_integration
@@ -365,4 +369,5 @@ stages:
               if [ -s .dgtr ]; then
                 cat .dgtr | xargs pytest --aws-integration -v
               fi
+              rm .dgtr
             displayName: 'pytest'
