@@ -6,6 +6,7 @@ from dateutil.parser import parse
 from tqdm.auto import tqdm
 
 from great_expectations.core import ExpectationSuite
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.dataset import Dataset, PandasDataset
@@ -106,7 +107,7 @@ class UserConfigurableProfiler:
         """
         self.column_info = {}
         self.profile_dataset = profile_dataset
-        assert isinstance(self.profile_dataset, (Dataset, Validator, Batch))
+        assert isinstance(self.profile_dataset, (Batch, Dataset, Validator))
 
         if isinstance(self.profile_dataset, Batch):
             self.profile_dataset = Validator(
@@ -203,6 +204,7 @@ class UserConfigurableProfiler:
             An expectation suite built either with or without a semantic_types dict
 
         """
+        expectation_suite: ExpectationSuite
         if len(self.profile_dataset.get_expectation_suite().expectations) > 0:
             # noinspection PyProtectedMember
             suite_name: str = (
@@ -211,9 +213,31 @@ class UserConfigurableProfiler:
             self.profile_dataset._expectation_suite = ExpectationSuite(suite_name)
 
         if self.semantic_types_dict:
-            return self._build_expectation_suite_from_semantic_types_dict()
+            expectation_suite = self._build_expectation_suite_from_semantic_types_dict()
+        else:
+            expectation_suite = self._profile_and_build_expectation_suite()
 
-        return self._profile_and_build_expectation_suite()
+        self._send_usage_stats_message()
+
+        return expectation_suite
+
+    def _send_usage_stats_message(self):
+        event_payload: dict = {
+            "profile_dataset_type": str(type(self.profile_dataset)),
+            "excluded_expectations_specified": self.excluded_expectations and isinstance(self.excluded_expectations, list),
+            "ignored_columns_specified": self.ignored_columns and isinstance(self.ignored_columns, list),
+            "not_null_only": self.not_null_only,
+            "primary_or_compound_key_specified": self.primary_or_compound_key and isinstance(self.primary_or_compound_key, list),
+            "semantic_types_dict_specified": self.semantic_types_dict and isinstance(self.semantic_types_dict, dict),
+            "table_expectations_only": self.table_expectations_only,
+            "value_set_threshold_specified": self.value_set_threshold and isinstance(self.value_set_threshold, str),
+        }
+        send_usage_message(
+            event="legacy_profiler.build_suite",
+            event_payload=event_payload,
+            api_version="v2",
+            success=True,
+        )
 
     def _build_expectation_suite_from_semantic_types_dict(self):
         """
