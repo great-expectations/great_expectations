@@ -253,6 +253,10 @@ def determine_test_candidates(
 def determine_tests_to_run(
     test_candidates: List[str], ignore_paths: List[str], filter: Optional[str]
 ) -> List[str]:
+    """
+    Applies a number of filters to a list of test candidates in order to determine
+    the final output to be fed to pytest.
+    """
     files_to_test = []
     for file in test_candidates:
         # Throw out files that are in our ignore list
