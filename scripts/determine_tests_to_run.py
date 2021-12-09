@@ -50,12 +50,14 @@ import os
 import subprocess
 import sys
 from collections import namedtuple
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 Import = namedtuple("Import", ["source", "module", "name", "alias"])
 
 
-def get_changed_files(branch: str) -> Tuple[List[str], List[str]]:
+def get_changed_files(
+    branch: str, source_path: str, tests_path: str
+) -> Tuple[List[str], List[str]]:
     """
     Standard git diff against a given branch to determine list of changed files.
 
@@ -65,9 +67,22 @@ def get_changed_files(branch: str) -> Tuple[List[str], List[str]]:
         ["git", "diff", "HEAD", branch, "--name-only"], stdout=subprocess.PIPE
     )
     files = [f.decode("utf-8") for f in process.stdout.splitlines()]
-    test_files = [f for f in files if f.startswith("tests")]
-    source_files = [f for f in files if f.startswith("great_expectations")]
+    source_files = get_changed_source_files(files, source_path)
+    test_files = get_changed_test_files(files, tests_path)
     return source_files, test_files
+
+
+def get_changed_source_files(files: List[str], source_path: str) -> List[str]:
+    return [f for f in files if f.startswith(source_path) and f.endswith(".py")]
+
+
+def get_changed_test_files(files: List[str], tests_path: str) -> List[str]:
+    valid_test = (
+        lambda f: f.startswith(tests_path)
+        and f.endswith(".py")
+        and f.split("/")[-1].startswith("test_")
+    )
+    return [f for f in files if valid_test(f)]
 
 
 def parse_imports(path: str) -> List[Import]:
@@ -212,7 +227,7 @@ def determine_relevant_source_files(
     return sorted(res)
 
 
-def determine_files_to_test(
+def determine_test_candidates(
     tests_dependency_graph: Dict[str, List[str]],
     source_files: List[str],
     changed_test_files: List[str],
@@ -232,6 +247,21 @@ def determine_files_to_test(
             if test_filename.startswith("test_"):
                 res.add(test)
     return sorted(res)
+
+
+def determine_tests_to_run(
+    test_candidates: List[str], ignore_paths: List[str], filter: Optional[str]
+) -> List[str]:
+    files_to_test = []
+    for file in test_candidates:
+        # Throw out files that are in our ignore list
+        if any(file.startswith(path) for path in ignore_paths):
+            continue
+        # Throw out files that aren't explicitly part of a filter (if supplied)
+        if filter and not file.startswith(filter):
+            continue
+        files_to_test.append(file)
+    return files_to_test
 
 
 def _get_user_args() -> argparse.Namespace:
@@ -269,7 +299,9 @@ def _get_user_args() -> argparse.Namespace:
 
 def main():
     user_args = _get_user_args()
-    changed_source_files, changed_test_files = get_changed_files(user_args.branch)
+    changed_source_files, changed_test_files = get_changed_files(
+        user_args.branch, user_args.source, user_args.tests
+    )
 
     ge_dependency_graph = create_dependency_graph(user_args.source)
     relevant_files = determine_relevant_source_files(
@@ -278,20 +310,13 @@ def main():
 
     # TODO(cdkini): Parsing of conftest.py will need to eventually be added to this step to raise accuracy
     tests_dependency_graph = create_dependency_graph(user_args.tests)
-    test_candidates = determine_files_to_test(
+    test_candidates = determine_test_candidates(
         tests_dependency_graph, relevant_files, changed_test_files
     )
 
-    files_to_test = []
-    for file in test_candidates:
-        # Throw out files that are in our ignore list
-        if any(file.startswith(path) for path in user_args.ignore):
-            continue
-        # Throw out files that aren't explicitly part of a filter (if supplied)
-        if user_args.filter and not file.startswith(user_args.filter):
-            continue
-        files_to_test.append(file)
-
+    files_to_test = determine_tests_to_run(
+        test_candidates, user_args.ignore, user_args.filter
+    )
     if len(files_to_test) == 0:
         # Return code is important as it let's us know whether or not to pipe to pytest
         sys.exit(1)
