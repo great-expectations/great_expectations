@@ -1,5 +1,3 @@
-import configparser
-import copy
 import datetime
 import errno
 import itertools
@@ -17,7 +15,7 @@ from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 import requests
 from dateutil.parser import parse
-from ruamel.yaml import YAML, YAMLError
+from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
@@ -109,7 +107,6 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import (
     filter_properties_dict,
-    silence_progress_bars,
     verify_dynamic_loading_support,
 )
 from great_expectations.validator.validator import BridgeValidator, Validator
@@ -409,7 +406,6 @@ class BaseDataContext:
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
-        BaseDataContext.set_data_context(self)
 
     @property
     def ge_cloud_config(self):
@@ -3808,20 +3804,6 @@ class DataContext(BaseDataContext):
     Similarly, if no expectation suite name is provided, the DataContext will assume the name "default".
     """
 
-    _data_context = None
-
-    @classmethod
-    def get_data_context(cls) -> "DataContext":
-        if cls._data_context is None:
-            raise DataContextError(
-                f"Could not retrieve DataContext from empty registry. Please instantiate DataContext before calling get_data_context()."
-            )
-        return cls._data_context
-
-    @classmethod
-    def set_data_context(cls, data_context: "DataContext"):
-        cls._data_context = data_context
-
     @classmethod
     def create(
         cls,
@@ -4075,9 +4057,6 @@ class DataContext(BaseDataContext):
             ge_cloud_mode=ge_cloud_mode,
             ge_cloud_config=ge_cloud_config,
         )
-
-        if self.progress_bars and not self.progress_bars["enabled"]:
-            silence_progress_bars()
 
         # save project config if data_context_id auto-generated or global config values applied
         project_config_dict = dataContextConfigSchema.dump(project_config)

@@ -1083,12 +1083,21 @@ class NotebooksConfigSchema(Schema):
 
 
 class ProgressBarsConfig(DictDot):
-    def __init__(self, enabled: bool = True):
-        self._enabled = enabled
+    def __init__(
+        self,
+        globally: bool = True,
+        profilers: bool = True,
+        metric_calculations: bool = True,
+    ):
+        self._globally = globally
+        self._profilers = profilers
+        self._metric_calculations = metric_calculations
 
 
 class ProgressBarsConfigSchema(Schema):
-    enabled = fields.Boolean(default=True)
+    globally = fields.Boolean(default=True)
+    profilers = fields.Boolean(default=True)
+    metric_calculations = fields.Boolean(default=True)
 
 
 class ConcurrencyConfig(DictDot):
