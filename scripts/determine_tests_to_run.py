@@ -270,7 +270,6 @@ def _get_user_args() -> argparse.Namespace:
 def main():
     user_args = _get_user_args()
     changed_source_files, changed_test_files = get_changed_files(user_args.branch)
-    changed_source_files = ["great_expectations/data_context/data_context.py"]
 
     ge_dependency_graph = create_dependency_graph(user_args.source)
     relevant_files = determine_relevant_source_files(
@@ -294,10 +293,10 @@ def main():
         files_to_test.append(file)
 
     if len(files_to_test) == 0:
-        sys.exit(
-            1
-        )  # Return code is important as it let's us know whether or not to pipe to pytest
+        # Return code is important as it let's us know whether or not to pipe to pytest
+        sys.exit(1)
 
+    # If we successfully get here, the return code is 0 and the output files are tested
     print("\n".join(files_to_test))
 
 
