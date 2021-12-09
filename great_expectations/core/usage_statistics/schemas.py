@@ -927,7 +927,9 @@ anonymized_usage_statistics_record_schema = {
                 "event": {
                     "enum": ["legacy_profiler.build_suite"],
                 },
-                "event_payload": {"$ref": "#/definitions/anonymized_legacy_profiler_build_suite_payload"},
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_legacy_profiler_build_suite_payload"
+                },
             },
         },
         {
