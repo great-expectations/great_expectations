@@ -14,7 +14,7 @@ title: Changelog
 * [BUGFIX] Fix issue where configuration store didn't allow nesting (#3811)
 * [BUGFIX] Fix Minor Bugs in and Clean Up UserConfigurableProfiler (#3822)
 * [BUGFIX] Ensure proper replacement of nulls in Jupyter Notebooks (#3782)
-* * [BUGFIX] Fix issue where configuration store didn't allow nesting (#3811)
+* [BUGFIX] Fix issue where configuration store didn't allow nesting (#3811)
 * [DOCS] Clean up TOC (#3783)
 * [DOCS] Update Checkpoint and Actions Reference with testing (#3787)
 * [DOCS] Update How to install Great Expectations locally (#3805)
