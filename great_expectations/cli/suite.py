@@ -20,6 +20,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
@@ -50,9 +51,9 @@ def suite(ctx):
     ctx.obj.data_context = context
 
     usage_stats_prefix = f"cli.suite.{ctx.invoked_subcommand}"
-    toolkit.send_usage_message(
-        data_context=context,
+    send_usage_message(
         event=f"{usage_stats_prefix}.begin",
+        data_context=context,
         success=True,
     )
     ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
@@ -195,9 +196,9 @@ def _process_suite_new_flags_and_prompt(
 
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
-        toolkit.send_usage_message(
-            data_context=context,
+        send_usage_message(
             event=usage_event_end,
+            data_context=context,
             event_payload=interactive_mode.value,
             success=False,
         )
@@ -353,9 +354,9 @@ def _suite_new_workflow(
             batch_request=batch_request,
         )
 
-        toolkit.send_usage_message(
-            data_context=context,
+        send_usage_message(
             event=usage_event,
+            data_context=context,
             event_payload=interactive_mode.value,
             success=True,
         )
@@ -388,17 +389,17 @@ def _suite_new_workflow(
         SQLAlchemyError,
     ) as e:
         cli_message(string=f"<red>{e}</red>")
-        toolkit.send_usage_message(
-            data_context=context,
+        send_usage_message(
             event=usage_event,
+            data_context=context,
             event_payload=interactive_mode.value,
             success=False,
         )
         sys.exit(1)
     except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context,
+        send_usage_message(
             event=usage_event,
+            data_context=context,
             event_payload=interactive_mode.value,
             success=False,
         )
@@ -561,9 +562,9 @@ options can be used.
 
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
-        toolkit.send_usage_message(
-            data_context=context,
+        send_usage_message(
             event=usage_event_end,
+            data_context=context,
             event_payload=interactive_mode.value,
             success=False,
         )
@@ -757,9 +758,9 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         )
 
         if not suppress_usage_message:
-            toolkit.send_usage_message(
-                data_context=context,
+            send_usage_message(
                 event=usage_event,
+                data_context=context,
                 event_payload=payload,
                 success=True,
             )
@@ -776,9 +777,9 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
     ) as e:
         cli_message(string=f"<red>{e}</red>")
         if not suppress_usage_message:
-            toolkit.send_usage_message(
-                data_context=context,
+            send_usage_message(
                 event=usage_event,
+                data_context=context,
                 event_payload=interactive_mode.value,
                 success=False,
             )
@@ -786,9 +787,9 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
     except Exception as e:
         if not suppress_usage_message:
-            toolkit.send_usage_message(
-                data_context=context,
+            send_usage_message(
                 event=usage_event,
+                data_context=context,
                 event_payload=interactive_mode.value,
                 success=False,
             )
@@ -802,8 +803,10 @@ def suite_demo(ctx):
     """This command is not supported in the v3 (Batch Request) API."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
-    toolkit.send_usage_message(
-        data_context=context, event=usage_event_end, success=True
+    send_usage_message(
+        event=usage_event_end,
+        data_context=context,
+        success=True,
     )
     cli_message(
         string="This command is not supported in the v3 (Batch Request) API. Please use `suite new` instead."
@@ -823,8 +826,10 @@ def suite_delete(ctx, suite):
     try:
         suite_names: List[str] = context.list_expectation_suite_names()
     except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=False
+        send_usage_message(
+            event=usage_event_end,
+            data_context=context,
+            success=False,
         )
         raise e
     if not suite_names:
@@ -854,8 +859,10 @@ def suite_delete(ctx, suite):
 
     context.delete_expectation_suite(suite)
     cli_message(string=f"Deleted the expectation suite named: {suite}")
-    toolkit.send_usage_message(
-        data_context=context, event=usage_event_end, success=True
+    send_usage_message(
+        event=usage_event_end,
+        data_context=context,
+        success=True,
     )
 
 
@@ -868,8 +875,10 @@ def suite_list(ctx):
     try:
         suite_names: List[str] = context.list_expectation_suite_names()
     except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=False
+        send_usage_message(
+            event=usage_event_end,
+            data_context=context,
+            success=False,
         )
         raise e
 
@@ -878,8 +887,10 @@ def suite_list(ctx):
     ]
     if len(suite_names_styled) == 0:
         cli_message(string="No Expectation Suites found")
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=True
+        send_usage_message(
+            event=usage_event_end,
+            data_context=context,
+            success=True,
         )
         return
 
@@ -891,8 +902,10 @@ def suite_list(ctx):
     cli_message_list(
         string_list=suite_names_styled, list_intro_string=list_intro_string
     )
-    toolkit.send_usage_message(
-        data_context=context, event=usage_event_end, success=True
+    send_usage_message(
+        event=usage_event_end,
+        data_context=context,
+        success=True,
     )
 
 

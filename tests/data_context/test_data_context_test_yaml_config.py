@@ -216,7 +216,7 @@ def test_checkpoint_store_with_filesystem_store_backend(
             "class_name": "TupleFilesystemStoreBackend",
             "base_directory": f"{tmp_dir}/checkpoints",
             "suppress_store_backend_id": True,
-            "filepath_template": "{0}.yml",
+            "filepath_suffix": ".yml",
         },
         "overwrite_existing": False,
         "runtime_environment": {
