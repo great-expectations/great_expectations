@@ -4,7 +4,7 @@ title: Changelog
 
 ### Develop
 
-### 0.13.45
+### 0.13.46
 * [FEATURE] Instrument Runtime DataConnector for Usage Statistics: Add "checkpoint.run" Event Schema (#3797)
 * [FEATURE] Add suite creation type field to CLI SUITE "new" and "edit" Usage Statistics events (#3810)
 * [FEATURE] [EXPERIMENTAL] Dependency graph based testing strategy and related pipeline (#3738, #3815, #3818)
