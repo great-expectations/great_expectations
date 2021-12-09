@@ -148,10 +148,9 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              echo "Tests identified by dependency graph test runner [dgtr]:"
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtr
-              if [ -s .dgtr ]; then
-                cat .dgtr | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              test_files=$(python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics')
+              if [ $? -eq 0 ]; then
+                echo $test_files | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
               fi
             displayName: 'pytest'
 
@@ -214,10 +213,9 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              echo "Tests identified by dependency graph test runner [dgtr]:"
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtr
-              if [ -s .dgtr ]; then
-                cat .dgtr | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              test_files=$(python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics')
+              if [ $? -eq 0 ]; then
+                echo $test_files | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
               fi
             displayName: 'pytest'
 
@@ -280,10 +278,9 @@ stages:
           - script: |
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              echo "Tests identified by dependency graph test runner [dgtr]:"
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtr
-              if [ -s .dgtr ]; then
-                cat .dgtr | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              test_files=$(python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics')
+              if [ $? -eq 0 ]; then
+                echo $test_files | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
               fi
             displayName: 'pytest'
 
@@ -316,10 +313,9 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              echo "Tests identified by dependency graph test runner [dgtr]:"
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtr
-              if [ -s .dgtr ]; then
-                cat .dgtr | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              test_files=$(python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics')
+              if [ $? -eq 0 ]; then
+                echo $test_files | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
               fi
             displayName: 'pytest'
 
@@ -360,9 +356,8 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines
-              echo "Tests identified by dependency graph test runner [dgtr]:"
-              python scripts/determine_tests_to_run.py --filter 'tests/cli' --depth 3 | tee .dgtr
-              if [ -s .dgtr ]; then
-                cat .dgtr | xargs pytest --aws-integration -v
+              test_files=$(python scripts/determine_tests_to_run.py --filter 'tests/cli' --depth 3)
+              if [ $? -eq 0 ]; then
+                echo $test_files | xargs pytest --aws-integration -v
               fi
             displayName: 'pytest'
