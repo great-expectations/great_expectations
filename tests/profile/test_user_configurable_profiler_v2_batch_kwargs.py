@@ -6,7 +6,7 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import PandasDataset
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
-    profiler_semantic_types,
+    ProfilerSemanticTypes,
 )
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
@@ -122,8 +122,8 @@ def test_init_with_semantic_types(cardinality_dataset):
     """
 
     semantic_types = {
-        "numeric": ["col_few", "col_many", "col_very_many"],
-        "value_set": ["col_two", "col_very_few"],
+        ProfilerSemanticTypes.NUMERIC.value: ["col_few", "col_many", "col_very_many"],
+        ProfilerSemanticTypes.VALUE_SET.value: ["col_two", "col_very_few"],
     }
     profiler = UserConfigurableProfiler(
         cardinality_dataset,
@@ -240,7 +240,7 @@ def test__validate_semantic_types_dict(cardinality_dataset):
         )
     assert e.value.args[0] == (
         f"incorrect_type is not a recognized semantic_type. Please only include one of "
-        f"{profiler_semantic_types}"
+        f"{[semantic_type.value for semantic_type in ProfilerSemanticTypes]}"
     )
 
     # Error if column is specified for both semantic_types and ignored
@@ -379,13 +379,15 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
 
     # key includes a non-existent column, should fail
     with pytest.raises(ValueError) as e:
+        # noinspection PyUnusedLocal
         bad_key_profiler = UserConfigurableProfiler(
             cardinality_dataset,
             primary_or_compound_key=["col_unique", "col_that_does_not_exist"],
         )
     assert e.value.args[0] == (
-        f"Column col_that_does_not_exist not found. Please ensure that this column is in the PandasDataset if "
-        f"you would like to use it as a primary_or_compound_key."
+        """Column col_that_does_not_exist not found. Please ensure that this column is in the PandasDataset if you \
+would like to use it as a primary_or_compound_key.
+"""
     )
 
     # key includes a column that exists, but is in ignored_columns, should pass
