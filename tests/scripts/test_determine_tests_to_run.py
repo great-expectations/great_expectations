@@ -4,7 +4,6 @@ from scripts.determine_tests_to_run import (
     Import,
     get_changed_source_files,
     get_changed_test_files,
-    get_import_paths,
     parse_imports,
 )
 
@@ -170,23 +169,3 @@ from great_expectations import exceptions as ge_exceptions
             and actual.name == expected.name
             and actual.alias == expected.alias
         )
-
-
-def test_get_import_paths(parsed_imports):
-    paths = get_import_paths(parsed_imports)
-    assert sorted(paths) == [
-        "great_expectations/checkpoint/__init__.py",
-        "great_expectations/checkpoint/actions.py",
-        "great_expectations/checkpoint/checkpoint.py",
-        "great_expectations/checkpoint/configurator.py",
-        "great_expectations/checkpoint/types/__init__.py",
-        "great_expectations/checkpoint/types/checkpoint_result.py",
-        "great_expectations/checkpoint/util.py",
-        "great_expectations/core/expectation_suite.py",
-        "great_expectations/core/expectation_validation_result.py",
-        "great_expectations/core/id_dict.py",
-        "great_expectations/core/metric.py",
-        "great_expectations/core/run_identifier.py",
-        "great_expectations/data_context/data_context.py",
-        "great_expectations/exceptions/exceptions.py",
-    ]
