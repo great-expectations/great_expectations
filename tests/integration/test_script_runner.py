@@ -421,6 +421,10 @@ integration_test_matrix = [
             ),
         ),
     },
+    {
+        "name": "pandas_execution_engine_with_gcp_installed",
+        "user_flow_script": "tests/integration/common_workflows/simple_build_data_docs.py",
+    },
 ]
 
 
