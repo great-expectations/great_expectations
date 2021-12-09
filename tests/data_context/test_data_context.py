@@ -228,6 +228,9 @@ def test_get_existing_expectation_suite(data_context_parameterized_expectation_s
 def test_add_expectation_to_expectation_suite(
     mock_emit, empty_data_context_stats_enabled, monkeypatch
 ):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
     expectation_suite = empty_data_context_stats_enabled.create_expectation_suite(
         "this_data_asset_config_does_not_exist.default"
     )
