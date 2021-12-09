@@ -165,8 +165,8 @@ def test_validate_invalid_parameters(
         ge.validate(dataset)
 
 
-def test_gen_directory_tree_str(tmp_path_factory):
-    project_dir = str(tmp_path_factory.mktemp("project_dir"))
+def test_gen_directory_tree_str(tmpdir):
+    project_dir = tmpdir.mkdir("project_dir")
     os.mkdir(os.path.join(project_dir, "BBB"))
     with open(os.path.join(project_dir, "BBB", "bbb.txt"), "w") as f:
         f.write("hello")
