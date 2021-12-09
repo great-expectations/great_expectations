@@ -689,12 +689,22 @@ class Validator:
                 validation_graph=graph, metrics=metrics
             )
 
+            # Check to see if the user has disabled progress bars
+            disable = len(graph.edges) < 3
+            if self._data_context:
+                progress_bars = self._data_context.progress_bars
+                if (
+                    progress_bars.get("validators") is False
+                    or progress_bars.get("globally") is False
+                ):
+                    disable = True
+
             if pbar is None:
                 # noinspection PyProtectedMember,SpellCheckingInspection
                 pbar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
                     desc="Calculating Metrics",
-                    disable=len(graph.edges) < 3,
+                    disable=disable,
                 )
                 pbar.update(0)
 
