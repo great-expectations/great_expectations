@@ -28,33 +28,12 @@ def diffed_files():
 
 @pytest.fixture
 def parsed_imports():
-    # Used to mock the result of converting AST import notes into an intermediary format
+    # Used to mock the result of converting AST import nodes into an intermediary format (namedtuple Import)
     filename = "great_expectations/my_fake_source_file.py"
     parsed = [
-        Import(source=filename, module=[], name=["configparser"], alias=None),
-        Import(source=filename, module=[], name=["copy"], alias=None),
-        Import(source=filename, module=[], name=["datetime"], alias=None),
-        Import(source=filename, module=[], name=["errno"], alias=None),
-        Import(source=filename, module=[], name=["itertools"], alias=None),
-        Import(source=filename, module=[], name=["json"], alias=None),
-        Import(source=filename, module=[], name=["logging"], alias=None),
-        Import(source=filename, module=[], name=["os"], alias=None),
-        Import(source=filename, module=[], name=["shutil"], alias=None),
-        Import(source=filename, module=[], name=["sys"], alias=None),
-        Import(source=filename, module=[], name=["traceback"], alias=None),
-        Import(source=filename, module=[], name=["uuid"], alias=None),
-        Import(source=filename, module=[], name=["warnings"], alias=None),
-        Import(source=filename, module=[], name=["webbrowser"], alias=None),
         Import(
             source=filename, module=["collections"], name=["OrderedDict"], alias=None
         ),
-        Import(source=filename, module=["typing"], name=["Any"], alias=None),
-        Import(source=filename, module=["typing"], name=["Callable"], alias=None),
-        Import(source=filename, module=["typing"], name=["Dict"], alias=None),
-        Import(source=filename, module=["typing"], name=["List"], alias=None),
-        Import(source=filename, module=["typing"], name=["Optional"], alias=None),
-        Import(source=filename, module=["typing"], name=["Union"], alias=None),
-        Import(source=filename, module=["typing"], name=["cast"], alias=None),
         Import(source=filename, module=[], name=["requests"], alias=None),
         Import(
             source=filename, module=["dateutil", "parser"], name=["parse"], alias=None
@@ -97,42 +76,6 @@ def parsed_imports():
             source=filename,
             module=["great_expectations", "checkpoint", "types", "checkpoint_result"],
             name=["CheckpointResult"],
-            alias=None,
-        ),
-        Import(
-            source=filename,
-            module=["great_expectations", "core", "batch"],
-            name=["Batch"],
-            alias=None,
-        ),
-        Import(
-            source=filename,
-            module=["great_expectations", "core", "batch"],
-            name=["BatchRequest"],
-            alias=None,
-        ),
-        Import(
-            source=filename,
-            module=["great_expectations", "core", "batch"],
-            name=["IDDict"],
-            alias=None,
-        ),
-        Import(
-            source=filename,
-            module=["great_expectations", "core", "batch"],
-            name=["RuntimeBatchRequest"],
-            alias=None,
-        ),
-        Import(
-            source=filename,
-            module=["great_expectations", "core", "batch"],
-            name=["get_batch_request_dict"],
-            alias=None,
-        ),
-        Import(
-            source=filename,
-            module=["great_expectations", "core", "batch"],
-            name=["get_batch_request_from_acceptable_arguments"],
             alias=None,
         ),
         Import(
@@ -197,22 +140,7 @@ def test_get_changed_test_files(diffed_files):
 def test_parse_imports(tmpdir, parsed_imports):
     temp_file = tmpdir.mkdir("tmp").join("ge_imports.py")
     import_statements = """
-import configparser
-import copy
-import datetime
-import errno
-import itertools
-import json
-import logging
-import os
-import shutil
-import sys
-import traceback
-import uuid
-import warnings
-import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 import requests
 from dateutil.parser import parse
@@ -222,14 +150,6 @@ from ruamel.yaml.constructor import DuplicateKeyError
 
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core.batch import (
-    Batch,
-    BatchRequest,
-    IDDict,
-    RuntimeBatchRequest,
-    get_batch_request_dict,
-    get_batch_request_from_acceptable_arguments,
-)
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
@@ -277,12 +197,6 @@ def test_get_import_paths(parsed_imports):
         "great_expectations/checkpoint/util.py",
         "great_expectations/checkpoint/util.py",
         "great_expectations/checkpoint/util.py",
-        "great_expectations/core/batch.py",
-        "great_expectations/core/batch.py",
-        "great_expectations/core/batch.py",
-        "great_expectations/core/batch.py",
-        "great_expectations/core/batch.py",
-        "great_expectations/core/batch.py",
         "great_expectations/core/expectation_suite.py",
         "great_expectations/core/expectation_validation_result.py",
         "great_expectations/core/id_dict.py",
