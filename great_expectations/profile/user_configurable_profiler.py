@@ -8,6 +8,7 @@ from tqdm.auto import tqdm
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.data_context import DataContext
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.exceptions import ProfilerError
 from great_expectations.execution_engine import (
@@ -108,7 +109,9 @@ class UserConfigurableProfiler:
         self.profile_dataset = profile_dataset
         assert isinstance(self.profile_dataset, (Dataset, Validator, Batch))
 
+        context: Optional[DataContext] = None
         if isinstance(self.profile_dataset, Batch):
+            context = self.profile_dataset.data_context
             self.profile_dataset = Validator(
                 execution_engine=self.profile_dataset.data.execution_engine,
                 batches=[self.profile_dataset],
@@ -117,11 +120,20 @@ class UserConfigurableProfiler:
                 MetricConfiguration("table.columns", {})
             )
         elif isinstance(self.profile_dataset, Validator):
+            context = self.profile_dataset.data_context
             self.all_table_columns = self.profile_dataset.get_metric(
                 MetricConfiguration("table.columns", {})
             )
         else:
             self.all_table_columns = self.profile_dataset.get_table_columns()
+
+        if context:
+            self._disable_progress_bars = (
+                context.progress_bars.get("profilers") is False
+                or context.progress_bars.get("globally") is False
+            )
+        else:
+            self._disable_progress_bars = False
 
         self.semantic_types_dict = semantic_types_dict
         assert isinstance(self.semantic_types_dict, (dict, type(None)))
@@ -244,7 +256,10 @@ class UserConfigurableProfiler:
             )
 
         with tqdm(
-            desc="Profiling Columns", total=len(self.column_info), delay=5
+            desc="Profiling Columns",
+            total=len(self.column_info),
+            delay=5,
+            disable=self._disable_progress_bars,
         ) as pbar:
             for column_name, column_info in self.column_info.items():
                 pbar.set_postfix_str(f"Column={column_name}")
@@ -289,7 +304,12 @@ class UserConfigurableProfiler:
 
         self._build_expectations_table(profile_dataset=self.profile_dataset)
 
-        with tqdm(desc="Profiling", total=len(self.column_info), delay=5) as pbar:
+        with tqdm(
+            desc="Profiling",
+            total=len(self.column_info),
+            delay=5,
+            disable=self._disable_progress_bars,
+        ) as pbar:
             for column_name, column_info in self.column_info.items():
                 pbar.set_postfix_str(f"Column={column_name}")
                 data_type = column_info.get("type")

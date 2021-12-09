@@ -27,6 +27,7 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
+from great_expectations.data_context import DataContext
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.exceptions import (
@@ -211,6 +212,10 @@ class Validator:
             combined_dir | set(dir(pd.DataFrame))
 
         return list(combined_dir)
+
+    @property
+    def data_context(self) -> Optional[DataContext]:
+        return self._data_context
 
     @property
     def expose_dataframe_methods(self) -> bool:
