@@ -23,7 +23,7 @@ Steps
 
     ```yaml
     db_creds:
-        drivername: postgres
+        drivername: postgresql
         host: '<your_host_name>'
         port: '<your_port>'
         username: '<your_username>'
@@ -35,7 +35,7 @@ Steps
 
     ```yaml
     db_creds:
-        drivername: postgres
+        drivername: postgresql
         host: '<your_host_name>'
         port: '<your_port>'
         username: '<your_username>'
