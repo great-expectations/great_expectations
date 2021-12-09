@@ -100,10 +100,14 @@ def docs_list(ctx):
             list_intro_string = _build_intro_string(docs_sites_strings)
             cli_message_list(docs_sites_strings, list_intro_string)
 
-        send_usage_message(event=usage_event_end, data_context=context, success=True,)
+        send_usage_message(
+            event=usage_event_end,
+            data_context=context,
+            success=True,
+        )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
@@ -143,7 +147,11 @@ def docs_clean(ctx, site_name=None, all_sites=False):
         # if site_name is None, context.clean_data_docs(site_name=site_name)
         # will clean all sites.
         context.clean_data_docs(site_name=site_name)
-        send_usage_message(event=usage_event_end, data_context=context, success=True,)
+        send_usage_message(
+            event=usage_event_end,
+            data_context=context,
+            success=True,
+        )
         cli_message("<green>{}</green>".format("Cleaned data docs"))
     except DataContextError as de:
         toolkit.exit_with_failure_message_and_stats(

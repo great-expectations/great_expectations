@@ -45,7 +45,12 @@ def docs_build(directory, site_name, view=True, assume_yes=False):
     """Build Data Docs for a project."""
     context = toolkit.load_data_context_with_error_handling(directory)
     build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
-    send_usage_message(event="cli.docs.build", data_context=context, api_version="v2", success=True,)
+    send_usage_message(
+        event="cli.docs.build",
+        data_context=context,
+        api_version="v2",
+        success=True,
+    )
 
 
 @docs.command(name="list")
@@ -76,7 +81,12 @@ def docs_list(directory):
         list_intro_string = _build_intro_string(docs_sites_strings)
         cli_message_list(docs_sites_strings, list_intro_string)
 
-    send_usage_message(event="cli.docs.list", data_context=context, api_version="v2", success=True,)
+    send_usage_message(
+        event="cli.docs.list",
+        data_context=context,
+        api_version="v2",
+        success=True,
+    )
 
 
 @docs.command(name="clean")
@@ -107,11 +117,21 @@ def clean_data_docs(directory, site_name=None, all=None):
     context.clean_data_docs(site_name=site_name)
     failed = False
     if not failed and context is not None:
-        send_usage_message(event="cli.docs.clean", data_context=context, api_version="v2", success=True,)
+        send_usage_message(
+            event="cli.docs.clean",
+            data_context=context,
+            api_version="v2",
+            success=True,
+        )
         cli_message("<green>{}</green>".format("Cleaned data docs"))
 
     if failed and context is not None:
-        send_usage_message(event="cli.docs.clean", data_context=context, api_version="v2", success=False,)
+        send_usage_message(
+            event="cli.docs.clean",
+            data_context=context,
+            api_version="v2",
+            success=False,
+        )
 
 
 def _build_intro_string(docs_sites_strings):
