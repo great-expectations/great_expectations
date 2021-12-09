@@ -125,7 +125,7 @@ def get_import_paths(imports: List[Import]) -> List[str]:
     If it is the case that an Import is pointing to a module or directory, we play it safe
     and add all files from that directory to ensure a high level of coverage.
     """
-    paths = []
+    paths = set()
     for imp in imports:
         if "great_expectations" not in imp.module:
             continue
@@ -144,13 +144,13 @@ def get_import_paths(imports: List[Import]) -> List[str]:
             path = "/".join(x for x in imp.module)
 
         if os.path.isfile(f"{path}.py"):
-            paths.append(f"{path}.py")
+            paths.add(f"{path}.py")
         # AST node points to a module so we add ALL files in that directory
         elif os.path.isdir(path):
             for file in glob.glob(f"{path}/**/*.py", recursive=True):
-                paths.append(file)
+                paths.add(file)
 
-    return paths
+    return sorted(paths)
 
 
 def create_dependency_graph(directory: str) -> Dict[str, List[str]]:
