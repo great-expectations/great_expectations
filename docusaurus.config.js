@@ -18,6 +18,29 @@ module.exports = {
   ],
 
   themeConfig: {
+    algolia: {
+      // If Algolia did not provide you any appId, use 'BH4D9OD16A'
+      appId: 'RA3RRQUBO1',
+
+      // Public API key: it is safe to commit it
+      apiKey: '6ca7609789d2503c8ce189e5575c4936',
+
+      indexName: 'greatexpectations_trial_doc_try2',
+
+      // Optional: see doc section below
+      // contextualSearch: true,
+
+       // Optional: Specify domains where the navigation should occur through window.location instead on history.push. Useful when our Algolia config crawls multiple documentation sites and we want to navigate with window.location.href to them.
+      // externalUrlRegex: 'external\\.com|domain\\.com',
+
+       // Optional: see doc section below
+      // appId: 'YOUR_APP_ID',
+
+       // Optional: Algolia search parameters
+      // searchParameters: {},
+
+      //... other Algolia params
+    },
     prism: {
       theme: require('prism-react-renderer/themes/vsDark')
     },
@@ -149,19 +172,19 @@ module.exports = {
         theme: {
           customCss: require.resolve('./src/css/custom.css')
         },
-        lastVersion: 'current',
-        versions: {
-          // Example configuration:
-          // <WILL> may have to be fixed
-          current: {
-            label: 'docs',
-            path: 'docs'
-          },
-          '0.13.9': {
-            label: '0.13.9-docs',
-            path: '0.13.9'
-          }
-        }
+        // lastVersion: 'current',
+        // versions: {
+        //   // Example configuration:
+        //   // <WILL> may have to be fixed
+        //   current: {
+        //     label: 'docs',
+        //     path: 'docs'
+        //   },
+        //   '0.13.9': {
+        //     label: '0.13.9-docs',
+        //     path: '0.13.9'
+        //   }
+        // }
       }
     ]
   ]
