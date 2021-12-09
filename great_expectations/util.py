@@ -1138,6 +1138,24 @@ def is_float(value: Any) -> bool:
     return True
 
 
+def is_nan(value: Any) -> bool:
+    """
+    If value is an array, test element-wise for NaN and return result as a boolean array.
+    If value is a scalar, return boolean.
+    Args:
+        value: The value to test
+
+    Returns:
+        The results of the test
+    """
+    import numpy as np
+
+    try:
+        return np.isnan(value)
+    except TypeError:
+        return True
+
+
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
     try:
         # noinspection PyUnusedLocal
