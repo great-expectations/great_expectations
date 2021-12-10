@@ -214,8 +214,11 @@ def test_catch_exceptions_no_exceptions(
     assert mock_emit.call_count == 0
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_catch_exceptions_exception_occurred_catch_exceptions_false(
-    in_memory_runtime_context, test_spark_df
+    mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict = {
@@ -324,10 +327,15 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
     )
     assert result.success
 
+    # assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
-# MARKER
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_catch_exceptions_exception_occurred_catch_exceptions_true(
-    in_memory_runtime_context, test_spark_df
+    mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = True  # expect exceptions to be caught
     result_format: dict = {
@@ -468,10 +476,15 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         "exception_message" not in result.exception_info
     ) or not result.exception_info["exception_message"]
 
+    # assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
-# MARKER
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_result_format_configured_no_set_default_override(
-    in_memory_runtime_context, test_spark_df
+    mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict
@@ -693,10 +706,15 @@ def test_result_format_configured_no_set_default_override(
     assert len(result.result.keys()) == 0
     assert result.result == {}
 
+    # assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
-# MARKER
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_result_format_configured_with_set_default_override(
-    in_memory_runtime_context, test_spark_df
+    mock_emit, in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict
@@ -862,3 +880,6 @@ def test_result_format_configured_with_set_default_override(
     }
     assert len(result.result.keys()) == 0
     assert result.result == {}
+
+    # assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []

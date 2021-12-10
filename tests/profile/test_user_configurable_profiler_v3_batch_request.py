@@ -476,7 +476,7 @@ def test_build_suite_no_config(
     assert len(suite.expectations) == 48
 
     # Note 20211209 - Profiler will also call ExpectationSuite's add_expectation(), but it will not
-    # send a usage_stats event when calle from a Profiler.
+    # send a usage_stats event when called from a Profiler.
     assert mock_emit.call_count == 1
 
     # noinspection PyUnresolvedReferences
@@ -660,7 +660,7 @@ def test_build_suite_with_semantic_types_dict(
     assert value_set_columns == {"col_two", "col_very_few"}
 
     # Note 20211209 - Profiler will also call ExpectationSuite's add_expectation(), but it will not
-    # send a usage_stats event when calle from a Profiler.
+    # send a usage_stats event when called from a Profiler.
     assert mock_emit.call_count == 1
 
     # noinspection PyUnresolvedReferences

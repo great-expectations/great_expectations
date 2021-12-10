@@ -9,7 +9,6 @@ import os
 import sys
 from collections.abc import Mapping
 from pathlib import Path
-from unittest import mock
 
 import _pytest.config
 import py.path
