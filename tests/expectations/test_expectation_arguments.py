@@ -640,7 +640,6 @@ def test_result_format_configured_no_set_default_override(
             },
             "expectation_type": "expect_column_values_to_not_be_null",
             "meta": {"Notes": "Some notes"},
-            "ge_cloud_id": None,
             "expectation_context": {"description": None},
         },
         "meta": {},
@@ -668,7 +667,6 @@ def test_result_format_configured_no_set_default_override(
         "success": True,
         "meta": {},
         "expectation_config": {
-            "ge_cloud_id": None,
             "expectation_type": "expect_column_values_to_not_be_null",
             "meta": {},
             "expectation_context": {"description": None},
@@ -775,7 +773,6 @@ def test_result_format_configured_with_set_default_override(
     assert result.to_json_dict() == {
         "result": {},
         "expectation_config": {
-            "ge_cloud_id": None,
             "kwargs": {
                 "catch_exceptions": False,
                 "result_format": {"result_format": "SUMMARY"},
@@ -845,7 +842,6 @@ def test_result_format_configured_with_set_default_override(
     assert result.to_json_dict() == {
         "result": {},
         "expectation_config": {
-            "ge_cloud_id": None,
             "kwargs": {
                 "include_config": True,
                 "column": "Name",
