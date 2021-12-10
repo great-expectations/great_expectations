@@ -564,10 +564,7 @@ class BaseDataContext:
                     )
                 )
         for config_path in BaseDataContext.GLOBAL_CONFIG_PATHS:
-            print("I am here in config")
             config = configparser.ConfigParser()
-            print("config")
-
             states = config.BOOLEAN_STATES
             for falsey_string in BaseDataContext.FALSEY_STRINGS:
                 states[falsey_string] = False
@@ -576,11 +573,8 @@ class BaseDataContext:
             config.BOOLEAN_STATES = states
             config.read(config_path)
             try:
-                print("~~~")
-                print(config.getboolean("anonymous_usage_statistics", "enabled"))
                 if config.getboolean("anonymous_usage_statistics", "enabled") is False:
                     # If stats are disabled, then opt out is true
-                    print("I HIT THIS")
                     return True
             except (ValueError, configparser.Error):
                 pass

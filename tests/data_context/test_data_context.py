@@ -126,7 +126,7 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_add_expectation_to_expectation_suite(
-    mock_emit, monkeypatch, empty_data_context_stats_enabled
+    mock_emit, empty_data_context_stats_enabled
 ):
     expectation_suite = empty_data_context_stats_enabled.create_expectation_suite(
         "this_data_asset_config_does_not_exist.default"
