@@ -63,15 +63,15 @@ def validation_operator_list(directory):
             cli_message("")
             cli_message_dict(validation_operator)
         send_usage_message(
-            event="cli.validation_operator.list",
             data_context=context,
+            event="cli.validation_operator.list",
             api_version="v2",
             success=True,
         )
     except Exception as e:
         send_usage_message(
-            event="cli.validation_operator.list",
             data_context=context,
+            event="cli.validation_operator.list",
             api_version="v2",
             success=False,
         )
@@ -160,8 +160,8 @@ def validation_operator_run(name, run_name, validation_config_file, suite, direc
                     f"Failed to process the --validation_config_file argument: <red>{e}</red>"
                 )
                 send_usage_message(
-                    event="cli.validation_operator.run",
                     data_context=context,
+                    event="cli.validation_operator.run",
                     api_version="v2",
                     success=False,
                 )
@@ -177,8 +177,8 @@ def validation_operator_run(name, run_name, validation_config_file, suite, direc
                     )
                 )
                 send_usage_message(
-                    event="cli.validation_operator.run",
                     data_context=context,
+                    event="cli.validation_operator.run",
                     api_version="v2",
                     success=False,
                 )
@@ -193,8 +193,8 @@ Call `great_expectation suite list` command to list the expectation suites in yo
 """
                 )
                 send_usage_message(
-                    event="cli.validation_operator.run",
                     data_context=context,
+                    event="cli.validation_operator.run",
                     api_version="v2",
                     success=False,
                 )
@@ -212,8 +212,8 @@ Call `great_expectation validation-operator list` command to list the operators 
 """
                 )
                 send_usage_message(
-                    event="cli.validation_operator.run",
                     data_context=context,
+                    event="cli.validation_operator.run",
                     api_version="v2",
                     success=False,
                 )
@@ -227,8 +227,8 @@ Call `great_expectation validation-operator list` command to list the operators 
 """
                     )
                     send_usage_message(
-                        event="cli.validation_operator.run",
                         data_context=context,
+                        event="cli.validation_operator.run",
                         api_version="v2",
                         success=False,
                     )
@@ -246,8 +246,8 @@ Let us help you specify the batch of data your want the validation operator to v
             except ValueError as ve:
                 cli_message(f"<red>{ve}</red>")
                 send_usage_message(
-                    event="cli.validation_operator.run",
                     data_context=context,
+                    event="cli.validation_operator.run",
                     api_version="v2",
                     success=False,
                 )
@@ -256,8 +256,8 @@ Let us help you specify the batch of data your want the validation operator to v
             if not data_source:
                 cli_message("<red>No datasources found in the context.</red>")
                 send_usage_message(
-                    event="cli.validation_operator.run",
                     data_context=context,
+                    event="cli.validation_operator.run",
                     api_version="v2",
                     success=False,
                 )
@@ -327,8 +327,8 @@ Let us help you specify the batch of data your want the validation operator to v
         except (ge_exceptions.DataContextError, OSError, SQLAlchemyError) as e:
             cli_message(f"<red>{e}</red>")
             send_usage_message(
-                event="cli.validation_operator.run",
                 data_context=context,
+                event="cli.validation_operator.run",
                 api_version="v2",
                 success=False,
             )
@@ -337,8 +337,8 @@ Let us help you specify the batch of data your want the validation operator to v
         if not results["success"]:
             cli_message("Validation failed!")
             send_usage_message(
-                event="cli.validation_operator.run",
                 data_context=context,
+                event="cli.validation_operator.run",
                 api_version="v2",
                 success=True,
             )
@@ -346,16 +346,16 @@ Let us help you specify the batch of data your want the validation operator to v
         else:
             cli_message("Validation succeeded!")
             send_usage_message(
-                event="cli.validation_operator.run",
                 data_context=context,
+                event="cli.validation_operator.run",
                 api_version="v2",
                 success=True,
             )
             sys.exit(0)
     except Exception as e:
         send_usage_message(
-            event="cli.validation_operator.run",
             data_context=context,
+            event="cli.validation_operator.run",
             api_version="v2",
             success=False,
         )

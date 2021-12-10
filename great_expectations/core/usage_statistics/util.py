@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 def send_usage_message(
+    data_context: Optional[BaseDataContext],
     event: str,
-    data_context: Optional[BaseDataContext] = None,
     event_payload: Optional[dict] = None,
     api_version: str = "v3",
     success: bool = False,

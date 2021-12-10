@@ -37,8 +37,8 @@ def project_check_config(ctx):
         sys.exit(1)
 
     send_usage_message(
-        event="cli.project.check_config",
         data_context=context,
+        event="cli.project.check_config",
         success=True,
     )
 

@@ -28,8 +28,8 @@ def store_list(directory):
         if len(stores) == 0:
             cli_message("No Stores found")
             send_usage_message(
-                event="cli.store.list",
                 data_context=context,
+                event="cli.store.list",
                 api_version="v2",
                 success=True,
             )
@@ -46,15 +46,15 @@ def store_list(directory):
             cli_message_dict(store)
 
         send_usage_message(
-            event="cli.store.list",
             data_context=context,
+            event="cli.store.list",
             api_version="v2",
             success=True,
         )
     except Exception as e:
         send_usage_message(
-            event="cli.store.list",
             data_context=context,
+            event="cli.store.list",
             api_version="v2",
             success=False,
         )
