@@ -15,7 +15,8 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "col1", "min_value": 1, "max_value": 2},
     )
-    # note: no usage event since we are adding Expectation within fixture
+    # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
+    # called within a fixture, and we will prevent it from sending a usage_event.
     suite.add_expectation(expectation, send_usage_event=False)
     context.save_expectation_suite(suite)
     return context

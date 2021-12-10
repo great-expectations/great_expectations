@@ -671,7 +671,11 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @mock.patch(
     "great_expectations.data_context.data_context.BaseDataContext.get_expectation_suite"
 )
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
+    mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
     multi_batch_taxi_validator_ge_cloud_mode,
@@ -710,6 +714,10 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
         multi_batch_taxi_validator_ge_cloud_mode.get_expectation_suite().to_json_dict()
         == mock_suite.to_json_dict()
     )
+
+    # add_expectation() will not send usage_statistics event when called from a Validator
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
 
 def test_validator_can_instantiate_with_a_multi_batch_request(

@@ -1,5 +1,6 @@
 import datetime
 import json
+from unittest import mock
 
 import pandas as pd
 import pytest
@@ -884,6 +885,22 @@ def test_ge_value_count_of_object_dtype_column_with_mixed_types():
 
     value_counts = df.get_column_value_counts("A")
     assert value_counts["I am a string in an otherwise float column"] == 1
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_adding_expectation_to_pandas_dataset_not_send_usage_message(mock_emit):
+    df = ge.dataset.PandasDataset(
+        {
+            "A": [[1, 2], None, [4, 5], 6],
+        }
+    )
+
+    validation = df.expect_column_values_to_be_of_type("A", "list")
+    # add_expectation() will not send usage_statistics event when called from a Pandas Dataset
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
 
 def test_expect_values_to_be_of_type_list():

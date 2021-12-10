@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import string
+from unittest import mock
 
 import pandas as pd
 import pytest
@@ -517,8 +518,11 @@ def test_profiler_works_with_batch_object(cardinality_validator):
     ]
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_build_suite_with_config_and_no_semantic_types_dict(
-    titanic_validator, possible_expectations_set
+    mock_emit, titanic_validator, possible_expectations_set
 ):
     """
     What does this test do and why?
@@ -544,8 +548,18 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     assert "expect_column_mean_to_be_between" not in expectations_from_suite
     assert len(suite.expectations) == 29
 
+    # Note 20211209 - Currently the only method called by the Profiler that is instrumented for usage_statistics
+    # is ExpectationSuite's add_expectation(). It will not send a usage_stats event when called from a Profiler.
+    # this number can change in the future if our instrumentation changes.
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_build_suite_with_semantic_types_dict(
+    mock_emit,
     cardinality_validator,
     possible_expectations_set,
 ):
@@ -589,8 +603,17 @@ def test_build_suite_with_semantic_types_dict(
     assert len(value_set_columns) == 2
     assert value_set_columns == {"col_two", "col_very_few"}
 
+    # Note 20211209 - Currently the only method called by the Profiler that is instrumented for usage_statistics
+    # is ExpectationSuite's add_expectation(). It will not send a usage_stats event when called from a Profiler.
+    # this number can change in the future if our instrumentation changes.
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
-def test_build_suite_when_suite_already_exists(cardinality_validator):
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_build_suite_when_suite_already_exists(mock_emit, cardinality_validator):
     """
     What does this test do and why?
     Confirms that creating a new suite on an existing profiler wipes the previous suite
@@ -611,6 +634,12 @@ def test_build_suite_when_suite_already_exists(cardinality_validator):
     _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
     assert len(suite.expectations) == 1
     assert "expect_table_row_count_to_be_between" in expectations
+
+    # Note 20211209 - Currently the only method called by the Profiler that is instrumented for usage_statistics
+    # is ExpectationSuite's add_expectation(). It will not send a usage_stats event when called from a Profiler.
+    # this number can change in the future if our instrumentation changes.
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
 
 def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
