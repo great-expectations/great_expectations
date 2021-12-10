@@ -555,6 +555,8 @@ class BaseDataContext:
     def _check_global_usage_statistics_opt_out(self):
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
+            print("I AM GETTING HERE THROUGH GE_USAGE STATS")
+            print(ge_usage_stats)
             if ge_usage_stats in BaseDataContext.FALSEY_STRINGS:
                 return True
             else:
@@ -564,6 +566,7 @@ class BaseDataContext:
                     )
                 )
         for config_path in BaseDataContext.GLOBAL_CONFIG_PATHS:
+            print("I AM GETTING HERE THROUGH CONFIG PATH")
             config = configparser.ConfigParser()
             states = config.BOOLEAN_STATES
             for falsey_string in BaseDataContext.FALSEY_STRINGS:
