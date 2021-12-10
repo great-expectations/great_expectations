@@ -555,8 +555,6 @@ class BaseDataContext:
     def _check_global_usage_statistics_opt_out(self):
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
-            print("I AM GETTING HERE THROUGH GE_USAGE STATS")
-            print(ge_usage_stats)
             if ge_usage_stats in BaseDataContext.FALSEY_STRINGS:
                 return True
             else:
@@ -566,8 +564,10 @@ class BaseDataContext:
                     )
                 )
         for config_path in BaseDataContext.GLOBAL_CONFIG_PATHS:
-            print("I AM GETTING HERE THROUGH CONFIG PATH")
+            print("I am here in config")
             config = configparser.ConfigParser()
+            print("config")
+
             states = config.BOOLEAN_STATES
             for falsey_string in BaseDataContext.FALSEY_STRINGS:
                 states[falsey_string] = False
@@ -576,8 +576,11 @@ class BaseDataContext:
             config.BOOLEAN_STATES = states
             config.read(config_path)
             try:
+                print("~~~")
+                print(config.getboolean("anonymous_usage_statistics", "enabled"))
                 if config.getboolean("anonymous_usage_statistics", "enabled") is False:
                     # If stats are disabled, then opt out is true
+                    print("I HIT THIS")
                     return True
             except (ValueError, configparser.Error):
                 pass
