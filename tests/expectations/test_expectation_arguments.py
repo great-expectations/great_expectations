@@ -1,6 +1,5 @@
 import logging
 from typing import List
-from unittest import mock
 
 import pandas as pd
 import pytest
@@ -686,7 +685,7 @@ def test_result_format_configured_no_set_default_override(
 
 
 def test_result_format_configured_with_set_default_override(
-    mock_emit, in_memory_runtime_context, test_spark_df
+    in_memory_runtime_context, test_spark_df
 ):
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict
