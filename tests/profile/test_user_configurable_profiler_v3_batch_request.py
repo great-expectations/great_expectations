@@ -478,6 +478,9 @@ def test_build_suite_no_config(
     # Note 20211209 - Profiler will also call ExpectationSuite's add_expectation(), but it will not
     # send a usage_stats event when called from a Profiler.
     assert mock_emit.call_count == 1
+    assert "expectation_suite.add_expectation" not in [
+        mock_emit.call_args_list[0][0][0]["event"]
+    ]
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call]
@@ -582,6 +585,9 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     assert len(suite.expectations) == 29
 
     assert mock_emit.call_count == 1
+    assert "expectation_suite.add_expectation" not in [
+        mock_emit.call_args_list[0][0][0]["event"]
+    ]
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call]

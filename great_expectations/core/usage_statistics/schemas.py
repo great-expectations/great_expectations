@@ -866,16 +866,6 @@ anonymized_usage_statistics_record_schema = {
                         "data_context.build_data_docs",
                         "data_context.open_data_docs",
                         "data_context.run_checkpoint",
-                    ],
-                },
-                "event_payload": {"$ref": "#/definitions/empty_payload"},
-            },
-        },
-        {
-            "type": "object",
-            "properties": {
-                "event": {
-                    "enum": [
                         "expectation_suite.add_expectation",
                     ],
                 },
