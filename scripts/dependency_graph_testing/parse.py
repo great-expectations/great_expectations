@@ -126,6 +126,7 @@ def _parse_import_nodes(
         elif len(candidates) == 1:
             paths.add(candidates[0])
         else:
+            # If we're not sure of the origin, use the stringified import statement and make an educated guess
             closest = difflib.get_close_matches(partial_path, candidates)[0]
             logger.info(
                 f"Ambiguous import of {key} in {filepath} - selected {closest} out of {candidates}"
@@ -159,7 +160,9 @@ def parse_pytest_fixtures(
     return fixture_map
 
 
-def _parse_pytest_fixtures(filepath: str, declaration_map: Dict[str, List[str]]):
+def _parse_pytest_fixtures(
+    filepath: str, declaration_map: Dict[str, List[str]]
+) -> Dict[str, List[str]]:
     with open(filepath) as f:
         root = ast.parse(f.read(), filepath)
 
@@ -175,14 +178,9 @@ def _parse_pytest_fixtures(filepath: str, declaration_map: Dict[str, List[str]])
         except Exception as e:
             logger.info(f"Something went wrong when parsing fixtures: {e}")
 
-    fixture_dependencies = {}
-    for node in fixture_nodes:
-        for symbol in node.args.args:
-            arg = symbol.arg
-            if arg not in fixture_dependencies:
-                fixture_dependencies[arg] = []
-            fixture_dependencies[arg].append(node.name)
-
+    # Parse the body of each fixture and find symbols.
+    # If that symbol is something that was declared in the source files (class or function),
+    # create an association between the fixture and the file that the symbol was declared in.
     fixture_map = {}
     for node in fixture_nodes:
         for child in ast.walk(node):
@@ -239,6 +237,7 @@ def _parse_tests_dependencies(
         if isinstance(node, ast.FunctionDef):
             for symbol in node.args.args:
                 arg = symbol.arg
+                # If the pytest function argument is a fixture, add that fixture's dependencies
                 for test_dep in fixture_map.get(arg, []):
                     if filepath not in file_imports:
                         file_imports[filepath] = []
