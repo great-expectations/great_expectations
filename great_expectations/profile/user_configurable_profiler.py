@@ -258,6 +258,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             and len(self.value_set_threshold) > 0,
         }
         send_usage_message(
+            data_context=self.profile_dataset._data_context,
             event="legacy_profiler.build_suite",
             event_payload=event_payload,
             api_version="v2",

@@ -24,8 +24,8 @@ def docs(ctx):
 
     usage_stats_prefix = f"cli.docs.{ctx.invoked_subcommand}"
     send_usage_message(
-        event=f"{usage_stats_prefix}.begin",
         data_context=context,
+        event=f"{usage_stats_prefix}.begin",
         success=True,
     )
     ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
@@ -70,8 +70,8 @@ def docs_build(ctx, site_name=None, no_view=False):
         assume_yes=ctx.obj.assume_yes,
     )
     send_usage_message(
-        event=usage_event_end,
         data_context=context,
+        event=usage_event_end,
         success=True,
     )
 
@@ -101,8 +101,8 @@ def docs_list(ctx):
             cli_message_list(docs_sites_strings, list_intro_string)
 
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=True,
         )
     except Exception as e:
@@ -148,8 +148,8 @@ def docs_clean(ctx, site_name=None, all_sites=False):
         # will clean all sites.
         context.clean_data_docs(site_name=site_name)
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=True,
         )
         cli_message("<green>{}</green>".format("Cleaned data docs"))

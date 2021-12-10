@@ -103,8 +103,8 @@ def init(target_directory, view, usage_stats):
                 target_directory, usage_statistics_enabled=usage_stats
             )
             send_usage_message(
-                event="cli.init.create",
                 data_context=context,
+                event="cli.init.create",
                 api_version="v2",
                 success=True,
             )
