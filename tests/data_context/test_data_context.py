@@ -122,6 +122,35 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_expectation_to_expectation_suite(
+    mock_emit, empty_data_context_stats_enabled, monkeypatch
+):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
+
+    expectation_suite = empty_data_context_stats_enabled.create_expectation_suite(
+        "this_data_asset_config_does_not_exist.default"
+    )
+    expectation_suite.add_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        )
+    ]
+
+
 def test_get_available_data_asset_names_with_one_datasource_including_a_single_generator(
     empty_data_context, filesystem_csv
 ):
@@ -220,35 +249,6 @@ def test_get_existing_expectation_suite(data_context_parameterized_expectation_s
         expectation_suite.expectation_suite_name == parameterized_expectation_suite_name
     )
     assert len(expectation_suite.expectations) == 2
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_add_expectation_to_expectation_suite(
-    mock_emit, empty_data_context_stats_enabled, monkeypatch
-):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
-
-    expectation_suite = empty_data_context_stats_enabled.create_expectation_suite(
-        "this_data_asset_config_does_not_exist.default"
-    )
-    expectation_suite.add_expectation(
-        ExpectationConfiguration(
-            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
-        )
-    )
-    assert mock_emit.call_count == 1
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "expectation_suite.add_expectation",
-                "event_payload": {},
-                "success": True,
-            }
-        )
-    ]
 
 
 def test_get_new_expectation_suite(data_context_parameterized_expectation_suite):
