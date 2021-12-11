@@ -98,8 +98,8 @@ def checkpoint_new(checkpoint, suite, directory, datasource):
     datasource = toolkit.select_datasource(context, datasource_name=datasource)
     if datasource is None:
         send_usage_message(
-            event=usage_event,
             data_context=context,
+            event=usage_event,
             api_version="v2",
             success=False,
         )
@@ -124,8 +124,8 @@ def checkpoint_new(checkpoint, suite, directory, datasource):
   - To run this Checkpoint, run `great_expectations checkpoint run {checkpoint}`"""
     )
     send_usage_message(
-        event=usage_event,
         data_context=context,
+        event=usage_event,
         api_version="v2",
         success=True,
     )
@@ -190,8 +190,8 @@ def checkpoint_list(directory):
             "  - Use the command `great_expectations checkpoint new` to create one."
         )
         send_usage_message(
-            event="cli.checkpoint.list",
             data_context=context,
+            event="cli.checkpoint.list",
             api_version="v2",
             success=True,
         )
@@ -203,8 +203,8 @@ def checkpoint_list(directory):
     pretty_list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
     cli_message_list(pretty_list, list_intro_string=message)
     send_usage_message(
-        event="cli.checkpoint.list",
         data_context=context,
+        event="cli.checkpoint.list",
         api_version="v2",
         success=True,
     )
@@ -242,8 +242,8 @@ def checkpoint_run(checkpoint, directory):
     if not results["success"]:
         cli_message("Validation failed!")
         send_usage_message(
-            event=usage_event,
             data_context=context,
+            event=usage_event,
             api_version="v2",
             success=True,
         )
@@ -252,8 +252,8 @@ def checkpoint_run(checkpoint, directory):
 
     cli_message("Validation succeeded!")
     send_usage_message(
-        event=usage_event,
         data_context=context,
+        event=usage_event,
         api_version="v2",
         success=True,
     )
@@ -334,8 +334,8 @@ def checkpoint_script(checkpoint, directory):
   - The script can be run with `python great_expectations/uncommitted/run_{checkpoint}.py`"""
     )
     send_usage_message(
-        event=usage_event,
         data_context=context,
+        event=usage_event,
         api_version="v2",
         success=True,
     )

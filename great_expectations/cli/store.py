@@ -22,8 +22,8 @@ def store(ctx):
 
     usage_stats_prefix = f"cli.store.{ctx.invoked_subcommand}"
     send_usage_message(
-        event=f"{usage_stats_prefix}.begin",
         data_context=context,
+        event=f"{usage_stats_prefix}.begin",
         success=True,
     )
     ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
@@ -43,8 +43,8 @@ def store_list(ctx):
             cli_message_dict(store)
 
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=True,
         )
     except Exception as e:
