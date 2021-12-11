@@ -16,9 +16,6 @@ def send_usage_message(
     api_version: str = "v3",
     success: bool = False,
 ):
-    if data_context is None:
-        data_context = BaseDataContext.get_data_context()
-
     if not event:
         event = None
 
