@@ -395,7 +395,6 @@ class BaseDataContext:
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
-        BaseDataContext.set_data_context(self)
 
     @property
     def ge_cloud_config(self):
