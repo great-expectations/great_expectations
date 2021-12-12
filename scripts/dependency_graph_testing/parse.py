@@ -217,7 +217,6 @@ def parse_tests_dependencies(
                 path, root_dir, declaration_map, fixture_map
             )
             _update_dict(tests_dependency_graph, file_graph)
-
     return tests_dependency_graph
 
 
@@ -233,16 +232,17 @@ def _parse_tests_dependencies(
     file_imports = _parse_import_nodes(
         filepath, root_dir, declaration_map, reverse_edges=True
     )
+
     for node in root.body:
         if isinstance(node, ast.FunctionDef):
             for symbol in node.args.args:
                 arg = symbol.arg
                 # If the pytest function argument is a fixture, add that fixture's dependencies
                 for test_dep in fixture_map.get(arg, []):
-                    if filepath not in file_imports:
-                        file_imports[filepath] = []
-                    if test_dep not in file_imports[filepath]:
-                        file_imports[filepath].append(test_dep)
+                    if test_dep not in file_imports:
+                        file_imports[test_dep] = []
+                    if filepath not in file_imports[test_dep]:
+                        file_imports[test_dep].append(filepath)
 
     return file_imports
 
