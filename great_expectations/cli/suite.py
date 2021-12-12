@@ -191,16 +191,8 @@ def _process_suite_new_flags_and_prompt(
         )
         sys.exit(1)
 
-    user_provided_any_flag_skip_prompt: bool = any(
-        (
-            (interactive_mode.value["interactive_flag"] is not None),
-            (profile is True),
-            (batch_request is not None),
-        )
-    )
-
     # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
-    if user_provided_any_flag_skip_prompt:
+    if _suite_new_user_provided_any_flag(interactive_mode, profile, batch_request):
         # Assume batch needed if user passes --profile
         if profile and interactive_mode.value["interactive_flag"] is None:
             cli_message(
@@ -416,6 +408,21 @@ def _suite_new_convert_flags_to_interactive_mode(
         interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
 
     return interactive_mode
+
+
+def _suite_new_user_provided_any_flag(
+    interactive_mode: CLISuiteInteractiveFlagCombinations,
+    profile: bool,
+    batch_request: Optional[str],
+) -> bool:
+    user_provided_any_flag_skip_prompt: bool = any(
+        (
+            (interactive_mode.value["interactive_flag"] is not None),
+            (profile is True),
+            (batch_request is not None),
+        )
+    )
+    return user_provided_any_flag_skip_prompt
 
 
 @suite.command(name="edit")
