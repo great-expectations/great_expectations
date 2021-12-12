@@ -181,56 +181,14 @@ def _process_suite_new_flags_and_prompt(
     ):
         error_message = """Please choose either --interactive or --manual, you may not choose both."""
 
-    if error_message is not None:
-        cli_message(string=f"<red>{error_message}</red>")
-        send_usage_message(
-            data_context=context,
-            event=usage_event_end,
-            event_payload=interactive_mode.value,
-            success=False,
-        )
-        sys.exit(1)
+    _exit_early_if_error(error_message, context, usage_event_end, interactive_mode)
 
     # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
     if _suite_new_user_provided_any_flag(interactive_mode, profile, batch_request):
-        # Assume batch needed if user passes --profile
-        if profile and interactive_mode.value["interactive_flag"] is None:
-            cli_message(
-                "<green>Entering interactive mode since you passed the --profile flag</green>"
-            )
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE
-            )
-        elif profile and interactive_mode.value["interactive_flag"] is True:
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE
-            )
-        elif profile and interactive_mode.value["interactive_flag"] is False:
-            cli_message(
-                "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag</yellow>"
-            )
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE
-            )
-        # Assume batch needed if user passes --batch-request
-        elif (batch_request is not None) and (
-            interactive_mode.value["interactive_flag"] is None
-        ):
-            cli_message(
-                "<green>Entering interactive mode since you passed the --batch-request flag</green>"
-            )
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
-            )
-        elif (batch_request is not None) and (
-            interactive_mode.value["interactive_flag"] is False
-        ):
-            cli_message(
-                "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
-            )
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
-            )
+        interactive_mode = _suite_new_process_profile_and_batch_request_flags(
+            interactive_mode, profile, batch_request
+        )
+
     else:
         suite_create_method: str = click.prompt(
             """
@@ -408,6 +366,70 @@ def _suite_new_convert_flags_to_interactive_mode(
         interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
 
     return interactive_mode
+
+
+def _suite_new_process_profile_and_batch_request_flags(
+    interactive_mode: CLISuiteInteractiveFlagCombinations,
+    profile: bool,
+    batch_request: Optional[str],
+) -> CLISuiteInteractiveFlagCombinations:
+    # Assume batch needed if user passes --profile
+    if profile and interactive_mode.value["interactive_flag"] is None:
+        cli_message(
+            "<green>Entering interactive mode since you passed the --profile flag</green>"
+        )
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE
+        )
+    elif profile and interactive_mode.value["interactive_flag"] is True:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE
+        )
+    elif profile and interactive_mode.value["interactive_flag"] is False:
+        cli_message(
+            "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag</yellow>"
+        )
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE
+        )
+    # Assume batch needed if user passes --batch-request
+    elif (batch_request is not None) and (
+        interactive_mode.value["interactive_flag"] is None
+    ):
+        cli_message(
+            "<green>Entering interactive mode since you passed the --batch-request flag</green>"
+        )
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
+        )
+    elif (batch_request is not None) and (
+        interactive_mode.value["interactive_flag"] is False
+    ):
+        cli_message(
+            "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
+        )
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
+        )
+
+    return interactive_mode
+
+
+def _exit_early_if_error(
+    error_message: Optional[str],
+    context: DataContext,
+    usage_event_end: str,
+    interactive_mode: CLISuiteInteractiveFlagCombinations,
+):
+    if error_message is not None:
+        cli_message(string=f"<red>{error_message}</red>")
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            event_payload=interactive_mode.value,
+            success=False,
+        )
+        sys.exit(1)
 
 
 def _suite_new_user_provided_any_flag(
