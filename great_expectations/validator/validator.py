@@ -315,7 +315,7 @@ class Validator:
                 else:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite.add_expectation(
-                        configuration.get_raw_configuration()
+                        configuration.get_raw_configuration(), send_usage_event=False
                     )
 
                 # If there was no interactive evaluation, success will not have been computed.
@@ -1285,7 +1285,7 @@ set as active.
             self._active_validation = True
 
             # If a different validation data context was provided, override
-            validate__data_context = self._data_context
+            validation_data_context = self._data_context
             if data_context is None and self._data_context is not None:
                 data_context = self._data_context
             elif data_context is not None:
@@ -1425,7 +1425,7 @@ set as active.
                 },
             )
 
-            self._data_context = validate__data_context
+            self._data_context = validation_data_context
         except Exception as e:
             if getattr(data_context, "_usage_statistics_handler", None):
                 # noinspection PyProtectedMember
@@ -1670,9 +1670,14 @@ set as active.
             )
         if expectation_suite is not None:
             if isinstance(expectation_suite, dict):
-                expectation_suite = expectationSuiteSchema.load(expectation_suite)
+                expectation_suite_dict: dict = expectationSuiteSchema.load(
+                    expectation_suite
+                )
+                expectation_suite = ExpectationSuite(
+                    **expectation_suite_dict, data_context=self._data_context
+                )
             else:
-                expectation_suite = copy.deepcopy(expectation_suite)
+                expectation_suite: ExpectationSuite = copy.deepcopy(expectation_suite)
             self._expectation_suite = expectation_suite
 
             if expectation_suite_name is not None:
@@ -1692,7 +1697,8 @@ set as active.
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name
+                expectation_suite_name=expectation_suite_name,
+                data_context=self._data_context,
             )
 
         self._expectation_suite.execution_engine_type = type(

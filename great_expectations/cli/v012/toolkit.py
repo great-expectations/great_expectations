@@ -346,8 +346,8 @@ def exit_with_failure_message_and_stats(
 ) -> None:
     cli_message(message)
     send_usage_message(
-        event=usage_event,
         data_context=context,
+        event=usage_event,
         api_version="v2",
         success=False,
     )

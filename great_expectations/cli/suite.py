@@ -52,8 +52,8 @@ def suite(ctx):
 
     usage_stats_prefix = f"cli.suite.{ctx.invoked_subcommand}"
     send_usage_message(
-        event=f"{usage_stats_prefix}.begin",
         data_context=context,
+        event=f"{usage_stats_prefix}.begin",
         success=True,
     )
     ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
@@ -197,8 +197,8 @@ def _process_suite_new_flags_and_prompt(
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             event_payload=interactive_mode.value,
             success=False,
         )
@@ -355,8 +355,8 @@ def _suite_new_workflow(
         )
 
         send_usage_message(
-            event=usage_event,
             data_context=context,
+            event=usage_event,
             event_payload=interactive_mode.value,
             success=True,
         )
@@ -390,16 +390,16 @@ def _suite_new_workflow(
     ) as e:
         cli_message(string=f"<red>{e}</red>")
         send_usage_message(
-            event=usage_event,
             data_context=context,
+            event=usage_event,
             event_payload=interactive_mode.value,
             success=False,
         )
         sys.exit(1)
     except Exception as e:
         send_usage_message(
-            event=usage_event,
             data_context=context,
+            event=usage_event,
             event_payload=interactive_mode.value,
             success=False,
         )
@@ -563,8 +563,8 @@ options can be used.
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             event_payload=interactive_mode.value,
             success=False,
         )
@@ -759,8 +759,8 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
         if not suppress_usage_message:
             send_usage_message(
-                event=usage_event,
                 data_context=context,
+                event=usage_event,
                 event_payload=payload,
                 success=True,
             )
@@ -778,8 +778,8 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         cli_message(string=f"<red>{e}</red>")
         if not suppress_usage_message:
             send_usage_message(
-                event=usage_event,
                 data_context=context,
+                event=usage_event,
                 event_payload=interactive_mode.value,
                 success=False,
             )
@@ -788,8 +788,8 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
     except Exception as e:
         if not suppress_usage_message:
             send_usage_message(
-                event=usage_event,
                 data_context=context,
+                event=usage_event,
                 event_payload=interactive_mode.value,
                 success=False,
             )
@@ -804,8 +804,8 @@ def suite_demo(ctx):
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     send_usage_message(
-        event=usage_event_end,
         data_context=context,
+        event=usage_event_end,
         success=True,
     )
     cli_message(
@@ -827,8 +827,8 @@ def suite_delete(ctx, suite):
         suite_names: List[str] = context.list_expectation_suite_names()
     except Exception as e:
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=False,
         )
         raise e
@@ -860,8 +860,8 @@ def suite_delete(ctx, suite):
     context.delete_expectation_suite(suite)
     cli_message(string=f"Deleted the expectation suite named: {suite}")
     send_usage_message(
-        event=usage_event_end,
         data_context=context,
+        event=usage_event_end,
         success=True,
     )
 
@@ -876,8 +876,8 @@ def suite_list(ctx):
         suite_names: List[str] = context.list_expectation_suite_names()
     except Exception as e:
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=False,
         )
         raise e
@@ -888,8 +888,8 @@ def suite_list(ctx):
     if len(suite_names_styled) == 0:
         cli_message(string="No Expectation Suites found")
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=True,
         )
         return
@@ -903,8 +903,8 @@ def suite_list(ctx):
         string_list=suite_names_styled, list_intro_string=list_intro_string
     )
     send_usage_message(
-        event=usage_event_end,
         data_context=context,
+        event=usage_event_end,
         success=True,
     )
 

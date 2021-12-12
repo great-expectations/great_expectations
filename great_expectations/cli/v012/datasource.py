@@ -93,15 +93,15 @@ def datasource_new(directory):
     if datasource_name:
         cli_message(f"A new datasource '{datasource_name}' was added to your project.")
         send_usage_message(
-            event="cli.datasource.new",
             data_context=context,
+            event="cli.datasource.new",
             api_version="v2",
             success=True,
         )
     else:  # no datasource was created
         send_usage_message(
-            event="cli.datasource.new",
             data_context=context,
+            event="cli.datasource.new",
             api_version="v2",
             success=False,
         )
@@ -160,8 +160,8 @@ def datasource_list(directory):
         cli_message_dict(datasource)
 
     send_usage_message(
-        event="cli.datasource.list",
         data_context=context,
+        event="cli.datasource.list",
         api_version="v2",
         success=True,
     )
@@ -256,8 +256,8 @@ def datasource_profile(
             if not datasources:
                 cli_message(NO_DATASOURCES_FOUND)
                 send_usage_message(
-                    event="cli.datasource.profile",
                     data_context=context,
+                    event="cli.datasource.profile",
                     api_version="v2",
                     success=False,
                 )
@@ -268,8 +268,8 @@ def datasource_profile(
                     "Available datasources: " + ", ".join(datasources) + "</red>"
                 )
                 send_usage_message(
-                    event="cli.datasource.profile",
                     data_context=context,
+                    event="cli.datasource.profile",
                     api_version="v2",
                     success=False,
                 )
@@ -286,8 +286,8 @@ def datasource_profile(
                     skip_prompt_flag=assume_yes,
                 )
                 send_usage_message(
-                    event="cli.datasource.profile",
                     data_context=context,
+                    event="cli.datasource.profile",
                     api_version="v2",
                     success=True,
                 )
@@ -303,15 +303,15 @@ def datasource_profile(
                 skip_prompt_flag=assume_yes,
             )
             send_usage_message(
-                event="cli.datasource.profile",
                 data_context=context,
+                event="cli.datasource.profile",
                 api_version="v2",
                 success=True,
             )
     except Exception as e:
         send_usage_message(
-            event="cli.datasource.profile",
             data_context=context,
+            event="cli.datasource.profile",
             api_version="v2",
             success=False,
         )
@@ -381,8 +381,8 @@ def _add_pandas_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
     send_usage_message(
-        event="cli.new_ds_choice",
         data_context=context,
+        event="cli.new_ds_choice",
         event_payload={"type": "pandas"},
         api_version="v2",
         success=True,
@@ -473,8 +473,8 @@ def _add_sqlalchemy_datasource(context, prompt_for_datasource_name=True):
     selected_database = list(SupportedDatabases)[selected_database]
 
     send_usage_message(
-        event="cli.new_ds_choice",
         data_context=context,
+        event="cli.new_ds_choice",
         event_payload={"type": "sqlalchemy", "db": selected_database.name},
         api_version="v2",
         success=True,
@@ -867,8 +867,8 @@ def _add_spark_datasource(
     context, passthrough_generator_only=True, prompt_for_datasource_name=True
 ):
     send_usage_message(
-        event="cli.new_ds_choice",
         data_context=context,
+        event="cli.new_ds_choice",
         event_payload={"type": "spark"},
         api_version="v2",
         success=True,
@@ -1385,7 +1385,7 @@ Would you like to continue?"""
         batch_kwargs.update(temp_table_kwargs)
         BridgeValidator(
             batch=datasource.get_batch(batch_kwargs),
-            expectation_suite=ExpectationSuite("throwaway"),
+            expectation_suite=ExpectationSuite("throwaway", data_context=context),
         ).get_dataset()
 
     batch_kwargs["data_asset_name"] = data_asset_name

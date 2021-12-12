@@ -57,8 +57,8 @@ def datasource(ctx):
     ctx.obj.data_context = context
     usage_stats_prefix = f"cli.datasource.{ctx.invoked_subcommand}"
     send_usage_message(
-        event=f"{usage_stats_prefix}.begin",
         data_context=context,
+        event=f"{usage_stats_prefix}.begin",
         success=True,
     )
     ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
@@ -116,8 +116,8 @@ def delete_datasource(ctx, datasource):
     except ValueError:
         cli_message(f"<red>Datasource {datasource} could not be found.</red>")
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=False,
         )
         sys.exit(1)
@@ -126,8 +126,8 @@ def delete_datasource(ctx, datasource):
     except ValueError:
         cli_message("<green>{}</green>".format("Datasource deleted successfully."))
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=True,
         )
         sys.exit(0)
@@ -152,8 +152,8 @@ def datasource_list(ctx):
             )
 
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=True,
         )
     except Exception as e:
@@ -212,8 +212,8 @@ What data would you like Great Expectations to connect to?
             f"To continue editing this Datasource, run <green>jupyter notebook {notebook_path}</green>"
         )
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=True,
         )
         return None
@@ -223,8 +223,8 @@ What data would you like Great Expectations to connect to?
             """<green>Because you requested to create a new Datasource, we'll open a notebook for you now to complete it!</green>\n\n"""
         )
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=True,
         )
         toolkit.launch_jupyter_notebook(notebook_path)
@@ -267,8 +267,8 @@ class BaseDatasourceNewYamlHelper:
 
     def send_backend_choice_usage_message(self, context: DataContext) -> None:
         send_usage_message(
-            event="cli.new_ds_choice",
             data_context=context,
+            event="cli.new_ds_choice",
             event_payload={
                 "type": self.datasource_type.value,
                 **self.usage_stats_payload,
@@ -325,7 +325,7 @@ data_connectors:
     class_name: InferredAssetFilesystemDataConnector
     base_directory: {self.base_path}
     default_regex:
-      group_names: 
+      group_names:
         - data_asset_name
       pattern: (.*)
   default_runtime_data_connector_name:

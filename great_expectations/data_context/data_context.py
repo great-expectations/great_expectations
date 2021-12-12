@@ -296,18 +296,6 @@ class BaseDataContext:
     _data_context = None
 
     @classmethod
-    def get_data_context(cls) -> "BaseDataContext":
-        if cls._data_context is None:
-            raise DataContextError(
-                f"Could not retrieve DataContext from empty registry. Please instantiate DataContext before calling get_data_context()."
-            )
-        return cls._data_context
-
-    @classmethod
-    def set_data_context(cls, data_context: "BaseDataContext"):
-        cls._data_context = data_context
-
-    @classmethod
     def validate_config(cls, project_config):
         if isinstance(project_config, DataContextConfig):
             return True
@@ -407,7 +395,6 @@ class BaseDataContext:
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
-        BaseDataContext.set_data_context(self)
 
     @property
     def ge_cloud_config(self):
@@ -2080,6 +2067,21 @@ class BaseDataContext:
             validation_operators.append(value)
         return validation_operators
 
+    def send_usage_message(
+        self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
+    ):
+        """helper method to send a usage method using DataContext. Used when sending usage events from
+            classes like ExpectationSuite.
+            event
+        Args:
+            event (str): str representation of event
+            event_payload (dict): optional event payload
+            success (bool): optional success param
+        Returns:
+            None
+        """
+        send_usage_message(self, event, event_payload, success)
+
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
@@ -2101,7 +2103,7 @@ class BaseDataContext:
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
         expectation_suite: ExpectationSuite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name
+            expectation_suite_name=expectation_suite_name, data_context=self
         )
         if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
@@ -2181,7 +2183,10 @@ class BaseDataContext:
             )
 
         if self.expectations_store.has_key(key):
-            return self.expectations_store.get(key)
+            expectations_schema_dict: dict = self.expectations_store.get(key)
+            # create the ExpectationSuite from constructor
+            return ExpectationSuite(**expectations_schema_dict, data_context=self)
+
         else:
             raise ge_exceptions.DataContextError(
                 "expectation_suite %s not found" % expectation_suite_name
@@ -2371,9 +2376,12 @@ class BaseDataContext:
         # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
         # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
         for key in self.expectations_store.list_keys():
-            expectation_suite = self.expectations_store.get(key)
-            if not expectation_suite:
+            expectation_suite_dict: dict = self.expectations_store.get(key)
+            if not expectation_suite_dict:
                 continue
+            expectation_suite: ExpectationSuite = ExpectationSuite(
+                **expectation_suite_dict, data_context=self
+            )
 
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
             if len(dependencies) > 0:
