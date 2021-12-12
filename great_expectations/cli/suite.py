@@ -147,6 +147,31 @@ def suite_new(
     )
 
 
+def _suite_new_convert_flags_to_interactive_mode(
+    interactive_flag: bool, manual_flag: bool
+) -> CLISuiteInteractiveFlagCombinations:
+    if interactive_flag is True and manual_flag is True:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
+        )
+    elif interactive_flag is False and manual_flag is False:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
+        )
+    elif interactive_flag is True and manual_flag is False:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE
+        )
+    elif interactive_flag is False and manual_flag is True:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE
+        )
+    else:
+        interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
+
+    return interactive_mode
+
+
 def _process_suite_new_flags_and_prompt(
     context: DataContext,
     usage_event_end: str,
@@ -170,29 +195,16 @@ def _process_suite_new_flags_and_prompt(
         {"interactive": True, "profile": False}
     """
 
-    error_message: Optional[str] = None
+    interactive_mode: Optional[
+        CLISuiteInteractiveFlagCombinations
+    ] = _suite_new_convert_flags_to_interactive_mode(interactive_flag, manual_flag)
 
-    # Convert interactive / no-interactive flags to interactive_mode
-    interactive_mode: Optional[CLISuiteInteractiveFlagCombinations]
-    if interactive_flag is True and manual_flag is True:
+    error_message: Optional[str] = None
+    if (
+        interactive_mode
+        == CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
+    ):
         error_message = """Please choose either --interactive or --manual, you may not choose both."""
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
-        )
-    elif interactive_flag is False and manual_flag is False:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
-        )
-    elif interactive_flag is True and manual_flag is False:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE
-        )
-    elif interactive_flag is False and manual_flag is True:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE
-        )
-    else:
-        interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
 
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
