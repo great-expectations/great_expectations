@@ -75,9 +75,11 @@ def determine_tests_to_run(
     for file in test_candidates:
         # Throw out files that are in our ignore list
         if any(file.startswith(path) for path in ignore_paths):
+            logger.info(f"Skipped '{file}' due to --ignore flag")
             continue
         # Throw out files that aren't explicitly part of a filter (if supplied)
         if filter_ and not file.startswith(filter_):
+            logger.info(f"Skipped '{file}' due to --filter flag")
             continue
         files_to_test.append(file)
     return files_to_test
