@@ -9,7 +9,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
 
-from ...core import ExpectationSuite
 from ...core.expectation_validation_result import ExpectationSuiteValidationResult
 from ...core.run_identifier import RunIdentifier
 from ...validation_operators.types.validation_operator_result import (
@@ -615,7 +614,7 @@ class ValidationResultsPageRenderer(Renderer):
 
 
 class ExpectationSuitePageRenderer(Renderer):
-    def __init__(self, data_context=None, column_section_renderer=None):
+    def __init__(self, column_section_renderer=None):
         super().__init__()
         if column_section_renderer is None:
             column_section_renderer = {
@@ -637,11 +636,6 @@ class ExpectationSuitePageRenderer(Renderer):
             )
 
     def render(self, expectations):
-        if isinstance(expectations, dict):
-            print("I am being called")
-            expectations = ExpectationSuite(
-                **expectations, data_context=self._data_context
-            )
         (
             columns,
             ordered_columns,

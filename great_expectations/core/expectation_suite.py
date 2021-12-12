@@ -30,6 +30,7 @@ from great_expectations.marshmallow__shade import (
     Schema,
     ValidationError,
     fields,
+    post_load,
     pre_dump,
 )
 from great_expectations.types import SerializableDictDot
@@ -49,7 +50,6 @@ class ExpectationSuite(SerializableDictDot):
     def __init__(
         self,
         expectation_suite_name,
-        data_context,
         expectations=None,
         evaluation_parameters=None,
         data_asset_type=None,
@@ -59,8 +59,6 @@ class ExpectationSuite(SerializableDictDot):
     ):
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
-        self._data_context = data_context
-
         if expectations is None:
             expectations = []
         self.expectations = [
@@ -135,10 +133,7 @@ class ExpectationSuite(SerializableDictDot):
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
-                    other_dict: dict = expectationSuiteSchema.load(other)
-                    other: ExpectationSuite = ExpectationSuite(
-                        **other_dict, data_context=self._data_context
-                    )
+                    other = expectationSuiteSchema.load(other)
                 except ValidationError:
                     logger.debug(
                         "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
@@ -180,19 +175,6 @@ class ExpectationSuite(SerializableDictDot):
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
-
-    def __deepcopy__(self, memo: dict):
-        cls = self.__class__
-        result = cls.__new__(cls)
-
-        memo[id(self)] = result
-
-        attributes_to_copy = list(ExpectationSuiteSchema().fields.keys())
-        for key in attributes_to_copy:
-            setattr(result, key, deepcopy(getattr(self, key)))
-
-        setattr(result, "_data_context", self._data_context)
-        return result
 
     def to_json_dict(self):
         myself = expectationSuiteSchema.dump(self)
@@ -523,7 +505,6 @@ class ExpectationSuite(SerializableDictDot):
         expectation_configuration: ExpectationConfiguration,
         match_type: str = "domain",
         overwrite_existing: bool = True,
-        send_usage_event: bool = True,
     ) -> ExpectationConfiguration:
         """
 
@@ -533,8 +514,6 @@ class ExpectationSuite(SerializableDictDot):
                 and so whether we should add or replace.
             overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
                 False.
-            send_usage_event: will only send usage event if method called directly from ExpectationSuite (not from
-                              Validator or Profiler), and if usage_statistics is enabled.
         Returns:
             The ExpectationConfiguration to add or replace.
         Raises:
@@ -546,14 +525,6 @@ class ExpectationSuite(SerializableDictDot):
         )
 
         if len(found_expectation_indexes) > 1:
-            if send_usage_event:
-                usage_stats_event_name: str = "expectation_suite.add_expectation"
-                usage_stats_event_payload: dict = {}
-                self._data_context.send_usage_message(
-                    event=usage_stats_event_name,
-                    event_payload=usage_stats_event_payload,
-                    success=False,
-                )
             raise ValueError(
                 "More than one matching expectation was found. Please be more specific with your search "
                 "criteria"
@@ -577,14 +548,6 @@ class ExpectationSuite(SerializableDictDot):
                     found_expectation_indexes[0]
                 ] = expectation_configuration
             else:
-                if send_usage_event:
-                    usage_stats_event_name: str = "expectation_suite.add_expectation"
-                    usage_stats_event_payload: dict = {}
-                    self._data_context.send_usage_message(
-                        event=usage_stats_event_name,
-                        event_payload=usage_stats_event_payload,
-                        success=False,
-                    )
                 raise DataContextError(
                     "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
                     "ExpectationConfiguration, set overwrite_existing=True"
@@ -592,14 +555,6 @@ class ExpectationSuite(SerializableDictDot):
         else:
             self.append_expectation(expectation_configuration)
 
-        if send_usage_event:
-            usage_stats_event_name: str = "expectation_suite.add_expectation"
-            usage_stats_event_payload: dict = {}
-            self._data_context.send_usage_message(
-                event=usage_stats_event_name,
-                event_payload=usage_stats_event_payload,
-                success=True,
-            )
         return expectation_configuration
 
     def get_grouped_and_ordered_expectations_by_column(
@@ -691,9 +646,9 @@ class ExpectationSuiteSchema(Schema):
         return data
 
     # noinspection PyUnusedLocal
-    # @post_load
-    # def make_expectation_suite(self, data, **kwargs):
-    #     return ExpectationSuite(**data)
+    @post_load
+    def make_expectation_suite(self, data, **kwargs):
+        return ExpectationSuite(**data)
 
 
 expectationSuiteSchema = ExpectationSuiteSchema()

@@ -5,7 +5,6 @@ from collections import OrderedDict
 from typing import Any, List, Optional, Tuple
 
 import great_expectations.exceptions as exceptions
-from great_expectations.core import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.store.html_site_store import (
     HtmlSiteStore,
@@ -352,7 +351,6 @@ class DefaultSiteSectionBuilder:
         **kwargs,
     ):
         self.name = name
-        self.data_context = data_context
         self.source_store = data_context.stores[source_store_name]
         self.target_store = target_store
         self.run_name_filter = run_name_filter
@@ -425,10 +423,6 @@ class DefaultSiteSectionBuilder:
                     continue
             try:
                 resource = self.source_store.get(resource_key)
-                if isinstance(resource_key, ExpectationSuiteIdentifier):
-                    resource = ExpectationSuite(
-                        **resource, data_context=self.data_context
-                    )
             except exceptions.InvalidKeyError:
                 logger.warning(
                     f"Object with Key: {str(resource_key)} could not be retrieved. Skipping..."

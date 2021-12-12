@@ -315,7 +315,7 @@ class Validator:
                 else:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite.add_expectation(
-                        configuration.get_raw_configuration(), send_usage_event=False
+                        configuration.get_raw_configuration()
                     )
 
                 # If there was no interactive evaluation, success will not have been computed.
@@ -1670,14 +1670,9 @@ set as active.
             )
         if expectation_suite is not None:
             if isinstance(expectation_suite, dict):
-                expectation_suite_dict: dict = expectationSuiteSchema.load(
-                    expectation_suite
-                )
-                expectation_suite = ExpectationSuite(
-                    **expectation_suite_dict, data_context=self._data_context
-                )
+                expectation_suite = expectationSuiteSchema.load(expectation_suite)
             else:
-                expectation_suite: ExpectationSuite = copy.deepcopy(expectation_suite)
+                expectation_suite = copy.deepcopy(expectation_suite)
             self._expectation_suite = expectation_suite
 
             if expectation_suite_name is not None:
@@ -1697,8 +1692,7 @@ set as active.
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
-                data_context=self._data_context,
+                expectation_suite_name=expectation_suite_name
             )
 
         self._expectation_suite.execution_engine_type = type(

@@ -1865,9 +1865,7 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
     :return: None. asserts correctness of results.
     """
-    expectation_suite = ExpectationSuite(
-        "json_test_suite", data_context=validator._data_context
-    )
+    expectation_suite = ExpectationSuite("json_test_suite")
     # noinspection PyProtectedMember
     validator._initialize_expectations(expectation_suite=expectation_suite)
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
