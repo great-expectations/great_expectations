@@ -15,17 +15,17 @@ def get_changed_files(
         ["git", "diff", "HEAD", branch, "--name-only"], stdout=subprocess.PIPE
     )
     files = [f.decode("utf-8") for f in process.stdout.splitlines()]
-    source_files = get_changed_source_files(files, source_path)
-    test_files = get_changed_test_files(files, tests_path)
+    source_files = _get_changed_source_files(files, source_path)
+    test_files = _get_changed_test_files(files, tests_path)
     return source_files, test_files
 
 
-def get_changed_source_files(files: List[str], source_path: str) -> List[str]:
+def _get_changed_source_files(files: List[str], source_path: str) -> List[str]:
     valid_src = lambda f: f.startswith(source_path) and f.endswith(".py")
     return [f for f in files if valid_src(f)]
 
 
-def get_changed_test_files(files: List[str], tests_path: str) -> List[str]:
+def _get_changed_test_files(files: List[str], tests_path: str) -> List[str]:
     valid_test = (
         lambda f: f.startswith(tests_path)
         and f.endswith(".py")
