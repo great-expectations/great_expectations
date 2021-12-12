@@ -170,9 +170,10 @@ def _process_suite_new_flags_and_prompt(
         {"interactive": True, "profile": False}
     """
 
-    interactive_mode: Optional[
-        CLISuiteInteractiveFlagCombinations
-    ] = _suite_new_convert_flags_to_interactive_mode(interactive_flag, manual_flag)
+    interactive_mode: Optional[CLISuiteInteractiveFlagCombinations]
+    interactive_mode = _suite_new_convert_flags_to_interactive_mode(
+        interactive_flag, manual_flag
+    )
 
     error_message: Optional[str] = None
     if (
@@ -183,7 +184,6 @@ def _process_suite_new_flags_and_prompt(
 
     _exit_early_if_error(error_message, context, usage_event_end, interactive_mode)
 
-    # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
     if _suite_new_user_provided_any_flag(interactive_mode, profile, batch_request):
         interactive_mode = _suite_new_process_profile_and_batch_request_flags(
             interactive_mode, profile, batch_request
@@ -373,6 +373,8 @@ def _suite_new_process_profile_and_batch_request_flags(
     profile: bool,
     batch_request: Optional[str],
 ) -> CLISuiteInteractiveFlagCombinations:
+
+    # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
     # Assume batch needed if user passes --profile
     if profile and interactive_mode.value["interactive_flag"] is None:
         cli_message(
