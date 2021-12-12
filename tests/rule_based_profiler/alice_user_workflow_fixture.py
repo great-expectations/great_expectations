@@ -172,7 +172,7 @@ def alice_columnar_table_single_batch():
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
     expected_expectation_suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name
+        expectation_suite_name=expectation_suite_name,
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:

@@ -30,7 +30,6 @@ from great_expectations.marshmallow__shade import (
     Schema,
     ValidationError,
     fields,
-    post_load,
     pre_dump,
 )
 from great_expectations.types import SerializableDictDot
@@ -50,6 +49,7 @@ class ExpectationSuite(SerializableDictDot):
     def __init__(
         self,
         expectation_suite_name,
+        data_context,
         expectations=None,
         evaluation_parameters=None,
         data_asset_type=None,
@@ -59,6 +59,8 @@ class ExpectationSuite(SerializableDictDot):
     ):
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
+        self._data_context = data_context
+
         if expectations is None:
             expectations = []
         self.expectations = [
@@ -133,7 +135,10 @@ class ExpectationSuite(SerializableDictDot):
         if not isinstance(other, self.__class__):
             if isinstance(other, dict):
                 try:
-                    other = expectationSuiteSchema.load(other)
+                    other_dict: dict = expectationSuiteSchema.load(other)
+                    other: ExpectationSuite = ExpectationSuite(
+                        **other_dict, data_context=self._data_context
+                    )
                 except ValidationError:
                     logger.debug(
                         "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
@@ -175,6 +180,19 @@ class ExpectationSuite(SerializableDictDot):
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
+
+    def __deepcopy__(self, memo: dict):
+        cls = self.__class__
+        result = cls.__new__(cls)
+
+        memo[id(self)] = result
+
+        attributes_to_copy = list(ExpectationSuiteSchema().fields.keys())
+        for key in attributes_to_copy:
+            setattr(result, key, deepcopy(getattr(self, key)))
+
+        setattr(result, "_data_context", self._data_context)
+        return result
 
     def to_json_dict(self):
         myself = expectationSuiteSchema.dump(self)
@@ -523,9 +541,6 @@ class ExpectationSuite(SerializableDictDot):
             More than one match
             One match if overwrite_existing = False
         """
-        if send_usage_event:
-            data_context_reference_for_usage_stats = ge.DataContext.get_data_context()
-
         found_expectation_indexes = self.find_expectation_indexes(
             expectation_configuration, match_type
         )
@@ -534,7 +549,7 @@ class ExpectationSuite(SerializableDictDot):
             if send_usage_event:
                 usage_stats_event_name: str = "expectation_suite.add_expectation"
                 usage_stats_event_payload: dict = {}
-                data_context_reference_for_usage_stats.send_usage_message(
+                self._data_context.send_usage_message(
                     event=usage_stats_event_name,
                     event_payload=usage_stats_event_payload,
                     success=False,
@@ -565,7 +580,7 @@ class ExpectationSuite(SerializableDictDot):
                 if send_usage_event:
                     usage_stats_event_name: str = "expectation_suite.add_expectation"
                     usage_stats_event_payload: dict = {}
-                    data_context_reference_for_usage_stats.send_usage_message(
+                    self._data_context.send_usage_message(
                         event=usage_stats_event_name,
                         event_payload=usage_stats_event_payload,
                         success=False,
@@ -580,7 +595,7 @@ class ExpectationSuite(SerializableDictDot):
         if send_usage_event:
             usage_stats_event_name: str = "expectation_suite.add_expectation"
             usage_stats_event_payload: dict = {}
-            data_context_reference_for_usage_stats.send_usage_message(
+            self._data_context.send_usage_message(
                 event=usage_stats_event_name,
                 event_payload=usage_stats_event_payload,
                 success=True,
@@ -676,9 +691,9 @@ class ExpectationSuiteSchema(Schema):
         return data
 
     # noinspection PyUnusedLocal
-    @post_load
-    def make_expectation_suite(self, data, **kwargs):
-        return ExpectationSuite(**data)
+    # @post_load
+    # def make_expectation_suite(self, data, **kwargs):
+    #     return ExpectationSuite(**data)
 
 
 expectationSuiteSchema = ExpectationSuiteSchema()

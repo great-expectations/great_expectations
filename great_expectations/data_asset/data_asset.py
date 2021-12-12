@@ -76,11 +76,11 @@ class DataAsset:
             )
         super().__init__(*args, **kwargs)
         self._config = {"interactive_evaluation": interactive_evaluation}
+        self._data_context = data_context
         self._initialize_expectations(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
         )
-        self._data_context = data_context
         self._batch_kwargs = BatchKwargs(batch_kwargs)
         self._batch_markers = batch_markers
         self._batch_parameters = batch_parameters
@@ -363,9 +363,15 @@ class DataAsset:
         """
         if expectation_suite is not None:
             if isinstance(expectation_suite, dict):
-                expectation_suite = expectationSuiteSchema.load(expectation_suite)
+                expectation_suite_dict: dict = expectationSuiteSchema.load(
+                    expectation_suite
+                )
+                expectation_suite: ExpectationSuite = ExpectationSuite(
+                    **expectation_suite_dict, data_context=self._data_context
+                )
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
+
             self._expectation_suite = expectation_suite
 
             if expectation_suite_name is not None:
@@ -385,7 +391,8 @@ class DataAsset:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name
+                expectation_suite_name=expectation_suite_name,
+                data_context=self._data_context,
             )
 
         self._expectation_suite.data_asset_type = self._data_asset_type
@@ -829,7 +836,12 @@ class DataAsset:
             elif isinstance(expectation_suite, str):
                 try:
                     with open(expectation_suite) as infile:
-                        expectation_suite = expectationSuiteSchema.loads(infile.read())
+                        expectation_suite_dict: dict = expectationSuiteSchema.loads(
+                            infile.read()
+                        )
+                        expectation_suite: ExpectationSuite = ExpectationSuite(
+                            **expectation_suite_dict, data_context=self._data_context
+                        )
                 except ValidationError:
                     raise
                 except OSError:

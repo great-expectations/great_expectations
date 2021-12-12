@@ -844,7 +844,11 @@ def test_data_context_updates_expectation_suite_names(
             "a_new_new_suite_name.json",
         ),
     ) as suite_file:
-        loaded_suite = expectationSuiteSchema.load(json.load(suite_file))
+        loaded_suite_dict: dict = expectationSuiteSchema.load(json.load(suite_file))
+        loaded_suite: ExpectationSuite = ExpectationSuite(
+            **loaded_suite_dict,
+            data_context=data_context_parameterized_expectation_suite,
+        )
         assert loaded_suite.expectation_suite_name == "a_new_new_suite_name"
 
     #   3. Using the new name but having the context draw that from the suite
@@ -1747,7 +1751,6 @@ def test_add_expectation_to_expectation_suite(
     mock_emit, empty_data_context_stats_enabled
 ):
     context: DataContext = empty_data_context_stats_enabled
-    context.set_data_context(context)
 
     expectation_suite: ExpectationSuite = context.create_expectation_suite(
         expectation_suite_name="my_new_expectation_suite"
