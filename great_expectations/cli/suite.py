@@ -147,31 +147,6 @@ def suite_new(
     )
 
 
-def _suite_new_convert_flags_to_interactive_mode(
-    interactive_flag: bool, manual_flag: bool
-) -> CLISuiteInteractiveFlagCombinations:
-    if interactive_flag is True and manual_flag is True:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
-        )
-    elif interactive_flag is False and manual_flag is False:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
-        )
-    elif interactive_flag is True and manual_flag is False:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE
-        )
-    elif interactive_flag is False and manual_flag is True:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE
-        )
-    else:
-        interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
-
-    return interactive_mode
-
-
 def _process_suite_new_flags_and_prompt(
     context: DataContext,
     usage_event_end: str,
@@ -416,6 +391,31 @@ def _suite_new_workflow(
             success=False,
         )
         raise e
+
+
+def _suite_new_convert_flags_to_interactive_mode(
+    interactive_flag: bool, manual_flag: bool
+) -> CLISuiteInteractiveFlagCombinations:
+    if interactive_flag is True and manual_flag is True:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
+        )
+    elif interactive_flag is False and manual_flag is False:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
+        )
+    elif interactive_flag is True and manual_flag is False:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE
+        )
+    elif interactive_flag is False and manual_flag is True:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE
+        )
+    else:
+        interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
+
+    return interactive_mode
 
 
 @suite.command(name="edit")
