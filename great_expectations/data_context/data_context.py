@@ -449,18 +449,19 @@ class BaseDataContext:
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
 
-    def _init_datasources(self, config):
+    def _init_datasources(self, config: DataContextConfig) -> None:
         if not config.datasources:
             return
-        for datasource_name, data_source_config in config.datasources.items():
+        for datasource_name in config.datasources:
             try:
                 self._cached_datasources[datasource_name] = self.get_datasource(
                     datasource_name=datasource_name
                 )
-            except ge_exceptions.DatasourceInitializationError:
+            except ge_exceptions.DatasourceInitializationError as e:
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
+                logger.warn(f"Cannot initialize datasource {datasource_name}: {e}")
                 pass
 
     def _apply_global_config_overrides(self):
