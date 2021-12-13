@@ -6,6 +6,7 @@ import pytest
 from ruamel.yaml import YAML
 
 import great_expectations.dataset.sqlalchemy_dataset
+from great_expectations import DataContext
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import SqlAlchemyDataset
@@ -237,7 +238,10 @@ def test_sqlalchemy_datasource_query_and_table_handling(sqlitedb_engine):
     )
 
 
-def test_sqlalchemy_datasource_processes_dataset_options(test_db_connection_string):
+def test_sqlalchemy_datasource_processes_dataset_options(
+    test_db_connection_string, empty_data_context
+):
+    context: DataContext = empty_data_context
     datasource = SqlAlchemyDatasource(
         "SqlAlchemy", credentials={"url": test_db_connection_string}
     )
@@ -246,7 +250,9 @@ def test_sqlalchemy_datasource_processes_dataset_options(test_db_connection_stri
     )
     batch_kwargs["query"] = "select * from table_1;"
     batch = datasource.get_batch(batch_kwargs)
-    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(
+        batch, ExpectationSuite(expectation_suite_name="foo", data_context=context)
+    )
     dataset = validator.get_dataset()
     assert dataset.caching is False
 
@@ -255,7 +261,9 @@ def test_sqlalchemy_datasource_processes_dataset_options(test_db_connection_stri
     )
     batch_kwargs["query"] = "select * from table_1;"
     batch = datasource.get_batch(batch_kwargs)
-    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(
+        batch, ExpectationSuite(expectation_suite_name="foo", data_context=context)
+    )
     dataset = validator.get_dataset()
     assert dataset.caching is True
 
@@ -264,6 +272,8 @@ def test_sqlalchemy_datasource_processes_dataset_options(test_db_connection_stri
         "dataset_options": {"caching": False},
     }
     batch = datasource.get_batch(batch_kwargs)
-    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(
+        batch, ExpectationSuite(expectation_suite_name="foo", data_context=context)
+    )
     dataset = validator.get_dataset()
     assert dataset.caching is False

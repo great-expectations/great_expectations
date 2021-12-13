@@ -28,8 +28,8 @@ from great_expectations.render.renderer.content_block import (
 
 
 @pytest.fixture(scope="module")
-def titanic_expectations(empty_data_context_stats_enabled):
-    context: DataContext = empty_data_context_stats_enabled
+def titanic_expectations(empty_data_context_module_scoped):
+    context: DataContext = empty_data_context_module_scoped
     with open(
         file_relative_path(__file__, "../test_sets/titanic_expectations.json")
     ) as infile:

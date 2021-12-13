@@ -47,8 +47,8 @@ def titanic_profiler_evrs_with_exception():
 
 
 @pytest.fixture(scope="module")
-def titanic_dataset_profiler_expectations(empty_data_context_stats_enabled):
-    context: DataContext = empty_data_context_stats_enabled
+def titanic_dataset_profiler_expectations(empty_data_context_module_scoped):
+    context: DataContext = empty_data_context_module_scoped
     with open(
         file_relative_path(
             __file__, "./fixtures/BasicDatasetProfiler_expectations.json"
@@ -62,9 +62,9 @@ def titanic_dataset_profiler_expectations(empty_data_context_stats_enabled):
 
 @pytest.fixture(scope="module")
 def titanic_dataset_profiler_expectations_with_distribution(
-    empty_data_context_stats_enabled,
+    empty_data_context_module_scoped,
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context: DataContext = empty_data_context_module_scoped
     with open(
         file_relative_path(
             __file__,
