@@ -190,39 +190,7 @@ def _process_suite_new_flags_and_prompt(
         )
 
     else:
-        suite_create_method: str = click.prompt(
-            """
-How would you like to create your Expectation Suite?
-    1. Manually, without interacting with a sample batch of data (default)
-    2. Interactively, with a sample batch of data
-    3. Automatically, using a profiler
-""",
-            type=click.Choice(["1", "2", "3"]),
-            show_choices=False,
-            default="1",
-            show_default=False,
-        )
-        # Default option
-        if suite_create_method == "":
-            profile = False
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
-            )
-        elif suite_create_method == "1":
-            profile = False
-            interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE
-        elif suite_create_method == "2":
-            profile = False
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_FALSE
-            )
-        elif suite_create_method == "3":
-            profile = True
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_TRUE
-            )
-        else:
-            interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
+        interactive_mode, profile = _suite_new_mode_from_prompt(profile)
 
     return {
         "interactive_mode": interactive_mode,
@@ -447,6 +415,42 @@ def _suite_new_user_provided_any_flag(
         )
     )
     return user_provided_any_flag_skip_prompt
+
+
+def _suite_new_mode_from_prompt(profile: bool):
+    suite_create_method: str = click.prompt(
+        """
+How would you like to create your Expectation Suite?
+    1. Manually, without interacting with a sample batch of data (default)
+    2. Interactively, with a sample batch of data
+    3. Automatically, using a profiler
+""",
+        type=click.Choice(["1", "2", "3"]),
+        show_choices=False,
+        default="1",
+        show_default=False,
+    )
+    # Default option
+    if suite_create_method == "":
+        profile = False
+        interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
+    elif suite_create_method == "1":
+        profile = False
+        interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE
+    elif suite_create_method == "2":
+        profile = False
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_FALSE
+        )
+    elif suite_create_method == "3":
+        profile = True
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_TRUE
+        )
+    else:
+        interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
+
+    return interactive_mode, profile
 
 
 @suite.command(name="edit")
