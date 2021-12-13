@@ -1,12 +1,13 @@
 import copy
+import logging
 import os
 
 import pytest
 
 import great_expectations as ge
 from great_expectations.core.util import nested_update
-from great_expectations.dataset.util import check_sql_engine_dialect
 from great_expectations.util import (
+    convert_nulls_to_None,
     deep_filter_properties_iterable,
     filter_properties_dict,
     get_currently_executing_function_call_arguments,
@@ -164,8 +165,8 @@ def test_validate_invalid_parameters(
         ge.validate(dataset)
 
 
-def test_gen_directory_tree_str(tmp_path_factory):
-    project_dir = str(tmp_path_factory.mktemp("project_dir"))
+def test_gen_directory_tree_str(tmpdir):
+    project_dir = str(tmpdir.mkdir("project_dir"))
     os.mkdir(os.path.join(project_dir, "BBB"))
     with open(os.path.join(project_dir, "BBB", "bbb.txt"), "w") as f:
         f.write("hello")
@@ -174,13 +175,14 @@ def test_gen_directory_tree_str(tmp_path_factory):
 
     os.mkdir(os.path.join(project_dir, "AAA"))
 
-    print(ge.util.gen_directory_tree_str(project_dir))
+    res = ge.util.gen_directory_tree_str(project_dir)
+    print(res)
 
     # Note: files and directories are sorteds alphabetically, so that this method can be used for testing.
     assert (
-        ge.util.gen_directory_tree_str(project_dir)
+        res
         == """\
-project_dir0/
+project_dir/
     AAA/
     BBB/
         aaa.txt
@@ -244,6 +246,40 @@ def test_linter_changes_dirty_code():
 def test_linter_leaves_clean_code():
     code = "foo = [1, 2, 3]\n"
     assert lint_code(code) == "foo = [1, 2, 3]\n"
+
+
+def test_convert_nulls_to_None_no_match():
+    text = """
+    "kwargs": {"max_value": 10000, "min_value": 10000},
+    "expectation_type": "expect_table_row_count_to_be_between",
+    "meta": {},
+    """
+    res = convert_nulls_to_None(text)
+    assert res == text
+
+
+def test_convert_nulls_to_None_with_match(caplog):
+    text = """
+    "ge_cloud_id": null,
+    "expectation_context": {"description": null},
+    """
+    expected = """
+    "ge_cloud_id": None,
+    "expectation_context": {"description": None},
+    """
+
+    with caplog.at_level(logging.INFO):
+        res = convert_nulls_to_None(text)
+
+    assert res == expected
+    assert (
+        "Replaced 'ge_cloud_id: null' with 'ge_cloud_id: None' before writing to file"
+        in caplog.text
+    )
+    assert (
+        "Replaced 'description: null' with 'description: None' before writing to file"
+        in caplog.text
+    )
 
 
 def test_get_currently_executing_function_call_arguments(a=None, *args, **kwargs):

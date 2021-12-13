@@ -293,6 +293,8 @@ class BaseDataContext:
         + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
     )
 
+    _data_context = None
+
     @classmethod
     def validate_config(cls, project_config):
         if isinstance(project_config, DataContextConfig):

@@ -10,6 +10,7 @@ from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.templates import YAMLToString
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
@@ -55,7 +56,7 @@ def datasource(ctx):
     # TODO consider moving this all the way up in to the CLIState constructor
     ctx.obj.data_context = context
     usage_stats_prefix = f"cli.datasource.{ctx.invoked_subcommand}"
-    toolkit.send_usage_message(
+    send_usage_message(
         data_context=context,
         event=f"{usage_stats_prefix}.begin",
         success=True,
@@ -114,13 +115,21 @@ def delete_datasource(ctx, datasource):
         context.delete_datasource(datasource)
     except ValueError:
         cli_message(f"<red>Datasource {datasource} could not be found.</red>")
-        toolkit.send_usage_message(context, event=usage_event_end, success=False)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=False,
+        )
         sys.exit(1)
     try:
         context.get_datasource(datasource)
     except ValueError:
         cli_message("<green>{}</green>".format("Datasource deleted successfully."))
-        toolkit.send_usage_message(context, event=usage_event_end, success=True)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
+        )
         sys.exit(0)
 
 
@@ -142,8 +151,10 @@ def datasource_list(ctx):
                 }
             )
 
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=True
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
@@ -200,14 +211,22 @@ What data would you like Great Expectations to connect to?
         cli_message(
             f"To continue editing this Datasource, run <green>jupyter notebook {notebook_path}</green>"
         )
-        toolkit.send_usage_message(context, event=usage_event_end, success=True)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
+        )
         return None
 
     if notebook_path:
         cli_message(
             """<green>Because you requested to create a new Datasource, we'll open a notebook for you now to complete it!</green>\n\n"""
         )
-        toolkit.send_usage_message(context, event=usage_event_end, success=True)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
+        )
         toolkit.launch_jupyter_notebook(notebook_path)
 
 
@@ -247,7 +266,7 @@ class BaseDatasourceNewYamlHelper:
         raise NotImplementedError
 
     def send_backend_choice_usage_message(self, context: DataContext) -> None:
-        toolkit.send_usage_message(
+        send_usage_message(
             data_context=context,
             event="cli.new_ds_choice",
             event_payload={
