@@ -222,12 +222,16 @@ def get_runtime_batch_request(
     if validation_batch_request is None:
         validation_batch_request = {}
 
+    if isinstance(validation_batch_request, BatchRequest):
+        validation_batch_request = validation_batch_request.to_dict()
+
+    if isinstance(runtime_config_batch_request, BatchRequest):
+        runtime_config_batch_request = runtime_config_batch_request.to_dict()
+
     effective_batch_request: dict = dict(
         **runtime_config_batch_request, **validation_batch_request
     )
-    if "runtime_parameters" in effective_batch_request or isinstance(
-        validation_batch_request, RuntimeBatchRequest
-    ):
+    if "runtime_parameters" in effective_batch_request:
         batch_request_class = RuntimeBatchRequest
     else:
         batch_request_class = BatchRequest

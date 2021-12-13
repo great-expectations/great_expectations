@@ -1,4 +1,5 @@
 import atexit
+import copy
 import datetime
 import json
 import logging
@@ -23,6 +24,9 @@ from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer impor
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
     BatchRequestAnonymizer,
 )
+from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
+    CheckpointRunAnonymizer,
+)
 from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
     DataDocsSiteAnonymizer,
 )
@@ -38,13 +42,17 @@ from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anon
 from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
     StoreAnonymizer,
 )
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    CLISuiteInteractiveFlagCombinations,
+)
 from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
     ValidationOperatorAnonymizer,
 )
 from great_expectations.core.usage_statistics.schemas import (
-    usage_statistics_record_schema,
+    anonymized_usage_statistics_record_schema,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.data_context.types.base import CheckpointConfig
 
 STOP_SIGNAL = object()
 
@@ -75,6 +83,7 @@ class UsageStatisticsHandler:
         self._batch_request_anonymizer = BatchRequestAnonymizer(data_context_id)
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
+        self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
         try:
             self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
         except ValueError:
@@ -223,7 +232,7 @@ class UsageStatisticsHandler:
                 message["event_payload"] = self.build_init_payload()
             message = self.build_envelope(message=message)
             if not self.validate_message(
-                message, schema=usage_statistics_record_schema
+                message, schema=anonymized_usage_statistics_record_schema
             ):
                 return
             self._message_queue.put(message)
@@ -398,7 +407,11 @@ def save_expectation_suite_usage_statistics(
     return payload
 
 
-def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name):
+def edit_expectation_suite_usage_statistics(
+    data_context: "DataContext",  # noqa: F821
+    expectation_suite_name: str,
+    interactive_mode: Optional[CLISuiteInteractiveFlagCombinations] = None,
+):
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -407,7 +420,11 @@ def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
-    payload = {}
+
+    if interactive_mode is None:
+        payload = {}
+    else:
+        payload = copy.deepcopy(interactive_mode.value)
 
     # noinspection PyBroadException
     try:
@@ -477,8 +494,49 @@ def get_batch_list_usage_statistics(data_context, *args, **kwargs):
     return payload
 
 
+# noinspection PyUnusedLocal
+def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
+    try:
+        data_context_id = checkpoint.data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+    anonymizer = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+    payload = {}
+
+    if checkpoint._usage_statistics_handler:
+        # noinspection PyBroadException
+        try:
+            checkpoint_run_anonymizer: CheckpointRunAnonymizer = (
+                checkpoint._usage_statistics_handler._checkpoint_run_anonymizer
+            )
+
+            checkpoint_config: CheckpointConfig = copy.deepcopy(checkpoint.config)
+
+            substituted_runtime_config: CheckpointConfig = (
+                checkpoint_run_anonymizer.resolve_config_using_acceptable_arguments(
+                    *(checkpoint,), **kwargs
+                )
+            )
+            resolved_runtime_kwargs: dict = substituted_runtime_config.to_json_dict()
+
+            payload = checkpoint_run_anonymizer.anonymize_checkpoint_run(
+                *(checkpoint,), **resolved_runtime_kwargs
+            )
+
+            checkpoint._config = checkpoint_config
+        except Exception:
+            logger.debug(
+                "get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
+            )
+
+    return payload
+
+
 def send_usage_message(
-    data_context,
+    data_context: "DataContext",  # noqa: F821
     event: str,
     event_payload: Optional[dict] = None,
     success: Optional[bool] = None,
