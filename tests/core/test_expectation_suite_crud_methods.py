@@ -4,6 +4,7 @@ from uuid import UUID
 
 import pytest
 
+from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.exceptions import (
@@ -13,20 +14,24 @@ from great_expectations.exceptions import (
 
 
 @pytest.fixture
-def empty_suite():
+def empty_suite(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
-def baseline_suite(exp1, exp2):
+def baseline_suite(exp1, exp2, empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp2],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
@@ -139,48 +144,71 @@ def column_pair_expectation():
 
 
 @pytest.fixture
-def single_expectation_suite(exp1):
+def single_expectation_suite(exp1, empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
-def single_expectation_suite_with_expectation_ge_cloud_id(exp1):
+def single_expectation_suite_with_expectation_ge_cloud_id(
+    exp1, empty_data_context_stats_enabled
+):
     exp1_with_ge_cloud_id = deepcopy(exp1)
     exp1_with_ge_cloud_id.ge_cloud_id = UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774")
+    context: DataContext = empty_data_context_stats_enabled
 
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1_with_ge_cloud_id],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
-def different_suite(exp1, exp4):
+def different_suite(exp1, exp4, empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
+
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp4],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
-def domain_success_runtime_suite(exp1, exp2, exp3, exp4, exp5):
+def domain_success_runtime_suite(
+    exp1, exp2, exp3, exp4, exp5, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
+
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp2, exp3, exp4, exp5],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
 def suite_with_table_and_column_expectations(
-    exp1, exp2, exp3, exp4, column_pair_expectation, table_exp1, table_exp2, table_exp3
+    exp1,
+    exp2,
+    exp3,
+    exp4,
+    column_pair_expectation,
+    table_exp1,
+    table_exp2,
+    table_exp3,
+    empty_data_context_stats_enabled,
 ):
+    context: DataContext = empty_data_context_stats_enabled
     suite = ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[
@@ -194,6 +222,7 @@ def suite_with_table_and_column_expectations(
             table_exp3,
         ],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
     assert suite.expectations == [
         exp1,
@@ -210,8 +239,14 @@ def suite_with_table_and_column_expectations(
 
 @pytest.fixture
 def suite_with_column_pair_and_table_expectations(
-    table_exp1, table_exp2, table_exp3, column_pair_expectation
+    table_exp1,
+    table_exp2,
+    table_exp3,
+    column_pair_expectation,
+    empty_data_context_stats_enabled,
 ):
+    context: DataContext = empty_data_context_stats_enabled
+
     suite = ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[
@@ -221,6 +256,7 @@ def suite_with_column_pair_and_table_expectations(
             table_exp3,
         ],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
     assert suite.expectations == [
         column_pair_expectation,
@@ -238,7 +274,9 @@ def ge_cloud_id():
 
 
 @pytest.fixture
-def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3):
+def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3, empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
+
     for exp in (exp1, exp2, exp3):
         exp.ge_cloud_id = ge_cloud_id
     return ExpectationSuite(
@@ -246,6 +284,7 @@ def ge_cloud_suite(ge_cloud_id, exp1, exp2, exp3):
         expectations=[exp1, exp2, exp3],
         meta={"notes": "This is an expectation suite."},
         ge_cloud_id=ge_cloud_id,
+        data_context=context,
     )
 
 

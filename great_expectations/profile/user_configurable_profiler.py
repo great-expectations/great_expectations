@@ -5,6 +5,7 @@ from typing import Callable, Dict, List, Optional, Union, cast
 from dateutil.parser import parse
 from tqdm.auto import tqdm
 
+from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -67,6 +68,7 @@ class UserConfigurableProfiler:
         semantic_types_dict: Optional[Dict[str, List[str]]] = None,
         table_expectations_only: bool = False,
         value_set_threshold: str = "MANY",
+        data_context: DataContext = None,
     ):
         """
         The UserConfigurableProfiler is used to build an expectation suite from a dataset. The profiler may be
@@ -107,6 +109,7 @@ class UserConfigurableProfiler:
         """
         self.column_info = {}
         self.profile_dataset = profile_dataset
+        self._data_context = data_context
         assert isinstance(self.profile_dataset, (Batch, Dataset, Validator))
 
         if isinstance(self.profile_dataset, Batch):
@@ -210,7 +213,9 @@ class UserConfigurableProfiler:
             suite_name: str = (
                 self.profile_dataset._expectation_suite.expectation_suite_name
             )
-            self.profile_dataset._expectation_suite = ExpectationSuite(suite_name)
+            self.profile_dataset._expectation_suite = ExpectationSuite(
+                expectation_suite_name=suite_name, data_context=self._data_context
+            )
 
         if self.semantic_types_dict:
             expectation_suite = self._build_expectation_suite_from_semantic_types_dict()

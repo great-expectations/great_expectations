@@ -638,7 +638,6 @@ class ExpectationSuitePageRenderer(Renderer):
 
     def render(self, expectations):
         if isinstance(expectations, dict):
-            print("I am being called")
             expectations = ExpectationSuite(
                 **expectations, data_context=self._data_context
             )

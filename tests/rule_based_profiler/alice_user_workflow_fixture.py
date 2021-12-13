@@ -12,7 +12,7 @@ from great_expectations.data_context.util import file_relative_path
 
 @pytest.fixture
 @freeze_time("09/26/2019 13:42:41")
-def alice_columnar_table_single_batch():
+def alice_columnar_table_single_batch(empty_data_context):
     """
     About the "Alice" User Workflow Fixture
 
@@ -172,7 +172,7 @@ def alice_columnar_table_single_batch():
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
     expected_expectation_suite: ExpectationSuite = ExpectationSuite(
-        expectation_suite_name=expectation_suite_name,
+        expectation_suite_name=expectation_suite_name, data_context=empty_data_context
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:

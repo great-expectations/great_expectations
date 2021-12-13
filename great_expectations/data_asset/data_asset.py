@@ -849,6 +849,11 @@ class DataAsset:
                         "Unable to load expectation suite: IO error while reading %s"
                         % expectation_suite
                     )
+            elif isinstance(expectation_suite, dict):
+                expectation_suite_dict: dict = expectation_suite
+                expectation_suite: ExpectationSuite = ExpectationSuite(
+                    **expectation_suite_dict, data_context=self._data_context
+                )
             elif not isinstance(expectation_suite, ExpectationSuite):
                 logger.error(
                     "Unable to validate using the provided value for expectation suite; does it need to be "
