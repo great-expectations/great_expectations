@@ -797,7 +797,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 as a subquery wrapped in "(subquery) alias". TextClause must first be converted
                 to TextualSelect using sa.columns() before it can be converted to type Subquery
                 """
-                if isinstance(selectable, TextClause):
+                if TextClause is not None and isinstance(selectable, TextClause):
                     res = self.engine.execute(
                         sa.select(query["select"]).select_from(
                             selectable.columns().subquery()
