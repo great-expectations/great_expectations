@@ -297,18 +297,6 @@ class BaseDataContext:
     _data_context = None
 
     @classmethod
-    def get_data_context(cls) -> "BaseDataContext":
-        if cls._data_context is None:
-            raise DataContextError(
-                f"Could not retrieve DataContext from empty registry. Please instantiate DataContext before calling get_data_context()."
-            )
-        return cls._data_context
-
-    @classmethod
-    def set_data_context(cls, data_context: "BaseDataContext"):
-        cls._data_context = data_context
-
-    @classmethod
     def validate_config(cls, project_config):
         if isinstance(project_config, DataContextConfig):
             return True
@@ -408,7 +396,6 @@ class BaseDataContext:
 
         self._evaluation_parameter_dependencies_compiled = False
         self._evaluation_parameter_dependencies = {}
-        BaseDataContext.set_data_context(self)
 
     @property
     def ge_cloud_config(self):

@@ -81,8 +81,8 @@ def checkpoint(ctx):
 
     usage_stats_prefix = f"cli.checkpoint.{ctx.invoked_subcommand}"
     send_usage_message(
-        event=f"{usage_stats_prefix}.begin",
         data_context=context,
+        event=f"{usage_stats_prefix}.begin",
         success=True,
     )
     ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
@@ -129,8 +129,8 @@ def _checkpoint_new(ctx, checkpoint_name, jupyter):
             )
 
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=True,
         )
 
@@ -188,8 +188,8 @@ def checkpoint_list(ctx):
             "  - Use the command `great_expectations checkpoint new` to create one."
         )
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=True,
         )
         sys.exit(0)
@@ -200,8 +200,8 @@ def checkpoint_list(ctx):
     pretty_list: list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
     cli_message_list(pretty_list, list_intro_string=message)
     send_usage_message(
-        event=usage_event_end,
         data_context=context,
+        event=usage_event_end,
         success=True,
     )
 
@@ -222,8 +222,8 @@ def checkpoint_delete(ctx, checkpoint):
             assume_yes=ctx.obj.assume_yes,
         )
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=True,
         )
     except Exception as e:
@@ -263,8 +263,8 @@ def checkpoint_run(ctx, checkpoint):
     if not result["success"]:
         cli_message(string="Validation failed!")
         send_usage_message(
-            event=usage_event_end,
             data_context=context,
+            event=usage_event_end,
             success=True,
         )
         print_validation_operator_results_details(result=result)
@@ -272,8 +272,8 @@ def checkpoint_run(ctx, checkpoint):
 
     cli_message("Validation succeeded!")
     send_usage_message(
-        event=usage_event_end,
         data_context=context,
+        event=usage_event_end,
         success=True,
     )
     print_validation_operator_results_details(result=result)
@@ -352,8 +352,8 @@ def checkpoint_script(ctx, checkpoint):
   - The script can be run with `python great_expectations/uncommitted/run_{checkpoint}.py`"""
     )
     send_usage_message(
-        event=usage_event_end,
         data_context=context,
+        event=usage_event_end,
         success=True,
     )
 

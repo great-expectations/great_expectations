@@ -1300,7 +1300,7 @@ set as active.
             self._active_validation = True
 
             # If a different validation data context was provided, override
-            validate__data_context = self._data_context
+            validation_data_context = self._data_context
             if data_context is None and self._data_context is not None:
                 data_context = self._data_context
             elif data_context is not None:
@@ -1440,7 +1440,7 @@ set as active.
                 },
             )
 
-            self._data_context = validate__data_context
+            self._data_context = validation_data_context
         except Exception as e:
             if getattr(data_context, "_usage_statistics_handler", None):
                 # noinspection PyProtectedMember
