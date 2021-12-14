@@ -187,7 +187,7 @@ class UsageStatisticsHandler:
             + "Z"
         )
 
-        event_duration_property_name: str = f'{message["event_name"]}.duration'.replace(
+        event_duration_property_name: str = f'{message["event"]}.duration'.replace(
             ".", "_"
         )
         if hasattr(self, event_duration_property_name):
