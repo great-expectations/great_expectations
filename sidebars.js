@@ -43,8 +43,9 @@ module.exports = {
               items: [
                 'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
                 'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
-                'guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables',
-                'guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_secrets_store',
+                //'guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables',
+                //'guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_secrets_store',
+                'guides/setup/configuring_data_contexts/how_to_configure_credentials',
                 'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file'
               ]
             },
