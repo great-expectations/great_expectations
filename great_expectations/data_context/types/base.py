@@ -1093,6 +1093,13 @@ class ProgressBarsConfig(DictDot):
         self._profilers = profilers
         self._metric_calculations = metric_calculations
 
+    def disabled(self, key: str) -> bool:
+        if super().__getitem__("globally") is False:
+            return True
+        elif super().__getitem__(key) is False:
+            return True
+        return False
+
 
 class ProgressBarsConfigSchema(Schema):
     globally = fields.Boolean(default=True)
