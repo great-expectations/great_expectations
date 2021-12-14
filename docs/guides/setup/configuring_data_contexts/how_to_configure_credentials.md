@@ -132,8 +132,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 <Prerequisites>
 
 - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-- Configured a secret store and secrets in the cloud:
-    - [AWS](https://docs.aws.amazon.com/secretsmanager/latest/userguide/tutorials_basic.html)
+- Configured a secret manager and secrets in the cloud with [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/tutorials_basic.html)
 
 </Prerequisites>
 
@@ -216,8 +215,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 <Prerequisites>
 
 - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-- Configured a secret store and secrets in the cloud:
-    - [GCP](https://cloud.google.com/secret-manager/docs/quickstart)
+- Configured a secret manager and secrets in the cloud with [GCP Secret Manager](https://cloud.google.com/secret-manager/docs/quickstart)
 
 </Prerequisites>
 
@@ -294,8 +292,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 <Prerequisites>
 
 - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-- Configured a secret store and secrets in the cloud:
-    - [Azure](https://docs.microsoft.com/azure/key-vault/secrets/quick_create_portal)
+- Configured a secret manager and secrets in the cloud with [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/general/overview)
 
 </Prerequisites>
 
