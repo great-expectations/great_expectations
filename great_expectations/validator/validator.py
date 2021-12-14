@@ -695,7 +695,7 @@ class Validator:
 
             # Check to see if the user has disabled progress bars
             if self._data_context:
-                disable = self._data_context.progress_bars.disabled(
+                disable = not self._data_context.progress_bars.is_enabled(
                     "metric_calculations"
                 )
             else:

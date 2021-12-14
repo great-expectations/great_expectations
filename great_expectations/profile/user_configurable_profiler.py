@@ -129,9 +129,9 @@ class UserConfigurableProfiler:
 
         # Check to see if the user has disabled progress bars
         if context:
-            self._disable_progress_bars = context.progress_bars.disabled("profilers")
+            self._enable_progress_bars = context.progress_bars.is_enabled("profilers")
         else:
-            self._disable_progress_bars = False
+            self._enable_progress_bars = True
 
         self.semantic_types_dict = semantic_types_dict
         assert isinstance(self.semantic_types_dict, (dict, type(None)))
@@ -306,7 +306,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             desc="Profiling Columns",
             total=len(self.column_info),
             delay=5,
-            disable=self._disable_progress_bars,
+            disable=not self._enable_progress_bars,
         ) as pbar:
             for column_name, column_info in self.column_info.items():
                 pbar.set_postfix_str(f"Column={column_name}")
@@ -355,7 +355,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             desc="Profiling",
             total=len(self.column_info),
             delay=5,
-            disable=self._disable_progress_bars,
+            disable=not self._enable_progress_bars,
         ) as pbar:
             for column_name, column_info in self.column_info.items():
                 pbar.set_postfix_str(f"Column={column_name}")
