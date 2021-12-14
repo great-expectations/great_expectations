@@ -1089,9 +1089,9 @@ class ProgressBarsConfig(DictDot):
         profilers: bool = True,
         metric_calculations: bool = True,
     ):
-        self._globally = globally
-        self._profilers = profilers
-        self._metric_calculations = metric_calculations
+        self.globally = globally
+        self.profilers = profilers
+        self.metric_calculations = metric_calculations
 
     def disabled(self, key: str) -> bool:
         if super().__getitem__("globally") is False:
