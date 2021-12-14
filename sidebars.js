@@ -16,25 +16,31 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'How to Guides',
+      label: 'Step 1: Setup',
       items: [
+        { type: 'doc', id: 'review', label: '! Overview' },
         {
           type: 'category',
-          label: 'Setting up Great Expectations',
+          label: 'Core Concepts',
           items: [
-            {
-              type: 'category',
-              label: 'Core skills',
-              items: [
-                // 'guides/setup/how_to_instantiate_a_data_context',
-              ]
-            },
+            { type: 'doc', id: 'review', label: '! Installation' },
+            { type: 'doc', id: 'reference/data_context', label: 'Data Contexts' },
+            { type: 'doc', id: 'review', label: '! Metadata Stores' },
+            { type: 'doc', id: 'reference/data_docs', label: 'Data Docs' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'How to guides',
+          items: [
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
             {
               type: 'category',
               label: 'Installation',
               items: [
-                'guides/setup/installation/local',
-                'guides/setup/installation/hosted_environment'
+                { type: 'doc', id: 'guides/setup/installation/local' },
+                { type: 'doc', id: 'guides/setup/installation/hosted_environment' }
               ]
             },
             {
@@ -76,31 +82,38 @@ module.exports = {
               ]
             }
           ]
+        }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Step 2: Connect to Data',
+      items: [
+        { type: 'doc', id: 'review', label: 'Overview' },
+        {
+          type: 'category',
+          label: 'Core Concepts',
+          items: [
+            { type: 'doc', id: 'review', label: '! Data Connectors' },
+            { type: 'doc', id: 'reference/datasources' },
+            { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
+            { type: 'doc', id: 'reference/data_discovery' }
+          ]
         },
         {
           type: 'category',
-          label: 'Connecting to your data',
+          label: 'How to guides',
           items: [
             {
               type: 'category',
-              label: 'Core skills',
+              label: 'Data Connectors',
               items: [
                 'guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use',
                 'guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector',
                 'guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector',
                 'guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector',
                 'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
-                'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
-                'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
-                'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'In memory',
-              items: [
-                'guides/connecting_to_your_data/in_memory/pandas',
-                'guides/connecting_to_your_data/in_memory/spark'
+                'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql'
               ]
             },
             {
@@ -137,13 +150,22 @@ module.exports = {
                 'guides/connecting_to_your_data/cloud/azure/spark'
               ]
             },
-            // {
-            // type: 'category',
-            // label: 'Contributing',
-            // items: [
-            // 'guides/connecting_to_your_data/contributing/how_to_add_support_for_a_new_sqlalchemy_dialect'
-            // ]
-            // },
+            {
+              type: 'category',
+              label: 'In memory data',
+              items: [
+                'guides/connecting_to_your_data/in_memory/pandas',
+                'guides/connecting_to_your_data/in_memory/spark'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Batches',
+              items: [
+                'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
+                'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource'
+              ]
+            },
             {
               type: 'category',
               label: 'Advanced',
@@ -157,15 +179,34 @@ module.exports = {
               ]
             }
           ]
+        }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Step 3: Create Expectations',
+      items: [
+        { type: 'doc', id: 'review', label: 'Overview' },
+        {
+          type: 'category',
+          label: 'Core Concepts',
+          items: [
+            { type: 'doc', id: 'reference/profilers' },
+            { type: 'doc', id: 'reference/expectations/result_format' },
+            { type: 'doc', id: 'reference/expectations/standard_arguments' },
+            { type: 'doc', id: 'reference/evaluation_parameters' },
+            { type: 'doc', id: 'reference/execution_engine' }
+          ]
         },
         {
           type: 'category',
-          label: 'Creating and editing Expectations for your data',
+          label: 'How to guides',
           items: [
             {
               type: 'category',
-              label: 'Core skills',
+              label: 'Creating and editing',
               items: [
+                { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' },
                 'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
                 'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
                 'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
@@ -175,7 +216,9 @@ module.exports = {
             {
               type: 'category',
               label: 'Configuring Profilers',
-              items: []
+              items: [
+                { type: 'doc', id: 'review', label: 'TODO: This category is empty.' }
+              ]
             },
             {
               type: 'category',
@@ -184,13 +227,6 @@ module.exports = {
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Contributing',
-              items: [
-                'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
               ]
             },
             {
@@ -206,26 +242,50 @@ module.exports = {
               ]
             }
           ]
+        }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Step 4: Validate Data',
+      items: [
+        { type: 'doc', id: 'review', label: 'Overview' },
+        {
+          type: 'category',
+          label: 'Core Concepts',
+          items: [
+            { type: 'doc', id: 'reference/validation' },
+            { type: 'doc', id: 'reference/checkpoints_and_actions' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' },
+            {
+              type: 'category',
+              label: 'Expectations',
+              collapsed: true,
+              items: [
+                { type: 'doc', id: 'reference/expectations/expectations' },
+                { type: 'doc', id: 'reference/expectations/conditional_expectations' },
+                { type: 'doc', id: 'reference/expectations/distributional_expectations' },
+                { type: 'doc', id: 'reference/expectations/implemented_expectations' },
+                { type: 'doc', id: 'reference/expectation_suite_operations' }
+              ]
+            },
+            { type: 'doc', id: 'reference/metrics' }
+          ]
         },
         {
           type: 'category',
-          label: 'Validating your data',
+          label: 'How to guides',
           items: [
-            {
-              type: 'category',
-              label: 'Core skills',
-              items: [
-                'guides/validation/how_to_validate_data_by_running_a_checkpoint'
-              ]
-            },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
             {
               type: 'category',
               label: 'Checkpoints',
               items: [
+                'guides/validation/how_to_validate_data_by_running_a_checkpoint',
                 'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
                 'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
                 'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
-                'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
+                'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint'
               ]
             },
             {
@@ -249,87 +309,44 @@ module.exports = {
               ]
             }
           ]
-        },
-        {
-          type: 'category',
-          label: 'Miscellaneous',
-          items: [
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' },
-            { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
-          ]
         }
       ]
     },
     {
       type: 'category',
-      label: 'Deployment Patterns',
+      label: 'Reference Architectures',
       items: [
+        { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' },
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_use_great_expectations_in_databricks',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_flyte'
-        // {
-        // type: 'category',
-        // label: 'Contributing',
-        // items: [
-        // 'deployment_patterns/contributing/how_to_add_a_new_deployment_pattern_document',
-        // 'deployment_patterns/contributing/how_to_contribute_to_an_existing_deployment_pattern_document'
-        // ]
-        // }
       ]
     },
     {
       type: 'category',
-      label: 'Core Concepts',
+      label: 'Reference Documents',
       items: [
         { type: 'doc', id: 'reference/core_concepts', label: 'Introduction' },
-        { type: 'doc', id: 'reference/checkpoints_and_actions' },
-        { type: 'doc', id: 'reference/data_context' },
-        { type: 'doc', id: 'reference/data_discovery' },
-        { type: 'doc', id: 'reference/data_docs' },
-        { type: 'doc', id: 'reference/datasources' },
-        { type: 'doc', id: 'reference/evaluation_parameters' },
-        { type: 'doc', id: 'reference/execution_engine' },
-        {
-          type: 'category',
-          label: 'Expectations',
-          collapsed: true,
-          items: [
-            { type: 'doc', id: 'reference/expectations/expectations' },
-            { type: 'doc', id: 'reference/expectations/conditional_expectations' },
-            { type: 'doc', id: 'reference/expectations/distributional_expectations' },
-            { type: 'doc', id: 'reference/expectations/implemented_expectations' },
-            { type: 'doc', id: 'reference/expectation_suite_operations' }
-          ]
-        },
-        { type: 'doc', id: 'reference/metrics' },
-        { type: 'doc', id: 'reference/profilers' },
-        { type: 'doc', id: 'reference/expectations/result_format' },
-        { type: 'doc', id: 'reference/expectations/standard_arguments' },
-        // { type: 'doc', id: 'reference/stores' },
-        { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
-        { type: 'doc', id: 'reference/validation' },
-        { type: 'doc', id: 'reference/anonymous_usage_statistics' },
-        { type: 'doc', id: 'reference/supporting_resources' }
+        { type: 'doc', id: 'review', label: '! Core Concepts' },
+        { type: 'doc', id: 'review', label: '! Expectations Gallery' },
+        { type: 'doc', id: 'review', label: '! CLI command reference' },
+        { type: 'doc', id: 'review', label: '! Glossary of terms' },
+        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' }
       ]
     },
     {
-      type: 'doc',
-      label: 'API Reference',
-      id: 'reference/api_reference'
-    },
-    {
       type: 'category',
-      label: 'Contributing',
-      collapsed: true,
+      label: 'Contributions Guide',
       items: [
+        { type: 'doc', id: 'review', label: '! Introduction' },
+        { type: 'doc', id: 'review', label: '! Contribution checklist' },
+        { type: 'doc', id: 'review', label: '! Setting up a Dev Environment' },
+        { type: 'doc', id: 'review', label: '! Contribution and testing' },
+        'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations',
+        { type: 'doc', id: 'review', label: '! Levels of maturity' },
+        { type: 'doc', id: 'review', label: '! ontributing Misc and CLA' },
         { type: 'doc', id: 'contributing/contributing', label: 'Introduction' },
         { type: 'doc', id: 'contributing/contributing_setup' },
         { type: 'doc', id: 'contributing/contributing_checklist' },
@@ -345,12 +362,38 @@ module.exports = {
             { type: 'doc', id: 'contributing/style_guides/code_style' },
             { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' }
           ]
+        },
+        {
+          type: 'category',
+          label: 'Style Guides',
+          items: [
+            { type: 'doc', id: 'review', label: '! Code Standards and Style' },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide', label: 'How to write a how-to-guide' },
+            { type: 'doc', id: 'review', label: '! How to write a reference architecture' },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_template', label: 'TEMPLATE: How to guide' },
+            { type: 'doc', id: 'review', label: '! TEMPLATE: Reference architecture' }
+          ]
         }
       ]
     },
     {
-      type: 'doc',
-      id: 'changelog'
+      type: 'category',
+      label: 'Community and Support',
+      items: [
+        { type: 'doc', id: 'review', label: '! Overview' },
+        { type: 'doc', id: 'review', label: '! Our Slack Channel' },
+        { type: 'doc', id: 'review', label: '! Our Discuss Board' },
+        { type: 'doc', id: 'reference/supporting_resources' }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Changes and Updates',
+      items: [
+        { type: 'doc', id: 'changelog', label: 'Changelog' },
+        { type: 'doc', id: 'guides/miscellaneous/migration_guide', label: 'Migration Guide' },
+        { type: 'doc', id: 'review', label: '! Feature Maturity Overview' }
+      ]
     }
   ]
 }
