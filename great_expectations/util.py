@@ -11,7 +11,7 @@ import time
 import uuid
 from collections import OrderedDict
 from datetime import datetime
-from functools import partialmethod, wraps
+from functools import wraps
 from gc import get_referrers
 from inspect import (
     ArgInfo,
@@ -28,7 +28,6 @@ from pathlib import Path
 from types import CodeType, FrameType, ModuleType
 from typing import Any, Callable, Optional, Set, Union
 
-import tqdm
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
