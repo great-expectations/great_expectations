@@ -27,7 +27,6 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
-from great_expectations.data_context import DataContext
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
 from great_expectations.exceptions import (
@@ -214,7 +213,7 @@ class Validator:
         return list(combined_dir)
 
     @property
-    def data_context(self) -> Optional[DataContext]:
+    def data_context(self) -> Optional["DataContext"]:
         return self._data_context
 
     @property
@@ -698,10 +697,9 @@ class Validator:
             disable = len(graph.edges) < 3
             if self._data_context:
                 progress_bars = self._data_context.progress_bars
-                if (
-                    progress_bars.get("validators") is False
-                    or progress_bars.get("globally") is False
-                ):
+                if progress_bars.get("globally") is False:
+                    disable = True
+                elif progress_bars.get("validators") is False:
                     disable = True
 
             if pbar is None:

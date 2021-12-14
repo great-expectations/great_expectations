@@ -1274,10 +1274,3 @@ def import_make_url():
     else:
         from sqlalchemy.engine import make_url
     return make_url
-
-
-def silence_progress_bars():
-    logger.info(
-        "Silencing tqdm progress bars; please go to your great_expectations.yml to configure this setting."
-    )
-    tqdm.tqdm.__init__ = partialmethod(tqdm.tqdm.__init__, disable=True)

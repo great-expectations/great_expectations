@@ -17,7 +17,7 @@ from typing import Any, Callable, Dict, List, Optional, Union, cast
 
 import requests
 from dateutil.parser import parse
-from ruamel.yaml import YAML
+from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
@@ -4055,7 +4055,6 @@ class DataContext(BaseDataContext):
             or project_config_dict != dataContextConfigSchema.dump(self._project_config)
         ):
             self._save_project_config()
-        DataContext.set_data_context(self)
 
     def _retrieve_data_context_config_from_ge_cloud(self) -> DataContextConfig:
         """

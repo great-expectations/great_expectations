@@ -109,7 +109,7 @@ class UserConfigurableProfiler:
         self.profile_dataset = profile_dataset
         assert isinstance(self.profile_dataset, (Batch, Dataset, Validator))
 
-        context: Optional[DataContext] = None
+        context: Optional["DataContext"] = None
         if isinstance(self.profile_dataset, Batch):
             context = self.profile_dataset.data_context
             self.profile_dataset = Validator(
@@ -127,13 +127,14 @@ class UserConfigurableProfiler:
         else:
             self.all_table_columns = self.profile_dataset.get_table_columns()
 
+        # Check to see if the user has disabled progress bars
+        self._disable_progress_bars = False
         if context:
-            self._disable_progress_bars = (
-                context.progress_bars.get("profilers") is False
-                or context.progress_bars.get("globally") is False
-            )
-        else:
-            self._disable_progress_bars = False
+            progress_bars = context.progress_bars
+            if progress_bars.get("globally") is False:
+                self._disable_progress_bars = True
+            elif progress_bars.get("profilers") is False:
+                self._disable_progress_bars = True
 
         self.semantic_types_dict = semantic_types_dict
         assert isinstance(self.semantic_types_dict, (dict, type(None)))
