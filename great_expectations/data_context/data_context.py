@@ -61,6 +61,8 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store.expectations_store import ExpectationsStore
+from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -879,7 +881,7 @@ class BaseDataContext:
         return self.project_config_with_variables_substituted.expectations_store_name
 
     @property
-    def expectations_store(self):
+    def expectations_store(self) -> ExpectationsStore:
         return self.stores[self.expectations_store_name]
 
     @property
@@ -2350,7 +2352,7 @@ class BaseDataContext:
         return self.project_config_with_variables_substituted.validations_store_name
 
     @property
-    def validations_store(self):
+    def validations_store(self) -> ValidationsStore:
         return self.stores[self.validations_store_name]
 
     def _compile_evaluation_parameter_dependencies(self):
