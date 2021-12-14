@@ -695,7 +695,9 @@ class Validator:
 
             # Check to see if the user has disabled progress bars
             if self._data_context:
-                disable = self._data_context.progress_bars.disabled("validators")
+                disable = self._data_context.progress_bars.disabled(
+                    "metric_calculations"
+                )
             else:
                 disable = len(graph.edges) < 3
 
