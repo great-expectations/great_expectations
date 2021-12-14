@@ -68,6 +68,7 @@ class ExpectColumnToExist(TableExpectation):
         "column": None,
         "column_index": None,
     }
+    args_keys = (*success_keys,)
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

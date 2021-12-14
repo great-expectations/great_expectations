@@ -223,14 +223,6 @@ legacy_method_parameters = {
         "catch_exceptions",
         "meta",
     ),
-    "expect_column_to_exist": (
-        "column",
-        "column_index",
-        "result_format",
-        "include_config",
-        "catch_exceptions",
-        "meta",
-    ),
     "expect_column_unique_value_count_to_be_between": (
         "column",
         "min_value",
