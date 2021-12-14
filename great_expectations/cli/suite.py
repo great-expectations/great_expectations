@@ -20,6 +20,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
@@ -50,7 +51,7 @@ def suite(ctx):
     ctx.obj.data_context = context
 
     usage_stats_prefix = f"cli.suite.{ctx.invoked_subcommand}"
-    toolkit.send_usage_message(
+    send_usage_message(
         data_context=context,
         event=f"{usage_stats_prefix}.begin",
         success=True,
@@ -169,122 +170,27 @@ def _process_suite_new_flags_and_prompt(
         {"interactive": True, "profile": False}
     """
 
-    error_message: Optional[str] = None
-
-    # Convert interactive / no-interactive flags to interactive_mode
     interactive_mode: Optional[CLISuiteInteractiveFlagCombinations]
-    if interactive_flag is True and manual_flag is True:
-        error_message = """Please choose either --interactive or --manual, you may not choose both."""
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
-        )
-    elif interactive_flag is False and manual_flag is False:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
-        )
-    elif interactive_flag is True and manual_flag is False:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE
-        )
-    elif interactive_flag is False and manual_flag is True:
-        interactive_mode = (
-            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE
-        )
-    else:
-        interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
-
-    if error_message is not None:
-        cli_message(string=f"<red>{error_message}</red>")
-        toolkit.send_usage_message(
-            data_context=context,
-            event=usage_event_end,
-            event_payload=interactive_mode.value,
-            success=False,
-        )
-        sys.exit(1)
-
-    user_provided_any_flag_skip_prompt: bool = any(
-        (
-            (interactive_mode.value["interactive_flag"] is not None),
-            (profile is True),
-            (batch_request is not None),
-        )
+    interactive_mode = _suite_new_convert_flags_to_interactive_mode(
+        interactive_flag, manual_flag
     )
 
-    # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
-    if user_provided_any_flag_skip_prompt:
-        # Assume batch needed if user passes --profile
-        if profile and interactive_mode.value["interactive_flag"] is None:
-            cli_message(
-                "<green>Entering interactive mode since you passed the --profile flag</green>"
-            )
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE
-            )
-        elif profile and interactive_mode.value["interactive_flag"] is True:
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE
-            )
-        elif profile and interactive_mode.value["interactive_flag"] is False:
-            cli_message(
-                "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag</yellow>"
-            )
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE
-            )
-        # Assume batch needed if user passes --batch-request
-        elif (batch_request is not None) and (
-            interactive_mode.value["interactive_flag"] is None
-        ):
-            cli_message(
-                "<green>Entering interactive mode since you passed the --batch-request flag</green>"
-            )
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
-            )
-        elif (batch_request is not None) and (
-            interactive_mode.value["interactive_flag"] is False
-        ):
-            cli_message(
-                "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
-            )
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
-            )
-    else:
-        suite_create_method: str = click.prompt(
-            """
-How would you like to create your Expectation Suite?
-    1. Manually, without interacting with a sample batch of data (default)
-    2. Interactively, with a sample batch of data
-    3. Automatically, using a profiler
-""",
-            type=click.Choice(["1", "2", "3"]),
-            show_choices=False,
-            default="1",
-            show_default=False,
+    error_message: Optional[str] = None
+    if (
+        interactive_mode
+        == CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
+    ):
+        error_message = """Please choose either --interactive or --manual, you may not choose both."""
+
+    _exit_early_if_error(error_message, context, usage_event_end, interactive_mode)
+
+    if _suite_new_user_provided_any_flag(interactive_mode, profile, batch_request):
+        interactive_mode = _suite_new_process_profile_and_batch_request_flags(
+            interactive_mode, profile, batch_request
         )
-        # Default option
-        if suite_create_method == "":
-            profile = False
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
-            )
-        elif suite_create_method == "1":
-            profile = False
-            interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE
-        elif suite_create_method == "2":
-            profile = False
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_FALSE
-            )
-        elif suite_create_method == "3":
-            profile = True
-            interactive_mode = (
-                CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_TRUE
-            )
-        else:
-            interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
+
+    else:
+        interactive_mode, profile = _suite_new_mode_from_prompt(profile)
 
     return {
         "interactive_mode": interactive_mode,
@@ -353,7 +259,7 @@ def _suite_new_workflow(
             batch_request=batch_request,
         )
 
-        toolkit.send_usage_message(
+        send_usage_message(
             data_context=context,
             event=usage_event,
             event_payload=interactive_mode.value,
@@ -388,7 +294,7 @@ def _suite_new_workflow(
         SQLAlchemyError,
     ) as e:
         cli_message(string=f"<red>{e}</red>")
-        toolkit.send_usage_message(
+        send_usage_message(
             data_context=context,
             event=usage_event,
             event_payload=interactive_mode.value,
@@ -396,13 +302,155 @@ def _suite_new_workflow(
         )
         sys.exit(1)
     except Exception as e:
-        toolkit.send_usage_message(
+        send_usage_message(
             data_context=context,
             event=usage_event,
             event_payload=interactive_mode.value,
             success=False,
         )
         raise e
+
+
+def _suite_new_convert_flags_to_interactive_mode(
+    interactive_flag: bool, manual_flag: bool
+) -> CLISuiteInteractiveFlagCombinations:
+    if interactive_flag is True and manual_flag is True:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE
+        )
+    elif interactive_flag is False and manual_flag is False:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_FALSE
+        )
+    elif interactive_flag is True and manual_flag is False:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE
+        )
+    elif interactive_flag is False and manual_flag is True:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE
+        )
+    else:
+        interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
+
+    return interactive_mode
+
+
+def _suite_new_process_profile_and_batch_request_flags(
+    interactive_mode: CLISuiteInteractiveFlagCombinations,
+    profile: bool,
+    batch_request: Optional[str],
+) -> CLISuiteInteractiveFlagCombinations:
+
+    # Explicit check for boolean or None for `interactive_flag` is necessary: None indicates user did not supply flag.
+    # Assume batch needed if user passes --profile
+    if profile and interactive_mode.value["interactive_flag"] is None:
+        cli_message(
+            "<green>Entering interactive mode since you passed the --profile flag</green>"
+        )
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE
+        )
+    elif profile and interactive_mode.value["interactive_flag"] is True:
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE
+        )
+    elif profile and interactive_mode.value["interactive_flag"] is False:
+        cli_message(
+            "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --profile flag</yellow>"
+        )
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE
+        )
+    # Assume batch needed if user passes --batch-request
+    elif (batch_request is not None) and (
+        interactive_mode.value["interactive_flag"] is None
+    ):
+        cli_message(
+            "<green>Entering interactive mode since you passed the --batch-request flag</green>"
+        )
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED
+        )
+    elif (batch_request is not None) and (
+        interactive_mode.value["interactive_flag"] is False
+    ):
+        cli_message(
+            "<yellow>Warning: Ignoring the --manual flag and entering interactive mode since you passed the --batch-request flag</yellow>"
+        )
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED
+        )
+
+    return interactive_mode
+
+
+def _exit_early_if_error(
+    error_message: Optional[str],
+    context: DataContext,
+    usage_event_end: str,
+    interactive_mode: CLISuiteInteractiveFlagCombinations,
+):
+    if error_message is not None:
+        cli_message(string=f"<red>{error_message}</red>")
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            event_payload=interactive_mode.value,
+            success=False,
+        )
+        sys.exit(1)
+
+
+def _suite_new_user_provided_any_flag(
+    interactive_mode: CLISuiteInteractiveFlagCombinations,
+    profile: bool,
+    batch_request: Optional[str],
+) -> bool:
+    user_provided_any_flag_skip_prompt: bool = any(
+        (
+            (interactive_mode.value["interactive_flag"] is not None),
+            (profile is True),
+            (batch_request is not None),
+        )
+    )
+    return user_provided_any_flag_skip_prompt
+
+
+def _suite_new_mode_from_prompt(profile: bool):
+    suite_create_method: str = click.prompt(
+        """
+How would you like to create your Expectation Suite?
+    1. Manually, without interacting with a sample batch of data (default)
+    2. Interactively, with a sample batch of data
+    3. Automatically, using a profiler
+""",
+        type=click.Choice(["1", "2", "3"]),
+        show_choices=False,
+        default="1",
+        show_default=False,
+    )
+    # Default option
+    if suite_create_method == "":
+        profile = False
+        interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT
+    elif suite_create_method == "1":
+        profile = False
+        interactive_mode = CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE
+    elif suite_create_method == "2":
+        profile = False
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_FALSE
+        )
+    elif suite_create_method == "3":
+        profile = True
+        interactive_mode = (
+            CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_TRUE
+        )
+    else:
+        interactive_mode = CLISuiteInteractiveFlagCombinations.UNKNOWN
+
+    return interactive_mode, profile
 
 
 @suite.command(name="edit")
@@ -561,7 +609,7 @@ options can be used.
 
     if error_message is not None:
         cli_message(string=f"<red>{error_message}</red>")
-        toolkit.send_usage_message(
+        send_usage_message(
             data_context=context,
             event=usage_event_end,
             event_payload=interactive_mode.value,
@@ -757,7 +805,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         )
 
         if not suppress_usage_message:
-            toolkit.send_usage_message(
+            send_usage_message(
                 data_context=context,
                 event=usage_event,
                 event_payload=payload,
@@ -776,7 +824,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
     ) as e:
         cli_message(string=f"<red>{e}</red>")
         if not suppress_usage_message:
-            toolkit.send_usage_message(
+            send_usage_message(
                 data_context=context,
                 event=usage_event,
                 event_payload=interactive_mode.value,
@@ -786,7 +834,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
     except Exception as e:
         if not suppress_usage_message:
-            toolkit.send_usage_message(
+            send_usage_message(
                 data_context=context,
                 event=usage_event,
                 event_payload=interactive_mode.value,
@@ -802,8 +850,10 @@ def suite_demo(ctx):
     """This command is not supported in the v3 (Batch Request) API."""
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
-    toolkit.send_usage_message(
-        data_context=context, event=usage_event_end, success=True
+    send_usage_message(
+        data_context=context,
+        event=usage_event_end,
+        success=True,
     )
     cli_message(
         string="This command is not supported in the v3 (Batch Request) API. Please use `suite new` instead."
@@ -823,8 +873,10 @@ def suite_delete(ctx, suite):
     try:
         suite_names: List[str] = context.list_expectation_suite_names()
     except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=False
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=False,
         )
         raise e
     if not suite_names:
@@ -854,8 +906,10 @@ def suite_delete(ctx, suite):
 
     context.delete_expectation_suite(suite)
     cli_message(string=f"Deleted the expectation suite named: {suite}")
-    toolkit.send_usage_message(
-        data_context=context, event=usage_event_end, success=True
+    send_usage_message(
+        data_context=context,
+        event=usage_event_end,
+        success=True,
     )
 
 
@@ -868,8 +922,10 @@ def suite_list(ctx):
     try:
         suite_names: List[str] = context.list_expectation_suite_names()
     except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=False
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=False,
         )
         raise e
 
@@ -878,8 +934,10 @@ def suite_list(ctx):
     ]
     if len(suite_names_styled) == 0:
         cli_message(string="No Expectation Suites found")
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=True
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
         )
         return
 
@@ -891,8 +949,10 @@ def suite_list(ctx):
     cli_message_list(
         string_list=suite_names_styled, list_intro_string=list_intro_string
     )
-    toolkit.send_usage_message(
-        data_context=context, event=usage_event_end, success=True
+    send_usage_message(
+        data_context=context,
+        event=usage_event_end,
+        success=True,
     )
 
 
