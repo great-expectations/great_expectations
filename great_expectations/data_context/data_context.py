@@ -13,7 +13,7 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import requests
 from dateutil.parser import parse
@@ -3469,124 +3469,29 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         try:
             if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
-                print(f"\tInstantiating as a Store, since class_name is {class_name}")
-                store_name: str = name or config.get("name") or "my_temp_store"
-                instantiated_class = cast(
-                    Store,
-                    self._build_store_from_config(
-                        store_name=store_name,
-                        store_config=config,
-                    ),
-                )
-                store_name = instantiated_class.store_name or store_name
-                self._project_config["stores"][store_name] = config
-
-                store_anonymizer = StoreAnonymizer(self.data_context_id)
-                usage_stats_event_payload = store_anonymizer.anonymize_store_info(
-                    store_name=store_name, store_obj=instantiated_class
-                )
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._instantiate_store_from_config(class_name, name, config)
 
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
-                print(
-                    f"\tInstantiating as a Datasource, since class_name is {class_name}"
-                )
-                datasource_name: str = (
-                    name or config.get("name") or "my_temp_datasource"
-                )
-                instantiated_class = cast(
-                    Datasource,
-                    self._instantiate_datasource_from_config_and_update_project_config(
-                        name=datasource_name,
-                        config=config,
-                        initialize=True,
-                    ),
-                )
-
-                datasource_anonymizer = DatasourceAnonymizer(self.data_context_id)
-
-                if class_name == "SimpleSqlalchemyDatasource":
-                    # Use the raw config here, defaults will be added in the anonymizer
-                    usage_stats_event_payload = (
-                        datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
-                            name=datasource_name, config=config
-                        )
-                    )
-                else:
-                    # Roundtrip through schema validator to add missing fields
-                    datasource_config = datasourceConfigSchema.load(
-                        instantiated_class.config
-                    )
-                    full_datasource_config = datasourceConfigSchema.dump(
-                        datasource_config
-                    )
-                    usage_stats_event_payload = (
-                        datasource_anonymizer.anonymize_datasource_info(
-                            name=datasource_name, config=full_datasource_config
-                        )
-                    )
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._instantiate_ds_from_config(class_name, name, config)
 
             elif class_name in ["Checkpoint", "SimpleCheckpoint"]:
-                print(
-                    f"\tInstantiating as a {class_name}, since class_name is {class_name}"
-                )
-
-                checkpoint_name: str = (
-                    name or config.get("name") or "my_temp_checkpoint"
-                )
-
-                checkpoint_config: Union[CheckpointConfig, dict]
-
-                checkpoint_config = CheckpointConfig.from_commented_map(
-                    commented_map=config
-                )
-                checkpoint_config = checkpoint_config.to_json_dict()
-                checkpoint_config.update({"name": checkpoint_name})
-
-                if class_name == "Checkpoint":
-                    instantiated_class = Checkpoint(
-                        data_context=self, **checkpoint_config
-                    )
-                elif class_name == "SimpleCheckpoint":
-                    instantiated_class = SimpleCheckpoint(
-                        data_context=self, **checkpoint_config
-                    )
-
-                checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
-                    self.data_context_id
-                )
-
-                usage_stats_event_payload = (
-                    checkpoint_anonymizer.anonymize_checkpoint_info(
-                        name=checkpoint_name, config=checkpoint_config
-                    )
-                )
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._instantiate_checkpoint_from_config(class_name, name, config)
 
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
-                print(
-                    f"\tInstantiating as a DataConnector, since class_name is {class_name}"
-                )
-                data_connector_name: str = (
-                    name or config.get("name") or "my_temp_data_connector"
-                )
-                instantiated_class = instantiate_class_from_config(
-                    config=config,
-                    runtime_environment={
-                        **runtime_environment,
-                        **{
-                            "root_directory": self.root_directory,
-                        },
-                    },
-                    config_defaults={},
-                )
-
-                data_connector_anonymizer = DataConnectorAnonymizer(
-                    self.data_context_id
-                )
-
-                usage_stats_event_payload = (
-                    data_connector_anonymizer.anonymize_data_connector_info(
-                        name=data_connector_name, config=config
-                    )
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._instantiate_data_connector_from_config(
+                    class_name, name, config
                 )
 
             else:
@@ -3749,6 +3654,119 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 traceback.print_exc(limit=1)
             else:
                 raise e
+
+    def _instantiate_store_from_config(
+        self, class_name: str, name: Optional[str], config: CommentedMap
+    ) -> Tuple[Store, dict]:
+        print(f"\tInstantiating as a Store, since class_name is {class_name}")
+        store_name: str = name or config.get("name") or "my_temp_store"
+        instantiated_class = cast(
+            Store,
+            self._build_store_from_config(
+                store_name=store_name,
+                store_config=config,
+            ),
+        )
+        store_name = instantiated_class.store_name or store_name
+        self._project_config["stores"][store_name] = config
+
+        store_anonymizer = StoreAnonymizer(self.data_context_id)
+        usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+            store_name=store_name, store_obj=instantiated_class
+        )
+        return instantiated_class, usage_stats_event_payload
+
+    def _instantiate_ds_from_config(
+        self, class_name: str, name: Optional[str], config: CommentedMap
+    ) -> Tuple[Datasource, dict]:
+        print(f"\tInstantiating as a Datasource, since class_name is {class_name}")
+        datasource_name: str = name or config.get("name") or "my_temp_datasource"
+        instantiated_class = cast(
+            Datasource,
+            self._instantiate_datasource_from_config_and_update_project_config(
+                name=datasource_name,
+                config=config,
+                initialize=True,
+            ),
+        )
+
+        datasource_anonymizer = DatasourceAnonymizer(self.data_context_id)
+
+        if class_name == "SimpleSqlalchemyDatasource":
+            # Use the raw config here, defaults will be added in the anonymizer
+            usage_stats_event_payload = (
+                datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+                    name=datasource_name, config=config
+                )
+            )
+        else:
+            # Roundtrip through schema validator to add missing fields
+            datasource_config = datasourceConfigSchema.load(instantiated_class.config)
+            full_datasource_config = datasourceConfigSchema.dump(datasource_config)
+            usage_stats_event_payload = datasource_anonymizer.anonymize_datasource_info(
+                name=datasource_name, config=full_datasource_config
+            )
+
+        return instantiated_class, usage_stats_event_payload
+
+    def _instantiate_checkpoint_from_config(
+        self, class_name: str, name: Optional[str], config: CommentedMap
+    ) -> Tuple[Checkpoint, dict]:
+        print(f"\tInstantiating as a {class_name}, since class_name is {class_name}")
+
+        checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
+
+        checkpoint_config: Union[CheckpointConfig, dict]
+
+        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)
+        checkpoint_config = checkpoint_config.to_json_dict()
+        checkpoint_config.update({"name": checkpoint_name})
+
+        instantiated_class: Union[Checkpoint, SimpleCheckpoint]
+        if class_name == "Checkpoint":
+            instantiated_class = Checkpoint(data_context=self, **checkpoint_config)
+        elif class_name == "SimpleCheckpoint":
+            instantiated_class = SimpleCheckpoint(
+                data_context=self, **checkpoint_config
+            )
+
+        checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
+            self.data_context_id
+        )
+
+        usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
+            name=checkpoint_name, config=checkpoint_config
+        )
+
+        return instantiated_class, usage_stats_event_payload
+
+    def _instantiate_data_connector_from_config(
+        self, class_name: str, name: Optional[str], config: CommentedMap
+    ) -> Tuple[Any, dict]:
+        print(f"\tInstantiating as a DataConnector, since class_name is {class_name}")
+        data_connector_name: str = (
+            name or config.get("name") or "my_temp_data_connector"
+        )
+        instantiated_class = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                **runtime_environment,
+                **{
+                    "root_directory": self.root_directory,
+                },
+            },
+            config_defaults={},
+        )
+
+        data_connector_anonymizer = DataConnectorAnonymizer(self.data_context_id)
+
+        usage_stats_event_payload = (
+            data_connector_anonymizer.anonymize_data_connector_info(
+                name=data_connector_name, config=config
+            )
+        )
+
+        return instantiated_class, usage_stats_event_payload
 
 
 class DataContext(BaseDataContext):
