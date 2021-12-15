@@ -2,6 +2,7 @@ import logging
 
 import pytest
 
+from great_expectations import DataContext
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
 )
@@ -226,3 +227,52 @@ def test_usage_statistics_handler_validate_message_success(
     assert validated_message
     assert len(caplog.messages) == 0
     assert not usage_stats_invalid_messages_exist(caplog.messages)
+
+
+def test_build_init_payload(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    """This test is for a happy path only but will fail if there is an exception thrown in init_payload"""
+
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    usage_statistics_handler = context._usage_statistics_handler
+    init_payload = usage_statistics_handler.build_init_payload()
+    assert list(init_payload.keys()) == [
+        "platform.system",
+        "platform.release",
+        "version_info",
+        "anonymized_datasources",
+        "anonymized_stores",
+        "anonymized_validation_operators",
+        "anonymized_data_docs_sites",
+        "anonymized_expectation_suites",
+    ]
+    assert init_payload["anonymized_datasources"] == [
+        {
+            "anonymized_data_connectors": [
+                {
+                    "anonymized_name": "af09acd176f54642635a8a2975305437",
+                    "parent_class": "InferredAssetFilesystemDataConnector",
+                },
+                {
+                    "anonymized_name": "e475f70ca0bcbaf2748b93da5e9867ec",
+                    "parent_class": "ConfiguredAssetFilesystemDataConnector",
+                },
+                {
+                    "anonymized_name": "2030a96b1eaa8579087d31709fb6ec1b",
+                    "parent_class": "ConfiguredAssetFilesystemDataConnector",
+                },
+                {
+                    "anonymized_name": "d52d7bff3226a7f94dd3510c1040de78",
+                    "parent_class": "RuntimeDataConnector",
+                },
+            ],
+            "anonymized_execution_engine": {
+                "anonymized_name": "212039ff9860a796a32c75c7d5c2fac0",
+                "parent_class": "PandasExecutionEngine",
+            },
+            "anonymized_name": "a732a247720783a5931fa7c4606403c2",
+            "parent_class": "Datasource",
+        }
+    ]
+    assert init_payload["anonymized_expectation_suites"] == []
