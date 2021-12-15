@@ -24,8 +24,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 </Prerequisites>
 
 
-Steps
-------
+### Steps
 
 1. Decide where you would like to save the desired credentials or config values - in a YAML file, environment variables, or a combination - then save the values. In most cases, we suggest using a config variables YAML file. YAML files make variables more visible, easily editable, and allow for modularization (e.g. one file for dev, another for prod).
 
@@ -38,16 +37,7 @@ Steps
 
   If using a YAML file, save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml`` or another YAML file of your choosing:
 
-  ```yaml
-  # great_expectations/uncommitted/config_variables.yml
-
-  my_postgres_db_yaml_creds:
-    drivername: postgres
-    host: 127.0.0.778
-    port: '7987'
-    username: administrator
-    password: ${MY_DB_PW}
-    database: postgres
+  ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L8-L14
   ```
 
   :::note
@@ -60,50 +50,17 @@ Steps
 
   If using environment variables, set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
 
-  ```bash
-  export POSTGRES_DRIVERNAME=postgres
-  export POSTGRES_HOST=localhost
-  export POSTGRES_PORT='5432'
-  export POSTGRES_USERNAME=postgres
-  export POSTGRES_PW=''
-  export POSTGRES_DB=postgres
-  export MY_DB_PW=password
+  ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L18-L24
   ```
 
 2. If using a YAML file, set the ``config_variables_file_path`` key in your ``great_expectations.yml`` or leave the default.
 
-  ```yaml
-  # great_expectations/great_expectations.yml
-
-  config_variables_file_path: uncommitted/config_variables.yml
+  ```yaml ../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L28
   ```
 
 3. Replace credentials or other values in your ``great_expectations.yml`` with ``${}``-wrapped variable names (i.e. ``${ENVIRONMENT_VARIABLE}`` or ``${YAML_KEY}``).
 
-  ```yaml
-  # great_expectations/great_expectations.yml
-
-  datasources:
-    my_postgres_db:
-      class_name: SqlAlchemyDatasource
-      data_asset_type:
-        class_name: SqlAlchemyDataset
-        module_name: great_expectations.dataset
-      module_name: great_expectations.datasource
-      credentials: ${my_postgres_db_yaml_creds}
-    my_other_postgres_db:
-      class_name: SqlAlchemyDatasource
-      data_asset_type:
-        class_name: SqlAlchemyDataset
-        module_name: great_expectations.dataset
-      module_name: great_expectations.datasource
-      credentials:
-        drivername: ${POSTGRES_DRIVERNAME}
-        host: ${POSTGRES_HOST}
-        port: ${POSTGRES_PORT}
-        username: ${POSTGRES_USERNAME}
-        password: ${POSTGRES_PW}
-        database: ${POSTGRES_DB}
+  ```yaml ../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L32-L58
   ```
 
 
@@ -146,7 +103,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-#### Setup
+### Setup
 
 To use AWS Secrets Manager, you may need to install the ``great_expectations`` package with its ``aws_secrets`` extra requirement:
 
@@ -229,7 +186,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-#### Setup
+### Setup
 
 To use GCP Secret Manager, you may need to install the ``great_expectations`` package with its ``gcp`` extra requirement:
 
@@ -307,7 +264,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 :::
 
 
-#### Setup
+### Setup
 
 To use Azure Key Vault, you may need to install the ``great_expectations`` package with its ``azure_secrets`` extra requirement:
 

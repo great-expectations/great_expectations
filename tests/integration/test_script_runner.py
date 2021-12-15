@@ -385,6 +385,11 @@ docs_test_matrix = [
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
 ]
 
 integration_test_matrix = [
