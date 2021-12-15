@@ -55,12 +55,12 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 
 2. If using a YAML file, set the ``config_variables_file_path`` key in your ``great_expectations.yml`` or leave the default.
 
-  ```yaml ../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L28
+  ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L28
   ```
 
 3. Replace credentials or other values in your ``great_expectations.yml`` with ``${}``-wrapped variable names (i.e. ``${ENVIRONMENT_VARIABLE}`` or ``${YAML_KEY}``).
 
-  ```yaml ../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L32-L58
+  ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L32-L58
   ```
 
 

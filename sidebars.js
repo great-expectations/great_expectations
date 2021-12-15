@@ -147,7 +147,6 @@ module.exports = {
               type: 'category',
               label: 'Advanced',
               items: [
-                'guides/connecting_to_your_data/advanced/database_credentials',
                 'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store',
                 'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql'
                 // 'guides/connecting_to_your_data/advanced/how_to_create_a_batch_from_a_sql_query',
