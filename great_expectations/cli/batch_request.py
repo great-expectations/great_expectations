@@ -178,8 +178,8 @@ def _get_data_asset_name_from_data_connector(
     datasource: BaseDatasource,
     data_connector_name: str,
     msg_prompt_enter_data_asset_name: str,
-) -> str:
-    data_asset_name: Optional[str]
+) -> Optional[str]:
+    data_asset_name: Optional[str] = None
 
     available_data_asset_names_by_data_connector_dict: Dict[
         str, List[str]
@@ -190,27 +190,84 @@ def _get_data_asset_name_from_data_connector(
         available_data_asset_names_by_data_connector_dict[data_connector_name],
         key=lambda x: x,
     )
+
+    num_data_assets = len(available_data_asset_names)
+    if num_data_assets > 50:
+        prompt = f"You have a list of {num_data_assets:,} data assets. Would you like to list them [L] or search [S]?\n"
+        user_selected_option: Optional[str] = None
+        while user_selected_option is None:
+            user_selected_option = (
+                click.prompt(prompt, show_default=False).strip().lower()
+            )
+            if user_selected_option == "l":
+                data_asset_name = _list_available_data_asset_names(
+                    available_data_asset_names, msg_prompt_enter_data_asset_name
+                )
+            elif user_selected_option == "s":
+                data_asset_name = _search_through_available_data_asset_names()
+            else:
+                user_selected_option = None
+    else:
+        data_asset_name = _list_available_data_asset_names(
+            available_data_asset_names, msg_prompt_enter_data_asset_name
+        )
+
+    return data_asset_name
+
+
+def _list_available_data_asset_names(
+    available_data_asset_names: List[str],
+    msg_prompt_enter_data_asset_name: str,
+):
     available_data_asset_names_str: List[str] = [
         f"{name}" for name in available_data_asset_names
     ]
 
-    data_asset_names_to_display: List[str] = available_data_asset_names_str[:50]
-    choices: str = "\n".join(
-        [f"    {i}. {name}" for i, name in enumerate(data_asset_names_to_display, 1)]
-    )
-    prompt: str = msg_prompt_enter_data_asset_name + choices + "\n"
-    data_asset_name_selection: str = click.prompt(prompt, show_default=False)
-    data_asset_name_selection = data_asset_name_selection.strip()
-    try:
-        data_asset_index: int = int(data_asset_name_selection) - 1
-        try:
-            data_asset_name = available_data_asset_names[data_asset_index]
-        except IndexError:
-            data_asset_name = None
-    except ValueError:
-        data_asset_name = data_asset_name_selection
+    data_asset_pages: List[List[str]] = [
+        available_data_asset_names_str[i : i + 50]
+        for i in range(0, len(available_data_asset_names_str), 50)
+    ]
+
+    display_idx = 0
+    data_asset_name: Optional[str] = None
+    while data_asset_name is None:
+        current_page = data_asset_pages[display_idx]
+        choices: str = "\n".join(
+            [
+                f"    {i+(display_idx*50)}. {name}"
+                for i, name in enumerate(current_page, 1)
+            ]
+        )
+        usage: str = (
+            "Use [N]/[P] to navigate through pages and select an asset by index:\n"
+        )
+        prompt: str = f"{msg_prompt_enter_data_asset_name}{usage}{choices}\n"
+        data_asset_name_selection: str = (
+            click.prompt(prompt, show_default=False).strip().lower()
+        )
+
+        if data_asset_name_selection == "n":
+            display_idx += 1
+            if display_idx >= len(data_asset_pages):
+                display_idx = 0
+        elif data_asset_name_selection == "p":
+            display_idx -= 1
+            if display_idx < 0:
+                display_idx = len(data_asset_pages) - 1
+        elif data_asset_name_selection.isdigit():
+            data_asset_index: int = int(data_asset_name_selection) - 1
+            try:
+                data_asset_name = available_data_asset_names[data_asset_index]
+            except IndexError:
+                break
+            except ValueError:
+                data_asset_name = data_asset_name_selection
 
     return data_asset_name
+
+
+def _search_through_available_data_asset_names():
+    pass
 
 
 def _get_data_asset_name_for_simple_sqlalchemy_datasource(
