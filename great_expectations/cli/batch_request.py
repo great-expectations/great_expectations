@@ -225,7 +225,7 @@ def _get_data_asset_name_from_data_connector(
 def _list_available_data_asset_names(
     available_data_asset_names: List[str],
     msg_prompt_enter_data_asset_name: str,
-):
+) -> Optional[str]:
     available_data_asset_names_str: List[str] = [
         f"{name}" for name in available_data_asset_names
     ]
@@ -276,7 +276,7 @@ def _list_available_data_asset_names(
 def _search_through_available_data_asset_names(
     available_data_asset_names: List[str],
     msg_prompt_enter_data_asset_name: str,
-):
+) -> Optional[str]:
     data_asset_name: Optional[str] = None
     while data_asset_name is None:
         available_data_asset_names_str: List[str] = [
