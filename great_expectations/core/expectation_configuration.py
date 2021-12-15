@@ -969,9 +969,6 @@ class ExpectationConfiguration(SerializableDictDot):
         self.meta = meta
         self.success_on_last_run = success_on_last_run
         self._ge_cloud_id = ge_cloud_id
-
-        if expectation_context is None:
-            expectation_context = ExpectationContext()
         self._expectation_context = expectation_context
 
     def process_evaluation_parameters(
@@ -1048,7 +1045,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self._ge_cloud_id = value
 
     @property
-    def expectation_context(self) -> ExpectationContext:
+    def expectation_context(self) -> Optional[ExpectationContext]:
         return self._expectation_context
 
     @expectation_context.setter
