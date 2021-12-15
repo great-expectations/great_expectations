@@ -539,7 +539,8 @@ class BaseDataContext:
                     return config_value
         return None
 
-    def _check_global_usage_statistics_opt_out(self):
+    @staticmethod
+    def _check_global_usage_statistics_opt_out():
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in BaseDataContext.FALSEY_STRINGS:
