@@ -232,18 +232,6 @@ class UsageStatisticsHandler:
         except Exception:
             pass
 
-    def _prep_for_emit(self, message):
-        try:
-            if message["event"] == "data_context.__init__":
-                message["event_payload"] = self.build_init_payload()
-            message = self.build_envelope(message=message)
-            return message
-
-        # noinspection PyBroadException
-        except Exception as e:
-            # We *always* tolerate *any* error in usage statistics
-            logger.debug(e)
-
     def emit(self, message):
         """
         Emit a message.
