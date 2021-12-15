@@ -83,7 +83,6 @@ def test_common_usage_stats_are_sent_no_mocking(
         "GE_USAGE_STATS", raising=False
     )  # Undo the project-wide test default
     assert os.getenv("GE_USAGE_STATS") is None
-    assert os.getenv("GE_USAGE_STATISTICS_URL") is None
 
     context: BaseDataContext = BaseDataContext(
         in_memory_data_context_config_usage_stats_enabled
