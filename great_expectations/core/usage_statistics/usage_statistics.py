@@ -1,6 +1,7 @@
 import atexit
 import copy
 import datetime
+import enum
 import json
 import logging
 import platform
@@ -60,7 +61,10 @@ logger = logging.getLogger(__name__)
 
 _anonymizers = {}
 
-EMIT_EXCEPTION_PREFIX: str = "UsageStatsException"
+
+class UsageStatsExceptionPrefix(enum.Enum):
+    EMIT_EXCEPTION: str = "UsageStatsException"
+    INVALID_MESSAGE: str = "UsageStatsInvalidMessage"
 
 
 class UsageStatisticsHandler:
@@ -204,7 +208,10 @@ class UsageStatisticsHandler:
             jsonschema.validate(message, schema=schema)
             return True
         except jsonschema.ValidationError as e:
-            logger.debug("invalid message: " + str(e))
+            logger.debug(
+                f"{UsageStatsExceptionPrefix.INVALID_MESSAGE.value} invalid message: "
+                + str(e)
+            )
             return False
 
     def send_usage_message(
@@ -225,6 +232,18 @@ class UsageStatisticsHandler:
         except Exception:
             pass
 
+    def _prep_for_emit(self, message):
+        try:
+            if message["event"] == "data_context.__init__":
+                message["event_payload"] = self.build_init_payload()
+            message = self.build_envelope(message=message)
+            return message
+
+        # noinspection PyBroadException
+        except Exception as e:
+            # We *always* tolerate *any* error in usage statistics
+            logger.debug(e)
+
     def emit(self, message):
         """
         Emit a message.
@@ -241,7 +260,9 @@ class UsageStatisticsHandler:
         # noinspection PyBroadException
         except Exception as e:
             # We *always* tolerate *any* error in usage statistics
-            log_message: str = f"{EMIT_EXCEPTION_PREFIX}: {e} type: {type(e)}"
+            log_message: str = (
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}"
+            )
             logger.debug(log_message)
 
 
