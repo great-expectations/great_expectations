@@ -60,6 +60,8 @@ logger = logging.getLogger(__name__)
 
 _anonymizers = {}
 
+EMIT_EXCEPTION_PREFIX: str = "UsageStatsException"
+
 
 class UsageStatisticsHandler:
     def __init__(self, data_context, data_context_id, usage_statistics_url):
@@ -239,7 +241,8 @@ class UsageStatisticsHandler:
         # noinspection PyBroadException
         except Exception as e:
             # We *always* tolerate *any* error in usage statistics
-            logger.debug(e)
+            log_message: str = f"{EMIT_EXCEPTION_PREFIX}: {e} type: {type(e)}"
+            logger.debug(log_message)
 
 
 def get_usage_statistics_handler(args_array):
