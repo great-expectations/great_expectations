@@ -1,5 +1,7 @@
+import difflib
 import logging
 import os
+import re
 import uuid
 from typing import Any, Dict, List, Optional, Union, cast
 
@@ -179,7 +181,6 @@ def _get_data_asset_name_from_data_connector(
     data_connector_name: str,
     msg_prompt_enter_data_asset_name: str,
 ) -> Optional[str]:
-    data_asset_name: Optional[str] = None
 
     available_data_asset_names_by_data_connector_dict: Dict[
         str, List[str]
@@ -191,9 +192,12 @@ def _get_data_asset_name_from_data_connector(
         key=lambda x: x,
     )
 
+    data_asset_name: Optional[str] = None
     num_data_assets = len(available_data_asset_names)
-    if num_data_assets > 50:
-        prompt = f"You have a list of {num_data_assets:,} data assets. Would you like to list them [L] or search [S]?\n"
+
+    # If we have a large number of assets, give the user the ability to paginate or search
+    if num_data_assets > 100:
+        prompt = f"You have a list of {num_data_assets:,} data assets. Would you like to list them [l] or search [s]?\n"
         user_selected_option: Optional[str] = None
         while user_selected_option is None:
             user_selected_option = (
@@ -204,9 +208,12 @@ def _get_data_asset_name_from_data_connector(
                     available_data_asset_names, msg_prompt_enter_data_asset_name
                 )
             elif user_selected_option == "s":
-                data_asset_name = _search_through_available_data_asset_names()
+                data_asset_name = _search_through_available_data_asset_names(
+                    available_data_asset_names, msg_prompt_enter_data_asset_name
+                )
             else:
                 user_selected_option = None
+    # Otherwise, default to pagination
     else:
         data_asset_name = _list_available_data_asset_names(
             available_data_asset_names, msg_prompt_enter_data_asset_name
@@ -222,10 +229,11 @@ def _list_available_data_asset_names(
     available_data_asset_names_str: List[str] = [
         f"{name}" for name in available_data_asset_names
     ]
+    PAGE_SIZE = 50
 
     data_asset_pages: List[List[str]] = [
-        available_data_asset_names_str[i : i + 50]
-        for i in range(0, len(available_data_asset_names_str), 50)
+        available_data_asset_names_str[i : i + PAGE_SIZE]
+        for i in range(0, len(available_data_asset_names_str), PAGE_SIZE)
     ]
 
     display_idx = 0
@@ -234,40 +242,73 @@ def _list_available_data_asset_names(
         current_page = data_asset_pages[display_idx]
         choices: str = "\n".join(
             [
-                f"    {i+(display_idx*50)}. {name}"
+                f"    {i+(display_idx*PAGE_SIZE)}. {name}"
                 for i, name in enumerate(current_page, 1)
             ]
         )
-        usage: str = (
-            "Use [N]/[P] to navigate through pages and select an asset by index:\n"
-        )
-        prompt: str = f"{msg_prompt_enter_data_asset_name}{usage}{choices}\n"
-        data_asset_name_selection: str = (
-            click.prompt(prompt, show_default=False).strip().lower()
-        )
 
-        if data_asset_name_selection == "n":
+        instructions = "Type [n] to see the next page or [p] for the previous. When you're ready to select an asset, enter the index."
+        prompt = f"{msg_prompt_enter_data_asset_name}{choices}\n\n{instructions}\n"
+        user_response: str = click.prompt(prompt, show_default=False).strip().lower()
+
+        if user_response == "n":
             display_idx += 1
-            if display_idx >= len(data_asset_pages):
-                display_idx = 0
-        elif data_asset_name_selection == "p":
+        elif user_response == "p":
             display_idx -= 1
-            if display_idx < 0:
-                display_idx = len(data_asset_pages) - 1
-        elif data_asset_name_selection.isdigit():
-            data_asset_index: int = int(data_asset_name_selection) - 1
+        elif user_response.isdigit():
+            data_asset_index: int = int(user_response) - 1
             try:
                 data_asset_name = available_data_asset_names[data_asset_index]
             except IndexError:
                 break
             except ValueError:
-                data_asset_name = data_asset_name_selection
+                data_asset_name = user_response
+
+        # Ensure that our display index is never out of bounds (loops around to the other side)
+        if display_idx >= len(data_asset_pages):
+            display_idx = 0
+        elif display_idx < 0:
+            display_idx = len(data_asset_pages) - 1
 
     return data_asset_name
 
 
-def _search_through_available_data_asset_names():
-    pass
+def _search_through_available_data_asset_names(
+    available_data_asset_names: List[str],
+    msg_prompt_enter_data_asset_name: str,
+):
+    data_asset_name: Optional[str] = None
+    while data_asset_name is None:
+        available_data_asset_names_str: List[str] = [
+            f"{name}" for name in available_data_asset_names
+        ]
+        choices: str = "\n".join(
+            [
+                f"    {i}. {name}"
+                for i, name in enumerate(available_data_asset_names_str, 1)
+            ]
+        )
+
+        instructions = "Search by name or regex to filter results. When you're ready to select an asset, enter the index."
+        prompt = f"{msg_prompt_enter_data_asset_name}{choices}\n\n{instructions}\n"
+        user_response: str = click.prompt(prompt, show_default=False).strip().lower()
+
+        if user_response.isdigit():
+            data_asset_index: int = int(user_response) - 1
+            try:
+                data_asset_name = available_data_asset_names[data_asset_index]
+            except IndexError:
+                break
+            except ValueError:
+                data_asset_name = user_response
+        else:
+            # Narrow the search results down to ones that are close to the user query
+            r = re.compile(user_response)
+            available_data_asset_names = list(
+                filter(r.match, available_data_asset_names)
+            )
+
+    return data_asset_name
 
 
 def _get_data_asset_name_for_simple_sqlalchemy_datasource(
