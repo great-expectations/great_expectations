@@ -1382,7 +1382,9 @@ class ExpectationConfigurationSchema(Schema):
     kwargs = fields.Dict()
     meta = fields.Dict()
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
-    expectation_context = fields.Nested(lambda: ExpectationContextSchema)
+    expectation_context = fields.Nested(
+        lambda: ExpectationContextSchema, required=False, allow_none=True
+    )
 
     REMOVE_KEYS_IF_NONE = ["ge_cloud_id"]
 
