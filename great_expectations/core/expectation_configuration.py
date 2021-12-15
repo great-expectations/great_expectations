@@ -1386,7 +1386,7 @@ class ExpectationConfigurationSchema(Schema):
         lambda: ExpectationContextSchema, required=False, allow_none=True
     )
 
-    REMOVE_KEYS_IF_NONE = ["ge_cloud_id"]
+    REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context"]
 
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs):
