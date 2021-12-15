@@ -189,7 +189,6 @@ def test_usage_statistics_handler_validate_message_failure(
         sample_partial_message, anonymized_usage_statistics_record_schema
     )
     assert not validated_message
-    assert len(caplog.messages) == 1
     assert usage_stats_invalid_messages_exist(caplog.messages)
 
 
@@ -225,7 +224,6 @@ def test_usage_statistics_handler_validate_message_success(
     )
 
     assert validated_message
-    assert len(caplog.messages) == 0
     assert not usage_stats_invalid_messages_exist(caplog.messages)
 
 

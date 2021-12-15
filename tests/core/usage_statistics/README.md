@@ -12,7 +12,7 @@ We ensure:
   - throughout the unit test suite there are checks that mock `UsageStatisticsHandler.emit()` and check that the correct messages were passed to it.
 - messages are sent
   - tests/integration/usage_statistics/test_usage_stats_common_messages_are_sent_v3api.py tests a subset of common v3api events
-  - TODO: check other methods that process usage stats in a new file tests/core/usage_statistics/test_usage_statistics_handler_methods.py e.g. `UsageStatisticsHandler.` `emit()`, `build_init_payload()`, `build_envelope()` and `validate_message()`
+  - tests/core/usage_statistics/test_usage_statistics_handler_methods.py e.g. those used in `UsageStatisticsHandler.emit()`: `build_init_payload()`, `build_envelope()` and `validate_message()`
 - no warnings are generated when sending messages
   - TODO: since we don't raise errors in the usage stats machinery, these tests will check the logs for errors
 - valid messages pass our validation schema
