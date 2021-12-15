@@ -24,7 +24,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 </Prerequisites>
 
 
-### Steps
+**Steps**
 
 1. Decide where you would like to save the desired credentials or config values - in a YAML file, environment variables, or a combination - then save the values. In most cases, we suggest using a config variables YAML file. YAML files make variables more visible, easily editable, and allow for modularization (e.g. one file for dev, another for prod).
 
@@ -37,7 +37,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 
   If using a YAML file, save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml`` or another YAML file of your choosing:
 
-  ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L8-L14
+  ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L9-L15
   ```
 
   :::note
@@ -50,24 +50,25 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 
   If using environment variables, set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
 
-  ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L18-L24
+  ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L19-L25
   ```
 
 2. If using a YAML file, set the ``config_variables_file_path`` key in your ``great_expectations.yml`` or leave the default.
 
-  ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L28
+  ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L29
   ```
 
 3. Replace credentials or other values in your ``great_expectations.yml`` with ``${}``-wrapped variable names (i.e. ``${ENVIRONMENT_VARIABLE}`` or ``${YAML_KEY}``).
 
-  ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L32-L58
+  ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L33-L59
   ```
 
 
-Additional Notes
---------------------
+**Additional Notes**
 
 - The default ``config_variables.yml`` file located at ``great_expectations/uncommitted/config_variables.yml`` applies to deployments created using ``great_expectations init``.
+- To view the full script used in this page, see it on GitHub: [how_to_configure_credentials.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py)
+
 
 </TabItem>
 <TabItem value="secret-manager">
@@ -103,7 +104,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-### Setup
+**Setup**
 
 To use AWS Secrets Manager, you may need to install the ``great_expectations`` package with its ``aws_secrets`` extra requirement:
 
@@ -130,11 +131,9 @@ If your secret value is a JSON string, you can retrieve a specific value like th
 Or like this:
 ``secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my_secret:00000000-0000-0000-0000-000000000000|key``
 
-**Example:**
+**Example great_expectations.yml:**
 
 ```yaml
-# great_expectations/great_expectations.yml
-
 datasources:
   dev_postgres_db:
     class_name: SqlAlchemyDatasource
@@ -186,7 +185,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-### Setup
+**Setup**
 
 To use GCP Secret Manager, you may need to install the ``great_expectations`` package with its ``gcp`` extra requirement:
 
@@ -207,11 +206,9 @@ If your secret value is a JSON string, you can retrieve a specific value like th
 Or like this:
 ``secret|projects/project_id/secrets/my_secret/versions/1|key``
 
-**Example:**
+**Example great_expectations.yml:**
 
 ```yaml
-# great_expectations/great_expectations.yml
-
 datasources:
   dev_postgres_db:
     class_name: SqlAlchemyDatasource
@@ -263,8 +260,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-
-### Setup
+**Setup**
 
 To use Azure Key Vault, you may need to install the ``great_expectations`` package with its ``azure_secrets`` extra requirement:
 
@@ -286,11 +282,9 @@ Or like this:
 ``secret|https://my-vault-name.vault.azure.net/secrets/my-secret/a0b00aba001aaab10b111001100a11ab|key``
 
 
-**Example:**
+**Example great_expectations.yml:**
 
 ```yaml
-# great_expectations/great_expectations.yml
-
 datasources:
   dev_postgres_db:
     class_name: SqlAlchemyDatasource
