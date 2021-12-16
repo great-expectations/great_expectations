@@ -12,7 +12,7 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import requests
 from dateutil.parser import parse
@@ -3161,61 +3161,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs,
         )
 
-    def _get_config_with_substituted_variables(
-        self,
-        yaml_config: str,
-        runtime_environment: dict,
-        usage_stats_event_name: str,
-    ) -> CommentedMap:
-        try:
-            substituted_config_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                self.config_variables,
-                dict(os.environ),
-            )
-
-            substitutions: dict = {
-                **substituted_config_variables,
-                **dict(os.environ),
-                **runtime_environment,
-            }
-
-            config_str_with_substituted_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                yaml_config,
-                substitutions,
-            )
-        except Exception as e:
-            usage_stats_event_payload = {
-                "diagnostic_info": ["__substitution_error__"],
-            }
-            send_usage_message(
-                data_context=self,
-                event=usage_stats_event_name,
-                event_payload=usage_stats_event_payload,
-                success=False,
-            )
-            raise e
-
-        try:
-            config: CommentedMap = yaml.load(config_str_with_substituted_variables)
-
-        except Exception as e:
-            usage_stats_event_payload = {
-                "diagnostic_info": ["__yaml_parse_error__"],
-            }
-            send_usage_message(
-                data_context=self,
-                event=usage_stats_event_name,
-                event_payload=usage_stats_event_payload,
-                success=False,
-            )
-            raise e
-
-        return config
-
     def test_yaml_config(
         self,
         yaml_config: str,
@@ -3295,22 +3240,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         try:
             if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
-                print(f"\tInstantiating as a Store, since class_name is {class_name}")
-                store_name: str = name or config.get("name") or "my_temp_store"
-                instantiated_class = cast(
-                    Store,
-                    self._build_store_from_config(
-                        store_name=store_name,
-                        store_config=config,
-                    ),
-                )
-                store_name = instantiated_class.store_name or store_name
-                self._project_config["stores"][store_name] = config
-
-                store_anonymizer = StoreAnonymizer(self.data_context_id)
-                usage_stats_event_payload = store_anonymizer.anonymize_store_info(
-                    store_name=store_name, store_obj=instantiated_class
-                )
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._test_yaml_config_stores(name, class_name, config)
 
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
                 print(
@@ -3575,6 +3508,83 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 traceback.print_exc(limit=1)
             else:
                 raise e
+
+    def _get_config_with_substituted_variables(
+        self,
+        yaml_config: str,
+        runtime_environment: dict,
+        usage_stats_event_name: str,
+    ) -> CommentedMap:
+        try:
+            substituted_config_variables: Union[
+                DataContextConfig, dict
+            ] = substitute_all_config_variables(
+                self.config_variables,
+                dict(os.environ),
+            )
+
+            substitutions: dict = {
+                **substituted_config_variables,
+                **dict(os.environ),
+                **runtime_environment,
+            }
+
+            config_str_with_substituted_variables: Union[
+                DataContextConfig, dict
+            ] = substitute_all_config_variables(
+                yaml_config,
+                substitutions,
+            )
+        except Exception as e:
+            usage_stats_event_payload = {
+                "diagnostic_info": ["__substitution_error__"],
+            }
+            send_usage_message(
+                data_context=self,
+                event=usage_stats_event_name,
+                event_payload=usage_stats_event_payload,
+                success=False,
+            )
+            raise e
+
+        try:
+            config: CommentedMap = yaml.load(config_str_with_substituted_variables)
+
+        except Exception as e:
+            usage_stats_event_payload = {
+                "diagnostic_info": ["__yaml_parse_error__"],
+            }
+            send_usage_message(
+                data_context=self,
+                event=usage_stats_event_name,
+                event_payload=usage_stats_event_payload,
+                success=False,
+            )
+            raise e
+
+        return config
+
+    def _test_yaml_config_stores(
+        self, name: Optional[str], class_name: str, config: dict
+    ) -> Tuple[Store, dict]:
+        print(f"\tInstantiating as a Store, since class_name is {class_name}")
+        store_name: str = name or config.get("name") or "my_temp_store"
+        instantiated_class = cast(
+            Store,
+            self._build_store_from_config(
+                store_name=store_name,
+                store_config=config,
+            ),
+        )
+        store_name = instantiated_class.store_name or store_name
+        self._project_config["stores"][store_name] = config
+
+        store_anonymizer = StoreAnonymizer(self.data_context_id)
+        usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+            store_name=store_name, store_obj=instantiated_class
+        )
+
+        return instantiated_class, usage_stats_event_payload
 
 
 class DataContext(BaseDataContext):
