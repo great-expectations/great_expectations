@@ -1654,7 +1654,13 @@ class BaseDataContext:
             **kwargs,
         )
         datasource_name = batch_request.datasource_name
-        datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+        if datasource_name in self.datasources:
+            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+        else:
+            raise ge_exceptions.DatasourceError(
+                datasource_name,
+                f"The given datasource could not be retrieved from the DataContext",
+            )
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     def get_validator(
