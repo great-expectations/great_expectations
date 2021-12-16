@@ -1659,7 +1659,7 @@ class BaseDataContext:
         else:
             raise ge_exceptions.DatasourceError(
                 datasource_name,
-                f"The given datasource could not be retrieved from the DataContext",
+                f"The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
             )
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
