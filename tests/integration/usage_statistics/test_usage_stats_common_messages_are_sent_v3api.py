@@ -6,9 +6,6 @@ import pytest
 from ruamel import yaml
 
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.core.usage_statistics.usage_statistics import (
-    EMIT_EXCEPTION_PREFIX,
-)
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from tests.core.usage_statistics.util import assert_no_usage_stats_exceptions
@@ -157,47 +154,3 @@ def test_common_usage_stats_are_sent_no_mocking(
     )
 
     assert_no_usage_stats_exceptions(messages=caplog.messages)
-
-
-@pytest.mark.parametrize(
-    "test_input",
-    [
-        pytest.param(
-            ["just", "some", "logger", "messages"], id="list_without_exceptions"
-        ),
-        pytest.param([], id="empty_list"),
-    ],
-)
-def test_assert_no_usage_stats_exceptions_passing(test_input):
-    assert_no_usage_stats_exceptions(messages=test_input)
-
-
-@pytest.mark.parametrize(
-    "test_input",
-    [
-        pytest.param(
-            [
-                "just",
-                "some",
-                "logger",
-                "messages",
-                f"{EMIT_EXCEPTION_PREFIX} some error message",
-            ],
-            id="list_with_exceptions",
-        ),
-        pytest.param(
-            [
-                "just",
-                "some",
-                "logger",
-                "messages",
-                f"{EMIT_EXCEPTION_PREFIX}some error message",
-            ],
-            id="list_with_exceptions_no_whitespace",
-        ),
-    ],
-)
-def test_assert_no_usage_stats_exceptions_failing(test_input):
-
-    with pytest.raises(AssertionError):
-        assert_no_usage_stats_exceptions(messages=test_input)
