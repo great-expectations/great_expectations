@@ -820,7 +820,7 @@ class BaseDataContext:
         return self.project_config_with_variables_substituted.concurrency
 
     @property
-    def progress_bars(self) -> ProgressBarsConfig:
+    def progress_bars(self) -> Optional[ProgressBarsConfig]:
         return self.project_config_with_variables_substituted.progress_bars
 
     @property
