@@ -690,10 +690,5 @@ class ExpectationSuiteSchema(Schema):
         data = self.clean_empty(data)
         return data
 
-    # noinspection PyUnusedLocal
-    # @post_load
-    # def make_expectation_suite(self, data, **kwargs):
-    #     return ExpectationSuite(**data)
-
 
 expectationSuiteSchema = ExpectationSuiteSchema()
