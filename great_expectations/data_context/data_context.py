@@ -3243,46 +3243,15 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 (
                     instantiated_class,
                     usage_stats_event_payload,
-                ) = self._test_yaml_config_stores(name, class_name, config)
+                ) = self._test_yaml_config_instantiate_store(name, class_name, config)
 
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
-                print(
-                    f"\tInstantiating as a Datasource, since class_name is {class_name}"
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._test_yaml_config_instantiate_datasource(
+                    name, class_name, config
                 )
-                datasource_name: str = (
-                    name or config.get("name") or "my_temp_datasource"
-                )
-                instantiated_class = cast(
-                    Datasource,
-                    self._instantiate_datasource_from_config_and_update_project_config(
-                        name=datasource_name,
-                        config=config,
-                        initialize=True,
-                    ),
-                )
-
-                datasource_anonymizer = DatasourceAnonymizer(self.data_context_id)
-
-                if class_name == "SimpleSqlalchemyDatasource":
-                    # Use the raw config here, defaults will be added in the anonymizer
-                    usage_stats_event_payload = (
-                        datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
-                            name=datasource_name, config=config
-                        )
-                    )
-                else:
-                    # Roundtrip through schema validator to add missing fields
-                    datasource_config = datasourceConfigSchema.load(
-                        instantiated_class.config
-                    )
-                    full_datasource_config = datasourceConfigSchema.dump(
-                        datasource_config
-                    )
-                    usage_stats_event_payload = (
-                        datasource_anonymizer.anonymize_datasource_info(
-                            name=datasource_name, config=full_datasource_config
-                        )
-                    )
 
             elif class_name in ["Checkpoint", "SimpleCheckpoint"]:
                 print(
@@ -3564,7 +3533,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         return config
 
-    def _test_yaml_config_stores(
+    def _test_yaml_config_instantiate_store(
         self, name: Optional[str], class_name: str, config: dict
     ) -> Tuple[Store, dict]:
         print(f"\tInstantiating as a Store, since class_name is {class_name}")
@@ -3583,6 +3552,39 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         usage_stats_event_payload = store_anonymizer.anonymize_store_info(
             store_name=store_name, store_obj=instantiated_class
         )
+
+        return instantiated_class, usage_stats_event_payload
+
+    def _test_yaml_config_instantiate_datasource(
+        self, name: Optional[str], class_name: str, config: dict
+    ) -> Tuple[Datasource, dict]:
+        print(f"\tInstantiating as a Datasource, since class_name is {class_name}")
+        datasource_name: str = name or config.get("name") or "my_temp_datasource"
+        instantiated_class = cast(
+            Datasource,
+            self._instantiate_datasource_from_config_and_update_project_config(
+                name=datasource_name,
+                config=config,
+                initialize=True,
+            ),
+        )
+
+        datasource_anonymizer = DatasourceAnonymizer(self.data_context_id)
+
+        if class_name == "SimpleSqlalchemyDatasource":
+            # Use the raw config here, defaults will be added in the anonymizer
+            usage_stats_event_payload = (
+                datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+                    name=datasource_name, config=config
+                )
+            )
+        else:
+            # Roundtrip through schema validator to add missing fields
+            datasource_config = datasourceConfigSchema.load(instantiated_class.config)
+            full_datasource_config = datasourceConfigSchema.dump(datasource_config)
+            usage_stats_event_payload = datasource_anonymizer.anonymize_datasource_info(
+                name=datasource_name, config=full_datasource_config
+            )
 
         return instantiated_class, usage_stats_event_payload
 
