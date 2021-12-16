@@ -191,6 +191,7 @@ def test_get_config(empty_data_context):
         "anonymous_usage_statistics",
         "notebooks",
         "concurrency",
+        "progress_bars",
     }
 
 
