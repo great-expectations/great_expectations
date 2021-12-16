@@ -697,10 +697,10 @@ class Validator:
             disable = len(graph.edges) < 3
             if self._data_context:
                 progress_bars = self._data_context.progress_bars
-                if progress_bars.get("globally") is False:
-                    disable = True
-                elif progress_bars.get("metric_calculations") is False:
-                    disable = True
+                if "globally" in progress_bars:
+                    disable = not progress_bars["globally"]
+                if "metric_calculations" in progress_bars:
+                    disable = not progress_bars["metric_calculations"]
 
             if pbar is None:
                 # noinspection PyProtectedMember,SpellCheckingInspection
