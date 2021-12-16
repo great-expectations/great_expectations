@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 from ruamel import yaml
 
@@ -21,15 +22,15 @@ stores:
     class_name: ExpectationsStore
     store_backend:
       class_name: TupleGCSStoreBackend
-      project: '<YOUR_GCP_PROJECT_NAME>'
-      bucket: '<YOUR_GCS_BUCKET_NAME>'
-      prefix: '<YOUR_GCS_FOLDER_NAME>'
+      project: <YOUR GCP PROJECT NAME>
+      bucket: <YOUR GCS BUCKET NAME>
+      prefix: <YOUR GCS PREFIX NAME>
       
 expectations_store_name: expectations_GCS_store
 """
 
 copy_expectation_command = """
-gsutil cp exp1.json gs://'<YOUR_GCS_BUCKET_NAME>'/'<YOUR_GCS_FOLDER_NAME>'
+gsutil cp expectations/my_expectation_suite.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/my_expectation_suite.json
 """
 
 copy_expectation_output = """
@@ -51,9 +52,9 @@ store_backend:
 class_name: ExpectationsStore
 store_backend:
   class_name: TupleGCSStoreBackend
-  project: '<YOUR_GCP_PROJECT_NAME>'
-  bucket: '<YOUR_GCS_BUCKET_NAME>'
-  prefix: '<YOUR_GCS_FOLDER_NAME>'
+  project: <YOUR GCP PROJECT NAME>
+  bucket: <YOUR GCS BUCKET NAME>
+  prefix: <YOUR GCS PREFIX NAME>
 """
 
 list_expectation_suites_command = """
@@ -62,12 +63,14 @@ great_expectations --v3-api suite list
 
 list_expectation_suites_output = """
 1 Expectation Suite found:
- - exp1
+ - my_expectation_suite
 """
 
 
 # NOTE: The following code is only for testing and can be ignored by users.
 context = ge.get_context()
+
+
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
@@ -94,5 +97,16 @@ configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"]["prefix"] = "data/taxi_yellow_tripdata_samples"
 
 context.add_store(store_name=configured_expectations_store["expectations_store_name"], store_config=configured_expectations_store["stores"]["expectations_GCS_store"])
+expectation_suite_name = "my_expectation_suite"
+context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
 
+# try gsutil cp command
+local_expectation_suite_file_path = os.path.join(context.root_directory, "expectations", f"{expectation_suite_name}.json")
+copy_expectation_command = copy_expectation_command.replace("expectations/my_expectation_suite.json", local_expectation_suite_file_path)
+copy_expectation_command = copy_expectation_command.replace("<YOUR GCS BUCKET NAME>", configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"]["bucket"])
+copy_expectation_command = copy_expectation_command.replace("<YOUR GCS PREFIX NAME>/my_expectation_suite.json", configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"]["prefix"] + f"/{expectation_suite_name}.json")
+print(copy_expectation_command.strip())
 
+stdout = subprocess.run(copy_expectation_command.strip(), check=True, stdout=subprocess.PIPE).stdout
+print(stdout)
+assert stdout == copy_expectation_output

@@ -68,10 +68,10 @@ Steps
 
 4. **Copy existing Expectation JSON files to the GCS bucket**. (This step is optional).
 
-    One way to copy Expectations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. The following example will copy one Expectation, ``exp1`` from a local folder to the GCS bucket.   Information on other ways to copy Expectation JSON files, like the Cloud Storage browser in the Google Cloud Console, can be found in the [Documentation for Google Cloud](https://cloud.google.com/storage/docs/uploading-objects).
+    One way to copy Expectations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. The following example will copy one Expectation, ``my_expectation_suite`` from a local folder to the GCS bucket. Information on other ways to copy Expectation JSON files, like the Cloud Storage browser in the Google Cloud Console, can be found in the [Documentation for Google Cloud](https://cloud.google.com/storage/docs/uploading-objects).
 
     ```bash
-    gsutil cp exp1.json gs://'<your_GCS_bucket_name>'/'<your_GCS_folder_name>'
+    gsutil cp expectations/my_expectation_suite.json gs://'<your_GCS_bucket_name>'/'<your_GCS_folder_name>'
 
     Operation completed over 1 objects/58.8 KiB.
     ```
