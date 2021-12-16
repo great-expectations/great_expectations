@@ -7,6 +7,8 @@ import TabItem from '@theme/TabItem'
 
 This guide will explain how to configure your ``great_expectations.yml`` project config to populate credentials from either a YAML file or a secret manager.
 
+If your Great Expectations deployment is in an environment without a file system, refer to [How to instantiate a Data Context without a yml file](./how_to_instantiate_a_data_context_without_a_yml_file.md) for credential configuration examples.
+
 <Tabs
   groupId="yaml-or-secret-manager"
   defaultValue='yaml'
@@ -17,12 +19,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 
 <TabItem value="yaml">
 
-<Prerequisites>
-
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-
-</Prerequisites>
-
+<Prerequisites></Prerequisites>
 
 **Steps**
 
@@ -89,7 +86,6 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 - Configured a secret manager and secrets in the cloud with [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/tutorials_basic.html)
 
 </Prerequisites>
@@ -170,7 +166,6 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 - Configured a secret manager and secrets in the cloud with [GCP Secret Manager](https://cloud.google.com/secret-manager/docs/quickstart)
 
 </Prerequisites>
