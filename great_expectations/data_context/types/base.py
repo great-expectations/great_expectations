@@ -1191,8 +1191,23 @@ class DataContextConfigSchema(Schema):
     )
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
-    progress_bars = fields.Nested(ProgressBarsConfigSchema)
+    progress_bars = fields.Nested(
+        ProgressBarsConfigSchema, required=False, allow_none=True
+    )
     concurrency = fields.Nested(ConcurrencyConfigSchema)
+
+    # if keys have None value, remove in post_dump
+    REMOVE_KEYS_IF_NONE = [
+        "progress_bars",
+    ]
+
+    @post_dump
+    def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
+        data = copy.deepcopy(data)
+        for key in self.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
 
     # noinspection PyMethodMayBeStatic
     # noinspection PyUnusedLocal
@@ -1854,9 +1869,6 @@ class DataContextConfig(BaseYamlConfig):
         elif isinstance(concurrency, dict):
             concurrency = ConcurrencyConfig(**concurrency)
         self.concurrency: ConcurrencyConfig = concurrency
-
-        if progress_bars is None:
-            progress_bars = ProgressBarsConfig()
         self.progress_bars = progress_bars
 
         super().__init__(commented_map=commented_map)
