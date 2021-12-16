@@ -4,11 +4,7 @@ from ruamel import yaml
 
 import great_expectations as ge
 
-context = ge.get_context()
-
-great_expectations_yaml_file_path = os.path.join(context.root_directory, "great_expectations.yml")
-
-existing_expectations_store_yaml = """
+expected_existing_expectations_store_yaml = """
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -80,3 +76,30 @@ list_expectation_suites_output = """
 1 Expectation Suite found:
  - exp1
 """
+
+
+context = ge.get_context()
+
+# parse great_expectations.yml for comparison
+great_expectations_yaml_file_path = os.path.join(
+    context.root_directory, "great_expectations.yml"
+)
+with open(great_expectations_yaml_file_path, "r") as f:
+    great_expectations_yaml = yaml.safe_load(f)
+
+stores_dict = great_expectations_yaml["stores"]
+pop_stores = ["checkpoint_store", "evaluation_parameter_store", "validations_store"]
+for store in pop_stores:
+    stores_dict.pop(store)
+stores_yaml = yaml.dump({"stores": stores_dict}, default_flow_style=False)
+expectations_store_name_yaml = "expectations_store_name: " + yaml.dump(
+    great_expectations_yaml["expectations_store_name"]
+)
+actual_existing_expectations_store_yaml = (
+    stores_yaml + "\n" + expectations_store_name_yaml
+)
+
+# yaml load/dump round-trip is required due to parser alphabetization
+assert yaml.dump(yaml.safe_load(actual_existing_expectations_store_yaml)) == yaml.dump(
+    yaml.safe_load(expected_existing_expectations_store_yaml)
+)
