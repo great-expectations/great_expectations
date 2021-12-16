@@ -144,7 +144,7 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
 
     # Check for `(?P<name>)` named group syntax
     match_dict = matches.groupdict()
-    if match_dict:
+    if match_dict:  # Only named groups will populate this dict
         batch_identifiers = _determine_batch_identifiers_using_named_groups(
             match_dict, group_names
         )
@@ -154,7 +154,9 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
 
     # TODO: <Alex>Accommodating "data_asset_name" inside batch_identifiers (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
     # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that IDDict never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
-    data_asset_name = batch_identifiers.pop("data_asset_name", DEFAULT_DATA_ASSET_NAME)
+    data_asset_name: str = batch_identifiers.pop(
+        "data_asset_name", DEFAULT_DATA_ASSET_NAME
+    )
     return data_asset_name, batch_identifiers
 
 

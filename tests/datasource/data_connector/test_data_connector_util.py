@@ -236,6 +236,7 @@ def test_convert_data_reference_string_to_batch_identifiers_using_regex_with_nam
 ):
     data_reference = "alex_20200809_1000.csv"
     pattern = r"^(?P<name>.+)_(?P<timestamp>\d+)_(?P<price>\d+)\.csv$"
+
     group_names = ["name", "timestamp", "price"]
     assert convert_data_reference_string_to_batch_identifiers_using_regex(
         data_reference=data_reference, regex_pattern=pattern, group_names=group_names
@@ -250,9 +251,7 @@ def test_convert_data_reference_string_to_batch_identifiers_using_regex_with_nam
         ),
     )
 
-    data_reference = "alex_20200809_1000.csv"
-    pattern = r"^(?P<name>.+)_(?P<timestamp>\d+)_(?P<cost>\d+)\.csv$"
-    group_names = ["name", "timestamp", "price"]  # Mismatch between "price" and "cost"!
+    group_names = ["name", "timestamp", "cost"]  # Mismatch between "price" and "cost"!
     assert convert_data_reference_string_to_batch_identifiers_using_regex(
         data_reference=data_reference, regex_pattern=pattern, group_names=group_names
     ) == (
@@ -264,7 +263,7 @@ def test_convert_data_reference_string_to_batch_identifiers_using_regex_with_nam
             }
         ),
     )
-    assert "The named group 'cost' must explicitly be stated" in caplog.text
+    assert "The named group 'price' must explicitly be stated" in caplog.text
 
 
 def test_map_batch_definition_to_data_reference_string_using_regex():
