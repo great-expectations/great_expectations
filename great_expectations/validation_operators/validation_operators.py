@@ -11,6 +11,7 @@ from great_expectations.core.async_executor import AsyncExecutor
 from great_expectations.core.batch import Batch
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
+from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GeCloudIdentifier,
@@ -328,8 +329,10 @@ class ActionListValidationOperator(ValidationOperator):
         # len(assets_to_validate) is equal to 1. So no unnecessary multithreading is ever used here even though it may
         # be nested inside another AsyncExecutor (and this is a good thing because it avoids extra overhead associated
         # with each thread and minimizes the total number of threads to simplify debugging).
+
+        concurrency = self.data_context.concurrency or ConcurrencyConfig()
         with AsyncExecutor(
-            self.data_context.concurrency, max_workers=len(assets_to_validate)
+            concurrency, max_workers=len(assets_to_validate)
         ) as async_executor:
             batch_and_async_result_tuples = []
             for item in assets_to_validate:

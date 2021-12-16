@@ -1173,7 +1173,23 @@ class DataContextConfigSchema(Schema):
     )
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
-    concurrency = fields.Nested(ConcurrencyConfigSchema)
+    concurrency = fields.Nested(
+        ConcurrencyConfigSchema, rqeuired=False, allow_none=True
+    )
+
+    # To ensure backwards compatability, we need to ensure that new options are "opt-in"
+    # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook
+    REMOVE_KEYS_IF_NONE = [
+        "concurrency",  # 0.13.33
+    ]
+
+    @post_dump
+    def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
+        data = copy.deepcopy(data)
+        for key in self.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
 
     # noinspection PyMethodMayBeStatic
     # noinspection PyUnusedLocal
@@ -1829,11 +1845,9 @@ class DataContextConfig(BaseYamlConfig):
                 **anonymous_usage_statistics
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
-        if concurrency is None:
-            concurrency = ConcurrencyConfig()
-        elif isinstance(concurrency, dict):
+        if isinstance(concurrency, dict):
             concurrency = ConcurrencyConfig(**concurrency)
-        self.concurrency: ConcurrencyConfig = concurrency
+        self.concurrency = concurrency
 
         super().__init__(commented_map=commented_map)
 

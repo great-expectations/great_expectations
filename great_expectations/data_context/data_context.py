@@ -815,7 +815,7 @@ class BaseDataContext:
         return self.project_config_with_variables_substituted.anonymous_usage_statistics
 
     @property
-    def concurrency(self) -> ConcurrencyConfig:
+    def concurrency(self) -> Optional[ConcurrencyConfig]:
         return self.project_config_with_variables_substituted.concurrency
 
     @property
