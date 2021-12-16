@@ -86,9 +86,8 @@ def test_common_usage_stats_are_sent_no_mocking(
         in_memory_data_context_config_usage_stats_enabled
     )
 
-    # Note, we lose the `data_context.__init__` event because it was emitted before setting _dry_run = True.
-    context._usage_statistics_handler._dry_run = True
-    assert context._usage_statistics_handler._dry_run
+    # Note, we lose the `data_context.__init__` event because it was emitted before closing the worker
+    context._usage_statistics_handler._close_worker()
 
     # Make sure usage stats are enabled
     assert not context._check_global_usage_statistics_opt_out()

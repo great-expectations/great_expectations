@@ -69,10 +69,12 @@ class UsageStatsExceptionPrefix(enum.Enum):
 
 class UsageStatisticsHandler:
     def __init__(
-        self, data_context, data_context_id, usage_statistics_url, dry_run=False
+        self,
+        data_context,
+        data_context_id,
+        usage_statistics_url,
     ):
         self._url = usage_statistics_url
-        self._dry_run = dry_run
 
         self._data_context_id = data_context_id
         self._data_context_instance_id = data_context.instance_id
@@ -119,7 +121,7 @@ class UsageStatisticsHandler:
 
     def _requests_worker(self):
         session = requests.Session()
-        while not self._dry_run:
+        while True:
             message = self._message_queue.get()
             if message == STOP_SIGNAL:
                 self._message_queue.task_done()
