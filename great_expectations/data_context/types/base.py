@@ -1174,7 +1174,7 @@ class DataContextConfigSchema(Schema):
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
     concurrency = fields.Nested(
-        ConcurrencyConfigSchema, rqeuired=False, allow_none=True
+        ConcurrencyConfigSchema, required=False, allow_none=True
     )
 
     # To ensure backwards compatability, we need to ensure that new options are "opt-in"
