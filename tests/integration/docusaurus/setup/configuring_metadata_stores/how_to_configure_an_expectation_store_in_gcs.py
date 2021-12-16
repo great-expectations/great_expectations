@@ -28,18 +28,6 @@ stores:
 expectations_store_name: expectations_GCS_store
 """
 
-# Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your path directly in the yaml above.
-configured_expectations_store_yaml = configured_expectations_store_yaml.replace(
-    "<YOUR_GCP_PROJECT_NAME>", ""
-)
-configured_expectations_store_yaml = configured_expectations_store_yaml.replace(
-    "<YOUR_GCS_BUCKET_HERE>", "superconductive-integration-tests"
-)
-configured_expectations_store_yaml = configured_expectations_store_yaml.replace(
-    "<YOUR_GCS_FOLDER_NAME>", "data/taxi_yellow_tripdata_samples"
-)
-
 copy_expectation_command = """
 gsutil cp exp1.json gs://'<YOUR_GCS_BUCKET_NAME>'/'<YOUR_GCS_FOLDER_NAME>'
 """
@@ -78,6 +66,7 @@ list_expectation_suites_output = """
 """
 
 
+# NOTE: The following code is only for testing and can be ignored by users.
 context = ge.get_context()
 
 # parse great_expectations.yml for comparison
@@ -87,19 +76,26 @@ great_expectations_yaml_file_path = os.path.join(
 with open(great_expectations_yaml_file_path, "r") as f:
     great_expectations_yaml = yaml.safe_load(f)
 
-stores_dict = great_expectations_yaml["stores"]
+stores = great_expectations_yaml["stores"]
 pop_stores = ["checkpoint_store", "evaluation_parameter_store", "validations_store"]
 for store in pop_stores:
-    stores_dict.pop(store)
-stores_yaml = yaml.dump({"stores": stores_dict}, default_flow_style=False)
-expectations_store_name_yaml = "expectations_store_name: " + yaml.dump(
-    great_expectations_yaml["expectations_store_name"]
+    stores.pop(store)
+
+actual_existing_expectations_store = dict()
+actual_existing_expectations_store["stores"] = stores
+actual_existing_expectations_store["expectations_store_name"] = great_expectations_yaml["expectations_store_name"]
+
+assert actual_existing_expectations_store == yaml.safe_load(expected_existing_expectations_store_yaml)
+
+# replace example code with integration test configuration
+configured_expectations_store_yaml = configured_expectations_store_yaml.replace(
+    "<YOUR_GCP_PROJECT_NAME>", ""
 )
-actual_existing_expectations_store_yaml = (
-    stores_yaml + "\n" + expectations_store_name_yaml
+configured_expectations_store_yaml = configured_expectations_store_yaml.replace(
+    "<YOUR_GCS_BUCKET_HERE>", "superconductive-integration-tests"
+)
+configured_expectations_store_yaml = configured_expectations_store_yaml.replace(
+    "<YOUR_GCS_FOLDER_NAME>", "data/taxi_yellow_tripdata_samples"
 )
 
-# yaml load/dump round-trip is required due to parser alphabetization
-assert yaml.dump(yaml.safe_load(actual_existing_expectations_store_yaml)) == yaml.dump(
-    yaml.safe_load(expected_existing_expectations_store_yaml)
-)
+
