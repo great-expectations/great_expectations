@@ -3,7 +3,7 @@ from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
-    ProgressBarConfig,
+    ProgressBarsConfig,
 )
 
 
@@ -33,13 +33,13 @@ def test_data_context_concurrency_property():
 
 
 def test_progress_bars_enabled_by_default():
-    progress_bars = ProgressBarConfig()
+    progress_bars = ProgressBarsConfig()
     assert progress_bars.is_enabled("profilers") is True
     assert progress_bars.is_enabled("metric_calculations") is True
 
 
 def test_progress_bars_disabled_globally():
-    progress_bars = ProgressBarConfig(
+    progress_bars = ProgressBarsConfig(
         globally=False, profilers=True, metric_calculations=True
     )
     assert progress_bars.is_enabled("profilers") is False
@@ -47,7 +47,7 @@ def test_progress_bars_disabled_globally():
 
 
 def test_progress_bars_disabled_metric_calculations():
-    progress_bars = ProgressBarConfig(
+    progress_bars = ProgressBarsConfig(
         globally=True, profilers=True, metric_calculations=False
     )
     assert progress_bars.is_enabled("profilers") is True
@@ -55,7 +55,7 @@ def test_progress_bars_disabled_metric_calculations():
 
 
 def test_progress_bars_disabled_profilers():
-    progress_bars = ProgressBarConfig(
+    progress_bars = ProgressBarsConfig(
         globally=True, profilers=False, metric_calculations=True
     )
     assert progress_bars.is_enabled("profilers") is False
