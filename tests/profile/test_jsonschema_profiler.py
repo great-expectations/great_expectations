@@ -286,13 +286,11 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
     assert obs.expectation_suite_name == "simple_suite"
     assert [e.to_json_dict() for e in obs.expectations] == [
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "first_name"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "first_name",
@@ -314,19 +312,16 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "first_name"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "age"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "age",
@@ -357,7 +352,6 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "age"},
             "meta": {},
@@ -374,13 +368,11 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
     assert obs.expectation_suite_name == "bools"
     assert [e.to_json_dict() for e in obs.expectations] == [
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "active"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "active",
@@ -397,25 +389,21 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_set",
             "kwargs": {"column": "active", "value_set": [True, False]},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "active"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "optional"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "optional",
@@ -432,7 +420,6 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_set",
             "kwargs": {"column": "optional", "value_set": [True, False]},
             "meta": {},
@@ -449,13 +436,11 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
     assert obs.expectation_suite_name == "enums"
     assert [e.to_json_dict() for e in obs.expectations] == [
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "shirt-size"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_set",
             "kwargs": {
                 "column": "shirt-size",
@@ -464,19 +449,16 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "shirt-size"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "optional-color"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_set",
             "kwargs": {
                 "column": "optional-color",
@@ -485,13 +467,11 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "optional-hat"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "optional-hat",
@@ -513,19 +493,16 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_set",
             "kwargs": {"column": "optional-hat", "value_set": ["red", "green", "blue"]},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "optional-answer"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_set",
             "kwargs": {"column": "optional-answer", "value_set": ["yes", "no"]},
             "meta": {},
@@ -542,13 +519,11 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
     assert obs.expectation_suite_name == "lengths"
     assert [e.to_json_dict() for e in obs.expectations] == [
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "comments-no-constraints"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "comments-no-constraints",
@@ -570,19 +545,16 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "comments-no-constraints"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "state-abbreviation-equal-min-max"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "state-abbreviation-equal-min-max",
@@ -604,25 +576,21 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_value_lengths_to_equal",
             "kwargs": {"column": "state-abbreviation-equal-min-max", "value": 2},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "state-abbreviation-equal-min-max"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "ICD10-code-3-7"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "ICD10-code-3-7",
@@ -644,25 +612,21 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_value_lengths_to_be_between",
             "kwargs": {"column": "ICD10-code-3-7", "max_value": 7, "min_value": 3},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "ICD10-code-3-7"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "name-no-max"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "name-no-max",
@@ -684,25 +648,21 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_value_lengths_to_be_between",
             "kwargs": {"column": "name-no-max", "min_value": 1},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "name-no-max"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "password-max-33"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "password-max-33",
@@ -724,25 +684,21 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_value_lengths_to_be_between",
             "kwargs": {"column": "password-max-33", "max_value": 33},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "password-max-33"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "optional-min-1"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "optional-min-1",
@@ -764,7 +720,6 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_value_lengths_to_be_between",
             "kwargs": {"column": "optional-min-1", "min_value": 1},
             "meta": {},
@@ -781,13 +736,11 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
     assert obs.expectation_suite_name == "integer_ranges"
     assert [e.to_json_dict() for e in obs.expectations] == [
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "favorite-number"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "favorite-number",
@@ -818,19 +771,16 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "favorite-number"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "age-0-130"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "age-0-130",
@@ -861,25 +811,21 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "age-0-130", "max_value": 130, "min_value": 0},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "age-0-130"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "wheel-count-0-plus"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "wheel-count-0-plus",
@@ -910,25 +856,21 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "wheel-count-0-plus", "min_value": 0},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "wheel-count-0-plus"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "rpm-max-7000"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "rpm-max-7000",
@@ -959,25 +901,21 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "rpm-max-7000", "max_value": 7000},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "rpm-max-7000"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "lake-depth-max-minus-100"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "lake-depth-max-minus-100",
@@ -1008,25 +946,21 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "lake-depth-max-minus-100", "max_value": -100},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "lake-depth-max-minus-100"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "floor-exclusive-min-0"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "floor-exclusive-min-0",
@@ -1057,7 +991,6 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {
                 "column": "floor-exclusive-min-0",
@@ -1067,19 +1000,16 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "floor-exclusive-min-0"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "floor-exclusive-max-100"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "floor-exclusive-max-100",
@@ -1110,7 +1040,6 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {
                 "column": "floor-exclusive-max-100",
@@ -1120,19 +1049,16 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "floor-exclusive-max-100"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "gear-exclusive-0-6"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "gear-exclusive-0-6",
@@ -1163,7 +1089,6 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {
                 "column": "gear-exclusive-0-6",
@@ -1175,19 +1100,16 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "gear-exclusive-0-6"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "optional-min-1"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "optional-min-1",
@@ -1218,7 +1140,6 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "optional-min-1", "min_value": 1},
             "meta": {},
@@ -1235,13 +1156,11 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
     assert obs.expectation_suite_name == "number_ranges"
     assert [e.to_json_dict() for e in obs.expectations] == [
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "favorite-number"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "favorite-number",
@@ -1268,19 +1187,16 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "favorite-number"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "age-0-130"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "age-0-130",
@@ -1307,25 +1223,21 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "age-0-130", "max_value": 130.5, "min_value": 0.5},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "age-0-130"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "wheel-count-0-plus"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "wheel-count-0-plus",
@@ -1352,25 +1264,21 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "wheel-count-0-plus", "min_value": 0.5},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "wheel-count-0-plus"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "rpm-max-7000"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "rpm-max-7000",
@@ -1397,25 +1305,21 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "rpm-max-7000", "max_value": 7000.5},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "rpm-max-7000"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "lake-depth-max-minus-100"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "lake-depth-max-minus-100",
@@ -1442,25 +1346,21 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "lake-depth-max-minus-100", "max_value": -100.5},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "lake-depth-max-minus-100"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "floor-exclusive-min-0"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "floor-exclusive-min-0",
@@ -1487,7 +1387,6 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {
                 "column": "floor-exclusive-min-0",
@@ -1497,19 +1396,16 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "floor-exclusive-min-0"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "floor-exclusive-max-100"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "floor-exclusive-max-100",
@@ -1536,7 +1432,6 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {
                 "column": "floor-exclusive-max-100",
@@ -1546,19 +1441,16 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "floor-exclusive-max-100"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "gear-exclusive-0-6"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "gear-exclusive-0-6",
@@ -1585,7 +1477,6 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {
                 "column": "gear-exclusive-0-6",
@@ -1597,19 +1488,16 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "gear-exclusive-0-6"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "optional-min-half"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "optional-min-half",
@@ -1636,7 +1524,6 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_between",
             "kwargs": {"column": "optional-min-half", "min_value": 0.5},
             "meta": {},
@@ -1660,13 +1547,11 @@ def test_has_profile_create_expectations_from_complex_schema(
 
     assert [e.to_json_dict() for e in obs.expectations] == [
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "post-office-box"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "post-office-box",
@@ -1688,19 +1573,16 @@ def test_has_profile_create_expectations_from_complex_schema(
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "post-office-box"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "street-name"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "street-name",
@@ -1722,13 +1604,11 @@ def test_has_profile_create_expectations_from_complex_schema(
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "street-name"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "street-number"},
             "meta": {
@@ -1739,7 +1619,6 @@ def test_has_profile_create_expectations_from_complex_schema(
             },
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "street-number",
@@ -1770,19 +1649,16 @@ def test_has_profile_create_expectations_from_complex_schema(
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "street-number"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "locality"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "locality",
@@ -1804,19 +1680,16 @@ def test_has_profile_create_expectations_from_complex_schema(
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "locality"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "region"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "region",
@@ -1838,19 +1711,16 @@ def test_has_profile_create_expectations_from_complex_schema(
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "region"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "postal-code"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "postal-code",
@@ -1872,19 +1742,16 @@ def test_has_profile_create_expectations_from_complex_schema(
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "postal-code"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "country-name"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "country-name",
@@ -1906,7 +1773,6 @@ def test_has_profile_create_expectations_from_complex_schema(
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_not_be_null",
             "kwargs": {"column": "country-name"},
             "meta": {},
@@ -1923,25 +1789,21 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
     assert obs.expectation_suite_name == "null_fields"
     assert [e.to_json_dict() for e in obs.expectations] == [
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "null"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_null",
             "kwargs": {"column": "null"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "string-or-null"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "string-or-null",
@@ -1963,13 +1825,11 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "int-or-null"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "int-or-null",
@@ -2000,13 +1860,11 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "number-or-null"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_type_list",
             "kwargs": {
                 "column": "number-or-null",
@@ -2033,13 +1891,11 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_to_exist",
             "kwargs": {"column": "enum-or-null"},
             "meta": {},
         },
         {
-            "expectation_context": {"description": None},
             "expectation_type": "expect_column_values_to_be_in_set",
             "kwargs": {"column": "enum-or-null", "value_set": ["a", "b", "c"]},
             "meta": {},
