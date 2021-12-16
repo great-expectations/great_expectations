@@ -5,7 +5,7 @@ from typing import Optional
 
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.data_context.toolkit as data_context_toolkit
+import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 from great_expectations import DataContext
 from great_expectations.cli.v012.upgrade_helpers.base_upgrade_helper import (
     BaseUpgradeHelper,
@@ -40,7 +40,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         self._generate_upgrade_checklist()
 
     def _generate_upgrade_checklist(self):
-        if data_context_toolkit.default_checkpoints_exist(
+        if checkpoint_toolkit.default_checkpoints_exist(
             directory_path=self.data_context.root_directory
         ):
             self._process_checkpoint_store_for_checklist()

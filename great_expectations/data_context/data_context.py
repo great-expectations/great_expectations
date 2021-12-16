@@ -20,7 +20,7 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
-import great_expectations.data_context.toolkit as data_context_toolkit
+import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -837,7 +837,7 @@ class BaseDataContext:
         try:
             return self.project_config_with_variables_substituted.checkpoint_store_name
         except AttributeError:
-            if data_context_toolkit.default_checkpoints_exist(
+            if checkpoint_toolkit.default_checkpoints_exist(
                 directory_path=self.root_directory
             ):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
@@ -853,7 +853,7 @@ class BaseDataContext:
         try:
             return self.stores[checkpoint_store_name]
         except KeyError:
-            if data_context_toolkit.default_checkpoints_exist(
+            if checkpoint_toolkit.default_checkpoints_exist(
                 directory_path=self.root_directory
             ):
                 logger.warning(
@@ -3007,7 +3007,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return profiling_results
 
     def list_checkpoints(self) -> List[str]:
-        return data_context_toolkit.list_checkpoints(
+        return checkpoint_toolkit.list_checkpoints(
             checkpoint_store=self.checkpoint_store,
             ge_cloud_mode=self.ge_cloud_mode,
         )
@@ -3038,7 +3038,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
-        return data_context_toolkit.add_checkpoint(
+        return checkpoint_toolkit.add_checkpoint(
             data_context=self,
             checkpoint_store=self.checkpoint_store,
             checkpoint_store_name=self.checkpoint_store_name,
@@ -3073,7 +3073,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
-        return data_context_toolkit.get_checkpoint(
+        return checkpoint_toolkit.get_checkpoint(
             data_context=self,
             checkpoint_store=self.checkpoint_store,
             name=name,
@@ -3085,7 +3085,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ):
-        data_context_toolkit.delete_checkpoint(
+        checkpoint_toolkit.delete_checkpoint(
             checkpoint_store=self.checkpoint_store,
             name=name,
             ge_cloud_id=ge_cloud_id,
@@ -3138,7 +3138,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         Returns:
             CheckpointResult
         """
-        return data_context_toolkit.run_checkpoint(
+        return checkpoint_toolkit.run_checkpoint(
             data_context=self,
             checkpoint_store=self.checkpoint_store,
             ge_cloud_mode=self.ge_cloud_mode,
