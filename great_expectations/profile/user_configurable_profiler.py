@@ -128,10 +128,13 @@ class UserConfigurableProfiler:
             self.all_table_columns = self.profile_dataset.get_table_columns()
 
         # Check to see if the user has disabled progress bars
+        self._enable_progress_bars = True
         if context:
-            self._enable_progress_bars = context.progress_bars.is_enabled("profilers")
-        else:
-            self._enable_progress_bars = True
+            progress_bars = context.progress_bars
+            if progress_bars.get("globally") is False:
+                self._enable_progress_bars = False
+            elif progress_bars.get("profilers") is False:
+                self._enable_progress_bars = False
 
         self.semantic_types_dict = semantic_types_dict
         assert isinstance(self.semantic_types_dict, (dict, type(None)))
