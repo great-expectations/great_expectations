@@ -68,12 +68,7 @@ class UsageStatsExceptionPrefix(enum.Enum):
 
 
 class UsageStatisticsHandler:
-    def __init__(
-        self,
-        data_context,
-        data_context_id,
-        usage_statistics_url,
-    ):
+    def __init__(self, data_context, data_context_id, usage_statistics_url):
         self._url = usage_statistics_url
 
         self._data_context_id = data_context_id
