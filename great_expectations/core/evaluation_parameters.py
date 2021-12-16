@@ -219,7 +219,7 @@ def build_evaluation_parameters(
 
             # First, check to see whether an argument was supplied at runtime
             # If it was, use that one, but remove it from the stored config
-            param_key = f'"$PARAMETER."{value["$PARAMETER"]}'
+            param_key = f"$PARAMETER.{value['$PARAMETER']}"
             if param_key in value:
                 evaluation_args[key] = evaluation_args[key][param_key]
                 del expectation_args[key][param_key]
