@@ -3161,6 +3161,61 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs,
         )
 
+    def _get_config_with_substituted_variables(
+        self,
+        yaml_config: str,
+        runtime_environment: dict,
+        usage_stats_event_name: str,
+    ) -> CommentedMap:
+        try:
+            substituted_config_variables: Union[
+                DataContextConfig, dict
+            ] = substitute_all_config_variables(
+                self.config_variables,
+                dict(os.environ),
+            )
+
+            substitutions: dict = {
+                **substituted_config_variables,
+                **dict(os.environ),
+                **runtime_environment,
+            }
+
+            config_str_with_substituted_variables: Union[
+                DataContextConfig, dict
+            ] = substitute_all_config_variables(
+                yaml_config,
+                substitutions,
+            )
+        except Exception as e:
+            usage_stats_event_payload = {
+                "diagnostic_info": ["__substitution_error__"],
+            }
+            send_usage_message(
+                data_context=self,
+                event=usage_stats_event_name,
+                event_payload=usage_stats_event_payload,
+                success=False,
+            )
+            raise e
+
+        try:
+            config: CommentedMap = yaml.load(config_str_with_substituted_variables)
+
+        except Exception as e:
+            usage_stats_event_payload = {
+                "diagnostic_info": ["__yaml_parse_error__"],
+            }
+            send_usage_message(
+                data_context=self,
+                event=usage_stats_event_name,
+                event_payload=usage_stats_event_payload,
+                success=False,
+            )
+            raise e
+
+        return config
+
     def test_yaml_config(
         self,
         yaml_config: str,
@@ -3229,55 +3284,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if return_mode not in ["instantiated_class", "report_object"]:
             raise ValueError(f"Unknown return_mode: {return_mode}.")
 
-        try:
-            substituted_config_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                self.config_variables,
-                dict(os.environ),
-            )
+        config: CommentedMap = self._get_config_with_substituted_variables(
+            yaml_config, runtime_environment, usage_stats_event_name
+        )
 
-            substitutions: dict = {
-                **substituted_config_variables,
-                **dict(os.environ),
-                **runtime_environment,
-            }
-
-            config_str_with_substituted_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                yaml_config,
-                substitutions,
-            )
-        except Exception as e:
-            usage_stats_event_payload: dict = {
-                "diagnostic_info": ["__substitution_error__"],
-            }
-            send_usage_message(
-                data_context=self,
-                event=usage_stats_event_name,
-                event_payload=usage_stats_event_payload,
-                success=False,
-            )
-            raise e
-
-        try:
-            config: CommentedMap = yaml.load(config_str_with_substituted_variables)
-
-            if "class_name" in config:
-                class_name = config["class_name"]
-
-        except Exception as e:
-            usage_stats_event_payload: dict = {
-                "diagnostic_info": ["__yaml_parse_error__"],
-            }
-            send_usage_message(
-                data_context=self,
-                event=usage_stats_event_name,
-                event_payload=usage_stats_event_payload,
-                success=False,
-            )
-            raise e
+        if "class_name" in config:
+            class_name = config["class_name"]
 
         instantiated_class: Any = None
 
