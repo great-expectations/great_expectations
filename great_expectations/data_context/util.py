@@ -37,7 +37,6 @@ from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointConfigSchema,
     DataContextConfig,
-    DataContextConfigDefaults,
     DataContextConfigSchema,
 )
 from great_expectations.util import load_class, verify_dynamic_loading_support
@@ -513,17 +512,6 @@ def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
         return parsed_substitution_variable.substitution_variable_name
     except pp.ParseException:
         return None
-
-
-def default_checkpoints_exist(directory_path: str) -> bool:
-    if not directory_path:
-        return False
-
-    checkpoints_directory_path: str = os.path.join(
-        directory_path,
-        DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
-    )
-    return os.path.isdir(checkpoints_directory_path)
 
 
 class PasswordMasker:

@@ -1,14 +1,12 @@
 import logging
 import os
+from typing import List
 
 import pandas as pd
 import pytest
 from ruamel import yaml
 
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.core.usage_statistics.usage_statistics import (
-    EMIT_EXCEPTION_PREFIX,
-)
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from tests.core.usage_statistics.util import assert_no_usage_stats_exceptions
@@ -26,7 +24,7 @@ def in_memory_data_context_config_usage_stats_enabled():
     return DataContextConfig(
         **{
             "commented_map": {},
-            "config_version": 2,
+            "config_version": 3,
             "plugins_directory": None,
             "evaluation_parameter_store_name": "evaluation_parameter_store",
             "validations_store_name": "validations_store",
@@ -88,12 +86,12 @@ def test_common_usage_stats_are_sent_no_mocking(
         in_memory_data_context_config_usage_stats_enabled
     )
 
+    # Note, we lose the `data_context.__init__` event because it was emitted before closing the worker
+    context._usage_statistics_handler._close_worker()
+
     # Make sure usage stats are enabled
     assert not context._check_global_usage_statistics_opt_out()
     assert context.anonymous_usage_statistics.enabled
-    assert context.anonymous_usage_statistics.usage_statistics_url == (
-        USAGE_STATISTICS_URL
-    )
     assert context.anonymous_usage_statistics.data_context_id == DATA_CONTEXT_ID
 
     # context.add_datasource() is decorated, was not sending usage stats events in v0.13.43-46 (possibly earlier)
@@ -113,8 +111,11 @@ def test_common_usage_stats_are_sent_no_mocking(
 
     # context.test_yaml_config() uses send_usage_message()
     context.test_yaml_config(yaml_config=datasource_yaml)
+    expected_events: List[str] = ["data_context.test_yaml_config"]
 
     context.add_datasource(**yaml.load(datasource_yaml))
+    # TODO: AJB `data_context.add_datasource` is not being emitted, though it should be. See GREAT-448
+    # expected_events.append("data_context.add_datasource")
 
     df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 
@@ -132,8 +133,10 @@ def test_common_usage_stats_are_sent_no_mocking(
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite"
     )
+    expected_events.append("data_context.get_batch_list")
     validator.expect_table_row_count_to_equal(value=2)
     validator.save_expectation_suite()
+    expected_events.append("data_context.save_expectation_suite")
 
     checkpoint_yaml = """
     name: my_checkpoint
@@ -148,7 +151,9 @@ def test_common_usage_stats_are_sent_no_mocking(
 
     """
     context.test_yaml_config(yaml_config=checkpoint_yaml)
+    expected_events.append("data_context.test_yaml_config")
 
+    # Note: add_checkpoint is not instrumented as of 20211215
     context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
 
     context.run_checkpoint(
@@ -158,49 +163,14 @@ def test_common_usage_stats_are_sent_no_mocking(
             "batch_identifiers": {"default_identifier_name": "my_simple_df"},
         },
     )
+    expected_events.append("data_context.build_data_docs")
+    expected_events.append("checkpoint.run")
+    expected_events.append("data_context.run_checkpoint")
 
     assert_no_usage_stats_exceptions(messages=caplog.messages)
 
+    message_queue = context._usage_statistics_handler._message_queue.queue
+    events = [event["event"] for event in message_queue]
 
-@pytest.mark.parametrize(
-    "test_input",
-    [
-        pytest.param(
-            ["just", "some", "logger", "messages"], id="list_without_exceptions"
-        ),
-        pytest.param([], id="empty_list"),
-    ],
-)
-def test_assert_no_usage_stats_exceptions_passing(test_input):
-    assert_no_usage_stats_exceptions(messages=test_input)
-
-
-@pytest.mark.parametrize(
-    "test_input",
-    [
-        pytest.param(
-            [
-                "just",
-                "some",
-                "logger",
-                "messages",
-                f"{EMIT_EXCEPTION_PREFIX} some error message",
-            ],
-            id="list_with_exceptions",
-        ),
-        pytest.param(
-            [
-                "just",
-                "some",
-                "logger",
-                "messages",
-                f"{EMIT_EXCEPTION_PREFIX}some error message",
-            ],
-            id="list_with_exceptions_no_whitespace",
-        ),
-    ],
-)
-def test_assert_no_usage_stats_exceptions_failing(test_input):
-
-    with pytest.raises(AssertionError):
-        assert_no_usage_stats_exceptions(messages=test_input)
+    # Note: expected events does not contain the `data_context.__init__` event
+    assert events == expected_events
