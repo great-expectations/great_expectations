@@ -5,6 +5,7 @@ from typing import List, Optional, Union
 
 from ruamel.yaml.comments import CommentedMap
 
+import great_expectations.data_context.toolkit as data_context_toolkit
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
@@ -13,7 +14,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
 )
-from great_expectations.data_context.util import default_checkpoints_exist
 
 
 class UpgradeHelperV13(BaseUpgradeHelper):
@@ -63,7 +63,9 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         self._process_validation_operators_for_checklist()
 
     def _process_checkpoint_store_for_checklist(self):
-        if default_checkpoints_exist(directory_path=self.data_context.root_directory):
+        if data_context_toolkit.default_checkpoints_exist(
+            directory_path=self.data_context.root_directory
+        ):
             config_commented_map: CommentedMap = (
                 self.data_context.get_config().commented_map
             )

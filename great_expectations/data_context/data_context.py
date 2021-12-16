@@ -2,7 +2,6 @@ import configparser
 import copy
 import datetime
 import errno
-import itertools
 import json
 import logging
 import os
@@ -21,6 +20,7 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
+import great_expectations.data_context.toolkit as data_context_toolkit
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -29,7 +29,6 @@ from great_expectations.core.batch import (
     BatchRequest,
     IDDict,
     RuntimeBatchRequest,
-    get_batch_request_dict,
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -85,7 +84,6 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
     GeCloudIdentifier,
     ValidationResultIdentifier,
@@ -93,7 +91,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import (
     PasswordMasker,
     build_store_from_config,
-    default_checkpoints_exist,
     file_relative_path,
     instantiate_class_from_config,
     load_class,
@@ -108,10 +105,7 @@ from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.util import (
-    filter_properties_dict,
-    verify_dynamic_loading_support,
-)
+from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -843,10 +837,9 @@ class BaseDataContext:
         try:
             return self.project_config_with_variables_substituted.checkpoint_store_name
         except AttributeError:
-            config_version: float = (
-                self.project_config_with_variables_substituted.config_version
-            )
-            if default_checkpoints_exist(directory_path=self.root_directory):
+            if data_context_toolkit.default_checkpoints_exist(
+                directory_path=self.root_directory
+            ):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             if self.root_directory:
                 error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
@@ -859,11 +852,10 @@ class BaseDataContext:
         checkpoint_store_name: str = self.checkpoint_store_name
         try:
             return self.stores[checkpoint_store_name]
-        except KeyError as e:
-            config_version: float = (
-                self.project_config_with_variables_substituted.config_version
-            )
-            if default_checkpoints_exist(directory_path=self.root_directory):
+        except KeyError:
+            if data_context_toolkit.default_checkpoints_exist(
+                directory_path=self.root_directory
+            ):
                 logger.warning(
                     f'Checkpoint store named "{checkpoint_store_name}" is not a configured store, so will try to use default Checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
                 )
@@ -1774,7 +1766,7 @@ class BaseDataContext:
             batch_definition.datasource_name
         ].execution_engine
 
-        validator = Validator(
+        validator: Validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
@@ -3014,6 +3006,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiling_results["success"] = True
         return profiling_results
 
+    def list_checkpoints(self) -> List[str]:
+        return data_context_toolkit.list_checkpoints(
+            checkpoint_store=self.checkpoint_store,
+            ge_cloud_mode=self.ge_cloud_mode,
+        )
+
     def add_checkpoint(
         self,
         name: str,
@@ -3040,183 +3038,58 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
-
-        batch_request, validations = get_batch_request_dict(batch_request, validations)
-
-        checkpoint_config: Union[CheckpointConfig, dict]
-
-        checkpoint_config = {
-            "name": name,
-            "config_version": config_version,
-            "template_name": template_name,
-            "module_name": module_name,
-            "class_name": class_name,
-            "run_name_template": run_name_template,
-            "expectation_suite_name": expectation_suite_name,
-            "batch_request": batch_request,
-            "action_list": action_list,
-            "evaluation_parameters": evaluation_parameters,
-            "runtime_configuration": runtime_configuration,
-            "validations": validations,
-            "profilers": profilers,
+        return data_context_toolkit.add_checkpoint(
+            data_context=self,
+            checkpoint_store=self.checkpoint_store,
+            checkpoint_store_name=self.checkpoint_store_name,
+            ge_cloud_mode=self.ge_cloud_mode,
+            name=name,
+            config_version=config_version,
+            template_name=template_name,
+            module_name=module_name,
+            class_name=class_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
             # Next two fields are for LegacyCheckpoint configuration
-            "validation_operator_name": validation_operator_name,
-            "batches": batches,
-            # the following four keys are used by SimpleCheckpoint
-            "site_names": site_names,
-            "slack_webhook": slack_webhook,
-            "notify_on": notify_on,
-            "notify_with": notify_with,
-            "ge_cloud_id": ge_cloud_id,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
-        }
-
-        # DataFrames shouldn't be saved to CheckpointStore
-        if checkpoint_config.get("validations") is not None:
-            for idx, val in enumerate(checkpoint_config["validations"]):
-                if (
-                    val.get("batch_request") is not None
-                    and val["batch_request"].get("runtime_parameters") is not None
-                    and val["batch_request"]["runtime_parameters"].get("batch_data")
-                    is not None
-                ):
-                    raise ge_exceptions.InvalidConfigError(
-                        f'batch_data found in validations at index {idx} cannot be saved to CheckpointStore "{self.checkpoint_store_name}"'
-                    )
-        elif (
-            checkpoint_config.get("batch_request") is not None
-            and checkpoint_config["batch_request"].get("runtime_parameters") is not None
-            and checkpoint_config["batch_request"]["runtime_parameters"].get(
-                "batch_data"
-            )
-            is not None
-        ):
-            raise ge_exceptions.InvalidConfigError(
-                f'batch_data found in batch_request cannot be saved to CheckpointStore "{self.checkpoint_store_name}"'
-            )
-
-        checkpoint_config = filter_properties_dict(
-            properties=checkpoint_config, clean_falsy=True
+            validation_operator_name=validation_operator_name,
+            batches=batches,
+            # the following four arguments are used by SimpleCheckpoint
+            site_names=site_names,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+            notify_with=notify_with,
+            ge_cloud_id=ge_cloud_id,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         )
-        new_checkpoint: Union[
-            Checkpoint, SimpleCheckpoint, LegacyCheckpoint
-        ] = instantiate_class_from_config(
-            config=checkpoint_config,
-            runtime_environment={
-                "data_context": self,
-            },
-            config_defaults={
-                "module_name": "great_expectations.checkpoint.checkpoint",
-            },
-        )
-
-        if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="contract", ge_cloud_id=ge_cloud_id
-            )
-        else:
-            key: ConfigurationIdentifier = ConfigurationIdentifier(
-                configuration_key=name,
-            )
-
-        checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
-        checkpoint_ref = self.checkpoint_store.set(key=key, value=checkpoint_config)
-        if isinstance(checkpoint_ref, GeCloudIdAwareRef):
-            ge_cloud_id = checkpoint_ref.ge_cloud_id
-            new_checkpoint.config.ge_cloud_id = uuid.UUID(ge_cloud_id)
-        return new_checkpoint
 
     def get_checkpoint(
-        self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
-        if ge_cloud_id:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="contract", ge_cloud_id=ge_cloud_id
-            )
-        else:
-            key: ConfigurationIdentifier = ConfigurationIdentifier(
-                configuration_key=name,
-            )
-        try:
-            checkpoint_config: CheckpointConfig = self.checkpoint_store.get(key=key)
-        except ge_exceptions.InvalidKeyError as exc_ik:
-            raise ge_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
-            )
-        except ValidationError as exc_ve:
-            raise ge_exceptions.InvalidCheckpointConfigError(
-                message="Invalid Checkpoint configuration", validation_error=exc_ve
-            )
-
-        if checkpoint_config.config_version is None:
-            if not (
-                "batches" in checkpoint_config.to_json_dict()
-                and (
-                    len(checkpoint_config.to_json_dict()["batches"]) == 0
-                    or {"batch_kwargs", "expectation_suite_names",}.issubset(
-                        set(
-                            list(
-                                itertools.chain.from_iterable(
-                                    [
-                                        item.keys()
-                                        for item in checkpoint_config.to_json_dict()[
-                                            "batches"
-                                        ]
-                                    ]
-                                )
-                            )
-                        )
-                    )
-                )
-            ):
-                raise ge_exceptions.CheckpointError(
-                    message="Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments."
-                )
-
-        config: dict = checkpoint_config.to_json_dict()
-        if name:
-            config.update({"name": name})
-        config = filter_properties_dict(properties=config, clean_falsy=True)
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "data_context": self,
-            },
-            config_defaults={
-                "module_name": "great_expectations.checkpoint",
-            },
+        return data_context_toolkit.get_checkpoint(
+            data_context=self,
+            checkpoint_store=self.checkpoint_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
         )
 
-        return checkpoint
-
     def delete_checkpoint(
-        self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
     ):
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id."
-
-        if ge_cloud_id:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="contract", ge_cloud_id=ge_cloud_id
-            )
-        else:
-            key: ConfigurationIdentifier = ConfigurationIdentifier(
-                configuration_key=name
-            )
-
-        try:
-            self.checkpoint_store.remove_key(key=key)
-        except ge_exceptions.InvalidKeyError as exc_ik:
-            raise ge_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
-            )
-
-    def list_checkpoints(self) -> List[str]:
-        if self.ge_cloud_mode:
-            return self.checkpoint_store.list_keys()
-        else:
-            return [x.configuration_key for x in self.checkpoint_store.list_keys()]
+        data_context_toolkit.delete_checkpoint(
+            checkpoint_store=self.checkpoint_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
 
     @usage_statistics_enabled_method(
         event_name="data_context.run_checkpoint",
@@ -3265,90 +3138,28 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         Returns:
             CheckpointResult
         """
-        # TODO mark experimental
-        batch_request, validations = get_batch_request_dict(batch_request, validations)
-        checkpoint: Union[
-            Checkpoint, SimpleCheckpoint, LegacyCheckpoint
-        ] = self.get_checkpoint(name=checkpoint_name, ge_cloud_id=ge_cloud_id)
-        checkpoint_config_from_store: dict = checkpoint.config.to_json_dict()
-
-        if (
-            "runtime_configuration" in checkpoint_config_from_store
-            and "result_format" in checkpoint_config_from_store["runtime_configuration"]
-        ):
-            result_format = result_format or checkpoint_config_from_store[
-                "runtime_configuration"
-            ].pop("result_format")
-
-        if result_format is None:
-            result_format = {"result_format": "SUMMARY"}
-
-        checkpoint_config_from_call_args: dict = {
-            "template_name": template_name,
-            "run_name_template": run_name_template,
-            "expectation_suite_name": expectation_suite_name,
-            "batch_request": batch_request,
-            "action_list": action_list,
-            "evaluation_parameters": evaluation_parameters,
-            "runtime_configuration": runtime_configuration,
-            "validations": validations,
-            "profilers": profilers,
-            "run_id": run_id,
-            "run_name": run_name,
-            "run_time": run_time,
-            "result_format": result_format,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
-        }
-
-        checkpoint_config: dict = {
-            key: value
-            for key, value in checkpoint_config_from_store.items()
-            if key in checkpoint_config_from_call_args
-        }
-        checkpoint_config.update(checkpoint_config_from_call_args)
-        if not self.ge_cloud_mode:
-            batch_data_list = []
-            batch_data = None
-            if checkpoint_config.get("validations") is not None:
-                for val in checkpoint_config["validations"]:
-                    if (
-                        val.get("batch_request") is not None
-                        and val["batch_request"].get("runtime_parameters") is not None
-                        and val["batch_request"]["runtime_parameters"].get("batch_data")
-                        is not None
-                    ):
-                        batch_data_list.append(
-                            val["batch_request"]["runtime_parameters"].pop("batch_data")
-                        )
-            elif (
-                checkpoint_config.get("batch_request") is not None
-                and checkpoint_config["batch_request"].get("runtime_parameters")
-                is not None
-                and checkpoint_config["batch_request"]["runtime_parameters"].get(
-                    "batch_data"
-                )
-                is not None
-            ):
-                batch_data = checkpoint_config["batch_request"][
-                    "runtime_parameters"
-                ].pop("batch_data")
-            checkpoint_config = filter_properties_dict(
-                properties=checkpoint_config, clean_falsy=True
-            )
-            if len(batch_data_list) > 0:
-                for idx, val in enumerate(checkpoint_config.get("validations")):
-                    if batch_data_list[idx] is not None:
-                        val["batch_request"]["runtime_parameters"][
-                            "batch_data"
-                        ] = batch_data_list[idx]
-            elif batch_data is not None:
-                checkpoint_config["batch_request"]["runtime_parameters"][
-                    "batch_data"
-                ] = batch_data
-
-        checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
-
-        return checkpoint.run(**checkpoint_run_arguments)
+        return data_context_toolkit.run_checkpoint(
+            data_context=self,
+            checkpoint_store=self.checkpoint_store,
+            ge_cloud_mode=self.ge_cloud_mode,
+            checkpoint_name=checkpoint_name,
+            template_name=template_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            run_id=run_id,
+            run_name=run_name,
+            run_time=run_time,
+            result_format=result_format,
+            ge_cloud_id=ge_cloud_id,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            **kwargs,
+        )
 
     def test_yaml_config(
         self,

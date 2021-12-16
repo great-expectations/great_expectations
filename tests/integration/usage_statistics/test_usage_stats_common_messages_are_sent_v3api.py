@@ -91,9 +91,6 @@ def test_common_usage_stats_are_sent_no_mocking(
     # Make sure usage stats are enabled
     assert not context._check_global_usage_statistics_opt_out()
     assert context.anonymous_usage_statistics.enabled
-    assert context.anonymous_usage_statistics.usage_statistics_url == (
-        USAGE_STATISTICS_URL
-    )
     assert context.anonymous_usage_statistics.data_context_id == DATA_CONTEXT_ID
 
     # context.add_datasource() is decorated, was not sending usage stats events in v0.13.43-46 (possibly earlier)
