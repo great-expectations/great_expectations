@@ -1196,9 +1196,10 @@ class DataContextConfigSchema(Schema):
     )
     concurrency = fields.Nested(ConcurrencyConfigSchema)
 
-    # if keys have None value, remove in post_dump
+    # To ensure backwards compatability, we need to ensure that new options are "opt-in"
+    # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook
     REMOVE_KEYS_IF_NONE = [
-        "progress_bars",
+        "progress_bars",  # 0.13.46
     ]
 
     @post_dump
