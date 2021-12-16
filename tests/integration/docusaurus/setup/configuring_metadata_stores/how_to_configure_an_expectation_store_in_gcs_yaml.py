@@ -88,14 +88,11 @@ actual_existing_expectations_store["expectations_store_name"] = great_expectatio
 assert actual_existing_expectations_store == yaml.safe_load(expected_existing_expectations_store_yaml)
 
 # replace example code with integration test configuration
-configured_expectations_store_yaml = configured_expectations_store_yaml.replace(
-    "<YOUR_GCP_PROJECT_NAME>", ""
-)
-configured_expectations_store_yaml = configured_expectations_store_yaml.replace(
-    "<YOUR_GCS_BUCKET_HERE>", "superconductive-integration-tests"
-)
-configured_expectations_store_yaml = configured_expectations_store_yaml.replace(
-    "<YOUR_GCS_FOLDER_NAME>", "data/taxi_yellow_tripdata_samples"
-)
+configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
+configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"]["project"] = ""
+configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"]["bucket"] = "superconductive-integration-tests"
+configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"]["prefix"] = "data/taxi_yellow_tripdata_samples"
+
+context.add_store(store_name=configured_expectations_store["expectations_store_name"], store_config=configured_expectations_store["stores"]["expectations_GCS_store"])
 
 
