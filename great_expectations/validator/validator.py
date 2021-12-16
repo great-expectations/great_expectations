@@ -694,13 +694,18 @@ class Validator:
             )
 
             # Check to see if the user has disabled progress bars
-            disable = len(graph.edges) < 3
+            disable = False
             if self._data_context:
                 progress_bars = self._data_context.progress_bars
-                if "globally" in progress_bars:
-                    disable = not progress_bars["globally"]
-                if "metric_calculations" in progress_bars:
-                    disable = not progress_bars["metric_calculations"]
+                # If progress_bars are not present, assume we want them enabled
+                if progress_bars is not None:
+                    if "globally" in progress_bars:
+                        disable = not progress_bars["globally"]
+                    if "metric_calculations" in progress_bars:
+                        disable = not progress_bars["metric_calculations"]
+
+            if len(graph.edges) < 3:
+                disable = True
 
             if pbar is None:
                 # noinspection PyProtectedMember,SpellCheckingInspection

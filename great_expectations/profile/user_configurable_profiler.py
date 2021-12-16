@@ -131,10 +131,11 @@ class UserConfigurableProfiler:
         self._enable_progress_bars = True
         if context:
             progress_bars = context.progress_bars
-            if "globally" in progress_bars:
-                self._enable_progress_bars = progress_bars["globally"]
-            if "profilers" in progress_bars:
-                self._enable_progress_bars = progress_bars["profilers"]
+            if progress_bars:
+                if "globally" in progress_bars:
+                    self._enable_progress_bars = progress_bars["globally"]
+                if "profilers" in progress_bars:
+                    self._enable_progress_bars = progress_bars["profilers"]
 
         self.semantic_types_dict = semantic_types_dict
         assert isinstance(self.semantic_types_dict, (dict, type(None)))
