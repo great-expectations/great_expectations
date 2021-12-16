@@ -74,9 +74,6 @@ class UsageStatisticsHandler:
         self._url = usage_statistics_url
         self._dry_run = dry_run
 
-        # TODO: AJB 20211215 THIS IS TEMPORARY REMOVE IT!
-        self._events_queued = []
-
         self._data_context_id = data_context_id
         self._data_context_instance_id = data_context.instance_id
         self._data_context = data_context
@@ -121,28 +118,27 @@ class UsageStatisticsHandler:
         self._worker.join()
 
     def _requests_worker(self):
-        if not self._dry_run:
-            session = requests.Session()
-            while True:
-                message = self._message_queue.get()
-                if message == STOP_SIGNAL:
-                    self._message_queue.task_done()
-                    return
-                try:
-                    res = session.post(self._url, json=message, timeout=2)
+        session = requests.Session()
+        while not self._dry_run:
+            message = self._message_queue.get()
+            if message == STOP_SIGNAL:
+                self._message_queue.task_done()
+                return
+            try:
+                res = session.post(self._url, json=message, timeout=2)
+                logger.debug(
+                    "Posted usage stats: message status " + str(res.status_code)
+                )
+                if res.status_code != 201:
                     logger.debug(
-                        "Posted usage stats: message status " + str(res.status_code)
+                        "Server rejected message: ", json.dumps(message, indent=2)
                     )
-                    if res.status_code != 201:
-                        logger.debug(
-                            "Server rejected message: ", json.dumps(message, indent=2)
-                        )
-                except requests.exceptions.Timeout:
-                    logger.debug("Timeout while sending usage stats message.")
-                except Exception as e:
-                    logger.debug("Unexpected error posting message: " + str(e))
-                finally:
-                    self._message_queue.task_done()
+            except requests.exceptions.Timeout:
+                logger.debug("Timeout while sending usage stats message.")
+            except Exception as e:
+                logger.debug("Unexpected error posting message: " + str(e))
+            finally:
+                self._message_queue.task_done()
 
     def build_init_payload(self):
         """Adds information that may be available only after full data context construction, but is useful to
@@ -251,16 +247,7 @@ class UsageStatisticsHandler:
                 message, schema=anonymized_usage_statistics_record_schema
             ):
                 return
-            print("=======================================")
-            print(f"About to put message with event {message['event']}")
-            self._events_queued.append(message["event"])
             self._message_queue.put(message)
-            print("Just put message")
-            print(
-                f"Current queue events: {[event['event'] for event in self._message_queue.queue]}"
-            )
-            print(f"Current self._events_queued list: {self._events_queued}")
-            print("=======================================")
         # noinspection PyBroadException
         except Exception as e:
             # We *always* tolerate *any* error in usage statistics
