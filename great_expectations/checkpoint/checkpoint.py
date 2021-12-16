@@ -19,10 +19,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import get_datetime_string_from_strftime_format
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    ConcurrencyConfig,
-)
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.validation_operators import ActionListValidationOperator
@@ -374,8 +371,9 @@ class Checkpoint:
         # concurrency is enabled in the data context configuration) -- please see the below arguments used to initialize
         # AsyncExecutor and the corresponding AsyncExecutor docstring for more details on when multiple threads are
         # used.
-        concurrency = self.data_context.concurrency or ConcurrencyConfig()
-        with AsyncExecutor(concurrency, max_workers=len(validations)) as async_executor:
+        with AsyncExecutor(
+            self.data_context.concurrency, max_workers=len(validations)
+        ) as async_executor:
             # noinspection PyUnresolvedReferences
             async_validation_operator_results: List[
                 AsyncResult[ValidationOperatorResult]
