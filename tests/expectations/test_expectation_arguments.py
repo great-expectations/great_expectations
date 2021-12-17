@@ -659,7 +659,6 @@ def test_result_format_configured_no_set_default_override(
             },
             "expectation_type": "expect_column_values_to_not_be_null",
             "meta": {"Notes": "Some notes"},
-            "expectation_context": {"description": None},
         },
         "meta": {},
         "exception_info": {
@@ -688,7 +687,6 @@ def test_result_format_configured_no_set_default_override(
         "expectation_config": {
             "expectation_type": "expect_column_values_to_not_be_null",
             "meta": {},
-            "expectation_context": {"description": None},
             "kwargs": {
                 "catch_exceptions": False,
                 "result_format": {
@@ -806,7 +804,6 @@ def test_result_format_configured_with_set_default_override(
             },
             "meta": {"Notes": "Some notes"},
             "expectation_type": "expect_column_values_to_not_be_null",
-            "expectation_context": {"description": None},
         },
         "success": True,
         "meta": {},
@@ -874,7 +871,6 @@ def test_result_format_configured_with_set_default_override(
             },
             "meta": {},
             "expectation_type": "expect_column_values_to_not_be_null",
-            "expectation_context": {"description": None},
         },
         "success": True,
         "meta": {},

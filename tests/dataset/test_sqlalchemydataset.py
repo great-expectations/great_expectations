@@ -356,10 +356,10 @@ def test_expect_compound_columns_to_be_unique(sa):
 
     data = pd.DataFrame(
         {
-            "col1": [1, 2, 3, 1, 2, 3, None, None],
-            "col2": [1, 2, 2, 2, 2, 3, None, None],
-            "col3": [1, 1, 2, 2, 3, 2, None, None],
-            "col4": [1, None, 2, 2, None, None, None, None],
+            "col1": [1, 2, 3, 1, 2, 3, 4, 5, None],
+            "col2": [1, 2, 2, 2, 2, 3, None, None, None],
+            "col3": [1, 1, 2, 2, 3, 2, None, None, None],
+            "col4": [1, None, 2, 2, None, None, None, None, None],
         }
     )
 
@@ -373,11 +373,15 @@ def test_expect_compound_columns_to_be_unique(sa):
         ["col1", "col2", "col3"]
     ).success
     assert not dataset.expect_compound_columns_to_be_unique(
+        ["col1", "col2", "col4"]
+    ).success
+    assert dataset.expect_compound_columns_to_be_unique(
         ["col1", "col2", "col4"],
         ignore_row_if="any_value_is_missing",
     ).success
-    assert dataset.expect_compound_columns_to_be_unique(
-        ["col1", "col2", "col4"]
+    assert not dataset.expect_compound_columns_to_be_unique(
+        ["col1", "col2", "col4"],
+        ignore_row_if="never",
     ).success
 
 
