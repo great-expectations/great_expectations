@@ -65,8 +65,6 @@ def test_checkpoint_config_repr(checkpoint):
 
     checkpoint_config_repr = checkpoint.config.__repr__()
 
-    print(checkpoint.config)
-
     assert (
         checkpoint_config_repr
         == """{
@@ -109,6 +107,119 @@ def test_checkpoint_config_repr(checkpoint):
         "data_asset_name": "my_data_asset"
       },
       "expectation_suite_name": "test_suite"
+    }
+  ],
+  "profilers": [],
+  "ge_cloud_id": null,
+  "expectation_suite_ge_cloud_id": null
+}"""
+    )
+
+
+def test_checkpoint_config_repr_after_substitution(checkpoint):
+
+    checkpoint_run_anonymizer = CheckpointRunAnonymizer(salt=DATA_CONTEXT_ID)
+
+    df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
+
+    batch_request_param = {
+        "runtime_parameters": {"batch_data": df},
+        "batch_identifiers": {"default_identifier_name": "my_simple_df"},
+    }
+
+    result_format_param = {"result_format": "SUMMARY"}
+
+    kwargs = {
+        "batch_request": batch_request_param,
+        "result_format": result_format_param,
+    }
+
+    # Matching how this is called in usage_statistics.py (parameter style)
+    substituted_runtime_config: CheckpointConfig = (
+        checkpoint_run_anonymizer.resolve_config_using_acceptable_arguments(
+            *(checkpoint,), **kwargs
+        )
+    )
+
+    checkpoint_config_repr = substituted_runtime_config.__repr__()
+
+    print(substituted_runtime_config)
+
+    assert (
+        checkpoint_config_repr
+        == """{
+  "name": "my_checkpoint",
+  "config_version": 1.0,
+  "template_name": null,
+  "module_name": "great_expectations.checkpoint",
+  "class_name": "Checkpoint",
+  "run_name_template": null,
+  "expectation_suite_name": null,
+  "batch_request": {
+    "runtime_parameters": {
+      "batch_data": "<class 'pandas.core.frame.DataFrame'>"
+    },
+    "batch_identifiers": {
+      "default_identifier_name": "my_simple_df"
+    }
+  },
+  "action_list": [
+    {
+      "name": "store_validation_result",
+      "action": {
+        "class_name": "StoreValidationResultAction"
+      }
+    },
+    {
+      "name": "store_evaluation_params",
+      "action": {
+        "class_name": "StoreEvaluationParametersAction"
+      }
+    },
+    {
+      "name": "update_data_docs",
+      "action": {
+        "class_name": "UpdateDataDocsAction",
+        "site_names": []
+      }
+    }
+  ],
+  "evaluation_parameters": {},
+  "runtime_configuration": {},
+  "validations": [
+    {
+      "batch_request": {
+        "datasource_name": "example_datasource",
+        "data_connector_name": "default_runtime_data_connector_name",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {"batch_data": "<class 'pandas.core.frame.DataFrame'>"},
+        "batch_identifiers": {
+          "default_identifier_name": "my_simple_df"
+        }
+      },
+      "expectation_suite_name": "test_suite",
+      "expectation_suite_ge_cloud_id": null,
+      "action_list": [
+        {
+          "name": "store_validation_result",
+          "action": {
+            "class_name": "StoreValidationResultAction"
+          }
+        },
+        {
+          "name": "store_evaluation_params",
+          "action": {
+            "class_name": "StoreEvaluationParametersAction"
+          }
+        },
+        {
+          "name": "update_data_docs",
+          "action": {
+            "class_name": "UpdateDataDocsAction",
+            "site_names": []
+          }
+        }
+      ]
     }
   ],
   "profilers": [],
