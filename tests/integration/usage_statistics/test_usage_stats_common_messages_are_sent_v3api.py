@@ -10,7 +10,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
 from tests.core.usage_statistics.util import (
-    assert_no_usage_stats_exceptions,
+    usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
 )
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
@@ -171,7 +171,7 @@ def test_common_usage_stats_are_sent_no_mocking(
     expected_events.append("checkpoint.run")
     expected_events.append("data_context.run_checkpoint")
 
-    assert_no_usage_stats_exceptions(messages=caplog.messages)
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
 
     message_queue = context._usage_statistics_handler._message_queue.queue
     events = [event["event"] for event in message_queue]
