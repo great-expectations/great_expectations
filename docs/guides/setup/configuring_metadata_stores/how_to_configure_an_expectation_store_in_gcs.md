@@ -80,3 +80,7 @@ Steps
 
     ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L157-L158
     ```
+
+### Additional Notes
+To view the full script used in this page, see it on GitHub:
+- [how_to_configure_an_expectation_store_in_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py)
