@@ -1022,16 +1022,42 @@ def standardize_batch_request_display_ordering(
     batch_request.pop("datasource_name")
     batch_request.pop("data_connector_name")
     batch_request.pop("data_asset_name")
+    # NOTE: AJB 20211217 The below conditionals should be refactored
     if runtime_parameters:
         batch_request.pop("runtime_parameters")
     if batch_identifiers:
         batch_request.pop("batch_identifiers")
-    batch_request = {
-        "datasource_name": datasource_name,
-        "data_connector_name": data_connector_name,
-        "data_asset_name": data_asset_name,
-        "runtime_parameters": runtime_parameters,
-        "batch_identifiers": batch_identifiers,
-        **batch_request,
-    }
+    if runtime_parameters and batch_identifiers:
+        batch_request = {
+            "datasource_name": datasource_name,
+            "data_connector_name": data_connector_name,
+            "data_asset_name": data_asset_name,
+            "runtime_parameters": runtime_parameters,
+            "batch_identifiers": batch_identifiers,
+            **batch_request,
+        }
+    elif runtime_parameters and not batch_identifiers:
+        batch_request = {
+            "datasource_name": datasource_name,
+            "data_connector_name": data_connector_name,
+            "data_asset_name": data_asset_name,
+            "runtime_parameters": runtime_parameters,
+            **batch_request,
+        }
+    elif not runtime_parameters and batch_identifiers:
+        batch_request = {
+            "datasource_name": datasource_name,
+            "data_connector_name": data_connector_name,
+            "data_asset_name": data_asset_name,
+            "batch_identifiers": batch_identifiers,
+            **batch_request,
+        }
+    else:
+        batch_request = {
+            "datasource_name": datasource_name,
+            "data_connector_name": data_connector_name,
+            "data_asset_name": data_asset_name,
+            **batch_request,
+        }
+
     return batch_request
