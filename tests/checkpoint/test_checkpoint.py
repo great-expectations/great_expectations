@@ -1653,12 +1653,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                             "anonymized_batch_request": {
                                 "anonymized_batch_request_required_top_level_properties": {
                                     "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
-                                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
-                                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                                    "anonymized_data_connector_name": "d52d7bff3226a7f94dd3510c1040de78",
+                                    "anonymized_data_asset_name": "7e60092b1b9b96327196fdba39029b9e",
                                 },
                                 "batch_request_optional_top_level_keys": [
                                     "batch_identifiers",
-                                    "data_connector_query",
                                     "runtime_parameters",
                                 ],
                                 "runtime_parameters_keys": ["batch_data"],
@@ -1687,11 +1686,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                                     "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
                                 },
                                 "batch_request_optional_top_level_keys": [
-                                    "batch_identifiers",
-                                    "data_connector_query",
-                                    "runtime_parameters",
+                                    "data_connector_query"
                                 ],
-                                "runtime_parameters_keys": ["batch_data"],
                             },
                             "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
                             "anonymized_action_list": [
@@ -1712,7 +1708,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                     ],
                 },
                 "success": False,
-            },
+            }
         ),
         mock.call(
             {
@@ -1730,7 +1726,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                     "runtime_parameters_keys": ["batch_data"],
                 },
                 "success": True,
-            },
+            }
         ),
         mock.call(
             {
@@ -1741,14 +1737,14 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                     "anonymized_datasource_name": "__not_found__",
                 },
                 "success": True,
-            },
+            }
         ),
         mock.call(
             {
                 "event": "data_context.build_data_docs",
                 "event_payload": {},
                 "success": True,
-            },
+            }
         ),
         mock.call(
             {
@@ -1758,15 +1754,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                         "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                         "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
                         "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
-                    },
-                    "batch_request_optional_top_level_keys": [
-                        "batch_identifiers",
-                        "runtime_parameters",
-                    ],
-                    "runtime_parameters_keys": ["batch_data"],
+                    }
                 },
                 "success": True,
-            },
+            }
         ),
         mock.call(
             {
@@ -1777,14 +1768,14 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                     "anonymized_datasource_name": "__not_found__",
                 },
                 "success": True,
-            },
+            }
         ),
         mock.call(
             {
                 "event": "data_context.build_data_docs",
                 "event_payload": {},
                 "success": True,
-            },
+            }
         ),
         mock.call(
             {
@@ -1813,12 +1804,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                             "anonymized_batch_request": {
                                 "anonymized_batch_request_required_top_level_properties": {
                                     "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
-                                    "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
-                                    "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                                    "anonymized_data_connector_name": "d52d7bff3226a7f94dd3510c1040de78",
+                                    "anonymized_data_asset_name": "7e60092b1b9b96327196fdba39029b9e",
                                 },
                                 "batch_request_optional_top_level_keys": [
                                     "batch_identifiers",
-                                    "data_connector_query",
                                     "runtime_parameters",
                                 ],
                                 "runtime_parameters_keys": ["batch_data"],
@@ -1847,11 +1837,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                                     "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
                                 },
                                 "batch_request_optional_top_level_keys": [
-                                    "batch_identifiers",
-                                    "data_connector_query",
-                                    "runtime_parameters",
+                                    "data_connector_query"
                                 ],
-                                "runtime_parameters_keys": ["batch_data"],
                             },
                             "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
                             "anonymized_action_list": [
@@ -1872,7 +1859,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                     ],
                 },
                 "success": True,
-            },
+            }
         ),
     ]
     # noinspection PyUnresolvedReferences

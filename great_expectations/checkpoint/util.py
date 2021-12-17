@@ -231,6 +231,9 @@ def get_runtime_batch_request(
     effective_batch_request: dict = dict(
         **runtime_config_batch_request, **validation_batch_request
     )
+
+    batch_request_class: type
+
     if "runtime_parameters" in effective_batch_request:
         batch_request_class = RuntimeBatchRequest
     else:
