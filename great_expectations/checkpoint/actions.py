@@ -3,10 +3,17 @@ An action is a way to take an arbitrary method and make it configurable and runn
 
 The only requirement from an action is for it to have a take_action method.
 """
-
 import logging
 import warnings
+from typing import Dict, Optional
 
+import requests
+
+from great_expectations import DataContext
+from great_expectations.core import (
+    ExpectationSuiteValidationResult,
+    ExpectationValidationResult,
+)
 from great_expectations.data_context.types.refs import GeCloudResourceRef
 
 try:
@@ -16,6 +23,7 @@ except ImportError:
 
 
 from great_expectations.checkpoint.util import (
+    send_cloud_notification,
     send_email,
     send_microsoft_teams_notifications,
     send_opsgenie_alert,
@@ -214,7 +222,7 @@ class SlackNotificationAction(ValidationAction):
             or self.notify_on == "failure"
             and not validation_success
         ):
-            query = self.renderer.render(
+            query: Dict = self.renderer.render(
                 validation_result_suite, data_docs_pages, self.notify_with
             )
 
@@ -1023,3 +1031,58 @@ class UpdateDataDocsAction(ValidationAction):
             data_docs_validation_results[sites["site_name"]] = sites["site_url"]
 
         return data_docs_validation_results
+
+
+class CloudNotificationAction(ValidationAction):
+    """
+    CloudNotificationAction is an action which utilizes the Cloud store backend
+    to deliver user-specified Notification Actions.
+    """
+
+    def __init__(
+        self,
+        data_context: DataContext,
+        cloud_notification_action_id: str,
+        action_type: str,
+    ):
+        super().__init__(data_context)
+        self.cloud_notification_action_id = cloud_notification_action_id
+        self.action_type = action_type
+
+    def _run(
+        self,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
+        data_asset=None,
+        payload: Optional[Dict] = None,
+        expectation_suite_identifier=None,
+        checkpoint_identifier=None,
+    ):
+        logger.debug("CloudNotificationAction.run")
+
+        if validation_result_suite is None:
+            return
+
+        if not self.data_context.ge_cloud_mode:
+            return Exception(
+                "CloudNotificationActions can only be used in GE Cloud Mode."
+            )
+
+        ge_cloud_url = (
+            self.data_context.ge_cloud_config.base_url
+            + f"/accounts/{self.data_context.ge_cloud_config.account_id}"
+            + f"/cloud-notification-action/{self.cloud_notification_action_id}"
+        )
+        auth_headers = {
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f"Bearer {self.data_context.ge_cloud_config.access_token}",
+        }
+        data = {
+            "action_type": self.action_type,
+            "cloud_notification_action_id": self.cloud_notification_action_id,
+            "validation_result_suite": validation_result_suite.to_json_dict(),
+            "validation_result_suite_identifier": validation_result_suite_identifier,
+        }
+        return send_cloud_notification(
+            url=ge_cloud_url, headers=auth_headers, data=data
+        )

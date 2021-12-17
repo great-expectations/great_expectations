@@ -17,6 +17,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.validation_operators import (
+    CloudNotificationAction,
     EmailAction,
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
@@ -35,6 +36,13 @@ class MockTeamsResponse:
 
 
 class MockSlackResponse:
+    def __init__(self, status_code):
+        self.status_code = status_code
+        self.text = "test_text"
+        self.content = json.dumps({"ok": "True"})
+
+
+class MockCloudResponse:
     def __init__(self, status_code):
         self.status_code = status_code
         self.text = "test_text"
@@ -642,3 +650,19 @@ def test_EmailAction(
 #         from_string="ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
 #     )) == {}
 #
+
+
+@mock.patch.object(Session, "post", return_value=MockCloudResponse(200))
+def test_cloud_notification_action(
+    data_context_parameterized_expectation_suite,
+    validation_result_suite,
+    validation_result_suite_id,
+):
+    cloud_notification_action_id = "5f8a9f94-c652-44b9-ac75-1aa2280f53be"
+    action_type = "fake_action"
+
+    cloud_action: CloudNotificationAction = CloudNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        cloud_notification_action_id=cloud_notification_action_id,
+        action_type=action_type,
+    )
