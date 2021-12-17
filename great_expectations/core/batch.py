@@ -1017,13 +1017,21 @@ def standardize_batch_request_display_ordering(
     datasource_name: str = batch_request["datasource_name"]
     data_connector_name: str = batch_request["data_connector_name"]
     data_asset_name: str = batch_request["data_asset_name"]
+    runtime_parameters: str = batch_request.get("runtime_parameters")
+    batch_identifiers: str = batch_request.get("batch_identifiers")
     batch_request.pop("datasource_name")
     batch_request.pop("data_connector_name")
     batch_request.pop("data_asset_name")
+    if runtime_parameters:
+        batch_request.pop("runtime_parameters")
+    if batch_identifiers:
+        batch_request.pop("batch_identifiers")
     batch_request = {
         "datasource_name": datasource_name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
+        "runtime_parameters": runtime_parameters,
+        "batch_identifiers": batch_identifiers,
         **batch_request,
     }
     return batch_request
