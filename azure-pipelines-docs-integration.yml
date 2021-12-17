@@ -82,6 +82,12 @@ stages:
             pip install .
           displayName: 'Install dependencies'
 
+        - script: |
+            curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz > google-cloud-sdk-367.0.0-linux-x86_64.tar.gz && gunzip google-cloud-sdk-367.0.0-linux-x86_64.tar.gz && rm google-cloud-sdk-367.0.0-linux-x86_64.tar.gz
+            ./google-cloud-sdk/install.sh
+            ./google-cloud-sdk/bin/gcloud init
+          displayName: 'Install Google Cloud SDK'
+
         - task: DownloadSecureFile@1
           name: gcp_authkey
           displayName: 'Download GCS Credentials'
