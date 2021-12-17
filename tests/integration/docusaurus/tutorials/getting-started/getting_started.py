@@ -20,24 +20,26 @@ assert context
 
 # First configure a new Datasource and add to DataContext
 datasource_yaml = f"""
-name: getting_started_datasource
-class_name: Datasource
-module_name: great_expectations.datasource
-execution_engine:
-  module_name: great_expectations.execution_engine
-  class_name: PandasExecutionEngine
-data_connectors:
+getting_started_datasource:
+  class_name: Datasource
+  module_name: great_expectations.datasource
+  execution_engine:
+    class_name: PandasExecutionEngine
+    module_name: great_expectations.execution_engine
+  data_connectors:
     default_runtime_data_connector_name:
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-            - default_identifier_name
+      class_name: RuntimeDataConnector
+      module_name: great_expectations.datasource.data_connector
+      batch_identifiers:
+        - default_identifier_name
     default_inferred_data_connector_name:
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: ../data/
-        default_regex:
-          group_names:
-            - data_asset_name
-          pattern: (.*)
+      class_name: InferredAssetFilesystemDataConnector
+      module_name: great_expectations.datasource.data_connector
+      base_directory: ../data
+      default_regex:
+        group_names:
+          - data_asset_name
+        pattern: (.*)
 """
 
 # Note : this override is for internal GE purposes, and is intended to helps us better understand how the
