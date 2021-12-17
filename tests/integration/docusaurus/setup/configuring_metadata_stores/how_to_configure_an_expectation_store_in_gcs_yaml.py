@@ -97,10 +97,10 @@ assert actual_existing_expectations_store == yaml.safe_load(
 configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "project"
-] = None
+] = "superconductive-internal/"
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "bucket"
-] = "superconductive-integration-tests"
+] = "superconductive-integration-tests/"
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "prefix"
 ] = "data/taxi_yellow_tripdata_samples/"
@@ -112,7 +112,10 @@ context.add_store(
 )
 with open(great_expectations_yaml_file_path, "r") as f:
     great_expectations_yaml_str = f.read()
-great_expectations_yaml_str = great_expectations_yaml_str.replace("expectations_store_name: expectations_store", "expectations_store_name: expectations_GCS_store")
+great_expectations_yaml_str = great_expectations_yaml_str.replace(
+    "expectations_store_name: expectations_store",
+    "expectations_store_name: expectations_GCS_store",
+)
 with open(great_expectations_yaml_file_path, "w") as f:
     f.write(great_expectations_yaml_str)
 
