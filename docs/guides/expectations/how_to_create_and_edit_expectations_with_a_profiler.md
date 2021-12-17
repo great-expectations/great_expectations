@@ -13,7 +13,7 @@ This guide will help you create a new Expectation Suite by profiling your data w
 
 </Prerequisites>
 
-:::Note
+:::note
 The User Configurable Profiler makes it easier to produce a new Expectation Suite by building out a bunch of Expectations for your data.
 
 These Expectations are deliberately over-fitted on your data e.g. if your table has 10,000 rows, the profiler will produce an Expectation with the following config:
@@ -31,7 +31,7 @@ These Expectations are deliberately over-fitted on your data e.g. if your table 
 Thus, the intention is for this Expectation Suite to be edited and updated to better suit your specific use case - it is not specifically intended to be used as is.
 :::
 
-:::Note
+:::note
 You can access this same functionality from the Great Expectations CLI by running
 ```console
 great_expectations --v3-api suite new --profile
@@ -47,8 +47,9 @@ If you go that route, you can follow along in the resulting Jupyter Notebook ins
 
 Load an on-disk Data Context via:
 ```python
-    import great_expectations as ge
-    context: DataContext = DataContext(
+    from great_expectations.data_context.data_context import DataContext
+
+    context = DataContext(
         context_root_dir='path/to/my/context/root/directory/great_expectations'
     )
 ```
@@ -72,9 +73,11 @@ batch_request = {
 
 ### 3. Instantiate your Validator
 
-We use a Validator access and interact with your data. We will be passing the Validator to our Profiler in a later step.
+We use a Validator to access and interact with your data. We will be passing the Validator to our Profiler in the next step.
 
 ```python
+from great_expectations.core.batch import BatchRequest
+
 validator = context.get_validator(
     batch_request=BatchRequest(**batch_request),
     expectation_suite_name=expectation_suite_name
@@ -88,6 +91,7 @@ After you get your Validator, you can call `validator.head()` to confirm that it
 Next, we instantiate a UserConfigurableProfiler, passing in the Validator with our data
 
 ```python
+from great_expectations.profile.user_configurable_profiler import UserConfigurableProfiler
 profiler = UserConfigurableProfiler(profile_dataset=validator)
 ```
 
@@ -104,6 +108,8 @@ suite = profiler.build_suite()
 If you'd like, you can validate your data with the new suite, save your Expectation Suite, and build Data Docs to take a closer look at the output
 
 ```python
+from great_expectations.checkpoint.checkpoint import SimpleCheckpoint
+
 # Review and save our Expectation Suite 
 print(validator.get_expectation_suite(discard_failed_expectations=False))
 validator.save_expectation_suite(discard_failed_expectations=False)
@@ -137,17 +143,11 @@ And you're all set!
 The UserConfigurableProfiler can take a few different parameters to further hone the results. These parameters are:
 
 - `excluded_expectations`: Takes a list of expectation names which you want to exclude from the suite
-
 - `ignored_columns`: Takes a list of columns for which you may not want to build expectations (i.e. if you have metadata columns which might not be the same between tables
-
 - `not_null_only`: Takes a boolean. By default, each column is evaluated for nullity. If the column values contain fewer than 50% null values, then the profiler will add `expect_column_values_to_not_be_null`; if greater than 50% it will add `expect_column_values_to_be_null`. If `not_null_only` is set to True, the profiler will add a not_null expectation irrespective of the percent nullity (and therefore will not add an `expect_column_values_to_be_null`)
-
 - `primary_or_compound_key`: Takes a list of one or more columns. This allows you to specify one or more columns as a primary or compound key, and will add `expect_column_values_to_be_unique` or `expect_compound_column_values_to_be_unique`
-
 - `table_expectations_only`: Takes a boolean. If True, this will only create table-level expectations (i.e. ignoring all columns). Table-level expectations include `expect_table_row_count_to_equal` and `expect_table_columns_to_match_ordered_list`
-
 - `value_set_threshold`: Takes a string from the following ordered list - "none", "one", "two", "very_few", "few", "many", "very_many", "unique". When the profiler runs, each column is profiled for cardinality. This threshold determines the greatest cardinality for which to add `expect_column_values_to_be_in_set`. For example, if `value_set_threshold` is set to "unique", it will add a value_set expectation for every included column. If set to "few", it will add a value_set expectation for columns whose cardinality is one of "one", "two", "very_few" or "few". The default value here is "many". For the purposes of comparing whether two tables are identical, it might make the most sense to set this to "unique".
-
 - `semantic_types_dict`: Takes a dictionary. Described in more detail below.
 
 If you would like to make use of these parameters, you can specify them while instantiating your profiler.
@@ -176,7 +176,7 @@ suite = profiler.build_suite()
 
 ```
 
-*Once you have instantiated a profiler with parameters specified, you must re-instantiate the profiler if you wish to change any of the parameters.*
+**Once you have instantiated a profiler with parameters specified, you must re-instantiate the profiler if you wish to change any of the parameters.**
 
 ### Semantic Types Dictionary Configuration
 
@@ -206,28 +206,33 @@ suite = profiler.build_suite()
 
 These are the expectations added when using a `semantics_type_dict`:
 
-*Table expectations:*
+**Table expectations:**
 - `expect_table_row_count_to_be_between`
 - `expect_table_columns_to_match_ordered_list`
 
-*Expectations added for all included columns*
+
+**Expectations added for all included columns**
 - `expect_column_value_to_not_be_null` (if a column consists of more than 50% null values, this will instead add `expect_column_values_to_be_null`)
 - `expect_column_proportion_of_unique_values_to_be_between`
 - `expect_column_values_to_be_in_type_list`
 
-*Value set expectations*
+
+**Value set expectations**
 - `expect_column_values_to_be_in_set`
 
-*Datetime expectations*
+
+**Datetime expectations**
 - `expect_column_values_to_be_between`
 
-*Numeric expectations*
+
+**Numeric expectations**
 - `expect_column_min_to_be_between`
 - `expect_column_max_to_be_between`
 - `expect_column_mean_to_be_between`
 - `expect_column_median_to_be_between`
 - `expect_column_quantile_values_to_be_between`
 
-*Other expectations*
+
+**Other expectations**
 - `expect_column_values_to_be_unique` (if a single key is specified for `primary_or_compound_key`)
 - `expect_compound_columns_to_be_unique` (if a compound key is specified for `primary_or_compound_key`)
