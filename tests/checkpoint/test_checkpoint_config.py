@@ -118,18 +118,20 @@ def test_checkpoint_config_repr(checkpoint):
 
 def test_checkpoint_config_repr_after_substitution(checkpoint):
 
-    checkpoint_run_anonymizer = CheckpointRunAnonymizer(salt=DATA_CONTEXT_ID)
+    checkpoint_run_anonymizer: CheckpointRunAnonymizer = CheckpointRunAnonymizer(
+        salt=DATA_CONTEXT_ID
+    )
 
-    df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
+    df: pd.DataFrame = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 
-    batch_request_param = {
+    batch_request_param: dict = {
         "runtime_parameters": {"batch_data": df},
         "batch_identifiers": {"default_identifier_name": "my_simple_df"},
     }
 
-    result_format_param = {"result_format": "SUMMARY"}
+    result_format_param: dict = {"result_format": "SUMMARY"}
 
-    kwargs = {
+    kwargs: dict = {
         "batch_request": batch_request_param,
         "result_format": result_format_param,
     }
@@ -143,9 +145,6 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
 
     checkpoint_config_repr: str = substituted_runtime_config.__repr__()
 
-    print(checkpoint_config_repr)
-
-    # TODO: AJB 20211217 - the `batch_identifiers` field in `validations` should not be present in the below
     assert (
         checkpoint_config_repr
         == """{
@@ -193,7 +192,9 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
         "datasource_name": "example_datasource",
         "data_connector_name": "default_runtime_data_connector_name",
         "data_asset_name": "my_data_asset",
-        "runtime_parameters": {},
+        "runtime_parameters": {
+          "batch_data": "<class 'pandas.core.frame.DataFrame'>"
+        },
         "batch_identifiers": {
           "default_identifier_name": "my_simple_df"
         }
