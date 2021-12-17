@@ -4,6 +4,8 @@ title: Changelog
 
 ### Develop
 
+* [BUGFIX] SlackNotificationAction must send slack_token and slack_channel to send_slack_notification function
+
 ### 0.13.46
 * [FEATURE] Instrument Runtime DataConnector for Usage Statistics: Add "checkpoint.run" Event Schema (#3797)
 * [FEATURE] Add suite creation type field to CLI SUITE "new" and "edit" Usage Statistics events (#3810)
