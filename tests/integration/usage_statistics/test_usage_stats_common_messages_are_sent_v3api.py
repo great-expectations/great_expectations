@@ -163,6 +163,7 @@ def test_common_usage_stats_are_sent_no_mocking(
             "batch_identifiers": {"default_identifier_name": "my_simple_df"},
         },
     )
+    expected_events.append("data_context.get_batch_list")
     expected_events.append("data_context.build_data_docs")
     expected_events.append("checkpoint.run")
     expected_events.append("data_context.run_checkpoint")

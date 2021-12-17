@@ -2122,33 +2122,42 @@ class CheckpointConfig(BaseYamlConfig):
                 )
             # update
             if runtime_kwargs.get("batch_request") is not None:
-                batch_request = self.batch_request
-                batch_request = batch_request or {}
+                batch_request = self.batch_request or {}
                 runtime_batch_request = runtime_kwargs.get("batch_request")
                 if runtime_batch_request is not None:
                     runtime_batch_request = self._safe_copy_batch_request(
                         batch_request=runtime_batch_request
                     )
+                    if not isinstance(runtime_batch_request, dict):
+                        # noinspection PyUnresolvedReferences
+                        runtime_batch_request = runtime_batch_request.to_dict()
+
                     delete_runtime_parameters_batch_data_references_from_config(
                         config=batch_request
                     )
+
                     batch_request = nested_update(batch_request, runtime_batch_request)
+
                 self._batch_request = batch_request
+
             if runtime_kwargs.get("action_list") is not None:
                 self.action_list = self.get_updated_action_list(
                     base_action_list=self.action_list,
                     other_action_list=runtime_kwargs.get("action_list"),
                 )
+
             if runtime_kwargs.get("evaluation_parameters") is not None:
                 nested_update(
                     self.evaluation_parameters,
                     runtime_kwargs.get("evaluation_parameters"),
                 )
+
             if runtime_kwargs.get("runtime_configuration") is not None:
                 nested_update(
                     self.runtime_configuration,
                     runtime_kwargs.get("runtime_configuration"),
                 )
+
             if runtime_kwargs.get("validations") is not None:
                 self.validations.extend(
                     filter(
@@ -2156,6 +2165,7 @@ class CheckpointConfig(BaseYamlConfig):
                         runtime_kwargs.get("validations"),
                     )
                 )
+
             if runtime_kwargs.get("profilers") is not None:
                 self.profilers.extend(runtime_kwargs.get("profilers"))
 
