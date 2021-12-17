@@ -1605,9 +1605,9 @@ WHERE
         )
 
         if ignore_row_if == "all_values_are_missing":
-            query = query.where(sa.and_(*(col != None for col in columns)))
+            query = query.where(~sa.and_(*(col == None for col in columns)))
         elif ignore_row_if == "any_value_is_missing":
-            query = query.where(sa.or_(*(col != None for col in columns)))
+            query = query.where(sa.and_(*(col != None for col in columns)))
         elif ignore_row_if == "never":
             pass
         else:
