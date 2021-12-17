@@ -71,7 +71,6 @@ list_expectation_suites_output = """
 context = ge.get_context()
 
 
-
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
@@ -86,27 +85,57 @@ for store in pop_stores:
 
 actual_existing_expectations_store = dict()
 actual_existing_expectations_store["stores"] = stores
-actual_existing_expectations_store["expectations_store_name"] = great_expectations_yaml["expectations_store_name"]
+actual_existing_expectations_store["expectations_store_name"] = great_expectations_yaml[
+    "expectations_store_name"
+]
 
-assert actual_existing_expectations_store == yaml.safe_load(expected_existing_expectations_store_yaml)
+assert actual_existing_expectations_store == yaml.safe_load(
+    expected_existing_expectations_store_yaml
+)
 
 # replace example code with integration test configuration
 configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
-configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"]["project"] = ""
-configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"]["bucket"] = "superconductive-integration-tests"
-configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"]["prefix"] = "data/taxi_yellow_tripdata_samples"
+configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
+    "project"
+] = ""
+configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
+    "bucket"
+] = "superconductive-integration-tests"
+configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
+    "prefix"
+] = "data/taxi_yellow_tripdata_samples"
 
-context.add_store(store_name=configured_expectations_store["expectations_store_name"], store_config=configured_expectations_store["stores"]["expectations_GCS_store"])
+context.add_store(
+    store_name=configured_expectations_store["expectations_store_name"],
+    store_config=configured_expectations_store["stores"]["expectations_GCS_store"],
+)
 expectation_suite_name = "my_expectation_suite"
 context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 # try gsutil cp command
-local_expectation_suite_file_path = os.path.join(context.root_directory, "expectations", f"{expectation_suite_name}.json")
-copy_expectation_command = copy_expectation_command.replace("expectations/my_expectation_suite.json", local_expectation_suite_file_path)
-copy_expectation_command = copy_expectation_command.replace("<YOUR GCS BUCKET NAME>", configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"]["bucket"])
-copy_expectation_command = copy_expectation_command.replace("<YOUR GCS PREFIX NAME>/my_expectation_suite.json", configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"]["prefix"] + f"/{expectation_suite_name}.json")
+local_expectation_suite_file_path = os.path.join(
+    context.root_directory, "expectations", f"{expectation_suite_name}.json"
+)
+copy_expectation_command = copy_expectation_command.replace(
+    "expectations/my_expectation_suite.json", local_expectation_suite_file_path
+)
+copy_expectation_command = copy_expectation_command.replace(
+    "<YOUR GCS BUCKET NAME>",
+    configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
+        "bucket"
+    ],
+)
+copy_expectation_command = copy_expectation_command.replace(
+    "<YOUR GCS PREFIX NAME>/my_expectation_suite.json",
+    configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
+        "prefix"
+    ]
+    + f"/{expectation_suite_name}.json",
+)
 print(copy_expectation_command.strip())
 
-stdout = subprocess.run(copy_expectation_command.strip(), check=True, stdout=subprocess.PIPE).stdout
+stdout = subprocess.run(
+    copy_expectation_command.strip(), check=True, stdout=subprocess.PIPE
+).stdout
 print(stdout)
 assert stdout == copy_expectation_output
