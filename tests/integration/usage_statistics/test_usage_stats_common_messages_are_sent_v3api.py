@@ -94,17 +94,18 @@ def test_common_usage_stats_are_sent_no_mocking(
     assert context.anonymous_usage_statistics.enabled
     assert context.anonymous_usage_statistics.data_context_id == DATA_CONTEXT_ID
 
-    # context.add_datasource() is decorated, was not sending usage stats events in v0.13.43-46 (possibly earlier)
+    # Note module_name fields are omitted purposely to ensure we are still able to send events
     datasource_yaml = f"""
     name: example_datasource
     class_name: Datasource
     module_name: great_expectations.datasource
     execution_engine:
-      module_name: great_expectations.execution_engine
+      # module_name: great_expectations.execution_engine
       class_name: PandasExecutionEngine
     data_connectors:
         default_runtime_data_connector_name:
             class_name: RuntimeDataConnector
+            # module_name: great_expectations.datasource.data_connector
             batch_identifiers:
                 - default_identifier_name
     """
@@ -114,8 +115,7 @@ def test_common_usage_stats_are_sent_no_mocking(
     expected_events: List[str] = ["data_context.test_yaml_config"]
 
     context.add_datasource(**yaml.load(datasource_yaml))
-    # TODO: AJB `data_context.add_datasource` is not being emitted, though it should be. See GREAT-448
-    # expected_events.append("data_context.add_datasource")
+    expected_events.append("data_context.add_datasource")
 
     df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 
