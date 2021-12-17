@@ -141,10 +141,11 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
         )
     )
 
-    checkpoint_config_repr = substituted_runtime_config.__repr__()
+    checkpoint_config_repr: str = substituted_runtime_config.__repr__()
 
-    print(substituted_runtime_config)
+    print(checkpoint_config_repr)
 
+    # TODO: AJB 20211217 - the `batch_identifiers` field in `validations` should not be present in the below
     assert (
         checkpoint_config_repr
         == """{
@@ -192,7 +193,7 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
         "datasource_name": "example_datasource",
         "data_connector_name": "default_runtime_data_connector_name",
         "data_asset_name": "my_data_asset",
-        "runtime_parameters": {"batch_data": "<class 'pandas.core.frame.DataFrame'>"},
+        "runtime_parameters": {},
         "batch_identifiers": {
           "default_identifier_name": "my_simple_df"
         }
