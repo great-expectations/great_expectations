@@ -47,11 +47,11 @@ If you go that route, you can follow along in the resulting Jupyter Notebook ins
 
 Load an on-disk Data Context via:
 ```python
-    from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.data_context import DataContext
 
-    context = DataContext(
-        context_root_dir='path/to/my/context/root/directory/great_expectations'
-    )
+context = DataContext(
+    context_root_dir='path/to/my/context/root/directory/great_expectations'
+)
 ```
 
 Alternatively, [you can instantiate a Data Context without a .yml file](../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file)
@@ -129,10 +129,11 @@ checkpoint = SimpleCheckpoint(
 )
 checkpoint_result = checkpoint.run()
 
-# Build and open Data Docs
+# Build Data Docs
 context.build_data_docs()
 
-validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
+# Get the only validation_result_identifier from our SimpleCheckpoint run, and open Data Docs to that page
+validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0] 
 context.open_data_docs(resource_identifier=validation_result_identifier)
 ```
 
@@ -142,13 +143,13 @@ And you're all set!
 
 The UserConfigurableProfiler can take a few different parameters to further hone the results. These parameters are:
 
-- `excluded_expectations`: Takes a list of expectation names which you want to exclude from the suite
-- `ignored_columns`: Takes a list of columns for which you may not want to build expectations (i.e. if you have metadata columns which might not be the same between tables
-- `not_null_only`: Takes a boolean. By default, each column is evaluated for nullity. If the column values contain fewer than 50% null values, then the profiler will add `expect_column_values_to_not_be_null`; if greater than 50% it will add `expect_column_values_to_be_null`. If `not_null_only` is set to True, the profiler will add a not_null expectation irrespective of the percent nullity (and therefore will not add an `expect_column_values_to_be_null`)
-- `primary_or_compound_key`: Takes a list of one or more columns. This allows you to specify one or more columns as a primary or compound key, and will add `expect_column_values_to_be_unique` or `expect_compound_column_values_to_be_unique`
-- `table_expectations_only`: Takes a boolean. If True, this will only create table-level expectations (i.e. ignoring all columns). Table-level expectations include `expect_table_row_count_to_equal` and `expect_table_columns_to_match_ordered_list`
-- `value_set_threshold`: Takes a string from the following ordered list - "none", "one", "two", "very_few", "few", "many", "very_many", "unique". When the profiler runs, each column is profiled for cardinality. This threshold determines the greatest cardinality for which to add `expect_column_values_to_be_in_set`. For example, if `value_set_threshold` is set to "unique", it will add a value_set expectation for every included column. If set to "few", it will add a value_set expectation for columns whose cardinality is one of "one", "two", "very_few" or "few". The default value here is "many". For the purposes of comparing whether two tables are identical, it might make the most sense to set this to "unique".
-- `semantic_types_dict`: Takes a dictionary. Described in more detail below.
+- **excluded_expectations**: List\[str\] - Specifies expectation types which you want to exclude from the suite
+- **ignored_columns**: List\[str\] - Columns for which you do not want to build expectations (i.e. if you have metadata columns which might not be the same between tables
+- **not_null_only**: Bool - By default, each column is evaluated for nullity. If the column values contain fewer than 50% null values, then the profiler will add `expect_column_values_to_not_be_null`; if greater than 50% it will add `expect_column_values_to_be_null`. If `not_null_only` is set to True, the profiler will add a not_null expectation irrespective of the percent nullity (and therefore will not add an `expect_column_values_to_be_null`)
+- **primary_or_compound_key**: List\[str\] - This allows you to specify one or more columns in list form as a primary or compound key, and will add `expect_column_values_to_be_unique` or `expect_compound_column_values_to_be_unique`
+- **table_expectations_only**: Bool - If True, this will only create table-level expectations (i.e. ignoring all columns). Table-level expectations include `expect_table_row_count_to_equal` and `expect_table_columns_to_match_ordered_list`
+- **value_set_threshold**: str: Specify a value from the following ordered list - "none", "one", "two", "very_few", "few", "many", "very_many", "unique". When the profiler runs, each column is profiled for cardinality. This threshold determines the greatest cardinality for which to add `expect_column_values_to_be_in_set`. For example, if `value_set_threshold` is set to "unique", it will add a value_set expectation for every included column. If set to "few", it will add a value_set expectation for columns whose cardinality is one of "one", "two", "very_few" or "few". The default value here is "many". For the purposes of comparing whether two tables are identical, it might make the most sense to set this to "unique".
+- **semantic_types_dict**: Dict\[str, List\[str\]\]. Described in more detail below.
 
 If you would like to make use of these parameters, you can specify them while instantiating your profiler.
 
@@ -173,7 +174,6 @@ profiler = UserConfigurableProfiler(
     value_set_threshold=value_set_threshold)
 
 suite = profiler.build_suite()
-
 ```
 
 **Once you have instantiated a profiler with parameters specified, you must re-instantiate the profiler if you wish to change any of the parameters.**
