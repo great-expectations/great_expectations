@@ -1,9 +1,11 @@
+from typing import List
+
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatsExceptionPrefix,
 )
 
 
-def assert_no_usage_stats_exceptions(messages) -> None:
+def assert_no_usage_stats_exceptions(messages: List[str]) -> None:
     """
     Since the usage stats functionality does not raise exceptions but merely logs them, we need to check the logs for errors.
     """
@@ -16,7 +18,7 @@ def assert_no_usage_stats_exceptions(messages) -> None:
     ), "Exception caught when processing or sending a usage stats event"
 
 
-def usage_stats_invalid_messages_exist(messages) -> bool:
+def usage_stats_invalid_messages_exist(messages: List[str]) -> bool:
     """
     Since the usage stats functionality does not raise exceptions but merely logs them, we need to check the logs for errors.
     """
