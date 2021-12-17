@@ -73,7 +73,9 @@ context.add_store(
 with open(great_expectations_yaml_file_path, "r") as f:
     great_expectations_yaml = yaml.safe_load(f)
 great_expectations_yaml["expectations_store_name"] = "expectations_GCS_store"
-great_expectations_yaml["stores"]["expectations_GCS_store"]["store_backend"].pop("suppress_store_backend_id")
+great_expectations_yaml["stores"]["expectations_GCS_store"]["store_backend"].pop(
+    "suppress_store_backend_id"
+)
 with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f, default_flow_style=False)
 
