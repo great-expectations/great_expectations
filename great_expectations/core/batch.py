@@ -1023,11 +1023,11 @@ def standardize_batch_request_display_ordering(
     batch_request.pop("data_connector_name")
     batch_request.pop("data_asset_name")
     # NOTE: AJB 20211217 The below conditionals should be refactored
-    if runtime_parameters:
+    if runtime_parameters is not None:
         batch_request.pop("runtime_parameters")
-    if batch_identifiers:
+    if batch_identifiers is not None:
         batch_request.pop("batch_identifiers")
-    if runtime_parameters and batch_identifiers:
+    if runtime_parameters is not None and batch_identifiers is not None:
         batch_request = {
             "datasource_name": datasource_name,
             "data_connector_name": data_connector_name,
@@ -1036,7 +1036,7 @@ def standardize_batch_request_display_ordering(
             "batch_identifiers": batch_identifiers,
             **batch_request,
         }
-    elif runtime_parameters and not batch_identifiers:
+    elif runtime_parameters is not None and batch_identifiers is None:
         batch_request = {
             "datasource_name": datasource_name,
             "data_connector_name": data_connector_name,
@@ -1044,7 +1044,7 @@ def standardize_batch_request_display_ordering(
             "runtime_parameters": runtime_parameters,
             **batch_request,
         }
-    elif not runtime_parameters and batch_identifiers:
+    elif runtime_parameters is None and batch_identifiers is not None:
         batch_request = {
             "datasource_name": datasource_name,
             "data_connector_name": data_connector_name,
