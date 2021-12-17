@@ -9,7 +9,10 @@ from ruamel import yaml
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
-from tests.core.usage_statistics.util import assert_no_usage_stats_exceptions
+from tests.core.usage_statistics.util import (
+    usage_stats_exceptions_exist,
+    usage_stats_invalid_messages_exist,
+)
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -163,14 +166,19 @@ def test_common_usage_stats_are_sent_no_mocking(
             "batch_identifiers": {"default_identifier_name": "my_simple_df"},
         },
     )
+
+    expected_events.append("data_context.get_batch_list")
+    expected_events.append("data_asset.validate")
     expected_events.append("data_context.build_data_docs")
     expected_events.append("checkpoint.run")
     expected_events.append("data_context.run_checkpoint")
 
-    assert_no_usage_stats_exceptions(messages=caplog.messages)
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
 
     message_queue = context._usage_statistics_handler._message_queue.queue
     events = [event["event"] for event in message_queue]
 
     # Note: expected events does not contain the `data_context.__init__` event
     assert events == expected_events
+
+    assert not usage_stats_invalid_messages_exist(caplog.messages)
