@@ -97,13 +97,13 @@ assert actual_existing_expectations_store == yaml.safe_load(
 configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "project"
-] = "superconductive-internal/"
+] = "superconductive-internal"
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "bucket"
-] = "superconductive-integration-tests/"
+] = "superconductive-integration-tests"
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "prefix"
-] = "data/taxi_yellow_tripdata_samples/"
+] = "expectations"
 
 # add and set the new expectation store
 context.add_store(
@@ -111,13 +111,16 @@ context.add_store(
     store_config=configured_expectations_store["stores"]["expectations_GCS_store"],
 )
 with open(great_expectations_yaml_file_path, "r") as f:
-    great_expectations_yaml_str = f.read()
-great_expectations_yaml_str = great_expectations_yaml_str.replace(
-    "expectations_store_name: expectations_store",
-    "expectations_store_name: expectations_GCS_store",
-)
+    great_expectations_yaml = yaml.safe_load(f)
+great_expectations_yaml["expectations_store_name"] = "expectations_GCS_store"
+great_expectations_yaml["stores"]["expectations_GCS_store"]["store_backend"].pop("suppress_store_backend_id")
 with open(great_expectations_yaml_file_path, "w") as f:
-    f.write(great_expectations_yaml_str)
+    yaml.dump(great_expectations_yaml, f, default_flow_style=False)
+
+with open(great_expectations_yaml_file_path, "r") as f:
+    text = f.read()
+
+print(text)
 
 expectation_suite_name = "my_expectation_suite"
 context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
@@ -140,7 +143,7 @@ copy_expectation_command = copy_expectation_command.replace(
     configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
         "prefix"
     ]
-    + f"{expectation_suite_name}.json",
+    + f"/{expectation_suite_name}.json",
 )
 
 result = subprocess.run(
@@ -150,7 +153,6 @@ stderr = result.stderr.decode("utf-8")
 assert copy_expectation_output.strip() in stderr
 
 # list expectation stores
-print(great_expectations_yaml_str)
 result = subprocess.run(
     list_expectation_stores_command.strip().split(), check=True, stdout=subprocess.PIPE
 )
