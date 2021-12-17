@@ -471,9 +471,9 @@ def add_datasource_usage_statistics(data_context, name, **kwargs):
     # noinspection PyBroadException
     try:
         payload = datasource_anonymizer.anonymize_datasource_info(name, kwargs)
-    except Exception:
+    except Exception as e:
         logger.debug(
-            "add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"
         )
 
     return payload
