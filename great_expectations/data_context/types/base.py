@@ -2129,26 +2129,9 @@ class CheckpointConfig(BaseYamlConfig):
                     runtime_batch_request = self._safe_copy_batch_request(
                         batch_request=runtime_batch_request
                     )
-                    if not isinstance(runtime_batch_request, dict):
-                        # noinspection PyUnresolvedReferences
-                        runtime_batch_request = runtime_batch_request.to_dict()
-                if (
-                    runtime_batch_request.get("runtime_parameters") is not None
-                    and runtime_batch_request["runtime_parameters"].get("batch_data")
-                    is not None
-                ):
-                    if (
-                        batch_request.get("runtime_parameters") is not None
-                        and batch_request["runtime_parameters"].get("batch_data")
-                        is not None
-                    ):
-                        batch_request["runtime_parameters"].pop("batch_data")
-                    batch_data = runtime_batch_request["runtime_parameters"].pop(
-                        "batch_data"
+                    delete_runtime_parameters_batch_data_references_from_config(
+                        config=batch_request
                     )
-                    batch_request = nested_update(batch_request, runtime_batch_request)
-                    batch_request["runtime_parameters"]["batch_data"] = batch_data
-                else:
                     batch_request = nested_update(batch_request, runtime_batch_request)
                 self._batch_request = batch_request
             if runtime_kwargs.get("action_list") is not None:

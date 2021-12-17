@@ -613,7 +613,7 @@ def get_batch_request_from_acceptable_arguments(
     data_connector_name: Optional[str] = None,
     data_asset_name: Optional[str] = None,
     *,
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest]] = None,
+    batch_request: Optional[BatchRequest] = None,
     batch_data: Optional[Any] = None,
     data_connector_query: Optional[dict] = None,
     batch_identifiers: Optional[dict] = None,
@@ -635,8 +635,6 @@ def get_batch_request_from_acceptable_arguments(
     This method applies only to the new (V3) Datasource schema.
 
     Args:
-        batch_request
-
         datasource_name
         data_connector_name
         data_asset_name
@@ -703,7 +701,12 @@ def get_batch_request_from_acceptable_arguments(
         # TODO: Raise a warning if any parameters besides batch_requests are specified
         return batch_request
 
+    batch_request_class: type
+    batch_request_as_dict: dict
+
     if any([batch_data is not None, query, path, runtime_parameters]):
+        batch_request_class = RuntimeBatchRequest
+
         runtime_parameters = runtime_parameters or {}
         if batch_data is not None:
             runtime_parameters["batch_data"] = batch_data
@@ -718,21 +721,24 @@ def get_batch_request_from_acceptable_arguments(
             # Raise a warning if kwargs exist
             pass
 
-        batch_request = RuntimeBatchRequest(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            runtime_parameters=runtime_parameters,
-            batch_identifiers=batch_identifiers,
-            batch_spec_passthrough=batch_spec_passthrough,
-        )
+        batch_request_as_dict = {
+            "datasource_name": datasource_name,
+            "data_connector_name": data_connector_name,
+            "data_asset_name": data_asset_name,
+            "runtime_parameters": runtime_parameters,
+            "batch_identifiers": batch_identifiers,
+            "batch_spec_passthrough": batch_spec_passthrough,
+        }
     else:
+        batch_request_class = BatchRequest
+
         if data_connector_query is None:
             if batch_filter_parameters is not None and batch_identifiers is not None:
                 raise ValueError(
                     'Must provide either "batch_filter_parameters" or "batch_identifiers", not both.'
                 )
-            elif batch_filter_parameters is None and batch_identifiers is not None:
+
+            if batch_filter_parameters is None and batch_identifiers is not None:
                 logger.warning(
                     'Attempting to build data_connector_query but "batch_identifiers" was provided '
                     'instead of "batch_filter_parameters". The "batch_identifiers" key on '
@@ -774,13 +780,21 @@ def get_batch_request_from_acceptable_arguments(
                     splitter_params["splitter_kwargs"] = splitter_kwargs
                 batch_spec_passthrough.update(splitter_params)
 
-        batch_request = BatchRequest(
-            datasource_name=datasource_name,
-            data_connector_name=data_connector_name,
-            data_asset_name=data_asset_name,
-            data_connector_query=data_connector_query,
-            batch_spec_passthrough=batch_spec_passthrough,
-        )
+        batch_request_as_dict: dict = {
+            "datasource_name": datasource_name,
+            "data_connector_name": data_connector_name,
+            "data_asset_name": data_asset_name,
+            "data_connector_query": data_connector_query,
+            "batch_spec_passthrough": batch_spec_passthrough,
+        }
+
+    deep_filter_properties_iterable(
+        properties=batch_request_as_dict,
+        keep_falsy_numerics=True,
+        inplace=True,
+    )
+
+    batch_request = batch_request_class(**batch_request_as_dict)
 
     return batch_request
 
