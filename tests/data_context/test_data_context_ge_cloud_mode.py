@@ -1042,10 +1042,13 @@ def test_datasource_initialization_error_thrown_in_cloud_mode(
     ge_cloud_runtime_account_id,
     ge_cloud_runtime_access_token,
 ):
+    # normally in cloud mode configuration is retrieved from an endpoint; we're providing it here in-line
     with mock.patch(
         "great_expectations.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
         return_value=ge_cloud_data_context_config,
     ):
+        # DataContext._init_datasources calls get_datasource, which may generate a DatasourceInitializationError
+        # that normally gets swallowed.
         with mock.patch(
             "great_expectations.data_context.DataContext.get_datasource"
         ) as get_datasource:
