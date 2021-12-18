@@ -5,8 +5,12 @@ import pytest
 from ruamel import yaml
 
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    DatasourceConfig,
+)
 from great_expectations.exceptions import DataContextError, GeCloudError
+from great_expectations.exceptions.exceptions import DatasourceInitializationError
 
 
 @pytest.fixture
@@ -830,141 +834,141 @@ def ge_cloud_data_context_config(
 #         )
 #
 #
-# def test_data_context_ge_cloud_mode_with_usage_stats_section_in_config(
-#     ge_cloud_data_context_config,
-#     data_context_with_complete_global_config_with_usage_stats_section_in_dot_dir_only,
-# ):
-#     # Don't want to make a real request in a unit test so we simply patch the config fixture
-#     with mock.patch(
-#         "great_expectations.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
-#         return_value=ge_cloud_data_context_config,
-#     ):
-#         context = DataContext(ge_cloud_mode=True)
-#         global_usage_statistics_url = context._get_global_config_value(
-#             environment_variable="GE_USAGE_STATISTICS_URL",
-#             conf_file_section="anonymous_usage_statistics",
-#             conf_file_option="usage_statistics_url",
-#         )
-#         expected_ge_cloud_config = {
-#             "access_token": "91bec65bf3fa41b99a98de6f2563eab0",
-#             "account_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-#             "base_url": "https://api.dev.greatexpectations.io/complete/version-1",
-#         }
-#         expected_project_config_with_variables_substituted = {
-#             "validations_store_name": "default_validations_store",
-#             "checkpoint_store_name": "default_checkpoint_store",
-#             "datasources": {
-#                 "default_spark_datasource": {
-#                     "module_name": "great_expectations.datasource",
-#                     "data_connectors": {
-#                         "default_runtime_data_connector": {
-#                             "batch_identifiers": ["timestamp"],
-#                             "class_name": "RuntimeDataConnector",
-#                         }
-#                     },
-#                     "class_name": "Datasource",
-#                     "execution_engine": {
-#                         "module_name": "great_expectations.execution_engine",
-#                         "class_name": "SparkDFExecutionEngine",
-#                     },
-#                 },
-#                 "default_pandas_datasource": {
-#                     "module_name": "great_expectations.datasource",
-#                     "data_connectors": {
-#                         "default_runtime_data_connector": {
-#                             "batch_identifiers": ["timestamp"],
-#                             "class_name": "RuntimeDataConnector",
-#                         }
-#                     },
-#                     "class_name": "Datasource",
-#                     "execution_engine": {
-#                         "module_name": "great_expectations.execution_engine",
-#                         "class_name": "PandasExecutionEngine",
-#                     },
-#                 },
-#             },
-#             "data_docs_sites": {
-#                 "default_site": {
-#                     "class_name": "SiteBuilder",
-#                     "show_how_to_buttons": True,
-#                     "store_backend": {
-#                         "class_name": "GeCloudStoreBackend",
-#                         "ge_cloud_base_url": "https://api.dev.greatexpectations.io/complete/version-1",
-#                         "ge_cloud_resource_type": "rendered_data_doc",
-#                         "ge_cloud_credentials": {
-#                             "access_token": "91bec65bf3fa41b99a98de6f2563eab0",
-#                             "account_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-#                         },
-#                         "suppress_store_backend_id": True,
-#                     },
-#                     "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
-#                     "site_section_builders": {"profiling": "None"},
-#                 }
-#             },
-#             "config_version": 3.0,
-#             "stores": {
-#                 "default_evaluation_parameter_store": {
-#                     "class_name": "EvaluationParameterStore"
-#                 },
-#                 "default_expectations_store": {
-#                     "class_name": "ExpectationsStore",
-#                     "store_backend": {
-#                         "class_name": "GeCloudStoreBackend",
-#                         "ge_cloud_base_url": "https://api.dev.greatexpectations.io/complete/version-1",
-#                         "ge_cloud_resource_type": "expectation_suite",
-#                         "ge_cloud_credentials": {
-#                             "access_token": "91bec65bf3fa41b99a98de6f2563eab0",
-#                             "account_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-#                         },
-#                         "suppress_store_backend_id": True,
-#                     },
-#                 },
-#                 "default_validations_store": {
-#                     "class_name": "ValidationsStore",
-#                     "store_backend": {
-#                         "class_name": "GeCloudStoreBackend",
-#                         "ge_cloud_base_url": "https://api.dev.greatexpectations.io/complete/version-1",
-#                         "ge_cloud_resource_type": "suite_validation_result",
-#                         "ge_cloud_credentials": {
-#                             "access_token": "91bec65bf3fa41b99a98de6f2563eab0",
-#                             "account_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-#                         },
-#                         "suppress_store_backend_id": True,
-#                     },
-#                 },
-#                 "default_checkpoint_store": {
-#                     "class_name": "CheckpointStore",
-#                     "store_backend": {
-#                         "class_name": "GeCloudStoreBackend",
-#                         "ge_cloud_base_url": "https://api.dev.greatexpectations.io/complete/version-1",
-#                         "ge_cloud_resource_type": "contract",
-#                         "ge_cloud_credentials": {
-#                             "access_token": "91bec65bf3fa41b99a98de6f2563eab0",
-#                             "account_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-#                         },
-#                         "suppress_store_backend_id": True,
-#                     },
-#                 },
-#             },
-#             "config_variables_file_path": None,
-#             "notebooks": None,
-#             "anonymous_usage_statistics": {
-#                 "enabled": False,
-#                 "data_context_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-#                 "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics/complete/version/1"
-#                 if not global_usage_statistics_url
-#                 else global_usage_statistics_url,
-#             },
-#             "concurrency": {"enabled": False},
-#             "expectations_store_name": "default_expectations_store",
-#             "plugins_directory": "/Users/foo/bar/my/plugins/directory/complete/version/1",
-#             "evaluation_parameter_store_name": "default_evaluation_parameter_store",
-#         }
-#     assert context.ge_cloud_config.to_json_dict() == expected_ge_cloud_config
-#     assert (
-#         context.project_config_with_variables_substituted.to_json_dict()
-#         == expected_project_config_with_variables_substituted
-#     )
+def test_data_context_ge_cloud_mode_with_usage_stats_section_in_config(
+    ge_cloud_data_context_config,
+    data_context_with_complete_global_config_with_usage_stats_section_in_dot_dir_only,
+):
+    # Don't want to make a real request in a unit test so we simply patch the config fixture
+    with mock.patch(
+        "great_expectations.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
+        return_value=ge_cloud_data_context_config,
+    ):
+        context = DataContext(ge_cloud_mode=True)
+        global_usage_statistics_url = context._get_global_config_value(
+            environment_variable="GE_USAGE_STATISTICS_URL",
+            conf_file_section="anonymous_usage_statistics",
+            conf_file_option="usage_statistics_url",
+        )
+        expected_ge_cloud_config = {
+            "access_token": "91bec65bf3fa41b99a98de6f2563eab0",
+            "account_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+            "base_url": "https://api.dev.greatexpectations.io/complete/version-1",
+        }
+        expected_project_config_with_variables_substituted = {
+            "validations_store_name": "default_validations_store",
+            "checkpoint_store_name": "default_checkpoint_store",
+            "datasources": {
+                "default_spark_datasource": {
+                    "module_name": "great_expectations.datasource",
+                    "data_connectors": {
+                        "default_runtime_data_connector": {
+                            "batch_identifiers": ["timestamp"],
+                            "class_name": "RuntimeDataConnector",
+                        }
+                    },
+                    "class_name": "Datasource",
+                    "execution_engine": {
+                        "module_name": "great_expectations.execution_engine",
+                        "class_name": "SparkDFExecutionEngine",
+                    },
+                },
+                "default_pandas_datasource": {
+                    "module_name": "great_expectations.datasource",
+                    "data_connectors": {
+                        "default_runtime_data_connector": {
+                            "batch_identifiers": ["timestamp"],
+                            "class_name": "RuntimeDataConnector",
+                        }
+                    },
+                    "class_name": "Datasource",
+                    "execution_engine": {
+                        "module_name": "great_expectations.execution_engine",
+                        "class_name": "PandasExecutionEngine",
+                    },
+                },
+            },
+            "data_docs_sites": {
+                "default_site": {
+                    "class_name": "SiteBuilder",
+                    "show_how_to_buttons": True,
+                    "store_backend": {
+                        "class_name": "GeCloudStoreBackend",
+                        "ge_cloud_base_url": "https://api.dev.greatexpectations.io/complete/version-1",
+                        "ge_cloud_resource_type": "rendered_data_doc",
+                        "ge_cloud_credentials": {
+                            "access_token": "91bec65bf3fa41b99a98de6f2563eab0",
+                            "account_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                        },
+                        "suppress_store_backend_id": True,
+                    },
+                    "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
+                    "site_section_builders": {"profiling": "None"},
+                }
+            },
+            "config_version": 3.0,
+            "stores": {
+                "default_evaluation_parameter_store": {
+                    "class_name": "EvaluationParameterStore"
+                },
+                "default_expectations_store": {
+                    "class_name": "ExpectationsStore",
+                    "store_backend": {
+                        "class_name": "GeCloudStoreBackend",
+                        "ge_cloud_base_url": "https://api.dev.greatexpectations.io/complete/version-1",
+                        "ge_cloud_resource_type": "expectation_suite",
+                        "ge_cloud_credentials": {
+                            "access_token": "91bec65bf3fa41b99a98de6f2563eab0",
+                            "account_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                        },
+                        "suppress_store_backend_id": True,
+                    },
+                },
+                "default_validations_store": {
+                    "class_name": "ValidationsStore",
+                    "store_backend": {
+                        "class_name": "GeCloudStoreBackend",
+                        "ge_cloud_base_url": "https://api.dev.greatexpectations.io/complete/version-1",
+                        "ge_cloud_resource_type": "suite_validation_result",
+                        "ge_cloud_credentials": {
+                            "access_token": "91bec65bf3fa41b99a98de6f2563eab0",
+                            "account_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                        },
+                        "suppress_store_backend_id": True,
+                    },
+                },
+                "default_checkpoint_store": {
+                    "class_name": "CheckpointStore",
+                    "store_backend": {
+                        "class_name": "GeCloudStoreBackend",
+                        "ge_cloud_base_url": "https://api.dev.greatexpectations.io/complete/version-1",
+                        "ge_cloud_resource_type": "contract",
+                        "ge_cloud_credentials": {
+                            "access_token": "91bec65bf3fa41b99a98de6f2563eab0",
+                            "account_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                        },
+                        "suppress_store_backend_id": True,
+                    },
+                },
+            },
+            "config_variables_file_path": None,
+            "notebooks": None,
+            "anonymous_usage_statistics": {
+                "enabled": False,
+                "data_context_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                "usage_statistics_url": "https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics/complete/version/1"
+                if not global_usage_statistics_url
+                else global_usage_statistics_url,
+            },
+            "concurrency": {"enabled": False},
+            "expectations_store_name": "default_expectations_store",
+            "plugins_directory": "/Users/foo/bar/my/plugins/directory/complete/version/1",
+            "evaluation_parameter_store_name": "default_evaluation_parameter_store",
+        }
+    assert context.ge_cloud_config.to_json_dict() == expected_ge_cloud_config
+    assert (
+        context.project_config_with_variables_substituted.to_json_dict()
+        == expected_project_config_with_variables_substituted
+    )
 
 
 def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error(
@@ -1030,3 +1034,27 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
             ge_cloud_account_id=ge_cloud_runtime_account_id,
             ge_cloud_access_token=ge_cloud_runtime_access_token,
         )
+
+
+def test_datasource_initialization_error_thrown_in_cloud_mode(
+    ge_cloud_data_context_config: DataContextConfig,
+    ge_cloud_runtime_base_url,
+    ge_cloud_runtime_account_id,
+    ge_cloud_runtime_access_token,
+):
+    with mock.patch(
+        "great_expectations.data_context.DataContext._retrieve_data_context_config_from_ge_cloud",
+        return_value=ge_cloud_data_context_config,
+    ):
+        with mock.patch(
+            "great_expectations.data_context.DataContext.get_datasource"
+        ) as get_datasource:
+            get_datasource.side_effect = DatasourceInitializationError
+            with pytest.raises(DatasourceInitializationError):
+                # Don't want to make a real request in a unit test so we simply patch the config fixture
+                DataContext(
+                    ge_cloud_mode=True,
+                    ge_cloud_base_url=ge_cloud_runtime_base_url,
+                    ge_cloud_account_id=ge_cloud_runtime_account_id,
+                    ge_cloud_access_token=ge_cloud_runtime_access_token,
+                )
