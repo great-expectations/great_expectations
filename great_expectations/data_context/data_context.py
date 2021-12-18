@@ -457,8 +457,13 @@ class BaseDataContext:
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
-                logger.warn(f"Cannot initialize datasource {datasource_name}: {e}")
-                pass
+                if self._ge_cloud_mode:
+                    # when running in cloud mode, we want to know if a datasource has been improperly configured at
+                    # init time.
+                    raise
+                else:
+                    logger.warn(f"Cannot initialize datasource {datasource_name}: {e}")
+                    pass
 
     def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
