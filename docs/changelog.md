@@ -48,6 +48,7 @@ title: Changelog
 * [MAINTENANCE] Certify the expectation "expect_table_row_count_to_equal_other_table" for V3 API (#3803)
 * [MAINTENANCE] Refactor to enable broader use of event emitting method for usage statistics (#3825)
 * [MAINTENANCE] Clean up temp file after CI/CD run (#3823)
+* [MAINTENANCE] Raising exceptions for misconfigured datasources in cloud mode (#3866)
 
 ### 0.13.45
 * [FEATURE] Feature/render validation metadata (#3397) (thanks @vshind1)
