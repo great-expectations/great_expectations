@@ -29,12 +29,6 @@ class BatchRequestAnonymizer(Anonymizer):
     def __init__(self, salt=None):
         super().__init__(salt=salt)
 
-        self._anonymized_batch_request_required_top_level_properties = {}
-        self._batch_request_optional_top_level_keys = []
-        self._batch_spec_passthrough_keys = []
-        self._data_connector_query_keys = []
-        self._runtime_parameters_keys = []
-
     def anonymize_batch_request(
         self, *args, **kwargs
     ) -> Optional[Dict[str, List[str]]]:
@@ -58,23 +52,35 @@ class BatchRequestAnonymizer(Anonymizer):
                 clean_falsy=True,
                 inplace=True,
             )
+
+            anonymized_batch_request_required_top_level_properties: dict = {}
+            batch_request_optional_top_level_keys: List[str] = []
+            batch_spec_passthrough_keys: List[str] = []
+            data_connector_query_keys: List[str] = []
+            runtime_parameters_keys: List[str] = []
+
             anonymized_batch_request_properties_dict = {
-                "anonymized_batch_request_required_top_level_properties": self._anonymized_batch_request_required_top_level_properties,
-                "batch_request_optional_top_level_keys": self._batch_request_optional_top_level_keys,
-                "batch_spec_passthrough_keys": self._batch_spec_passthrough_keys,
-                "runtime_parameters_keys": self._runtime_parameters_keys,
-                "data_connector_query_keys": self._data_connector_query_keys,
+                "anonymized_batch_request_required_top_level_properties": (
+                    anonymized_batch_request_required_top_level_properties
+                ),
+                "batch_request_optional_top_level_keys": batch_request_optional_top_level_keys,
+                "batch_spec_passthrough_keys": batch_spec_passthrough_keys,
+                "runtime_parameters_keys": runtime_parameters_keys,
+                "data_connector_query_keys": data_connector_query_keys,
             }
-            self._build_anonymized_batch_request(source=anonymized_batch_request_dict)
+            self._build_anonymized_batch_request(
+                destination=anonymized_batch_request_properties_dict,
+                source=anonymized_batch_request_dict,
+            )
             deep_filter_properties_iterable(
                 properties=anonymized_batch_request_properties_dict,
                 clean_falsy=True,
                 inplace=True,
             )
-            self._batch_request_optional_top_level_keys.sort()
-            self._batch_spec_passthrough_keys.sort()
-            self._data_connector_query_keys.sort()
-            self._runtime_parameters_keys.sort()
+            batch_request_optional_top_level_keys.sort()
+            batch_spec_passthrough_keys.sort()
+            data_connector_query_keys.sort()
+            runtime_parameters_keys.sort()
 
         except Exception:
             logger.debug(
@@ -120,27 +126,33 @@ class BatchRequestAnonymizer(Anonymizer):
 
         return self.anonymize(str(source))
 
-    def _build_anonymized_batch_request(self, source: Optional[Any] = None):
+    def _build_anonymized_batch_request(
+        self,
+        destination: Optional[Dict[str, Union[Dict[str, str], List[str]]]],
+        source: Optional[Any] = None,
+    ):
         if isinstance(source, dict):
             key: str
             value: Any
             for key, value in source.items():
                 if key in BATCH_REQUEST_REQUIRED_TOP_LEVEL_KEYS:
-                    self._anonymized_batch_request_required_top_level_properties[
-                        f"anonymized_{key}"
-                    ] = value
+                    destination[
+                        "anonymized_batch_request_required_top_level_properties"
+                    ][f"anonymized_{key}"] = value
                 elif key in BATCH_REQUEST_OPTIONAL_TOP_LEVEL_KEYS:
-                    self._batch_request_optional_top_level_keys.append(key)
+                    destination["batch_request_optional_top_level_keys"].append(key)
                 elif key in BATCH_SPEC_PASSTHROUGH_KEYS:
-                    self._batch_spec_passthrough_keys.append(key)
+                    destination["batch_spec_passthrough_keys"].append(key)
                 elif key in DATA_CONNECTOR_QUERY_KEYS:
-                    self._data_connector_query_keys.append(key)
+                    destination["data_connector_query_keys"].append(key)
                 elif key in RUNTIME_PARAMETERS_KEYS:
-                    self._runtime_parameters_keys.append(key)
+                    destination["runtime_parameters_keys"].append(key)
                 else:
                     pass
 
-                self._build_anonymized_batch_request(source=value)
+                self._build_anonymized_batch_request(
+                    destination=destination, source=value
+                )
 
     @staticmethod
     def _is_getting_started_keyword(value: str):
