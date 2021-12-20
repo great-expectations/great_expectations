@@ -672,7 +672,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
         expected_expectation_suite_oneshot_sampling_method._add_expectation(
-            expectation_configuration=expectation_configuration
+            expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
     yaml = YAML()
