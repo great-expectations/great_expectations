@@ -16,7 +16,7 @@ title: 'Tutorial, Step 2: Connect to data'
 
 :::note Prerequisites
 
-- Completed [Step 1: Setup](../tutorial_setup) of this tutorial.
+- Completed [Step 1: Setup](tutorial_setup.md) of this tutorial.
 
 :::
 
@@ -111,5 +111,5 @@ Please note that due to how data is serialized, the entry in your ```great_expec
 
 In the future, you can modify or delete your configuration by editing your ```great_expectations.yml``` and ```config_variables.yml``` files directly.
 
-For now, let’s move on to [Step 3: Create Expectations.](../tutorial_create_expectations)
+For now, let’s move on to [Step 3: Create Expectations.](tutorial_create_expectations.md)
 

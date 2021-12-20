@@ -83,4 +83,4 @@ Remember the icons for the four steps we'll be going through?
 
 Great! You should know: The icon associated with each of these steps will also be displayed on any related documentation.  So if you do follow links into more detailed discussions of anything we introduce you to, you will be able to find your way back to the step you were on with ease.
 
-And now it looks like you're ready to move on to [Step 1: Setup.](../tutorial_setup)
+And now it looks like you're ready to move on to [Step 1: Setup.](tutorial_setup.md)

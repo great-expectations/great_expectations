@@ -16,7 +16,7 @@ title: 'Tutorial, Step 4: Validate data'
 
 :::note Prerequisites
 
-- Completed [Step 3: Create Expectations](../tutorial_create_expectations) of this tutorial.
+- Completed [Step 3: Create Expectations](tutorial_create_expectations.md) of this tutorial.
 
 :::
 
