@@ -111,14 +111,14 @@ copy_validation_command = copy_validation_command.replace(
     configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
         "prefix"
     ]
-    + "validation_1.json",
+    + "/validation_1.json",
 )
 copy_validation_command = copy_validation_command.replace(
     "<YOUR GCS PREFIX NAME>/validation_2.json",
     configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
         "prefix"
     ]
-    + "validation_1.json",
+    + "/validation_2.json",
 )
 
 result = subprocess.run(
