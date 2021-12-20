@@ -94,8 +94,7 @@ copy_expectation_command = copy_expectation_command.replace(
     "expectations/my_expectation_suite.json", local_expectation_suite_file_path
 )
 copy_expectation_command = copy_expectation_command.replace(
-    "gsutil",
-    "./google-cloud-sdk/bin/gsutil"
+    "gsutil", "./google-cloud-sdk/bin/gsutil"
 )
 copy_expectation_command = copy_expectation_command.replace(
     "<YOUR GCS BUCKET NAME>",
