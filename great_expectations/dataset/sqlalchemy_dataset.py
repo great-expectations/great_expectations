@@ -523,7 +523,6 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         connection_string=None,
         custom_sql=None,
         schema=None,
-        data_context=None,
         *args,
         **kwargs,
     ):
@@ -667,7 +666,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if len(self.columns) == 0:
             self.columns = self.column_reflection_fallback()
 
-        self._data_context = data_context
+        self._data_context = None
 
         # Only call super once connection is established and table_name and columns known to allow autoinspection
         super().__init__(*args, **kwargs)

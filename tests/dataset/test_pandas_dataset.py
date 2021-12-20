@@ -895,6 +895,14 @@ def test_ge_value_count_of_object_dtype_column_with_mixed_types():
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_adding_expectation_to_pandas_dataset_not_send_usage_message(mock_emit):
+    """
+    What does this test and why?
+
+    When an Expectation is called using a PandasDataset, it validates the dataset using the implementation of
+    the Expectation. As part of the process, it also adds the Expectation to the active
+    ExpectationSuite. This test ensures that this in-direct way of adding an Expectation to the ExpectationSuite
+    (ie not calling add_expectations() directly) does not emit a usage_stats event.
+    """
     df = ge.dataset.PandasDataset(
         {
             "A": [[1, 2], None, [4, 5], 6],

@@ -132,6 +132,14 @@ def test_sqlalchemydataset_builds_guid_for_table_name_on_custom_sql(sa):
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_adding_expectation_to_sqlalchemy_dataset_not_send_usage_message(mock_emit, sa):
+    """
+    What does this test and why?
+
+    When an Expectation is called using a SqlAlchemyDataset, it validates the dataset using the implementation of
+    the Expectation. As part of the process, it also adds the Expectation to the active
+    ExpectationSuite. This test ensures that this in-direct way of adding an Expectation to the ExpectationSuite
+    (ie not calling add_expectations() directly) does not emit a usage_stats event.
+    """
     engine = sa.create_engine("sqlite://")
 
     data = pd.DataFrame(

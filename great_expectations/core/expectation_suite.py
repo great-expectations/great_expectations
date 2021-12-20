@@ -518,42 +518,21 @@ class ExpectationSuite(SerializableDictDot):
         self.expectations[found_expectation_indexes[0]].patch(op, path, value)
         return self.expectations[found_expectation_indexes[0]]
 
-    def add_expectation(
+    def _add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
+        send_usage_event: bool,
         match_type: str = "domain",
         overwrite_existing: bool = True,
-        send_usage_event: bool = True,
     ) -> ExpectationConfiguration:
-        """
 
-        Args:
-            expectation_configuration: The ExpectationConfiguration to add or update
-            match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
-                and so whether we should add or replace.
-            overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
-                False.
-            send_usage_event: will only send usage event if method called directly from ExpectationSuite (not from
-                              Validator or Profiler), and if usage_statistics is enabled.
-        Returns:
-            The ExpectationConfiguration to add or replace.
-        Raises:
-            More than one match
-            One match if overwrite_existing = False
-        """
         found_expectation_indexes = self.find_expectation_indexes(
             expectation_configuration, match_type
         )
 
         if len(found_expectation_indexes) > 1:
             if send_usage_event:
-                usage_stats_event_name: str = "expectation_suite.add_expectation"
-                usage_stats_event_payload: dict = {}
-                self._data_context.send_usage_message(
-                    event=usage_stats_event_name,
-                    event_payload=usage_stats_event_payload,
-                    success=False,
-                )
+                self.send_usage_event(success=False)
             raise ValueError(
                 "More than one matching expectation was found. Please be more specific with your search "
                 "criteria"
@@ -578,29 +557,54 @@ class ExpectationSuite(SerializableDictDot):
                 ] = expectation_configuration
             else:
                 if send_usage_event:
-                    usage_stats_event_name: str = "expectation_suite.add_expectation"
-                    usage_stats_event_payload: dict = {}
-                    self._data_context.send_usage_message(
-                        event=usage_stats_event_name,
-                        event_payload=usage_stats_event_payload,
-                        success=False,
-                    )
+                    self.send_usage_event(success=False)
                 raise DataContextError(
                     "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
                     "ExpectationConfiguration, set overwrite_existing=True"
                 )
         else:
             self.append_expectation(expectation_configuration)
-
         if send_usage_event:
-            usage_stats_event_name: str = "expectation_suite.add_expectation"
-            usage_stats_event_payload: dict = {}
-            self._data_context.send_usage_message(
-                event=usage_stats_event_name,
-                event_payload=usage_stats_event_payload,
-                success=True,
-            )
+            self.send_usage_event(success=True)
         return expectation_configuration
+
+    def send_usage_event(self, success: bool):
+        usage_stats_event_name: str = "expectation_suite.add_expectation"
+        usage_stats_event_payload: dict = {}
+        self._data_context.send_usage_message(
+            event=usage_stats_event_name,
+            event_payload=usage_stats_event_payload,
+            success=success,
+        )
+
+    def add_expectation(
+        self,
+        expectation_configuration: ExpectationConfiguration,
+        match_type: str = "domain",
+        overwrite_existing: bool = True,
+    ) -> ExpectationConfiguration:
+        """
+
+        Args:
+            expectation_configuration: The ExpectationConfiguration to add or update
+            match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
+                and so whether we should add or replace.
+            overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
+                False.
+            send_usage_event: will only send usage event if method called directly from ExpectationSuite (not from
+                              Validator or Profiler), and if usage_statistics is enabled.
+        Returns:
+            The ExpectationConfiguration to add or replace.
+        Raises:
+            More than one match
+            One match if overwrite_existing = False
+        """
+        return self._add_expectation(
+            expectation_configuration=expectation_configuration,
+            send_usage_event=True,
+            match_type=match_type,
+            overwrite_existing=overwrite_existing,
+        )
 
     def get_grouped_and_ordered_expectations_by_column(
         self, expectation_type_filter: Optional[str] = None

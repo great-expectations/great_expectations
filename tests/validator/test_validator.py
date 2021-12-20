@@ -863,6 +863,27 @@ def test_custom_filter_function(
     assert batch_definitions_months_set == {"01", "02"}
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_adding_expectation_to_validator_not_send_usage_message(
+    mock_emit, multi_batch_taxi_validator
+):
+    """
+    What does this test and why?
+
+    When an Expectation is called using a Validator, it validates the dataset using the implementation of
+    the Expectation. As part of the process, it also adds the Expectation to the active
+    ExpectationSuite. This test ensures that this in-direct way of adding an Expectation to the ExpectationSuite
+    (ie not calling add_expectations() directly) does not emit a usage_stats event.
+    """
+    multi_batch_taxi_validator.expect_column_values_to_be_between(
+        column="trip_distance", min_value=11, max_value=22
+    )
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
+
+
 def test_validator_set_active_batch(
     multi_batch_taxi_validator,
 ):
