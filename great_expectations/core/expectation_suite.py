@@ -521,7 +521,7 @@ class ExpectationSuite(SerializableDictDot):
     def _add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
-        send_usage_event: bool,
+        send_usage_event: bool = False,
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
@@ -591,8 +591,6 @@ class ExpectationSuite(SerializableDictDot):
                 and so whether we should add or replace.
             overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
                 False.
-            send_usage_event: will only send usage event if method called directly from ExpectationSuite (not from
-                              Validator or Profiler), and if usage_statistics is enabled.
         Returns:
             The ExpectationConfiguration to add or replace.
         Raises:

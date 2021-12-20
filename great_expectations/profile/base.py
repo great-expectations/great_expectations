@@ -256,9 +256,8 @@ class Profiler(metaclass=abc.ABCMeta):
       kind of object. You should raise an appropriate Exception if the object is not valid.
     """
 
-    def __init__(self, configuration: dict = None, data_context: "DataContext" = None):
+    def __init__(self, configuration: dict = None):
         self.configuration = configuration
-        self._data_context = data_context
 
     def validate(self, item_to_validate: Any) -> None:
         pass

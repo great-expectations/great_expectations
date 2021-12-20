@@ -18,6 +18,6 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
     # NOTE Will 20211208 _add_expectation() method, although being called by an ExpectationSuite instance, is being
     # called within a fixture, and so will call the private method _add_expectation() and prevent it from sending a
     # usage_event.
-    suite._add_expectation(expectation, send_usage_event=False)
+    suite._add_expectation(expectation)
     context.save_expectation_suite(suite)
     return context

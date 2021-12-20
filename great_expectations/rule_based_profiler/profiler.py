@@ -232,8 +232,7 @@ class Profiler:
             expectation_configuration: ExpectationConfiguration
             for expectation_configuration in expectation_configurations:
                 expectation_suite._add_expectation(
-                    expectation_configuration=expectation_configuration,
-                    send_usage_event=False,
+                    expectation_configuration=expectation_configuration
                 )
 
         return expectation_suite

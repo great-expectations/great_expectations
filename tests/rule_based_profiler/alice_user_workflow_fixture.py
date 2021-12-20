@@ -177,9 +177,10 @@ def alice_columnar_table_single_batch(empty_data_context):
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
         # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
-        # called within a fixture, and we will prevent it from sending a usage_event.
+        # called within a fixture, and we will prevent it from sending a usage_event by calling the private method
+        # _add_expectation().
         expected_expectation_suite._add_expectation(
-            expectation_configuration=expectation_configuration, send_usage_event=False
+            expectation_configuration=expectation_configuration
         )
 
     # NOTE that this expectation suite should fail when validated on the data in "sample_data_relative_path"

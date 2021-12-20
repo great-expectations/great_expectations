@@ -615,7 +615,7 @@ class ValidationResultsPageRenderer(Renderer):
 
 
 class ExpectationSuitePageRenderer(Renderer):
-    def __init__(self, data_context=None, column_section_renderer=None):
+    def __init__(self, column_section_renderer=None):
         super().__init__()
         if column_section_renderer is None:
             column_section_renderer = {
@@ -638,9 +638,7 @@ class ExpectationSuitePageRenderer(Renderer):
 
     def render(self, expectations):
         if isinstance(expectations, dict):
-            expectations = ExpectationSuite(
-                **expectations, data_context=self._data_context
-            )
+            expectations = ExpectationSuite(**expectations, data_context=None)
         (
             columns,
             ordered_columns,
