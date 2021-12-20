@@ -1039,12 +1039,10 @@ class CloudNotificationAction(ValidationAction):
     def __init__(
         self,
         data_context: "DataContext",
-        cloud_notification_action_id: str,
-        action_type: str,
+        checkpoint_ge_cloud_id: str,
     ):
         super().__init__(data_context)
-        self.cloud_notification_action_id = cloud_notification_action_id
-        self.action_type = action_type
+        self.checkpoint_ge_cloud_id = checkpoint_ge_cloud_id
 
     def _run(
         self,
@@ -1068,16 +1066,15 @@ class CloudNotificationAction(ValidationAction):
         ge_cloud_url = (
             self.data_context.ge_cloud_config.base_url
             + f"/accounts/{self.data_context.ge_cloud_config.account_id}"
-            + f"/cloud-notification-action/{self.cloud_notification_action_id}"
+            + f"/cloud-notification-action/{self.checkpoint_ge_cloud_id}"
         )
         auth_headers = {
             "Content-Type": "application/vnd.api+json",
             "Authorization": f"Bearer {self.data_context.ge_cloud_config.access_token}",
         }
         data = {
-            "action_type": self.action_type,
-            "cloud_notification_action_id": self.cloud_notification_action_id,
-            "validation_result_suite": validation_result_suite.to_json_dict(),
+            "cloud_notification_action_id": self.checkpoint_ge_cloud_id,
+            # "validation_result_suite": validation_result_suite.to_json_dict(),
             "validation_result_suite_identifier": validation_result_suite_identifier,
         }
         return send_cloud_notification(
