@@ -137,7 +137,6 @@ def test_usage_statistics_handler_build_envelope(
         usage_statistics_url=in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.usage_statistics_url,
     )
 
-    assert usage_statistics_handler._url == USAGE_STATISTICS_QA_URL
     assert (
         usage_statistics_handler._data_context_id
         == "00000000-0000-0000-0000-000000000001"
@@ -179,7 +178,6 @@ def test_usage_statistics_handler_validate_message_failure(
         usage_statistics_url=in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.usage_statistics_url,
     )
 
-    assert usage_statistics_handler._url == USAGE_STATISTICS_QA_URL
     assert (
         usage_statistics_handler._data_context_id
         == "00000000-0000-0000-0000-000000000001"
@@ -212,7 +210,6 @@ def test_usage_statistics_handler_validate_message_success(
         usage_statistics_url=in_memory_data_context_config_usage_stats_enabled.anonymous_usage_statistics.usage_statistics_url,
     )
 
-    assert usage_statistics_handler._url == USAGE_STATISTICS_QA_URL
     assert (
         usage_statistics_handler._data_context_id
         == "00000000-0000-0000-0000-000000000001"
