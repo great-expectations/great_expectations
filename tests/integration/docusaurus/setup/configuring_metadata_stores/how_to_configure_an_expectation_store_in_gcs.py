@@ -150,7 +150,10 @@ great_expectations --v3-api suite list
 
 try:
     result = subprocess.run(
-        list_expectation_suites_command.strip().split(), check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        list_expectation_suites_command.strip().split(),
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
 except subprocess.CalledProcessError as e:
     exitcode, err = e.returncode, e.output
