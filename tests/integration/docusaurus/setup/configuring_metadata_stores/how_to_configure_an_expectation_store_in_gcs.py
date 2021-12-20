@@ -115,8 +115,8 @@ try:
         stderr=subprocess.PIPE,
     )
 except subprocess.CalledProcessError as e:
-    exitcode, err = e.returncode, e.output
-    print("exitcode:", exitcode, "output:", err)
+    exitcode, err = e.returncode, e.stderr
+    print("exitcode:", exitcode, "stderr:", err)
 stderr = result.stderr.decode("utf-8")
 
 copy_expectation_output = """
