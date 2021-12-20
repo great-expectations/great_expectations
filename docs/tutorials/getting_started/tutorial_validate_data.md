@@ -4,13 +4,48 @@ title: 'Tutorial, Step 4: Validate data'
 
 <table class="borderless center">
 <tr>
-    <td><img src="../../images/universal_map/Gear-inactive.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Outlet inactive.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Flask inactive.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Checkmark active.png" alt="Setup" /></td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Gear-inactive.png').default}
+          alt="Setup"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Arrow.png').default}
+          alt="Arrow"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Outlet-inactive.png').default}
+          alt="Connect to Data"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Arrow.png').default}
+          alt="Arrow"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Flask-inactive.png').default}
+          alt="Create Expectations"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Arrow.png').default}
+          alt="Arrow"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Checkmark-active.png').default}
+          alt="Validate Data"
+        />
+    </td>
 </tr>
 </table>
 

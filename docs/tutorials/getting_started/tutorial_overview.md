@@ -14,28 +14,48 @@ For a tutorial for older versions of Great Expectations, please see older versio
 
 <table class="borderless">
 <tr>
-    <td><img src="../../images/universal_map/Gear active.png" alt="Setup" /></td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Gear-active.png').default}
+          alt="Setup"
+        />
+    </td>
     <td>
         <b>Setup</b>
         <p>First, we will make sure you have Great Expectations installed and show you how to initializa a <b>Data Context.</b></p>
     </td>
 </tr>
 <tr>
-    <td><img src="../../images/universal_map/Outlet active.png" alt="Setup" /></td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Outlet-active.png').default}
+          alt="Connect to Data"
+        />
+    </td>
     <td>
         <b>Connect to Data</b>
         <p>Then you will learn how to configure a <b>Datasource</b> to connect to your data.</p>
     </td>
 </tr>
 <tr>
-    <td><img src="../../images/universal_map/Flask active.png" alt="Setup" /></td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Flask-active.png').default}
+          alt="Create Expectations"
+        />
+    </td>
     <td>
         <b>Create Expectations</b>
         <p>You will then create your first <b>Expectation Suite</b> using the built-in automated <b>Profiler</b>. We'll also give you a tour of <b>Data Docs</b> to view your Validation Results.</p>
     </td>
 </tr>
 <tr>
-    <td><img src="../../images/universal_map/Checkmark active.png" alt="Setup" /></td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Checkmark-active.png').default}
+          alt="Validate Data"
+        />
+    </td>
     <td>
         <b>Validate Data</b>
         <p>Finally, we will show you how to use this Expectation Suite to <b>validate</b> a new batch of data, and show how you can further customize the Data Docs which will show your validation results.</p>
@@ -71,13 +91,48 @@ Remember the icons for the four steps we'll be going through?
 
 <table class="borderless center">
 <tr>
-    <td><img src="../../images/universal_map/Gear active.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Outlet active.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Flask active.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Checkmark active.png" alt="Setup" /></td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Gear-active.png').default}
+          alt="Setup"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Arrow.png').default}
+          alt="Arrow"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Outlet-active.png').default}
+          alt="Connect to Data"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Arrow.png').default}
+          alt="Arrow"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Flask-active.png').default}
+          alt="Create Expectations"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Arrow.png').default}
+          alt="Arrow"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Checkmark-active.png').default}
+          alt="Validate Data"
+        />
+    </td>
 </tr>
 </table>
 

@@ -7,15 +7,45 @@ title: 'Tutorial, Step 3: Create Expectations'
     <td>
         <img
           src={require('../../images/universal_map/Gear-inactive.png').default}
-          alt="Example banner"
+          alt="Setup"
         />
     </td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Arrow" /></td>
-    <td><img src="../../images/universal_map/Outlet inactive.png" alt="Connect to Data" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Arrow" /></td>
-    <td><img src="../../images/universal_map/Flask active.png" alt="Create Expectations" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Arrow" /></td>
-    <td><img src="../../images/universal_map/Checkmark inactive.png" alt="Validate Data" /></td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Arrow.png').default}
+          alt="Arrow"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Outlet-inactive.png').default}
+          alt="Connect to Data"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Arrow.png').default}
+          alt="Arrow"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Flask-active.png').default}
+          alt="Create Expectations"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Arrow.png').default}
+          alt="Arrow"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Checkmark-inactive.png').default}
+          alt="Validate Data"
+        />
+    </td>
 </tr>
 </table>
 

@@ -4,13 +4,48 @@ title: 'Review and next steps'
 
 <table class="borderless center">
 <tr>
-    <td><img src="../../images/universal_map/Gear active.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Outlet active.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Flask active.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Checkmark active.png" alt="Setup" /></td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Gear-active.png').default}
+          alt="Setup"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Arrow.png').default}
+          alt="Arrow"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Outlet-active.png').default}
+          alt="Connect to Data"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Arrow.png').default}
+          alt="Arrow"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Flask-active.png').default}
+          alt="Create Expectations"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Arrow.png').default}
+          alt="Arrow"
+        />
+    </td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Checkmark-active.png').default}
+          alt="Validate Data"
+        />
+    </td>
 </tr>
 </table>
 
@@ -27,7 +62,7 @@ Let's review each of these steps and take a look at the important concepts and f
 
 <table class="borderless">
     <tr>
-        <td><img src="../../images/universal_map/Gear active.png" alt="Setup" /></td>
+        <td><img src={require('../../images/universal_map/Gear-active.png').default} alt="Setup" /></td>
         <td>
             <h3>Step 1: Setup</h3>
             <p>You installed Great Expectations and initialized your Data Context.</p>
@@ -40,7 +75,7 @@ Let's review each of these steps and take a look at the important concepts and f
 
 <table class="borderless">
     <tr>
-        <td><img src="../../images/universal_map/Outlet active.png" alt="Connect to Data" /></td>
+        <td><img src={require('../../images/universal_map/Outlet-active.png').default} alt="Connect to Data" /></td>
         <td>
             <h3>Step 2: Connect to Data</h3>
             <p>You created and configured your Datasource.</p>
@@ -53,7 +88,7 @@ Let's review each of these steps and take a look at the important concepts and f
 
 <table class="borderless">
     <tr>
-        <td><img src="../../images/universal_map/Flask active.png" alt="Create Expectations" /></td>
+        <td><img src={require('../../images/universal_map/Flask-active.png').default} alt="Create Expectations" /></td>
         <td>
             <h3>Step 3: Create Expectations</h3>
             <p>You used the automatic Profiler to build an Expectation Suite.</p>
@@ -67,7 +102,7 @@ Let's review each of these steps and take a look at the important concepts and f
 
 <table class="borderless">
     <tr>
-        <td><img src="../../images/universal_map/Checkmark active.png" alt="Validate Data" /></td>
+        <td><img src={require('../../images/universal_map/Checkmark-active.png').default} alt="Validate Data" /></td>
         <td>
             <h3>Step 4: Validate Data</h3>
             <p>You created a Checkpoint which you used to validate new data.  You then viewed the Validation Results in Data Docs.</p>
