@@ -4,9 +4,8 @@ title: Changelog
 
 ### Develop
 
-<<<<<<< BUGFIX/fix_slack_token_and_channel_usage_in_SlackNotificationAction
 * [BUGFIX] SlackNotificationAction must send slack_token and slack_channel to send_slack_notification function
-=======
+
 ### 0.13.47
 * [FEATURE] Add support for named groups in data asset regex (#3855)
 * [BUGFIX] Fix issue where dependency graph tester picks up non *.py files and add test file (#3830)
@@ -28,7 +27,6 @@ title: Changelog
 * [MAINTENANCE] Add logging around DatasourceInitializationError in DataContext (#3846)
 * [MAINTENANCE] Use f-string to prevent string concat issue in Evaluation Parameters (#3864)
 * [MAINTENANCE] Test for errors / invalid messages in logs & fix various existing issues (#3875)
->>>>>>> develop
 
 ### 0.13.46
 * [FEATURE] Instrument Runtime DataConnector for Usage Statistics: Add "checkpoint.run" Event Schema (#3797)
