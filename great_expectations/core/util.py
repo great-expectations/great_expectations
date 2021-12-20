@@ -31,8 +31,10 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
+    from sqlalchemy.engine.row import LegacyRow
 except ImportError:
     sqlalchemy = None
+    LegacyRow = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
@@ -235,6 +237,10 @@ def convert_to_json_serializable(data):
         return convert_to_json_serializable(
             dict(zip(data.schema.names, zip(*data.collect())))
         )
+
+    # SQLAlchemy serialization
+    if LegacyRow and isinstance(data, LegacyRow):
+        return dict(data)
 
     if isinstance(data, decimal.Decimal):
         if requires_lossy_conversion(data):

@@ -445,19 +445,25 @@ class BaseDataContext:
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
 
-    def _init_datasources(self, config):
+    def _init_datasources(self, config: DataContextConfig) -> None:
         if not config.datasources:
             return
-        for datasource_name, data_source_config in config.datasources.items():
+        for datasource_name in config.datasources:
             try:
                 self._cached_datasources[datasource_name] = self.get_datasource(
                     datasource_name=datasource_name
                 )
-            except ge_exceptions.DatasourceInitializationError:
+            except ge_exceptions.DatasourceInitializationError as e:
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
-                pass
+                if self._ge_cloud_mode:
+                    # when running in cloud mode, we want to know if a datasource has been improperly configured at
+                    # init time.
+                    raise
+                else:
+                    logger.warn(f"Cannot initialize datasource {datasource_name}: {e}")
+                    pass
 
     def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
@@ -1653,7 +1659,13 @@ class BaseDataContext:
             **kwargs,
         )
         datasource_name = batch_request.datasource_name
-        datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+        if datasource_name in self.datasources:
+            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+        else:
+            raise ge_exceptions.DatasourceError(
+                datasource_name,
+                f"The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
+            )
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     def get_validator(
