@@ -207,32 +207,32 @@ suite = profiler.build_suite()
 These are the expectations added when using a `semantics_type_dict`:
 
 **Table expectations:**
-- `expect_table_row_count_to_be_between`
-- `expect_table_columns_to_match_ordered_list`
+- [`expect_table_row_count_to_be_between`](https://greatexpectations.io/expectations/expect_table_row_count_to_be_between)
+- [`expect_table_columns_to_match_ordered_list`](https://greatexpectations.io/expectations/expect_table_columns_to_match_ordered_list)
 
 
 **Expectations added for all included columns**
-- `expect_column_value_to_not_be_null` (if a column consists of more than 50% null values, this will instead add `expect_column_values_to_be_null`)
-- `expect_column_proportion_of_unique_values_to_be_between`
-- `expect_column_values_to_be_in_type_list`
+- [`expect_column_value_to_not_be_null`](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null) (if a column consists of more than 50% null values, this will instead add [`expect_column_values_to_be_null`](https://greatexpectations.io/expectations/expect_column_values_to_be_null))
+- [`expect_column_proportion_of_unique_values_to_be_between`](https://greatexpectations.io/expectations/expect_column_proportion_of_unique_values_to_be_between)
+- [`expect_column_values_to_be_in_type_list`](https://greatexpectations.io/expectations/expect_column_values_to_be_in_type_list)
 
 
 **Value set expectations**
-- `expect_column_values_to_be_in_set`
+- [`expect_column_values_to_be_in_set`](https://greatexpectations.io/expectations/expect_column_values_to_be_in_set)
 
 
 **Datetime expectations**
-- `expect_column_values_to_be_between`
+- [`expect_column_values_to_be_between`](https://greatexpectations.io/expectations/expect_column_values_to_be_between)
 
 
 **Numeric expectations**
-- `expect_column_min_to_be_between`
-- `expect_column_max_to_be_between`
-- `expect_column_mean_to_be_between`
-- `expect_column_median_to_be_between`
-- `expect_column_quantile_values_to_be_between`
+- [`expect_column_min_to_be_between`](https://greatexpectations.io/expectations/expect_column_min_to_be_between)
+- [`expect_column_max_to_be_between`](https://greatexpectations.io/expectations/expect_column_max_to_be_between)
+- [`expect_column_mean_to_be_between`](https://greatexpectations.io/expectations/expect_column_mean_to_be_between)
+- [`expect_column_median_to_be_between`](https://greatexpectations.io/expectations/expect_column_median_to_be_between)
+- [`expect_column_quantile_values_to_be_between`](https://greatexpectations.io/expectations/expect_column_quantile_values_to_be_between)
 
 
 **Other expectations**
-- `expect_column_values_to_be_unique` (if a single key is specified for `primary_or_compound_key`)
-- `expect_compound_columns_to_be_unique` (if a compound key is specified for `primary_or_compound_key`)
+- [`expect_column_values_to_be_unique`](https://greatexpectations.io/expectations/expect_column_values_to_be_unique) (if a single key is specified for `primary_or_compound_key`)
+- [`expect_compound_columns_to_be_unique`](https://greatexpectations.io/expectations/expect_compound_columns_to_be_unique) (if a compound key is specified for `primary_or_compound_key`)
