@@ -125,16 +125,11 @@ list_expectation_stores_command = """
 great_expectations --v3-api store list
 """
 
-try:
-    result = subprocess.run(
-        list_expectation_stores_command.strip().split(),
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-except subprocess.CalledProcessError as e:
-    exitcode, err = e.returncode, e.stderr
-    print("exitcode:", exitcode, "stderr:", err)
+result = subprocess.run(
+    list_expectation_stores_command.strip().split(),
+    check=True,
+    stdout=subprocess.PIPE,
+)
 stdout = result.stdout.decode("utf-8")
 
 list_expectation_stores_output = """
