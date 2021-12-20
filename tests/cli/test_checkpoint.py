@@ -1602,8 +1602,8 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "__not_found__",
-                    "anonymized_datasource_name": "__not_found__",
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                 },
                 "success": True,
             }
@@ -1814,8 +1814,8 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "__not_found__",
-                    "anonymized_datasource_name": "__not_found__",
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                    "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
                 },
                 "success": True,
             }
@@ -2031,8 +2031,8 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "__not_found__",
-                    "anonymized_datasource_name": "__not_found__",
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                    "anonymized_datasource_name": "42ad8ec5a5ed470e596939f73f31d613",
                 },
                 "success": True,
             }
@@ -2248,8 +2248,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "__not_found__",
-                    "anonymized_datasource_name": "__not_found__",
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                 },
                 "success": True,
             }
@@ -2450,8 +2450,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "__not_found__",
-                    "anonymized_datasource_name": "__not_found__",
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                    "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
                 },
                 "success": True,
             }
@@ -2662,8 +2662,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "__not_found__",
-                    "anonymized_datasource_name": "__not_found__",
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                    "anonymized_datasource_name": "42ad8ec5a5ed470e596939f73f31d613",
                 },
                 "success": True,
             }
@@ -2880,8 +2880,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "__not_found__",
-                    "anonymized_datasource_name": "__not_found__",
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                    "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
                 },
                 "success": False,
             }
@@ -3078,8 +3078,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "__not_found__",
-                    "anonymized_datasource_name": "__not_found__",
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                    "anonymized_datasource_name": "d841f52415fe99e4d100fe49e7c4d0a6",
                 },
                 "success": False,
             }
@@ -3292,8 +3292,8 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
                 "event": "data_asset.validate",
                 "event_payload": {
                     "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "__not_found__",
-                    "anonymized_datasource_name": "__not_found__",
+                    "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
+                    "anonymized_datasource_name": "42ad8ec5a5ed470e596939f73f31d613",
                 },
                 "success": False,
             }
