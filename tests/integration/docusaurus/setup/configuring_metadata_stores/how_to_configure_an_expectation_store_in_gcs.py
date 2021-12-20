@@ -107,9 +107,16 @@ copy_expectation_command = copy_expectation_command.replace(
     + f"/{expectation_suite_name}.json",
 )
 
-result = subprocess.run(
-    copy_expectation_command.strip().split(), check=True, stderr=subprocess.PIPE
-)
+try:
+    result = subprocess.run(
+        copy_expectation_command.strip().split(),
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+except subprocess.CalledProcessError as e:
+    exitcode, err = e.returncode, e.output
+    print("exitcode:", exitcode, "output:", err)
 stderr = result.stderr.decode("utf-8")
 
 copy_expectation_output = """
@@ -148,16 +155,11 @@ list_expectation_suites_command = """
 great_expectations --v3-api suite list
 """
 
-try:
-    result = subprocess.run(
-        list_expectation_suites_command.strip().split(),
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-except subprocess.CalledProcessError as e:
-    exitcode, err = e.returncode, e.output
-    print("exitcode:", exitcode, "output:", err)
+result = subprocess.run(
+    list_expectation_suites_command.strip().split(),
+    check=True,
+    stdout=subprocess.PIPE,
+)
 stdout = result.stdout.decode("utf-8")
 
 list_expectation_suites_output = """
