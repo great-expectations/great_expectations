@@ -389,6 +389,10 @@ docs_test_matrix = [
         "user_flow_script": "tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
 ]
 
 integration_test_matrix = [

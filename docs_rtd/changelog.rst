@@ -8,6 +8,29 @@ Changelog
 develop
 -----------------
 
+0.13.47
+-----------------
+* [FEATURE] Add support for named groups in data asset regex (#3855)
+* [BUGFIX] Fix issue where dependency graph tester picks up non *.py files and add test file (#3830)
+* [BUGFIX] Ensure proper exit code for dependency graph script (#3839)
+* [BUGFIX] Allows GE to work when installed in a zip file (PEP 273). Fixes issue #3772 (#3798) (thanks @joseignaciorc)
+* [BUGFIX] Update conditional for TextClause isinstance check in SQLAlchemyExecutionEngine (#3844)
+* [BUGFIX] Fix usage stats events (#3857)
+* [BUGFIX] Make ExpectationContext optional and remove when null to ensure backwards compatability (#3859)
+* [BUGFIX] Fix sqlalchemy expect_compound_columns_to_be_unique (#3827) (thanks @harperweaver-dox)
+* [BUGFIX] Ensure proper serialization of SQLAlchemy Legacy Row (#3865)
+* [DOCS] Update migration_guide.md (#3832)
+* [MAINTENANCE] Remove the need for DataContext registry in the instrumentation of the Legacy Profiler profiling method. (#3836)
+* [MAINTENANCE] Remove DataContext registry (#3838)
+* [MAINTENANCE] Refactor cli suite conditionals (#3841)
+* [MAINTENANCE] adding hints to stores in data context (#3849)
+* [MAINTENANCE] Improve usage stats testing (#3858, #3861)
+* [MAINTENANCE] Make checkpoint methods in DataContext pass-through (#3860)
+* [MAINTENANCE] Datasource and ExecutionEngine Anonymizers handle missing module_name (#3867)
+* [MAINTENANCE] Add logging around DatasourceInitializationError in DataContext (#3846)
+* [MAINTENANCE] Use f-string to prevent string concat issue in Evaluation Parameters (#3864)
+* [MAINTENANCE] Test for errors / invalid messages in logs & fix various existing issues (#3875)
+
 0.13.46
 -----------------
 * [FEATURE] Instrument Runtime DataConnector for Usage Statistics: Add "checkpoint.run" Event Schema (#3797)
@@ -31,6 +54,7 @@ develop
 * [MAINTENANCE] Certify the expectation "expect_table_row_count_to_equal_other_table" for V3 API (#3803)
 * [MAINTENANCE] Refactor to enable broader use of event emitting method for usage statistics (#3825)
 * [MAINTENANCE] Clean up temp file after CI/CD run (#3823)
+* [MAINTENANCE] Raising exceptions for misconfigured datasources in cloud mode (#3866)
 
 0.13.45
 -----------------
