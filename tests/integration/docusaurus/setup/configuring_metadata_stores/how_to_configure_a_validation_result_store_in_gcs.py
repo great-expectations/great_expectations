@@ -121,10 +121,14 @@ copy_validation_command = copy_validation_command.replace(
     + "/validation_2.json",
 )
 
+# split two commands to be run one at a time
+both_commands = copy_validation_command.strip().replace("\n", "; ")
+
 result = subprocess.run(
-    copy_validation_command.strip().split(),
+    both_commands,
     check=True,
     stderr=subprocess.PIPE,
+    shell=True
 )
 stderr = result.stderr.decode("utf-8")
 
