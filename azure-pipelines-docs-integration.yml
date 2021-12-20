@@ -82,12 +82,6 @@ stages:
             pip install .
           displayName: 'Install dependencies'
 
-        - script: |
-            curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-367.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-367.0.0-linux-x86_64.tar.gz
-            ./google-cloud-sdk/install.sh
-            ./google-cloud-sdk/bin/gcloud init --console-only --no-launch-browser --skip-diagnostics
-          displayName: 'Install Google Cloud SDK'
-
         - task: DownloadSecureFile@1
           name: gcp_authkey
           displayName: 'Download GCS Credentials'
@@ -100,6 +94,14 @@ stages:
           inputs:
               secureFile: 'aws_config'
               retryCount: '2'
+
+        - script: |
+            curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-367.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-367.0.0-linux-x86_64.tar.gz
+            ./google-cloud-sdk/install.sh
+            ./google-cloud-sdk/bin/gcloud config configurations create superconductive-internal-configurations
+            ./google-cloud-sdk/bin/gcloud auth sandbox-account-for-azure--482@superconductive-internal.iam.gserviceaccount.com --key-file=$(gcp_authkey.secureFilePath) --project=superconductive-internal
+          displayName: 'Install Google Cloud SDK'
+
         - script: |
             sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
           displayName: 'Create MSSQL database test_ci'
