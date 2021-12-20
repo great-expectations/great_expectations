@@ -4,7 +4,7 @@ title: 'Tutorial, Step 4: Validate data'
 
 <table class="borderless center">
 <tr>
-    <td><img src="../../images/universal_map/Gear inactive.png" alt="Setup" /></td>
+    <td><img src="../../images/universal_map/Gear-inactive.png" alt="Setup" /></td>
     <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
     <td><img src="../../images/universal_map/Outlet inactive.png" alt="Setup" /></td>
     <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>

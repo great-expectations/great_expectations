@@ -4,13 +4,18 @@ title: 'Tutorial, Step 3: Create Expectations'
 
 <table class="borderless center">
 <tr>
-    <td><img src="../../images/universal_map/Gear inactive.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Outlet inactive.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Flask active.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
-    <td><img src="../../images/universal_map/Checkmark inactive.png" alt="Setup" /></td>
+    <td>
+        <img
+          src={require('../../images/universal_map/Gear-inactive.png').default}
+          alt="Example banner"
+        />
+    </td>
+    <td><img src="../../images/universal_map/Arrow.png" alt="Arrow" /></td>
+    <td><img src="../../images/universal_map/Outlet inactive.png" alt="Connect to Data" /></td>
+    <td><img src="../../images/universal_map/Arrow.png" alt="Arrow" /></td>
+    <td><img src="../../images/universal_map/Flask active.png" alt="Create Expectations" /></td>
+    <td><img src="../../images/universal_map/Arrow.png" alt="Arrow" /></td>
+    <td><img src="../../images/universal_map/Checkmark inactive.png" alt="Validate Data" /></td>
 </tr>
 </table>
 

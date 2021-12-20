@@ -4,7 +4,7 @@ title: 'Tutorial, Step 2: Connect to data'
 
 <table class="borderless center">
 <tr>
-    <td><img src="../../images/universal_map/Gear inactive.png" alt="Setup" /></td>
+    <td><img src="../../images/universal_map/Gear-inactive.png" alt="Setup" /></td>
     <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
     <td><img src="../../images/universal_map/Outlet active.png" alt="Setup" /></td>
     <td><img src="../../images/universal_map/Arrow.png" alt="Setup" /></td>
