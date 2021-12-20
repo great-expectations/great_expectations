@@ -50,7 +50,7 @@ stores:
       bucket: <YOUR GCS BUCKET NAME>
       prefix: <YOUR GCS PREFIX NAME>
 
-expectations_store_name: validations_GCS_store
+validations_store_name: validations_GCS_store
 """
 
 # replace example code with integration test configuration
@@ -95,10 +95,10 @@ local_validation_2_file_path = os.path.join(
     context.root_directory, "validations", "validation_1.json"
 )
 copy_validation_command = copy_validation_command.replace(
-    "validations/validation_1.json", local_validation_1_file_path
+    "uncommitted/validations/validation_1.json", local_validation_1_file_path
 )
 copy_validation_command = copy_validation_command.replace(
-    "validations/validation_2.json", local_validation_1_file_path
+    "uncommitted/validations/validation_2.json", local_validation_1_file_path
 )
 copy_validation_command = copy_validation_command.replace(
     "<YOUR GCS BUCKET NAME>",
