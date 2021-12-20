@@ -32,7 +32,7 @@ pytest-cov>=2.8.1  # all_tests
 pytest-order>=0.9.5 # all tests
 pyupgrade==2.7.2  # lint
 requirements-parser>=0.2.0  # all_tests
-s3fs>=0.4.0 # all_tests
+s3fs<0.5.0 # all_tests
 snapshottest==0.6.0 # GE Cloud atomic renderer tests
 typing-extensions>=3.10.0.0 # typing. Added 202108 @Shinnnyshinshin and @cdkini
 xlrd>=1.1.0,<2.0.0  # all_tests
