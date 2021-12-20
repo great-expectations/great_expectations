@@ -148,9 +148,13 @@ list_expectation_suites_command = """
 great_expectations --v3-api suite list
 """
 
-result = subprocess.run(
-    list_expectation_suites_command.strip().split(), check=True, stdout=subprocess.PIPE
-)
+try:
+    result = subprocess.run(
+        list_expectation_suites_command.strip().split(), check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+except subprocess.CalledProcessError as e:
+    exitcode, err = e.returncode, e.output
+    print("exitcode:", exitcode, "output:", err)
 stdout = result.stdout.decode("utf-8")
 
 list_expectation_suites_output = """
