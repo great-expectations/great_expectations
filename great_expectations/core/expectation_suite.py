@@ -521,10 +521,29 @@ class ExpectationSuite(SerializableDictDot):
     def _add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
-        send_usage_event: bool = False,
+        send_usage_event: bool,
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
+        """
+        This is a private method for adding expectations that allows for usage_events to be suppressed when
+        Expectations are added through internal processing (ie. while building profilers, rendering or validation). It
+        takes in send_usage_event boolean.
+
+        Args:
+            expectation_configuration: The ExpectationConfiguration to add or update
+            send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
+                public add_expectation() method, this is set to `True`.
+            match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
+                and so whether we should add or replace.
+            overwrite_existing: If the expectation already exists, this will overwrite if True and raise an error if
+                False.
+        Returns:
+            The ExpectationConfiguration to add or replace.
+        Raises:
+            More than one match
+            One match if overwrite_existing = False
+        """
 
         found_expectation_indexes = self.find_expectation_indexes(
             expectation_configuration, match_type
@@ -584,7 +603,6 @@ class ExpectationSuite(SerializableDictDot):
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
         """
-
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration

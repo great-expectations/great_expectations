@@ -180,7 +180,7 @@ def alice_columnar_table_single_batch(empty_data_context):
         # called within a fixture, and we will prevent it from sending a usage_event by calling the private method
         # _add_expectation().
         expected_expectation_suite._add_expectation(
-            expectation_configuration=expectation_configuration
+            expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
     # NOTE that this expectation suite should fail when validated on the data in "sample_data_relative_path"

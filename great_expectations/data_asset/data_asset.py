@@ -298,7 +298,8 @@ class DataAsset:
                 else:
                     # Append the expectation to the config.
                     stored_config = self._expectation_suite._add_expectation(
-                        expectation_config
+                        expectation_configuration=expectation_config,
+                        send_usage_event=False,
                     )
 
                 if include_config:
@@ -852,7 +853,7 @@ class DataAsset:
             elif isinstance(expectation_suite, dict):
                 expectation_suite_dict: dict = expectation_suite
                 expectation_suite: ExpectationSuite = ExpectationSuite(
-                    **expectation_suite_dict, data_context=self._data_context
+                    **expectation_suite_dict, data_context=None
                 )
             elif not isinstance(expectation_suite, ExpectationSuite):
                 logger.error(
