@@ -55,13 +55,13 @@ expectations_store_name: validations_GCS_store
 
 # replace example code with integration test configuration
 configured_validations_store = yaml.safe_load(configured_validations_store_yaml)
-configured_validations_store["stores"]["expectations_GCS_store"]["store_backend"][
+configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "project"
 ] = "superconductive-internal"
-configured_validations_store["stores"]["expectations_GCS_store"]["store_backend"][
+configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "bucket"
 ] = "superconductive-integration-tests"
-configured_validations_store["stores"]["expectations_GCS_store"]["store_backend"][
+configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "prefix"
 ] = "validations"
 
