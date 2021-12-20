@@ -99,7 +99,7 @@ stages:
             curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-367.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-367.0.0-linux-x86_64.tar.gz
             ./google-cloud-sdk/install.sh --usage-reporting=False --path-update --quiet --install-python=False
             ./google-cloud-sdk/bin/gcloud config configurations create superconductive-internal-configurations
-            ./google-cloud-sdk/bin/gcloud config set account sandbox-account-for-azure-tests --project superconductive-internal --access-token-file $(gcp_authkey.secureFilePath)
+            ./google-cloud-sdk/bin/gcloud config set account sandbox-account-for-azure-tests --project=superconductive-internal --access-token-file=$(gcp_authkey.secureFilePath)
           displayName: 'Install Google Cloud SDK'
 
         - script: |
