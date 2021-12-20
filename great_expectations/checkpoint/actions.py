@@ -7,9 +7,6 @@ import logging
 import warnings
 from typing import Dict, Optional
 
-import requests
-
-from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
@@ -53,7 +50,7 @@ class ValidationAction:
 
     def run(
         self,
-        validation_result_suite,
+        validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset,
         expectation_suite_identifier=None,
@@ -79,8 +76,8 @@ class ValidationAction:
 
     def _run(
         self,
-        validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -97,8 +94,8 @@ class NoOpAction(ValidationAction):
 
     def _run(
         self,
-        validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -185,8 +182,8 @@ class SlackNotificationAction(ValidationAction):
 
     def _run(
         self,
-        validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -279,8 +276,8 @@ class PagerdutyAlertAction(ValidationAction):
 
     def _run(
         self,
-        validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -395,8 +392,8 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     def _run(
         self,
-        validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -505,8 +502,8 @@ class OpsgenieAlertAction(ValidationAction):
 
     def _run(
         self,
-        validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -658,8 +655,8 @@ class EmailAction(ValidationAction):
 
     def _run(
         self,
-        validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -753,8 +750,8 @@ class StoreValidationResultAction(ValidationAction):
 
     def _run(
         self,
-        validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -835,7 +832,7 @@ class StoreEvaluationParametersAction(ValidationAction):
 
     def _run(
         self,
-        validation_result_suite,
+        validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset,
         payload=None,
@@ -913,8 +910,8 @@ class StoreMetricsAction(ValidationAction):
 
     def _run(
         self,
-        validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -985,8 +982,8 @@ class UpdateDataDocsAction(ValidationAction):
 
     def _run(
         self,
-        validation_result_suite,
-        validation_result_suite_identifier,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -1041,7 +1038,7 @@ class CloudNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: "DataContext",
         cloud_notification_action_id: str,
         action_type: str,
     ):

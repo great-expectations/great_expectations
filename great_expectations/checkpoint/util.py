@@ -321,7 +321,7 @@ def validate_validation_dict(validation_dict: dict):
 
 def send_cloud_notification(url: str, headers: dict, data: dict):
     """
-    Post a CloudNotificationAction to the .
+    Post a CloudNotificationAction to GE Cloud Backend for processing.
     """
     session = requests.Session()
 

@@ -4766,3 +4766,49 @@ def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
         **config,
     )
     return context
+
+
+@pytest.fixture(scope="function")
+def empty_cloud_data_context(
+    tmp_path,
+) -> DataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+    context = ge.data_context.DataContext(
+        context_root_dir=project_path,
+        ge_cloud_mode=True,
+        ge_cloud_account_id="fake",
+        ge_cloud_base_url="http://locahost",
+        ge_cloud_access_token="fake",
+    )
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    assert context.list_datasources() == []
+    return context
+
+
+@pytest.fixture
+def cloud_data_context_with_datasource_sqlalchemy_engine(
+    empty_cloud_data_context, db_file
+):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: sqlite:///{db_file}
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context

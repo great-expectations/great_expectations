@@ -654,7 +654,7 @@ def test_EmailAction(
 
 @mock.patch.object(Session, "post", return_value=MockCloudResponse(200))
 def test_cloud_notification_action(
-    data_context_parameterized_expectation_suite,
+    cloud_data_context_with_datasource_sqlalchemy_engine,
     validation_result_suite,
     validation_result_suite_id,
 ):
@@ -662,7 +662,16 @@ def test_cloud_notification_action(
     action_type = "fake_action"
 
     cloud_action: CloudNotificationAction = CloudNotificationAction(
-        data_context=data_context_parameterized_expectation_suite,
+        data_context=cloud_data_context_with_datasource_sqlalchemy_engine,
         cloud_notification_action_id=cloud_notification_action_id,
         action_type=action_type,
+    )
+
+    assert (
+        cloud_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        )
+        == "Cloud notification succeeded."
     )
