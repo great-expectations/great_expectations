@@ -101,6 +101,7 @@ stages:
             ./google-cloud-sdk/bin/gcloud config configurations create superconductive-internal-configurations
             ./google-cloud-sdk/bin/gcloud config set account sandbox-account-for-azure-tests --project=superconductive-internal --access-token-file=$(gcp_authkey.secureFilePath)
             ./google-cloud-sdk/bin/gcloud config set pass_credentials_to_gsutil True
+            gsutil version -l
           displayName: 'Install Google Cloud SDK'
 
         - script: |
