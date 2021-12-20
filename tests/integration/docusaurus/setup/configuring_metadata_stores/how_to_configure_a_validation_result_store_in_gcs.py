@@ -15,65 +15,65 @@ with open(great_expectations_yaml_file_path, "r") as f:
     great_expectations_yaml = yaml.safe_load(f)
 
 stores = great_expectations_yaml["stores"]
-pop_stores = ["checkpoint_store", "evaluation_parameter_store", "validations_store"]
+pop_stores = ["checkpoint_store", "evaluation_parameter_store", "expectations_store"]
 for store in pop_stores:
     stores.pop(store)
 
-actual_existing_expectations_store = dict()
-actual_existing_expectations_store["stores"] = stores
-actual_existing_expectations_store["expectations_store_name"] = great_expectations_yaml[
-    "expectations_store_name"
+actual_existing_validations_store = dict()
+actual_existing_validations_store["stores"] = stores
+actual_existing_validations_store["validations_store_name"] = great_expectations_yaml[
+    "validations_store_name"
 ]
 
-expected_existing_expectations_store_yaml = """
+expected_existing_validations_store_yaml = """
 stores:
-  expectations_store:
-    class_name: ExpectationsStore
+  validations_store:
+    class_name: ValidationsStore
     store_backend:
       class_name: TupleFilesystemStoreBackend
-      base_directory: expectations/
+      base_directory: uncommitted/validations/
 
-expectations_store_name: expectations_store
+validations_store_name: validations_store
 """
 
-assert actual_existing_expectations_store == yaml.safe_load(
-    expected_existing_expectations_store_yaml
+assert actual_existing_validations_store == yaml.safe_load(
+    expected_existing_validations_store_yaml
 )
 
-configured_expectations_store_yaml = """
+configured_validations_store_yaml = """
 stores:
-  expectations_GCS_store:
-    class_name: ExpectationsStore
+  validations_GCS_store:
+    class_name: ValidationsStore
     store_backend:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>
       bucket: <YOUR GCS BUCKET NAME>
       prefix: <YOUR GCS PREFIX NAME>
 
-expectations_store_name: expectations_GCS_store
+expectations_store_name: validations_GCS_store
 """
 
 # replace example code with integration test configuration
-configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
-configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
+configured_validations_store = yaml.safe_load(configured_validations_store_yaml)
+configured_validations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "project"
 ] = "superconductive-internal"
-configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
+configured_validations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "bucket"
 ] = "superconductive-integration-tests"
-configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
+configured_validations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "prefix"
-] = "expectations"
+] = "validations"
 
-# add and set the new expectation store
+# add and set the new validation store
 context.add_store(
-    store_name=configured_expectations_store["expectations_store_name"],
-    store_config=configured_expectations_store["stores"]["expectations_GCS_store"],
+    store_name=configured_validations_store["validations_store_name"],
+    store_config=configured_validations_store["stores"]["validations_GCS_store"],
 )
 with open(great_expectations_yaml_file_path, "r") as f:
     great_expectations_yaml = yaml.safe_load(f)
-great_expectations_yaml["expectations_store_name"] = "expectations_GCS_store"
-great_expectations_yaml["stores"]["expectations_GCS_store"]["store_backend"].pop(
+great_expectations_yaml["validations_store_name"] = "validations_GCS_store"
+great_expectations_yaml["stores"]["validations_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"
 )
 with open(great_expectations_yaml_file_path, "w") as f:
@@ -83,51 +83,65 @@ expectation_suite_name = "my_expectation_suite"
 context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 # try gsutil cp command
-copy_expectation_command = """
-gsutil cp expectations/my_expectation_suite.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/my_expectation_suite.json
+copy_validation_command = """
+gsutil cp uncommitted/validations/validation_1.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_1.json
+gsutil cp uncommitted/validations/validation_2.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_2.json
 """
 
-local_expectation_suite_file_path = os.path.join(
-    context.root_directory, "expectations", f"{expectation_suite_name}.json"
+local_validation_1_file_path = os.path.join(
+    context.root_directory, "validations", "validation_1.json"
 )
-copy_expectation_command = copy_expectation_command.replace(
-    "expectations/my_expectation_suite.json", local_expectation_suite_file_path
+local_validation_2_file_path = os.path.join(
+    context.root_directory, "validations", "validation_1.json"
 )
-copy_expectation_command = copy_expectation_command.replace(
+copy_validation_command = copy_validation_command.replace(
+    "validations/validation_1.json", local_validation_1_file_path
+)
+copy_validation_command = copy_validation_command.replace(
+    "validations/validation_2.json", local_validation_1_file_path
+)
+copy_validation_command = copy_validation_command.replace(
     "<YOUR GCS BUCKET NAME>",
-    configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
+    configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
         "bucket"
     ],
 )
-copy_expectation_command = copy_expectation_command.replace(
-    "<YOUR GCS PREFIX NAME>/my_expectation_suite.json",
-    configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
+copy_validation_command = copy_validation_command.replace(
+    "<YOUR GCS PREFIX NAME>/validation_1.json",
+    configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
         "prefix"
     ]
-    + f"/{expectation_suite_name}.json",
+    + "validation_1.json",
+)
+copy_validation_command = copy_validation_command.replace(
+    "<YOUR GCS PREFIX NAME>/validation_2.json",
+    configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
+        "prefix"
+    ]
+    + "validation_1.json",
 )
 
 result = subprocess.run(
-    copy_expectation_command.strip().split(),
+    copy_validation_command.strip().split(),
     check=True,
     stderr=subprocess.PIPE,
 )
 stderr = result.stderr.decode("utf-8")
 
-copy_expectation_output = """
-Operation completed over 1 objects
+copy_validation_output = """
+Operation completed over 2 objects
 """
 
-assert copy_expectation_output.strip() in stderr
+assert copy_validation_output.strip() in stderr
 
-# list expectation stores
-list_expectation_stores_command = """
+# list validation stores
+list_validation_stores_command = """
 great_expectations --v3-api store list
 """
 
 try:
     result = subprocess.run(
-        list_expectation_stores_command.strip().split(),
+        list_validation_stores_command.strip().split(),
         check=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -137,9 +151,9 @@ except subprocess.CalledProcessError as e:
     print("exitcode:", exitcode, "stderr:", err)
 stdout = result.stdout.decode("utf-8")
 
-list_expectation_stores_output = """
-  - name: expectations_GCS_store
-    class_name: ExpectationsStore
+list_validation_stores_output = """
+  - name: validations_GCS_store
+    class_name: ValidationsStore
     store_backend:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>
@@ -147,29 +161,9 @@ list_expectation_stores_output = """
       prefix: <YOUR GCS PREFIX NAME>
 """
 
-assert "expectations_GCS_store" in list_expectation_stores_output
-assert "expectations_GCS_store" in stdout
-assert "TupleGCSStoreBackend" in list_expectation_stores_output
+assert "validations_GCS_store" in list_validation_stores_output
+assert "validations_GCS_store" in stdout
+assert "TupleGCSStoreBackend" in list_validation_stores_output
 assert "TupleGCSStoreBackend" in stdout
 
-# list expectation suites
-list_expectation_suites_command = """
-great_expectations --v3-api suite list
-"""
 
-result = subprocess.run(
-    list_expectation_suites_command.strip().split(),
-    check=True,
-    stdout=subprocess.PIPE,
-)
-stdout = result.stdout.decode("utf-8")
-
-list_expectation_suites_output = """
-1 Expectation Suite found:
- - my_expectation_suite
-"""
-
-assert "1 Expectation Suite found:" in list_expectation_suites_output
-assert "1 Expectation Suite found:" in stdout
-assert "my_expectation_suite" in list_expectation_suites_output
-assert "my_expectation_suite" in stdout
