@@ -52,22 +52,22 @@ If you are also storing [Expectations in GCS](../configuring_metadata_stores/how
 
     One way to copy Validations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. In the example below, two Validation results, ``validation_1`` and ``validation_2`` are copied to the GCS bucket. Information on other ways to copy Validation results, like the Cloud Storage browser in the Google Cloud Console, can be found in the [Documentation for Google Cloud](https://cloud.google.com/storage/docs/uploading-objects).
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L124-L125
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L138-L139
     ```
    
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L180
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L194
     ```
 
 
 
 5. **Confirm that the new Validations store has been added by running:**
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L185
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L199
     ```
    
     Only the active Stores will be listed. Great Expectations will look for Validations in GCS as long as we set the ``validations_store_name`` variable to ``validations_GCS_store``, and the config for ``validations_store`` can be removed if you would like.
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L196-L202
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L210-L216
     ```
 
 6. **Confirm that the Validations store has been correctly configured.**
