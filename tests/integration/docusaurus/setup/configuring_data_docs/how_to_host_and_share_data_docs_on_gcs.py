@@ -9,31 +9,38 @@ context = ge.get_context()
 
 # set GCP project
 result = subprocess.run(
-    "gcloud config set project superconductive-internal",
+    "gcloud config set project superconductive-internal".split(),
     check=True,
     stderr=subprocess.PIPE,
 )
 
-create_data_docs_directory = """
-gsutil mb -p <YOUR GCP PROJECT NAME> -l US-EAST1 -b on gs://<YOUR GCS BUCKET NAME>/
-"""
-create_data_docs_directory = create_data_docs_directory.replace("<YOUR GCP PROJECT NAME>", "superconductive-internal")
-create_data_docs_directory = create_data_docs_directory.replace("<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs")
-
 try:
+    # remove this bucket if there was a failure in the script last time
     result = subprocess.run(
-        create_data_docs_directory.strip().split(),
+        "gsutil rm -r gs://superconductive-integration-tests-data-docs/".split(),
         check=True,
         stderr=subprocess.PIPE,
     )
 except Exception as e:
-    print("stderr:", e.stderr)
+    pass
 
-result = subprocess.run("gsutil rm -r gs://superconductive-integration-tests-data-docs/", check=True, stderr=subprocess.PIPE)
+create_data_docs_directory = """
+gsutil mb -p <YOUR GCP PROJECT NAME> -l US-EAST1 -b on gs://<YOUR GCS BUCKET NAME>/
+"""
+create_data_docs_directory = create_data_docs_directory.replace(
+    "<YOUR GCP PROJECT NAME>", "superconductive-internal"
+)
+create_data_docs_directory = create_data_docs_directory.replace(
+    "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs"
+)
 
+result = subprocess.run(
+    create_data_docs_directory.strip().split(),
+    check=True,
+    stderr=subprocess.PIPE,
+)
 stderr = result.stderr.decode("utf-8")
 assert "Creating gs://superconductive-integration-tests-data-docs/..." in stderr
-
 
 
 app_yaml = """
@@ -125,3 +132,10 @@ build_data_docs_command = """
 
   Done building Data Docs
 """
+
+# remove this bucket to clean up for next time
+result = subprocess.run(
+    "gsutil rm -r gs://superconductive-integration-tests-data-docs/".split(),
+    check=True,
+    stderr=subprocess.PIPE,
+)
