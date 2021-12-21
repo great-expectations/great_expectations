@@ -4,8 +4,48 @@ import subprocess
 from ruamel import yaml
 
 import great_expectations as ge
+from great_expectations.core.batch import BatchRequest
 
 context = ge.get_context()
+
+datasource_config = {
+    "name": "my_datasource",
+    "class_name": "Datasource",
+    "module_name": "great_expectations.datasource",
+    "execution_engine": {
+        "module_name": "great_expectations.execution_engine",
+        "class_name": "PandasExecutionEngine",
+    },
+    "data_connectors": {
+        "default_inferred_data_connector_name": {
+            "class_name": "InferredAssetFilesystemDataConnector",
+            "base_directory": "../data/",
+            "default_regex": {"group_names": ["data_asset_name"], "pattern": "(.*)"},
+        },
+    },
+}
+context.add_datasource(**datasource_config)
+
+expectation_suite_name = "my_expectation_suite"
+context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+
+config = f"""
+name: my_checkpoint
+config_version: 1
+class_name: SimpleCheckpoint
+validations:
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: yellow_tripdata_sample_2019-01.csv
+    expectation_suite_name: {expectation_suite_name}
+"""
+checkpoint = context.add_checkpoint(**yaml.safe_load(config))
+checkpoint.run()
+checkpoint.run()
+
+import glob
+print(glob.glob(f"{context.root_directory}/uncommitted/validations/my_expectation_suite/*"))
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
@@ -79,9 +119,6 @@ great_expectations_yaml["stores"]["validations_GCS_store"]["store_backend"].pop(
 with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f, default_flow_style=False)
 
-expectation_suite_name = "my_expectation_suite"
-context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
-
 # try gsutil cp command
 copy_validation_command = """
 gsutil cp uncommitted/validations/validation_1.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_1.json
@@ -124,12 +161,12 @@ copy_validation_command = copy_validation_command.replace(
 # split two commands to be run one at a time
 both_commands = copy_validation_command.strip().replace("\n", "; ")
 
-result = subprocess.run(
-    both_commands,
-    check=True,
-    stderr=subprocess.PIPE,
-    shell=True
-)
+try:
+    result = subprocess.run(
+        both_commands, check=True, stderr=subprocess.PIPE, shell=True
+    )
+except Exception as e:
+    print(e.stderr)
 stderr = result.stderr.decode("utf-8")
 
 copy_validation_output = """
@@ -169,5 +206,3 @@ assert "validations_GCS_store" in list_validation_stores_output
 assert "validations_GCS_store" in stdout
 assert "TupleGCSStoreBackend" in list_validation_stores_output
 assert "TupleGCSStoreBackend" in stdout
-
-
