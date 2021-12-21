@@ -241,7 +241,7 @@ result = subprocess.run(
 )
 stdout = result.stdout.decode("utf-8")
 assert (
-    "gs://superconductive-integration-tests/validations/my_expectation_suite/"
+    "gs://superconductive-integration-tests/how_to_configure_a_validation_result_store_in_gcs/validations/my_expectation_suite/"
     not in stdout
 )
 
@@ -258,7 +258,7 @@ result = subprocess.run(
 )
 stdout = result.stdout.decode("utf-8")
 assert (
-    "gs://superconductive-integration-tests/validations/my_expectation_suite/" in stdout
+    "gs://superconductive-integration-tests/how_to_configure_a_validation_result_store_in_gcs/validations/my_expectation_suite/" in stdout
 )
 
 # clean up validation store for next time
