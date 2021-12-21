@@ -398,6 +398,11 @@ docs_test_matrix = [
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
 ]
 
 integration_test_matrix = [
