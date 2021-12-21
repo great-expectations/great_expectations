@@ -753,6 +753,7 @@ def get_test_validator_with_data(
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
+                    # noinspection PyUnresolvedReferences
                     type_ = getattr(pd.core.dtypes.dtypes, value)
                     # If this raises AttributeError it's okay: it means someone built a bad test
                 pandas_schema[key] = type_
@@ -898,7 +899,12 @@ def build_pandas_validator_with_data(
     batch_definition: Optional[BatchDefinition] = None,
 ) -> Validator:
     batch: Batch = Batch(data=df, batch_definition=batch_definition)
-    return Validator(execution_engine=PandasExecutionEngine(), batches=(batch,))
+    return Validator(
+        execution_engine=PandasExecutionEngine(),
+        batches=[
+            batch,
+        ],
+    )
 
 
 def build_sa_validator_with_data(
