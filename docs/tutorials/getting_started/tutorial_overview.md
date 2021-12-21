@@ -79,7 +79,7 @@ In this tutorial, we provide two CSV files, each with a 10,000 row sample of the
 
 For purposes of this tutorial, we are treating the January 2019 taxi data as our "current" data, and the February 2019 taxi data as "future" data that we have not yet looked at.  We will use Great Expectations to build a profile of the January data and then use that profile to check for any unexpected data quality issues in the February data.  In a real-life scenario, this would ensure that any problems with the February data would be caught (so it could be dealt with) before the February data is used in a production application!
 
-It should be noted that in the tutorial we only have one month's worth of "current" data.  However, you can use Multi-Batch profilers to build profiles of multiple past or current sets of data.  Doing so will generally result in a more accurate data profile but for this small example a single set of "current" data will suffice.
+It should be noted that in the tutorial we only have one month's worth of "current" data.  However, you can use Multi-Batch Profilers to build profiles of multiple past or current sets of data.  Doing so will generally result in a more accurate data profile but for this small example a single set of "current" data will suffice.
 
 ### Getting started with the Getting Started Tutorial
 

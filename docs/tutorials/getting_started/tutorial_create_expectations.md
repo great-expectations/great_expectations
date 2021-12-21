@@ -57,7 +57,7 @@ title: 'Tutorial, Step 3: Create Expectations'
 
 Expectations are the workhorse abstraction in Great Expectations. Each Expectation is a declarative, machine-verifiable assertion about the expected format, content, or behavior of your data. Great Expectations comes with dozens of built-in Expectations, and it’s possible to develop your own custom Expectations, too.
 
-The CLI will help you create your first Expectation Suite. Suites are simply collections of Expectations. In order to create a new suite, we will use the built-in profiler to automatically create an Expectation Suite called `getting_started_expectation_suite_taxi.demo`.
+The CLI will help you create your first Expectation Suite. Suites are simply collections of Expectations. In order to create a new suite, we will use the built-in Profiler to automatically create an Expectation Suite called `getting_started_expectation_suite_taxi.demo`.
 
 ### Create an Expectation Suite using the CLI
 
@@ -165,7 +165,7 @@ Data Docs translate Expectations, Validation Results, and other metadata into cl
 
 In particular, take a look at the Expectations that were created for the `passenger_count` field.  These are the rules that we will be comparing the February data against when we validate it in step four of this tutorial.
 
-### How did we get those expectations?
+### How did we get those Expectations?
 
 You can create and edit Expectations using several different workflows. Using an automated [Profiler](/docs/reference/profilers) as we just did is one of the quickest options to get started with an Expectation Suite.
 

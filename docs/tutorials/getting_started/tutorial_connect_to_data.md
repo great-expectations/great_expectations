@@ -139,7 +139,7 @@ Please note that due to how data is serialized, the entry in your ```great_expec
         <b>DataConnectors</b> :  <code>DataConnectors</code> facilitate access to external data stores, such as filesystems, databases, and cloud storage. The current configuration contains both an <code>InferredAssetFilesystemDataConnector</code>, which allows you to retrieve a batch of data by naming a data asset (which is the filename in our case), and a <code>RuntimeDataConnector</code>, which allows you to retrieve a batch of data by defining a filepath.  In this tutorial we will only be using the <code>InferredAssetFilesystemDataConnector</code>.  For more information on <code>DataConnectors</code>, please refer to the <a href="https://docs.greatexpectations.io/docs/reference/datasources">Core Concepts document on Datasources</a>.
     </p>
     <p>
-        This datasource does not require any credentials. However, if you were to connect to a database that requires connection credentials, those would be stored in <code>great_expectations/uncommitted/config_variables.yml</code>.
+        This Datasource does not require any credentials. However, if you were to connect to a database that requires connection credentials, those would be stored in <code>great_expectations/uncommitted/config_variables.yml</code>.
     </p>
   </div>
 </details>

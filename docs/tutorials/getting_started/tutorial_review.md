@@ -97,7 +97,7 @@ Let's review each of these steps and take a look at the important concepts and f
 </table>
 
 - **Expectation Suite**: A collection of Expectations.
-- **Expectations**: A verifiable assertion about data. Great Expectations is a framework for defining expectations and running them against your data. In the tutorial's example, we asserted that NYC taxi rides should have a minimum of one passenger.  When we ran that expectation against our second set of data Great Expectations reported back that some records in the new data indicated a ride with zero passengers, which failed to meet this expectation.
+- **Expectations**: A verifiable assertion about data. Great Expectations is a framework for defining Expectations and running them against your data. In the tutorial's example, we asserted that NYC taxi rides should have a minimum of one passenger.  When we ran that expectation against our second set of data Great Expectations reported back that some records in the new data indicated a ride with zero passengers, which failed to meet this expectation.
 - **Profiler**: A tool that automatically generates Expectations from a Batch of data.
 
 <table class="borderless">
@@ -116,7 +116,7 @@ Let's review each of these steps and take a look at the important concepts and f
 
 ### Going Forward
 
-Your specific use case will no doubt differ from that of our tutorial.  However, the four steps you'll need to perform in order to get Great Expectations working for you will be the same.  Setup, connect to data, create expectations, and validate data.  That's all there is to it!  As long as you can perform these four steps you can have Great Expectations working to validate data for you.
+Your specific use case will no doubt differ from that of our tutorial.  However, the four steps you'll need to perform in order to get Great Expectations working for you will be the same.  Setup, connect to data, create Expectations, and validate data.  That's all there is to it!  As long as you can perform these four steps you can have Great Expectations working to validate data for you.
 
 For those who only need to know the basics in order to make Great Expectations work our documentation includes Core Concepts for each step.
 
