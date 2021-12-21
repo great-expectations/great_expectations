@@ -10,7 +10,7 @@ The steps described in this tutorial assume you are installing Great Expectation
 For a tutorial for older versions of Great Expectations, please see older versions of this documentation, which can be found [here](https://docs.greatexpectations.io/en/latest/guides/tutorials.html).
 :::
 
-### This tutorial will walk you through the following steps:
+### This tutorial will walk you through the following steps
 
 <table class="borderless">
 <tr>
@@ -21,8 +21,8 @@ For a tutorial for older versions of Great Expectations, please see older versio
         />
     </td>
     <td>
-        <b>Setup</b>
-        <p>First, we will make sure you have Great Expectations installed and show you how to initializa a <b>Data Context.</b></p>
+        <h4>Setup</h4>
+        <p>First, we will make sure you have Great Expectations installed and show you how to initialize a <b>Data Context.</b></p>
     </td>
 </tr>
 <tr>
@@ -33,7 +33,7 @@ For a tutorial for older versions of Great Expectations, please see older versio
         />
     </td>
     <td>
-        <b>Connect to Data</b>
+        <h4>Connect to Data</h4>
         <p>Then you will learn how to configure a <b>Datasource</b> to connect to your data.</p>
     </td>
 </tr>
@@ -45,8 +45,8 @@ For a tutorial for older versions of Great Expectations, please see older versio
         />
     </td>
     <td>
-        <b>Create Expectations</b>
-        <p>You will then create your first <b>Expectation Suite</b> using the built-in automated <b>Profiler</b>. We'll also give you a tour of <b>Data Docs</b> to view your Validation Results.</p>
+        <h4>Create Expectations</h4>
+        <p>You will then create your first <b>Expectation Suite</b> using the built-in automated <b>Profiler</b>. We'll also give you a tour of <b>Data Docs</b> to view your <b>Validation Results</b>.</p>
     </td>
 </tr>
 <tr>
@@ -57,21 +57,19 @@ For a tutorial for older versions of Great Expectations, please see older versio
         />
     </td>
     <td>
-        <b>Validate Data</b>
-        <p>Finally, we will show you how to use this Expectation Suite to <b>validate</b> a new batch of data, and show how you can further customize the Data Docs which will show your validation results.</p>
+        <h4>Validate Data</h4>
+        <p>Finally, we will show you how to use this Expectation Suite to <b>validate</b> a new batch of data, and show how you can further customize the Data Docs which will show your Validation Results.</p>
     </td>
 </tr>
 </table>
 
 But before we dive into the first step, let's bring you up to speed on the problem we are going to address in this tutorial, and the data that we'll be using to illustrate it.
 
-### The data problem we're solving in this tutorial:
+### The data problem we're solving in this tutorial
 
 In this tutorial we will be looking at two sets of data representing the same information over different periods of time.  We will use the values of the first set of data to populate the rules that we expect this data to follow in the future.  We will then use these Expectations to determine if there is a problem with the second set of data.
 
-### The data we're using for this tutorial:
-
-The [NYC taxi data](https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page) we’re going to use in this tutorial is an open data set which is updated every month. Each record in the data corresponds to one taxi ride and contains information such as the pick up and drop-off location, the payment amount, and the number of passengers, among others.
+The data we're going to use for this tutorial is the [NYC taxi data](https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page). This is an open data set which is updated every month. Each record in the data corresponds to one taxi ride and contains information such as the pick up and drop-off location, the payment amount, and the number of passengers, among others.
 
 In this tutorial, we provide two CSV files, each with a 10,000 row sample of the Yellow Taxi Trip Records set:
 

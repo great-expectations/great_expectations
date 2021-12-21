@@ -100,7 +100,7 @@ For detailed installation instructions, see [How to install Great Expectations l
   <summary>Other deployment patterns</summary>
   <div>
     <p>
-      This tutorial deploys Great Expectations locally. Note that other options (e.g. running Great Expectations on an EMR Cluster) are also available. You can find more information in the Reference Architectures section of the documentation.
+      This tutorial deploys Great Expectations locally. Note that other options (e.g. running Great Expectations on an EMR Cluster) are also available. You can find more information in the Deployment Patterns section of the documentation.
     </p>
   </div>
 </details>
@@ -111,7 +111,7 @@ In Great Expectations, your Data Context manages your project configuration, so 
 
 When you installed Great Expectations, you also installed the Great Expectations command line interface (CLI). It provides helpful utilities for deploying and configuring Data Contexts, plus a few other convenience methods. Note that since we’re using the V3 (Batch Request) API in this tutorial, all CLI commands will use the `--v3-api` flag.
 
-To initialize your Great Expectations deployment for the project, run this command in the terminal from the `ge_tutorials/` directory:
+To initialize your Great Expectations deployment for the project, run this command in the terminal from the `ge_tutorials` directory:
 
 ```console
 great_expectations --v3-api init
@@ -157,10 +157,10 @@ Your Data Context will contain the entirety of your Great Expectations project. 
 :::
 
 <details>
-  <summary>About the <code>great_expectations/</code> directory structure</summary>
+  <summary>About the <code>great_expectations</code> directory structure</summary>
   <div>
     <p>
-      After running the <code>init</code> command, your <code>great_expectations/</code> directory will contain all of the important components of a local Great Expectations deployment. This is what the directory structure looks like
+      After running the <code>init</code> command, your <code>great_expectations</code> directory will contain all of the important components of a local Great Expectations deployment. This is what the directory structure looks like
     </p>
     <ul>
       <li><code>great_expectations.yml</code> contains the main configuration of your deployment.</li>

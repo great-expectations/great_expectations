@@ -79,7 +79,7 @@ The Jupyter Notebook contains some boilerplate code that allows you to configure
 
 You can then execute all cells in the notebook in order to store the Checkpoint to your Data Context.
 
-**What just happened?**
+#### What just happened?
 
 - `getting_started_checkpoint` is the name of your new Checkpoint.
 
@@ -95,7 +95,7 @@ In order to build Data Docs and get your results in a nice, human-readable forma
 
 You’ll see that the test suite failed when you ran it against the February data.
 
-**What just happened? Why did it fail?? Help!?**
+#### What just happened? Why did it fail?? Help!?
 
 We ran the Checkpoint and it successfully failed! **Wait - what?** Yes, that’s correct, this indicates that the February data has data quality issues, which means we want the validation to fail.
 
@@ -103,7 +103,7 @@ Click on the highlighted row to access the Validation Results page, which will t
 
 ![data_docs_failed_validation2](../../../docs/images/data_docs_taxi_failed_validation02.png)
 
-On the Validation Results page, you will see that the validation of the staging data *failed* because the set of *Observed Values* in the `passenger_count` column contained the value **0**! This violates our Expectation, which makes the validation fail.
+On the Validation Results page, you will see that the validation of the staging data *failed* because the set of *Observed Values* in the `passenger_count` column contained the value `0`! This violates our Expectation, which makes the validation fail.
 
 **And this is it!**
 

@@ -55,7 +55,7 @@ title: 'Review and next steps'
 
 :::
 
-## Review
+### Review
 In this tutorial we've taken you through the four steps you need to be able to perform to use Great Expectations.
 
 Let's review each of these steps and take a look at the important concepts and features we used.
@@ -114,13 +114,9 @@ Let's review each of these steps and take a look at the important concepts and f
 - **Validation Results**: A report generated from an Expectation Suite being run against a batch of data.  The Validation Result itself is in JSON and is rendered as Data Docs.
 - **Data Docs**: Human readable documentation that describes Expectations for data and its Validation Results.  Data docs van be generated both from Expectation Suites (describing our Expectations for the data) and also from Validation Results (describing if the data meets those Expectations).
 
-## Going Forward
+### Going Forward
 
 Your specific use case will no doubt differ from that of our tutorial.  However, the four steps you'll need to perform in order to get Great Expectations working for you will be the same.  Setup, connect to data, create expectations, and validate data.  That's all there is to it!  As long as you can perform these four steps you can have Great Expectations working to validate data for you.
-
-
-## The Great Expectations documentation
-The rest of our documentation will assist you in configuring Great Expectations for your specific needs.
 
 For those who only need to know the basics in order to make Great Expectations work our documentation includes Core Concepts for each step.
 

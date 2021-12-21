@@ -59,7 +59,7 @@ Expectations are the workhorse abstraction in Great Expectations. Each Expectati
 
 The CLI will help you create your first Expectation Suite. Suites are simply collections of Expectations. In order to create a new suite, we will use the built-in profiler to automatically create an Expectation Suite called `getting_started_expectation_suite_taxi.demo`.
 
-### Create an Expectation Suite using the CLI:
+### Create an Expectation Suite using the CLI
 
 Since we are using the CLI, you will want to return to your console and the `ge_tutorials` folder.  Remember: This is where we initialized our Data Context, and the Data Context is our access point to everything else in Great Expectations!
 
@@ -90,7 +90,7 @@ Which data asset (accessible by data connector "default_inferred_data_connector_
     2. yellow_tripdata_sample_2019-02.csv
 : 1
 ```
-The Profiler will require a batch of data to analize.  This prompt is asking us which data to use for that.  As you can see, the prompt it is giving corresponds to the .CSV files in our `data` folder.  These are the very same ones we configured our Datasource to connect to back in Step 2: Connect to Data.
+The Profiler will require a batch of data to analyze.  This prompt is asking us which data to use for that.  As you can see, the prompt it is giving corresponds to the .CSV files in our `data` folder.  These are the very same ones we configured our Datasource to connect to back in Step 2: Connect to Data.
 
 We're going to choose the first file.  If you're wondering why, here's an explanation: Recall that our data directory contains two CSV files: `yellow_tripdata_sample_2019-01` and `yellow_tripdata_sample_2019-02`.
 
@@ -128,7 +128,7 @@ Notebooks are a simple way of interacting with the Great Expectations Python API
 
 Since notebooks are often less permanent, creating Expectations in a notebook also helps reinforce that the source of truth about Expectations is the Expectation Suite, not the code that generates the Expectations.
 
-**Let’s take a look through the notebook and see what’s happening in each cell**:
+### Let’s take a look through the notebook and see what’s happening in each cell
 
 **Cell 1**
 ![Cell1](../../images/getting_started_tutorial/tutorial_create_expectations_cell1.png)
@@ -157,7 +157,7 @@ For purposes of this tutorial, the default values in all of these cells (except 
 
 **Let’s execute all the cells** and wait for Great Expectations to open a browser window with Data Docs, which will then let us see and edit the Expectations that were composed for us by the Profiler.
 
-### Viewing your Expectations in Data Docs:
+### Viewing your Expectations in Data Docs
 
 Once the Profiler is done executing it will open up Data Docs in your browser automatically.
 
