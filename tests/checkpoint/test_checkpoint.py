@@ -4322,20 +4322,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    # create expectation suite
-    suite = context.create_expectation_suite("my_expectation_suite")
-    expectation = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_between",
-        kwargs={"column": "col1", "min_value": 1, "max_value": 2},
-    )
-    suite.add_expectation(expectation)
-    context.save_expectation_suite(suite)
 
     batch_request = BatchRequest(
         **{
@@ -4422,20 +4413,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    # create expectation suite
-    suite = context.create_expectation_suite("my_expectation_suite")
-    expectation = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_between",
-        kwargs={"column": "col1", "min_value": 1, "max_value": 2},
-    )
-    suite.add_expectation(expectation)
-    context.save_expectation_suite(suite)
 
     batch_request = BatchRequest(
         **{
@@ -4536,20 +4518,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    # create expectation suite
-    suite = context.create_expectation_suite("my_expectation_suite")
-    expectation = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_between",
-        kwargs={"column": "col1", "min_value": 1, "max_value": 2},
-    )
-    suite.add_expectation(expectation)
-    context.save_expectation_suite(suite)
 
     batch_request = BatchRequest(
         **{
@@ -4637,20 +4610,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint(
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-
-    # create expectation suite
-    suite = context.create_expectation_suite("my_expectation_suite")
-    expectation = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_between",
-        kwargs={"column": "col1", "min_value": 1, "max_value": 2},
-    )
-    suite.add_expectation(expectation)
-    context.save_expectation_suite(suite)
 
     # add checkpoint config
     batch_request = BatchRequest(

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -30,7 +30,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         observed_value_counts = metrics["column.value_counts"]
@@ -42,7 +42,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         observed_value_counts = metrics["column.value_counts"]
@@ -93,7 +93,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         observed_value_counts = metrics["column.value_counts"]
@@ -105,7 +105,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         observed_value_counts = metrics["column.value_counts"]

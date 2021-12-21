@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pandas as pd
 import pytest
 
@@ -298,7 +300,11 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     assert len(suite.expectations) == 29
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_build_suite_with_semantic_types_dict(
+    mock_emit,
     cardinality_dataset,
     possible_expectations_set,
 ):
@@ -342,8 +348,17 @@ def test_build_suite_with_semantic_types_dict(
     assert len(value_set_columns) == 2
     assert value_set_columns == {"col_two", "col_very_few"}
 
+    # Note 20211209 - Currently the only method called by the Profiler that is instrumented for usage_statistics
+    # is ExpectationSuite's add_expectation(). It will not send a usage_stats event when called from a Profiler.
+    # this number can change in the future if our instrumentation changes.
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
-def test_build_suite_when_suite_already_exists(cardinality_dataset):
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_build_suite_when_suite_already_exists(mock_emit, cardinality_dataset):
     """
     What does this test do and why?
     Confirms that creating a new suite on an existing profiler wipes the previous suite
@@ -365,8 +380,17 @@ def test_build_suite_when_suite_already_exists(cardinality_dataset):
     assert len(suite.expectations) == 1
     assert "expect_table_row_count_to_be_between" in expectations
 
+    # Note 20211209 - Currently the only method called by the Profiler that is instrumented for usage_statistics
+    # is ExpectationSuite's add_expectation(). It will not send a usage_stats event when called from a Profiler.
+    # this number can change in the future if our instrumentation changes.
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
-def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_primary_or_compound_key_not_found_in_columns(mock_emit, cardinality_dataset):
     """
     What does this test do and why?
     Confirms that an error is raised if a primary_or_compound key is specified with a column not found in the dataset
@@ -397,6 +421,12 @@ would like to use it as a primary_or_compound_key.
         ignored_columns=["col_none", "col_one"],
     )
     assert ignored_column_profiler.primary_or_compound_key == ["col_unique", "col_one"]
+
+    # Note 20211209 - Currently the only method called by the Profiler that is instrumented for usage_statistics
+    # is ExpectationSuite's add_expectation(). It will not send a usage_stats event when called from a Profiler.
+    # this number can change in the future if our instrumentation changes.
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
 
 def test_config_with_not_null_only(nulls_dataset, possible_expectations_set):
