@@ -42,61 +42,74 @@ result = subprocess.run(
 stderr = result.stderr.decode("utf-8")
 assert "Creating gs://superconductive-integration-tests-data-docs/..." in stderr
 
-
 app_yaml = """
-  # app.yaml (make sure to use your own bucket name)
-
-  runtime: python37
-  env_variables:
-      CLOUD_STORAGE_BUCKET: my_org_data_docs
+runtime: python37
+env_variables:
+  CLOUD_STORAGE_BUCKET: <YOUR GCS BUCKET NAME>
 """
+app_yaml = app_yaml.replace(
+    "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs"
+)
+
+team_gcs_app_directory = os.path.join(context.root_directory, "team_gcs_app")
+os.makedirs(team_gcs_app_directory, exist_ok=True)
+
+app_yaml_file_path = os.path.join(team_gcs_app_directory, "app.yml")
+with open(app_yaml_file_path, "w") as f:
+    yaml.dump(app_yaml, f)
 
 requirements_txt = """
-  # requirements.txt
-
-  flask>=1.1.0
-  google-cloud-storage
+flask>=1.1.0
+google-cloud-storage
 """
+
+requirements_txt_file_path = os.path.join(team_gcs_app_directory, "requirements.txt")
+with open(requirements_txt_file_path, "w") as f:
+    f.write(requirements_txt)
 
 main_py = """
-  # main.py
-
-  import logging
-  import os
-  from flask import Flask, request
-  from google.cloud import storage
-  app = Flask(__name__)
-  # Configure this environment variable via app.yaml
-  CLOUD_STORAGE_BUCKET = os.environ['CLOUD_STORAGE_BUCKET']
-  @app.route('/', defaults={'path': 'index.html'})
-  @app.route('/<path:path>')
-  def index(path):
-      gcs = storage.Client()
-      bucket = gcs.get_bucket(CLOUD_STORAGE_BUCKET)
-      try:
-          blob = bucket.get_blob(path)
-          content = blob.download_as_string()
-          if blob.content_encoding:
-              resource = content.decode(blob.content_encoding)
-          else:
-              resource = content
-      except Exception as e:
-          logging.exception("couldn't get blob")
-          resource = "<p></p>"
-      return resource
-  @app.errorhandler(500)
-  def server_error(e):
-      logging.exception('An error occurred during a request.')
-      return '''
-      An internal error occurred: <pre>{}</pre>
-      See logs for full stacktrace.
-      '''.format(e), 500
+import logging
+import os
+from flask import Flask, request
+from google.cloud import storage
+app = Flask(__name__)
+# Configure this environment variable via app.yaml
+CLOUD_STORAGE_BUCKET = os.environ['CLOUD_STORAGE_BUCKET']
+@app.route('/', defaults={'path': 'index.html'})
+@app.route('/<path:path>')
+def index(path):
+    gcs = storage.Client()
+    bucket = gcs.get_bucket(CLOUD_STORAGE_BUCKET)
+    try:
+        blob = bucket.get_blob(path)
+        content = blob.download_as_string()
+        if blob.content_encoding:
+            resource = content.decode(blob.content_encoding)
+        else:
+            resource = content
+    except Exception as e:
+        logging.exception("couldn't get blob")
+        resource = "<p></p>"
+    return resource
+@app.errorhandler(500)
+def server_error(e):
+    logging.exception('An error occurred during a request.')
+    return '''
+    An internal error occurred: <pre>{}</pre>
+    See logs for full stacktrace.
+    '''.format(e), 500
 """
 
-gcloud_login_command = """
-  # Insert the appropriate project name.
+main_py_file_path = os.path.join(team_gcs_app_directory, "main.py")
+with open(main_py_file_path, "w") as f:
+    f.write(main_py)
 
-  gcloud auth login && gcloud config set project <<project_name>>
+gcloud_login_command = """
+gcloud auth login && gcloud config set project <YOUR GCP PROJECT NAME>
+"""
+
+gcloud_app_deploy_command = """
+gcloud app deploy
 """
 
 data_docs_site_yaml = """
