@@ -105,4 +105,5 @@ If you are also storing [Expectations in GCS](../configuring_metadata_stores/how
     Run a [Checkpoint](../../../tutorials/getting_started/validate_your_data.md) to store results in the new Validations store on GCS then visualize the results by re-building [Data Docs](../../../tutorials/getting_started/validate_your_data.md).
 
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.
+### Additional Notes
+To view the full script used in this page, see it on GitHub: [how_to_configure_a_validation_result_store_in_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py)

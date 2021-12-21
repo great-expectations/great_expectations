@@ -202,3 +202,10 @@ assert "validations_GCS_store" in list_validation_stores_output
 assert "validations_GCS_store" in stdout
 assert "TupleGCSStoreBackend" in list_validation_stores_output
 assert "TupleGCSStoreBackend" in stdout
+
+# run a checkpoint to ensure validation store is changed
+result = subprocess.run(
+    split_commands[1], check=True, stderr=subprocess.PIPE, shell=True
+)
+stderr = result.stderr.decode("utf-8")
+context.run_checkpoint(checkpoint_name=checkpoint_name)
