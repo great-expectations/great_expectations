@@ -4,7 +4,7 @@ title: How to host and share Data Docs on GCS
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
 
-This guide will explain how to host and share Data Docs on Google Cloud Storage.  We recommend using IP-based access, which is achieved by deploying a simple Google App Engine app.  Data Docs can also be served on Google Cloud Storage if the contents of the bucket are set to be publicly readable, but this is strongly discouraged.
+This guide will explain how to host and share Data Docs on Google Cloud Storage. We recommend using IP-based access, which is achieved by deploying a simple Google App Engine app. Data Docs can also be served on Google Cloud Storage if the contents of the bucket are set to be publicly readable, but this is strongly discouraged.
 
 <Prerequisites>
 
