@@ -19,7 +19,7 @@ pop_stores = ["checkpoint_store", "evaluation_parameter_store", "validations_sto
 for store in pop_stores:
     stores.pop(store)
 
-actual_existing_expectations_store = dict()
+actual_existing_expectations_store = {}
 actual_existing_expectations_store["stores"] = stores
 actual_existing_expectations_store["expectations_store_name"] = great_expectations_yaml[
     "expectations_store_name"
