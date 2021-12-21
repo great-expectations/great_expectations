@@ -59,7 +59,7 @@ pop_stores = ["checkpoint_store", "evaluation_parameter_store", "expectations_st
 for store in pop_stores:
     stores.pop(store)
 
-actual_existing_validations_store = dict()
+actual_existing_validations_store = {}
 actual_existing_validations_store["stores"] = stores
 actual_existing_validations_store["validations_store_name"] = great_expectations_yaml[
     "validations_store_name"
@@ -125,12 +125,16 @@ gsutil cp uncommitted/validations/my_expectation_suite/validation_1.json gs://<Y
 gsutil cp uncommitted/validations/my_expectation_suite/validation_2.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_2.json
 """
 
-validation_files = glob.glob(f"{context.root_directory}/uncommitted/validations/my_expectation_suite/__none__/*/*.json")
-copy_validation_command = copy_validation_command.replace(
-    "uncommitted/validations/my_expectation_suite/validation_1.json", validation_files[0]
+validation_files = glob.glob(
+    f"{context.root_directory}/uncommitted/validations/my_expectation_suite/__none__/*/*.json"
 )
 copy_validation_command = copy_validation_command.replace(
-    "uncommitted/validations/my_expectation_suite/validation_2.json", validation_files[1]
+    "uncommitted/validations/my_expectation_suite/validation_1.json",
+    validation_files[0],
+)
+copy_validation_command = copy_validation_command.replace(
+    "uncommitted/validations/my_expectation_suite/validation_2.json",
+    validation_files[1],
 )
 copy_validation_command = copy_validation_command.replace(
     "<YOUR GCS BUCKET NAME>",
@@ -203,9 +207,53 @@ assert "validations_GCS_store" in stdout
 assert "TupleGCSStoreBackend" in list_validation_stores_output
 assert "TupleGCSStoreBackend" in stdout
 
-# run a checkpoint to ensure validation store is changed
+# delete the validations in the GCS store
+delete_validation_store_files = (
+    f"gsutil -m rm gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
+    + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}/*.json"
+)
 result = subprocess.run(
-    split_commands[1], check=True, stderr=subprocess.PIPE, shell=True
+    delete_validation_store_files, check=True, stderr=subprocess.PIPE, shell=True
 )
 stderr = result.stderr.decode("utf-8")
-context.run_checkpoint(checkpoint_name=checkpoint_name)
+assert "Operation completed over 2 objects" in stderr
+
+list_validation_store_files = (
+    f"gsutil ls gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
+    + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}"
+)
+result = subprocess.run(
+    list_validation_store_files, check=True, stdout=subprocess.PIPE, shell=True
+)
+stdout = result.stdout.decode("utf-8")
+assert (
+    "gs://superconductive-integration-tests/validations/my_expectation_suite/"
+    not in stdout
+)
+
+# get the updated context and run a checkpoint to ensure validation store is updated
+context = ge.get_context()
+validation_result = context.run_checkpoint(checkpoint_name=checkpoint_name)
+assert validation_result["success"] == True
+list_validation_store_files = (
+    f"gsutil ls gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
+    + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}"
+)
+result = subprocess.run(
+    list_validation_store_files, check=True, stdout=subprocess.PIPE, shell=True
+)
+stdout = result.stdout.decode("utf-8")
+assert (
+    "gs://superconductive-integration-tests/validations/my_expectation_suite/" in stdout
+)
+
+# clean up validation store for next time
+delete_validation_store_files = (
+    f"gsutil -m rm gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
+    + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}/**"
+)
+result = subprocess.run(
+    delete_validation_store_files, check=True, stderr=subprocess.PIPE, shell=True
+)
+stderr = result.stderr.decode("utf-8")
+assert "Operation completed over 2 objects" in stderr
