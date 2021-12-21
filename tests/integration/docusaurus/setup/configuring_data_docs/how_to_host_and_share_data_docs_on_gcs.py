@@ -54,7 +54,7 @@ app_yaml = app_yaml.replace(
 team_gcs_app_directory = os.path.join(context.root_directory, "team_gcs_app")
 os.makedirs(team_gcs_app_directory, exist_ok=True)
 
-app_yaml_file_path = os.path.join(team_gcs_app_directory, "app.yml")
+app_yaml_file_path = os.path.join(team_gcs_app_directory, "app.yaml")
 with open(app_yaml_file_path, "w") as f:
     yaml.dump(app_yaml, f)
 
@@ -112,29 +112,53 @@ gcloud_app_deploy_command = """
 gcloud app deploy
 """
 
+result = subprocess.Popen(
+    gcloud_app_deploy_command.strip().split(),
+    cwd=team_gcs_app_directory,
+)
+
 data_docs_site_yaml = """
-  data_docs_sites:
-    local_site:
-      class_name: SiteBuilder
-      show_how_to_buttons: true
-      store_backend:
-        class_name: TupleFilesystemStoreBackend
-        base_directory: uncommitted/data_docs/local_site/
-      site_index_builder:
-        class_name: DefaultSiteIndexBuilder
-    gs_site:  # this is a user-selected name - you may select your own
-      class_name: SiteBuilder
-      store_backend:
-        class_name: TupleGCSStoreBackend
-        project: my_org_project # UPDATE the project name with your own
-        bucket: my_org_data_docs  # UPDATE the bucket name here to match the bucket you configured above
-      site_index_builder:
-        class_name: DefaultSiteIndexBuilder
+data_docs_sites:
+  local_site:
+    class_name: SiteBuilder
+    show_how_to_buttons: true
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/data_docs/local_site/
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+  gs_site:  # this is a user-selected name - you may select your own
+    class_name: SiteBuilder
+    store_backend:
+      class_name: TupleGCSStoreBackend
+      project: <YOUR GCP PROJECT NAME>
+      bucket: <YOUR GCS BUCKET NAME>
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
 """
+data_docs_site_yaml = data_docs_site_yaml.replace(
+    "<YOUR GCP PROJECT NAME>", "superconductive-internal"
+)
+data_docs_site_yaml = data_docs_site_yaml.replace(
+    "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs"
+)
+great_expectations_yaml_file_path = os.path.join(context.root_directory, "great_expectations.yml")
+with open(great_expectations_yaml_file_path, "w") as f:
+    yaml.dump(data_docs_site_yaml, f)
 
 build_data_docs_command = """
-  great_expectations --v3-api docs build --site-name gs_site
+great_expectations --v3-api docs build --site-name gs_site
+"""
 
+result = subprocess.run(
+    create_data_docs_directory.strip().split(),
+    check=True,
+    stdout=subprocess.PIPE,
+)
+stdout = result.stdout.decode("utf-8")
+print(stdout)
+
+build_data_docs_output = """
   The following Data Docs sites will be built:
 
    - gs_site: https://storage.googleapis.com/my_org_data_docs/index.html
@@ -152,3 +176,4 @@ result = subprocess.run(
     check=True,
     stderr=subprocess.PIPE,
 )
+assert "1234" in stdout
