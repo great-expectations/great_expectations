@@ -5,6 +5,7 @@ from collections import OrderedDict
 import mistune
 import pytest
 
+from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
@@ -16,9 +17,14 @@ from great_expectations.render.renderer import (
 from great_expectations.render.types import RenderedContent, RenderedDocumentContent
 
 
-def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
+def test_ExpectationSuitePageRenderer_render_expectation_suite_notes(
+    empty_data_context,
+):
+    context: DataContext = empty_data_context
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(expectation_suite_name="test", meta={"notes": "*hi*"})
+        ExpectationSuite(
+            expectation_suite_name="test", meta={"notes": "*hi*"}, data_context=context
+        )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
@@ -30,6 +36,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
         ExpectationSuite(
             expectation_suite_name="test",
             meta={"notes": ["*alpha*", "_bravo_", "charlie"]},
+            data_context=context,
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -49,6 +56,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
                     "content": ["*alpha*", "_bravo_", "charlie"],
                 }
             },
+            data_context=context,
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -63,6 +71,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
         ExpectationSuite(
             expectation_suite_name="test",
             meta={"notes": {"format": "markdown", "content": "*alpha*"}},
+            data_context=context,
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -92,6 +101,7 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
                     "content": ["*alpha*", "_bravo_", "charlie"],
                 }
             },
+            data_context=context,
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -125,9 +135,17 @@ def test_ExpectationSuitePageRenderer_render_expectation_suite_notes():
         ]
 
 
-def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_suite_notes():
+def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_suite_notes(
+    empty_data_context,
+):
+    context: ExpectationSuite = empty_data_context
     result = ExpectationSuitePageRenderer._render_expectation_suite_notes(
-        ExpectationSuite(expectation_suite_name="test", meta={}, expectations=None)
+        ExpectationSuite(
+            expectation_suite_name="test",
+            meta={},
+            expectations=None,
+            data_context=context,
+        )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
     assert RenderedContent.rendered_content_list_to_json(result.text) == [
@@ -138,6 +156,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
         ExpectationSuite(
             expectation_suite_name="test",
             meta={"notes": {"format": "markdown", "content": ["hi"]}},
+            data_context=context,
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text))
@@ -174,6 +193,7 @@ def test_expectation_summary_in_ExpectationSuitePageRenderer_render_expectation_
                     expectation_type="expect_column_to_exist", kwargs={"column": "y"}
                 ),
             ],
+            data_context=context,
         )
     )
     # print(RenderedContent.rendered_content_list_to_json(result.text)[0])

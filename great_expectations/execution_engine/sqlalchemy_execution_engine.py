@@ -1074,14 +1074,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             }
         )
 
-        temp_table_name: Optional[str]
-        if "bigquery_temp_table" in batch_spec:
-            temp_table_name = batch_spec.get("bigquery_temp_table")
-        else:
-            temp_table_name = None
+        source_schema_name: str = batch_spec.get("schema_name", None)
+        source_table_name: str = batch_spec.get("table_name", None)
 
-        source_table_name = batch_spec.get("table_name", None)
-        source_schema_name = batch_spec.get("schema_name", None)
+        temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
+        temp_table_name: Optional[str] = batch_spec.get("bigquery_temp_table")
+
+        create_temp_table: bool = batch_spec.get(
+            "create_temp_table", self._create_temp_table
+        )
 
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
@@ -1091,10 +1092,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 query=query,
+                temp_table_schema_name=temp_table_schema_name,
                 temp_table_name=temp_table_name,
-                create_temp_table=batch_spec.get(
-                    "create_temp_table", self._create_temp_table
-                ),
+                create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,
             )
@@ -1112,9 +1112,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=self,
                 selectable=selectable,
                 temp_table_name=temp_table_name,
-                create_temp_table=batch_spec.get(
-                    "create_temp_table", self._create_temp_table
-                ),
+                create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,
             )
