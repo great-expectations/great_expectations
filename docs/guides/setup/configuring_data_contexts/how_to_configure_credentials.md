@@ -1,11 +1,76 @@
 ---
-title: How to configure credentials using a secrets store 
+title: How to configure credentials
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 
-Choose which Secret Manager you are using:
+This guide will explain how to configure your ``great_expectations.yml`` project config to populate credentials from either a YAML file or a secret manager.
+
+If your Great Expectations deployment is in an environment without a file system, refer to [How to instantiate a Data Context without a yml file](./how_to_instantiate_a_data_context_without_a_yml_file.md) for credential configuration examples.
+
+<Tabs
+  groupId="yaml-or-secret-manager"
+  defaultValue='yaml'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Secret Manager', value:'secret-manager'},
+  ]}>
+
+<TabItem value="yaml">
+
+<Prerequisites></Prerequisites>
+
+**Steps**
+
+1. Decide where you would like to save the desired credentials or config values - in a YAML file, environment variables, or a combination - then save the values. In most cases, we suggest using a config variables YAML file. YAML files make variables more visible, easily editable, and allow for modularization (e.g. one file for dev, another for prod).
+
+  :::note
+
+    - In the ``great_expectations.yml`` config file, environment variables take precedence over variables defined in a config variables YAML
+    - Environment variable substitution is supported in both the ``great_expectations.yml`` and config variables ``config_variables.yml`` config file.
+
+  :::
+
+  If using a YAML file, save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml`` or another YAML file of your choosing:
+
+  ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L9-L15
+  ```
+
+  :::note
+
+    - If you wish to store values that include the dollar sign character ``$``, please escape them using a backslash ``\`` so substitution is not attempted. For example in the above example for Postgres credentials you could set ``password: pa\$sword`` if your password is ``pa$sword``. Say that 5 times fast, and also please choose a more secure password!
+    - When you save values via the CLI, they are automatically escaped if they contain the ``$`` character.
+    - You can also have multiple substitutions for the same item, e.g. ``database_string: ${USER}:${PASSWORD}@${HOST}:${PORT}/${DATABASE}``
+
+  :::
+
+  If using environment variables, set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
+
+  ```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L19-L25
+  ```
+
+2. If using a YAML file, set the ``config_variables_file_path`` key in your ``great_expectations.yml`` or leave the default.
+
+  ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L29
+  ```
+
+3. Replace credentials or other values in your ``great_expectations.yml`` with ``${}``-wrapped variable names (i.e. ``${ENVIRONMENT_VARIABLE}`` or ``${YAML_KEY}``).
+
+  ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L33-L59
+  ```
+
+
+**Additional Notes**
+
+- The default ``config_variables.yml`` file located at ``great_expectations/uncommitted/config_variables.yml`` applies to deployments created using ``great_expectations init``.
+- To view the full script used in this page, see it on GitHub: [how_to_configure_credentials.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py)
+
+
+</TabItem>
+<TabItem value="secret-manager">
+
+Choose which secret manager you are using:
 <Tabs
   groupId="secret-manager"
   defaultValue='aws'
@@ -21,10 +86,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-- [Knowledge on how to populate credentials](../configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md)
-- Configured a secret store and secrets in the cloud:
-    - [AWS](https://docs.aws.amazon.com/secretsmanager/latest/userguide/tutorials_basic.html)
+- Configured a secret manager and secrets in the cloud with [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/tutorials_basic.html)
 
 </Prerequisites>
 
@@ -38,7 +100,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-#### Setup
+**Setup**
 
 To use AWS Secrets Manager, you may need to install the ``great_expectations`` package with its ``aws_secrets`` extra requirement:
 
@@ -65,11 +127,9 @@ If your secret value is a JSON string, you can retrieve a specific value like th
 Or like this:
 ``secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my_secret:00000000-0000-0000-0000-000000000000|key``
 
-**Example:**
+**Example great_expectations.yml:**
 
 ```yaml
-# great_expectations/great_expectations.yml
-
 datasources:
   dev_postgres_db:
     class_name: SqlAlchemyDatasource
@@ -106,10 +166,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-- [Knowledge on how to populate credentials](../configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md)
-- Configured a secret store and secrets in the cloud:
-    - [GCP](https://cloud.google.com/secret-manager/docs/quickstart)
+- Configured a secret manager and secrets in the cloud with [GCP Secret Manager](https://cloud.google.com/secret-manager/docs/quickstart)
 
 </Prerequisites>
 
@@ -123,7 +180,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-#### Setup
+**Setup**
 
 To use GCP Secret Manager, you may need to install the ``great_expectations`` package with its ``gcp`` extra requirement:
 
@@ -144,11 +201,9 @@ If your secret value is a JSON string, you can retrieve a specific value like th
 Or like this:
 ``secret|projects/project_id/secrets/my_secret/versions/1|key``
 
-**Example:**
+**Example great_expectations.yml:**
 
 ```yaml
-# great_expectations/great_expectations.yml
-
 datasources:
   dev_postgres_db:
     class_name: SqlAlchemyDatasource
@@ -186,9 +241,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 <Prerequisites>
 
 - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-- [Knowledge on how to populate credentials](../configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md)
-- Configured a secret store and secrets in the cloud:
-    - [Azure](https://docs.microsoft.com/azure/key-vault/secrets/quick_create_portal)
+- Configured a secret manager and secrets in the cloud with [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/general/overview)
 
 </Prerequisites>
 
@@ -202,8 +255,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-
-#### Setup
+**Setup**
 
 To use Azure Key Vault, you may need to install the ``great_expectations`` package with its ``azure_secrets`` extra requirement:
 
@@ -225,11 +277,9 @@ Or like this:
 ``secret|https://my-vault-name.vault.azure.net/secrets/my-secret/a0b00aba001aaab10b111001100a11ab|key``
 
 
-**Example:**
+**Example great_expectations.yml:**
 
 ```yaml
-# great_expectations/great_expectations.yml
-
 datasources:
   dev_postgres_db:
     class_name: SqlAlchemyDatasource
@@ -258,6 +308,9 @@ datasources:
       password: secret|https://${VAULT_NAME}.vault.azure.net/secrets/PROD_DB_CREDENTIALS_PASSWORD
       database: secret|https://${VAULT_NAME}.vault.azure.net/secrets/PROD_DB_CREDENTIALS_DATABASE
 ```
+
+</TabItem>
+</Tabs>
 
 </TabItem>
 </Tabs>
