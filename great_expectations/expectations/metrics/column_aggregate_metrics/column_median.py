@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 import numpy as np
 
@@ -16,11 +16,8 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric_value,
-)
+from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -40,7 +37,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         (
@@ -90,7 +87,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         (
