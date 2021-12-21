@@ -158,22 +158,16 @@ split_commands = copy_validation_command.strip().split("gsutil")[1:]
 split_commands[0] = "gsutil " + split_commands[0].strip()
 split_commands[1] = "gsutil " + split_commands[1].strip()
 
-try:
-    result = subprocess.run(
-        split_commands[0], check=True, stderr=subprocess.PIPE, shell=True
-    )
-except Exception as e:
-    print(e.stderr)
+result = subprocess.run(
+    split_commands[0], check=True, stderr=subprocess.PIPE, shell=True
+)
 stderr = result.stderr.decode("utf-8")
 
 assert "Operation completed over 1 objects" in stderr
 
-try:
-    result = subprocess.run(
-        split_commands[1], check=True, stderr=subprocess.PIPE, shell=True
-    )
-except Exception as e:
-    print(e.stderr)
+result = subprocess.run(
+    split_commands[1], check=True, stderr=subprocess.PIPE, shell=True
+)
 stderr = result.stderr.decode("utf-8")
 
 assert "Operation completed over 1 objects" in stderr
@@ -187,16 +181,11 @@ list_validation_stores_command = """
 great_expectations --v3-api store list
 """
 
-try:
-    result = subprocess.run(
-        list_validation_stores_command.strip().split(),
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-except subprocess.CalledProcessError as e:
-    exitcode, err = e.returncode, e.stderr
-    print("exitcode:", exitcode, "stderr:", err)
+result = subprocess.run(
+    list_validation_stores_command.strip().split(),
+    check=True,
+    stdout=subprocess.PIPE,
+)
 stdout = result.stdout.decode("utf-8")
 
 list_validation_stores_output = """
