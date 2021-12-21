@@ -17,9 +17,7 @@ from great_expectations.cli.pretty_printing import cli_colorize_string, cli_mess
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.usage_statistics.usage_statistics import (
-    send_usage_message as send_usage_stats_message,
-)
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
@@ -238,7 +236,11 @@ def exit_with_failure_message_and_stats(
     if message:
         cli_message(string=message)
     if not suppress_usage_message:
-        send_usage_message(data_context=data_context, event=usage_event, success=False)
+        send_usage_message(
+            event=usage_event,
+            data_context=data_context,
+            success=False,
+        )
     sys.exit(1)
 
 
@@ -353,7 +355,9 @@ def select_datasource(
         data_sources: List[BaseDatasource] = cast(
             List[BaseDatasource],
             list(
-                sorted(context.datasources.values(), key=lambda x: x.name),
+                sorted(
+                    context.datasources.values(), key=lambda x: (len(x.name), x.name)
+                ),
             ),
         )
         if len(data_sources) == 0:
@@ -469,8 +473,8 @@ def upgrade_project_strictly_multiple_versions_increment(
         # noinspection PyBroadException
         try:
             send_usage_message(
-                data_context=context,
                 event="cli.project.upgrade.end",
+                data_context=context,
                 success=True,
             )
         except Exception:
@@ -556,9 +560,11 @@ To learn more about the upgrade process, visit \
 
     # noinspection PyBroadException
     try:
-        context: DataContext = DataContext(context_root_dir=context_root_dir)
+        data_context: DataContext = DataContext(context_root_dir=context_root_dir)
         send_usage_message(
-            data_context=context, event="cli.project.upgrade.end", success=False
+            event="cli.project.upgrade.end",
+            data_context=data_context,
+            success=True,
         )
     except Exception:
         # Do not raise error for usage stats
@@ -576,8 +582,8 @@ def upgrade_project_one_or_multiple_versions_increment(
     # noinspection PyBroadException
     try:
         send_usage_message(
-            data_context=context,
             event="cli.project.upgrade.begin",
+            data_context=context,
             success=True,
         )
     except Exception:
@@ -637,8 +643,8 @@ def upgrade_project_one_or_multiple_versions_increment(
         # noinspection PyBroadException
         try:
             send_usage_message(
-                data_context=context,
                 event="cli.project.upgrade.end",
+                data_context=context,
                 success=True,
             )
         except Exception:
@@ -678,8 +684,8 @@ def upgrade_project_zero_versions_increment(
         # noinspection PyBroadException
         try:
             send_usage_message(
-                data_context=context,
                 event="cli.project.upgrade.begin",
+                data_context=context,
                 success=True,
             )
         except Exception:
@@ -713,8 +719,8 @@ def upgrade_project_zero_versions_increment(
         # noinspection PyBroadException
         try:
             send_usage_message(
-                data_context=context,
                 event="cli.project.upgrade.end",
+                data_context=context,
                 success=True,
             )
         except Exception:
@@ -834,8 +840,8 @@ def confirm_proceed_or_exit(
                 # noinspection PyBroadException
                 try:
                     send_usage_message(
-                        data_context=data_context,
                         event=usage_stats_event,
+                        data_context=data_context,
                         event_payload={"cancelled": True},
                         success=True,
                     )
@@ -868,12 +874,14 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
 
         # If the file or directory exists, treat it appropriately
         # This handles files without extensions
+        filename: Optional[str]
+        directory: Optional[str]
         if config_file_location_path.is_file():
-            filename: Optional[str] = fr"{str(config_file_location_path.name)}"
-            directory: Optional[str] = fr"{str(config_file_location_path.parent)}"
+            filename = fr"{str(config_file_location_path.name)}"
+            directory = fr"{str(config_file_location_path.parent)}"
         elif config_file_location_path.is_dir():
-            filename: Optional[str] = None
-            directory: Optional[str] = config_file_location
+            filename = None
+            directory = config_file_location
 
         else:
             raise ge_exceptions.ConfigNotFoundError()
@@ -884,24 +892,6 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
         filename = None
 
     return {"directory": directory, "filename": filename}
-
-
-def send_usage_message(
-    data_context: DataContext,
-    event: str,
-    event_payload: Optional[dict] = None,
-    success: bool = False,
-):
-    if not ((event is None) or (data_context is None)):
-        if event_payload is None:
-            event_payload = {}
-        event_payload.update({"api_version": "v3"})
-        send_usage_stats_message(
-            data_context=data_context,
-            event=event,
-            event_payload=event_payload,
-            success=success,
-        )
 
 
 def is_cloud_file_url(file_path: str) -> bool:
@@ -1060,7 +1050,9 @@ def get_batch_request_from_json_file(
         cli_message(string=f"<red>{e}</red>")
         if not suppress_usage_message:
             send_usage_message(
-                data_context=data_context, event=usage_event, success=False
+                event=usage_event,
+                data_context=data_context,
+                success=False,
             )
         sys.exit(1)
 
@@ -1088,7 +1080,9 @@ def get_batch_request_using_datasource_name(
         cli_message(string="<red>No datasources found in the context.</red>")
         if not suppress_usage_message:
             send_usage_message(
-                data_context=data_context, event=usage_event, success=False
+                event=usage_event,
+                data_context=data_context,
+                success=False,
             )
         sys.exit(1)
 

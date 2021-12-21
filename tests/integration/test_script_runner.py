@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import sys
+from typing import Tuple
 
 import pytest
 
@@ -374,6 +375,16 @@ docs_test_matrix = [
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "extra_backend_dependencies": BackendDependencies.SPARK,
     },
+    {
+        "user_flow_script": "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
 ]
 
 integration_test_matrix = [
@@ -402,6 +413,18 @@ integration_test_matrix = [
         "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
         "user_flow_script": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
+    },
+    {
+        "name": "pandas_execution_engine_with_gcp_installed",
+        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
+        "user_flow_script": "tests/integration/common_workflows/pandas_execution_engine_with_gcp_installed.py",
+        "other_files": (
+            (
+                "tests/integration/fixtures/cloud_provider_configs/gcp/my_example_creds.json",
+                ".gcs/my_example_creds.json",
+            ),
+        ),
     },
 ]
 
@@ -475,6 +498,23 @@ def _execute_integration_test(test_configuration, tmp_path):
                 source_data_dir,
                 test_data_dir,
             )
+
+        # Other files
+        # Other files to copy should be supplied as a tuple of tuples with source, dest pairs
+        # e.g. (("/source1/file1", "/dest1/file1"), ("/source2/file2", "/dest2/file2"))
+        other_files: Tuple[Tuple[str, str]] = test_configuration.get("other_files")
+        if other_files is not None:
+            if not isinstance(other_files, Tuple):
+                raise TypeError("other_files must be of type Tuple[Tuple[str, str]]")
+            if not all(isinstance(t, Tuple) for t in other_files):
+                raise TypeError("other_files must be of type Tuple[Tuple[str, str]]")
+
+            for file_paths in other_files:
+                source_file = os.path.join(base_dir, file_paths[0])
+                dest_file = os.path.join(tmp_path, file_paths[1])
+                dest_dir = os.path.dirname(dest_file)
+                os.makedirs(dest_dir)
+                shutil.copyfile(src=source_file, dst=dest_file)
 
         # UAT Script
         script_source = os.path.join(

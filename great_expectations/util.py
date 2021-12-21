@@ -41,6 +41,11 @@ from great_expectations.exceptions import (
 from great_expectations.expectations.registry import _registered_expectations
 
 try:
+    import black
+except ImportError:
+    black = None
+
+try:
     # This library moved in python 3.8
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
@@ -62,8 +67,6 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
-
-logger = logging.getLogger(__name__)
 
 SINGULAR_TO_PLURAL_LOOKUP_DICT = {
     "batch": "batches",
@@ -160,22 +163,30 @@ def profile(func: Callable = None) -> Callable:
     return profile_function_call
 
 
-def measure_execution_time(func: Callable = None) -> Callable:
-    @wraps(func)
-    def compute_delta_t(*args, **kwargs) -> Any:
-        time_begin: int = int(round(time.time() * 1000))
-        try:
-            return func(*args, **kwargs)
-        finally:
-            time_end: int = int(round(time.time() * 1000))
-            delta_t: int = time_end - time_begin
-            bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-            call_args: OrderedDict = bound_args.arguments
-            print(
-                f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
-            )
+def measure_execution_time(pretty_print: bool = False) -> Callable:
+    def execution_time_decorator(func: Callable) -> Callable:
+        func.execution_duration_milliseconds = 0
 
-    return compute_delta_t
+        @wraps(func)
+        def compute_delta_t(*args, **kwargs) -> Any:
+            time_begin: int = int(round(time.time() * 1000))
+            try:
+                return func(*args, **kwargs)
+            finally:
+                time_end: int = int(round(time.time() * 1000))
+                delta_t: int = time_end - time_begin
+                func.execution_duration_milliseconds = delta_t
+                bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
+                call_args: OrderedDict = bound_args.arguments
+
+                if pretty_print:
+                    print(
+                        f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
+                    )
+
+        return compute_delta_t
+
+    return execution_time_decorator
 
 
 # noinspection SpellCheckingInspection
@@ -911,23 +922,19 @@ def lint_code(code: str) -> str:
     # NOTE: Chetan 20211111 - This import was failing in Azure with 20.8b1 so we bumped up the version to 21.8b0
     # While this seems to resolve the issue, the root cause is yet to be determined.
 
-    try:
-        import black
-
-        black_file_mode = black.FileMode()
-        if not isinstance(code, str):
-            raise TypeError
-        try:
-            linted_code = black.format_file_contents(
-                code, fast=True, mode=black_file_mode
-            )
-            return linted_code
-        except (black.NothingChanged, RuntimeError):
-            return code
-    except ImportError:
+    if black is None:
         logger.warning(
             "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
         )
+        return code
+
+    black_file_mode = black.FileMode()
+    if not isinstance(code, str):
+        raise TypeError
+    try:
+        linted_code = black.format_file_contents(code, fast=True, mode=black_file_mode)
+        return linted_code
+    except (black.NothingChanged, RuntimeError):
         return code
 
 
@@ -1011,8 +1018,8 @@ def filter_properties_dict(
                     if not (
                         (keep_fields and key in keep_fields)
                         or (delete_fields and key in delete_fields)
+                        or is_truthy(value=value)
                         or is_numeric(value=value)
-                        or value
                     )
                 ]
             )
@@ -1024,7 +1031,7 @@ def filter_properties_dict(
                     if not (
                         (keep_fields and key in keep_fields)
                         or (delete_fields and key in delete_fields)
-                        or value
+                        or is_truthy(value=value)
                     )
                 ]
             )
@@ -1040,17 +1047,15 @@ def filter_properties_dict(
     return properties
 
 
-def deep_filter_properties_dict(
-    properties: Optional[dict] = None,
+def deep_filter_properties_iterable(
+    properties: Optional[Union[dict, list, set]] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
     clean_falsy: bool = False,
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
-) -> Optional[dict]:
-    key: str
-    value: Any
+) -> Optional[Union[dict, list, set]]:
     if isinstance(properties, dict):
         if not inplace:
             properties = copy.deepcopy(properties)
@@ -1064,8 +1069,27 @@ def deep_filter_properties_dict(
             keep_falsy_numerics=keep_falsy_numerics,
             inplace=True,
         )
+
+        key: str
+        value: Any
         for key, value in properties.items():
-            deep_filter_properties_dict(
+            deep_filter_properties_iterable(
+                properties=value,
+                keep_fields=keep_fields,
+                delete_fields=delete_fields,
+                clean_nulls=clean_nulls,
+                clean_falsy=clean_falsy,
+                keep_falsy_numerics=keep_falsy_numerics,
+                inplace=True,
+            )
+
+    elif isinstance(properties, (list, set)):
+        if not inplace:
+            properties = copy.deepcopy(properties)
+
+        value: Any
+        for value in properties:
+            deep_filter_properties_iterable(
                 properties=value,
                 keep_fields=keep_fields,
                 delete_fields=delete_fields,
@@ -1081,12 +1105,23 @@ def deep_filter_properties_dict(
     return properties
 
 
+def is_truthy(value: Any) -> bool:
+    try:
+        if value:
+            return True
+        else:
+            return False
+    except ValueError:
+        return False
+
+
 def is_numeric(value: Any) -> bool:
     return value is not None and (is_int(value=value) or is_float(value=value))
 
 
 def is_int(value: Any) -> bool:
     try:
+        # noinspection PyUnusedLocal
         num: int = int(value)
     except (TypeError, ValueError):
         return False
@@ -1095,10 +1130,29 @@ def is_int(value: Any) -> bool:
 
 def is_float(value: Any) -> bool:
     try:
+        # noinspection PyUnusedLocal
         num: float = float(value)
     except (TypeError, ValueError):
         return False
     return True
+
+
+def is_nan(value: Any) -> bool:
+    """
+    If value is an array, test element-wise for NaN and return result as a boolean array.
+    If value is a scalar, return boolean.
+    Args:
+        value: The value to test
+
+    Returns:
+        The results of the test
+    """
+    import numpy as np
+
+    try:
+        return np.isnan(value)
+    except TypeError:
+        return True
 
 
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:
@@ -1144,8 +1198,8 @@ def delete_blank_lines(text: str) -> str:
 
 
 def generate_temporary_table_name(
-    default_table_name_prefix: Optional[str] = "ge_temp_",
-    num_digits: Optional[int] = 8,
+    default_table_name_prefix: str = "ge_temp_",
+    num_digits: int = 8,
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
     return table_name
@@ -1191,3 +1245,15 @@ def get_sqlalchemy_domain_data(domain_data):
     # engine.get_domain_records returns a valid select object;
     # calling fetchall at execution is equivalent to a SELECT *
     return domain_data
+
+
+def import_make_url():
+    """
+    Beginning from SQLAlchemy 1.4, make_url is accessed from sqlalchemy.engine; earlier versions must
+    still be accessed from sqlalchemy.engine.url to avoid import errors.
+    """
+    if version.parse(sa.__version__) < version.parse("1.4"):
+        from sqlalchemy.engine.url import make_url
+    else:
+        from sqlalchemy.engine import make_url
+    return make_url
