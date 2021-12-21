@@ -25,7 +25,7 @@ module.exports = {
       // Public API key: it is safe to commit it
       apiKey: '6ca7609789d2503c8ce189e5575c4936',
 
-      indexName: 'greatexpectations_trial_doc_try2',
+      indexName: 'greatexpectations_trial_doc_try3',
 
       // Optional: see doc section below
       // contextualSearch: true,
