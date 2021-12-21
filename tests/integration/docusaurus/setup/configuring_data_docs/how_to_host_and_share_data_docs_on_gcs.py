@@ -17,7 +17,7 @@ result = subprocess.run(
 try:
     # remove this bucket if there was a failure in the script last time
     result = subprocess.run(
-        "gsutil rm -r gs://superconductive-integration-tests-data-docs/".split(),
+        "gsutil rm -r gs://superconductive-integration-tests-data-docs".split(),
         check=True,
         stderr=subprocess.PIPE,
     )
@@ -143,32 +143,36 @@ data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs"
 )
 great_expectations_yaml_file_path = os.path.join(context.root_directory, "great_expectations.yml")
+with open(great_expectations_yaml_file_path, "r") as f:
+    great_expectations_yaml = yaml.safe_load(f)
+great_expectations_yaml["data_docs_sites"] = yaml.safe_load(data_docs_site_yaml)["data_docs_sites"]
 with open(great_expectations_yaml_file_path, "w") as f:
-    yaml.dump(data_docs_site_yaml, f)
+    yaml.dump(great_expectations_yaml, f)
 
 build_data_docs_command = """
 great_expectations --v3-api docs build --site-name gs_site
 """
 
-result = subprocess.run(
-    create_data_docs_directory.strip().split(),
-    check=True,
+result = subprocess.Popen(
+    "echo Y | " + build_data_docs_command.strip() + " --no-view",
+    shell=True,
     stdout=subprocess.PIPE,
 )
-stdout = result.stdout.decode("utf-8")
-print(stdout)
+stdout = result.stdout.read().decode("utf-8")
 
 build_data_docs_output = """
-  The following Data Docs sites will be built:
+The following Data Docs sites will be built:
 
-   - gs_site: https://storage.googleapis.com/my_org_data_docs/index.html
+ - gs_site: https://storage.googleapis.com/<YOUR GCS BUCKET NAME>/index.html
 
-  Would you like to proceed? [Y/n]: Y
+Would you like to proceed? [Y/n]: Y
+Building Data Docs...
 
-  Building Data Docs...
-
-  Done building Data Docs
+Done building Data Docs
 """
+
+assert "https://storage.googleapis.com/superconductive-integration-tests-data-docs/index.html" in stdout
+assert "Done building Data Docs" in stdout
 
 # remove this bucket to clean up for next time
 result = subprocess.run(
@@ -176,4 +180,3 @@ result = subprocess.run(
     check=True,
     stderr=subprocess.PIPE,
 )
-assert "1234" in stdout
