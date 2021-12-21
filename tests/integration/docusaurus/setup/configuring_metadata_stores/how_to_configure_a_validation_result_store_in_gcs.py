@@ -1,3 +1,4 @@
+import glob
 import os
 import subprocess
 
@@ -7,30 +8,29 @@ import great_expectations as ge
 
 context = ge.get_context()
 
-datasource_config = {
-    "name": "my_datasource",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "module_name": "great_expectations.execution_engine",
-        "class_name": "PandasExecutionEngine",
-    },
-    "data_connectors": {
-        "default_inferred_data_connector_name": {
-            "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "../data/",
-            "default_regex": {"group_names": ["data_asset_name"], "pattern": "(.*)"},
-        },
-    },
-}
-datasource = context.add_datasource(**datasource_config)
-print(datasource.get_available_data_asset_names(data_connector_names=["default_inferred_data_connector_name"]))
+datasource_config = """
+name: my_datasource
+class_name: Datasource
+module_name: great_expectations.datasource
+execution_engine:
+  module_name: great_expectations.execution_engine
+  class_name: PandasExecutionEngine
+data_connectors:
+  default_inferred_data_connector_name:
+    class_name: InferredAssetFilesystemDataConnector
+    base_directory: ../data/
+    default_regex:
+      group_names:
+        - data_asset_name
+      pattern: (.*)\.csv
+"""
+datasource = context.add_datasource(**yaml.safe_load(datasource_config))
 
 expectation_suite_name = "my_expectation_suite"
 context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 checkpoint_name = "my_checkpoint"
-config = f"""
+checkpoint_config = f"""
 name: {checkpoint_name}
 config_version: 1
 class_name: SimpleCheckpoint
@@ -38,15 +38,14 @@ validations:
   - batch_request:
       datasource_name: my_datasource
       data_connector_name: default_inferred_data_connector_name
-      data_asset_name: yellow_tripdata_sample_2019-01.csv
+      data_asset_name: yellow_tripdata_sample_2019-01
     expectation_suite_name: {expectation_suite_name}
 """
-context.add_checkpoint(**yaml.safe_load(config))
-context.run_checkpoint(checkpoint_name=checkpoint_name)
-context.run_checkpoint(checkpoint_name=checkpoint_name)
+context.add_checkpoint(**yaml.safe_load(checkpoint_config))
 
-import glob
-print(glob.glob(f"{context.root_directory}/uncommitted/validations/my_expectation_suite/*"))
+# run the checkpoint twice to create two validations
+context.run_checkpoint(checkpoint_name=checkpoint_name)
+context.run_checkpoint(checkpoint_name=checkpoint_name)
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
@@ -122,21 +121,16 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 # try gsutil cp command
 copy_validation_command = """
-gsutil cp uncommitted/validations/validation_1.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_1.json
-gsutil cp uncommitted/validations/validation_2.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_2.json
+gsutil cp uncommitted/validations/my_expectation_suite/validation_1.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_1.json
+gsutil cp uncommitted/validations/my_expectation_suite/validation_2.json gs://<YOUR GCS BUCKET NAME>/<YOUR GCS PREFIX NAME>/validation_2.json
 """
 
-local_validation_1_file_path = os.path.join(
-    context.root_directory, "validations", "validation_1.json"
-)
-local_validation_2_file_path = os.path.join(
-    context.root_directory, "validations", "validation_1.json"
+validation_files = glob.glob(f"{context.root_directory}/uncommitted/validations/my_expectation_suite/__none__/*/*.json")
+copy_validation_command = copy_validation_command.replace(
+    "uncommitted/validations/my_expectation_suite/validation_1.json", validation_files[0]
 )
 copy_validation_command = copy_validation_command.replace(
-    "uncommitted/validations/validation_1.json", local_validation_1_file_path
-)
-copy_validation_command = copy_validation_command.replace(
-    "uncommitted/validations/validation_2.json", local_validation_1_file_path
+    "uncommitted/validations/my_expectation_suite/validation_2.json", validation_files[1]
 )
 copy_validation_command = copy_validation_command.replace(
     "<YOUR GCS BUCKET NAME>",
@@ -160,21 +154,33 @@ copy_validation_command = copy_validation_command.replace(
 )
 
 # split two commands to be run one at a time
-both_commands = copy_validation_command.strip().replace("\n", "; ")
+split_commands = copy_validation_command.strip().split("gsutil")[1:]
+split_commands[0] = "gsutil " + split_commands[0].strip()
+split_commands[1] = "gsutil " + split_commands[1].strip()
 
 try:
     result = subprocess.run(
-        both_commands, check=True, stderr=subprocess.PIPE, shell=True
+        split_commands[0], check=True, stderr=subprocess.PIPE, shell=True
     )
 except Exception as e:
     print(e.stderr)
 stderr = result.stderr.decode("utf-8")
 
+assert "Operation completed over 1 objects" in stderr
+
+try:
+    result = subprocess.run(
+        split_commands[1], check=True, stderr=subprocess.PIPE, shell=True
+    )
+except Exception as e:
+    print(e.stderr)
+stderr = result.stderr.decode("utf-8")
+
+assert "Operation completed over 1 objects" in stderr
+
 copy_validation_output = """
 Operation completed over 2 objects
 """
-
-assert copy_validation_output.strip() in stderr
 
 # list validation stores
 list_validation_stores_command = """
