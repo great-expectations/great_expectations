@@ -63,7 +63,7 @@ configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend
 ] = "superconductive-integration-tests"
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "prefix"
-] = "expectations"
+] = "how_to_configure_an_expectation_store_in_gcs/expectations"
 
 # add and set the new expectation store
 context.add_store(
