@@ -103,7 +103,21 @@ configured_validations_store["stores"]["validations_GCS_store"]["store_backend"]
 ] = "superconductive-integration-tests"
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "prefix"
-] = "validations"
+] = "how_to_configure_a_validation_result_store_in_gcs/validations"
+
+try:
+    # clean up validation store from last time if there was a failure mid-script
+    delete_validation_store_files = (
+        f"gsutil -m rm gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
+        + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}/**"
+    )
+    result = subprocess.run(
+        delete_validation_store_files, check=True, stderr=subprocess.PIPE, shell=True
+    )
+    stderr = result.stderr.decode("utf-8")
+    assert "Operation completed" in stderr
+except Exception as e:
+    pass
 
 # add and set the new validation store
 context.add_store(
