@@ -65,6 +65,16 @@ configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend
     "prefix"
 ] = "how_to_configure_an_expectation_store_in_gcs/expectations"
 
+try:
+    # remove this bucket if there was a failure in the script last time
+    result = subprocess.run(
+        "gsutil rm -r gs://superconductive-integration-tests/how_to_configure_an_expectation_store_in_gcs/expectations".split(),
+        check=True,
+        stderr=subprocess.PIPE,
+    )
+except Exception as e:
+    pass
+
 # add and set the new expectation store
 context.add_store(
     store_name=configured_expectations_store["expectations_store_name"],
@@ -168,3 +178,10 @@ assert "1 Expectation Suite found:" in list_expectation_suites_output
 assert "1 Expectation Suite found:" in stdout
 assert "my_expectation_suite" in list_expectation_suites_output
 assert "my_expectation_suite" in stdout
+
+# clean up this bucket for next time
+result = subprocess.run(
+    "gsutil rm -r gs://superconductive-integration-tests/how_to_configure_an_expectation_store_in_gcs/expectations".split(),
+    check=True,
+    stderr=subprocess.PIPE,
+)
