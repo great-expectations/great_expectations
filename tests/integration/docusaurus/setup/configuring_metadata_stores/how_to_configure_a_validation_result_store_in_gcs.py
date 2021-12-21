@@ -4,7 +4,6 @@ import subprocess
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations.core.batch import BatchRequest
 
 context = ge.get_context()
 
@@ -24,13 +23,15 @@ datasource_config = {
         },
     },
 }
-context.add_datasource(**datasource_config)
+datasource = context.add_datasource(**datasource_config)
+print(datasource.get_available_data_asset_names(data_connector_names=["default_inferred_data_connector_name"]))
 
 expectation_suite_name = "my_expectation_suite"
 context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
 
+checkpoint_name = "my_checkpoint"
 config = f"""
-name: my_checkpoint
+name: {checkpoint_name}
 config_version: 1
 class_name: SimpleCheckpoint
 validations:
@@ -40,9 +41,9 @@ validations:
       data_asset_name: yellow_tripdata_sample_2019-01.csv
     expectation_suite_name: {expectation_suite_name}
 """
-checkpoint = context.add_checkpoint(**yaml.safe_load(config))
-checkpoint.run()
-checkpoint.run()
+context.add_checkpoint(**yaml.safe_load(config))
+context.run_checkpoint(checkpoint_name=checkpoint_name)
+context.run_checkpoint(checkpoint_name=checkpoint_name)
 
 import glob
 print(glob.glob(f"{context.root_directory}/uncommitted/validations/my_expectation_suite/*"))
