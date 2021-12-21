@@ -40,7 +40,13 @@ result = subprocess.run(
     stderr=subprocess.PIPE,
 )
 stderr = result.stderr.decode("utf-8")
-assert "Creating gs://superconductive-integration-tests-data-docs/..." in stderr
+
+create_data_docs_directory_output = """
+Creating gs://<YOUR GCS BUCKET NAME>/...
+"""
+create_data_docs_directory_output = create_data_docs_directory_output.replace("<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs")
+
+assert create_data_docs_directory_output.strip() in stderr
 
 app_yaml = """
 runtime: python37
