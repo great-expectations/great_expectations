@@ -1072,11 +1072,4 @@ class CloudNotificationAction(ValidationAction):
             "Content-Type": "application/vnd.api+json",
             "Authorization": f"Bearer {self.data_context.ge_cloud_config.access_token}",
         }
-        data = {
-            "cloud_notification_action_id": self.checkpoint_ge_cloud_id,
-            # "validation_result_suite": validation_result_suite.to_json_dict(),
-            "validation_result_suite_identifier": validation_result_suite_identifier,
-        }
-        return send_cloud_notification(
-            url=ge_cloud_url, headers=auth_headers, data=data
-        )
+        return send_cloud_notification(url=ge_cloud_url, headers=auth_headers)

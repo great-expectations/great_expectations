@@ -322,14 +322,14 @@ def validate_validation_dict(validation_dict: dict):
         raise ge_exceptions.CheckpointError("validation action_list cannot be empty")
 
 
-def send_cloud_notification(url: str, headers: dict, data: dict):
+def send_cloud_notification(url: str, headers: dict):
     """
     Post a CloudNotificationAction to GE Cloud Backend for processing.
     """
     session = requests.Session()
 
     try:
-        response = session.post(url=url, headers=headers, json=data)
+        response = session.post(url=url, headers=headers)
     except requests.ConnectionError:
         logger.warning(
             f"Failed to connect to Cloud backend at {url} " f"after {10} retries."
