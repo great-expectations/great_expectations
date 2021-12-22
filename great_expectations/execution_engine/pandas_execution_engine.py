@@ -122,25 +122,26 @@ Notes:
         except (TypeError, AttributeError):
             self._azure = None
 
-        # Can only configure a GCS connection by 1) seting an env var OR 2) passing explicit credentials
-        if os.getenv("GOOGLE_APPLICATION_CREDENTIALS") is None and gcs_options == {}:
+        # Can only configure a GCS connection by 1) setting an env var OR 2) passing explicit credentials OR
+        # 3) Running Great Expectations from within a GCP container, at which point you would be able to create a
+        # storage.Client() without passing in additional ENV var or explicit credentials
+        if gcs_options is None:
+            gcs_options = {}
+        try:
+            credentials = None  # If configured with gcloud CLI / env vars
+            if "filename" in gcs_options:
+                filename = gcs_options.pop("filename")
+                credentials = service_account.Credentials.from_service_account_file(
+                    filename=filename
+                )
+            elif "info" in gcs_options:
+                info = gcs_options.pop("info")
+                credentials = service_account.Credentials.from_service_account_info(
+                    info=info
+                )
+            self._gcs = storage.Client(credentials=credentials, **gcs_options)
+        except (TypeError, AttributeError):
             self._gcs = None
-        else:
-            try:
-                credentials = None  # If configured with gcloud CLI / env vars
-                if "filename" in gcs_options:
-                    filename = gcs_options.pop("filename")
-                    credentials = service_account.Credentials.from_service_account_file(
-                        filename=filename
-                    )
-                elif "info" in gcs_options:
-                    info = gcs_options.pop("info")
-                    credentials = service_account.Credentials.from_service_account_info(
-                        info=info
-                    )
-                self._gcs = storage.Client(credentials=credentials, **gcs_options)
-            except (TypeError, AttributeError):
-                self._gcs = None
 
         super().__init__(*args, **kwargs)
 
