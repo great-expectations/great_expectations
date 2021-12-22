@@ -33,15 +33,15 @@ If your Metric does not yet exist within the framework, you will need to impleme
 
 The parent class expects the variable `metric_name` to be set. Change the value of `metric_name` to something that fits your Metric. Follow these two naming conventions:
 
-* the name should start with “column.”, because it is a column Metric
-* the second part of the name (after the “.”) should be in snake_case format
+* The name should start with `column.`, because it is a column Metric
+* The second part of the name (after the `.`) should be in snake_case format
 
 The parent class of your Metric Provider class is `ColumnMetricProvider`. It uses Python Decorators to hide most of the complexity from you, and give you a clear and simple API to implement one method per backend that computes the metric.
 Implement the computation of the metric in your new Metric Provider class for at least one of the three backends ([**Execution Engines**](../../../reference/execution_engine.md)) that Great Expectations supports: Pandas, SQLAlchemy, and Spark.
 
 Here is the implementation of our example metric for Pandas:
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L40-L43
+```python file=../../../../examples/expectations/column_custom_max_expectation.py#L49-L52
 ```
 This means that the method `_pandas` is a metric function that is decorated as a `column_aggregate_value`. It will be called with the engine-specific column type. It must return a value that is computed over this column. 
 The `engine` argument of `column_aggregate_value` is set to `PandasExecutionEngine` to signal to the method in the parent class that this method computes the Metric for the Pandas backend.
@@ -52,7 +52,7 @@ If you have never used Python Decorators and don’t know what they are and how 
 
 Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark Dialects.
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L35-L54
+```python file=../../../../examples/expectations/column_custom_max_expectation.py#L44-L63
 ```
 
 #### 3. Define Parameters
@@ -71,7 +71,7 @@ Add the following attributes to your Expectation class:
 
 An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class):
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L57-L71
+```python file=../../../../examples/expectations/column_custom_max_expectation.py#L66-L80
 ```
 
 #### 4. Validate Configuration
@@ -79,33 +79,35 @@ An example of Expectation Parameters is shown below (notice that we are now in a
 We have almost reached the end of our journey in implementing an Expectation! 
 Now, if we have requested certain parameters from the user, we would like to validate that the user has entered them correctly via a `validate_configuration` method, and raise an error if the Expectation has been incorrectly configured.
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L110-L127
+```python file=../../../../examples/expectations/column_custom_max_expectation.py#L119-L136
 ```
 
 In this method, the user provides a configuration, and we check that certain conditions are satisfied by the configuration. We need to verify that the basic configuration parameters are set:
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L129-L135
+```python file=../../../../examples/expectations/column_custom_max_expectation.py#L138-L144
 ```
 
 And validate optional configuration parameters. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold:
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L137-L160
+```python file=../../../../examples/expectations/column_custom_max_expectation.py#L146-L169
 ```
 
 #### 5. Validate
 
 In this step, we simply need to validate that the results of our Metrics meet our Expectation.
 
-The validate method is implemented as `_validate`. This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not:
+The validate method is implemented as `_validate`. 
+This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
+and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not:
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L73-L108
+```python file=../../../../examples/expectations/column_custom_max_expectation.py#L82-L117
 ```
+
+You have now implemented your own Custom Expectation! For more information about Expectations and Metrics, please reference the Core Concepts documentation.
 
 :::note
 To use a custom Expectation, you need to ensure it has been placed into your `plugins/` directory and imported into the running Python interpreter.
 :::
-
-You have now implemented your own Custom Expectation! For more information about Expectations and Metrics, please reference the Core Concepts documentation.
 
 ## Next Steps
 
