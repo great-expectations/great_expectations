@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ develop ]
+    branches: [ integrate-algolia-with-docusauras ]
 
 jobs:
 
