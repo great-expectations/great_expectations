@@ -3,9 +3,9 @@ title: How to create a Custom Column Aggregate Expectation
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
-Beginning in version 0.13, we have introduced a new API focused on enabling Modular Expectations. They utilize a class structure that is significantly easier to build than ever before!
+Beginning in version 0.13, we have introduced a new API focused on enabling Modular [**Expectations**](../../../reference/expectations/expectations.md). They utilize a class structure that is significantly easier to build than ever before!
 
-ColumnExpectations are evaluated for a single column, but produce an aggregate metric, such as a mean, standard deviation, number of unique values, column type, etc.
+**ColumnExpectations** are evaluated for a single column, and produce an aggregate [**Metric**](../../../reference/metrics.md), such as a mean, standard deviation, number of unique values, column type, etc.
 
 This guide will walk you through the process of creating your own Modular ColumnExpectations in a few simple steps!
 
@@ -19,17 +19,17 @@ We will be following this [complete example](https://github.com/superconductive/
 
 #### 1. Plan Metric Dependencies
 
-In the new Modular Expectation design, Expectations rely on Metrics defined by separate MetricProvider Classes, which are then referenced within the Expectation and used for computation. For more on Metric Naming Conventions, see our guide on [metric naming conventions](/docs/reference/metrics).
+In the new Modular Expectation design, Expectations rely on Metrics defined by separate MetricProvider Classes, which are then referenced within the Expectation and used for computation. For more on Metric naming conventions, see our guide [here](../../../reference/metrics.md#metrics-naming-conventions).
 
-Once you’ve decided on an Expectation to implement, think of the different aggregations, mappings, or metadata you’ll need to validate your data within the Expectation - each of these will be a separate metric that must be implemented prior to validating your Expectation.
+Once you’ve decided on an Expectation to implement, think of the different aggregations, mappings, or metadata you’ll need to validate your data within the Expectation - each of these will be a separate Metric that must be implemented prior to validating your Expectation.
 
-Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is possible you will find that the Metric you’d like to implement already exists within the GE framework and can be readily deployed.
+Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is possible you will find that the Metric you’d like to implement already exists within the Great Expectations framework and can be readily deployed. If so, you can skip to [Step 3](#3-define-parameters)!
 
-#### 2. Implement your Metric (Optional)
+#### 2. Implement your Metric
 
-Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Expectations and Metrics](docs/reference/metrics).
+Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Expectations and Metrics](../../../reference/metrics).
 
-If your metric does not yet exist within the framework, you will need to implement it yourself in a new class - a task that is quick and simple within the new modular framework. The convention is to implement a new Metric Provider (a class that can compute a metric) that your Expectation depends on in the same file as the Expectation itself.
+If your Metric does not yet exist within the framework, you will need to implement it yourself in a new class - a task that is quick and simple within the new modular framework. The convention is to implement a new Metric Provider (a class that can compute a metric) that your Expectation depends on in the same file as the Expectation itself.
 
 The parent class expects the variable `metric_name` to be set. Change the value of `metric_name` to something that fits your Metric. Follow these two naming conventions:
 
@@ -37,14 +37,14 @@ The parent class expects the variable `metric_name` to be set. Change the value 
 * the second part of the name (after the “.”) should be in snake_case format
 
 The parent class of your Metric Provider class is `ColumnMetricProvider`. It uses Python Decorators to hide most of the complexity from you, and give you a clear and simple API to implement one method per backend that computes the metric.
-Implement the computation of the metric in your new Metric Provider class for at least one of the three backends (Execution Engines) that Great Expectations supports: Pandas, SQLAlchemy, and Spark.
+Implement the computation of the metric in your new Metric Provider class for at least one of the three backends ([**Execution Engines**](../../../reference/execution_engine.md)) that Great Expectations supports: Pandas, SQLAlchemy, and Spark.
 
 Here is the implementation of our example metric for Pandas:
 
 ```python file=../../../../examples/expectations/column_custom_max_expectation.py#L40-L43
 ```
 This means that the method `_pandas` is a metric function that is decorated as a `column_aggregate_value`. It will be called with the engine-specific column type. It must return a value that is computed over this column. 
-The engine argument of `column_aggregate_value` is set to `PandasExecutionEngine` to signal to the method in the parent class that this method computes the Metric for the Pandas backend.
+The `engine` argument of `column_aggregate_value` is set to `PandasExecutionEngine` to signal to the method in the parent class that this method computes the Metric for the Pandas backend.
 
 :::note
 If you have never used Python Decorators and don’t know what they are and how they work, no worries - this should not stop you from successfully implementing your Expectation. Decorators allow the parent class to “wrap” your methods, which means to execute some code before and after your method runs. All you need to know is the name of the Decorator to add (with “@”) above your method definition.
@@ -94,9 +94,9 @@ And validate optional configuration parameters. For example, if the user has giv
 
 #### 5. Validate
 
-In this step, we simply need to validate that the results of our metrics meet our Expectation.
+In this step, we simply need to validate that the results of our Metrics meet our Expectation.
 
-The validate method is implemented as `_validate`. This method takes a dictionary named `metrics`, which contains all metrics requested by your metric dependencies, and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not:
+The validate method is implemented as `_validate`. This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not:
 
 ```python file=../../../../examples/expectations/column_custom_max_expectation.py#L73-L108
 ```
