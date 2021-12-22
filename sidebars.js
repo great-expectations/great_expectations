@@ -3,15 +3,16 @@ module.exports = {
     'intro',
     {
       type: 'category',
-      label: 'Getting Started',
+      label: 'Getting Started (A Tutorial)',
       items: [
-        'tutorials/getting_started/intro',
-        'tutorials/getting_started/initialize_a_data_context',
-        'tutorials/getting_started/connect_to_data',
-        'tutorials/getting_started/create_your_first_expectations',
-        'tutorials/getting_started/check_out_data_docs',
-        'tutorials/getting_started/validate_your_data',
-        'tutorials/getting_started/customize_your_deployment'
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_overview', label: 'Overview' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_setup', label: '1. Setup' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_connect_to_data', label: '2. Connect to Data' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_create_expectations', label: '3. Create Expectations' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_validate_data', label: '4. Validate Data' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_review', label: 'Review and next steps' }
+        // { type: 'doc', id: 'tutorials/getting_started/check_out_data_docs', label: 'Viewing your Results' },
+        // { type: 'doc', id: 'tutorials/getting_started/customize_your_deployment', label: 'Next Steps: Customizing for your Deployment' }
       ]
     },
     {
@@ -19,6 +20,7 @@ module.exports = {
       label: 'Step 1: Setup',
       items: [
         { type: 'doc', id: 'review', label: '! Overview' },
+        { type: 'doc', id: 'reference/supporting_resources' },
         {
           type: 'category',
           label: 'Core Concepts',
@@ -383,7 +385,6 @@ module.exports = {
         { type: 'doc', id: 'review', label: '! Overview' },
         { type: 'doc', id: 'review', label: '! Our Slack Channel' },
         { type: 'doc', id: 'review', label: '! Our Discuss Board' },
-        { type: 'doc', id: 'reference/supporting_resources' }
       ]
     },
     {
