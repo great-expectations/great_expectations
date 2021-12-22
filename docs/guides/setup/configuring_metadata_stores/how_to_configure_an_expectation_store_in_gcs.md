@@ -53,32 +53,32 @@ Steps
 
     One way to copy Expectations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. The following example will copy one Expectation, ``my_expectation_suite`` from a local folder to the GCS bucket. Information on other ways to copy Expectation JSON files, like the Cloud Storage browser in the Google Cloud Console, can be found in the [Documentation for Google Cloud](https://cloud.google.com/storage/docs/uploading-objects).
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L87
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L97
     ```
    
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L118
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L128
     ```
 
 
 5. **Confirm that the new Expectations store has been added by running:**
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L125
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L135
     ```
    
     Only the active Stores will be listed. Great Expectations will look for Expectations in GCS as long as we set the ``expectations_store_name`` variable to ``expectations_GCS_store``, and the config for ``expectations_store`` can be removed if you would like.
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L136-L142
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L146-L152
     ```
 
 
 6. **Confirm that Expectations can be accessed from GCS by running:**
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L152
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L162
     ```
 
     If you followed Step 4, the output should include the Expectation we copied to GCS: ``my_expectation_suite``. If you did not copy Expectations to the new Store, you will see a message saying no Expectations were found.
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L163-L164
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py#L173-L174
     ```
 
 ### Additional Notes
