@@ -31,8 +31,7 @@ The simplest way to manage your Great Expectations configuration is usually by c
 
 Here’s how to handle each of those cases:
 
-* [How to use a YAML file or environment variables to populate credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables)
-* [How to populate credentials from a secrets store](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_secrets_store)
+* [How to configure credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
 * [How to instantiate a Data Context without a yml file](/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file)
 
 ## Options for storing Expectations

@@ -10,7 +10,10 @@ from great_expectations import DataContext
 
 # noinspection PyProtectedMember
 from great_expectations.cli.v012.suite import _suite_edit
-from great_expectations.core.expectation_suite import ExpectationSuiteSchema
+from great_expectations.core.expectation_suite import (
+    ExpectationSuite,
+    ExpectationSuiteSchema,
+)
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
@@ -20,11 +23,12 @@ from great_expectations.render.renderer.suite_edit_notebook_renderer import (
 
 
 @pytest.fixture
-def critical_suite_with_citations():
+def critical_suite_with_citations(empty_data_context) -> ExpectationSuite:
     """
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including an BasicSuiteBuilderProfiler entry, and citations.
     """
+    context: DataContext = empty_data_context
     schema = ExpectationSuiteSchema()
     critical_suite = {
         "expectation_suite_name": "critical",
@@ -89,16 +93,18 @@ def critical_suite_with_citations():
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(critical_suite))
+    expectation_suite_dict: dict = schema.loads(json.dumps(critical_suite))
+    return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 @pytest.fixture
-def suite_with_multiple_citations():
+def suite_with_multiple_citations(empty_data_context) -> ExpectationSuite:
     """
     A handmade suite with multiple citations each with different batch_kwargs.
 
     The most recent citation does not have batch_kwargs
     """
+    context: DataContext = empty_data_context
     schema = ExpectationSuiteSchema()
     critical_suite = {
         "expectation_suite_name": "critical",
@@ -144,15 +150,17 @@ def suite_with_multiple_citations():
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(critical_suite))
+    expectation_suite_dict: dict = schema.loads(json.dumps(critical_suite))
+    return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 @pytest.fixture
-def warning_suite():
+def warning_suite(empty_data_context) -> ExpectationSuite:
     """
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including BasicSuiteBuilderProfiler entries.
     """
+    context: DataContext = empty_data_context
     schema = ExpectationSuiteSchema()
     warning_suite = {
         "expectation_suite_name": "warning",
@@ -386,7 +394,8 @@ def warning_suite():
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(warning_suite))
+    expectation_suite_dict: dict = schema.loads(json.dumps(warning_suite))
+    return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
