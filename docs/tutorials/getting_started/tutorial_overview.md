@@ -46,7 +46,7 @@ For a tutorial for older versions of Great Expectations, please see older versio
     </td>
     <td>
         <h4>Create Expectations</h4>
-        <p>You will then create your first <b>Expectation Suite</b> using the built-in automated <b>Profiler</b>. We'll also give you a tour of <b>Data Docs</b> to view your <b>Validation Results</b>.</p>
+        <p>You will then create your first <b>Expectation Suite</b> using the built-in automated <b>Profiler</b>. You'll also take your first look at <b>Data Docs</b>, where you will be able to see the <b>Expectations</b> that were created.</p>
     </td>
 </tr>
 <tr>
