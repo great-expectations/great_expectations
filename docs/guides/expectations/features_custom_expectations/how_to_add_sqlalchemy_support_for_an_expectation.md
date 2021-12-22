@@ -15,7 +15,7 @@ This guide will help you implement native SQLAlchemy support for your custom Met
 
 - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- Implemented a [custom Expectation](../../../guides/expectations/creating_custom_expectations/how_to_create_custom_expectations.md).
+- Implemented a [custom Expectation](../../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
     
 </Prerequisites>
 

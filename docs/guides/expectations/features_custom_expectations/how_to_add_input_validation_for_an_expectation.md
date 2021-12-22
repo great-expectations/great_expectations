@@ -12,7 +12,7 @@ This how-to guide assumes you have already:
 
 Our Expectation will typically be configured using input parameters: for example, we might expect the fraction of null values to be most `mostly=.05`. We can define the `validate_configuration` method of our Expectation to ensure that the input parameters constitute a valid configuration, so that it raises an exception if `mostly=-2` or `mostly=Joe`. 
 
-In the follwoing example, given input parameters of a minimum and maximum threshold, we verify that our minimum threshold does not exceed our maximum threshold:
+In the following example, given input parameters of a minimum and maximum threshold, we verify that our minimum threshold does not exceed our maximum threshold:
 
 ````python
 def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):

@@ -18,7 +18,7 @@ This guide will help you implement renderers for your custom Expectations, allow
 
 - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- Implemented a [custom Expectation](../../../guides/expectations/creating_custom_expectations/how_to_create_custom_expectations.md).
+- Implemented a [custom Expectation](../../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
 - Set up a [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md) site.
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md) containing your custom Expectation.
 - Generated one Validation Result ([Validation Operator](../../../guides/validation/how_to_add_a_validation_operator.md)) containing your custom Expectation
