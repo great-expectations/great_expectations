@@ -1,0 +1,11 @@
+- name: Algolia Docsearch Indexer
+  # You may pin to the exact commit or the version.
+  # uses: darrenjennings/algolia-docsearch-action@e3b8c5540e90a964b655be6ca73c1ee1aeba2719
+  uses: darrenjennings/algolia-docsearch-action@v0.2.0
+  with:
+    # Algolia docsearch APPLICATION_ID
+    algolia_application_id: 
+    # Algolia docsearch API_KEY
+    algolia_api_key: 
+    # File path to docsearch
+    file: 
