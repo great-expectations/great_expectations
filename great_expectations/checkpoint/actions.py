@@ -6,6 +6,7 @@ The only requirement from an action is for it to have a take_action method.
 import logging
 import warnings
 from typing import Dict, Optional
+from urllib.parse import urljoin
 
 from great_expectations.core import (
     ExpectationSuiteValidationResult,
@@ -1062,11 +1063,10 @@ class CloudNotificationAction(ValidationAction):
             return Exception(
                 "CloudNotificationActions can only be used in GE Cloud Mode."
             )
-
-        ge_cloud_url = (
-            self.data_context.ge_cloud_config.base_url
-            + f"/accounts/{self.data_context.ge_cloud_config.account_id}"
-            + f"/cloud-notification-action/{self.checkpoint_ge_cloud_id}"
+        ge_cloud_url = urljoin(
+            self.data_context.ge_cloud_config.base_url,
+            f"/accounts/{self.data_context.ge_cloud_config.account_id}/contracts/"
+            f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.ge_cloud_id}/notification-actions",
         )
         auth_headers = {
             "Content-Type": "application/vnd.api+json",
