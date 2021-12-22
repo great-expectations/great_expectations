@@ -22,7 +22,7 @@ For a tutorial for older versions of Great Expectations, please see older versio
     </td>
     <td>
         <h4>Setup</h4>
-        <p>First, we will make sure you have Great Expectations installed and show you how to initialize a <b>Data Context.</b></p>
+        <p>First, we will make sure you have Great Expectations installed and show you how to initialize a %%Data Context|data_context%%.</p>
     </td>
 </tr>
 <tr>
@@ -34,7 +34,7 @@ For a tutorial for older versions of Great Expectations, please see older versio
     </td>
     <td>
         <h4>Connect to Data</h4>
-        <p>Then you will learn how to configure a <b>Datasource</b> to connect to your data.</p>
+        <p>Then you will learn how to configure a %%Datasource|datasource%% to connect to your data.</p>
     </td>
 </tr>
 <tr>
@@ -46,7 +46,7 @@ For a tutorial for older versions of Great Expectations, please see older versio
     </td>
     <td>
         <h4>Create Expectations</h4>
-        <p>You will then create your first <b>Expectation Suite</b> using the built-in automated <b>Profiler</b>. You'll also take your first look at <b>Data Docs</b>, where you will be able to see the <b>Expectations</b> that were created.</p>
+        <p>You will then create your first %%Expectation Suite|expectation_suite%% using the built-in automated %%Profiler|profiler%%. You'll also take your first look at %%Data Docs|data_docs%%, where you will be able to see the %%Expectations|expectation%% that were created.</p>
     </td>
 </tr>
 <tr>
@@ -58,7 +58,7 @@ For a tutorial for older versions of Great Expectations, please see older versio
     </td>
     <td>
         <h4>Validate Data</h4>
-        <p>Finally, we will show you how to use this Expectation Suite to <b>validate</b> a new batch of data, and take a deeper look at the Data Docs which will show your Validation Results.</p>
+        <p>Finally, we will show you how to use this Expectation Suite to %%validate|validation%% a new batch of data, and take a deeper look at the Data Docs which will show your %%Validation Results|validation_result%%.</p>
     </td>
 </tr>
 </table>
