@@ -3,7 +3,7 @@ module.exports = {
     'intro',
     {
       type: 'category',
-      label: 'Getting Started (A Tutorial)',
+      label: 'Getting Started (A 15 minute tutorial)',
       items: [
         { type: 'doc', id: 'tutorials/getting_started/tutorial_overview', label: 'Overview' },
         { type: 'doc', id: 'tutorials/getting_started/tutorial_setup', label: '1. Setup' },
@@ -334,7 +334,7 @@ module.exports = {
         { type: 'doc', id: 'review', label: '! Core Concepts' },
         { type: 'doc', id: 'review', label: '! Expectations Gallery' },
         { type: 'doc', id: 'review', label: '! CLI command reference' },
-        { type: 'doc', id: 'review', label: '! Glossary of terms' },
+        { type: 'doc', id: 'glossary', label: 'Glossary of terms' },
         { type: 'doc', label: 'API Reference', id: 'reference/api_reference' }
       ]
     },
