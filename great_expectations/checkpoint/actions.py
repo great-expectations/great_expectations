@@ -1047,7 +1047,7 @@ class CloudNotificationAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: GeCloudIdentifier,
         data_asset=None,
         payload: Optional[Dict] = None,
         expectation_suite_identifier=None,
