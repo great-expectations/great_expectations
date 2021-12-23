@@ -2,7 +2,6 @@ import copy
 import datetime
 import hashlib
 import logging
-import os
 import pickle
 import random
 import warnings
@@ -10,7 +9,6 @@ from functools import partial
 from io import BytesIO
 from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 
-import botocore.handlers
 import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
