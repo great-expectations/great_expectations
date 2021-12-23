@@ -31,9 +31,9 @@ Expectations rely on Metrics to produce their result. A Metric is any observable
 
 If your Metric does not yet exist within the framework, you will need to implement it yourself in a new class - a task that is quick and simple within the new modular framework. The convention is to implement a new Metric Provider (a class that can compute a metric) that your Expectation depends on in the same file as the Expectation itself.
 
-The parent class expects the variable `metric_name` to be set. Change the value of `metric_name` to something that fits your Metric. Follow these two naming conventions:
+The parent class expects the variable `condition_metric_name` to be set. Change the value of `condition_metric_name` to something that fits your Metric. Follow these two naming conventions:
 
-* The name should start with `column.`, because it is a column Metric
+* The name should start with `column_values.`, because it is a column map Metric
 * The second part of the name (after the `.`) should be in snake_case format
 
 The parent class of your Metric Provider class is `ColumnMapMetricProvider`. It uses Python Decorators to hide most of the complexity from you, and give you a clear and simple API to implement one method per backend that computes the metric.
@@ -44,7 +44,7 @@ Here is the implementation of our example metric for Pandas:
 :::caution Under Construction
 :::
 
-This means that the method `_pandas` is a metric function that is decorated as a `column_condition`. It will be called with the engine-specific column type. It must return a boolean value for each row of the column. 
+This means that the method `_pandas` is a metric function that is decorated as a `column_condition_partial`. It will be called with the engine-specific column type. It must return a boolean value for each row of the column. 
 The `engine` argument of `column_condition_partial` is set to `PandasExecutionEngine` to signal to the method in the parent class that this method computes the Metric for the Pandas backend.
 
 :::note
