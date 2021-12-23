@@ -15,7 +15,7 @@ from great_expectations.exceptions import (
 )
 from great_expectations.types import ClassConfig
 from great_expectations.types.configurations import classConfigSchema
-from great_expectations.util import get_sqlalchemy_url
+from great_expectations.util import get_sqlalchemy_url, import_make_url
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +23,8 @@ try:
     import sqlalchemy
     from sqlalchemy import create_engine
     from sqlalchemy.sql.elements import quoted_name
+
+    make_url = import_make_url()
 
 except ImportError:
     sqlalchemy = None
@@ -257,7 +259,8 @@ class SqlAlchemyDatasource(LegacyDatasource):
                     connection.close()
                 elif "url" in credentials:
                     url = credentials.pop("url")
-                    self.drivername = urlparse(url).scheme
+                    parsed_url = make_url(url)
+                    self.drivername = parsed_url.drivername
                     self.engine = create_engine(url, **kwargs)
                     connection = self.engine.connect()
                     connection.close()

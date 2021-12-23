@@ -14,9 +14,15 @@ from great_expectations.cli.suite import (
     _process_suite_new_flags_and_prompt,
 )
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import (
+    BatchRequest,
+    standardize_batch_request_display_ordering,
+)
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.util import lint_code
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    CLISuiteInteractiveFlagCombinations,
+)
+from great_expectations.util import deep_filter_properties_iterable, lint_code
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 from tests.render.test_util import (
     find_code_in_notebook,
@@ -79,7 +85,11 @@ def test_suite_demo_deprecation_message(
 
     expected_call_args_list = [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -179,7 +189,11 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
     assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -191,12 +205,22 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
         mock.call(
             {
                 "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": False,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": True,
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
     ]
 
@@ -279,7 +303,11 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -291,12 +319,22 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
         mock.call(
             {
                 "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": False,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": True,
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
     ]
 
@@ -377,7 +415,11 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
     assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -389,12 +431,22 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
         mock.call(
             {
                 "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": False,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": True,
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
     ]
 
@@ -475,7 +527,11 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
     assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -487,12 +543,22 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
         mock.call(
             {
                 "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": False,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": True,
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
     ]
 
@@ -546,7 +612,11 @@ nonexistent_file.json --no-jupyter
     assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -563,7 +633,11 @@ nonexistent_file.json --no-jupyter
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
     ]
 
@@ -623,7 +697,11 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
     assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -640,7 +718,11 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
     ]
 
@@ -705,11 +787,20 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
     )
     assert os.path.isfile(expected_notebook_path)
 
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
@@ -753,7 +844,11 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
     assert mock_emit.call_count == 5
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -764,22 +859,32 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
         ),
         mock.call(
             {
+                "event": "data_context.save_expectation_suite",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
                 },
-                "event": "data_context.save_expectation_suite",
                 "success": True,
             }
         ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": True,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": True,
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
     ]
 
@@ -814,7 +919,11 @@ def test_suite_edit_without_suite_name_raises_error(
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -867,7 +976,11 @@ def test_suite_edit_datasource_and_batch_request_error(
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -879,7 +992,13 @@ def test_suite_edit_datasource_and_batch_request_error(
         mock.call(
             {
                 "event": "cli.suite.edit.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": None,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.ERROR_DATASOURCE_SPECIFIED_BATCH_REQUEST_SPECIFIED.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": False,
             }
         ),
@@ -931,7 +1050,11 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -1010,7 +1133,11 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -1022,7 +1149,13 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
         mock.call(
             {
                 "event": "cli.suite.edit.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": True,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_DATASOURCE_SPECIFIED.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": False,
             }
         ),
@@ -1078,11 +1211,20 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
         "data_asset_name": "Titanic_1911",
         "limit": 1000,
     }
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
@@ -1111,9 +1253,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     assert mock_webbrowser.call_count == 0
     mock_webbrowser.reset_mock()
 
-    assert mock_subprocess.call_count == 0
-    mock_subprocess.reset_mock()
-
     # remove the citations from the suite
     context = DataContext(context_root_dir=project_dir)
 
@@ -1138,7 +1277,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
             f"{expectation_suite_name}",
             "--interactive",
         ],
-        input="2\n1\n1\n\n",
+        input="1\n1\n1\n1\n",
         catch_exceptions=False,
     )
 
@@ -1190,7 +1329,11 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     assert mock_emit.call_count == 10
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -1201,34 +1344,48 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
         ),
         mock.call(
             {
+                "event": "data_context.save_expectation_suite",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
                 },
-                "event": "data_context.save_expectation_suite",
                 "success": True,
             }
         ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": True,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": True,
             }
-        ),
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event_payload": {
-                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-                },
-                "event": "data_context.save_expectation_suite",
+                "event": "data_context.__init__",
+                "event_payload": {},
                 "success": True,
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -1239,10 +1396,10 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
         ),
         mock.call(
             {
+                "event": "data_context.save_expectation_suite",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
                 },
-                "event": "data_context.save_expectation_suite",
                 "success": True,
             }
         ),
@@ -1250,6 +1407,10 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
             {
                 "event": "cli.suite.edit.end",
                 "event_payload": {
+                    "interactive_flag": True,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
                     "api_version": "v3",
                 },
@@ -1305,11 +1466,20 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
         "data_asset_name": "Titanic_1911",
         "limit": 1000,
     }
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
@@ -1326,7 +1496,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
             "--interactive",
             "--no-jupyter",
         ],
-        input="2\n1\n1\n\n",
+        input="1\n1\n1\n\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1412,7 +1582,11 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     assert mock_emit.call_count == 8
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -1423,25 +1597,39 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
         ),
         mock.call(
             {
+                "event": "data_context.save_expectation_suite",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
                 },
-                "event": "data_context.save_expectation_suite",
                 "success": True,
             }
         ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": True,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": True,
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -1454,8 +1642,12 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
             {
                 "event": "cli.suite.edit.end",
                 "event_payload": {
-                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
+                    "interactive_flag": True,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "api_version": "v3",
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
                 },
                 "success": True,
             }
@@ -1512,11 +1704,20 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
         "data_asset_name": "titanic",
         "limit": 1000,
     }
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
@@ -1572,7 +1773,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
             f"{expectation_suite_name}",
             "--interactive",
         ],
-        input="3\n2\ny\n2\n",
+        input="2\n2\n2\n1\n",
         catch_exceptions=False,
     )
 
@@ -1624,7 +1825,11 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     assert mock_emit.call_count == 10
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -1635,34 +1840,48 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
         ),
         mock.call(
             {
+                "event": "data_context.save_expectation_suite",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
                 },
-                "event": "data_context.save_expectation_suite",
                 "success": True,
             }
         ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": True,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": True,
             }
-        ),
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
         ),
         mock.call(
             {
-                "event_payload": {
-                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-                },
-                "event": "data_context.save_expectation_suite",
+                "event": "data_context.__init__",
+                "event_payload": {},
                 "success": True,
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -1673,10 +1892,10 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
         ),
         mock.call(
             {
+                "event": "data_context.save_expectation_suite",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
                 },
-                "event": "data_context.save_expectation_suite",
                 "success": True,
             }
         ),
@@ -1684,6 +1903,10 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
             {
                 "event": "cli.suite.edit.end",
                 "event_payload": {
+                    "interactive_flag": True,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
                     "api_version": "v3",
                 },
@@ -1739,11 +1962,20 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
         "data_asset_name": "titanic",
         "limit": 1000,
     }
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
@@ -1760,7 +1992,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
             "--interactive",
             "--no-jupyter",
         ],
-        input="3\n2\ny\n2\n",
+        input="2\n2\ny\n2\n",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1846,7 +2078,11 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
     assert mock_emit.call_count == 8
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -1857,25 +2093,39 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
         ),
         mock.call(
             {
+                "event": "data_context.save_expectation_suite",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
                 },
-                "event": "data_context.save_expectation_suite",
                 "success": True,
             }
         ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": True,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": True,
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -1888,6 +2138,10 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
             {
                 "event": "cli.suite.edit.end",
                 "event_payload": {
+                    "interactive_flag": True,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE.value[
+                        "interactive_attribution"
+                    ],
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe",
                     "api_version": "v3",
                 },
@@ -1971,7 +2225,11 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2024,7 +2282,11 @@ def test_suite_list_with_zero_suites(
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2086,7 +2348,11 @@ def test_suite_list_with_one_suite(
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2155,7 +2421,11 @@ def test_suite_list_with_multiple_suites(
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2203,7 +2473,11 @@ def test_suite_delete_with_zero_suites(
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2264,7 +2538,11 @@ def test_suite_delete_with_non_existent_suite(
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2341,7 +2619,11 @@ def test_suite_delete_with_one_suite(
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2418,7 +2700,11 @@ def test_suite_delete_canceled_with_one_suite(
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2491,7 +2777,11 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2580,7 +2870,11 @@ def test_suite_new_profile_on_context_with_no_datasource_raises_error(
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2681,7 +2975,11 @@ def test_suite_new_profile_on_existing_suite_raises_error(
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2786,11 +3084,20 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     )
     assert os.path.isfile(expected_notebook_path)
 
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
@@ -2876,10 +3183,14 @@ suite = profiler.build_suite()"""
 
     assert mock_webbroser.call_count == 0
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -2890,22 +3201,45 @@ suite = profiler.build_suite()"""
         ),
         mock.call(
             {
+                "event": "data_context.save_expectation_suite",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
                 },
-                "event": "data_context.save_expectation_suite",
                 "success": True,
             }
         ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": True,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": True,
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "anonymized_batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                        "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                    }
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
     ]
 
@@ -2992,11 +3326,20 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     )
     assert os.path.isfile(expected_notebook_path)
 
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+        keep_falsy_numerics=True,
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
     batch_request_string: str = (
-        str(BatchRequest(**batch_request))
-        .replace("{\n", "{\n  ")
-        .replace(",\n", ",\n  ")
-        .replace("\n}", ",\n}")
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
     )
     batch_request_string = fr"batch_request = {batch_request_string}"
 
@@ -3086,10 +3429,14 @@ suite = profiler.build_suite()"""
 
     assert mock_webbroser.call_count == 0
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
     assert mock_emit.call_args_list == [
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
         mock.call(
             {
@@ -3100,22 +3447,45 @@ suite = profiler.build_suite()"""
         ),
         mock.call(
             {
+                "event": "data_context.save_expectation_suite",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
                 },
-                "event": "data_context.save_expectation_suite",
                 "success": True,
             }
         ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
-                "event_payload": {"api_version": "v3"},
+                "event_payload": {
+                    "interactive_flag": True,
+                    "interactive_attribution": CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE.value[
+                        "interactive_attribution"
+                    ],
+                    "api_version": "v3",
+                },
                 "success": True,
             }
         ),
         mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            {
+                "event": "data_context.get_batch_list",
+                "event_payload": {
+                    "anonymized_batch_request_required_top_level_properties": {
+                        "anonymized_datasource_name": "a732a247720783a5931fa7c4606403c2",
+                        "anonymized_data_connector_name": "af09acd176f54642635a8a2975305437",
+                        "anonymized_data_asset_name": "38b9086d45a8746d014a0d63ad58e331",
+                    }
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_context.__init__",
+                "event_payload": {},
+                "success": True,
+            }
         ),
     ]
 
@@ -3155,7 +3525,7 @@ How would you like to create your Expectation Suite?
             None,
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE,
             False,
             "no_msg",
             "no_msg",
@@ -3169,7 +3539,7 @@ How would you like to create your Expectation Suite?
             None,
             False,
             None,
-            False,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE,
             False,
             "no_msg",
             "no_msg",
@@ -3183,7 +3553,7 @@ How would you like to create your Expectation Suite?
             None,
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE,
             True,
             "no_msg",
             "no_msg",
@@ -3196,7 +3566,7 @@ How would you like to create your Expectation Suite?
             None,
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE,
             True,
             "no_msg",
             "no_msg",
@@ -3210,7 +3580,7 @@ How would you like to create your Expectation Suite?
             "batch_request.json",
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE,
             False,
             "no_msg",
             "no_msg",
@@ -3223,7 +3593,7 @@ How would you like to create your Expectation Suite?
             "batch_request.json",
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_PROFILE_TRUE,
             True,
             "happy_path_profile",
             "no_msg",
@@ -3236,7 +3606,7 @@ How would you like to create your Expectation Suite?
             "batch_request.json",
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_PROFILE_TRUE,
             True,
             "no_msg",
             "no_msg",
@@ -3251,7 +3621,7 @@ How would you like to create your Expectation Suite?
             None,
             False,
             "",
-            False,
+            CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT,
             False,
             "no_msg",
             "no_msg",
@@ -3265,7 +3635,7 @@ How would you like to create your Expectation Suite?
             None,
             False,
             "1",
-            False,
+            CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE,
             False,
             "no_msg",
             "no_msg",
@@ -3279,7 +3649,7 @@ How would you like to create your Expectation Suite?
             None,
             False,
             "2",
-            True,
+            CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_FALSE,
             False,
             "no_msg",
             "no_msg",
@@ -3293,7 +3663,7 @@ How would you like to create your Expectation Suite?
             None,
             False,
             "3",
-            True,
+            CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE_PROFILE_TRUE,
             True,
             "no_msg",
             "no_msg",
@@ -3308,7 +3678,7 @@ How would you like to create your Expectation Suite?
             "batch_request.json",
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED,
             False,
             "warning_batch_request",
             "no_msg",
@@ -3321,7 +3691,7 @@ How would you like to create your Expectation Suite?
             "batch_request.json",
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE,
             True,
             "warning_profile",
             "no_msg",
@@ -3335,7 +3705,7 @@ How would you like to create your Expectation Suite?
             None,
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_PROFILE_TRUE,
             True,
             "warning_profile",
             "no_msg",
@@ -3350,7 +3720,7 @@ How would you like to create your Expectation Suite?
             None,
             True,
             None,
-            None,
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE,
             None,
             "error_both_interactive_flags",
             "no_msg",
@@ -3363,7 +3733,7 @@ How would you like to create your Expectation Suite?
             "batch_request.json",
             True,
             None,
-            None,
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE,
             None,
             "error_both_interactive_flags",
             "no_msg",
@@ -3377,7 +3747,7 @@ How would you like to create your Expectation Suite?
             None,
             True,
             None,
-            None,
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE,
             None,
             "error_both_interactive_flags",
             "no_msg",
@@ -3390,7 +3760,7 @@ How would you like to create your Expectation Suite?
             "batch_request.json",
             True,
             None,
-            None,
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE,
             None,
             "error_both_interactive_flags",
             "no_msg",
@@ -3431,7 +3801,7 @@ def test__process_suite_new_flags_and_prompt(
     if not error_expected:
         if prompt_input is not None:
             mock_prompt.side_effect = [prompt_input]
-        processed_flags = _process_suite_new_flags_and_prompt(
+        processed_flags: dict = _process_suite_new_flags_and_prompt(
             context=context,
             usage_event_end=usage_event_end,
             interactive_flag=interactive_flag,
@@ -3440,7 +3810,7 @@ def test__process_suite_new_flags_and_prompt(
             batch_request=batch_request_flag,
         )
         assert processed_flags == {
-            "interactive": return_interactive,
+            "interactive_mode": return_interactive,
             "profile": return_profile,
         }
         # Note - in this method on happy path no usage stats message is sent. Other messages are sent during the full
@@ -3488,7 +3858,13 @@ def test__process_suite_new_flags_and_prompt(
             mock.call(
                 {
                     "event": usage_event_end,
-                    "event_payload": {"api_version": "v3"},
+                    "event_payload": {
+                        "interactive_flag": None,
+                        "interactive_attribution": return_interactive.value[
+                            "interactive_attribution"
+                        ],
+                        "api_version": "v3",
+                    },
                     "success": False,
                 }
             ),
@@ -3527,7 +3903,7 @@ options can be used.
             None,
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE,
             "no_msg",
             "no_msg",
             id="--interactive",
@@ -3540,7 +3916,7 @@ options can be used.
             None,
             False,
             None,
-            False,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE,
             "no_msg",
             "no_msg",
             id="--manual",
@@ -3553,7 +3929,7 @@ options can be used.
             None,
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_DATASOURCE_SPECIFIED,
             "happy_path_datasource_name",
             "no_msg",
             id="--datasource-name",
@@ -3565,7 +3941,7 @@ options can be used.
             None,
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_TRUE_MANUAL_FALSE_DATASOURCE_SPECIFIED,
             "no_msg",
             "no_msg",
             id="--interactive --datasource-name",
@@ -3578,7 +3954,7 @@ options can be used.
             "batch_request.json",
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_TRUE_MANUAL_FALSE,
             "no_msg",
             "no_msg",
             id="--interactive --batch-request",
@@ -3590,7 +3966,7 @@ options can be used.
             "batch_request.json",
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_FALSE_BATCH_REQUEST_SPECIFIED,
             "happy_path_batch_request",
             "no_msg",
             id="--batch-request",
@@ -3604,12 +3980,12 @@ options can be used.
             None,
             False,
             "",
-            False,
+            CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_DEFAULT,
             "no_msg",
             "no_msg",
             id="prompt: Default Choice 1 - Manual suite edit (default)",
         ),
-        # # Choice 1 - Manual suite edit (default)
+        # Choice 1 - Manual suite edit (default)
         pytest.param(
             False,
             False,
@@ -3617,12 +3993,12 @@ options can be used.
             None,
             False,
             "1",
-            False,
+            CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_FALSE,
             "no_msg",
             "no_msg",
             id="prompt: Choice 1 - Manual suite edit (default)",
         ),
-        # Choice 2 - Interactive suite edit
+        # # Choice 2 - Interactive suite edit
         pytest.param(
             False,
             False,
@@ -3630,7 +4006,7 @@ options can be used.
             None,
             False,
             "2",
-            True,
+            CLISuiteInteractiveFlagCombinations.PROMPTED_CHOICE_TRUE,
             "no_msg",
             "no_msg",
             id="prompt: Choice 2 - Interactive suite edit",
@@ -3644,7 +4020,7 @@ options can be used.
             "batch_request.json",
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_BATCH_REQUEST_SPECIFIED,
             "warning_batch_request",
             "no_msg",
             id="warning: --manual --batch-request",
@@ -3657,7 +4033,7 @@ options can be used.
             None,
             False,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.UNPROMPTED_OVERRIDE_INTERACTIVE_FALSE_MANUAL_TRUE_DATASOURCE_SPECIFIED,
             "warning_datasource_name",
             "no_msg",
             id="warning: --manual --datasource-name",
@@ -3671,7 +4047,7 @@ options can be used.
             None,
             True,
             None,
-            None,
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE,
             "error_both_interactive_flags",
             "no_msg",
             id="error: --interactive --manual",
@@ -3683,7 +4059,7 @@ options can be used.
             "batch_request.json",
             True,
             None,
-            None,
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE,
             "error_both_interactive_flags",
             "no_msg",
             id="error: --interactive --manual --batch-request",
@@ -3696,7 +4072,7 @@ options can be used.
             None,
             True,
             None,
-            None,
+            CLISuiteInteractiveFlagCombinations.ERROR_INTERACTIVE_TRUE_MANUAL_TRUE,
             "error_both_interactive_flags",
             "no_msg",
             id="error: --interactive --manual --datasource-name",
@@ -3708,7 +4084,7 @@ options can be used.
             "batch_request.json",
             True,
             None,
-            None,
+            CLISuiteInteractiveFlagCombinations.ERROR_DATASOURCE_SPECIFIED_BATCH_REQUEST_SPECIFIED,
             "error_both_datasource_name_and_batch_request_flags",
             "no_msg",
             id="error: --interactive --manual --datasource-name --batch-request",
@@ -3721,7 +4097,7 @@ options can be used.
             "batch_request.json",
             True,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.ERROR_DATASOURCE_SPECIFIED_BATCH_REQUEST_SPECIFIED,
             "error_both_datasource_name_and_batch_request_flags",
             "no_msg",
             id="error: --datasource-name --batch-request",
@@ -3733,7 +4109,7 @@ options can be used.
             "batch_request.json",
             True,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.ERROR_DATASOURCE_SPECIFIED_BATCH_REQUEST_SPECIFIED,
             "error_both_datasource_name_and_batch_request_flags",
             "no_msg",
             id="--interactive --datasource-name --batch-request",
@@ -3745,7 +4121,7 @@ options can be used.
             "batch_request.json",
             True,
             None,
-            True,
+            CLISuiteInteractiveFlagCombinations.ERROR_DATASOURCE_SPECIFIED_BATCH_REQUEST_SPECIFIED,
             "error_both_datasource_name_and_batch_request_flags",
             "no_msg",
             id="--manual --datasource-name --batch-request",
@@ -3784,15 +4160,17 @@ def test__process_suite_edit_flags_and_prompt(
     if not error_expected:
         if prompt_input is not None:
             mock_prompt.side_effect = [prompt_input]
-        interactive: bool = _process_suite_edit_flags_and_prompt(
-            context=context,
-            usage_event_end=usage_event_end,
-            interactive_flag=interactive_flag,
-            manual_flag=manual_flag,
-            datasource_name=datasource_name_flag,
-            batch_request=batch_request_flag,
+        interactive_mode: CLISuiteInteractiveFlagCombinations = (
+            _process_suite_edit_flags_and_prompt(
+                context=context,
+                usage_event_end=usage_event_end,
+                interactive_flag=interactive_flag,
+                manual_flag=manual_flag,
+                datasource_name=datasource_name_flag,
+                batch_request=batch_request_flag,
+            )
         )
-        assert interactive == return_interactive
+        assert interactive_mode == return_interactive
         # Note - in this method on happy path no usage stats message is sent. Other messages are sent during the full
         #  CLI suite new flow of creating a notebook etc.
         assert mock_emit.call_count == 0
@@ -3838,7 +4216,13 @@ def test__process_suite_edit_flags_and_prompt(
             mock.call(
                 {
                     "event": usage_event_end,
-                    "event_payload": {"api_version": "v3"},
+                    "event_payload": {
+                        "interactive_flag": None,
+                        "interactive_attribution": return_interactive.value[
+                            "interactive_attribution"
+                        ],
+                        "api_version": "v3",
+                    },
                     "success": False,
                 }
             ),

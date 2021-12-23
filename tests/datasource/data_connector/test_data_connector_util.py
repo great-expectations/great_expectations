@@ -231,6 +231,41 @@ def test_convert_data_reference_string_to_batch_identifiers_using_regex():
     )
 
 
+def test_convert_data_reference_string_to_batch_identifiers_using_regex_with_named_groups(
+    caplog,
+):
+    data_reference = "alex_20200809_1000.csv"
+    pattern = r"^(?P<name>.+)_(?P<timestamp>\d+)_(?P<price>\d+)\.csv$"
+
+    group_names = ["name", "timestamp", "price"]
+    assert convert_data_reference_string_to_batch_identifiers_using_regex(
+        data_reference=data_reference, regex_pattern=pattern, group_names=group_names
+    ) == (
+        "DEFAULT_ASSET_NAME",
+        IDDict(
+            {
+                "name": "alex",
+                "timestamp": "20200809",
+                "price": "1000",
+            }
+        ),
+    )
+
+    group_names = ["name", "timestamp", "cost"]  # Mismatch between "price" and "cost"!
+    assert convert_data_reference_string_to_batch_identifiers_using_regex(
+        data_reference=data_reference, regex_pattern=pattern, group_names=group_names
+    ) == (
+        "DEFAULT_ASSET_NAME",
+        IDDict(
+            {
+                "name": "alex",
+                "timestamp": "20200809",
+            }
+        ),
+    )
+    assert "The named group 'price' must explicitly be stated" in caplog.text
+
+
 def test_map_batch_definition_to_data_reference_string_using_regex():
     # not BatchDefinition
     my_batch_definition = "I_am_a_string"

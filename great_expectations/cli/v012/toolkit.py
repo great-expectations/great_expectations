@@ -19,9 +19,7 @@ from great_expectations.cli.v012.util import cli_colorize_string, cli_message
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.usage_statistics.usage_statistics import (
-    send_usage_message as send_usage_stats_message,
-)
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
@@ -347,7 +345,12 @@ def exit_with_failure_message_and_stats(
     context: DataContext, usage_event: str, message: str
 ) -> None:
     cli_message(message)
-    send_usage_message(context, event=usage_event, success=False)
+    send_usage_message(
+        data_context=context,
+        event=usage_event,
+        api_version="v2",
+        success=False,
+    )
     sys.exit(1)
 
 
@@ -629,20 +632,3 @@ def confirm_proceed_or_exit(
         else:
             return False
     return True
-
-
-def send_usage_message(
-    data_context: DataContext,
-    event: str,
-    event_payload: Optional[dict] = None,
-    success: bool = False,
-):
-    if event_payload is None:
-        event_payload = {}
-    event_payload.update({"api_version": "v2"})
-    send_usage_stats_message(
-        data_context=data_context,
-        event=event,
-        event_payload=event_payload,
-        success=success,
-    )

@@ -29,7 +29,7 @@ class ColumnValuesInSet(ColumnMapMetricProvider):
         **kwargs,
     ):
         # no need to parse as datetime; just compare the strings as is
-        parse_strings_as_datetimes: Optional[bool] = (
+        parse_strings_as_datetimes: bool = (
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
@@ -54,7 +54,7 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
         **kwargs,
     ):
         # no need to parse as datetime; just compare the strings as is
-        parse_strings_as_datetimes: Optional[bool] = (
+        parse_strings_as_datetimes: bool = (
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
@@ -82,7 +82,7 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
         **kwargs,
     ):
         # no need to parse as datetime; just compare the strings as is
-        parse_strings_as_datetimes: Optional[bool] = (
+        parse_strings_as_datetimes: bool = (
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
