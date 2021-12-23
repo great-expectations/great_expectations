@@ -33,7 +33,6 @@ from great_expectations.expectations.registry import (
     register_renderer,
 )
 from great_expectations.expectations.util import (
-    legacy_method_parameters,
     render_evaluation_parameter_string,
 )
 from great_expectations.self_check.util import (
@@ -139,7 +138,6 @@ class Expectation(metaclass=MetaExpectation):
         "result_format": "BASIC",
     }
     args_keys = None
-    legacy_method_parameters = legacy_method_parameters
 
     def __init__(self, configuration: Optional[ExpectationConfiguration] = None):
         if configuration is not None:

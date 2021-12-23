@@ -142,6 +142,11 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "quantile_ranges",
+        "allow_relative_error",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)

@@ -120,6 +120,10 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "value_set",
+    )
 
     @classmethod
     def _atomic_prescriptive_template(

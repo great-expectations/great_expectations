@@ -270,11 +270,7 @@ class Validator:
 
             meta = expectation_kwargs.pop("meta", None)
 
-            args_keys = expectation_impl.args_keys
-            if args_keys is None:
-                # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
-                # positional arguments to expectation methods
-                args_keys = expectation_impl.legacy_method_parameters.get(name, tuple())
+            args_keys = expectation_impl.args_keys or tuple()
 
             for idx, arg in enumerate(args):
                 try:

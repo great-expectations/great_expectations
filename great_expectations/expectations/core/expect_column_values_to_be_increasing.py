@@ -90,6 +90,9 @@ class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):
         "catch_exceptions": False,
         "parse_strings_as_datetimes": False,
     }
+    args_keys = (
+        "column",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         return super().validate_configuration(configuration)

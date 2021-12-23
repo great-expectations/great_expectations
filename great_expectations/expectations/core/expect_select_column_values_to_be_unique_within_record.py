@@ -70,6 +70,9 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column_list",
+    )
 
     @classmethod
     def _atomic_prescriptive_template(
