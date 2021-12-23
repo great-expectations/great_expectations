@@ -647,16 +647,6 @@ def test_get_batch_with_split_on_whole_table_s3(
     assert df.dataframe.shape == test_df_small.shape
 
 
-def test_get_batch_with_no_s3_configured(batch_with_split_on_whole_table_s3):
-    # if S3 was not configured
-    execution_engine_no_s3 = PandasExecutionEngine()
-    execution_engine_no_s3._s3 = None
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
-        execution_engine_no_s3.get_batch_data(
-            batch_spec=batch_with_split_on_whole_table_s3
-        )
-
-
 def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_connector(
     test_s3_files, test_df_small
 ):
@@ -1038,7 +1028,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     custom_gcs_options = {"filename": "a/b/c/my_gcs_credentials.json"}
     engine = PandasExecutionEngine(gcs_options=custom_gcs_options)
     assert "gcs_options" in engine.config
-    assert "filename" not in engine.config.get("gcs_options")
+    assert "filename" in engine.config.get("gcs_options")
 
 
 @mock.patch(
@@ -1073,13 +1063,3 @@ def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monke
     monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS", raising=False)
     with pytest.raises(Exception):
         PandasExecutionEngine().get_batch_data(batch_spec=gcs_batch_spec)
-
-
-def test_get_batch_with_no_gcs_configured(gcs_batch_spec):
-    # if GCS Client was not configured
-    execution_engine_no_gcs = PandasExecutionEngine()
-    execution_engine_no_gcs._gcs = None
-
-    # Raises error due the connection object not being set
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
-        execution_engine_no_gcs.get_batch_data(batch_spec=gcs_batch_spec)

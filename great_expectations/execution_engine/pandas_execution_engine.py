@@ -108,23 +108,11 @@ Notes:
         azure_options: dict = kwargs.pop("azure_options", {})
         gcs_options: dict = kwargs.pop("gcs_options", {})
 
-        # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
-        try:
-            self._s3 = boto3.client("s3", **boto3_options)
-        except (TypeError, AttributeError):
-            self._s3 = None
-
-        try:
-            if "conn_str" in azure_options:
-                self._azure = BlobServiceClient.from_connection_string(**azure_options)
-            else:
-                self._azure = BlobServiceClient(**azure_options)
-        except (TypeError, AttributeError):
-            self._azure = None
-
-        # Instantiate cloud provider clients as None at first. We will try to instantiate when passed in BatchSpec
+        # Instantiate cloud provider clients as None at first.
+        # They will be instantiated if/when passed cloud-specific in BatchSpec is passed in
+        self._s3 = None
+        self._azure = None
         self._gcs = None
-        self._gcs_options = gcs_options
 
         super().__init__(*args, **kwargs)
 
@@ -136,6 +124,51 @@ Notes:
                 "gcs_options": gcs_options,
             }
         )
+
+    def _instantiate_azure_client(self):
+        azure_options = self.config.get("azure_options", {})
+        try:
+            if "conn_str" in azure_options:
+                self._azure = BlobServiceClient.from_connection_string(**azure_options)
+            else:
+                self._azure = BlobServiceClient(**azure_options)
+        except (TypeError, AttributeError):
+            self._azure = None
+
+    def _instantiate_s3_client(self):
+        # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
+        boto3_options = self.config.get("boto3_options", {})
+        try:
+            self._s3 = boto3.client("s3", **boto3_options)
+        except (TypeError, AttributeError):
+            self._s3 = None
+
+    def _instantiate_gcs_client(self):
+        """
+        Helper method for instantiating GCS client when GCSBatchSpec is passed in.
+
+        The method accounts for 3 ways that a GCS connection can be configured:
+            1. setting an environment variable, which is typically GOOGLE_APPLICATION_CREDENTIALS
+            2. passing in explicit credentials via gcs_options
+            3. running Great Expectations from within a GCP container, at which you would be able to create a Client
+                without passing in an additional environment variable or explicit credentials
+        """
+        gcs_options = self.config.get("gcs_options", {})
+        try:
+            credentials = None  # If configured with gcloud CLI / env vars
+            if "filename" in gcs_options:
+                filename = gcs_options.pop("filename")
+                credentials = service_account.Credentials.from_service_account_file(
+                    filename=filename
+                )
+            elif "info" in gcs_options:
+                info = gcs_options.pop("info")
+                credentials = service_account.Credentials.from_service_account_info(
+                    info=info
+                )
+            self._gcs = storage.Client(credentials=credentials, **gcs_options)
+        except (TypeError, AttributeError, DefaultCredentialsError):
+            self._gcs = None
 
     def configure_validator(self, validator):
         super().configure_validator(validator)
@@ -185,6 +218,9 @@ Please check your config."""
 
         elif isinstance(batch_spec, S3BatchSpec):
             if self._s3 is None:
+                self._instantiate_s3_client()
+            # if we were not able to instantiate S3 client, then raise error
+            if self._s3 is None:
                 raise ge_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine has been passed a S3BatchSpec,
                         but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
@@ -211,6 +247,9 @@ Please check your config."""
 
         elif isinstance(batch_spec, AzureBatchSpec):
             if self._azure is None:
+                self._instantiate_azure_client()
+            # if we were not able to instantiate Azure client, then raise error
+            if self._azure is None:
                 raise ge_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine has been passed a AzureBatchSpec,
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
@@ -234,8 +273,7 @@ Please check your config."""
 
         elif isinstance(batch_spec, GCSBatchSpec):
             if self._gcs is None:
-                self._instantiate_GCS_client()
-
+                self._instantiate_gcs_client()
             # if we were not able to instantiate GCS client, then raise error
             if self._gcs is None:
                 raise ge_exceptions.ExecutionEngineError(
@@ -275,36 +313,6 @@ Please check your config."""
         typed_batch_data = PandasBatchData(execution_engine=self, dataframe=df)
 
         return typed_batch_data, batch_markers
-
-    def _instantiate_GCS_client(self):
-        """
-        Helper method for instantiating GCS client when GCSBatchSpec is passed in.
-
-        The method accounts for 3 ways that a GCS connection can be configured:
-            1. setting an environment variable, which is typically GOOGLE_APPLICATION_CREDENTIALS
-            2. passing in explicit credentials via gcs_options
-            3. running Great Expectations from within a GCP container, at which you would be able to create a Client
-                without passing in an additional environment variable or explicit credentials
-        """
-        if self._gcs_options is None:
-            gcs_options = {}
-        else:
-            gcs_options = self._gcs_options
-        try:
-            credentials = None  # If configured with gcloud CLI / env vars
-            if "filename" in gcs_options:
-                filename = gcs_options.pop("filename")
-                credentials = service_account.Credentials.from_service_account_file(
-                    filename=filename
-                )
-            elif "info" in gcs_options:
-                info = gcs_options.pop("info")
-                credentials = service_account.Credentials.from_service_account_info(
-                    info=info
-                )
-            self._gcs = storage.Client(credentials=credentials, **gcs_options)
-        except (TypeError, AttributeError, DefaultCredentialsError):
-            self._gcs = None
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):
