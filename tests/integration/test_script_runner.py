@@ -389,6 +389,24 @@ docs_test_matrix = [
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    # },
+    # {
+    #     "user_flow_script": "tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    # },
 ]
 
 integration_test_matrix = [
