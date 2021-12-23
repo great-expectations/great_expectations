@@ -49,7 +49,7 @@ class ExpectationSuite(SerializableDictDot):
     def __init__(
         self,
         expectation_suite_name,
-        data_context,
+        data_context=None,
         expectations=None,
         evaluation_parameters=None,
         data_asset_type=None,
