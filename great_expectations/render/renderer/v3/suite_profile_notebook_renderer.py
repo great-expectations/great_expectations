@@ -3,10 +3,14 @@ from typing import Any, Dict, List, Union
 import nbformat
 
 from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import (
+    BatchRequest,
+    standardize_batch_request_display_ordering,
+)
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
+from great_expectations.util import deep_filter_properties_iterable
 
 
 class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
@@ -20,6 +24,16 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
 
         if batch_request is None:
             batch_request = {}
+
+        deep_filter_properties_iterable(
+            properties=batch_request,
+            keep_falsy_numerics=True,
+            inplace=True,
+        )
+        batch_request = standardize_batch_request_display_ordering(
+            batch_request=batch_request
+        )
+
         self.batch_request = batch_request
 
         self.validator = context.get_validator(

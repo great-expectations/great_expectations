@@ -2,6 +2,8 @@ import json
 
 import pytest
 
+from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.util import file_relative_path
@@ -10,7 +12,8 @@ from great_expectations.self_check.util import expectationSuiteSchema
 
 
 @pytest.fixture()
-def parameterized_expectation_suite():
+def parameterized_expectation_suite(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     fixture_path = file_relative_path(
         __file__,
         "../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
@@ -18,7 +21,8 @@ def parameterized_expectation_suite():
     with open(
         fixture_path,
     ) as suite:
-        return expectationSuiteSchema.load(json.load(suite))
+        expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(suite))
+        return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 @pytest.fixture

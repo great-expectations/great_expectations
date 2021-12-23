@@ -8,8 +8,7 @@ This guide will explain how to use a Validation Action to update Data Docs sites
 
 <Prerequisites>
 
- - Learned [How to add a Validation Operator](../how_to_add_a_validation_operator)
- - Set up a `.py` class: `great_expectations.validation_operators.validation_operators.ActionListValidationOperator` **or**
+  - Set up a `.py` class: `great_expectations.validation_operators.validation_operators.ActionListValidationOperator` **or**
  - Set up a `.py` class: `great_expectations.validation_operators.validation_operators.WarningAndFailureExpectationSuitesValidationOperator`
  - Created at least one Expectation Suite.
  - Created at least one [Checkpoint](../checkpoints/how_to_create_a_new_checkpoint). You will need it in order to test that your new Validation Operator is working.

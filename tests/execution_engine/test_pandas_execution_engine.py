@@ -264,9 +264,13 @@ def test_get_domain_records_with_column_pair_domain():
     )
 
     expected_column_pair_df = pd.DataFrame(
-        {"a": [2, 3, 4, 6], "b": [3.0, 4.0, 5.0, 6.0], "c": [2.0, 3.0, 4.0, None]}
+        {
+            "a": [2, 3, 4, 6],
+            "b": [3.0, 4.0, 5.0, 6.0],
+            "c": [2.0, 3.0, 4.0, None],
+        },
+        index=[1, 2, 3, 5],
     )
-
     assert data.equals(
         expected_column_pair_df
     ), "Data does not match after getting full access compute domain"
@@ -283,7 +287,7 @@ def test_get_domain_records_with_column_pair_domain():
     data = data.astype(int)
 
     expected_column_pair_df = pd.DataFrame(
-        {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}
+        {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}, index=[1, 2, 3]
     )
 
     assert data.equals(
@@ -336,7 +340,7 @@ def test_get_domain_records_with_multicolumn_domain():
     data = data.astype(int)
 
     expected_multicolumn_df = pd.DataFrame(
-        {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
+        {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[1, 2, 3, 5]
     )
 
     assert data.equals(
@@ -468,7 +472,7 @@ def test_get_compute_domain_with_column_domain():
 def test_get_compute_domain_with_row_condition():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    expected_df = df[df["b"] > 2].reset_index()
+    expected_df = df[df["b"] > 2]
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -493,7 +497,7 @@ def test_get_compute_domain_with_row_condition():
 def test_get_compute_domain_with_unmeetable_row_condition():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    expected_df = df[df["b"] > 24].reset_index()
+    expected_df = df[df["b"] > 24]
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
