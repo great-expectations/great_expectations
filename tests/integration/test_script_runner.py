@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import sys
+from typing import Tuple
 
 import pytest
 
@@ -24,16 +25,27 @@ class BackendDependencies(enum.Enum):
 
 docs_test_matrix = [
     {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
+    },
+    {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.BIGQUERY,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.BIGQUERY,
     },
@@ -124,15 +136,14 @@ docs_test_matrix = [
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/configured_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     # },
-    # TODO: <Alex>ALEX -- uncomment next two (2) tests once S3 testing in Azure Pipelines is re-enabled.</Alex>
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    # },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    # },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and S3 Configured YAML Example is implemented.</Alex>
     # {
@@ -148,10 +159,12 @@ docs_test_matrix = [
     # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     #     "extra_backend_dependencies": BackendDependencies.SPARK,
     # },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py",
+    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     #     "extra_backend_dependencies": BackendDependencies.SPARK,
     # },
     # Redshift
@@ -159,38 +172,38 @@ docs_test_matrix = [
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
     #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
     # },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
     #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
     # },
     {
         "name": "getting_started",
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "user_flow_script": "tests/integration/docusaurus/tutorials/getting-started/getting_started.py",
     },
     {
         "name": "how_to_get_a_batch_of_data_from_a_configured_datasource",
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py",
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
+        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     },
     {
         "user_flow_script": "tests/integration/docusaurus/expectations/creating_custom_expectations/column_map_equal_three_example.py",
@@ -203,41 +216,63 @@ docs_test_matrix = [
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/sqlite/",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
         "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/sqlite/",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
+        "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
+        "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
         "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
     },
     {
@@ -262,76 +297,164 @@ docs_test_matrix = [
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "extra_backend_dependencies": BackendDependencies.SPARK,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "extra_backend_dependencies": BackendDependencies.SPARK,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mssql_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.MSSQL,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mssql_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.MSSQL,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/dataconnector_docs",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/dataconnector_docs",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/dataconnector_docs",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/dataconnector_docs",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
     },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
     #     "extra_backend_dependencies": BackendDependencies.MYSQL,
     # },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
     #     "extra_backend_dependencies": BackendDependencies.MYSQL,
     # },
     # {
     #     "name": "rule_base_profiler_multi_batch_example",
-    #     "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples/first_3_files",
+    #     "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
     # },
+    {
+        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "extra_backend_dependencies": BackendDependencies.SPARK,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
 ]
 
 integration_test_matrix = [
     {
         "name": "pandas_one_multi_batch_request_one_validator",
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/one_multi_batch_request_one_validator.py",
+        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/one_multi_batch_request_one_validator.py",
     },
     {
         "name": "pandas_two_batch_requests_two_validators",
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/two_batch_requests_two_validators.py",
+        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/two_batch_requests_two_validators.py",
         "expected_stderrs": "",
         "expected_stdouts": "",
     },
     {
         "name": "pandas_multiple_batch_requests_one_validator_multiple_steps",
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
+        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
     },
     {
         "name": "pandas_multiple_batch_requests_one_validator_one_step",
-        "data_context_dir": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_trip_data_samples",
-        "user_flow_script": "tests/integration/fixtures/yellow_trip_data_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
+        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
+        "user_flow_script": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
+    },
+    {
+        "name": "pandas_execution_engine_with_gcp_installed",
+        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
+        "user_flow_script": "tests/integration/common_workflows/pandas_execution_engine_with_gcp_installed.py",
+        "other_files": (
+            (
+                "tests/integration/fixtures/cloud_provider_configs/gcp/my_example_creds.json",
+                ".gcs/my_example_creds.json",
+            ),
+        ),
+    },
+    {
+        "name": "pandas_execution_engine_with_gcp_installed",
+        "user_flow_script": "tests/integration/common_workflows/simple_build_data_docs.py",
     },
 ]
 
@@ -405,6 +528,23 @@ def _execute_integration_test(test_configuration, tmp_path):
                 source_data_dir,
                 test_data_dir,
             )
+
+        # Other files
+        # Other files to copy should be supplied as a tuple of tuples with source, dest pairs
+        # e.g. (("/source1/file1", "/dest1/file1"), ("/source2/file2", "/dest2/file2"))
+        other_files: Tuple[Tuple[str, str]] = test_configuration.get("other_files")
+        if other_files is not None:
+            if not isinstance(other_files, Tuple):
+                raise TypeError("other_files must be of type Tuple[Tuple[str, str]]")
+            if not all(isinstance(t, Tuple) for t in other_files):
+                raise TypeError("other_files must be of type Tuple[Tuple[str, str]]")
+
+            for file_paths in other_files:
+                source_file = os.path.join(base_dir, file_paths[0])
+                dest_file = os.path.join(tmp_path, file_paths[1])
+                dest_dir = os.path.dirname(dest_file)
+                os.makedirs(dest_dir)
+                shutil.copyfile(src=source_file, dst=dest_file)
 
         # UAT Script
         script_source = os.path.join(

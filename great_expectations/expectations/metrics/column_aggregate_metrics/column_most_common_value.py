@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -11,15 +11,10 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
-    column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
-    sa as sa,
-)
-from great_expectations.expectations.metrics.import_manager import F
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class ColumnMostCommonValue(ColumnAggregateMetricProvider):
@@ -36,7 +31,7 @@ class ColumnMostCommonValue(ColumnAggregateMetricProvider):
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         column_value_counts = metrics.get("column.value_counts")
@@ -50,7 +45,7 @@ class ColumnMostCommonValue(ColumnAggregateMetricProvider):
         execution_engine: "SqlAlchemyExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         column_value_counts = metrics.get("column.value_counts")

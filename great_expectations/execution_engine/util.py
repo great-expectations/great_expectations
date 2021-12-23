@@ -1,11 +1,10 @@
 # Utility methods for dealing with Dataset objects
-
 import logging
 from typing import Any, List
 
 import numpy as np
 
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 

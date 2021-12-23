@@ -28,11 +28,14 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.execution_engine import (
+    ExecutionEngine,
+    MetricDomainTypes,
+)
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
@@ -261,9 +264,13 @@ def test_get_domain_records_with_column_pair_domain():
     )
 
     expected_column_pair_df = pd.DataFrame(
-        {"a": [2, 3, 4, 6], "b": [3.0, 4.0, 5.0, 6.0], "c": [2.0, 3.0, 4.0, None]}
+        {
+            "a": [2, 3, 4, 6],
+            "b": [3.0, 4.0, 5.0, 6.0],
+            "c": [2.0, 3.0, 4.0, None],
+        },
+        index=[1, 2, 3, 5],
     )
-
     assert data.equals(
         expected_column_pair_df
     ), "Data does not match after getting full access compute domain"
@@ -280,7 +287,7 @@ def test_get_domain_records_with_column_pair_domain():
     data = data.astype(int)
 
     expected_column_pair_df = pd.DataFrame(
-        {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}
+        {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}, index=[1, 2, 3]
     )
 
     assert data.equals(
@@ -333,7 +340,7 @@ def test_get_domain_records_with_multicolumn_domain():
     data = data.astype(int)
 
     expected_multicolumn_df = pd.DataFrame(
-        {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
+        {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[1, 2, 3, 5]
     )
 
     assert data.equals(
@@ -465,7 +472,7 @@ def test_get_compute_domain_with_column_domain():
 def test_get_compute_domain_with_row_condition():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    expected_df = df[df["b"] > 2].reset_index()
+    expected_df = df[df["b"] > 2]
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -490,7 +497,7 @@ def test_get_compute_domain_with_row_condition():
 def test_get_compute_domain_with_unmeetable_row_condition():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    expected_df = df[df["b"] > 24].reset_index()
+    expected_df = df[df["b"] > 24]
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -656,16 +663,19 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
     bucket, _keys = test_s3_files
     expected_df = test_df_small
 
+    execution_engine: ExecutionEngine = PandasExecutionEngine()
+
     my_data_connector = ConfiguredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        bucket=bucket,
+        execution_engine=execution_engine,
+        prefix="",
+        assets={"alpha": {}},
         default_regex={
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        bucket=bucket,
-        prefix="",
-        assets={"alpha": {}},
     )
     batch_def = BatchDefinition(
         datasource_name="FAKE_DATASOURCE_NAME",
@@ -677,7 +687,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
             "splitter_method": "_split_on_whole_table",
         },
     )
-    test_df = PandasExecutionEngine().get_batch_data(
+    test_df = execution_engine.get_batch_data(
         batch_spec=my_data_connector.build_batch_spec(batch_definition=batch_def)
     )
     assert test_df.dataframe.shape == expected_df.shape
@@ -694,7 +704,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
         },
     )
     with pytest.raises(ClientError):
-        PandasExecutionEngine().get_batch_data(
+        execution_engine.get_batch_data(
             batch_spec=my_data_connector.build_batch_spec(
                 batch_definition=batch_def_no_key
             )
@@ -1028,9 +1038,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     custom_gcs_options = {"filename": "a/b/c/my_gcs_credentials.json"}
     engine = PandasExecutionEngine(gcs_options=custom_gcs_options)
     assert "gcs_options" in engine.config
-    assert (
-        engine.config.get("gcs_options")["filename"] == "a/b/c/my_gcs_credentials.json"
-    )
+    assert "filename" not in engine.config.get("gcs_options")
 
 
 @mock.patch(

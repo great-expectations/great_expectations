@@ -1,7 +1,12 @@
 import json
 from copy import deepcopy
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+from great_expectations.core.batch import (
+    delete_runtime_parameters_batch_data_references_from_config,
+    get_runtime_parameters_batch_data_references_from_config,
+    restore_runtime_parameters_batch_data_references_into_config,
+)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -283,11 +288,29 @@ class CheckpointResult(DictDot):
             }
         return self._validation_statistics
 
-    def to_json_dict(self):
+    def to_json_dict(self) -> dict:
         return checkpointResultSchema.dump(self)
 
     def __repr__(self):
-        return json.dumps(self.to_json_dict(), indent=2)
+        batch_data_references: Tuple[
+            Optional[Any], Optional[List[Any]]
+        ] = get_runtime_parameters_batch_data_references_from_config(
+            config=self["checkpoint_config"]
+        )
+        delete_runtime_parameters_batch_data_references_from_config(
+            config=self["checkpoint_config"]
+        )
+        serializeable_dict: dict = self.to_json_dict()
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=self["checkpoint_config"],
+            batch_data_references=batch_data_references,
+        )
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=serializeable_dict["checkpoint_config"],
+            batch_data_references=batch_data_references,
+            replace_value_with_type_string=True,
+        )
+        return json.dumps(serializeable_dict, indent=2)
 
 
 class CheckpointResultSchema(Schema):

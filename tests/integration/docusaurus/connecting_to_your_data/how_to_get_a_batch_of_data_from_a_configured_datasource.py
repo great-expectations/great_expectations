@@ -2,7 +2,7 @@ from ruamel import yaml
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 context = ge.get_context()
 
@@ -169,7 +169,7 @@ assert row_count == 10000
 
 assert (
     validator.active_batch.batch_definition.batch_identifiers["name"]
-    == "yellow_trip_data_sample"
+    == "yellow_tripdata_sample"
 )
 assert (
     validator.active_batch.batch_definition.batch_identifiers[
@@ -186,7 +186,7 @@ assert (
 
 assert (
     batch_list_last_index_batch_request[0].batch_definition.batch_identifiers["name"]
-    == "yellow_trip_data_sample"
+    == "yellow_tripdata_sample"
 )
 assert (
     batch_list_last_index_batch_request[0].batch_definition.batch_identifiers[

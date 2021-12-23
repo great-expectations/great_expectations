@@ -1,16 +1,24 @@
-import abc
+import copy
 import enum
 import itertools
+import json
 import logging
 import uuid
-from copy import deepcopy
-from typing import Any, Dict, List, MutableMapping, Optional, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Tuple, Union
+from uuid import UUID
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import (
+    BatchRequest,
+    delete_runtime_parameters_batch_data_references_from_config,
+    get_batch_request_dict,
+    get_runtime_parameters_batch_data_references_from_config,
+    restore_runtime_parameters_batch_data_references_into_config,
+)
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.marshmallow__shade import (
     INCLUDE,
@@ -19,7 +27,6 @@ from great_expectations.marshmallow__shade import (
     fields,
     post_dump,
     post_load,
-    pre_load,
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
@@ -92,7 +99,7 @@ class BaseYamlConfig(SerializableDictDot):
             raise
 
     def _get_schema_validated_updated_commented_map(self) -> CommentedMap:
-        commented_map: CommentedMap = deepcopy(self._commented_map)
+        commented_map: CommentedMap = copy.deepcopy(self._commented_map)
         commented_map.update(self._get_schema_instance().dump(self))
         return commented_map
 
@@ -189,6 +196,10 @@ class AssetConfigSchema(Schema):
     delimiter = fields.String(required=False, allow_none=True)
     max_keys = fields.Integer(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
+
+    # Necessary addition for Cloud assets
+    table_name = fields.String(required=False, allow_none=True)
+    type = fields.String(required=False, allow_none=True)
 
     @validates_schema
     def validate_schema(self, data, **kwargs):
@@ -437,6 +448,7 @@ class DataConnectorConfigSchema(Schema):
     skip_inapplicable_tables = fields.Boolean(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
@@ -453,6 +465,8 @@ class DataConnectorConfigSchema(Schema):
                 "ConfiguredAssetAzureDataConnector",
                 "InferredAssetGCSDataConnector",
                 "ConfiguredAssetGCSDataConnector",
+                "InferredAssetDBFSDataConnector",
+                "ConfiguredAssetDBFSDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
@@ -466,6 +480,8 @@ configuration to continue.
             in [
                 "InferredAssetFilesystemDataConnector",
                 "ConfiguredAssetFilesystemDataConnector",
+                "InferredAssetDBFSDataConnector",
+                "ConfiguredAssetDBFSDataConnector",
             ]
         ):
             raise ge_exceptions.InvalidConfigError(
@@ -669,7 +685,9 @@ class ExecutionEngineConfigSchema(Schema):
     )
     caching = fields.Boolean(required=False, allow_none=True)
     batch_spec_defaults = fields.Dict(required=False, allow_none=True)
+    force_reuse_spark_context = fields.Boolean(required=False, allow_none=True)
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         # If a class_name begins with the dollar sign ("$"), then it is assumed to be a variable name to be substituted.
@@ -704,7 +722,7 @@ class DatasourceConfig(DictDot):
     def __init__(
         self,
         class_name=None,
-        module_name: Optional[str] = "great_expectations.datasource",
+        module_name: str = "great_expectations.datasource",
         execution_engine=None,
         data_connectors=None,
         data_asset_type=None,
@@ -828,6 +846,7 @@ class DatasourceConfigSchema(Schema):
     )
     limit = fields.Integer(required=False, allow_none=True)
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "generators" in data:
@@ -1066,7 +1085,7 @@ class NotebooksConfigSchema(Schema):
 class ConcurrencyConfig(DictDot):
     """WARNING: This class is experimental."""
 
-    def __init__(self, enabled: Optional[bool] = False):
+    def __init__(self, enabled: bool = False):
         """Initialize a concurrency configuration to control multithreaded execution.
 
         Args:
@@ -1083,7 +1102,7 @@ class ConcurrencyConfig(DictDot):
     def max_database_query_concurrency(self) -> int:
         """Max number of concurrent database queries to execute with mulithreading."""
         # BigQuery has a limit of 100 for "Concurrent rate limit for interactive queries" as described at
-        # https://cloud.google.com/bigquery/quotas#query_jobs). If necessary, this can later be tuned for other
+        # (https://cloud.google.com/bigquery/quotas#query_jobs). If necessary, this can later be tuned for other
         # databases and/or be manually user configurable.
         return 100
 
@@ -1176,6 +1195,7 @@ class DataContextConfigSchema(Schema):
             message=message,
         )
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if "config_version" not in data:
@@ -1204,7 +1224,7 @@ class DataContextConfigSchema(Schema):
         if data["config_version"] < MINIMUM_SUPPORTED_CONFIG_VERSION:
             raise ge_exceptions.UnsupportedConfigVersionError(
                 "You appear to have an invalid config version ({}).\n    The version number must be at least {}. "
-                "Please see the migration guide at https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html".format(
+                "Please see the migration guide at https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api".format(
                     data["config_version"], MINIMUM_SUPPORTED_CONFIG_VERSION
                 ),
             )
@@ -1227,11 +1247,11 @@ class DataContextConfigSchema(Schema):
             )
         ):
             raise ge_exceptions.InvalidDataContextConfigError(
-                "You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
+                "You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(
                     data["config_version"], float(CURRENT_GE_CONFIG_VERSION)
                 ),
                 validation_error=ValidationError(
-                    message="You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html to learn more about the upgrade process.".format(
+                    message="You appear to be using a Checkpoint store with an invalid config version ({}).\n    Your data context with this older configuration version specifies a Checkpoint store, which is a new feature.  Please update your configuration to the new version number {} before adding a Checkpoint store.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.".format(
                         data["config_version"], float(CURRENT_GE_CONFIG_VERSION)
                     )
                 ),
@@ -1242,11 +1262,14 @@ class DataContextConfigSchema(Schema):
             and "validation_operators" in data
             and data["validation_operators"] is not None
         ):
-            # TODO: <Alex>Add a URL to the migration guide with instructions for how to replace validation_operators with appropriate actions.</Alex>
             logger.warning(
-                "You appear to be using a legacy capability with the latest config version ({}).\n    Your data context with this configuration version uses validation_operators, which are being deprecated.  Please update your configuration to be compatible with the version number {}.".format(
-                    data["config_version"], CURRENT_GE_CONFIG_VERSION
-                ),
+                f"""You appear to be using a legacy capability with the latest config version \
+({data["config_version"]}).\n    Your data context with this configuration version uses validation_operators, which \
+are being deprecated.  Please consult the V3 API migration guide \
+https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and \
+update your configuration to be compatible with the version number {CURRENT_GE_CONFIG_VERSION}.\n    (This message \
+will appear repeatedly until your configuration is updated.)
+"""
             )
 
 
@@ -1275,7 +1298,6 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
     PLUGINS_BASE_DIRECTORY = "plugins"
     DEFAULT_PLUGINS_DIRECTORY = f"{PLUGINS_BASE_DIRECTORY}/"
-    NOTEBOOKS_BASE_DIRECTORY = "notebooks"
     DEFAULT_VALIDATION_OPERATORS = {
         "action_list_operator": {
             "class_name": "ActionListValidationOperator",
@@ -1365,10 +1387,10 @@ class BaseStoreBackendDefaults(DictDot):
         self.checkpoint_store_name = checkpoint_store_name
         self.validation_operators = validation_operators
         if stores is None:
-            stores = deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
+            stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
         self.stores = stores
         if data_docs_sites is None:
-            data_docs_sites = deepcopy(
+            data_docs_sites = copy.deepcopy(
                 DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
             )
         self.data_docs_sites = data_docs_sites
@@ -1912,6 +1934,7 @@ class CheckpointConfigSchema(Schema):
     notify_on = fields.String(required=False, allow_none=True)
     notify_with = fields.String(required=False, allow_none=True)
 
+    # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs):
         if not (
@@ -1931,12 +1954,27 @@ class CheckpointConfigSchema(Schema):
                     """
                 )
 
+    # noinspection PyUnusedLocal
     @post_dump
     def remove_keys_if_none(self, data, **kwargs):
-        data = deepcopy(data)
+        data = copy.deepcopy(data)
         for key in self.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:
                 data.pop(key)
+        return data
+
+    def dump(self, obj: Any, *, many: Optional[bool] = None) -> dict:
+        batch_data_references: Tuple[
+            Optional[Any], Optional[List[Any]]
+        ] = get_runtime_parameters_batch_data_references_from_config(config=obj)
+        delete_runtime_parameters_batch_data_references_from_config(config=obj)
+        data: dict = super().dump(obj=obj, many=many)
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=obj, batch_data_references=batch_data_references
+        )
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=data, batch_data_references=batch_data_references
+        )
         return data
 
 
@@ -1953,7 +1991,7 @@ class CheckpointConfig(BaseYamlConfig):
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[dict] = None,
+        batch_request: Optional[Union[dict, BatchRequest]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -1962,13 +2000,13 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
-        ge_cloud_id: Optional[str] = None,
+        ge_cloud_id: Optional[Union[UUID, str]] = None,
         # the following four args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[Union[UUID, str]] = None,
     ):
         self._name = name
         self._config_version = config_version
@@ -1978,6 +2016,10 @@ class CheckpointConfig(BaseYamlConfig):
             if batches is not None and isinstance(batches, list):
                 self.batches = batches
         else:
+            batch_request, validations = get_batch_request_dict(
+                batch_request, validations
+            )
+
             class_name = class_name or "Checkpoint"
             self._template_name = template_name
             self._run_name_template = run_name_template
@@ -2028,7 +2070,7 @@ class CheckpointConfig(BaseYamlConfig):
                 )
             # update
             if other_config.batch_request is not None:
-                if self.batch_request is None:
+                if getattr(self, "batch_request", None) is None:
                     batch_request = {}
                 else:
                     batch_request = self.batch_request
@@ -2063,8 +2105,11 @@ class CheckpointConfig(BaseYamlConfig):
                 )
             if other_config.profilers is not None:
                 self.profilers.extend(other_config.profilers)
+
         if runtime_kwargs is not None and any(runtime_kwargs.values()):
             # replace
+            if runtime_kwargs.get("template_name") is not None:
+                self.template_name = runtime_kwargs.get("template_name")
             if runtime_kwargs.get("run_name_template") is not None:
                 self.run_name_template = runtime_kwargs.get("run_name_template")
             if runtime_kwargs.get("expectation_suite_name") is not None:
@@ -2077,26 +2122,42 @@ class CheckpointConfig(BaseYamlConfig):
                 )
             # update
             if runtime_kwargs.get("batch_request") is not None:
-                batch_request = self.batch_request
-                batch_request = batch_request or {}
+                batch_request = self.batch_request or {}
                 runtime_batch_request = runtime_kwargs.get("batch_request")
-                batch_request = nested_update(batch_request, runtime_batch_request)
+                if runtime_batch_request is not None:
+                    runtime_batch_request = self._safe_copy_batch_request(
+                        batch_request=runtime_batch_request
+                    )
+                    if not isinstance(runtime_batch_request, dict):
+                        # noinspection PyUnresolvedReferences
+                        runtime_batch_request = runtime_batch_request.to_dict()
+
+                    delete_runtime_parameters_batch_data_references_from_config(
+                        config=batch_request
+                    )
+
+                    batch_request = nested_update(batch_request, runtime_batch_request)
+
                 self._batch_request = batch_request
+
             if runtime_kwargs.get("action_list") is not None:
                 self.action_list = self.get_updated_action_list(
                     base_action_list=self.action_list,
                     other_action_list=runtime_kwargs.get("action_list"),
                 )
+
             if runtime_kwargs.get("evaluation_parameters") is not None:
                 nested_update(
                     self.evaluation_parameters,
                     runtime_kwargs.get("evaluation_parameters"),
                 )
+
             if runtime_kwargs.get("runtime_configuration") is not None:
                 nested_update(
                     self.runtime_configuration,
                     runtime_kwargs.get("runtime_configuration"),
                 )
+
             if runtime_kwargs.get("validations") is not None:
                 self.validations.extend(
                     filter(
@@ -2104,12 +2165,13 @@ class CheckpointConfig(BaseYamlConfig):
                         runtime_kwargs.get("validations"),
                     )
                 )
+
             if runtime_kwargs.get("profilers") is not None:
                 self.profilers.extend(runtime_kwargs.get("profilers"))
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
-    def get_config_class(cls):
+    def get_config_class(cls) -> type:
         return cls  # CheckpointConfig
 
     @classmethod
@@ -2117,23 +2179,23 @@ class CheckpointConfig(BaseYamlConfig):
         return CheckpointConfigSchema
 
     @property
-    def ge_cloud_id(self):
+    def ge_cloud_id(self) -> Optional[Union[UUID, str]]:
         return self._ge_cloud_id
 
     @ge_cloud_id.setter
-    def ge_cloud_id(self, value: str):
+    def ge_cloud_id(self, value: Union[UUID, str]):
         self._ge_cloud_id = value
 
     @property
-    def expectation_suite_ge_cloud_id(self):
+    def expectation_suite_ge_cloud_id(self) -> Optional[Union[UUID, str]]:
         return self._expectation_suite_ge_cloud_id
 
     @expectation_suite_ge_cloud_id.setter
-    def expectation_suite_ge_cloud_id(self, value: str):
+    def expectation_suite_ge_cloud_id(self, value: Union[UUID, str]):
         self._expectation_suite_ge_cloud_id = value
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @name.setter
@@ -2141,7 +2203,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._name = value
 
     @property
-    def template_name(self):
+    def template_name(self) -> str:
         return self._template_name
 
     @template_name.setter
@@ -2149,19 +2211,31 @@ class CheckpointConfig(BaseYamlConfig):
         self._template_name = value
 
     @property
-    def config_version(self):
+    def config_version(self) -> float:
         return self._config_version
 
+    @config_version.setter
+    def config_version(self, value: float):
+        self._config_version = value
+
     @property
-    def validations(self):
+    def validations(self) -> List[dict]:
         return self._validations
 
-    @property
-    def profilers(self):
-        return self._profilers
+    @validations.setter
+    def validations(self, value: List[dict]):
+        self._validations = value
 
     @property
-    def module_name(self):
+    def profilers(self) -> List[dict]:
+        return self._profilers
+
+    @profilers.setter
+    def profilers(self, value: List[dict]):
+        self._profilers = value
+
+    @property
+    def module_name(self) -> str:
         return self._module_name
 
     @module_name.setter
@@ -2169,7 +2243,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._module_name = value
 
     @property
-    def class_name(self):
+    def class_name(self) -> str:
         return self._class_name
 
     @class_name.setter
@@ -2177,7 +2251,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._class_name = value
 
     @property
-    def run_name_template(self):
+    def run_name_template(self) -> str:
         return self._run_name_template
 
     @run_name_template.setter
@@ -2185,7 +2259,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._run_name_template = value
 
     @property
-    def batch_request(self):
+    def batch_request(self) -> dict:
         return self._batch_request
 
     @batch_request.setter
@@ -2193,7 +2267,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._batch_request = value
 
     @property
-    def expectation_suite_name(self):
+    def expectation_suite_name(self) -> str:
         return self._expectation_suite_name
 
     @expectation_suite_name.setter
@@ -2201,7 +2275,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._expectation_suite_name = value
 
     @property
-    def action_list(self):
+    def action_list(self) -> List[dict]:
         return self._action_list
 
     @action_list.setter
@@ -2209,19 +2283,19 @@ class CheckpointConfig(BaseYamlConfig):
         self._action_list = value
 
     @property
-    def site_names(self):
+    def site_names(self) -> List[str]:
         return self._site_names
 
     @property
-    def slack_webhook(self):
+    def slack_webhook(self) -> str:
         return self._slack_webhook
 
     @property
-    def notify_on(self):
+    def notify_on(self) -> str:
         return self._notify_on
 
     @property
-    def notify_with(self):
+    def notify_with(self) -> str:
         return self._notify_with
 
     @classmethod
@@ -2231,28 +2305,109 @@ class CheckpointConfig(BaseYamlConfig):
         other_action_list: list,
     ) -> List[dict]:
         base_action_list_dict = {action["name"]: action for action in base_action_list}
+
         for other_action in other_action_list:
             other_action_name = other_action["name"]
             if other_action_name in base_action_list_dict:
-                if other_action["action"] is None:
-                    base_action_list_dict.pop(other_action_name)
-                else:
+                if other_action["action"]:
                     nested_update(
                         base_action_list_dict[other_action_name],
                         other_action,
                         dedup=True,
                     )
+                else:
+                    base_action_list_dict.pop(other_action_name)
             else:
                 base_action_list_dict[other_action_name] = other_action
+
+        for other_action in other_action_list:
+            other_action_name = other_action["name"]
+            if other_action_name in base_action_list_dict:
+                if not other_action["action"]:
+                    base_action_list_dict.pop(other_action_name)
+
         return list(base_action_list_dict.values())
 
     @property
-    def evaluation_parameters(self):
+    def evaluation_parameters(self) -> dict:
         return self._evaluation_parameters
 
+    @evaluation_parameters.setter
+    def evaluation_parameters(self, value: dict):
+        self._evaluation_parameters = value
+
     @property
-    def runtime_configuration(self):
+    def runtime_configuration(self) -> dict:
         return self._runtime_configuration
+
+    @runtime_configuration.setter
+    def runtime_configuration(self, value: dict):
+        self._runtime_configuration = value
+
+    def __deepcopy__(self, memo):
+        batch_data_references: Tuple[
+            Optional[Any], Optional[List[Any]]
+        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
+        delete_runtime_parameters_batch_data_references_from_config(config=self)
+
+        cls = self.__class__
+        result = cls.__new__(cls)
+        result._commented_map = CommentedMap()
+
+        memo[id(self)] = result
+        for key, value in self.to_json_dict().items():
+            # noinspection PyArgumentList
+            value_copy = copy.deepcopy(value, memo)
+            setattr(result, key, value_copy)
+
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=self, batch_data_references=batch_data_references
+        )
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=result, batch_data_references=batch_data_references
+        )
+
+        return result
+
+    def __repr__(self) -> str:
+        batch_data_references: Tuple[
+            Optional[Any], Optional[List[Any]]
+        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
+        delete_runtime_parameters_batch_data_references_from_config(config=self)
+        config: dict = self.to_json_dict()
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=self, batch_data_references=batch_data_references
+        )
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=config,
+            batch_data_references=batch_data_references,
+            replace_value_with_type_string=True,
+        )
+        return json.dumps(config, indent=2)
+
+    @staticmethod
+    def _safe_copy_batch_request(
+        batch_request: Optional[Union[DictDot, dict]]
+    ) -> Optional[Union[DictDot, dict]]:
+        if batch_request is None:
+            return None
+
+        batch_data_references: Tuple[
+            Optional[Any], Optional[List[Any]]
+        ] = get_runtime_parameters_batch_data_references_from_config(
+            config=batch_request
+        )
+        delete_runtime_parameters_batch_data_references_from_config(
+            config=batch_request
+        )
+        result = copy.deepcopy(batch_request)
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=batch_request, batch_data_references=batch_data_references
+        )
+        restore_runtime_parameters_batch_data_references_into_config(
+            config=result, batch_data_references=batch_data_references
+        )
+        return result
 
 
 class CheckpointValidationConfig(DictDot):
@@ -2266,8 +2421,10 @@ class CheckpointValidationConfigSchema(Schema):
 dataContextConfigSchema = DataContextConfigSchema()
 datasourceConfigSchema = DatasourceConfigSchema()
 dataConnectorConfigSchema = DataConnectorConfigSchema()
+executionEngineConfigSchema = ExecutionEngineConfigSchema()
 assetConfigSchema = AssetConfigSchema()
 sorterConfigSchema = SorterConfigSchema()
+# noinspection SpellCheckingInspection
 anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()

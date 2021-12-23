@@ -753,6 +753,7 @@ def get_test_validator_with_data(
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
+                    # noinspection PyUnresolvedReferences
                     type_ = getattr(pd.core.dtypes.dtypes, value)
                     # If this raises AttributeError it's okay: it means someone built a bad test
                 pandas_schema[key] = type_
@@ -898,7 +899,12 @@ def build_pandas_validator_with_data(
     batch_definition: Optional[BatchDefinition] = None,
 ) -> Validator:
     batch: Batch = Batch(data=df, batch_definition=batch_definition)
-    return Validator(execution_engine=PandasExecutionEngine(), batches=(batch,))
+    return Validator(
+        execution_engine=PandasExecutionEngine(),
+        batches=[
+            batch,
+        ],
+    )
 
 
 def build_sa_validator_with_data(
@@ -1074,8 +1080,8 @@ def build_sa_engine(
     df: pd.DataFrame,
     sa: ModuleType,
     schema: Optional[str] = None,
-    if_exists: Optional[str] = "fail",
-    index: Optional[bool] = False,
+    if_exists: str = "fail",
+    index: bool = False,
     dtype: Optional[dict] = None,
 ) -> SqlAlchemyExecutionEngine:
     table_name: str = "test"
@@ -1231,7 +1237,6 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
 def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
     if context in ["sqlite", "postgresql", "mysql", "mssql"]:
         return expectation_type in [
-            # "expect_select_column_values_to_be_unique_within_record",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
             "expect_column_values_to_match_strftime_format",
@@ -1248,13 +1253,14 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             # "expect_column_pair_values_A_to_be_greater_than_B",
             # "expect_column_pair_values_to_be_equal",
             # "expect_column_pair_values_to_be_in_set",
-            "expect_multicolumn_values_to_be_unique",
             # "expect_multicolumn_sum_to_equal",
+            # "expect_compound_columns_to_be_unique",
+            "expect_multicolumn_values_to_be_unique",
+            # "expect_select_column_values_to_be_unique_within_record",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-            "expect_compound_columns_to_be_unique",
         ]
 
     if context == "bigquery":
@@ -1276,7 +1282,6 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             "expect_column_values_to_be_between",  # TODO: "400 No matching signature for operator >=" -- https://github.com/great-expectations/great_expectations/issues/3260
             "expect_column_quantile_values_to_be_between",  # TODO: takes over 15 minutes to "collect" (haven't actually seen it complete yet) -- https://github.com/great-expectations/great_expectations/issues/3260
             "expect_column_mean_to_be_between",  # TODO: "400 No matching signature for operator *" -- https://github.com/great-expectations/great_expectations/issues/3260
-            # "expect_select_column_values_to_be_unique_within_record",
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
             "expect_column_values_to_match_strftime_format",
@@ -1287,17 +1292,17 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             # "expect_column_pair_values_A_to_be_greater_than_B",
             # "expect_column_pair_values_to_be_equal",
             # "expect_column_pair_values_to_be_in_set",
-            "expect_multicolumn_values_to_be_unique",
             # "expect_multicolumn_sum_to_equal",
+            # "expect_compound_columns_to_be_unique",
+            "expect_multicolumn_values_to_be_unique",
+            # "expect_select_column_values_to_be_unique_within_record",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-            "expect_compound_columns_to_be_unique",
         ]
     if context == "spark":
         return expectation_type in [
-            # "expect_select_column_values_to_be_unique_within_record",
             "expect_table_row_count_to_equal_other_table",
             "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
@@ -1310,9 +1315,10 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             # "expect_column_pair_values_A_to_be_greater_than_B",
             # "expect_column_pair_values_to_be_equal",
             # "expect_column_pair_values_to_be_in_set",
+            # "expect_multicolumn_sum_to_equal",
             # "expect_compound_columns_to_be_unique",
             "expect_multicolumn_values_to_be_unique",
-            # "expect_multicolumn_sum_to_equal",
+            # "expect_select_column_values_to_be_unique_within_record",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
@@ -1345,9 +1351,10 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
             # "expect_column_pair_values_A_to_be_greater_than_B",
             # "expect_column_pair_values_to_be_equal",
             # "expect_column_pair_values_to_be_in_set",
-            # "expect_select_column_values_to_be_unique_within_record",
+            # "expect_multicolumn_sum_to_equal",
             # "expect_compound_columns_to_be_unique",
             "expect_multicolumn_values_to_be_unique",
+            # "expect_select_column_values_to_be_unique_within_record",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
@@ -1766,6 +1773,30 @@ def generate_expectation_tests(
     return parametrized_tests
 
 
+def sort_unexpected_values(test_value_list, result_value_list):
+    # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
+    if (isinstance(test_value_list, list)) & (len(test_value_list) >= 1):
+        # __lt__ is not implemented for python dictionaries making sorting trickier
+        # in our case, we will sort on the values for each key sequentially
+        if isinstance(test_value_list[0], dict):
+            test_value_list = sorted(
+                test_value_list,
+                key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
+            )
+            result_value_list = sorted(
+                result_value_list,
+                key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
+            )
+        # if python built-in class has __lt__ then sorting can always work this way
+        elif type(test_value_list[0].__lt__(test_value_list[0])) != type(
+            NotImplemented
+        ):
+            test_value_list = sorted(test_value_list, key=lambda x: str(x))
+            result_value_list = sorted(result_value_list, key=lambda x: str(x))
+
+    return test_value_list, result_value_list
+
+
 def evaluate_json_test(data_asset, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
@@ -1840,7 +1871,9 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
     :return: None. asserts correctness of results.
     """
-    expectation_suite = ExpectationSuite("json_test_suite")
+    expectation_suite = ExpectationSuite(
+        "json_test_suite", data_context=validator._data_context
+    )
     # noinspection PyProtectedMember
     validator._initialize_expectations(expectation_suite=expectation_suite)
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
@@ -1878,6 +1911,45 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
 
 
 def check_json_test_result(test, result, data_asset=None):
+    # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
+    if "unexpected_list" in result["result"]:
+        if ("result" in test["out"]) and ("unexpected_list" in test["out"]["result"]):
+            (
+                test["out"]["result"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["result"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            )
+        elif "unexpected_list" in test["out"]:
+            (
+                test["out"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            )
+
+    if "partial_unexpected_list" in result["result"]:
+        if ("result" in test["out"]) and (
+            "partial_unexpected_list" in test["out"]["result"]
+        ):
+            (
+                test["out"]["result"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["result"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            )
+        elif "partial_unexpected_list" in test["out"]:
+            (
+                test["out"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            )
+
     # Check results
     if test["exact_match_out"] is True:
         assert result == expectationValidationResultSchema.load(test["out"])
@@ -1928,19 +2000,19 @@ def check_json_test_result(test, result, data_asset=None):
                     assert result["result"]["unexpected_index_list"] == value
 
             elif key == "unexpected_list":
-                # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
-                if (isinstance(value, list)) & (len(value) >= 1):
-                    if type(value[0].__lt__(value[0])) != type(NotImplemented):
-                        value = sorted(value, key=lambda x: str(x))
-                        result["result"]["unexpected_list"] = sorted(
-                            result["result"]["unexpected_list"], key=lambda x: str(x)
-                        )
-
                 assert result["result"]["unexpected_list"] == value, (
                     "expected "
                     + str(value)
                     + " but got "
                     + str(result["result"]["unexpected_list"])
+                )
+
+            elif key == "partial_unexpected_list":
+                assert result["result"]["partial_unexpected_list"] == value, (
+                    "expected "
+                    + str(value)
+                    + " but got "
+                    + str(result["result"]["partial_unexpected_list"])
                 )
 
             elif key == "details":
@@ -2025,7 +2097,7 @@ def check_json_test_result(test, result, data_asset=None):
 
 
 def generate_test_table_name(
-    default_table_name_prefix: Optional[str] = "test_data_",
+    default_table_name_prefix: str = "test_data_",
 ) -> str:
     table_name: str = default_table_name_prefix + "".join(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]

@@ -31,17 +31,17 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     ALLOWED_SET_KWARGS_BY_RESOURCE_TYPE = {
         "expectation_suite": {"clause_id"},
         "rendered_data_doc": {"source_type", "source_id"},
-        "suite_validation_result": {"contract_id"},
+        "suite_validation_result": {"contract_id", "expectation_suite_id"},
     }
 
     def __init__(
         self,
         ge_cloud_credentials: Dict,
-        ge_cloud_base_url: Optional[str] = "https://app.greatexpectations.io/",
+        ge_cloud_base_url: str = "https://app.greatexpectations.io/",
         ge_cloud_resource_type: Optional[str] = None,
         ge_cloud_resource_name: Optional[str] = None,
-        suppress_store_backend_id: Optional[bool] = True,
-        manually_initialize_store_backend_id: Optional[str] = "",
+        suppress_store_backend_id: bool = True,
+        manually_initialize_store_backend_id: str = "",
         store_name: Optional[str] = None,
     ):
         super().__init__(

@@ -2,16 +2,17 @@ import copy
 import logging
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Dict, Iterable, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union
 
 import pandas as pd
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers, BatchSpec
+from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.util import filter_properties_dict
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -54,6 +55,87 @@ class MetricDomainTypes(Enum):
     COLUMN_PAIR = "column_pair"
     MULTICOLUMN = "multicolumn"
     TABLE = "table"
+
+
+class DataConnectorStorageDataReferenceResolver:
+    DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
+        "InferredAssetS3DataConnector": "S3",
+        "ConfiguredAssetS3DataConnector": "S3",
+        "InferredAssetGCSDataConnector": "GCS",
+        "ConfiguredAssetGCSDataConnector": "GCS",
+        "InferredAssetAzureDataConnector": "ABS",
+        "ConfiguredAssetAzureDataConnector": "ABS",
+        "InferredAssetDBFSDataConnector": "DBFS",
+        "ConfiguredAssetDBFSDataConnector": "DBFS",
+    }
+    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
+        Tuple[str, str], Callable
+    ] = {
+        (
+            "S3",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "S3",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "GCS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "GCS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "ABS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "ABS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "DBFS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
+            **template_arguments
+        ),
+        (
+            "DBFS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
+            **template_arguments
+        ),
+    }
+
+    @staticmethod
+    def resolve_data_reference(
+        data_connector_name: str,
+        execution_engine_name: str,
+        template_arguments: dict,
+    ):
+        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
+        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
+            data_connector_name
+        ]
+        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
+            (storage_name, execution_engine_name)
+        ](
+            template_arguments
+        )
 
 
 class ExecutionEngine(ABC):
@@ -203,9 +285,9 @@ class ExecutionEngine(ABC):
     def resolve_metrics(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Optional[Dict[Tuple, MetricConfiguration]] = None,
+        metrics: Optional[Dict[Tuple[str, str, str], MetricConfiguration]] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> Dict[Tuple, Any]:
+    ) -> Dict[Tuple[str, str, str], Any]:
         """resolve_metrics is the main entrypoint for an execution engine. The execution engine will compute the value
         of the provided metrics.
 
@@ -220,7 +302,7 @@ class ExecutionEngine(ABC):
         if metrics is None:
             metrics = {}
 
-        resolved_metrics: Dict[Tuple, MetricConfiguration] = {}
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
 
         metric_fn_bundle = []
         for metric_to_resolve in metrics_to_resolve:
@@ -285,10 +367,7 @@ class ExecutionEngine(ABC):
                     resolved_metrics[metric_to_resolve.id] = metric_fn(
                         **metric_provider_kwargs
                     )
-                except (
-                    ge_exceptions.MetricComputationError,
-                    ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError,
-                ) as e:
+                except Exception as e:
                     raise ge_exceptions.MetricResolutionError(
                         message=str(e), failed_metrics=(metric_to_resolve,)
                     )
@@ -297,10 +376,7 @@ class ExecutionEngine(ABC):
                     resolved_metrics[metric_to_resolve.id] = metric_fn(
                         **metric_provider_kwargs
                     )
-                except (
-                    ge_exceptions.MetricComputationError,
-                    ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError,
-                ) as e:
+                except Exception as e:
                     raise ge_exceptions.MetricResolutionError(
                         message=str(e), failed_metrics=(metric_to_resolve,)
                     )
@@ -312,10 +388,7 @@ class ExecutionEngine(ABC):
                     resolved_metrics[metric_to_resolve.id] = metric_fn(
                         **metric_provider_kwargs
                     )
-                except (
-                    ge_exceptions.MetricComputationError,
-                    ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError,
-                ) as e:
+                except Exception as e:
                     raise ge_exceptions.MetricResolutionError(
                         message=str(e), failed_metrics=(metric_to_resolve,)
                     )
@@ -323,10 +396,7 @@ class ExecutionEngine(ABC):
             try:
                 new_resolved = self.resolve_metric_bundle(metric_fn_bundle)
                 resolved_metrics.update(new_resolved)
-            except (
-                ge_exceptions.MetricComputationError,
-                ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError,
-            ) as e:
+            except Exception as e:
                 raise ge_exceptions.MetricResolutionError(
                     message=str(e), failed_metrics=[x[0] for x in metric_fn_bundle]
                 )
@@ -413,6 +483,16 @@ class ExecutionEngine(ABC):
         new_domain_kwargs["condition_parser"] = "great_expectations__experimental__"
         new_domain_kwargs["row_condition"] = f'col("{column}").notnull()'
         return new_domain_kwargs
+
+    def resolve_data_reference(
+        self, data_connector_name: str, template_arguments: dict
+    ):
+        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
+        return DataConnectorStorageDataReferenceResolver.resolve_data_reference(
+            data_connector_name=data_connector_name,
+            execution_engine_name=self.__class__.__name__,
+            template_arguments=template_arguments,
+        )
 
 
 class MetricPartialFunctionTypes(Enum):

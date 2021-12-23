@@ -13,4 +13,4 @@ You are adding Expectation configurations to the suite. Since you selected manua
 Note that if you do select interactive mode you may specify a sample batch of data to use when creating your Expectation Suite. You can then use a `validator` to get immediate feedback on your Expectations against your specified sample batch.
 {% endif %}
 
-You can see all the available expectations in the **[expectation glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=create_expectations)**.
+You can see all the available expectations in the **[expectation gallery](https://greatexpectations.io/expectations)**.

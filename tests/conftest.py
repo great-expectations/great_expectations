@@ -269,7 +269,8 @@ def empty_expectation_suite():
 
 
 @pytest.fixture
-def basic_expectation_suite():
+def basic_expectation_suite(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     expectation_suite = ExpectationSuite(
         expectation_suite_name="default",
         meta={},
@@ -289,6 +290,7 @@ def basic_expectation_suite():
                 kwargs={"column": "naturals"},
             ),
         ],
+        data_context=context,
     )
     return expectation_suite
 
@@ -2315,6 +2317,119 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     )
     # noinspection PyProtectedMember
     context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
+    tmp_path_factory,
+    monkeypatch,
+    spark_session,
+):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "test_fixtures",
+                "great_expectations_v013_no_datasource_stats_enabled.yml",
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        str(
+            os.path.join(
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        str(
+            os.path.join(context_path, "..", "data", "titanic", "Titanic_19120414_1313")
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
+    )
+
+    context: DataContext = DataContext(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    datasource_config: str = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: SparkDFExecutionEngine
+
+        data_connectors:
+            my_basic_data_connector:
+                class_name: InferredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                default_regex:
+                    pattern: (.*)\\.csv
+                    group_names:
+                        - data_asset_name
+
+            my_special_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users:
+                        base_directory: {data_path}
+                        pattern: (.+)_(\\d+)_(\\d+)\\.csv
+                        group_names:
+                            - name
+                            - timestamp
+                            - size
+
+            my_other_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users: {{}}
+
+            my_runtime_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: RuntimeDataConnector
+                batch_identifiers:
+                    - pipeline_stage_name
+                    - airflow_run_id
+    """
+
+    # noinspection PyUnusedLocal
+    datasource: Datasource = context.test_yaml_config(
+        name="my_datasource", yaml_config=datasource_config, pretty_print=False
+    )
+    # noinspection PyProtectedMember
+    context._save_project_config()
     return context
 
 
@@ -2863,7 +2978,18 @@ def empty_context_with_checkpoint_stats_enabled(empty_data_context_stats_enabled
 @pytest.fixture
 def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
+    project_path = str(tmp_path_factory.mktemp("empty_data_context"))
+    context = ge.data_context.DataContext.create(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    return context
+
+
+@pytest.fixture(scope="module")
+def empty_data_context_module_scoped(tmp_path_factory):
+    # Re-enable GE_USAGE_STATS
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
@@ -2912,6 +3038,29 @@ def titanic_data_context(
     os.makedirs(os.path.join(data_path), exist_ok=True)
     titanic_yml_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_v013_titanic.yml"
+    )
+    shutil.copy(
+        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+    )
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    shutil.copy(
+        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def titanic_data_context_clean(
+    tmp_path_factory,
+) -> DataContext:
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
+    data_path = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    titanic_yml_path = file_relative_path(
+        __file__, "./test_fixtures/great_expectations_v013clean_titanic.yml"
     )
     shutil.copy(
         titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
@@ -3087,7 +3236,8 @@ def titanic_sqlite_db(sa):
 
 
 @pytest.fixture
-def titanic_expectation_suite():
+def titanic_expectation_suite(empty_data_context_stats_enabled):
+    data_context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="Titanic.warning",
         meta={},
@@ -3105,6 +3255,7 @@ def titanic_expectation_suite():
                 kwargs={"value": 1313},
             ),
         ],
+        data_context=data_context,
     )
 
 
@@ -3330,6 +3481,54 @@ def v20_project_directory(tmp_path_factory):
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/upgrade_helper/great_expectations_v2.yml"
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
+
+
+@pytest.fixture
+def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_factory):
+    """
+    GE config_version: 3 project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v30_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v20_project_with_v30_configuration_and_v20_checkpoints/",
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
+
+
+@pytest.fixture
+def v20_project_directory_with_v30_configuration_and_no_checkpoints(tmp_path_factory):
+    """
+    GE config_version: 3 project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v30_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v20_project_with_v30_configuration_and_no_checkpoints/",
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
         ),
         os.path.join(context_root_dir, "great_expectations.yml"),
     )
@@ -3906,29 +4105,36 @@ def titanic_profiled_name_column_evrs():
 
 
 @pytest.fixture
-def titanic_profiled_expectations_1():
+def titanic_profiled_expectations_1(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     with open(
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
         ),
     ) as infile:
-        return expectationSuiteSchema.load(json.load(infile))
+        expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(infile))
+        return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 @pytest.fixture
-def titanic_profiled_name_column_expectations():
-    from great_expectations.render.renderer.renderer import Renderer
-
+def titanic_profiled_name_column_expectations(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     with open(
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
         ),
     ) as infile:
-        titanic_profiled_expectations = expectationSuiteSchema.load(json.load(infile))
+        titanic_profiled_expectations_dict: dict = expectationSuiteSchema.load(
+            json.load(infile)
+        )
+        titanic_profiled_expectations = ExpectationSuite(
+            **titanic_profiled_expectations_dict, data_context=context
+        )
 
-    columns, ordered_columns = Renderer()._group_and_order_expectations_by_column(
-        titanic_profiled_expectations
-    )
+    (
+        columns,
+        ordered_columns,
+    ) = titanic_profiled_expectations.get_grouped_and_ordered_expectations_by_column()
     name_column_expectations = columns["Name"]
 
     return name_column_expectations
@@ -4421,7 +4627,7 @@ def yellow_trip_pandas_data_context(
             os.path.join(
                 "integration",
                 "fixtures",
-                "yellow_trip_data_pandas_fixture",
+                "yellow_tripdata_pandas_fixture",
                 "great_expectations",
                 "great_expectations.yml",
             ),
@@ -4433,13 +4639,13 @@ def yellow_trip_pandas_data_context(
             __file__,
             os.path.join(
                 "test_sets",
-                "taxi_yellow_trip_data_samples",
-                "yellow_trip_data_sample_2019-01.csv",
+                "taxi_yellow_tripdata_samples",
+                "yellow_tripdata_sample_2019-01.csv",
             ),
         ),
         str(
             os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-01.csv"
+                context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
             )
         ),
     )
@@ -4448,13 +4654,13 @@ def yellow_trip_pandas_data_context(
             __file__,
             os.path.join(
                 "test_sets",
-                "taxi_yellow_trip_data_samples",
-                "yellow_trip_data_sample_2019-02.csv",
+                "taxi_yellow_tripdata_samples",
+                "yellow_tripdata_sample_2019-02.csv",
             ),
         ),
         str(
             os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-02.csv"
+                context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
             )
         ),
     )
@@ -4463,13 +4669,13 @@ def yellow_trip_pandas_data_context(
             __file__,
             os.path.join(
                 "test_sets",
-                "taxi_yellow_trip_data_samples",
-                "yellow_trip_data_sample_2019-03.csv",
+                "taxi_yellow_tripdata_samples",
+                "yellow_tripdata_sample_2019-03.csv",
             ),
         ),
         str(
             os.path.join(
-                context_path, "..", "data", "yellow_trip_data_sample_2019-03.csv"
+                context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
             )
         ),
     )

@@ -111,7 +111,11 @@ class SlackNotificationAction(ValidationAction):
           class_name: SlackNotificationAction
           # put the actual webhook URL in the uncommitted/config_variables.yml file
           # or pass in as environment variable
+          # use slack_webhook when not using slack bot token
           slack_webhook: ${validation_notification_slack_webhook}
+          # pass slack token and slack channel when not using slack_webhook
+          slack_token: # token from slack app
+          slack_channel: # slack channel that messages should go to
           notify_on: all # possible values: "all", "failure", "success"
           notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all
           renderer:
@@ -127,7 +131,9 @@ class SlackNotificationAction(ValidationAction):
         self,
         data_context,
         renderer,
-        slack_webhook,
+        slack_webhook=None,
+        slack_token=None,
+        slack_channel=None,
         notify_on="all",
         notify_with=None,
     ):
@@ -157,8 +163,15 @@ class SlackNotificationAction(ValidationAction):
                 package_name=None,
                 class_name=renderer["class_name"],
             )
+        if not slack_token and slack_channel:
+            assert slack_webhook
+        if not slack_webhook:
+            assert slack_token and slack_channel
+        assert not (slack_webhook and slack_channel and slack_token)
+
         self.slack_webhook = slack_webhook
-        assert slack_webhook, "No Slack webhook found in action config."
+        self.slack_token = slack_token
+        self.slack_channel = slack_channel
         self.notify_on = notify_on
         self.notify_with = notify_with
 
@@ -204,15 +217,15 @@ class SlackNotificationAction(ValidationAction):
             query = self.renderer.render(
                 validation_result_suite, data_docs_pages, self.notify_with
             )
-            # this will actually sent the POST request to the Slack webapp server
+
+            # this will actually send the POST request to the Slack webapp server
             slack_notif_result = send_slack_notification(
                 query, slack_webhook=self.slack_webhook
             )
-
-            # sending payload back as dictionary
             return {"slack_notification_result": slack_notif_result}
+
         else:
-            return {"slack_notification_result": ""}
+            return {"slack_notification_result": "none required"}
 
 
 class PagerdutyAlertAction(ValidationAction):
@@ -758,10 +771,17 @@ class StoreValidationResultAction(ValidationAction):
         if self.data_context.ge_cloud_mode and checkpoint_identifier:
             contract_ge_cloud_id = checkpoint_identifier.ge_cloud_id
 
+        expectation_suite_ge_cloud_id = None
+        if self.data_context.ge_cloud_mode and expectation_suite_identifier:
+            expectation_suite_ge_cloud_id = str(
+                expectation_suite_identifier.ge_cloud_id
+            )
+
         return_val = self.target_store.set(
             validation_result_suite_identifier,
             validation_result_suite,
             contract_id=contract_ge_cloud_id,
+            expectation_suite_id=expectation_suite_ge_cloud_id,
         )
         if self.data_context.ge_cloud_mode:
             return_val: GeCloudResourceRef

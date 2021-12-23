@@ -13,7 +13,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.rule_based_profiler.profiler import Profiler
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 yaml = YAML()
@@ -124,9 +124,9 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     data_connector: DataConnector = datasource.data_connectors[data_connector_name]
 
     file_list: List[str] = [
-        "yellow_trip_data_sample_2019-01.csv",
-        "yellow_trip_data_sample_2019-02.csv",
-        "yellow_trip_data_sample_2019-03.csv",
+        "yellow_tripdata_sample_2019-01.csv",
+        "yellow_tripdata_sample_2019-02.csv",
+        "yellow_tripdata_sample_2019-03.csv",
     ]
 
     assert (

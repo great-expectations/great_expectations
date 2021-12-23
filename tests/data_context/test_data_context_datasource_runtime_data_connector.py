@@ -20,8 +20,8 @@ def taxi_test_file():
         os.path.join(
             "..",
             "test_sets",
-            "taxi_yellow_trip_data_samples",
-            "yellow_trip_data_sample_2019-01.csv",
+            "taxi_yellow_tripdata_samples",
+            "yellow_tripdata_sample_2019-01.csv",
         ),
     )
 
@@ -31,7 +31,7 @@ def taxi_test_file_directory():
     return file_relative_path(
         __file__,
         os.path.join(
-            "..", "test_sets", "taxi_yellow_trip_data_samples", "first_3_files/"
+            "..", "test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"
         ),
     )
 
@@ -88,6 +88,7 @@ def test_get_batch_ambiguous_parameter_pandas_engine(
 
     # raised by get_batch_list()
     with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
+        # noinspection PyUnusedLocal
         batch_list: list = context.get_batch_list(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
