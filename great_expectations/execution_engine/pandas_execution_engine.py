@@ -122,26 +122,9 @@ Notes:
         except (TypeError, AttributeError):
             self._azure = None
 
-        # Can only configure a GCS connection by 1) setting an env var OR 2) passing explicit credentials OR
-        # 3) Running Great Expectations from within a GCP container, at which point you would be able to create a
-        # storage.Client() without passing in additional ENV var or explicit credentials
-        if gcs_options is None:
-            gcs_options = {}
-        try:
-            credentials = None  # If configured with gcloud CLI / env vars
-            if "filename" in gcs_options:
-                filename = gcs_options.pop("filename")
-                credentials = service_account.Credentials.from_service_account_file(
-                    filename=filename
-                )
-            elif "info" in gcs_options:
-                info = gcs_options.pop("info")
-                credentials = service_account.Credentials.from_service_account_info(
-                    info=info
-                )
-            self._gcs = storage.Client(credentials=credentials, **gcs_options)
-        except (TypeError, AttributeError, DefaultCredentialsError):
-            self._gcs = None
+        # Instantiate cloud provider clients as None at first. We will try to instantiate when passed in BatchSpec
+        self._gcs = None
+        self._gcs_options = gcs_options
 
         super().__init__(*args, **kwargs)
 
@@ -251,6 +234,10 @@ Please check your config."""
 
         elif isinstance(batch_spec, GCSBatchSpec):
             if self._gcs is None:
+                self._instantiate_GCS_client()
+
+            # if we were not able to instantiate GCS client, then raise error
+            if self._gcs is None:
                 raise ge_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine has been passed a GCSBatchSpec,
                         but the ExecutionEngine does not have an GCS client configured. Please check your config."""
@@ -288,6 +275,36 @@ Please check your config."""
         typed_batch_data = PandasBatchData(execution_engine=self, dataframe=df)
 
         return typed_batch_data, batch_markers
+
+    def _instantiate_GCS_client(self):
+        """
+        Helper method for instantiating GCS client when GCSBatchSpec is passed in.
+
+        The method accounts for 3 ways that a GCS connection can be configured:
+            1. setting an environment variable, which is typically GOOGLE_APPLICATION_CREDENTIALS
+            2. passing in explicit credentials via gcs_options
+            3. running Great Expectations from within a GCP container, at which you would be able to create a Client
+                without passing in an additional environment variable or explicit credentials
+        """
+        if self._gcs_options is None:
+            gcs_options = {}
+        else:
+            gcs_options = self._gcs_options
+        try:
+            credentials = None  # If configured with gcloud CLI / env vars
+            if "filename" in gcs_options:
+                filename = gcs_options.pop("filename")
+                credentials = service_account.Credentials.from_service_account_file(
+                    filename=filename
+                )
+            elif "info" in gcs_options:
+                info = gcs_options.pop("info")
+                credentials = service_account.Credentials.from_service_account_info(
+                    info=info
+                )
+            self._gcs = storage.Client(credentials=credentials, **gcs_options)
+        except (TypeError, AttributeError, DefaultCredentialsError):
+            self._gcs = None
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         if batch_spec.get("splitter_method"):
