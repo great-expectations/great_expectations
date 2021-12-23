@@ -8,7 +8,6 @@ from unittest import mock
 import boto3
 import pandas as pd
 import pytest
-from botocore.errorfactory import ClientError
 from moto import mock_s3
 
 try:

@@ -35,6 +35,8 @@ try:
     from botocore.exceptions import ClientError, ParamValidationError
 except ImportError:
     boto3 = None
+    ClientError = None
+    ParamValidationError = None
     logger.debug(
         "Unable to load AWS connection object; install optional boto3 dependency for support"
     )
