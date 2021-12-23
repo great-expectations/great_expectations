@@ -5,11 +5,11 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 
 Beginning in version 0.13, we have introduced a new API focused on enabling Modular [**Expectations**](../../../reference/expectations/expectations.md). They utilize a class structure that is significantly easier to build than ever before!
 
-**ColumnExpectations** are evaluated for a single column, and produce an aggregate metric, such as a mean, standard deviation, number of unique values, column type, etc.
+**ColumnMapExpectations** are evaluated for a single column. They ask a yes/no question for every row in that column, then ask what percentage of rows gave a positive answer to that question. If that percentage is high enough, the Expectation considers that data valid.
 
 This guide will walk you through the process of creating your own Modular ColumnExpectations in a few simple steps!
 
-We will be following this [complete example](../../../../examples/expectations/column_custom_max_expectation.py).
+We will be following this **PLACEHOLDER**.
 
 <Prerequisites>
 
@@ -36,34 +36,35 @@ The parent class expects the variable `metric_name` to be set. Change the value 
 * The name should start with `column.`, because it is a column Metric
 * The second part of the name (after the `.`) should be in snake_case format
 
-The parent class of your Metric Provider class is `ColumnMetricProvider`. It uses Python Decorators to hide most of the complexity from you, and give you a clear and simple API to implement one method per backend that computes the metric.
+The parent class of your Metric Provider class is `ColumnMapMetricProvider`. It uses Python Decorators to hide most of the complexity from you, and give you a clear and simple API to implement one method per backend that computes the metric.
 Implement the computation of the metric in your new Metric Provider class for at least one of the three backends ([**Execution Engines**](../../../reference/execution_engine.md)) that Great Expectations supports: Pandas, SQLAlchemy, and Spark.
 
 Here is the implementation of our example metric for Pandas:
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L49-L52
-```
-This means that the method `_pandas` is a metric function that is decorated as a `column_aggregate_value`. It will be called with the engine-specific column type. It must return a value that is computed over this column. 
-The `engine` argument of `column_aggregate_value` is set to `PandasExecutionEngine` to signal to the method in the parent class that this method computes the Metric for the Pandas backend.
+:::caution Under Construction
+:::
+
+This means that the method `_pandas` is a metric function that is decorated as a `column_condition`. It will be called with the engine-specific column type. It must return a boolean value for each row of the column. 
+The `engine` argument of `column_condition_partial` is set to `PandasExecutionEngine` to signal to the method in the parent class that this method computes the Metric for the Pandas backend.
 
 :::note
 If you have never used Python Decorators and don’t know what they are and how they work, no worries - this should not stop you from successfully implementing your Expectation. Decorators allow the parent class to “wrap” your methods, which means to execute some code before and after your method runs. All you need to know is the name of the Decorator to add (with “@”) above your method definition.
 :::
 
-Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark Dialects.
+Below lies the full implementation of a map metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark Dialects.
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L44-L63
-```
+:::caution Under Construction
+:::
 
 #### 3. Define Parameters
 
 The structure of a Modular Expectation now exists within its own specialized class. This structure has 3 fundamental components: Metric Dependencies, Configuration Validation, and Expectation Validation. In this step, we will address setting up our parameters.
 
-In this guide, we're focusing on a `ColumnExpectation`, which can define metric dependencies simply using the metric_dependencies property.
+In this guide, we're focusing on a `ColumnMapExpectation`, which can define a metric dependency using the `map_metric` property.
 
 Add the following attributes to your Expectation class:
 
-* **Metric Dependencies** - A tuple consisting of the names of all metrics necessary to evaluate the Expectation. Using this shortcut tuple will provide the dependent metric with the same domain kwargs and value kwargs as the Expectation.
+* **Map Metric** - The name of the metric necessary. Using this will provide the dependent metric with the same domain kwargs and value kwargs as the Expectation.
 
 * **Success Keys** - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
 
@@ -71,37 +72,37 @@ Add the following attributes to your Expectation class:
 
 An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class):
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L66-L80
-```
+:::caution Under Construction
+:::
 
 #### 4. Validate Configuration
 
 We have almost reached the end of our journey in implementing an Expectation! 
 Now, if we have requested certain parameters from the user, we would like to validate that the user has entered them correctly via a `validate_configuration` method, and raise an error if the Expectation has been incorrectly configured.
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L119-L136
-```
+::: Under Construction
+:::
 
 In this method, the user provides a configuration, and we check that certain conditions are satisfied by the configuration. We need to verify that the basic configuration parameters are set:
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L138-L144
-```
+::: Under Construction
+:::
 
-And validate optional configuration parameters. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold:
+And validate optional configuration parameters. For example, **PLACEHOLDER**:
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L146-L169
-```
+::: Under Construction
+:::
 
 #### 5. Validate
 
-In this step, we simply need to validate that the results of our Metrics meet our Expectation.
+In this step, we simply need to validate that the results of our Metric meets our Expectation.
 
 The validate method is implemented as `_validate`. 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
 and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not:
 
-```python file=../../../../examples/expectations/column_custom_max_expectation.py#L82-L117
-```
+:::caution Under Construction
+:::
 
 You have now implemented your own Custom Expectation! For more information about Expectations and Metrics, please reference the [Core Concepts](../../../reference/core_concepts.md) documentation.
 
@@ -114,7 +115,7 @@ To use a custom Expectation, you need to ensure it has been placed into your `pl
 When developing an Expectation, we highly encourage the writing of tests and implementation of renderers to verify that the Expectation works as intended and is providing the best possible results in your Data Docs.
 If you plan on contributing your Custom Expectation into the `contrib` library of Great Expectations, there are certain baseline requirements that must be met with regard to backend implementation, renderer implementation, and testing.
 
-Great Expectations provides templates to get you started on developing Custom Expectations for contribution, including renderers & test cases. The ColumnExpectation template can be found [here](../../../../examples/expectations/column_aggregate_expectation_template.py).
+Great Expectations provides templates to get you started on developing Custom Expectations for contribution, including renderers & test cases. The ColumnMapExpectation template can be found [here](../../../../examples/expectations/column_map_expectation_template.py).
 
 :::caution Under Construction
 Please see the following documentation for more on:
