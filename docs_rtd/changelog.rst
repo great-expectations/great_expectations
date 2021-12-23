@@ -8,6 +8,17 @@ Changelog
 develop
 -----------------
 
+0.13.48
+-----------------
+* [DOCS] Updates to configuring credentials (#3856)
+* [DOCS] Add docs on creating suites with the UserConfigurableProfiler (#3877)
+* [DOCS] Update how to configure an expectation store in GCS (#3874)
+* [DOCS] Update how to configure a validation result store in GCS (#3887)
+* [DOCS] Update how to host and share data docs on GCS (#3889)
+* [DOCS] Organize metadata store sidebar category by type of store (#3890)
+* [MAINTENANCE] `add_expectation()` in `ExpectationSuite` supports usage statistics for GE.  (#3824)
+* [MAINTENANCE] Clean up Metrics type usage, SQLAlchemyExecutionEngine and SQLAlchemyBatchData implementation, and SQLAlchemy API usage (#3884)
+
 0.13.47
 -----------------
 * [FEATURE] Add support for named groups in data asset regex (#3855)
