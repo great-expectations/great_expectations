@@ -10,6 +10,7 @@ from functools import partial
 from io import BytesIO
 from typing import Any, Callable, Iterable, List, Optional, Tuple, Union
 
+import botocore.handlers
 import pandas as pd
 
 import great_expectations.exceptions as ge_exceptions
@@ -31,6 +32,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import boto3
+    from botocore.exceptions import ClientError, ParamValidationError
 except ImportError:
     boto3 = None
     logger.debug(
@@ -46,6 +48,7 @@ except ImportError:
     )
 
 try:
+    from google.api_core.exceptions import GoogleAPIError
     from google.auth.exceptions import DefaultCredentialsError
     from google.cloud import storage
     from google.oauth2 import service_account
@@ -226,15 +229,20 @@ Please check your config."""
                         but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
                 )
             s3_engine = self._s3
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
-            s3_url = S3Url(path)
-            if "compression" not in reader_options.keys():
-                inferred_compression_param = sniff_s3_compression(s3_url)
-                if inferred_compression_param is not None:
-                    reader_options["compression"] = inferred_compression_param
-            s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
+            try:
+                reader_method: str = batch_spec.reader_method
+                reader_options: dict = batch_spec.reader_options or {}
+                path: str = batch_spec.path
+                s3_url = S3Url(path)
+                if "compression" not in reader_options.keys():
+                    inferred_compression_param = sniff_s3_compression(s3_url)
+                    if inferred_compression_param is not None:
+                        reader_options["compression"] = inferred_compression_param
+                s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
+            except (ParamValidationError, ClientError) as error:
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
+                )
             logger.debug(
                 "Fetching s3 object. Bucket: {} Key: {}".format(
                     s3_url.bucket, s3_url.key
@@ -284,11 +292,16 @@ Please check your config."""
             gcs_url = GCSUrl(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
-            gcs_bucket = gcs_engine.get_bucket(gcs_url.bucket)
-            gcs_blob = gcs_bucket.blob(gcs_url.blob)
-            logger.debug(
-                f"Fetching GCS blob. Bucket: {gcs_url.bucket} Blob: {gcs_url.blob}"
-            )
+            try:
+                gcs_bucket = gcs_engine.get_bucket(gcs_url.bucket)
+                gcs_blob = gcs_bucket.blob(gcs_url.blob)
+                logger.debug(
+                    f"Fetching GCS blob. Bucket: {gcs_url.bucket} Blob: {gcs_url.blob}"
+                )
+            except GoogleAPIError as error:
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine encountered the following error while trying to read data from GCS Bucket: {error}"""
+                )
             reader_fn = self._get_reader_fn(reader_method, gcs_url.blob)
             buf = BytesIO(gcs_blob.download_as_bytes())
             buf.seek(0)

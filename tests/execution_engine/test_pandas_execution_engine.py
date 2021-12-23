@@ -693,7 +693,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
             "splitter_method": "_split_on_whole_table",
         },
     )
-    with pytest.raises(ClientError):
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
         execution_engine.get_batch_data(
             batch_spec=my_data_connector.build_batch_spec(
                 batch_definition=batch_def_no_key
@@ -719,6 +719,19 @@ def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_parquet")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
     assert df.dataframe.shape == test_df_small.shape
+
+
+def test_get_batch_with_no_s3_configured():
+    batch_spec = S3BatchSpec(
+        path="s3a://i_dont_exist",
+        reader_method="read_csv",
+        splitter_method="_split_on_whole_table",
+    )
+    # if S3 was not configured
+    execution_engine_no_s3 = PandasExecutionEngine()
+
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        execution_engine_no_s3.get_batch_data(batch_spec=batch_spec)
 
 
 def test_get_batch_with_split_on_column_value(test_df):
@@ -1063,3 +1076,11 @@ def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monke
     monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS", raising=False)
     with pytest.raises(Exception):
         PandasExecutionEngine().get_batch_data(batch_spec=gcs_batch_spec)
+
+
+def test_get_batch_with_gcs_misconfigured(gcs_batch_spec):
+    # gcs_batchspec point to data that the ExecutionEngine does not have access to
+    execution_engine_no_gcs = PandasExecutionEngine()
+    # Raises error if batch_spec causes ExecutionEngine error
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        execution_engine_no_gcs.get_batch_data(batch_spec=gcs_batch_spec)
