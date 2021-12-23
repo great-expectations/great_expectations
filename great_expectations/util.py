@@ -32,7 +32,10 @@ from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
 
-from great_expectations.core.expectation_suite import expectationSuiteSchema
+from great_expectations.core.expectation_suite import (
+    ExpectationSuite,
+    expectationSuiteSchema,
+)
 from great_expectations.exceptions import (
     GreatExpectationsError,
     PluginClassNotFoundError,
@@ -821,7 +824,12 @@ def validate(
         )
     else:
         if isinstance(expectation_suite, dict):
-            expectation_suite = expectationSuiteSchema.load(expectation_suite)
+            expectation_suite_dict: dict = expectationSuiteSchema.load(
+                expectation_suite
+            )
+            expectation_suite: ExpectationSuite = ExpectationSuite(
+                **expectation_suite_dict, data_context=data_context
+            )
         if data_asset_name is not None:
             raise ValueError(
                 "When providing an expectation suite, data_asset_name cannot also be provided."
@@ -936,6 +944,22 @@ def lint_code(code: str) -> str:
         return linted_code
     except (black.NothingChanged, RuntimeError):
         return code
+
+
+def convert_nulls_to_None(code: str) -> str:
+    """
+    Substitute instances of 'null' with 'None' in string representations of Python dictionaries.
+
+    Designed to provide security when serializing GE objects and writing them to Jupyter Notebooks.
+    """
+    pattern = r'"([a-zA-Z0-9_]+)": null'
+    result = re.findall(pattern, code)
+    for match in result:
+        code = code.replace(f'"{match}": null', f'"{match}": None')
+        logger.info(
+            f"Replaced '{match}: null' with '{match}: None' before writing to file"
+        )
+    return code
 
 
 def filter_properties_dict(

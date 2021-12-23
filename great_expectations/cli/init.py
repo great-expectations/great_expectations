@@ -103,8 +103,8 @@ def init(ctx, usage_stats):
                 target_directory, usage_statistics_enabled=usage_stats
             )
             send_usage_message(
-                event="cli.init.create",
                 data_context=context,
+                event="cli.init.create",
                 success=True,
             )
         except DataContextError as e:

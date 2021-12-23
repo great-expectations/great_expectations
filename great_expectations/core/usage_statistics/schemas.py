@@ -707,6 +707,49 @@ anonymized_checkpoint_run_schema = {
     ],
 }
 
+anonymized_legacy_profiler_build_suite_payload_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-legacy-profiler-build-suite-payload",
+    "type": "object",
+    "properties": {
+        "profile_dataset_type": {"type": "string", "maxLength": 256},
+        "excluded_expectations_specified": {
+            "type": ["boolean"],
+        },
+        "ignored_columns_specified": {
+            "type": ["boolean"],
+        },
+        "not_null_only": {
+            "type": ["boolean"],
+        },
+        "primary_or_compound_key_specified": {
+            "type": ["boolean"],
+        },
+        "semantic_types_dict_specified": {
+            "type": ["boolean"],
+        },
+        "table_expectations_only": {
+            "type": ["boolean"],
+        },
+        "value_set_threshold_specified": {
+            "type": ["boolean"],
+        },
+        "api_version": {"type": "string", "maxLength": 256},
+    },
+    "required": [
+        "profile_dataset_type",
+        "excluded_expectations_specified",
+        "ignored_columns_specified",
+        "not_null_only",
+        "primary_or_compound_key_specified",
+        "semantic_types_dict_specified",
+        "table_expectations_only",
+        "value_set_threshold_specified",
+        "api_version",
+    ],
+    "additionalProperties": False,
+}
+
 anonymized_usage_statistics_record_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-usage-statistics-record",
@@ -737,6 +780,7 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_validation": anonymized_validation_schema,
         "anonymized_validations": anonymized_validations_list_schema,
         "anonymized_checkpoint_run": anonymized_checkpoint_run_schema,
+        "anonymized_legacy_profiler_build_suite_payload": anonymized_legacy_profiler_build_suite_payload_schema,
     },
     "type": "object",
     "properties": {
@@ -822,6 +866,7 @@ anonymized_usage_statistics_record_schema = {
                         "data_context.build_data_docs",
                         "data_context.open_data_docs",
                         "data_context.run_checkpoint",
+                        "expectation_suite.add_expectation",
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
@@ -875,6 +920,17 @@ anonymized_usage_statistics_record_schema = {
                     "enum": ["checkpoint.run"],
                 },
                 "event_payload": {"$ref": "#/definitions/anonymized_checkpoint_run"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": ["legacy_profiler.build_suite"],
+                },
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_legacy_profiler_build_suite_payload"
+                },
             },
         },
         {

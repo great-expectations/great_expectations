@@ -15,7 +15,6 @@ The Batch Request (V3) API was introduced as part of the 0.13 major release of G
   - `expect_column_chisquare_test_p_value_to_be_greater_than`
   - `expect_column_kl_divergence_to_be_less_than`
   - `expect_column_pair_cramers_phi_value_to_be_less_than`
-  - `expect_table_row_count_to_equal_other_table`
 
 :::
 

@@ -147,12 +147,23 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
+              # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
-              echo "Tests identified by dependency graph test runner [dgtr]:"
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtr
-              if [ -s .dgtr ]; then
-                cat .dgtr | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+
+              # Run script and save output to a temp file
+              echo "Tests identified by dependency graph test runner [dgtest]:"
+              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtest
+
+              # If the script found any matches, feed them into pytest
+              EXIT_STATUS=0
+              if [ -s .dgtest ]; then
+                cat .dgtest | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+                EXIT_STATUS=$?
               fi
+
+              # Clean up
+              rm .dgtest
+              exit $EXIT_STATUS
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -213,12 +224,23 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
+              # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
-              echo "Tests identified by dependency graph test runner [dgtr]:"
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtr
-              if [ -s .dgtr ]; then
-                cat .dgtr | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+
+              # Run script and save output to a temp file
+              echo "Tests identified by dependency graph test runner [dgtest]:"
+              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtest
+
+              # If the script found any matches, feed them into pytest
+              EXIT_STATUS=0
+              if [ -s .dgtest ]; then
+                cat .dgtest | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+                EXIT_STATUS=$?
               fi
+
+              # Clean up
+              rm .dgtest
+              exit $EXIT_STATUS
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -278,13 +300,24 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
+              # Install dependencies
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              echo "Tests identified by dependency graph test runner [dgtr]:"
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtr
-              if [ -s .dgtr ]; then
-                cat .dgtr | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+
+              # Run script and save output to a temp file
+              echo "Tests identified by dependency graph test runner [dgtest]:"
+              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtest
+
+              # If the script found any matches, feed them into pytest
+              EXIT_STATUS=0
+              if [ -s .dgtest ]; then
+                cat .dgtest | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+                EXIT_STATUS=$?
               fi
+
+              # Clean up
+              rm .dgtest
+              exit $EXIT_STATUS
             displayName: 'pytest'
 
       - job: mssql
@@ -315,12 +348,23 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
+              # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
-              echo "Tests identified by dependency graph test runner [dgtr]:"
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtr
-              if [ -s .dgtr ]; then
-                cat .dgtr | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+
+              # Run script and save output to a temp file
+              echo "Tests identified by dependency graph test runner [dgtest]:"
+              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtest
+
+              # If the script found any matches, feed them into pytest
+              EXIT_STATUS=0
+              if [ -s .dgtest ]; then
+                cat .dgtest | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+                EXIT_STATUS=$?
               fi
+
+              # Clean up
+              rm .dgtest
+              exit $EXIT_STATUS
             displayName: 'pytest'
 
   - stage: cli_integration
@@ -359,10 +403,21 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
+              # Install dependencies
               pip install pytest pytest-azurepipelines
-              echo "Tests identified by dependency graph test runner [dgtr]:"
-              python scripts/determine_tests_to_run.py --filter 'tests/cli' --depth 3 | tee .dgtr
-              if [ -s .dgtr ]; then
-                cat .dgtr | xargs pytest --aws-integration -v
+
+              # Run script and save output to a temp file
+              echo "Tests identified by dependency graph test runner [dgtest]:"
+              python scripts/determine_tests_to_run.py --filter 'tests/cli' --depth 3 | tee .dgtest
+
+              # If the script found any matches, feed them into pytest
+              EXIT_STATUS=0
+              if [ -s .dgtest ]; then
+                cat .dgtest | xargs pytest --aws-integration -v
+                EXIT_STATUS=$?
               fi
+
+              # Clean up
+              rm .dgtest
+              exit $EXIT_STATUS
             displayName: 'pytest'

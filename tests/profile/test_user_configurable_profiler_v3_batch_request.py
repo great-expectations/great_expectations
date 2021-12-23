@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import string
+from unittest import mock
 
 import pandas as pd
 import pytest
@@ -365,11 +366,6 @@ def test_init_with_semantic_types(cardinality_validator):
 
     assert "col_one" not in profiler.column_info
 
-    # assert profiler.column_info.get("col_none") == {
-    #     "cardinality": "NONE",
-    #     "type": "NUMERIC",
-    #     "semantic_types": [],
-    # }
     assert profiler.column_info.get("col_two") == {
         "cardinality": "TWO",
         "type": "INT",
@@ -460,7 +456,14 @@ def test__validate_semantic_types_dict(cardinality_validator):
     )
 
 
-def test_build_suite_no_config(titanic_validator, possible_expectations_set):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_build_suite_no_config(
+    mock_emit,
+    titanic_validator,
+    possible_expectations_set,
+):
     """
     What does this test do and why?
     Tests that the build_suite function works as expected with no config
@@ -471,6 +474,40 @@ def test_build_suite_no_config(titanic_validator, possible_expectations_set):
 
     assert expectations_from_suite.issubset(possible_expectations_set)
     assert len(suite.expectations) == 48
+
+    # Note 20211209 - Profiler will also call ExpectationSuite's add_expectation(), but it will not
+    # send a usage_stats event when called from a Profiler.
+    assert mock_emit.call_count == 1
+    assert "expectation_suite.add_expectation" not in [
+        mock_emit.call_args_list[0][0][0]["event"]
+    ]
+
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call]
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "legacy_profiler.build_suite",
+                "event_payload": {
+                    "profile_dataset_type": "Validator",
+                    "excluded_expectations_specified": False,
+                    "ignored_columns_specified": False,
+                    "not_null_only": False,
+                    "primary_or_compound_key_specified": False,
+                    "semantic_types_dict_specified": False,
+                    "table_expectations_only": False,
+                    "value_set_threshold_specified": True,
+                    "api_version": "v2",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
 
 def test_all_table_columns_populates(taxi_validator_pandas):
@@ -517,8 +554,11 @@ def test_profiler_works_with_batch_object(cardinality_validator):
     ]
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_build_suite_with_config_and_no_semantic_types_dict(
-    titanic_validator, possible_expectations_set
+    mock_emit, titanic_validator, possible_expectations_set
 ):
     """
     What does this test do and why?
@@ -544,8 +584,44 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     assert "expect_column_mean_to_be_between" not in expectations_from_suite
     assert len(suite.expectations) == 29
 
+    assert mock_emit.call_count == 1
+    assert "expectation_suite.add_expectation" not in [
+        mock_emit.call_args_list[0][0][0]["event"]
+    ]
 
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call]
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "legacy_profiler.build_suite",
+                "event_payload": {
+                    "profile_dataset_type": "Validator",
+                    "excluded_expectations_specified": True,
+                    "ignored_columns_specified": True,
+                    "not_null_only": False,
+                    "primary_or_compound_key_specified": True,
+                    "semantic_types_dict_specified": False,
+                    "table_expectations_only": False,
+                    "value_set_threshold_specified": True,
+                    "api_version": "v2",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_build_suite_with_semantic_types_dict(
+    mock_emit,
     cardinality_validator,
     possible_expectations_set,
 ):
@@ -589,8 +665,45 @@ def test_build_suite_with_semantic_types_dict(
     assert len(value_set_columns) == 2
     assert value_set_columns == {"col_two", "col_very_few"}
 
+    # Note 20211209 - Profiler will also call ExpectationSuite's add_expectation(), but it will not
+    # send a usage_stats event when called from a Profiler.
+    assert mock_emit.call_count == 1
 
-def test_build_suite_when_suite_already_exists(cardinality_validator):
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call]
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "legacy_profiler.build_suite",
+                "event_payload": {
+                    "profile_dataset_type": "Validator",
+                    "excluded_expectations_specified": True,
+                    "ignored_columns_specified": True,
+                    "not_null_only": False,
+                    "primary_or_compound_key_specified": True,
+                    "semantic_types_dict_specified": True,
+                    "table_expectations_only": False,
+                    "value_set_threshold_specified": True,
+                    "api_version": "v2",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_build_suite_when_suite_already_exists(
+    mock_emit,
+    cardinality_validator,
+):
     """
     What does this test do and why?
     Confirms that creating a new suite on an existing profiler wipes the previous suite
@@ -611,6 +724,52 @@ def test_build_suite_when_suite_already_exists(cardinality_validator):
     _, expectations = get_set_of_columns_and_expectations_from_suite(suite)
     assert len(suite.expectations) == 1
     assert "expect_table_row_count_to_be_between" in expectations
+
+    assert mock_emit.call_count == 2
+
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call]
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "legacy_profiler.build_suite",
+                "event_payload": {
+                    "profile_dataset_type": "Validator",
+                    "excluded_expectations_specified": True,
+                    "ignored_columns_specified": True,
+                    "not_null_only": False,
+                    "primary_or_compound_key_specified": False,
+                    "semantic_types_dict_specified": False,
+                    "table_expectations_only": True,
+                    "value_set_threshold_specified": True,
+                    "api_version": "v2",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "legacy_profiler.build_suite",
+                "event_payload": {
+                    "profile_dataset_type": "Validator",
+                    "excluded_expectations_specified": True,
+                    "ignored_columns_specified": True,
+                    "not_null_only": False,
+                    "primary_or_compound_key_specified": False,
+                    "semantic_types_dict_specified": False,
+                    "table_expectations_only": True,
+                    "value_set_threshold_specified": True,
+                    "api_version": "v2",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
 
 def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):

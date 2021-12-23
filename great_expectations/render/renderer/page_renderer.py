@@ -9,6 +9,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.render.util import num_to_str
 
+from ...core import ExpectationSuite
 from ...core.expectation_validation_result import ExpectationSuiteValidationResult
 from ...core.run_identifier import RunIdentifier
 from ...validation_operators.types.validation_operator_result import (
@@ -636,6 +637,8 @@ class ExpectationSuitePageRenderer(Renderer):
             )
 
     def render(self, expectations):
+        if isinstance(expectations, dict):
+            expectations = ExpectationSuite(**expectations, data_context=None)
         (
             columns,
             ordered_columns,

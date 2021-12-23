@@ -1,6 +1,7 @@
 import atexit
 import copy
 import datetime
+import enum
 import json
 import logging
 import platform
@@ -59,6 +60,11 @@ STOP_SIGNAL = object()
 logger = logging.getLogger(__name__)
 
 _anonymizers = {}
+
+
+class UsageStatsExceptionPrefix(enum.Enum):
+    EMIT_EXCEPTION: str = "UsageStatsException"
+    INVALID_MESSAGE: str = "UsageStatsInvalidMessage"
 
 
 class UsageStatisticsHandler:
@@ -187,7 +193,7 @@ class UsageStatisticsHandler:
             + "Z"
         )
 
-        event_duration_property_name: str = f'{message["event_name"]}.duration'.replace(
+        event_duration_property_name: str = f'{message["event"]}.duration'.replace(
             ".", "_"
         )
         if hasattr(self, event_duration_property_name):
@@ -202,7 +208,10 @@ class UsageStatisticsHandler:
             jsonschema.validate(message, schema=schema)
             return True
         except jsonschema.ValidationError as e:
-            logger.debug("invalid message: " + str(e))
+            logger.debug(
+                f"{UsageStatsExceptionPrefix.INVALID_MESSAGE.value} invalid message: "
+                + str(e)
+            )
             return False
 
     def send_usage_message(
@@ -239,7 +248,10 @@ class UsageStatisticsHandler:
         # noinspection PyBroadException
         except Exception as e:
             # We *always* tolerate *any* error in usage statistics
-            logger.debug(e)
+            log_message: str = (
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}"
+            )
+            logger.debug(log_message)
 
 
 def get_usage_statistics_handler(args_array):
@@ -459,9 +471,9 @@ def add_datasource_usage_statistics(data_context, name, **kwargs):
     # noinspection PyBroadException
     try:
         payload = datasource_anonymizer.anonymize_datasource_info(name, kwargs)
-    except Exception:
+    except Exception as e:
         logger.debug(
-            "add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"
         )
 
     return payload
@@ -536,7 +548,7 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
 
 
 def send_usage_message(
-    data_context,
+    data_context: "DataContext",  # noqa: F821
     event: str,
     event_payload: Optional[dict] = None,
     success: Optional[bool] = None,
