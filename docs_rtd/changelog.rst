@@ -8,6 +8,12 @@ Changelog
 develop
 -----------------
 
+0.13.49
+-----------------
+* [FEATURE] PandasExecutionEngine is able to instantiate Google Storage client in Google Cloud Composer (#3896)
+* [BUGFIX] Revert change to ExpectationSuite constructor (#3902)
+* [MAINTENANCE] SQL statements that are of TextClause type expressed as subqueries (#3899)
+
 0.13.48
 -----------------
 * [DOCS] Updates to configuring credentials (#3856)
