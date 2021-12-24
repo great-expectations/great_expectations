@@ -1,8 +1,9 @@
 name: Docker Image CI
 
 on:
-  push:
-    branches: [ integrate-algolia-with-docusauras ]
+ push:
+    branches:
+      - develop
 
 jobs:
 
@@ -11,12 +12,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-#     - uses: actions/checkout@v2
-#     - name: Build the Docker image
-#       run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
     - uses: actions/checkout@v2
-    - uses: darrenjennings/algolia-docsearch-action@master
-      with:
-        algolia_application_id: 'RA3RRQUBO1'
-        algolia_api_key: '5fc4b9cbb86b1510fd966ce24afb13a4'
-        file: 'algolia/my-algolia-config.json'
+    - name: Get the content of algolia.json as config
+      id: algolia_config
+      run: echo "::set-output name=config::$(cat ${{ github.workspace }}/algoliaconfig.json | jq -r tostring)"
+
+    - name: Push indices to Algolia
+      uses: signcl/docsearch-scraper-action@master
+      env:
+        APPLICATION_ID: 'RA3RRQUBO1'
+        API_KEY: '5fc4b9cbb86b1510fd966ce24afb13a4'
+        CONFIG: ${{ github.workspace }}/algoliaconfig.json
