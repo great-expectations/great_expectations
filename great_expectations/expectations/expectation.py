@@ -7,6 +7,7 @@ from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
 from typing import Any, Dict, List, Optional, Tuple, Union
+from numpy import negative
 
 import pandas as pd
 from dateutil.parser import parse
@@ -877,7 +878,7 @@ class Expectation(metaclass=MetaExpectation):
             meta=meta,
         )
 
-    def run_diagnostics(self, pretty_print=True):
+    def run_diagnostics(self):
         """
         Produce a diagnostic report about this expectation.
         The current uses for this method's output are
@@ -902,9 +903,6 @@ class Expectation(metaclass=MetaExpectation):
         incompleteness of the Expectation's implementation (e.g., declaring a dependency on Metrics
         that do not exist). These errors are added under "errors" key in the report.
 
-        :param pretty_print: TODO: this argument is not currently used. The intent is to return
-        a well formatted and easily readable text instead of the dictionary when the argument is set
-        to True
         :return: a dictionary view of the report
         """
 
@@ -1002,6 +1000,93 @@ class Expectation(metaclass=MetaExpectation):
                 )
 
         return report_obj
+
+    def generate_diagnostic_checklist(self):
+
+        diagnostics_report = self.run_diagnostics()
+
+        checks = []
+        
+        # Check whether this Expectation has a library_metadata object
+        checks.append({
+            "message": "library_metadata object exists",
+            "passed" : hasattr(self, "library_metadata") and \
+                type(self.library_metadata) == dict and \
+                set(self.library_metadata.keys()) == {"maturity", "package", "tags", "contributors"}
+        })
+
+        # Check whether this Expectation has an informative docstring
+        message = "Has a docstring, including a one-line short description"
+        if "short_description" in diagnostics_report["description"]:
+            short_description = diagnostics_report["description"]["short_description"]
+        else:
+            short_description = None
+        if short_description not in {
+            "", "\n", "TODO: Add a docstring here", None
+        }:
+            checks.append({
+                "message": message+": "+short_description,
+                "passed" : True,
+            })
+        else:
+            checks.append({
+                "message": message,
+                "passed" : False,
+            })
+
+        # Check whether this Expectation has at least one positive and negative example case (and all test cases return the expected output)
+        message = "Has at least one positive and negative example case, and all test cases pass"
+        positive_cases = 0
+        negative_cases = 0
+        for dataset in diagnostics_report["examples"]:
+            for test in dataset["tests"]:
+                if test["out"]["success"] == True:
+                    positive_cases += 1
+                elif test["out"]["success"] == False:
+                    negative_cases += 1
+        
+        unexpected_cases = 0
+        sub_messages = []
+        for test in diagnostics_report["test_report"]:
+            if test["test_passed"] != 'true':
+                unexpected_cases += 1
+                sub_messages.append([test]["title"])
+        print(sub_messages)
+
+        passed = (positive_cases > 0) and (negative_cases > 0) and (unexpected_cases == 0)
+        if passed:
+            checks.append({
+                "message": message,
+                "passed" : passed,
+            })
+        else:
+            checks.append({
+                "message": message,
+                "sub_messages": sub_messages,
+                "passed" : passed,
+            })
+
+#     Core logic exists and passes tests on at least one Execution Engine
+#     Has all four statement Renderers: question, descriptive, prescriptive, diagnostic
+#     Has default ParameterBuilders and Domain hooks to support Profiling
+#     Core logic exists and passes tests for all applicable Execution Engines and backends
+#     All Renderers exist and produce typed output
+#     Linting for type hints and other code standards passes
+#     Input validation exists
+# """)
+
+
+        print(f"Completeness checklist for {self.__class__.__name__}:")
+        for check in checks:
+            if check["passed"]:
+                print(" ✔ "+check["message"])
+            else:
+                print("   "+check["message"])
+            
+            if "sub_messages" in check:
+                for sub_message in check["sub_messages"]:
+                    print("      "+sub_message)
+
 
     @staticmethod
     def _add_error_to_diagnostics_report(
