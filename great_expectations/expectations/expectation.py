@@ -1044,13 +1044,17 @@ class Expectation(metaclass=MetaExpectation):
                     positive_cases += 1
                 elif test["out"]["success"] == False:
                     negative_cases += 1
-        
+
         unexpected_cases = 0
         sub_messages = []
         for test in diagnostics_report["test_report"]:
-            if test["test_passed"] != 'true':
+            passed = (test["test_passed"] == 'true')
+            sub_messages.append({
+                "message": test["test title"],
+                "passed" : passed,
+            })
+            if not passed:
                 unexpected_cases += 1
-                sub_messages.append([test]["title"])
 
         passed = (positive_cases > 0) and (negative_cases > 0) and (unexpected_cases == 0)
         if passed:
@@ -1067,14 +1071,35 @@ class Expectation(metaclass=MetaExpectation):
 
         # Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine
         message = "Core logic exists and passes tests on at least one Execution Engine"
-        checks.append({
-            "message": message,
-            "sub_messages": sub_messages,
-            "passed" : passed,
-        })
+        successful_execution_engines = 0
+        sub_messages = []
+        for k,v in diagnostics_report["execution_engines"].items():
+            if v:
+                successful_execution_engines += 1
+            sub_messages += [{
+                "message": k,
+                "passed": v,
+            }]
+        
+        if successful_execution_engines > 0:
+            checks.append({
+                "message": message,
+                "passed" : True,
+            })
+        else:
+            checks.append({
+                "message": message,
+                "sub_messages": sub_messages,
+                "passed" : False,
+            })
 
         # Check whether the Expectation has all four statement Renderers: question, descriptive, prescriptive, diagnostic
-        message = "Has all four statement Renderers: question, descriptive, prescriptive, diagnostic"
+        # message = "Has all four statement Renderers: question, descriptive, prescriptive, diagnostic"
+        # sub_messages = []
+        # checks.append({
+        #     "message": message,
+        #     "passed" : True,
+        # })
 
         output_message = self._convert_checks_into_output_message(checks)
         return output_message

@@ -53,7 +53,10 @@ Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration:
  ✔ library_metadata object exists
    Has a docstring, including a one-line short description
    Has at least one positive and negative example case, and all test cases pass
-   Core logic exists and passes tests on at least one Execution Engine
+    ✔ positive_test_with_mostly
+    ✔ negative_test_with_mostly
+    ✔ other_negative_test_with_mostly
+ ✔ Core logic exists and passes tests on at least one Execution Engine
 """
 
 def test_generate_diagnostic_checklist__third_iteration():
@@ -65,5 +68,8 @@ Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration:
  ✔ library_metadata object exists
    Has a docstring, including a one-line short description
    Has at least one positive and negative example case, and all test cases pass
-   Core logic exists and passes tests on at least one Execution Engine
+    ✔ positive_test_with_mostly
+    ✔ negative_test_with_mostly
+    ✔ other_negative_test_with_mostly
+ ✔ Core logic exists and passes tests on at least one Execution Engine
 """
