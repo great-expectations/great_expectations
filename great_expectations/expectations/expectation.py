@@ -1001,7 +1001,7 @@ class Expectation(metaclass=MetaExpectation):
 
         return report_obj
 
-    def generate_diagnostic_checklist(self):
+    def generate_diagnostic_checklist(self) -> str:
 
         diagnostics_report = self.run_diagnostics()
 
@@ -1051,7 +1051,6 @@ class Expectation(metaclass=MetaExpectation):
             if test["test_passed"] != 'true':
                 unexpected_cases += 1
                 sub_messages.append([test]["title"])
-        print(sub_messages)
 
         passed = (positive_cases > 0) and (negative_cases > 0) and (unexpected_cases == 0)
         if passed:
@@ -1066,6 +1065,14 @@ class Expectation(metaclass=MetaExpectation):
                 "passed" : passed,
             })
 
+        # Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine
+        message = "Core logic exists and passes tests on at least one Execution Engine"
+        checks.append({
+            "message": message,
+            "sub_messages": sub_messages,
+            "passed" : passed,
+        })
+
 #     Core logic exists and passes tests on at least one Execution Engine
 #     Has all four statement Renderers: question, descriptive, prescriptive, diagnostic
 #     Has default ParameterBuilders and Domain hooks to support Profiling
@@ -1076,16 +1083,19 @@ class Expectation(metaclass=MetaExpectation):
 # """)
 
 
-        print(f"Completeness checklist for {self.__class__.__name__}:")
+        output_message = f"Completeness checklist for {self.__class__.__name__}:"
         for check in checks:
             if check["passed"]:
-                print(" ✔ "+check["message"])
+                output_message += "\n ✔ "+check["message"]
             else:
-                print("   "+check["message"])
+                output_message += "\n   "+check["message"]
             
             if "sub_messages" in check:
                 for sub_message in check["sub_messages"]:
-                    print("      "+sub_message)
+                    output_message += "\n      "+sub_message
+        output_message += "\n"
+
+        return output_message
 
 
     @staticmethod
