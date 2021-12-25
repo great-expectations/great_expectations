@@ -1073,15 +1073,13 @@ class Expectation(metaclass=MetaExpectation):
             "passed" : passed,
         })
 
-#     Core logic exists and passes tests on at least one Execution Engine
-#     Has all four statement Renderers: question, descriptive, prescriptive, diagnostic
-#     Has default ParameterBuilders and Domain hooks to support Profiling
-#     Core logic exists and passes tests for all applicable Execution Engines and backends
-#     All Renderers exist and produce typed output
-#     Linting for type hints and other code standards passes
-#     Input validation exists
-# """)
+        # Check whether the Expectation has all four statement Renderers: question, descriptive, prescriptive, diagnostic
+        message = "Has all four statement Renderers: question, descriptive, prescriptive, diagnostic"
 
+        output_message = self._convert_checks_into_output_message(checks)
+        return output_message
+
+    def _convert_checks_into_output_message(self, checks) -> str:
 
         output_message = f"Completeness checklist for {self.__class__.__name__}:"
         for check in checks:
@@ -1092,7 +1090,10 @@ class Expectation(metaclass=MetaExpectation):
             
             if "sub_messages" in check:
                 for sub_message in check["sub_messages"]:
-                    output_message += "\n      "+sub_message
+                    if sub_message["passed"]:
+                        output_message += "\n    ✔ "+sub_message["message"]
+                    else:
+                        output_message += "\n      "+sub_message["message"]
         output_message += "\n"
 
         return output_message

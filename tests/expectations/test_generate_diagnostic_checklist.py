@@ -4,7 +4,35 @@ from .expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree__ThirdIteration,
 )
 
-def test_generate_diagnostic_checklist__first_iteration(capsys):
+def test__convert_checks_into_output_message():
+    checks = [{
+        "message": "AAA",
+        "passed": True,
+    },{
+        "message": "BBB",
+        "passed": False,
+    },{
+        "message": "CCC",
+        "passed": False,
+        "sub_messages": [{
+            "message": "ddd",
+            "passed": True,
+        },{
+            "message": "eee",
+            "passed": False,
+        }]
+    },]
+
+    assert ExpectColumnValuesToEqualThree()._convert_checks_into_output_message(checks) == """\
+Completeness checklist for ExpectColumnValuesToEqualThree:
+ ✔ AAA
+   BBB
+   CCC
+    ✔ ddd
+      eee
+"""
+
+def test_generate_diagnostic_checklist__first_iteration():
     output_message = ExpectColumnValuesToEqualThree().generate_diagnostic_checklist()
     print(output_message)
 
