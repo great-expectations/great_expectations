@@ -656,14 +656,14 @@ def test_EmailAction(
 @mock.patch.object(Session, "post", return_value=MockCloudResponse(200))
 def test_cloud_notification_action(
     mock_post_method,
-    cloud_data_context_with_datasource_sqlalchemy_engine,
+    cloud_data_context_with_datasource_pandas_engine,
     validation_result_suite_with_ge_cloud_id,
     validation_result_suite_ge_cloud_identifier,
     checkpoint_ge_cloud_id,
     ge_cloud_access_token,
 ):
     cloud_action: CloudNotificationAction = CloudNotificationAction(
-        data_context=cloud_data_context_with_datasource_sqlalchemy_engine,
+        data_context=cloud_data_context_with_datasource_pandas_engine,
         checkpoint_ge_cloud_id=checkpoint_ge_cloud_id,
     )
     expected_ge_cloud_url = urljoin(
@@ -692,14 +692,14 @@ def test_cloud_notification_action(
 @mock.patch.object(Session, "post", return_value=MockCloudResponse(418))
 def test_cloud_notification_action_bad_response(
     mock_post_method,
-    cloud_data_context_with_datasource_sqlalchemy_engine,
+    cloud_data_context_with_datasource_pandas_engine,
     validation_result_suite_with_ge_cloud_id,
     validation_result_suite_ge_cloud_identifier,
     checkpoint_ge_cloud_id,
     ge_cloud_access_token,
 ):
     cloud_action: CloudNotificationAction = CloudNotificationAction(
-        data_context=cloud_data_context_with_datasource_sqlalchemy_engine,
+        data_context=cloud_data_context_with_datasource_pandas_engine,
         checkpoint_ge_cloud_id=checkpoint_ge_cloud_id,
     )
     expected_ge_cloud_url = urljoin(
