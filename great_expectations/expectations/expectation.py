@@ -1025,7 +1025,11 @@ class Expectation(metaclass=MetaExpectation):
             "", "\n", "TODO: Add a docstring here", None
         }:
             checks.append({
-                "message": message+": "+short_description,
+                "message": message,
+                "sub_messages": [{
+                    "message" : '"'+short_description+'"',
+                    "passed" : True,
+                }],
                 "passed" : True,
             })
         else:

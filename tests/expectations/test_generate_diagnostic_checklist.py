@@ -57,7 +57,8 @@ def test_generate_diagnostic_checklist__second_iteration():
     assert output_message == """\
 Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration:
  ✔ library_metadata object exists
-   Has a docstring, including a one-line short description
+ ✔ Has a docstring, including a one-line short description
+    ✔ "Expect values in this column to equal the number three."
  ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Core logic exists and passes tests on at least one Execution Engine
 """

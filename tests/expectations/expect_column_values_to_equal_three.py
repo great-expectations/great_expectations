@@ -29,6 +29,8 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
 
 class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualThree):
+    """Expect values in this column to equal the number three.
+    """
 
     examples = [
         {
