@@ -52,7 +52,9 @@ class ValidationAction:
     def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
+        validation_result_suite_identifier: Union[
+            ValidationResultIdentifier, GeCloudIdentifier
+        ],
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,

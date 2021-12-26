@@ -23,7 +23,11 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.util import get_or_create_spark_application
-from great_expectations.data_context.types.base import CheckpointConfig, DataContextConfig, GeCloudConfig
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    DataContextConfig,
+    GeCloudConfig,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
@@ -4806,11 +4810,17 @@ def ge_cloud_access_token():
 
 @pytest.fixture
 def ge_cloud_config(ge_cloud_base_url, ge_cloud_account_id, ge_cloud_access_token):
-    return GeCloudConfig(base_url=ge_cloud_base_url, account_id=ge_cloud_account_id, access_token=ge_cloud_access_token)
+    return GeCloudConfig(
+        base_url=ge_cloud_base_url,
+        account_id=ge_cloud_account_id,
+        access_token=ge_cloud_access_token,
+    )
 
 
 @pytest.fixture(scope="function")
-def empty_ge_cloud_data_context_config(ge_cloud_base_url, ge_cloud_account_id, ge_cloud_access_token):
+def empty_ge_cloud_data_context_config(
+    ge_cloud_base_url, ge_cloud_account_id, ge_cloud_access_token
+):
     config_yaml_str = f"""
 stores:
   default_evaluation_parameter_store:
@@ -4860,9 +4870,7 @@ checkpoint_store_name: default_checkpoint_store
 
 @pytest.fixture(scope="function")
 def empty_cloud_data_context(
-    tmp_path,
-    empty_ge_cloud_data_context_config,
-    ge_cloud_config
+    tmp_path, empty_ge_cloud_data_context_config, ge_cloud_config
 ) -> DataContext:
     project_path = tmp_path / "empty_data_context"
     project_path.mkdir()
@@ -4872,7 +4880,7 @@ def empty_cloud_data_context(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path,
         ge_cloud_mode=True,
-        ge_cloud_config=ge_cloud_config
+        ge_cloud_config=ge_cloud_config,
     )
     assert context.list_datasources() == []
     return context
