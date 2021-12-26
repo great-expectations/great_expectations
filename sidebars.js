@@ -197,7 +197,6 @@ module.exports = {
               type: 'category',
               label: 'Creating Custom Expectations',
               items: [
-                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
                 'guides/expectations/creating_custom_expectations/how_to_create_example_cases_for_an_expectation',
