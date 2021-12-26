@@ -1,3 +1,5 @@
+import json
+
 from .expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__SecondIteration,
@@ -32,6 +34,10 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
       eee
 """
 
+def test__count_positive_and_negative_example_cases():
+    assert ExpectColumnValuesToEqualThree()._count_positive_and_negative_example_cases() == (0,0)
+    assert ExpectColumnValuesToEqualThree__SecondIteration()._count_positive_and_negative_example_cases() == (1,2)
+
 def test_generate_diagnostic_checklist__first_iteration():
     output_message = ExpectColumnValuesToEqualThree().generate_diagnostic_checklist()
     print(output_message)
@@ -52,10 +58,7 @@ def test_generate_diagnostic_checklist__second_iteration():
 Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration:
  ✔ library_metadata object exists
    Has a docstring, including a one-line short description
-   Has at least one positive and negative example case, and all test cases pass
-    ✔ positive_test_with_mostly
-    ✔ negative_test_with_mostly
-    ✔ other_negative_test_with_mostly
+ ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Core logic exists and passes tests on at least one Execution Engine
 """
 
@@ -67,9 +70,6 @@ def test_generate_diagnostic_checklist__third_iteration():
 Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration:
  ✔ library_metadata object exists
    Has a docstring, including a one-line short description
-   Has at least one positive and negative example case, and all test cases pass
-    ✔ positive_test_with_mostly
-    ✔ negative_test_with_mostly
-    ✔ other_negative_test_with_mostly
+ ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Core logic exists and passes tests on at least one Execution Engine
 """

@@ -1036,14 +1036,7 @@ class Expectation(metaclass=MetaExpectation):
 
         # Check whether this Expectation has at least one positive and negative example case (and all test cases return the expected output)
         message = "Has at least one positive and negative example case, and all test cases pass"
-        positive_cases = 0
-        negative_cases = 0
-        for dataset in diagnostics_report["examples"]:
-            for test in dataset["tests"]:
-                if test["out"]["success"] == True:
-                    positive_cases += 1
-                elif test["out"]["success"] == False:
-                    negative_cases += 1
+        positive_cases, negative_cases = self._count_positive_and_negative_example_cases()
 
         unexpected_cases = 0
         sub_messages = []
@@ -1103,6 +1096,22 @@ class Expectation(metaclass=MetaExpectation):
 
         output_message = self._convert_checks_into_output_message(checks)
         return output_message
+
+    def _count_positive_and_negative_example_cases(self):
+        if not hasattr(self, "examples"):
+            return 0, 0
+
+        positive_cases = 0
+        negative_cases = 0
+
+        for dataset in self.examples:
+            for test in dataset["tests"]:
+                if test["out"]["success"] == True:
+                    positive_cases += 1
+                elif test["out"]["success"] == False:
+                    negative_cases += 1
+        
+        return positive_cases, negative_cases
 
     def _convert_checks_into_output_message(self, checks) -> str:
 
