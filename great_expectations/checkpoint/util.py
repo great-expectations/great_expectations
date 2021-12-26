@@ -338,10 +338,8 @@ def send_cloud_notification(url: str, headers: dict):
         logger.error(str(e))
     else:
         if response.status_code != 200:
-            logger.warning(
-                f"Cloud Notification request at {url} "
-                f"returned error {response.status_code}: {response.text}"
-            )
-
+            message = f"Cloud Notification request at {url} returned error {response.status_code}: {response.text}"
+            logger.warning(message)
+            return message
         else:
             return "Cloud notification succeeded."
