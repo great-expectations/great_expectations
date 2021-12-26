@@ -7,14 +7,13 @@ from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ExpectationConfiguration,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-)
+from great_expectations.expectations.registry import _registered_expectations
 
 from .expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__SecondIteration,
 )
+
 
 def test_expectation_self_check():
 
