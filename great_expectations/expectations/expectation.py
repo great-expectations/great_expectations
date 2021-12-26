@@ -1041,18 +1041,7 @@ class Expectation(metaclass=MetaExpectation):
         # Check whether this Expectation has at least one positive and negative example case (and all test cases return the expected output)
         message = "Has at least one positive and negative example case, and all test cases pass"
         positive_cases, negative_cases = self._count_positive_and_negative_example_cases()
-
-        unexpected_cases = 0
-        sub_messages = []
-        for test in diagnostics_report["test_report"]:
-            passed = (test["test_passed"] == 'true')
-            sub_messages.append({
-                "message": test["test title"],
-                "passed" : passed,
-            })
-            if not passed:
-                unexpected_cases += 1
-
+        unexpected_cases, sub_messages = self._count_unexpected_cases_and_get_sub_messages(diagnostics_report["test_report"])
         passed = (positive_cases > 0) and (negative_cases > 0) and (unexpected_cases == 0)
         if passed:
             checks.append({
@@ -1116,6 +1105,21 @@ class Expectation(metaclass=MetaExpectation):
                     negative_cases += 1
         
         return positive_cases, negative_cases
+
+    @staticmethod
+    def _count_unexpected_cases_and_get_sub_messages(test_report):
+        unexpected_cases = 0
+        sub_messages = []
+        for test in test_report:
+            passed = (test["test_passed"] == 'true')
+            sub_messages.append({
+                "message": test["test title"],
+                "passed" : passed,
+            })
+            if not passed:
+                unexpected_cases += 1
+        
+        return unexpected_cases, sub_messages
 
     def _convert_checks_into_output_message(self, checks) -> str:
 
