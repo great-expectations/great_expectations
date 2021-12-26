@@ -1,6 +1,7 @@
 import json
 import logging
 from unittest import mock
+from urllib.parse import urljoin
 
 import pytest
 from freezegun import freeze_time
@@ -654,24 +655,68 @@ def test_EmailAction(
 
 @mock.patch.object(Session, "post", return_value=MockCloudResponse(200))
 def test_cloud_notification_action(
+    mock_post_method,
     cloud_data_context_with_datasource_sqlalchemy_engine,
-    validation_result_suite,
-    validation_result_suite_id,
+    validation_result_suite_with_ge_cloud_id,
+    validation_result_suite_ge_cloud_identifier,
+    checkpoint_ge_cloud_id,
+    ge_cloud_access_token
 ):
-    cloud_notification_action_id = "5f8a9f94-c652-44b9-ac75-1aa2280f53be"
-    action_type = "fake_action"
-
     cloud_action: CloudNotificationAction = CloudNotificationAction(
         data_context=cloud_data_context_with_datasource_sqlalchemy_engine,
-        cloud_notification_action_id=cloud_notification_action_id,
-        action_type=action_type,
+        checkpoint_ge_cloud_id=checkpoint_ge_cloud_id
     )
+    expected_ge_cloud_url = urljoin(
+        cloud_action.data_context.ge_cloud_config.base_url,
+        f"/accounts/{cloud_action.data_context.ge_cloud_config.account_id}/contracts/"
+        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
+    )
+    expected_headers = {
+        'Content-Type': 'application/vnd.api+json',
+        'Authorization': f'Bearer {ge_cloud_access_token}'
+    }
 
     assert (
         cloud_action.run(
-            validation_result_suite_identifier=validation_result_suite_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
+            validation_result_suite=validation_result_suite_with_ge_cloud_id,
+            validation_result_suite_identifier=validation_result_suite_ge_cloud_identifier,
+            data_asset=None
         )
         == "Cloud notification succeeded."
     )
+    mock_post_method.assert_called_with(url=expected_ge_cloud_url, headers=expected_headers)
+
+
+@mock.patch.object(Session, "post", return_value=MockCloudResponse(418))
+def test_cloud_notification_action_bad_response(
+    mock_post_method,
+    cloud_data_context_with_datasource_sqlalchemy_engine,
+    validation_result_suite_with_ge_cloud_id,
+    validation_result_suite_ge_cloud_identifier,
+    checkpoint_ge_cloud_id,
+    ge_cloud_access_token
+):
+    cloud_action: CloudNotificationAction = CloudNotificationAction(
+        data_context=cloud_data_context_with_datasource_sqlalchemy_engine,
+        checkpoint_ge_cloud_id=checkpoint_ge_cloud_id
+    )
+    expected_ge_cloud_url = urljoin(
+        cloud_action.data_context.ge_cloud_config.base_url,
+        f"/accounts/{cloud_action.data_context.ge_cloud_config.account_id}/contracts/"
+        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
+    )
+    expected_headers = {
+        'Content-Type': 'application/vnd.api+json',
+        'Authorization': f'Bearer {ge_cloud_access_token}'
+    }
+    expected_error_message = "Cloud Notification request at https://app.test.greatexpectations.io/accounts/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/contracts/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/suite-validation-results/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/notification-actions returned error 418: test_text"
+
+    assert (
+        cloud_action.run(
+            validation_result_suite=validation_result_suite_with_ge_cloud_id,
+            validation_result_suite_identifier=validation_result_suite_ge_cloud_identifier,
+            data_asset=None
+        )
+        == expected_error_message
+    )
+    mock_post_method.assert_called_with(url=expected_ge_cloud_url, headers=expected_headers)
