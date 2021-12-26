@@ -7,10 +7,10 @@ from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
 from typing import Any, Dict, List, Optional, Tuple, Union
-from numpy import negative
 
 import pandas as pd
 from dateutil.parser import parse
+from numpy import negative
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
