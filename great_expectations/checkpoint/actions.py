@@ -5,7 +5,7 @@ The only requirement from an action is for it to have a take_action method.
 """
 import logging
 import warnings
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from urllib.parse import urljoin
 
 from great_expectations.core import (
@@ -52,7 +52,7 @@ class ValidationAction:
     def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
