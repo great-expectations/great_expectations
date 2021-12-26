@@ -16,6 +16,7 @@ from .expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree__SecondIteration,
 )
 
+
 def test_expectation_self_check():
 
     my_expectation = ExpectColumnValuesToEqualThree()

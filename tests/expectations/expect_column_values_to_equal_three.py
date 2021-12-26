@@ -11,6 +11,7 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 
+
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
     condition_metric_name = "column_values.equal_three"
     # condition_value_keys = {}
@@ -29,8 +30,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
 
 class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualThree):
-    """Expect values in this column to equal the number three.
-    """
+    """Expect values in this column to equal the number three."""
 
     examples = [
         {
