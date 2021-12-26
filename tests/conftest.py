@@ -4887,9 +4887,7 @@ def empty_cloud_data_context(
 
 
 @pytest.fixture
-def cloud_data_context_with_datasource_pandas_engine(
-    empty_cloud_data_context
-):
+def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
     context = empty_cloud_data_context
     config = yaml.load(
         f"""
