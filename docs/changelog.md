@@ -3,6 +3,7 @@ title: Changelog
 ---
 
 ### Develop
+* [FEATURE] Add Expectation.generate_diagnostic_checklist to assist with developing custom Expectations (#3906)
 
 ### 0.13.47
 * [FEATURE] Add support for named groups in data asset regex (#3855)
