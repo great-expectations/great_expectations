@@ -344,7 +344,7 @@ module.exports = {
         { type: 'doc', id: 'glossary', label: 'Glossary of Terms' },
         {
           type: 'category',
-          label: 'Terms',
+          label: 'Terms in depth',
           items: [
             { type: 'doc', id: 'terms/actions', label: 'Actions' },
             { type: 'doc', id: 'terms/batch', label: 'Batch' },

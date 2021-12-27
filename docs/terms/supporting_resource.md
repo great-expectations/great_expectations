@@ -1,5 +1,5 @@
 ---
-id: supporting resource
+id: supporting_resource
 title: Supporting Resources
 hoverText: 
 ---
