@@ -1,3 +1,0 @@
-[submodule "contrib/great_expectations_contrib/great-expectations-contrib-cookiecutter"]
-	path = contrib/great_expectations_contrib/great-expectations-contrib-cookiecutter
-	url = https://github.com/great-expectations/great-expectations-contrib-cookiecutter.git
