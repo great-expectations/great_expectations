@@ -337,6 +337,27 @@ module.exports = {
       ]
     },
     {
+      type: 'category',
+      label: 'Reference Documents',
+      items: [
+        {
+          type: 'category',
+          label: 'Glossary of Terms',
+          items: [
+            { type: 'doc', id: 'glossary', label: 'Index' },
+            { type: 'doc', id: 'terms/actions', label: 'Actions' },
+            { type: 'doc', id: 'terms/batch', label: 'Actions' },
+            { type: 'doc', id: 'terms/batch_request', label: 'Actions' },
+            { type: 'doc', id: 'terms/checkpoint', label: 'Actions' },
+            { type: 'doc', id: 'terms/cli', label: 'Actions' },
+            { type: 'doc', id: 'terms/custom_expectation', label: 'Actions' },
+            { type: 'doc', id: 'terms/data_asset', label: 'Actions' }
+          ]
+        },
+        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' }
+      ]
+    },
+    {
       type: 'doc',
       label: 'API Reference',
       id: 'reference/api_reference'
