@@ -1,10 +1,12 @@
 import os
 import subprocess
 import sys
-from typing import Tuple
+from collections import namedtuple
 
 import click
 from cookiecutter.main import cookiecutter
+
+Command = namedtuple("Command", ["name", "args", "error_message"])
 
 
 def init_cmd(url: str) -> None:
@@ -45,16 +47,23 @@ def publish_cmd() -> None:
 
 def perform_check(suppress_output: bool) -> bool:
     commands = [
-        (
+        Command(
+            "black",
             "black --check .",
             "Please ensure that your files are linted properly with `black .`",
         ),
-        (
+        Command(
+            "isort",
             "isort --profile black --check .",
             "Please ensure that your imports are sorted properly with `isort --profile black .`",
         ),
-        ("pytest .", "Please ensure that you've written tests and that they all pass"),
-        (
+        Command(
+            "pytest",
+            "pytest .",
+            "Please ensure that you've written tests and that they all pass",
+        ),
+        Command(
+            "mypy",
             "mypy --ignore-missing-imports --disallow-untyped-defs --show-error-codes --exclude venv .",
             "Please ensure that all functions are type hinted",
         ),
@@ -76,11 +85,13 @@ def perform_check(suppress_output: bool) -> bool:
 
 def publish_to_pypi() -> None:
     commands = [
-        (
+        Command(
+            "wheel",
             "python setup.py sdist bdist_wheel",
             "Something went wrong when creating a wheel",
         ),
-        (
+        Command(
+            "twine",
             "twine upload --repository testpypi dist/*",
             "Something went wrong when uploading with twine",
         ),
@@ -97,20 +108,17 @@ def publish_to_pypi() -> None:
     )
 
 
-def run_command(
-    idx: int, command: Tuple[str, str], suppress_output: bool = False
-) -> bool:
+def run_command(idx: int, command: Command, suppress_output: bool = False) -> bool:
     # If suppressed, set STDOUT to dev/null
     stdout = sys.stdout
     if suppress_output:
         sys.stdout = open(os.devnull, "w")
 
-    cmd, err = command
-    args = cmd.split(" ")
-    name = args[0]
-
-    echo(f"{idx}) [{name}]", "blue", bold=True)
-    result = subprocess.run(args, shell=False, stdout=sys.stdout, stderr=sys.stdout)
+    name, args, err = command
+    echo(f"{idx}) {name}:", "blue", bold=True)
+    result = subprocess.run(
+        args.split(" "), shell=False, stdout=sys.stdout, stderr=sys.stdout
+    )
 
     success = result.returncode == 0
     if success:
