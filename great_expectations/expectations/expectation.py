@@ -2108,5 +2108,6 @@ def _format_map_output(
 
     raise ValueError("Unknown result_format {}.".format(result_format["result_format"]))
 
+
 def do_nothing():
     pass
