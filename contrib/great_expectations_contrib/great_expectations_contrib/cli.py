@@ -1,5 +1,5 @@
 import click
-from ge_contrib.commands import check_cmd, init_cmd, publish_cmd
+from great_expectations_contrib.commands import check_cmd, init_cmd, publish_cmd
 
 URL = "https://github.com/superconductive/ge-contrib-cookiecutter"
 
