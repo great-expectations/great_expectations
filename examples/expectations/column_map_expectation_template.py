@@ -1,3 +1,9 @@
+"""
+This is a template for creating custom ColumnMapExpectations.
+For detailed instructions on how to use it, please see:
+    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
+"""
+
 import json
 
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -9,12 +15,12 @@ from great_expectations.expectations.metrics import (
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesEqualThree(ColumnMapMetricProvider):
+class ColumnValuesMatchSomeCriteria(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
     # condition_metric_name = "METRIC NAME GOES HERE"
 
-    # Description needed
+    # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         raise NotImplementedError
@@ -33,8 +39,6 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
     # map_metric = "METRIC NAME GOES HERE"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
-    # for more information about domain and success keys, and other arguments to Expectations
     success_keys = ("mostly",)
 
     # This dictionary contains default values for any parameters that should have default values
