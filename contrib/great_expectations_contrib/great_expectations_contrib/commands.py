@@ -8,41 +8,42 @@ from cookiecutter.main import cookiecutter
 
 
 def init_cmd(url: str) -> None:
-    click.echo(click.style("Configure your template:\n", fg="blue", bold=True))
+    """
+    Initializes a contributor package by pulling down the Cookiecutter template
+    and hydrating it.
+    """
+    echo("Configure your template:\n", "blue", bold=True)
     cookiecutter(url, overwrite_if_exists=False)
-    click.echo(
-        click.style("\nSuccessfully set up contrib package!", fg="green", bold=True)
-    )
-
-
-def publish_cmd() -> None:
-    success = _perform_check(suppress_output=True)
-    if not success:
-        click.echo(
-            click.style(
-                "Please run the `check` command to diagnose before publishing",
-                fg="red",
-                bold=True,
-            )
-        )
-        return
-
-    click.echo(
-        click.style(
-            "All checks have succeeded; you are ready to publish!",
-            fg="green",
-            bold=True,
-        )
-    )
-
-    _publish_to_pypi()
+    echo("\nSuccessfully set up contrib package!", "green", bold=True)
 
 
 def check_cmd() -> None:
-    _perform_check(suppress_output=False)
+    """
+    Performs a series of checks on a contributor package.
+    These include code style, testing, docstrings, and more.
+    """
+    perform_check(suppress_output=False)
 
 
-def _perform_check(suppress_output: bool) -> bool:
+def publish_cmd() -> None:
+    """
+    Performs same checks as `check_cmd`; if they pass, the user is prompted to
+    supply PyPi credentials. Valid inputs will result in an uploaded package.
+    """
+    success = perform_check(suppress_output=True)
+    if not success:
+        echo(
+            "Please run the `check` command to diagnose before publishing",
+            "red",
+            bold=True,
+        )
+        return
+
+    echo("All checks have succeeded; you are ready to publish!", "green", bold=True)
+    publish_to_pypi()
+
+
+def perform_check(suppress_output: bool) -> bool:
     commands = [
         (
             "black --check .",
@@ -59,28 +60,47 @@ def _perform_check(suppress_output: bool) -> bool:
         ),
     ]
 
-    count = 0
+    successes = 0
     for i, command in enumerate(commands):
-        success = _run_check_command(i + 1, command, suppress_output=suppress_output)
-        if success:
-            count += 1
+        if run_command(i + 1, command, suppress_output=suppress_output):
+            successes += 1
 
-    is_successful = count == len(commands)
-    click.echo(
-        click.style(
-            f"Summary: [{count}/{len(commands)}] checks have passed!",
-            fg="green" if is_successful else "red",
-            bold=True,
-        )
+    is_successful = successes == len(commands)
+    color = "green" if is_successful else "red"
+    echo(
+        f"Summary: [{successes}/{len(commands)}] checks have passed!", color, bold=True
     )
 
     return is_successful
 
 
-def _run_check_command(
-    idx: int, command: Tuple[str, str], suppress_output: bool
+def publish_to_pypi() -> None:
+    commands = [
+        (
+            "python setup.py sdist bdist_wheel",
+            "Something went wrong when creating a wheel",
+        ),
+        (
+            "twine upload --repository testpypi dist/*",
+            "Something went wrong when uploading with twine",
+        ),
+    ]
+
+    for i, command in enumerate(commands):
+        if not run_command(i + 1, command):
+            return
+
+    echo(
+        "Successfully uploaded package to PyPi! Congratulations on a job well done :)",
+        "green",
+        bold=True,
+    )
+
+
+def run_command(
+    idx: int, command: Tuple[str, str], suppress_output: bool = False
 ) -> bool:
-    # If applicable, set STDOUT to dev/null
+    # If suppressed, set STDOUT to dev/null
     stdout = sys.stdout
     if suppress_output:
         sys.stdout = open(os.devnull, "w")
@@ -89,49 +109,19 @@ def _run_check_command(
     args = cmd.split(" ")
     name = args[0]
 
-    click.echo(click.style(f"{idx}) [{name}]", fg="blue", bold=True))
+    echo(f"{idx}) [{name}]", "blue", bold=True)
     result = subprocess.run(args, shell=False, stdout=sys.stdout, stderr=sys.stdout)
 
     success = result.returncode == 0
     if success:
-        click.echo(click.style("Check succeeded\n", fg="green"))
+        echo("[SUCCEEDED]\n", "green")
     else:
-        click.echo(click.style(f"Check failed - {err}\n", fg="red"))
+        echo(f"[FAILED] {err}\n", "red")
 
-    # If reassigned before, set STDOUT back
+    # If reassigned before, set STDOUT back to its default value
     sys.stdout = stdout
     return success
 
 
-def _publish_to_pypi() -> None:
-    create_wheel = subprocess.run(
-        ["python", "setup.py", "sdist", "bdist_wheel"], shell=False
-    )
-
-    if create_wheel.returncode != 0:
-        click.echo(
-            click.style(
-                "Something went wrong when creating a wheel", fg="red", bold=True
-            )
-        )
-        return
-
-    upload_twine = subprocess.run(
-        ["twine", "upload", "--repository", "testpypi", "dist/*"], shell=False
-    )
-
-    if upload_twine.returncode != 0:
-        click.echo(
-            click.style(
-                "Something went wrong when uploading with twine", fg="red", bold=True
-            )
-        )
-        return
-
-    click.echo(
-        click.style(
-            "Succesfully uploaded package to PyPi! Congratulations :)",
-            fg="green",
-            bold=True,
-        )
-    )
+def echo(msg: str, color: str, bold: bool = False) -> None:
+    click.echo(click.style(msg, fg=color, bold=bold))
