@@ -340,21 +340,42 @@ module.exports = {
       type: 'category',
       label: 'Reference Documents',
       items: [
+        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' },
+        { type: 'doc', id: 'glossary', label: 'Glossary of Terms' },
         {
           type: 'category',
-          label: 'Glossary of Terms',
+          label: 'Terms',
           items: [
-            { type: 'doc', id: 'glossary', label: 'Index' },
             { type: 'doc', id: 'terms/actions', label: 'Actions' },
-            { type: 'doc', id: 'terms/batch', label: 'Actions' },
-            { type: 'doc', id: 'terms/batch_request', label: 'Actions' },
-            { type: 'doc', id: 'terms/checkpoint', label: 'Actions' },
-            { type: 'doc', id: 'terms/cli', label: 'Actions' },
-            { type: 'doc', id: 'terms/custom_expectation', label: 'Actions' },
-            { type: 'doc', id: 'terms/data_asset', label: 'Actions' }
+            { type: 'doc', id: 'terms/batch', label: 'Batch' },
+            { type: 'doc', id: 'terms/batch_request', label: 'Batch Request' },
+            { type: 'doc', id: 'terms/checkpoint', label: 'Checkpoint' },
+            { type: 'doc', id: 'terms/cli', label: 'Command Line Interface' },
+            { type: 'doc', id: 'terms/custom_expectation', label: 'Custom Expectation' },
+            { type: 'doc', id: 'terms/data_connectors', label: 'Data Connector' },
+            { type: 'doc', id: 'terms/data_context', label: 'Data Context' },
+            { type: 'doc', id: 'terms/data_docs', label: 'Data Docs' },
+            { type: 'doc', id: 'terms/datasource', label: 'Datasource' },
+            { type: 'doc', id: 'terms/evaluation_parameter_store', label: 'Evaluation Parameter Store' },
+            { type: 'doc', id: 'terms/execution_engine', label: 'Execution Engine' },
+            { type: 'doc', id: 'terms/expectation', label: 'Expectation' },
+            { type: 'doc', id: 'terms/expectation_store', label: 'Expectation Store' },
+            { type: 'doc', id: 'terms/expectation_suite', label: 'Expectation Suite' },
+            { type: 'doc', id: 'terms/inferred_asset_filesystem_data_connector', label: 'Inferred Asset Filesystem Data Connector' },
+            { type: 'doc', id: 'terms/jupyter_notebook', label: 'Jupyter Notebook' },
+            { type: 'doc', id: 'terms/metadata_store', label: 'Metadata Store' },
+            { type: 'doc', id: 'terms/metric_store', label: 'Metric Store' },
+            { type: 'doc', id: 'terms/data_asset', label: 'Data Asset' },
+            { type: 'doc', id: 'terms/data_asset', label: 'Data Asset' },
+            { type: 'doc', id: 'terms/data_asset', label: 'Data Asset' },
+            { type: 'doc', id: 'terms/data_asset', label: 'Data Asset' },
+            { type: 'doc', id: 'terms/data_asset', label: 'Data Asset' },
+            { type: 'doc', id: 'terms/data_asset', label: 'Data Asset' },
+            { type: 'doc', id: 'terms/data_asset', label: 'Data Asset' },
+            { type: 'doc', id: 'terms/data_asset', label: 'Data Asset' },
+            { type: 'doc', id: 'terms/data_asset', label: 'Data Asset' }
           ]
-        },
-        { type: 'doc', label: 'API Reference', id: 'reference/api_reference' }
+        }
       ]
     },
     {
