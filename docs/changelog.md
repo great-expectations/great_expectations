@@ -3,7 +3,6 @@ title: Changelog
 ---
 
 ### Develop
-* [FEATURE] Add Expectation.generate_diagnostic_checklist to assist with developing custom Expectations (#3906)
 
 ### 0.13.49
 * [FEATURE] PandasExecutionEngine is able to instantiate Google Storage client in Google Cloud Composer (#3896)
