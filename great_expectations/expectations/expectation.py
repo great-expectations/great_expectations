@@ -1106,14 +1106,6 @@ class Expectation(metaclass=MetaExpectation):
                 }
             )
 
-        # Check whether the Expectation has all four statement Renderers: question, descriptive, prescriptive, diagnostic
-        # message = "Has all four statement Renderers: question, descriptive, prescriptive, diagnostic"
-        # sub_messages = []
-        # checks.append({
-        #     "message": message,
-        #     "passed" : True,
-        # })
-
         output_message = self._convert_checks_into_output_message(checks)
         return output_message
 
