@@ -4,9 +4,16 @@ title: Levels  of Maturity
 
 Features and code within Great Expectations are separated into three levels of maturity: Experimental, Beta, and Production.
 
-* Experimental: Try, but do not rely
-* Beta: Ready for early adopters
-* Production: Ready for general use
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<div>
+    <ul style={{
+        "list-style-type": "none"
+    }}>
+        <li><i class="fas fa-circle" style={{color: "#dc3545"}}></i> &nbsp; Experimental: Try, but do not rely</li>
+        <li><i class="fas fa-circle" style={{color: "#ffc107"}}></i> &nbsp; Beta: Ready for early adopters</li>
+        <li><i class="fas fa-check-circle" style={{color: "#28a745"}}></i> &nbsp; Production: Ready for general use</li>
+    </ul>
+</div>
 
 Being explicit about these levels allows us to enable experimentation, without creating unnecessary thrash when features and APIs evolve. It also helps streamline development, by giving contributors a clear, incremental path to create and improve the Great Expectations code base.
 
@@ -17,7 +24,7 @@ For contributors to Great Expectations, our goal is to channel creativity by alw
 This grid provides guidelines for how the maintainers of Great Expectations evaluate levels of maturity. Maintainers will always exercise some discretion in determining when any given feature is ready to graduate to the next level. If you have ideas or suggestions for leveling up a specific feature, please raise them in Github issues, and we’ll work with you to get there.
 
 
-| Criteria                                 |    Experimental <br/>Try, but do not rely |    Beta <br/>Ready for early adopters |    Production <br/>Ready for general use |
+| Criteria                                 | <i class="fas fa-circle" style={{color: "#dc3545"}}></i> Experimental <br/>Try, but do not rely | <i class="fas fa-circle" style={{color: "#ffc107"}}></i> Beta <br/>Ready for early adopters | <i class="fas fa-circle" style={{color: "#28a745"}}></i> Production <br/>Ready for general use |
 |------------------------------------------|--------------------------------------|----------------------------------|-------------------------------------|
 | API stability                            | Unstable*                            | Mostly Stable                    | Stable                              |
 | Implementation completeness              | Minimal                              | Partial**                        | Complete                            |
