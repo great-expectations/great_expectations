@@ -165,3 +165,74 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
                 }
             )
         ]
+
+
+class ExpectColumnValuesToEqualThree__BrokenIteration(
+    ExpectColumnValuesToEqualThree__SecondIteration
+):
+
+    examples = [
+        {
+            "data": {
+                "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
+                "broken_column": [3, 3, 3, 3, 3, 3, 2, -1, "b", "b"],
+            },
+            "tests": [
+                {
+                    "title": "positive_test_with_mostly",
+                    "exact_match_out": False,
+                    "in": {"column": "mostly_threes", "mostly": 0.6},
+                    "include_in_gallery": True,
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [6, 7],
+                        "unexpected_list": [2, -1],
+                    },
+                },
+                {
+                    "title": "negative_test_with_mostly",
+                    "exact_match_out": False,
+                    "in": {"column": "mostly_threes", "mostly": 0.9},
+                    "include_in_gallery": False,
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [6, 7],
+                        "unexpected_list": [2, -1],
+                    },
+                },
+                {
+                    "title": "other_negative_test_with_mostly",
+                    "exact_match_out": False,
+                    "in": {"column": "mostly_threes", "mostly": 0.9},
+                    # "include_in_gallery": False, #This key is omitted, so the example shouldn't show up in the gallery
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [6, 7],
+                        "unexpected_list": [2, -1],
+                    },
+                },
+                {
+                    "title": "test_that_will_error_out",
+                    "exact_match_out": False,
+                    "in": {"column": "column_that_doesnt_exist"},
+                    "include_in_gallery": True,
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [6, 7],
+                        "unexpected_list": [2, -1],
+                    },
+                },
+                {
+                    "title": "another_test_that_will_error_out",
+                    "exact_match_out": False,
+                    "in": {"column": "broken_column"},
+                    "include_in_gallery": True,
+                    "out": {
+                        "success": True,
+                        "unexpected_index_list": [6, 7],
+                        "unexpected_list": [2, -1],
+                    },
+                },
+            ],
+        }
+    ]
