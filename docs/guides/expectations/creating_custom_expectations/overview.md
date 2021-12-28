@@ -71,6 +71,6 @@ Beyond the first four steps, additional features are generally similar across al
 
 ## Publishing your Expectation as an open source contribution
 
-(Add this later; possibly in a different location in the TOC)
+You can find more detailed instructions in the [Contributing](/docs/contributing/contributing) section of the docs.
 
 ## Wrapping up
