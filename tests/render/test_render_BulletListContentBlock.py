@@ -61,7 +61,6 @@ def test_parse_row_condition_string_pandas_engine():
 @pytest.mark.rendered_output
 def test_all_expectations_using_test_definitions():
     test_files = glob.glob("tests/test_definitions/*/expect*.json")
-    print("\n".join(test_files))
 
     all_true = True
     failure_count, total_count = 0, 0
