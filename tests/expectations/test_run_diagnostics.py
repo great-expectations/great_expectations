@@ -3,183 +3,17 @@ import json
 import pandas as pd
 
 from great_expectations.core.batch import Batch
-from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    Expectation,
     ExpectationConfiguration,
 )
-from great_expectations.expectations.metrics import (
-    ColumnMapMetricProvider,
-    column_condition_partial,
+from great_expectations.expectations.registry import _registered_expectations
+
+from .fixtures.expect_column_values_to_equal_three import (
+    ExpectColumnValuesToEqualThree,
+    ExpectColumnValuesToEqualThree__SecondIteration,
+    ExpectColumnValuesToEqualThree__BrokenIteration,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
-from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.validator import Validator
-
-
-class ColumnValuesEqualThree(ColumnMapMetricProvider):
-    condition_metric_name = "column_values.equal_three"
-    # condition_value_keys = {}
-    # default_kwarg_values = {}
-
-    @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
-        return column == 3
-
-
-class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-
-    map_metric = "column_values.equal_three"
-    success_keys = ("mostly",)
-    # default_kwarg_values = ColumnMapExpectation.default_kwarg_values
-
-
-class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualThree):
-
-    examples = [
-        {
-            "data": {
-                "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
-            },
-            "tests": [
-                {
-                    "title": "positive_test_with_mostly",
-                    "exact_match_out": False,
-                    "in": {"column": "mostly_threes", "mostly": 0.6},
-                    "include_in_gallery": True,
-                    "out": {
-                        "success": True,
-                        "unexpected_index_list": [6, 7],
-                        "unexpected_list": [2, -1],
-                    },
-                },
-                {
-                    "title": "negative_test_with_mostly",
-                    "exact_match_out": False,
-                    "in": {"column": "mostly_threes", "mostly": 0.9},
-                    "include_in_gallery": False,
-                    "out": {
-                        "success": False,
-                        "unexpected_index_list": [6, 7],
-                        "unexpected_list": [2, -1],
-                    },
-                },
-                {
-                    "title": "other_negative_test_with_mostly",
-                    "exact_match_out": False,
-                    "in": {"column": "mostly_threes", "mostly": 0.9},
-                    # "include_in_gallery": False, #This key is omitted, so the example shouldn't show up in the gallery
-                    "out": {
-                        "success": False,
-                        "unexpected_index_list": [6, 7],
-                        "unexpected_list": [2, -1],
-                    },
-                },
-            ],
-        }
-    ]
-
-    library_metadata = {
-        "maturity": "experimental",
-        "package": "great_expectations",
-        "tags": ["tag", "other_tag"],
-        "contributors": [
-            "@abegong",
-        ],
-    }
-
-
-class ExpectColumnValuesToEqualThree__ThirdIteration(
-    ExpectColumnValuesToEqualThree__SecondIteration
-):
-    @classmethod
-    @renderer(renderer_type="renderer.question")
-    def _question_renderer(
-        cls, configuration, result=None, language=None, runtime_configuration=None
-    ):
-        column = configuration.kwargs.get("column")
-        mostly = configuration.kwargs.get("mostly")
-        regex = configuration.kwargs.get("regex")
-
-        return f'Do at least {mostly * 100}% of values in column "{column}" equal 3?'
-
-    @classmethod
-    @renderer(renderer_type="renderer.answer")
-    def _answer_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None
-    ):
-        column = result.expectation_config.kwargs.get("column")
-        mostly = result.expectation_config.kwargs.get("mostly")
-        regex = result.expectation_config.kwargs.get("regex")
-        if result.success:
-            return f'At least {mostly * 100}% of values in column "{column}" equal 3.'
-        else:
-            return f'Less than {mostly * 100}% of values in column "{column}" equal 3.'
-
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "regex", "mostly", "row_condition", "condition_parser"],
-        )
-
-        template_str = "values must be equal to 3"
-        if params["mostly"] is not None:
-            params["mostly_pct"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
-            )
-            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-            template_str += ", at least $mostly_pct % of the time."
-        else:
-            template_str += "."
-
-        if include_column_name:
-            template_str = "$column " + template_str
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
-            params.update(conditional_params)
-
-        return [
-            RenderedStringTemplateContent(
-                **{
-                    "content_block_type": "string_template",
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
-            )
-        ]
 
 
 def test_expectation_self_check():
@@ -497,3 +331,36 @@ def test_expectation_is_abstract():
     # is_abstract determines whether the expectation should be added to the registry (i.e. is fully implemented)
     assert ColumnMapExpectation.is_abstract()
     assert not ExpectColumnValuesToEqualThree.is_abstract()
+
+
+
+def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
+    diagnostic_report = ExpectColumnValuesToEqualThree__BrokenIteration().run_diagnostics()
+    print(json.dumps(diagnostic_report, indent=2))
+
+    test_report = diagnostic_report["test_report"]
+    
+    assert len(test_report)==5
+    assert test_report[0] == {
+        "test title": "positive_test_with_mostly",
+        "backend": "pandas",
+        "test_passed": "true"
+    }
+
+    assert set(test_report[3].keys()) == {
+        "test title",
+        "backend",
+        "test_passed",
+        "error_message",
+        "stack_trace"
+    }
+    assert test_report[3]["test_passed"] == "false"
+
+    assert set(test_report[4].keys()) == {
+        "test title",
+        "backend",
+        "test_passed",
+        "error_message",
+        "stack_trace"
+    }
+    assert test_report[4]["test_passed"] == "false"

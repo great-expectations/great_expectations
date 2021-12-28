@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from dateutil.parser import parse
+from numpy import negative
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
@@ -877,7 +878,7 @@ class Expectation(metaclass=MetaExpectation):
             meta=meta,
         )
 
-    def run_diagnostics(self, pretty_print=True):
+    def run_diagnostics(self):
         """
         Produce a diagnostic report about this expectation.
         The current uses for this method's output are
@@ -902,9 +903,6 @@ class Expectation(metaclass=MetaExpectation):
         incompleteness of the Expectation's implementation (e.g., declaring a dependency on Metrics
         that do not exist). These errors are added under "errors" key in the report.
 
-        :param pretty_print: TODO: this argument is not currently used. The intent is to return
-        a well formatted and easily readable text instead of the dictionary when the argument is set
-        to True
         :return: a dictionary view of the report
         """
 
@@ -1002,6 +1000,183 @@ class Expectation(metaclass=MetaExpectation):
                 )
 
         return report_obj
+
+    def generate_diagnostic_checklist(self) -> str:
+        """Runs self.run_diagnostics and generates a diagnostic checklist that looks something like this:
+
+            Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration:
+            ✔ library_metadata object exists
+            ✔ Has a docstring, including a one-line short description
+                ✔ "Expect values in this column to equal the number three."
+            ✔ Has at least one positive and negative example case, and all test cases pass
+            ✔ Core logic exists and passes tests on at least one Execution Engine
+
+        This method is experimental.
+        """
+
+        diagnostics_report = self.run_diagnostics()
+
+        checks: list(dict) = []
+
+        # Check whether this Expectation has a library_metadata object
+        checks.append(
+            {
+                "message": "library_metadata object exists",
+                "passed": hasattr(self, "library_metadata")
+                and type(self.library_metadata) == dict
+                and set(self.library_metadata.keys())
+                == {"maturity", "package", "tags", "contributors"},
+            }
+        )
+
+        # Check whether this Expectation has an informative docstring
+        message = "Has a docstring, including a one-line short description"
+        if "short_description" in diagnostics_report["description"]:
+            short_description = diagnostics_report["description"]["short_description"]
+        else:
+            short_description = None
+        if short_description not in {"", "\n", "TODO: Add a docstring here", None}:
+            checks.append(
+                {
+                    "message": message,
+                    "sub_messages": [
+                        {
+                            "message": '"' + short_description + '"',
+                            "passed": True,
+                        }
+                    ],
+                    "passed": True,
+                }
+            )
+        else:
+            checks.append(
+                {
+                    "message": message,
+                    "passed": False,
+                }
+            )
+
+        # Check whether this Expectation has at least one positive and negative example case (and all test cases return the expected output)
+        message = "Has at least one positive and negative example case, and all test cases pass"
+        (
+            positive_cases,
+            negative_cases,
+        ) = self._count_positive_and_negative_example_cases()
+        (
+            unexpected_cases,
+            sub_messages,
+        ) = self._count_unexpected_cases_and_get_sub_messages(
+            diagnostics_report["test_report"]
+        )
+        passed = (
+            (positive_cases > 0) and (negative_cases > 0) and (unexpected_cases == 0)
+        )
+        if passed:
+            checks.append(
+                {
+                    "message": message,
+                    "passed": passed,
+                }
+            )
+        else:
+            checks.append(
+                {
+                    "message": message,
+                    "sub_messages": sub_messages,
+                    "passed": passed,
+                }
+            )
+
+        # Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine
+        message = "Core logic exists and passes tests on at least one Execution Engine"
+        successful_execution_engines = 0
+        sub_messages = []
+        for k, v in diagnostics_report["execution_engines"].items():
+            if v:
+                successful_execution_engines += 1
+            sub_messages += [
+                {
+                    "message": k,
+                    "passed": v,
+                }
+            ]
+
+        if successful_execution_engines > 0:
+            checks.append(
+                {
+                    "message": message,
+                    "passed": True,
+                }
+            )
+        else:
+            checks.append(
+                {
+                    "message": message,
+                    "sub_messages": sub_messages,
+                    "passed": False,
+                }
+            )
+
+        output_message = self._convert_checks_into_output_message(checks)
+        return output_message
+
+    def _count_positive_and_negative_example_cases(self) -> Tuple[int, int]:
+        """Scans self.examples and returns a 2-ple with the numbers of cases with success == True and success == False"""
+
+        if not hasattr(self, "examples"):
+            return 0, 0
+
+        positive_cases: int = 0
+        negative_cases: int = 0
+
+        for dataset in self.examples:
+            for test in dataset["tests"]:
+                if test["out"]["success"] == True:
+                    positive_cases += 1
+                elif test["out"]["success"] == False:
+                    negative_cases += 1
+
+        return positive_cases, negative_cases
+
+    @staticmethod
+    def _count_unexpected_cases_and_get_sub_messages(test_report) -> Tuple[int, list]:
+        """Scans self.examples and returns a 2-ple with the number of cases that did not pass, and a list of dictionaries containing each test title and whether or not it passed."""
+
+        unexpected_cases: int = 0
+        sub_messages: List[Dict] = []
+
+        for test in test_report:
+            passed = test["test_passed"] == "true"
+            sub_messages.append(
+                {
+                    "message": test["test title"],
+                    "passed": passed,
+                }
+            )
+            if not passed:
+                unexpected_cases += 1
+
+        return unexpected_cases, sub_messages
+
+    def _convert_checks_into_output_message(self, checks: List[dict]) -> str:
+        """Converts a list of checks into an output string (potentially nested), with ✔ to indicate checks that passed."""
+
+        output_message = f"Completeness checklist for {self.__class__.__name__}:"
+        for check in checks:
+            if check["passed"]:
+                output_message += "\n ✔ " + check["message"]
+            else:
+                output_message += "\n   " + check["message"]
+
+            if "sub_messages" in check:
+                for sub_message in check["sub_messages"]:
+                    if sub_message["passed"]:
+                        output_message += "\n    ✔ " + sub_message["message"]
+                    else:
+                        output_message += "\n      " + sub_message["message"]
+        output_message += "\n"
+
+        return output_message
 
     @staticmethod
     def _add_error_to_diagnostics_report(
