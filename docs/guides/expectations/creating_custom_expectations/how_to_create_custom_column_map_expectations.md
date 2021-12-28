@@ -1,13 +1,11 @@
 ---
 title: How to create a Custom Column Map Expectation
 ---
-import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
-**ColumnMapExpectations** are evaluated for a single column. They ask a yes/no question for every row in that column, then ask what percentage of rows gave a positive answer to that question. If that percentage is high enough, the Expectation considers that data valid.
+**ColumnMapExpectations** are one of the most common types of Expectation. They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
-This guide will walk you through the process of creating your own ColumnMapExpectations.
-
-We will be following this **PLACEHOLDER**.
+This guide will walk you through the process of creating a custom ColumnMapExpectation.
 
 <Prerequisites>
 
@@ -139,11 +137,9 @@ Next, we're going to search for `examples = []` in your file, and replace it at 
 
 These examples serve a dual purpose:
 
-* First, they provide test cases that the Great Expectations testing framework can execute automatically.
+1. They provide test cases that the Great Expectations testing framework can execute automatically.
 
-* Second, they help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate as valid and as invalid. When your Expectation is released, its entry in the Gallery will render these examples.
-
-[pic]
+2. They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery to help illustrate its logic.
 
 Your examples will look something like this:
 
@@ -190,13 +186,13 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 
 * `tests`: a list of test cases that use the data defined above as input to validate
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
-	* 'include_in_gallery': set it to True if you want this test case to be visible in the gallery as an example (true for most test cases).
+	* `include_in_gallery`: set it to `True` if you want this test case to be visible in the Gallery as an example.
 	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mostly_threes", "mostly": 0.6}` in the example above is equivalent to `expect_column_values_to_equal_three(column="mostly_threes, mostly=0.6)`
 	* `out` is based on the Validation Result returned when executing the Expectation.
-	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the result object - only the ones that are important to test.
+	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
 
-Run `run_diagnostics` again. The newly added examples will appear in the output. They are not executed as tests yet, because the Expectation itself hasn't been implemented yet, but they'll check the box for example cases.
+Run your Expectation file again. The newly added examples will appear in the output. They are not executed as tests yet, because the Expectation itself hasn't been implemented yet, but they'll check the box for example cases.
 
 ```
 $ python expect_column_values_to_equal_three.py
