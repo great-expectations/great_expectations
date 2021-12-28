@@ -1140,7 +1140,7 @@ class Expectation(metaclass=MetaExpectation):
 
     @staticmethod
     def _count_unexpected_cases_and_get_sub_messages(test_report) -> Tuple[int, list]:
-        """Scans self.examples and returns a 2-ple with the numbers of cases with success == True and success == False"""
+        """Scans self.examples and returns a 2-ple with the number of cases that did not pass, and a list of dictionaries containing each test title and whether or not it passed."""
 
         unexpected_cases: int = 0
         sub_messages: List[Dict] = []
