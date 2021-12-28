@@ -18,7 +18,7 @@ Great Expectations' built-in library includes more than 50 common Expectations, 
 
 For a full list of available Expectations, please check out the [Expectation Gallery](https://greatexpectations.io/expectations).
 
-You can also extend Great Expectations by [creating your own custom Expectations](../../guides/expectations/creating_custom_expectations/how_to_create_custom_expectations).
+You can also extend Great Expectations by [creating your own custom Expectations](../../guides/expectations/creating_custom_expectations/overview).
 
 Expectations *enhance communication* about your data and *improve quality* for data applications. Using Expectations
 helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
