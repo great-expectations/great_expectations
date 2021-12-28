@@ -6,7 +6,7 @@ from collections import namedtuple
 import click
 from cookiecutter.main import cookiecutter
 
-Command = namedtuple("Command", ["name", "args", "error_message"])
+Command = namedtuple("Command", ["name", "full_command", "error_message"])
 
 
 def init_cmd(url: str) -> None:
@@ -70,8 +70,8 @@ def perform_check(suppress_output: bool) -> bool:
     ]
 
     successes = 0
-    for i, command in enumerate(commands):
-        if run_command(i + 1, command, suppress_output=suppress_output):
+    for command in commands:
+        if run_command(command, suppress_output=suppress_output):
             successes += 1
 
     is_successful = successes == len(commands)
@@ -97,8 +97,8 @@ def publish_to_pypi() -> None:
         ),
     ]
 
-    for i, command in enumerate(commands):
-        if not run_command(i + 1, command):
+    for command in commands:
+        if not run_command(command):
             return
 
     echo(
@@ -108,16 +108,17 @@ def publish_to_pypi() -> None:
     )
 
 
-def run_command(idx: int, command: Command, suppress_output: bool = False) -> bool:
+def run_command(command: Command, suppress_output: bool = False) -> bool:
     # If suppressed, set STDOUT to dev/null
     stdout = sys.stdout
     if suppress_output:
         sys.stdout = open(os.devnull, "w")
 
-    name, args, err = command
-    echo(f"{idx}) {name}:", "blue", bold=True)
+    name, full_command, err = command
+
+    echo(f"{name}:", "blue", bold=True)
     result = subprocess.run(
-        args.split(" "), shell=False, stdout=sys.stdout, stderr=sys.stdout
+        full_command.split(" "), shell=False, stdout=sys.stdout, stderr=sys.stdout
     )
 
     success = result.returncode == 0
