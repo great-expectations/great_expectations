@@ -3,46 +3,58 @@ title: How to create a Custom Column Map Expectation
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 
-Beginning in version 0.13, we have introduced a new API focused on enabling Modular [**Expectations**](../../../reference/expectations/expectations.md). They utilize a class structure that is significantly easier to build than ever before!
-
 **ColumnMapExpectations** are evaluated for a single column. They ask a yes/no question for every row in that column, then ask what percentage of rows gave a positive answer to that question. If that percentage is high enough, the Expectation considers that data valid.
 
-This guide will walk you through the process of creating your own Modular ColumnExpectations in a few simple steps!
+This guide will walk you through the process of creating your own ColumnMapExpectations.
 
 We will be following this **PLACEHOLDER**.
 
 <Prerequisites>
 
+- Read the [overview for creating Custom Expectations](overview).
+
 </Prerequisites>
 
 ### Steps
 
-#### 1. Copy and rename the template file
+#### 1. Choose a name for your Expectation
 
-You can find the template file for a custom ColumnMapExpectation [here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py).
+First, decide on a name for your own Expectation. By convention, `ColumnMapExpectations` always start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](/docs/contributing/style_guides/code_style#expectations)  of the code Style Guide.
 
-You'll need to decide on a name for your Expecation. Since you're building a ColumnMapExpectation, the Style Guide says that it should start with `expect_column_values_`. In this example, we'll use `expect_column_values_to_equal_three`.
+Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
-By convention, each Expectation is kept in its own python file, named with snake_case version of the Expectation's name. For example: `expect_column_values_to_equal_three.py`.
+- `ExpectColumnValuesToEqualThree`
+- `expect_column_values_to_equal_three`
+
+#### 2. Copy and rename the template file
+
+By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
+
+You can find the template file for a custom ColumnMapExpectation [here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
-mv column_map_expectation_template.py expect_column_values_to_equal_three.py
+mv column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_equal_three.py
 ```
 
 <details>
-  <summary>Where should I copy my Expectation file?</summary>
+  <summary>Where should I put my Expectation file?</summary>
   <div>
     <p>
-        This depends on how you intend to use your custom Expectation.
+        During development, you don't actually need to put the file anywhere in particular. It's self-contained, and can be executed anywhere as long as <code>great_expectations</code> is installed.
     </p>
     <p>
-        If you're building a custom expectation for personal use only, you'll probably put it in the <code>great_expectations/plugins</code> folder for your Great Expectations deployment.
-        If you're building a custom expectation to contribute to the open source project, you'll probably put it in <code>great_expectations/contrib/some_expectation_package/some_expectation_package/expectations/</code>, where <code>great_expectations</code> is the full package for Great Expectations.        
+        But to use your new Expectation alongside the other components of Great Expectations, you'll need to make sure the file is in the right place. The right place depends on what you intend to use it for.
+    </p>
+    <p>
+        <ul>
+            <li>If you're building a Custom Expectation for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all plugins in the directory available for use.</li>
+            <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
+        </ul>
     </p>
   </div>
 </details>
 
-#### 2. Run checklist diagnostics on your file
+#### 3. Run checklist diagnostics on your file
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -69,7 +81,7 @@ Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
 Not all Expectation diagnostics can be automated, but automating most of the core steps helps make it fast and simple to author, submit, and review new Expectations that satisfy the code quality standards for Great Expectations.
 
 
-#### 2. Change the Expectation class name and add a docstring
+#### 4. Change the Expectation class name and add a docstring
 
 Replace the Expectation class name
 ```
@@ -125,7 +137,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 ```
 
 
-#### 3. Add test cases
+#### 5. Add test cases
 
 ```python
 examples = [
@@ -151,9 +163,12 @@ examples = [
 ]
 ```
 
-#### 4. Implement your Metric and connect it to your Expectation
+#### 6. Implement your Metric and connect it to your Expectation
 
-Matric class name : ColumnValuesEqualThree
+This is the stage where you implement the actual business logic for your Expectation.
+
+
+Metric class name : ColumnValuesEqualThree
 condition_metric_name = "column_values.equal_three"
 
 map_metric = "column_values.equal_three"
@@ -173,9 +188,7 @@ An example of Expectation Parameters is shown below (notice that we are now in a
 </details>
 
 
-
-
-#### 5. Update `library_metadata`
+#### 7. Update `library_metadata`
 
 ```
     library_metadata = {
