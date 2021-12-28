@@ -12,7 +12,7 @@ from great_expectations.data_context.util import file_relative_path
 
 @pytest.fixture
 @freeze_time("09/26/2019 13:42:41")
-def bobby_columnar_table_multi_batch():
+def bobby_columnar_table_multi_batch(empty_data_context):
     """
     # TODO: <Alex>ALEX -- Add DocString</Alex>
     """
@@ -663,13 +663,16 @@ def bobby_columnar_table_multi_batch():
     )
     expected_expectation_suite_oneshot_sampling_method: ExpectationSuite = (
         ExpectationSuite(
-            expectation_suite_name=expectation_suite_name_oneshot_sampling_method
+            expectation_suite_name=expectation_suite_name_oneshot_sampling_method,
+            data_context=empty_data_context,
         )
     )
     expectation_configuration: ExpectationConfiguration
     for expectation_configuration in expectation_configurations:
-        expected_expectation_suite_oneshot_sampling_method.add_expectation(
-            expectation_configuration
+        # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
+        # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
+        expected_expectation_suite_oneshot_sampling_method._add_expectation(
+            expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
     yaml = YAML()

@@ -969,9 +969,6 @@ class ExpectationConfiguration(SerializableDictDot):
         self.meta = meta
         self.success_on_last_run = success_on_last_run
         self._ge_cloud_id = ge_cloud_id
-
-        if expectation_context is None:
-            expectation_context = ExpectationContext()
         self._expectation_context = expectation_context
 
     def process_evaluation_parameters(
@@ -1048,7 +1045,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self._ge_cloud_id = value
 
     @property
-    def expectation_context(self) -> ExpectationContext:
+    def expectation_context(self) -> Optional[ExpectationContext]:
         return self._expectation_context
 
     @expectation_context.setter
@@ -1286,9 +1283,12 @@ class ExpectationConfiguration(SerializableDictDot):
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
         myself["kwargs"] = convert_to_json_serializable(myself["kwargs"])
-        myself["expectation_context"] = convert_to_json_serializable(
-            myself["expectation_context"]
-        )
+
+        # Post dump hook removes this value if null so we need to ensure applicability before conversion
+        if "expectation_context" in myself:
+            myself["expectation_context"] = convert_to_json_serializable(
+                myself["expectation_context"]
+            )
         return myself
 
     def get_evaluation_parameter_dependencies(self) -> dict:
@@ -1382,9 +1382,11 @@ class ExpectationConfigurationSchema(Schema):
     kwargs = fields.Dict()
     meta = fields.Dict()
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
-    expectation_context = fields.Nested(lambda: ExpectationContextSchema)
+    expectation_context = fields.Nested(
+        lambda: ExpectationContextSchema, required=False, allow_none=True
+    )
 
-    REMOVE_KEYS_IF_NONE = ["ge_cloud_id"]
+    REMOVE_KEYS_IF_NONE = ["ge_cloud_id", "expectation_context"]
 
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs):

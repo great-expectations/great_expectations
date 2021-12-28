@@ -480,6 +480,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         else:
             selectable = data_object.selectable
 
+        """
+        If a custom query is passed, selectable will be TextClause and not formatted
+        as a subquery wrapped in "(subquery) alias". TextClause must first be converted
+        to TextualSelect using sa.columns() before it can be converted to type Subquery
+        """
+        if TextClause and isinstance(selectable, TextClause):
+            selectable = selectable.columns().subquery()
+
         # Filtering by row condition.
         if (
             "row_condition" in domain_kwargs
@@ -490,10 +498,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 parsed_condition = parse_condition_to_sqlalchemy(
                     domain_kwargs["row_condition"]
                 )
-                selectable = sa.select(
-                    "*", from_obj=selectable, whereclause=parsed_condition
+                selectable = (
+                    sa.select(sa.text("*"))
+                    .select_from(selectable)
+                    .where(parsed_condition)
                 )
-
             else:
                 raise GreatExpectationsError(
                     "SqlAlchemyExecutionEngine only supports the great_expectations condition_parser."
@@ -1074,14 +1083,20 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             }
         )
 
-        temp_table_name: Optional[str]
-        if "bigquery_temp_table" in batch_spec:
-            temp_table_name = batch_spec.get("bigquery_temp_table")
-        else:
-            temp_table_name = None
+        source_schema_name: str = batch_spec.get("schema_name", None)
+        source_table_name: str = batch_spec.get("table_name", None)
 
-        source_table_name = batch_spec.get("table_name", None)
-        source_schema_name = batch_spec.get("schema_name", None)
+        temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
+        temp_table_name: Optional[str] = batch_spec.get("bigquery_temp_table")
+
+        create_temp_table: bool = batch_spec.get(
+            "create_temp_table", self._create_temp_table
+        ) and (
+            self.engine.dialect.name.lower()
+            not in [
+                "trino",
+            ]
+        )
 
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
@@ -1091,10 +1106,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 query=query,
+                temp_table_schema_name=temp_table_schema_name,
                 temp_table_name=temp_table_name,
-                create_temp_table=batch_spec.get(
-                    "create_temp_table", self._create_temp_table
-                ),
+                create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,
             )
@@ -1112,9 +1126,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 execution_engine=self,
                 selectable=selectable,
                 temp_table_name=temp_table_name,
-                create_temp_table=batch_spec.get(
-                    "create_temp_table", self._create_temp_table
-                ),
+                create_temp_table=create_temp_table,
                 source_table_name=source_table_name,
                 source_schema_name=source_schema_name,
             )
