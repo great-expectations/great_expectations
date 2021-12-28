@@ -34,7 +34,7 @@ Grouped together, they constitute a Definition of Done for Expectations at each 
 * Has basic input validation and type checking
 * Has all four statement `Renderers`: question, descriptive, prescriptive, diagnostic
 * Has default `Parameter Builders` and Domain hooks to support Profiling   
-* Has core logic exists and passes tests for all applicable `Execution Engines` and SQL dialects
+* Has core logic that passes tests for all applicable `Execution Engines` and SQL dialects
 
 <i class="fas fa-check-circle" style={{color: "#28a745"}}></i> A production Expectation...
 
