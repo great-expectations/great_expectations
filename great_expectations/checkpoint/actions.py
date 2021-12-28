@@ -52,9 +52,7 @@ class ValidationAction:
     def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GeCloudIdentifier
-        ],
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -80,7 +78,7 @@ class ValidationAction:
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -98,7 +96,7 @@ class NoOpAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -186,7 +184,7 @@ class SlackNotificationAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -198,10 +196,11 @@ class SlackNotificationAction(ValidationAction):
             return
 
         if not isinstance(
-            validation_result_suite_identifier, ValidationResultIdentifier
+            validation_result_suite_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier, not {}".format(
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
+                "not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -280,7 +279,7 @@ class PagerdutyAlertAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -292,10 +291,11 @@ class PagerdutyAlertAction(ValidationAction):
             return
 
         if not isinstance(
-            validation_result_suite_identifier, ValidationResultIdentifier
+            validation_result_suite_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier, not {}".format(
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
+                "not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -396,7 +396,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -408,10 +408,11 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             return
 
         if not isinstance(
-            validation_result_suite_identifier, ValidationResultIdentifier
+            validation_result_suite_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier, not {}".format(
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
+                "not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -506,7 +507,7 @@ class OpsgenieAlertAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -518,10 +519,11 @@ class OpsgenieAlertAction(ValidationAction):
             return
 
         if not isinstance(
-            validation_result_suite_identifier, ValidationResultIdentifier
+            validation_result_suite_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier, not {}".format(
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
+                "not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -659,7 +661,7 @@ class EmailAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -671,10 +673,11 @@ class EmailAction(ValidationAction):
             return
 
         if not isinstance(
-            validation_result_suite_identifier, ValidationResultIdentifier
+            validation_result_suite_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
         ):
             raise TypeError(
-                "validation_result_suite_id must be of type ValidationResultIdentifier, not {}".format(
+                "validation_result_suite_id must be of type ValidationResultIdentifier or GeCloudIdentifier, "
+                "not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -754,7 +757,7 @@ class StoreValidationResultAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -836,7 +839,7 @@ class StoreEvaluationParametersAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -914,7 +917,7 @@ class StoreMetricsAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -926,10 +929,10 @@ class StoreMetricsAction(ValidationAction):
             return
 
         if not isinstance(
-            validation_result_suite_identifier, ValidationResultIdentifier
+            validation_result_suite_identifier, (ValidationResultIdentifier, GeCloudIdentifier)
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier, not {}".format(
+                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -986,7 +989,7 @@ class UpdateDataDocsAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: ValidationResultIdentifier,
+        validation_result_suite_identifier: Union[ValidationResultIdentifier, GeCloudIdentifier],
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -1065,6 +1068,15 @@ class CloudNotificationAction(ValidationAction):
             return Exception(
                 "CloudNotificationActions can only be used in GE Cloud Mode."
             )
+        if not isinstance(
+            validation_result_suite_identifier, GeCloudIdentifier
+        ):
+            raise TypeError(
+                "validation_result_id must be of type GeCloudIdentifier, not {}".format(
+                    type(validation_result_suite_identifier)
+                )
+            )
+
         ge_cloud_url = urljoin(
             self.data_context.ge_cloud_config.base_url,
             f"/accounts/{self.data_context.ge_cloud_config.account_id}/contracts/"
