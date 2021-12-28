@@ -47,7 +47,7 @@ Grouped together, they constitute a Definition of Done for Expectations at each 
 
 The docs in `Creating custom Expectations` focus on completing the four steps for experimental Expectations. Completing them will get to the point where your Expectation can be executed against one backend, with a couple tests to verify correctness, and a basic docstring and metadata to support diagonstics. Optionally, you can also publish experimental Expectations to the [Great Expectations open source gallery](https://greatexpectations.io/expectations) by following the steps [here](overview#publishing-your-expectation-as-an-open-source-contribution).
 
-These code to achieve the first four steps looks somewhat different depending on the class of Expectation you're developing. Accordingly, there are separate how-to guides and templates for each class of Expectation.
+The code to achieve the first four steps looks somewhat different depending on the class of Expectation you're developing. Accordingly, there are separate how-to guides and templates for each class of Expectation.
 
 | Guide: "How to create a custom..." |  Template |
 |-----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
