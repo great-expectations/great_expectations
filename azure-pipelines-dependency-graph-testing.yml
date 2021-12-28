@@ -153,11 +153,11 @@ stages:
               pip install -e dgtest
 
               # Run script and save output to a $VAR
-              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' 'tests/integration/usage_statistics' --depth 3)
+              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
+              EXIT_STATUS=$?
               echo "Tests identified by dependency graph test runner [dgtest]:\n $TESTS"
 
               # If the script found any matches, feed them into pytest
-              EXIT_STATUS=0
               if [[ ! -z "$TESTS" ]]; then
                 echo "$TESTS" | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
                 EXIT_STATUS=$?
@@ -231,11 +231,11 @@ stages:
 
               # Run script and save output to a $VAR
               echo "Tests identified by dependency graph test runner [dgtest]:"
-              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' 'tests/integration/usage_statistics' --depth 3)
+              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
+              EXIT_STATUS=$?
               echo "Tests identified by dependency graph test runner [dgtest]:\n $TESTS"
 
               # If the script found any matches, feed them into pytest
-              EXIT_STATUS=0
               if [[ ! -z "$TESTS" ]]; then
                 echo "$TESTS" | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
                 EXIT_STATUS=$?
@@ -308,11 +308,11 @@ stages:
               pip install -e dgtest
 
               # Run script and save output to a $VAR
-              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' 'tests/integration/usage_statistics' --depth 3)
+              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
+              EXIT_STATUS=$?
               echo "Tests identified by dependency graph test runner [dgtest]:\n $TESTS"
 
               # If the script found any matches, feed them into pytest
-              EXIT_STATUS=0
               if [[ ! -z "$TESTS" ]]; then
                 echo "$TESTS" | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
                 EXIT_STATUS=$?
@@ -355,11 +355,11 @@ stages:
               pip install -e dgtest
 
               # Run script and save output to a $VAR
-              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' 'tests/integration/usage_statistics' --depth 3)
+              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
+              EXIT_STATUS=$?
               echo "Tests identified by dependency graph test runner [dgtest]:\n $TESTS"
 
               # If the script found any matches, feed them into pytest
-              EXIT_STATUS=0
               if [[ ! -z "$TESTS" ]]; then
                 echo "$TESTS" | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
                 EXIT_STATUS=$?
@@ -411,10 +411,10 @@ stages:
 
               # Run script and save output to a $VAR
               TESTS=$(dgtest run great_expectations --tests tests --filter 'tests/cli' --depth 3)
+              EXIT_STATUS=$?
               echo "Tests identified by dependency graph test runner [dgtest]:\n $TESTS"
 
               # If the script found any matches, feed them into pytest
-              EXIT_STATUS=0
               if [[ ! -z "$TESTS" ]]; then
                 echo "$TESTS" | xargs pytest --aws-integration -v
                 EXIT_STATUS=$?
