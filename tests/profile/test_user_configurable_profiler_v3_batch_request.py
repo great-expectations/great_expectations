@@ -2,7 +2,6 @@ import logging
 import os
 import random
 import string
-import unittest
 from unittest import mock
 
 import pandas as pd
@@ -476,7 +475,12 @@ def test_build_suite_no_config(
     assert expectations_from_suite.issubset(possible_expectations_set)
     assert len(suite.expectations) == 48
 
+    # Note 20211209 - Profiler will also call ExpectationSuite's add_expectation(), but it will not
+    # send a usage_stats event when called from a Profiler.
     assert mock_emit.call_count == 1
+    assert "expectation_suite.add_expectation" not in [
+        mock_emit.call_args_list[0][0][0]["event"]
+    ]
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call]
@@ -554,9 +558,7 @@ def test_profiler_works_with_batch_object(cardinality_validator):
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_build_suite_with_config_and_no_semantic_types_dict(
-    mock_emit,
-    titanic_validator,
-    possible_expectations_set,
+    mock_emit, titanic_validator, possible_expectations_set
 ):
     """
     What does this test do and why?
@@ -583,6 +585,9 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     assert len(suite.expectations) == 29
 
     assert mock_emit.call_count == 1
+    assert "expectation_suite.add_expectation" not in [
+        mock_emit.call_args_list[0][0][0]["event"]
+    ]
 
     # noinspection PyUnresolvedReferences
     expected_events: List[unittest.mock._Call]
@@ -660,6 +665,8 @@ def test_build_suite_with_semantic_types_dict(
     assert len(value_set_columns) == 2
     assert value_set_columns == {"col_two", "col_very_few"}
 
+    # Note 20211209 - Profiler will also call ExpectationSuite's add_expectation(), but it will not
+    # send a usage_stats event when called from a Profiler.
     assert mock_emit.call_count == 1
 
     # noinspection PyUnresolvedReferences

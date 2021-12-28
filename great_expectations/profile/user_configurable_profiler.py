@@ -5,6 +5,7 @@ from typing import Callable, Dict, List, Optional, Union, cast
 from dateutil.parser import parse
 from tqdm.auto import tqdm
 
+from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -223,7 +224,9 @@ class UserConfigurableProfiler:
             suite_name: str = (
                 self.profile_dataset._expectation_suite.expectation_suite_name
             )
-            self.profile_dataset._expectation_suite = ExpectationSuite(suite_name)
+            self.profile_dataset._expectation_suite = ExpectationSuite(
+                expectation_suite_name=suite_name, data_context=None
+            )
 
         if self.semantic_types_dict:
             expectation_suite = self._build_expectation_suite_from_semantic_types_dict()

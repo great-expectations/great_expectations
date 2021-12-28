@@ -14,7 +14,7 @@ class DictDot:
         delattr(self, key)
 
     def __contains__(self, key):
-        return key in self.__dict__
+        return hasattr(self, key)
 
     def __len__(self):
         return len(self.__dict__)
