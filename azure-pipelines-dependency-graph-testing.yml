@@ -155,7 +155,8 @@ stages:
               # Run script and save output to a $VAR
               TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
               EXIT_STATUS=$?
-              echo "Tests identified by dependency graph test runner [dgtest]:\n $TESTS"
+              echo "Tests identified by dependency graph test runner [dgtest]:"
+              echo $TESTS"
 
               # If the script found any matches, feed them into pytest
               if [[ ! -z "$TESTS" ]]; then
@@ -230,10 +231,10 @@ stages:
               pip install -e dgtest
 
               # Run script and save output to a $VAR
-              echo "Tests identified by dependency graph test runner [dgtest]:"
               TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
               EXIT_STATUS=$?
-              echo "Tests identified by dependency graph test runner [dgtest]:\n $TESTS"
+              echo "Tests identified by dependency graph test runner [dgtest]:"
+              echo $TESTS"
 
               # If the script found any matches, feed them into pytest
               if [[ ! -z "$TESTS" ]]; then
@@ -310,7 +311,8 @@ stages:
               # Run script and save output to a $VAR
               TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
               EXIT_STATUS=$?
-              echo "Tests identified by dependency graph test runner [dgtest]:\n $TESTS"
+              echo "Tests identified by dependency graph test runner [dgtest]:"
+              echo $TESTS"
 
               # If the script found any matches, feed them into pytest
               if [[ ! -z "$TESTS" ]]; then
@@ -357,7 +359,8 @@ stages:
               # Run script and save output to a $VAR
               TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
               EXIT_STATUS=$?
-              echo "Tests identified by dependency graph test runner [dgtest]:\n $TESTS"
+              echo "Tests identified by dependency graph test runner [dgtest]:"
+              echo $TESTS"
 
               # If the script found any matches, feed them into pytest
               if [[ ! -z "$TESTS" ]]; then
@@ -412,7 +415,8 @@ stages:
               # Run script and save output to a $VAR
               TESTS=$(dgtest run great_expectations --tests tests --filter 'tests/cli' --depth 3)
               EXIT_STATUS=$?
-              echo "Tests identified by dependency graph test runner [dgtest]:\n $TESTS"
+              echo "Tests identified by dependency graph test runner [dgtest]:"
+              echo $TESTS"
 
               # If the script found any matches, feed them into pytest
               if [[ ! -z "$TESTS" ]]; then
