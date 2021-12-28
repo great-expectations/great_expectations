@@ -45,6 +45,37 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 """
     )
 
+def test__count_unexpected_cases_and_get_sub_messages__with_everything_passing():
+    test_report = [
+        {"test title": "positive_test_with_mostly", "backend": "pandas", "test_passed": "true"},
+        {"test title": "negative_test_with_mostly", "backend": "pandas", "test_passed": "true"},
+        {"test title": "other_negative_test_with_mostly", "backend": "pandas", "test_passed": "true"}
+    ]
+    print(ExpectColumnValuesToEqualThree()._count_unexpected_cases_and_get_sub_messages(test_report))
+    assert (
+        ExpectColumnValuesToEqualThree()._count_unexpected_cases_and_get_sub_messages(test_report)
+        == (0, [
+            {'message': 'positive_test_with_mostly', 'passed': True},
+            {'message': 'negative_test_with_mostly', 'passed': True},
+            {'message': 'other_negative_test_with_mostly', 'passed': True}
+        ])
+    )
+
+def test__count_unexpected_cases_and_get_sub_messages__with_one_failure():
+    test_report = [
+        {"test title": "positive_test_with_mostly", "backend": "pandas", "test_passed": "false"},
+        {"test title": "negative_test_with_mostly", "backend": "pandas", "test_passed": "true"},
+        {"test title": "other_negative_test_with_mostly", "backend": "pandas", "test_passed": "true"}
+    ]
+    print(ExpectColumnValuesToEqualThree()._count_unexpected_cases_and_get_sub_messages(test_report))
+    assert (
+        ExpectColumnValuesToEqualThree()._count_unexpected_cases_and_get_sub_messages(test_report)
+        == (1, [
+            {'message': 'positive_test_with_mostly', 'passed': False},
+            {'message': 'negative_test_with_mostly', 'passed': True},
+            {'message': 'other_negative_test_with_mostly', 'passed': True}
+        ])
+    )
 
 def test__count_positive_and_negative_example_cases():
     assert (
