@@ -46,8 +46,8 @@ def docs_build(directory, site_name, view=True, assume_yes=False):
     context = toolkit.load_data_context_with_error_handling(directory)
     build_docs(context, site_name=site_name, view=view, assume_yes=assume_yes)
     send_usage_message(
-        event="cli.docs.build",
         data_context=context,
+        event="cli.docs.build",
         api_version="v2",
         success=True,
     )
@@ -82,8 +82,8 @@ def docs_list(directory):
         cli_message_list(docs_sites_strings, list_intro_string)
 
     send_usage_message(
-        event="cli.docs.list",
         data_context=context,
+        event="cli.docs.list",
         api_version="v2",
         success=True,
     )
@@ -118,8 +118,8 @@ def clean_data_docs(directory, site_name=None, all=None):
     failed = False
     if not failed and context is not None:
         send_usage_message(
-            event="cli.docs.clean",
             data_context=context,
+            event="cli.docs.clean",
             api_version="v2",
             success=True,
         )
@@ -127,8 +127,8 @@ def clean_data_docs(directory, site_name=None, all=None):
 
     if failed and context is not None:
         send_usage_message(
-            event="cli.docs.clean",
             data_context=context,
+            event="cli.docs.clean",
             api_version="v2",
             success=False,
         )

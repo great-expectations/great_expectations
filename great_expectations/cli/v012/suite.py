@@ -120,8 +120,8 @@ def _suite_edit(
                 )
                 if not suppress_usage_message:
                     send_usage_message(
-                        event=usage_event,
                         data_context=context,
+                        event=usage_event,
                         api_version="v2",
                         success=True,
                     )
@@ -132,8 +132,8 @@ def _suite_edit(
                 )
                 if not suppress_usage_message:
                     send_usage_message(
-                        event=usage_event,
                         data_context=context,
+                        event=usage_event,
                         api_version="v2",
                         success=False,
                     )
@@ -146,8 +146,8 @@ def _suite_edit(
                 )
                 if not suppress_usage_message:
                     send_usage_message(
-                        event=usage_event,
                         data_context=context,
+                        event=usage_event,
                         api_version="v2",
                         success=False,
                     )
@@ -170,8 +170,8 @@ A batch of data is required to edit the suite - let's help you to specify it."""
             except ValueError as ve:
                 cli_message(f"<red>{ve}</red>")
                 send_usage_message(
-                    event=usage_event,
                     data_context=context,
+                    event=usage_event,
                     api_version="v2",
                     success=False,
                 )
@@ -181,8 +181,8 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                 cli_message("<red>No datasources found in the context.</red>")
                 if not suppress_usage_message:
                     send_usage_message(
-                        event=usage_event,
                         data_context=context,
+                        event=usage_event,
                         api_version="v2",
                         success=False,
                     )
@@ -219,8 +219,8 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
         if not suppress_usage_message:
             send_usage_message(
-                event=usage_event,
                 data_context=context,
+                event=usage_event,
                 event_payload=payload,
                 api_version="v2",
                 success=True,
@@ -231,8 +231,8 @@ A batch of data is required to edit the suite - let's help you to specify it."""
 
     except Exception as e:
         send_usage_message(
-            event=usage_event,
             data_context=context,
+            event=usage_event,
             api_version="v2",
             success=False,
         )
@@ -348,8 +348,8 @@ def _suite_new(
 If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
                     )
             send_usage_message(
-                event=usage_event,
                 data_context=context,
+                event=usage_event,
                 api_version="v2",
                 success=True,
             )
@@ -365,8 +365,8 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             )
         else:
             send_usage_message(
-                event=usage_event,
                 data_context=context,
+                event=usage_event,
                 api_version="v2",
                 success=False,
             )
@@ -378,16 +378,16 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
     ) as e:
         cli_message(f"<red>{e}</red>")
         send_usage_message(
-            event=usage_event,
             data_context=context,
+            event=usage_event,
             api_version="v2",
             success=False,
         )
         sys.exit(1)
     except Exception as e:
         send_usage_message(
-            event=usage_event,
             data_context=context,
+            event=usage_event,
             api_version="v2",
             success=False,
         )
@@ -425,8 +425,8 @@ def suite_delete(suite, directory):
     context.delete_expectation_suite(suite)
     cli_message(f"Deleted the expectation suite named: {suite}")
     send_usage_message(
-        event=usage_event,
         data_context=context,
+        event=usage_event,
         api_version="v2",
         success=True,
     )
@@ -466,8 +466,8 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
                 f"  - If you wish to adjust your scaffolding, you can open this notebook with jupyter: `{notebook_path}` <red>(Please note that if you run that notebook, you will overwrite your existing suite.)</red>"
             )
         send_usage_message(
-            event=usage_event,
             data_context=context,
+            event=usage_event,
             api_version="v2",
             success=False,
         )
@@ -476,8 +476,8 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
     datasource = toolkit.select_datasource(context)
     if datasource is None:
         send_usage_message(
-            event=usage_event,
             data_context=context,
+            event=usage_event,
             api_version="v2",
             success=False,
         )
@@ -489,8 +489,8 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
     renderer.render_to_disk(notebook_path)
 
     send_usage_message(
-        event=usage_event,
         data_context=context,
+        event=usage_event,
         api_version="v2",
         success=True,
     )
@@ -522,8 +522,8 @@ def suite_list(directory):
         if len(suite_names) == 0:
             cli_message("No Expectation Suites found")
             send_usage_message(
-                event="cli.suite.list",
                 data_context=context,
+                event="cli.suite.list",
                 api_version="v2",
                 success=True,
             )
@@ -535,12 +535,15 @@ def suite_list(directory):
 
         cli_message_list(suite_names, list_intro_string)
         send_usage_message(
-            event="cli.suite.list", data_context=context, api_version="v2", success=True
+            data_context=context,
+            event="cli.suite.list",
+            api_version="v2",
+            success=True,
         )
     except Exception as e:
         send_usage_message(
-            event="cli.suite.list",
             data_context=context,
+            event="cli.suite.list",
             api_version="v2",
             success=False,
         )

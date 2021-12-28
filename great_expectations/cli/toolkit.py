@@ -237,8 +237,8 @@ def exit_with_failure_message_and_stats(
         cli_message(string=message)
     if not suppress_usage_message:
         send_usage_message(
-            event=usage_event,
             data_context=data_context,
+            event=usage_event,
             success=False,
         )
     sys.exit(1)
@@ -473,8 +473,8 @@ def upgrade_project_strictly_multiple_versions_increment(
         # noinspection PyBroadException
         try:
             send_usage_message(
-                event="cli.project.upgrade.end",
                 data_context=context,
+                event="cli.project.upgrade.end",
                 success=True,
             )
         except Exception:
@@ -562,8 +562,8 @@ To learn more about the upgrade process, visit \
     try:
         data_context: DataContext = DataContext(context_root_dir=context_root_dir)
         send_usage_message(
-            event="cli.project.upgrade.end",
             data_context=data_context,
+            event="cli.project.upgrade.end",
             success=True,
         )
     except Exception:
@@ -582,8 +582,8 @@ def upgrade_project_one_or_multiple_versions_increment(
     # noinspection PyBroadException
     try:
         send_usage_message(
-            event="cli.project.upgrade.begin",
             data_context=context,
+            event="cli.project.upgrade.begin",
             success=True,
         )
     except Exception:
@@ -643,8 +643,8 @@ def upgrade_project_one_or_multiple_versions_increment(
         # noinspection PyBroadException
         try:
             send_usage_message(
-                event="cli.project.upgrade.end",
                 data_context=context,
+                event="cli.project.upgrade.end",
                 success=True,
             )
         except Exception:
@@ -684,8 +684,8 @@ def upgrade_project_zero_versions_increment(
         # noinspection PyBroadException
         try:
             send_usage_message(
-                event="cli.project.upgrade.begin",
                 data_context=context,
+                event="cli.project.upgrade.begin",
                 success=True,
             )
         except Exception:
@@ -719,8 +719,8 @@ def upgrade_project_zero_versions_increment(
         # noinspection PyBroadException
         try:
             send_usage_message(
-                event="cli.project.upgrade.end",
                 data_context=context,
+                event="cli.project.upgrade.end",
                 success=True,
             )
         except Exception:
@@ -840,8 +840,8 @@ def confirm_proceed_or_exit(
                 # noinspection PyBroadException
                 try:
                     send_usage_message(
-                        event=usage_stats_event,
                         data_context=data_context,
+                        event=usage_stats_event,
                         event_payload={"cancelled": True},
                         success=True,
                     )
@@ -1050,8 +1050,8 @@ def get_batch_request_from_json_file(
         cli_message(string=f"<red>{e}</red>")
         if not suppress_usage_message:
             send_usage_message(
-                event=usage_event,
                 data_context=data_context,
+                event=usage_event,
                 success=False,
             )
         sys.exit(1)
@@ -1080,8 +1080,8 @@ def get_batch_request_using_datasource_name(
         cli_message(string="<red>No datasources found in the context.</red>")
         if not suppress_usage_message:
             send_usage_message(
-                event=usage_event,
                 data_context=data_context,
+                event=usage_event,
                 success=False,
             )
         sys.exit(1)

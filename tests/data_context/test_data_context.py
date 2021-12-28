@@ -62,49 +62,6 @@ def parameterized_expectation_suite():
         return json.load(suite)
 
 
-def test_get_data_context_no_context_instantiated():
-    """
-    What does this test and why?
-
-    The get_data_context() and set_data_context() methods were added as part of PR #3812 and #3819 which introduces a registry
-    for BaseDataContext. This PR introduces a registry for DataContext so that it is accessible throughout GE. The next 3 tests test this functionality.
-
-    This test tests whether the correct error is raised if we try to retrieve a BaseDataContext from a registry that has not been instantiated (set to None)
-    """
-    BaseDataContext.set_data_context(None)
-    with pytest.raises(ge_exceptions.DataContextError) as e:
-        BaseDataContext.get_data_context()
-
-    assert (
-        "Could not retrieve DataContext from empty registry. Please instantiate DataContext before calling "
-        "get_data_context()" in str(e.value)
-    )
-
-
-def test_get_data_context(titanic_data_context):
-    """
-    This test tests whether the registry contains the identical data_context to the only that was passed in as a param.
-    """
-    my_data_context: BaseDataContext = BaseDataContext.get_data_context()
-    assert my_data_context is not None
-    assert my_data_context is titanic_data_context
-
-
-def test_set_data_context(
-    titanic_data_context, empty_data_context_with_config_variables
-):
-    """
-    This test tests whether the registry contains only the most recent data_context object.
-    """
-    my_data_context: BaseDataContext = BaseDataContext.get_data_context()
-    assert my_data_context is empty_data_context_with_config_variables
-
-    # set as previous context
-    DataContext.set_data_context(titanic_data_context)
-    my_data_context: BaseDataContext = DataContext.get_data_context()
-    assert my_data_context is titanic_data_context
-
-
 def test_create_duplicate_expectation_suite(titanic_data_context):
     # create new expectation suite
     assert titanic_data_context.create_expectation_suite(
@@ -887,7 +844,11 @@ def test_data_context_updates_expectation_suite_names(
             "a_new_new_suite_name.json",
         ),
     ) as suite_file:
-        loaded_suite = expectationSuiteSchema.load(json.load(suite_file))
+        loaded_suite_dict: dict = expectationSuiteSchema.load(json.load(suite_file))
+        loaded_suite: ExpectationSuite = ExpectationSuite(
+            **loaded_suite_dict,
+            data_context=data_context_parameterized_expectation_suite,
+        )
         assert loaded_suite.expectation_suite_name == "a_new_new_suite_name"
 
     #   3. Using the new name but having the context draw that from the suite
@@ -1647,9 +1608,9 @@ def test_run_checkpoint_new_style(
 
 
 def test_get_validator_with_instantiated_expectation_suite(
-    empty_data_context, tmp_path_factory
+    empty_data_context_stats_enabled, tmp_path_factory
 ):
-    context = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -1695,7 +1656,9 @@ data_connectors:
         batch_identifiers={
             "alphanumeric": "some_file",
         },
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
     )
     assert my_validator.expectation_suite_name == "my_expectation_suite"
 
@@ -1781,6 +1744,34 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
         expectation_suite_name=expectation_suite,
     )
     assert len(batch) == 3
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_expectation_to_expectation_suite(
+    mock_emit, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
+
+    expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name="my_new_expectation_suite"
+    )
+    expectation_suite.add_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        )
+    ]
 
 
 @mock.patch(

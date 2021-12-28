@@ -30,8 +30,8 @@ def project_check_config(directory):
     is_config_ok, error_message, context = do_config_check(directory)
     if context:
         send_usage_message(
-            event="cli.project.check_config",
             data_context=context,
+            event="cli.project.check_config",
             api_version="v2",
             success=True,
         )
