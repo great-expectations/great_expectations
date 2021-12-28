@@ -9,7 +9,10 @@ from ruamel import yaml
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
-from tests.core.usage_statistics.util import assert_no_usage_stats_exceptions
+from tests.core.usage_statistics.util import (
+    usage_stats_exceptions_exist,
+    usage_stats_invalid_messages_exist,
+)
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -94,17 +97,18 @@ def test_common_usage_stats_are_sent_no_mocking(
     assert context.anonymous_usage_statistics.enabled
     assert context.anonymous_usage_statistics.data_context_id == DATA_CONTEXT_ID
 
-    # context.add_datasource() is decorated, was not sending usage stats events in v0.13.43-46 (possibly earlier)
+    # Note module_name fields are omitted purposely to ensure we are still able to send events
     datasource_yaml = f"""
     name: example_datasource
     class_name: Datasource
     module_name: great_expectations.datasource
     execution_engine:
-      module_name: great_expectations.execution_engine
+      # module_name: great_expectations.execution_engine
       class_name: PandasExecutionEngine
     data_connectors:
         default_runtime_data_connector_name:
             class_name: RuntimeDataConnector
+            # module_name: great_expectations.datasource.data_connector
             batch_identifiers:
                 - default_identifier_name
     """
@@ -114,8 +118,7 @@ def test_common_usage_stats_are_sent_no_mocking(
     expected_events: List[str] = ["data_context.test_yaml_config"]
 
     context.add_datasource(**yaml.load(datasource_yaml))
-    # TODO: AJB `data_context.add_datasource` is not being emitted, though it should be. See GREAT-448
-    # expected_events.append("data_context.add_datasource")
+    expected_events.append("data_context.add_datasource")
 
     df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 
@@ -163,14 +166,19 @@ def test_common_usage_stats_are_sent_no_mocking(
             "batch_identifiers": {"default_identifier_name": "my_simple_df"},
         },
     )
+
+    expected_events.append("data_context.get_batch_list")
+    expected_events.append("data_asset.validate")
     expected_events.append("data_context.build_data_docs")
     expected_events.append("checkpoint.run")
     expected_events.append("data_context.run_checkpoint")
 
-    assert_no_usage_stats_exceptions(messages=caplog.messages)
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
 
     message_queue = context._usage_statistics_handler._message_queue.queue
     events = [event["event"] for event in message_queue]
 
     # Note: expected events does not contain the `data_context.__init__` event
     assert events == expected_events
+
+    assert not usage_stats_invalid_messages_exist(caplog.messages)

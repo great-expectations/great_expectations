@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from dateutil.parser import parse
@@ -287,7 +287,7 @@ def get_sqlalchemy_column_metadata(
         try:
             # if a custom query was passed
             if isinstance(table_selectable, TextClause):
-                columns = table_selectable.columns().columns
+                columns = table_selectable.selected_columns.columns
             else:
                 columns = inspector.get_columns(
                     table_selectable,
