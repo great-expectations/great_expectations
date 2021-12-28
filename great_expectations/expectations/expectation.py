@@ -1002,10 +1002,21 @@ class Expectation(metaclass=MetaExpectation):
         return report_obj
 
     def generate_diagnostic_checklist(self) -> str:
+        """Runs self.run_diagnostics and generates a diagnostic checklist that looks something like this:
+
+            Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration:
+            ✔ library_metadata object exists
+            ✔ Has a docstring, including a one-line short description
+                ✔ "Expect values in this column to equal the number three."
+            ✔ Has at least one positive and negative example case, and all test cases pass
+            ✔ Core logic exists and passes tests on at least one Execution Engine
+
+        This method is experimental.
+        """
 
         diagnostics_report = self.run_diagnostics()
 
-        checks = []
+        checks: list(dict) = []
 
         # Check whether this Expectation has a library_metadata object
         checks.append(
@@ -1106,23 +1117,17 @@ class Expectation(metaclass=MetaExpectation):
                 }
             )
 
-        # Check whether the Expectation has all four statement Renderers: question, descriptive, prescriptive, diagnostic
-        # message = "Has all four statement Renderers: question, descriptive, prescriptive, diagnostic"
-        # sub_messages = []
-        # checks.append({
-        #     "message": message,
-        #     "passed" : True,
-        # })
-
         output_message = self._convert_checks_into_output_message(checks)
         return output_message
 
-    def _count_positive_and_negative_example_cases(self):
+    def _count_positive_and_negative_example_cases(self) -> Tuple[int, int]:
+        """Scans self.examples and returns a 2-ple with the numbers of cases with success == True and success == False"""
+
         if not hasattr(self, "examples"):
             return 0, 0
 
-        positive_cases = 0
-        negative_cases = 0
+        positive_cases: int = 0
+        negative_cases: int = 0
 
         for dataset in self.examples:
             for test in dataset["tests"]:
@@ -1134,9 +1139,12 @@ class Expectation(metaclass=MetaExpectation):
         return positive_cases, negative_cases
 
     @staticmethod
-    def _count_unexpected_cases_and_get_sub_messages(test_report):
-        unexpected_cases = 0
-        sub_messages = []
+    def _count_unexpected_cases_and_get_sub_messages(test_report) -> Tuple[int, list]:
+        """Scans self.examples and returns a 2-ple with the number of cases that did not pass, and a list of dictionaries containing each test title and whether or not it passed."""
+
+        unexpected_cases: int = 0
+        sub_messages: List[Dict] = []
+
         for test in test_report:
             passed = test["test_passed"] == "true"
             sub_messages.append(
@@ -1150,7 +1158,8 @@ class Expectation(metaclass=MetaExpectation):
 
         return unexpected_cases, sub_messages
 
-    def _convert_checks_into_output_message(self, checks) -> str:
+    def _convert_checks_into_output_message(self, checks: List[dict]) -> str:
+        """Converts a list of checks into an output string (potentially nested), with ✔ to indicate checks that passed."""
 
         output_message = f"Completeness checklist for {self.__class__.__name__}:"
         for check in checks:

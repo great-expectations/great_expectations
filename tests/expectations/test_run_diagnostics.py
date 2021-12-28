@@ -9,9 +9,10 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.expectations.registry import _registered_expectations
 
-from .expect_column_values_to_equal_three import (
+from .fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
     ExpectColumnValuesToEqualThree__SecondIteration,
+    ExpectColumnValuesToEqualThree__BrokenIteration,
 )
 
 
@@ -330,3 +331,36 @@ def test_expectation_is_abstract():
     # is_abstract determines whether the expectation should be added to the registry (i.e. is fully implemented)
     assert ColumnMapExpectation.is_abstract()
     assert not ExpectColumnValuesToEqualThree.is_abstract()
+
+
+
+def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
+    diagnostic_report = ExpectColumnValuesToEqualThree__BrokenIteration().run_diagnostics()
+    print(json.dumps(diagnostic_report, indent=2))
+
+    test_report = diagnostic_report["test_report"]
+    
+    assert len(test_report)==5
+    assert test_report[0] == {
+        "test title": "positive_test_with_mostly",
+        "backend": "pandas",
+        "test_passed": "true"
+    }
+
+    assert set(test_report[3].keys()) == {
+        "test title",
+        "backend",
+        "test_passed",
+        "error_message",
+        "stack_trace"
+    }
+    assert test_report[3]["test_passed"] == "false"
+
+    assert set(test_report[4].keys()) == {
+        "test title",
+        "backend",
+        "test_passed",
+        "error_message",
+        "stack_trace"
+    }
+    assert test_report[4]["test_passed"] == "false"
