@@ -5,7 +5,7 @@ import Prerequisites from './components/prerequisites.jsx'
 
 You can extend the functionality of Great Expectations by creating your own custom Expectations. You can also enrich Great Expectations as a shared standard for data quality by contributing new Expectations to the open source project.
 
-Both processes follow the same streamlined steps. This section will teach you how.
+These processes compliment each other and their steps are streamlined so that one flows into the other. Once you have created a custom Expectation, it is simple to contribute it to the open source project. This section will teach you how to do both.
 
 <Prerequisites></Prerequisites>
 
