@@ -216,7 +216,8 @@ class Profiler:
             )
 
         expectation_suite: ExpectationSuite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name
+            expectation_suite_name=expectation_suite_name,
+            data_context=self._data_context,
         )
 
         if include_citation:
@@ -230,8 +231,9 @@ class Profiler:
             expectation_configurations: List[ExpectationConfiguration] = rule.generate()
             expectation_configuration: ExpectationConfiguration
             for expectation_configuration in expectation_configurations:
-                expectation_suite.add_expectation(
-                    expectation_configuration=expectation_configuration
+                expectation_suite._add_expectation(
+                    expectation_configuration=expectation_configuration,
+                    send_usage_event=False,
                 )
 
         return expectation_suite

@@ -33,11 +33,11 @@ class SqlAlchemyBatchData(BatchData):
         # Option 3
         selectable=None,
         create_temp_table: bool = True,
-        temp_table_name: str = None,
         temp_table_schema_name: str = None,
+        temp_table_name: str = None,
         use_quoted_name: bool = False,
-        source_table_name: str = None,
         source_schema_name: str = None,
+        source_table_name: str = None,
     ):
         """A Constructor used to initialize and SqlAlchemy Batch, create an id for it, and verify that all necessary
         parameters have been provided. If a Query is given, also builds a temporary table for this query
@@ -151,8 +151,8 @@ class SqlAlchemyBatchData(BatchData):
                         compile_kwargs={"literal_binds": True},
                     )
             self._create_temporary_table(
-                generated_table_name,
-                query,
+                temp_table_name=generated_table_name,
+                query=query,
                 temp_table_schema_name=temp_table_schema_name,
             )
             self._selectable = sa.Table(
@@ -209,6 +209,7 @@ class SqlAlchemyBatchData(BatchData):
         elif self.sql_engine_dialect.name.lower() == "snowflake":
             if temp_table_schema_name is not None:
                 temp_table_name = temp_table_schema_name + "." + temp_table_name
+
             stmt = (
                 "CREATE OR REPLACE TEMPORARY TABLE {temp_table_name} AS {query}".format(
                     temp_table_name=temp_table_name, query=query
@@ -225,6 +226,7 @@ class SqlAlchemyBatchData(BatchData):
             # Split is case sensitive so detect case.
             # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
             # changing column names), so this is not an option!
+            # noinspection PyUnresolvedReferences
             if isinstance(query, sa.dialects.mssql.base.MSSQLCompiler):
                 query = query.string  # extracting string from MSSQLCompiler object
 

@@ -20,7 +20,7 @@ Steps
 
 1. **Configure the** `config_variables.yml` **file with your database credentials**
 
-    We recommend that database credentials be stored in the  `config_variables.yml` file, which is located in the `uncommitted/` folder by default, and is not part of source control.  The following lines add database credentials under the key `db_creds`. Additional options for configuring the `config_variables.yml` file or additional environment variables can be found [here](../configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md).
+    We recommend that database credentials be stored in the `config_variables.yml` file, which is located in the `uncommitted/` folder by default, and is not part of source control. The following lines add database credentials under the key `db_creds`. Additional options for configuring the `config_variables.yml` file or additional environment variables can be found [here](../configuring_data_contexts/how_to_configure_credentials.md).
 
     ```yaml
     db_creds:

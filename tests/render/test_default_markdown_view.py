@@ -6,6 +6,7 @@ import pytest
 
 import great_expectations as ge
 import great_expectations.render as render
+from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
@@ -45,7 +46,8 @@ def validation_operator_result():
 
 
 @pytest.fixture()
-def expectation_suite_to_render_with_notes():
+def expectation_suite_to_render_with_notes(empty_data_context):
+    context: DataContext = empty_data_context
     expectation_suite = ExpectationSuite(
         expectation_suite_name="default",
         meta={"great_expectations_version": "0.13.0-test"},
@@ -78,6 +80,7 @@ def expectation_suite_to_render_with_notes():
                 },
             ),
         ],
+        data_context=context,
     )
     return expectation_suite
 
