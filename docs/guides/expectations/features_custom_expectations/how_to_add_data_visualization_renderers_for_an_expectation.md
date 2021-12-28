@@ -18,7 +18,6 @@ This guide will help you add data visualization renderers to a custom Expectatio
 - Implemented a [custom Expectation](../../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
 - Set up a [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md) site.
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md) containing your custom Expectation.
-- Generated one Validation Result ([Validation Operator](../../../guides/validation/how_to_add_a_validation_operator.md)) containing your custom Expectation
 - Have installed and are familiarized with [Altair](https://altair-viz.github.io/)
  
 </Prerequisites>
