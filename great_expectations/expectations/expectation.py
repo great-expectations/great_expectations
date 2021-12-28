@@ -1120,7 +1120,7 @@ class Expectation(metaclass=MetaExpectation):
         output_message = self._convert_checks_into_output_message(checks)
         return output_message
 
-    def _count_positive_and_negative_example_cases(self) -> Tuple(int, int):
+    def _count_positive_and_negative_example_cases(self) -> Tuple[int, int]:
         """Scans self.examples and returns a 2-ple with the numbers of cases with success == True and success == False"""
 
         if not hasattr(self, "examples"):
@@ -1139,11 +1139,11 @@ class Expectation(metaclass=MetaExpectation):
         return positive_cases, negative_cases
 
     @staticmethod
-    def _count_unexpected_cases_and_get_sub_messages(test_report) -> Tuple(int, list):
+    def _count_unexpected_cases_and_get_sub_messages(test_report) -> Tuple[int, list]:
         """Scans self.examples and returns a 2-ple with the numbers of cases with success == True and success == False"""
 
         unexpected_cases: int = 0
-        sub_messages: list(dict) = []
+        sub_messages: List[Dict] = []
 
         for test in test_report:
             passed = test["test_passed"] == "true"
@@ -1158,7 +1158,7 @@ class Expectation(metaclass=MetaExpectation):
 
         return unexpected_cases, sub_messages
 
-    def _convert_checks_into_output_message(self, checks: list(dict)) -> str:
+    def _convert_checks_into_output_message(self, checks: List[dict]) -> str:
         """Converts a list of checks into an output string (potentially nested), with ✔ to indicate checks that passed."""
 
         output_message = f"Completeness checklist for {self.__class__.__name__}:"
