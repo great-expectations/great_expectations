@@ -314,7 +314,7 @@ stages:
               # If the script found any matches, feed them into pytest
               EXIT_STATUS=0
               if [[ ! -z "$TESTS" ]]; then
-                echo "$TESTS" | xargs pytest $(GE_pytest_opts) --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+                echo "$TESTS" | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
                 EXIT_STATUS=$?
               fi
               exit $EXIT_STATUS
@@ -361,7 +361,7 @@ stages:
               # If the script found any matches, feed them into pytest
               EXIT_STATUS=0
               if [[ ! -z "$TESTS" ]]; then
-                echo "$TESTS" | xargs pytest $(GE_pytest_opts) --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+                echo "$TESTS" | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
                 EXIT_STATUS=$?
               fi
               exit $EXIT_STATUS
