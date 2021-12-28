@@ -9,7 +9,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
 This guide will walk you through the process of creating your own Modular ColumnExpectations in a few simple steps!
 
-We will be following this [complete example](../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/column_custom_max_expectation.py).
+We will be following this [complete example](../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/custom_column_max_example.py).
 
 <Prerequisites>
 
@@ -41,7 +41,7 @@ Implement the computation of the metric in your new Metric Provider class for at
 
 Here is the implementation of our example metric for Pandas:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/column_custom_max_expectation.py#L49-L52
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/custom_column_max_example.py#L49-L52
 ```
 This means that the method `_pandas` is a metric function that is decorated as a `column_aggregate_value`. It will be called with the engine-specific column type. It must return a value that is computed over this column. 
 The `engine` argument of `column_aggregate_value` is set to `PandasExecutionEngine` to signal to the method in the parent class that this method computes the Metric for the Pandas backend.
@@ -52,7 +52,7 @@ If you have never used Python Decorators and don’t know what they are and how 
 
 Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark Dialects.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/column_custom_max_expectation.py#L44-L63
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/custom_column_max_example.py#L44-L63
 ```
 
 #### 3. Define Parameters
@@ -71,7 +71,7 @@ Add the following attributes to your Expectation class:
 
 An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class):
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/column_custom_max_expectation.py#L66-L80
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/custom_column_max_example.py#L66-L80
 ```
 
 #### 4. Validate Configuration
@@ -79,17 +79,17 @@ An example of Expectation Parameters is shown below (notice that we are now in a
 We have almost reached the end of our journey in implementing an Expectation! 
 Now, if we have requested certain parameters from the user, we would like to validate that the user has entered them correctly via a `validate_configuration` method, and raise an error if the Expectation has been incorrectly configured.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/column_custom_max_expectation.py#L119-L136
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/custom_column_max_example.py#L119-L136
 ```
 
 In this method, the user provides a configuration, and we check that certain conditions are satisfied by the configuration. We need to verify that the basic configuration parameters are set:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/column_custom_max_expectation.py#L138-L144
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/custom_column_max_example.py#L138-L144
 ```
 
 And validate optional configuration parameters. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/column_custom_max_expectation.py#L146-L169
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/custom_column_max_example.py#L146-L169
 ```
 
 #### 5. Validate
@@ -100,7 +100,7 @@ The validate method is implemented as `_validate`.
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
 and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/column_custom_max_expectation.py#L82-L117
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/custom_column_max_example.py#L82-L117
 ```
 
 You have now implemented your own Custom Expectation! For more information about Expectations and Metrics, please reference the [Core Concepts](../../../reference/core_concepts.md) documentation.
