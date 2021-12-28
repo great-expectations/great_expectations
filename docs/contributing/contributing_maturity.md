@@ -5,7 +5,7 @@ title: Levels  of Maturity
 Features and code within Great Expectations are separated into three levels of maturity: Experimental, Beta, and Production.
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<div class="container my-container">
+<div>
     <ul style={{
         "list-style-type": "none"
     }}>
