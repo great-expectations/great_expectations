@@ -62,7 +62,7 @@ Once you've copied and renamed the template file, you can execute it as follows.
 python expect_column_values_to_equal_three.py
 ```
 
-The template file is set up so that this will run the expectations `generate_diagnostic_checklist` method. This will run a diagnostic script on your new Expectation, return a checklist of steps to get it to full production readiness, and recommend a next step.
+The template file is set up so that this will run the Expectation's `generate_diagnostic_checklist` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
 
 ```
 Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
@@ -78,43 +78,43 @@ Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
     Input validation exists
 ```
 
-Not all Expectation diagnostics can be automated, but automating most of the core steps helps make it fast and simple to author, submit, and review new Expectations that satisfy the code quality standards for Great Expectations.
-
+When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first four steps on the checklist.
 
 #### 4. Change the Expectation class name and add a docstring
 
+Let's start by updating your Expectations's name and docstring.
+
 Replace the Expectation class name
-```
+```python
+# This class defines the Expectation itself
 class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
+    """TODO: Add a docstring here"""
 ```
 
 with your real Expectation class name, in upper camel case:
-```
+```python
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 ```
 
-You'll also need to change the class name at the bottom of the file, by replacing this:
-
-```
-diagnostics_report = ExpectColumnValuesToMatchSomeCriteria().run_diagnostics()
-```
-
-with this:
-```
-diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
-```
-
-
 You can also go ahead and write a new one-line docstring, replacing
-```
-"""TODO: add a docstring here"""
+```python
+    """TODO: add a docstring here"""
 ```
 
 with something like:
+```python
+    """Expect values in this column to equal 3."""
 ```
-"""Expect values in this column to equal 3.
 
-"""
+You'll also need to change the class name at the bottom of the file, by replacing this line:
+
+```python
+checklist = ExpectColumnValuesToMatchSomeCriteria().generate_diagnostic_checklist()
+```
+
+with this one:
+```python
+checklist = ExpectColumnValuesToEqualThree().generate_diagnostic_checklist()
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -128,39 +128,85 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
   ✔ Has a docstring, including a one-line short description
     Has at least one positive and negative example case
     Core logic exists and passes tests on at least one Execution Engine
-    Has all four statement Renderers: question, descriptive, prescriptive, diagnostic
-    Has default ParameterBuilders and Domain hooks to support Profiling
-    Core logic exists and passes tests for all applicable Execution Engines and backends
-    All Renderers exist and produce typed output
-    Linting for type hints and other code standards passes
-    Input validation exists
+...
 ```
 
+Congratulations! You're one step closer to implementing a Custom Expectation.
 
 #### 5. Add test cases
+
+Next, we're going to search for `examples = []` in your file, and replace it at least two test examples.
+
+These examples serve a dual purpose:
+
+* First, they provide test cases that the Great Expectations testing framework can execute automatically.
+
+* Second, they help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate as valid and as invalid. When your Expectation is released, its entry in the Gallery will render these examples.
+
+[pic]
+
+Your examples will look something like this:
 
 ```python
 examples = [
     {
         "data": {
-            "all_threes": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-            "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
+            "all_threes": [3, 3, 3, 3, 3],
+            "some_zeroes": [3, 3, 3, 0, None],
         },
         "tests": [
             {
-                "title": "positive_test_with_mostly",
+                "title": "positive_test",
                 "exact_match_out": False,
                 "include_in_gallery": True,
-                "in": {"column": "mostly_threes", "mostly": 0.6},
+                "in": {
+                    "column": "all_threes"
+                },
                 "out": {
                     "success": True,
-                    "unexpected_index_list": [6, 7],
-                    "unexpected_list": [2, -1],
+                },
+            }
+            {
+                "title": "negative_test",
+                "exact_match_out": False,
+                "include_in_gallery": True,
+                "in": {
+                    "column": "all_zeroes"
+                },
+                "out": {
+                    "success": False,
+                    "unexpected_index_list": [3, 4],
+                    "unexpected_list": [0, None],
                 },
             }
         ],
     }
 ]
+```
+
+Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
+
+* `data`: defines the input data of the example as a table/data frame. In this example the table has one column named `all_threes` and a second column named `some_zeroes`. Both columns have 5 rows. (Note: if you define multiple columns, make sure that they have the same number of rows.)
+
+* `tests`: a list of test cases that use the data defined above as input to validate
+	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
+	* 'include_in_gallery': set it to True if you want this test case to be visible in the gallery as an example (true for most test cases).
+	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mostly_threes", "mostly": 0.6}` in the example above is equivalent to `expect_column_values_to_equal_three(column="mostly_threes, mostly=0.6)`
+	* `out` is based on the Validation Result returned when executing the Expectation.
+	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the result object - only the ones that are important to test.
+
+
+Run `run_diagnostics` again. The newly added examples will appear in the output. They are not executed as tests yet, because the Expectation itself hasn't been implemented yet, but they'll check the box for example cases.
+
+```
+$ python expect_column_values_to_equal_three.py
+
+Completeness checklist for ExpectColumnValuesToEqualThree:
+  ✔ library_metadata object exists
+  ✔ Has a docstring, including a one-line short description
+  ✔ Has at least one positive and negative example case
+    Core logic exists and passes tests on at least one Execution Engine
+...
 ```
 
 #### 6. Implement your Metric and connect it to your Expectation
@@ -190,17 +236,17 @@ An example of Expectation Parameters is shown below (notice that we are now in a
 
 #### 7. Update `library_metadata`
 
-```
-    library_metadata = {
-        "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
-        ],
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
-        ],
-        # "package": "experimental_expectations", # This should be auto-populated.
-    }
+```python
+library_metadata = {
+    "maturity": "experimental",  # "experimental", "beta", or "production"
+    "tags": [  # Tags for this Expectation in the gallery
+        #         "experimental"
+    ],
+    "contributors": [  # Github handles for all contributors to this Expectation.
+        #         "@your_name_here", # Don't forget to add your github handle here!
+    ],
+    # "package": "experimental_expectations", # This should be auto-populated.
+}
 ```
 
 Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Metrics](../../../reference/metrics.md).
