@@ -204,6 +204,7 @@ class SlackNotificationAction(ValidationAction):
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
+            return
 
         if not isinstance(
             validation_result_suite_identifier,
@@ -302,6 +303,7 @@ class PagerdutyAlertAction(ValidationAction):
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
+            return
 
         if not isinstance(
             validation_result_suite_identifier,
@@ -422,6 +424,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
+            return
 
         if not isinstance(
             validation_result_suite_identifier,
@@ -536,6 +539,7 @@ class OpsgenieAlertAction(ValidationAction):
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
+            return
 
         if not isinstance(
             validation_result_suite_identifier,
@@ -693,6 +697,7 @@ class EmailAction(ValidationAction):
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
+            return
 
         if not isinstance(
             validation_result_suite_identifier,
@@ -792,6 +797,7 @@ class StoreValidationResultAction(ValidationAction):
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
+            return
 
         if not isinstance(
             validation_result_suite_identifier,
@@ -878,6 +884,7 @@ class StoreEvaluationParametersAction(ValidationAction):
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
+            return
 
         if not isinstance(
             validation_result_suite_identifier,
@@ -960,6 +967,7 @@ class StoreMetricsAction(ValidationAction):
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
+            return
 
         if not isinstance(
             validation_result_suite_identifier,
@@ -1037,6 +1045,7 @@ class UpdateDataDocsAction(ValidationAction):
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
+            return
 
         if not isinstance(
             validation_result_suite_identifier,
