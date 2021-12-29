@@ -409,7 +409,7 @@ stages:
               pip install -e dgtest
 
               # Run script and save output to a $VAR
-              TESTS=$(dgtest run great_expectations --tests tests --filter 'tests/cli' --depth 3)
+              TESTS=$(dgtest run great_expectations --tests tests --filter 'tests/cli')
               EXIT_STATUS=$?
               printf "Tests identified by dependency graph test runner [dgtest]:\n%s" "$TESTS"
 
