@@ -1,4 +1,3 @@
-# TEST
 # Utility methods for dealing with DataAsset objects
 
 import datetime
