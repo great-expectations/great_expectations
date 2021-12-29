@@ -58,7 +58,7 @@ Using this example configuration, add in your GCS bucket and path to a directory
 
 It is also important to note that GCS `DataConnector` for Spark supports the method of authentication that requires running the `gcloud` command line tool in order to obtain the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 
-For more details regarding storing credentials for use with Great Expectations see: [How to configure credentials](../../../setup/configuring_data_contexts/how_to_configure_credentials) 
+For more details regarding storing credentials for use with Great Expectations see: [How to configure credentials](../../../setup/configuring_data_contexts/how_to_configure_credentials.md)
 
 For more details regarding authentication, please visit the following:
 * [gcloud CLI Tutorial](https://cloud.google.com/storage/docs/reference/libraries)

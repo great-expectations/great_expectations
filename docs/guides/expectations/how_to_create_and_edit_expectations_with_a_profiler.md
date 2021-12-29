@@ -54,7 +54,7 @@ context = DataContext(
 )
 ```
 
-Alternatively, [you can instantiate a Data Context without a .yml file](../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file)
+Alternatively, [you can instantiate a Data Context without a .yml file](../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
 
 
 ### 2. Set your expectation_suite_name and create your Batch Request 
