@@ -91,7 +91,7 @@ Run the following code to set up a [Data Context](../reference/data_context.md) 
 
 <details>
   <summary>What is an "in code" Data Context?</summary>
-When you don't have easy access to a file system, instead of defining your Data Context via great_expectations.yml you can do so by instantiating a BaseDataContext with a config. Take a look at our how-to guide to learn more: <a href="../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file">How to instantiate a Data Context without a yml file</a>. In Databricks, you can do either since you have access to a filesystem - we've simply shown the in code version here for simplicity.
+When you don't have easy access to a file system, instead of defining your Data Context via great_expectations.yml you can do so by instantiating a BaseDataContext with a config. Take a look at our how-to guide to learn more: <a href='/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file'>How to instantiate a Data Context without a yml file</a>. In Databricks, you can do either since you have access to a filesystem - we've simply shown the in code version here for simplicity.
 </details>
 
 <details>
@@ -232,7 +232,7 @@ Here we add a [Datasource and Data Connector](../reference/datasources.md) by ru
   <summary>What does this configuration contain?</summary>
 Here we are setting up a Datasource using a SparkDFExecutionEngine (which loads the data into a spark dataframe to process the validations). We also configure a Data Connector using a few helpful parameters. Here is a summary of some key parameters, but you can also find more information in our "Connecting to your data" docs, especially the "Core skills" and "Filesystem" sections:
   <ul>
-    <li>class_name: Here we reference one of the two DBFS data connectors InferredAssetDBFSDataConnector (ConfiguredAssetDBFSDataConnector is also available) which handle the translation from /dbfs/ to dbfs:/ style paths for you. For more information on the difference between Configured/Inferred, see <a href="../guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use">How to choose which DataConnector to use.</a></li>
+    <li>class_name: Here we reference one of the two DBFS data connectors InferredAssetDBFSDataConnector (ConfiguredAssetDBFSDataConnector is also available) which handle the translation from /dbfs/ to dbfs:/ style paths for you. For more information on the difference between Configured/Inferred, see <a href='/docs/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use'>How to choose which DataConnector to use.</a></li>
     <li>base_directory: Where your files are located, here we reference the file path in DBFS we copied our data to earlier.</li>
     <li>glob_directive: This allows you to select files within that base_directory that match a <a href="https://docs.python.org/3/library/glob.html">glob</a> pattern.</li>
     <li>default_regex: Here we specify the group_names corresponding to the groups in the regex defined in the pattern - we can use these later to filter so that we can apply our Checkpoint to a specific Batch (using this configuration, each file is a Batch).</li>
@@ -265,7 +265,7 @@ Here we add a [Datasource and Data Connector](../reference/datasources.md) by ru
   <summary>What does this configuration contain?</summary>
 Here we are setting up a Datasource using a SparkDFExecutionEngine (which loads the data into a spark dataframe to process the validations). We also configure a Data Connector using a few helpful parameters. Here is a summary of some key parameters, but you can also find more information in our "Connecting to your data" docs, especially the "Core skills" and "Filesystem" sections:
   <ul>
-    <li>class_name: Here we reference one of the two DBFS data connectors InferredAssetDBFSDataConnector (ConfiguredAssetDBFSDataConnector is also available) which handle the translation from /dbfs/ to dbfs:/ style paths for you. For more information on the difference between Configured/Inferred, see <a href="../guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use">How to choose which DataConnector to use.</a></li>
+    <li>class_name: Here we reference one of the two DBFS data connectors InferredAssetDBFSDataConnector (ConfiguredAssetDBFSDataConnector is also available) which handle the translation from /dbfs/ to dbfs:/ style paths for you. For more information on the difference between Configured/Inferred, see <a href='/docs/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use'>How to choose which DataConnector to use.</a></li>
     <li>base_directory: Where your files are located, here we reference the file path in DBFS we copied our data to earlier.</li>
     <li>glob_directive: This allows you to select files within that base_directory that match a <a href="https://docs.python.org/3/library/glob.html">glob</a> pattern.</li>
     <li>default_regex: Here we specify the group_names corresponding to the groups in the regex defined in the pattern - we can use these later to filter so that we can apply our Checkpoint to a specific Batch (using this configuration, each file is a Batch).</li>
