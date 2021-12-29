@@ -2022,7 +2022,7 @@ def check_json_test_result(test, result, data_asset=None):
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
         # representations, serializations, and objects should interact and how much of that is shown to the user.
         result = result.to_json_dict()
-        print(result)
+        # print(result)
         for key, value in test["out"].items():
             # Apply our great expectations-specific test logic
 
