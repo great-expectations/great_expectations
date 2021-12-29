@@ -795,7 +795,14 @@ def get_test_validator_with_data(
 
         return build_pandas_validator_with_data(df=df)
 
-    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql", "bigquery", "trino"]:
+    elif execution_engine in [
+        "sqlite",
+        "postgresql",
+        "mysql",
+        "mssql",
+        "bigquery",
+        "trino",
+    ]:
         if not create_engine:
             return None
         return build_sa_validator_with_data(
@@ -2212,4 +2219,6 @@ def _create_trino_engine() -> Engine:
             "Environment Variable GE_TEST_TRINO_CLUSTER is required to run trino expectation tests."
         )
 
-    return create_engine(f"trino://{trino_user}:{trino_password}@{trino_account}-{trino_cluster}.trino.galaxy.starburst.io:443/test_suite/test_ci")
+    return create_engine(
+        f"trino://{trino_user}:{trino_password}@{trino_account}-{trino_cluster}.trino.galaxy.starburst.io:443/test_suite/test_ci"
+    )
