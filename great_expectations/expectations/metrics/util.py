@@ -102,6 +102,7 @@ try:
     import teradatasqlalchemy.types as teradatatypes
 except ImportError:
     teradatasqlalchemy = None
+    teradatatypes = None
 
 
 def get_dialect_regex_expression(column, regex, dialect, positive=True):
@@ -307,7 +308,7 @@ def get_sqlalchemy_column_metadata(
                 sqlalchemy_engine=engine,
             )
 
-        # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
+        # Use fallback because for mssql and trino reflection mechanisms do not throw an error but return an empty list
         if len(columns) == 0:
             columns = column_reflection_fallback(
                 selectable=table_selectable,
@@ -329,26 +330,48 @@ def column_reflection_fallback(
     if dialect.name.lower() == "mssql":
         # Get column names and types from the database
         # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
-        columns_query: str = f"""
-SELECT
-    SCHEMA_NAME(tab.schema_id) AS schema_name,
-    tab.name AS table_name,
-    col.column_id AS column_id,
-    col.name AS column_name,
-    t.name AS column_data_type,
-    col.max_length AS column_max_length,
-    col.precision AS column_precision
-FROM sys.tables AS tab
-    INNER JOIN sys.columns AS col
-    ON tab.object_id = col.object_id
-    LEFT JOIN sys.types AS t
-    ON col.user_type_id = t.user_type_id
-WHERE tab.name = '{selectable}'
-ORDER BY schema_name,
-    table_name,
-    column_id
-"""
-        col_info_query: TextClause = sa.text(columns_query)
+        tables_table: sa.Table = sa.Table(
+            "tables",
+            sa.MetaData(),
+            schema="sys",
+        )
+        columns_table: sa.Table = sa.Table(
+            "columns",
+            sa.MetaData(),
+            schema="sys",
+        )
+        types_table: sa.Table = sa.Table(
+            "types",
+            sa.MetaData(),
+            schema="sys",
+        )
+        inner_join_conditions = sa.and_(
+            *(
+                tables_table.columns.object_id == columns_table.columns.object_id,
+            )
+        )
+        outer_join_conditions = sa.and_(
+            *(
+                columns_table.columns.user_type_id == types_table.columns.user_type_id,
+            )
+        )
+        col_info_query: Select = sa.select(
+            [
+                sa.func.schema_name(tables_table.columns.schema_id).label("schema_name"),
+                tables_table.columns.name.label("table_name"),
+                columns_table.columns.column_id.label("column_id"),
+                columns_table.columns.name.label("column_name"),
+                types_table.columns.name.label("column_data_type"),
+                columns_table.columns.max_length.label("column_max_length"),
+                columns_table.columns.precision.label("column_precision"),
+            ]
+        ).select_from(
+            tables_table.join(
+                right=columns_table, onclause=inner_join_conditions, isouter=False
+            ).join(
+                right=types_table, onclause=outer_join_conditions, isouter=True
+            )
+        ).where(tables_table.columns.name == selectable).order_by(sa.column("schema_name").asc(), sa.column("table_name").asc(), sa.column("column_id").asc()).alias("column_info")
         col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
             col_info_query
         ).fetchall()
@@ -360,6 +383,47 @@ ORDER BY schema_name,
                 "type": column_data_type.upper(),
             }
             for schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision in col_info_tuples_list
+        ]
+    elif dialect.name.lower() == "trino":
+        tables_table: sa.Table = sa.Table(
+            "tables",
+            sa.MetaData(),
+            schema="information_schema",
+        )
+        columns_table: sa.Table = sa.Table(
+            "columns",
+            sa.MetaData(),
+            schema="information_schema",
+        )
+        conditions = sa.and_(
+            *(
+                tables_table.columns.table_name == columns_table.columns.table_name,
+                tables_table.columns.table_schema == columns_table.columns.table_schema,
+            )
+        )
+        col_info_query: Select = sa.select(
+            [
+                tables_table.columns.table_schema.label("schema_name"),
+                tables_table.columns.table_name.label("table_name"),
+                columns_table.columns.column_name.label("column_name"),
+                columns_table.columns.data_type.label("data_type"),
+            ]
+        ).select_from(
+            tables_table.join(
+                right=columns_table, onclause=conditions, isouter=False
+            )
+        ).where(tables_table.columns.table_name == selectable).alias("column_info")
+        col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
+            col_info_query
+        ).fetchall()
+        # type_module = _get_dialect_type_module(dialect=dialect)
+        col_info_dict_list: List[Dict[str, str]] = [
+            {
+                "name": column_name,
+                "type": column_data_type.upper(),
+            }
+            for schema_name, table_name, column_name, column_data_type
+            in col_info_tuples_list
         ]
     else:
         # if a custom query was passed

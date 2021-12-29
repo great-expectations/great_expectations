@@ -236,6 +236,35 @@ except (ImportError, KeyError):
     mssqlDialect = None
     MSSQL_TYPES = {}
 
+try:
+    import sqlalchemy_trino
+    import sqlalchemy_trino.datatype as trinotypes
+    from sqlalchemy_trino.dialect import TrinoDialect as trinoDialect
+
+    TRINO_TYPES = {
+        "BOOLEAN": trinotypes._type_map["boolean"],
+        "TINYINT": trinotypes._type_map["tinyint"],
+        "SMALLINT": trinotypes._type_map["smallint"],
+        "INT": trinotypes._type_map["int"],
+        "INTEGER": trinotypes._type_map["integer"],
+        "BIGINT": trinotypes._type_map["bigint"],
+        "REAL": trinotypes._type_map["real"],
+        "DOUBLE": trinotypes._type_map["double"],
+        "DECIMAL": trinotypes._type_map["decimal"],
+        "VARCHAR": trinotypes._type_map["varchar"],
+        "CHAR": trinotypes._type_map["char"],
+        "VARBINARY": trinotypes._type_map["varbinary"],
+        "JSON": trinotypes._type_map["json"],
+        "DATE": trinotypes._type_map["date"],
+        "TIME": trinotypes._type_map["time"],
+        "TIMESTAMP": trinotypes._type_map["timestamp"],
+    }
+except (ImportError, KeyError):
+    sqlalchemy_trino = None
+    trinotypes = None
+    trinoDialect = None
+    TRINO_TYPES = {}
+
 
 class SqlAlchemyConnectionManager:
     def __init__(self):
@@ -766,7 +795,7 @@ def get_test_validator_with_data(
 
         return build_pandas_validator_with_data(df=df)
 
-    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
+    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql", "bigquery", "trino"]:
         if not create_engine:
             return None
         return build_sa_validator_with_data(
@@ -922,6 +951,7 @@ def build_sa_validator_with_data(
         "mysql": mysqltypes.dialect,
         "mssql": mssqltypes.dialect,
         "bigquery": pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+        "trino": trinoDialect,
     }
     dialect_types = {
         "sqlite": SQLITE_TYPES,
@@ -929,6 +959,7 @@ def build_sa_validator_with_data(
         "mysql": MYSQL_TYPES,
         "mssql": MSSQL_TYPES,
         "bigquery": BIGQUERY_TYPES,
+        "trino": TRINO_TYPES,
     }
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
@@ -947,6 +978,8 @@ def build_sa_validator_with_data(
         )
     elif sa_engine_name == "bigquery":
         engine = _create_bigquery_engine()
+    elif sa_engine_name == "trino":
+        engine = _create_trino_engine()
     else:
         engine = None
 
@@ -1007,19 +1040,33 @@ def build_sa_validator_with_data(
     if table_name is None:
         table_name = generate_test_table_name()
 
+    if sa_engine_name in [
+        "trino",
+    ]:
+        sql_insert_method = "multi"
+        table_name = table_name.lower()
+    else:
+        sql_insert_method = None
+
     df.to_sql(
         name=table_name,
         con=engine,
         index=False,
         dtype=sql_dtypes,
         if_exists="replace",
+        method=sql_insert_method,
     )
 
     batch_data = SqlAlchemyBatchData(execution_engine=engine, table_name=table_name)
     batch = Batch(data=batch_data, batch_definition=batch_definition)
     execution_engine = SqlAlchemyExecutionEngine(caching=caching, engine=engine)
 
-    return Validator(execution_engine=execution_engine, batches=(batch,))
+    return Validator(
+        execution_engine=execution_engine,
+        batches=[
+            batch,
+        ],
+    )
 
 
 def modify_locale(func):
@@ -1062,7 +1109,12 @@ def build_spark_validator_with_data(
         df=df,
         batch_id=batch.id,
     )
-    return Validator(execution_engine=execution_engine, batches=(batch,))
+    return Validator(
+        execution_engine=execution_engine,
+        batches=[
+            batch,
+        ],
+    )
 
 
 def build_pandas_engine(
@@ -1373,6 +1425,7 @@ def build_test_backends_list(
     include_mysql=False,
     include_mssql=False,
     include_bigquery=False,
+    include_trino=False,
 ):
     test_backends = []
 
@@ -1457,6 +1510,17 @@ def build_test_backends_list(
                     "bigquery tests are requested, but unable to connect"
                 ) from e
             test_backends += ["bigquery"]
+
+        if include_trino:
+            try:
+                engine = _create_trino_engine()
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError) as e:
+                raise ImportError(
+                    "trino tests are requested, but unable to connect"
+                ) from e
+            test_backends += ["trino"]
 
     return test_backends
 
@@ -2121,3 +2185,31 @@ def _bigquery_dataset() -> str:
             "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"
         )
     return dataset
+
+
+def _create_trino_engine() -> Engine:
+    trino_user = os.getenv("GE_TEST_TRINO_USER")
+    if not trino_user:
+        raise ValueError(
+            "Environment Variable GE_TEST_TRINO_USER is required to run trino expectation tests."
+        )
+
+    trino_password = os.getenv("GE_TEST_TRINO_PASSWORD")
+    if not trino_password:
+        raise ValueError(
+            "Environment Variable GE_TEST_TRINO_PASSWORD is required to run trino expectation tests."
+        )
+
+    trino_account = os.getenv("GE_TEST_TRINO_ACCOUNT")
+    if not trino_account:
+        raise ValueError(
+            "Environment Variable GE_TEST_TRINO_ACCOUNT is required to run trino expectation tests."
+        )
+
+    trino_cluster = os.getenv("GE_TEST_TRINO_CLUSTER")
+    if not trino_cluster:
+        raise ValueError(
+            "Environment Variable GE_TEST_TRINO_CLUSTER is required to run trino expectation tests."
+        )
+
+    return create_engine(f"trino://{trino_user}:{trino_password}@{trino_account}-{trino_cluster}.trino.galaxy.starburst.io:443/test_suite/test_ci")
