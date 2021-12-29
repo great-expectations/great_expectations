@@ -149,21 +149,21 @@ stages:
           - script: |
               # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
 
-              # Run script and save output to a temp file
-              echo "Tests identified by dependency graph test runner [dgtest]:"
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtest
+              # Run script and save output to a $VAR
+              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
+              EXIT_STATUS=$?
+              printf "Tests identified by dependency graph test runner [dgtest]:\n%s" "$TESTS"
 
               # If the script found any matches, feed them into pytest
-              EXIT_STATUS=0
-              if [ -s .dgtest ]; then
-                cat .dgtest | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              if [[ ! -z "$TESTS" ]]; then
+                echo "$TESTS" | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
                 EXIT_STATUS=$?
               fi
-
-              # Clean up
-              rm .dgtest
               exit $EXIT_STATUS
+
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -226,21 +226,21 @@ stages:
           - script: |
               # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
 
-              # Run script and save output to a temp file
-              echo "Tests identified by dependency graph test runner [dgtest]:"
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtest
+              # Run script and save output to a $VAR
+              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
+              EXIT_STATUS=$?
+              printf "Tests identified by dependency graph test runner [dgtest]:\n%s" "$TESTS"
 
               # If the script found any matches, feed them into pytest
-              EXIT_STATUS=0
-              if [ -s .dgtest ]; then
-                cat .dgtest | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              if [[ ! -z "$TESTS" ]]; then
+                echo "$TESTS" | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
                 EXIT_STATUS=$?
               fi
-
-              # Clean up
-              rm .dgtest
               exit $EXIT_STATUS
+
             displayName: 'pytest'
 
           - task: PublishTestResults@2
@@ -303,21 +303,21 @@ stages:
               # Install dependencies
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
 
-              # Run script and save output to a temp file
-              echo "Tests identified by dependency graph test runner [dgtest]:"
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtest
+              # Run script and save output to a $VAR
+              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
+              EXIT_STATUS=$?
+              printf "Tests identified by dependency graph test runner [dgtest]:\n%s" "$TESTS"
 
               # If the script found any matches, feed them into pytest
-              EXIT_STATUS=0
-              if [ -s .dgtest ]; then
-                cat .dgtest | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              if [[ ! -z "$TESTS" ]]; then
+                echo "$TESTS" | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
                 EXIT_STATUS=$?
               fi
-
-              # Clean up
-              rm .dgtest
               exit $EXIT_STATUS
+
             displayName: 'pytest'
 
       - job: mssql
@@ -350,21 +350,21 @@ stages:
           - script: |
               # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
 
-              # Run script and save output to a temp file
-              echo "Tests identified by dependency graph test runner [dgtest]:"
-              python scripts/determine_tests_to_run.py --depth 3 --ignore 'tests/cli' 'tests/integration/usage_statistics' | tee .dgtest
+              # Run script and save output to a $VAR
+              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
+              EXIT_STATUS=$?
+              printf "Tests identified by dependency graph test runner [dgtest]:\n%s" "$TESTS"
 
               # If the script found any matches, feed them into pytest
-              EXIT_STATUS=0
-              if [ -s .dgtest ]; then
-                cat .dgtest | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              if [[ ! -z "$TESTS" ]]; then
+                echo "$TESTS" | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
                 EXIT_STATUS=$?
               fi
-
-              # Clean up
-              rm .dgtest
               exit $EXIT_STATUS
+
             displayName: 'pytest'
 
   - stage: cli_integration
@@ -405,19 +405,19 @@ stages:
           - script: |
               # Install dependencies
               pip install pytest pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
 
-              # Run script and save output to a temp file
-              echo "Tests identified by dependency graph test runner [dgtest]:"
-              python scripts/determine_tests_to_run.py --filter 'tests/cli' --depth 3 | tee .dgtest
+              # Run script and save output to a $VAR
+              TESTS=$(dgtest run great_expectations --tests tests --filter 'tests/cli')
+              EXIT_STATUS=$?
+              printf "Tests identified by dependency graph test runner [dgtest]:\n%s" "$TESTS"
 
               # If the script found any matches, feed them into pytest
-              EXIT_STATUS=0
-              if [ -s .dgtest ]; then
-                cat .dgtest | xargs pytest --aws-integration -v
+              if [[ ! -z "$TESTS" ]]; then
+                echo "$TESTS" | xargs pytest --aws-integration -v
                 EXIT_STATUS=$?
               fi
-
-              # Clean up
-              rm .dgtest
               exit $EXIT_STATUS
+
             displayName: 'pytest'
