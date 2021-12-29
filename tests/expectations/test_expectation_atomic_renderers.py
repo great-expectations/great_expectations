@@ -1,3 +1,4 @@
+import re
 from pprint import pprint
 from typing import Callable, Dict, Union
 
@@ -180,11 +181,7 @@ def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
     pprint(res)
 
     # replace version of vega-lite in res to match snapshot test
-    current_graph_string = res["value"]["graph"]
-    start_index = current_graph_string.index("vega-lite/") + len("vega-lite/")
-    end_index = current_graph_string.index(".json")
-    modified_graph_string = current_graph_string[:start_index] + "v4.8.1" + current_graph_string[end_index:]
-    res["value"]["graph"] = modified_graph_string
+    res["value"]["graph"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"])
 
     snapshot.assert_match(res)
 
