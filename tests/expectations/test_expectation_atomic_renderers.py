@@ -224,6 +224,8 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
 
     res = rendered_content.to_json_dict()
     pprint(res)
+
+    res["value"]["graph"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"])
     snapshot.assert_match(res)
 
 
