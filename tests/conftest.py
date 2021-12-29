@@ -23,7 +23,11 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.util import get_or_create_spark_application
-from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    DataContextConfig,
+    GeCloudConfig,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
@@ -269,7 +273,8 @@ def empty_expectation_suite():
 
 
 @pytest.fixture
-def basic_expectation_suite():
+def basic_expectation_suite(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     expectation_suite = ExpectationSuite(
         expectation_suite_name="default",
         meta={},
@@ -289,6 +294,7 @@ def basic_expectation_suite():
                 kwargs={"column": "naturals"},
             ),
         ],
+        data_context=context,
     )
     return expectation_suite
 
@@ -2976,7 +2982,18 @@ def empty_context_with_checkpoint_stats_enabled(empty_data_context_stats_enabled
 @pytest.fixture
 def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
     # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
+    project_path = str(tmp_path_factory.mktemp("empty_data_context"))
+    context = ge.data_context.DataContext.create(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    return context
+
+
+@pytest.fixture(scope="module")
+def empty_data_context_module_scoped(tmp_path_factory):
+    # Re-enable GE_USAGE_STATS
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
@@ -3223,7 +3240,8 @@ def titanic_sqlite_db(sa):
 
 
 @pytest.fixture
-def titanic_expectation_suite():
+def titanic_expectation_suite(empty_data_context_stats_enabled):
+    data_context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="Titanic.warning",
         meta={},
@@ -3241,6 +3259,7 @@ def titanic_expectation_suite():
                 kwargs={"value": 1313},
             ),
         ],
+        data_context=data_context,
     )
 
 
@@ -4090,25 +4109,31 @@ def titanic_profiled_name_column_evrs():
 
 
 @pytest.fixture
-def titanic_profiled_expectations_1():
+def titanic_profiled_expectations_1(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     with open(
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
         ),
     ) as infile:
-        return expectationSuiteSchema.load(json.load(infile))
+        expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(infile))
+        return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 @pytest.fixture
-def titanic_profiled_name_column_expectations():
-    from great_expectations.render.renderer.renderer import Renderer
-
+def titanic_profiled_name_column_expectations(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     with open(
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
         ),
     ) as infile:
-        titanic_profiled_expectations = expectationSuiteSchema.load(json.load(infile))
+        titanic_profiled_expectations_dict: dict = expectationSuiteSchema.load(
+            json.load(infile)
+        )
+        titanic_profiled_expectations = ExpectationSuite(
+            **titanic_profiled_expectations_dict, data_context=context
+        )
 
     (
         columns,
@@ -4748,6 +4773,146 @@ def data_context_with_datasource_spark_engine_batch_spec_passthrough(
 @pytest.fixture
 def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
     context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: sqlite:///{db_file}
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def ge_cloud_base_url():
+    return "https://app.test.greatexpectations.io"
+
+
+@pytest.fixture
+def ge_cloud_account_id():
+    return "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
+
+
+@pytest.fixture
+def ge_cloud_access_token():
+    return "6bb5b6f5c7794892a4ca168c65c2603e"
+
+
+@pytest.fixture
+def ge_cloud_config(ge_cloud_base_url, ge_cloud_account_id, ge_cloud_access_token):
+    return GeCloudConfig(
+        base_url=ge_cloud_base_url,
+        account_id=ge_cloud_account_id,
+        access_token=ge_cloud_access_token,
+    )
+
+
+@pytest.fixture(scope="function")
+def empty_ge_cloud_data_context_config(
+    ge_cloud_base_url, ge_cloud_account_id, ge_cloud_access_token
+):
+    config_yaml_str = f"""
+stores:
+  default_evaluation_parameter_store:
+    class_name: EvaluationParameterStore
+
+  default_expectations_store:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: GeCloudStoreBackend
+      ge_cloud_base_url: {ge_cloud_base_url}
+      ge_cloud_resource_type: expectation_suite
+      ge_cloud_credentials:
+        access_token: {ge_cloud_access_token}
+        account_id: {ge_cloud_account_id}
+      suppress_store_backend_id: True
+
+  default_validations_store:
+    class_name: ValidationsStore
+    store_backend:
+      class_name: GeCloudStoreBackend
+      ge_cloud_base_url: {ge_cloud_base_url}
+      ge_cloud_resource_type: suite_validation_result
+      ge_cloud_credentials:
+        access_token: {ge_cloud_access_token}
+        account_id: {ge_cloud_account_id}
+      suppress_store_backend_id: True
+
+  default_checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: GeCloudStoreBackend
+      ge_cloud_base_url: {ge_cloud_base_url}
+      ge_cloud_resource_type: contract
+      ge_cloud_credentials:
+        access_token: {ge_cloud_access_token}
+        account_id: {ge_cloud_account_id}
+      suppress_store_backend_id: True
+
+evaluation_parameter_store_name: default_evaluation_parameter_store
+expectations_store_name: default_expectations_store
+validations_store_name: default_validations_store
+checkpoint_store_name: default_checkpoint_store
+"""
+    data_context_config_dict = yaml.load(config_yaml_str)
+    return DataContextConfig(**data_context_config_dict)
+
+
+@pytest.fixture(scope="function")
+def empty_cloud_data_context(
+    tmp_path, empty_ge_cloud_data_context_config, ge_cloud_config
+) -> DataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+
+    context = ge.data_context.BaseDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path,
+        ge_cloud_mode=True,
+        ge_cloud_config=ge_cloud_config,
+    )
+    assert context.list_datasources() == []
+    return context
+
+
+@pytest.fixture
+def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
+    context = empty_cloud_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def cloud_data_context_with_datasource_sqlalchemy_engine(
+    empty_cloud_data_context, db_file
+):
+    context = empty_cloud_data_context
     config = yaml.load(
         f"""
     class_name: Datasource
