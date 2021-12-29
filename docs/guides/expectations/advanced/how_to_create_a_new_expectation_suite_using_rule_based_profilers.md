@@ -9,7 +9,7 @@ In this tutorial, you will develop hands-on experience with configuring a Rule-B
 
 - Have a basic understanding of [Metrics in Great Expectations](https://docs.greatexpectations.io/docs/reference/metrics)
 - Have a basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations)
-- Have read the sections in Core Concepts on [Profilers](../../../reference/profilers) and [Rule-Based Profilers](../../../reference/profilers#rule-based-profilers)
+- Have read the sections in Core Concepts on [Profilers](../../../reference/profilers.md) and [Rule-Based Profilers](../../../reference/profilers.md#rule-based-profilers)
 
 </Prerequisites>
 
@@ -25,7 +25,7 @@ In this tutorial, you will develop hands-on experience with configuring a Rule-B
 - Move the unzipped directory of `csv` files into the `data` directory that you created in Step 1
 
 ### 3. Setting up your Datasource
-- Follow the steps in the [How to connect to data on a filesystem using Pandas](../../../guides/connecting_to_your_data/filesystem/pandas). For the purpose of this tutorial, we will work from a `yaml` to set up your datasource config. When you open up your notebook to create and test and save your datasource config, replace the config docstring with the following docstring:
+- Follow the steps in the [How to connect to data on a filesystem using Pandas](../../../guides/connecting_to_your_data/filesystem/pandas.md). For the purpose of this tutorial, we will work from a `yaml` to set up your datasource config. When you open up your notebook to create and test and save your datasource config, replace the config docstring with the following docstring:
 ```python
 example_yaml = f"""
 name: taxi_pandas
