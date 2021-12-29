@@ -16,7 +16,7 @@ Steps
 1. The ``--interactive`` mode denotes the fact that you are interacting with your data.  In
     other words, you have access to a data source and can specify a Batch of data to be used to create Expectations
     against.  ``--manual`` mode
-    (please see [How to create and edit Expectations based on domain knowledge, without inspecting data directly](./how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly))
+    (please see [How to create and edit Expectations based on domain knowledge, without inspecting data directly](./how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md))
     still allows you to create expectations (e.g., if you already know enough about your data, such as the various columns
     in a database table), but you will not be able to run validations, until you specify a Batch of data,
     which can be done at a later point; in fact, you can switch back and forth between the interactive and
