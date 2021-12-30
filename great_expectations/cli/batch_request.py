@@ -228,12 +228,13 @@ def _list_available_data_asset_names(
     ]
     PAGE_SIZE = 50
 
+    # Organize available data assets into pages of 50
     data_asset_pages: List[List[str]] = [
         available_data_asset_names_str[i : i + PAGE_SIZE]
         for i in range(0, len(available_data_asset_names_str), PAGE_SIZE)
     ]
 
-    display_idx = 0
+    display_idx = 0  # Used to traverse between pages
     data_asset_name: Optional[str] = None
     while data_asset_name is None:
         current_page = data_asset_pages[display_idx]
@@ -248,10 +249,12 @@ def _list_available_data_asset_names(
         prompt = f"{msg_prompt_enter_data_asset_name}{choices}\n\n{instructions}\n"
         user_response: str = _get_user_response(prompt)
 
+        # Pagination options
         if user_response == "n":
             display_idx += 1
         elif user_response == "p":
             display_idx -= 1
+        # Selected asset
         elif user_response.isdigit():
             data_asset_index: int = int(user_response) - 1
             try:
@@ -290,6 +293,7 @@ def _search_through_available_data_asset_names(
         prompt = f"{msg_prompt_enter_data_asset_name}{choices}\n\n{instructions}\n"
         user_response = _get_user_response(prompt)
 
+        # Selected asset
         if user_response.isdigit():
             data_asset_index: int = int(user_response) - 1
             try:
@@ -298,6 +302,7 @@ def _search_through_available_data_asset_names(
                 break
             except ValueError:
                 data_asset_name = user_response
+        # Used search
         else:
             # Narrow the search results down to ones that are close to the user query
             r = re.compile(user_response)
