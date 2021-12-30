@@ -1,4 +1,3 @@
-import difflib
 import logging
 import os
 import re
@@ -80,7 +79,7 @@ def get_batch_request(
 
     if isinstance(datasource, Datasource):
         msg_prompt_enter_data_asset_name: str = f'\nWhich data asset (accessible by data connector "{data_connector_name}") would you like to use?\n'
-        data_asset_name = _get_data_asset_name_from_data_connector(
+        data_asset_name = get_data_asset_name_from_data_connector(
             datasource=datasource,
             data_connector_name=data_connector_name,
             msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
@@ -176,7 +175,7 @@ def select_data_connector_name(
     return data_connector_name
 
 
-def _get_data_asset_name_from_data_connector(
+def get_data_asset_name_from_data_connector(
     datasource: BaseDatasource,
     data_connector_name: str,
     msg_prompt_enter_data_asset_name: str,
@@ -200,9 +199,7 @@ def _get_data_asset_name_from_data_connector(
         prompt = f"You have a list of {num_data_assets:,} data assets. Would you like to list them [l] or search [s]?\n"
         user_selected_option: Optional[str] = None
         while user_selected_option is None:
-            user_selected_option = (
-                click.prompt(prompt, show_default=False).strip().lower()
-            )
+            user_selected_option = _get_user_response(prompt)
             if user_selected_option == "l":
                 data_asset_name = _list_available_data_asset_names(
                     available_data_asset_names, msg_prompt_enter_data_asset_name
@@ -249,7 +246,7 @@ def _list_available_data_asset_names(
 
         instructions = "Type [n] to see the next page or [p] for the previous. When you're ready to select an asset, enter the index."
         prompt = f"{msg_prompt_enter_data_asset_name}{choices}\n\n{instructions}\n"
-        user_response: str = click.prompt(prompt, show_default=False).strip().lower()
+        user_response: str = _get_user_response(prompt)
 
         if user_response == "n":
             display_idx += 1
@@ -291,7 +288,7 @@ def _search_through_available_data_asset_names(
 
         instructions = "Search by name or regex to filter results. When you're ready to select an asset, enter the index."
         prompt = f"{msg_prompt_enter_data_asset_name}{choices}\n\n{instructions}\n"
-        user_response: str = click.prompt(prompt, show_default=False).strip().lower()
+        user_response = _get_user_response(prompt)
 
         if user_response.isdigit():
             data_asset_index: int = int(user_response) - 1
@@ -354,7 +351,7 @@ Would you like to continue?"""
                 msg_prompt_warning, type=click.Choice(["y", "n"]), show_choices=True
             )
             if confirmation == "y":
-                data_asset_name = _get_data_asset_name_from_data_connector(
+                data_asset_name = get_data_asset_name_from_data_connector(
                     datasource=datasource,
                     data_connector_name=data_connector_name,
                     msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
@@ -416,3 +413,7 @@ def _get_batch_spec_passthrough(
         )
 
     return batch_spec_passthrough
+
+
+def _get_user_response(prompt: str) -> str:
+    return click.prompt(prompt, show_default=False).strip().lower()
