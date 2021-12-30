@@ -19,7 +19,7 @@ Getting started with Great Expectations is quick and easy.  Once you have comple
 
 ## The Setup process
 
-<!-- Brief outline of what the process entails. -->
+<!-- Brief outline of what the process entails.  -->
 
 Setup entails ensuring your system is prepared to run Great Expectations, installing Great Expectations itself, initializing your deployment, and doing some optional configuration of things like Data Docs and Datastores.  We'll look at each of these things in sequence.
 
