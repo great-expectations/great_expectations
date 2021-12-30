@@ -344,7 +344,7 @@ def column_reflection_fallback(
                 ]
             )
             .select_from(tables_table)
-            .alias("tables_table")
+            .alias("sys_tables_table")
         )
         columns_table: sa.Table = sa.Table(
             "columns",
@@ -363,7 +363,7 @@ def column_reflection_fallback(
                 ]
             )
             .select_from(columns_table)
-            .alias("columns_table")
+            .alias("sys_columns_table")
         )
         types_table: sa.Table = sa.Table(
             "types",
@@ -378,7 +378,7 @@ def column_reflection_fallback(
                 ]
             )
             .select_from(types_table)
-            .alias("types_table")
+            .alias("sys_types_table")
         )
         inner_join_conditions: BinaryExpression = sa.and_(
             *(tables_table_query.c.object_id == columns_table_query.c.object_id,)
@@ -446,7 +446,7 @@ def column_reflection_fallback(
                 ]
             )
             .select_from(tables_table)
-            .alias("tables_table")
+            .alias("information_schema_tables_table")
         )
         columns_table: sa.Table = sa.Table(
             "columns",
@@ -463,7 +463,7 @@ def column_reflection_fallback(
                 ]
             )
             .select_from(columns_table)
-            .alias("columns_table")
+            .alias("information_schema_columns_table")
         )
         conditions = sa.and_(
             *(
