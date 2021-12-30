@@ -335,38 +335,59 @@ def column_reflection_fallback(
             sa.MetaData(),
             schema="sys",
         )
-        tables_table_query: Select = sa.select([
-            sa.column("object_id").label("object_id"),
-            sa.func.schema_name(sa.column("schema_id")).label("schema_name"),
-            sa.column("name").label("table_name"),
-        ]).select_from(tables_table).alias("tables_table")
+        tables_table_query: Select = (
+            sa.select(
+                [
+                    sa.column("object_id").label("object_id"),
+                    sa.func.schema_name(sa.column("schema_id")).label("schema_name"),
+                    sa.column("name").label("table_name"),
+                ]
+            )
+            .select_from(tables_table)
+            .alias("tables_table")
+        )
         columns_table: sa.Table = sa.Table(
             "columns",
             sa.MetaData(),
             schema="sys",
         )
-        columns_table_query: Select = sa.select([
-            sa.column("object_id").label("object_id"),
-            sa.column("user_type_id").label("user_type_id"),
-            sa.column("column_id").label("column_id"),
-            sa.column("name").label("column_name"),
-            sa.column("max_length").label("column_max_length"),
-            sa.column("precision").label("column_precision"),
-        ]).select_from(columns_table).alias("columns_table")
+        columns_table_query: Select = (
+            sa.select(
+                [
+                    sa.column("object_id").label("object_id"),
+                    sa.column("user_type_id").label("user_type_id"),
+                    sa.column("column_id").label("column_id"),
+                    sa.column("name").label("column_name"),
+                    sa.column("max_length").label("column_max_length"),
+                    sa.column("precision").label("column_precision"),
+                ]
+            )
+            .select_from(columns_table)
+            .alias("columns_table")
+        )
         types_table: sa.Table = sa.Table(
             "types",
             sa.MetaData(),
             schema="sys",
         )
-        types_table_query: Select = sa.select([
-            sa.column("user_type_id").label("user_type_id"),
-            sa.column("name").label("column_data_type"),
-        ]).select_from(types_table).alias("types_table")
+        types_table_query: Select = (
+            sa.select(
+                [
+                    sa.column("user_type_id").label("user_type_id"),
+                    sa.column("name").label("column_data_type"),
+                ]
+            )
+            .select_from(types_table)
+            .alias("types_table")
+        )
         inner_join_conditions: BinaryExpression = sa.and_(
             *(tables_table_query.c.object_id == columns_table_query.c.object_id,)
         )
         outer_join_conditions: BinaryExpression = sa.and_(
-            *(columns_table_query.columns.user_type_id == types_table_query.columns.user_type_id,)
+            *(
+                columns_table_query.columns.user_type_id
+                == types_table_query.columns.user_type_id,
+            )
         )
         col_info_query: Select = (
             sa.select(
@@ -382,8 +403,14 @@ def column_reflection_fallback(
             )
             .select_from(
                 tables_table_query.join(
-                    right=columns_table_query, onclause=inner_join_conditions, isouter=False
-                ).join(right=types_table_query, onclause=outer_join_conditions, isouter=True)
+                    right=columns_table_query,
+                    onclause=inner_join_conditions,
+                    isouter=False,
+                ).join(
+                    right=types_table_query,
+                    onclause=outer_join_conditions,
+                    isouter=True,
+                )
             )
             .where(tables_table_query.c.table_name == selectable.name)
             .order_by(
@@ -411,21 +438,33 @@ def column_reflection_fallback(
             sa.MetaData(),
             schema="information_schema",
         )
-        tables_table_query: Select = sa.select([
-            sa.column("table_schema").label("schema_name"),
-            sa.column("table_name").label("table_name"),
-        ]).select_from(tables_table).alias("tables_table")
+        tables_table_query: Select = (
+            sa.select(
+                [
+                    sa.column("table_schema").label("schema_name"),
+                    sa.column("table_name").label("table_name"),
+                ]
+            )
+            .select_from(tables_table)
+            .alias("tables_table")
+        )
         columns_table: sa.Table = sa.Table(
             "columns",
             sa.MetaData(),
             schema="information_schema",
         )
-        columns_table_query: Select = sa.select([
-            sa.column("column_name").label("column_name"),
-            sa.column("table_name").label("table_name"),
-            sa.column("table_schema").label("schema_name"),
-            sa.column("data_type").label("column_data_type"),
-        ]).select_from(columns_table).alias("columns_table")
+        columns_table_query: Select = (
+            sa.select(
+                [
+                    sa.column("column_name").label("column_name"),
+                    sa.column("table_name").label("table_name"),
+                    sa.column("table_schema").label("schema_name"),
+                    sa.column("data_type").label("column_data_type"),
+                ]
+            )
+            .select_from(columns_table)
+            .alias("columns_table")
+        )
         conditions = sa.and_(
             *(
                 tables_table_query.c.table_name == columns_table_query.c.table_name,
