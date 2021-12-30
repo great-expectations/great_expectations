@@ -18,7 +18,7 @@ module.exports = {
       type: 'category',
       label: 'Step 1: Setup',
       items: [
-        { type: 'doc', id: 'setup/setup_overview', label: 'Overview' },
+        { type: 'doc', id: 'guides/setup/setup_overview', label: 'Overview' },
         {
           type: 'category',
           label: 'How to guides',
