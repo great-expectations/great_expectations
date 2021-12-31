@@ -1,6 +1,7 @@
+import json
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 
 @dataclass
@@ -90,7 +91,11 @@ class GreatExpectationsContribPackage:
         return asdict(self)
 
     @classmethod
-    def from_json(cls, data: Dict[str, Any]) -> "GreatExpectationsContribPackage":
+    def from_json_file(cls, file: str) -> "GreatExpectationsContribPackage":
+        with open(file) as f:
+            contents = f.read()
+
+        data = json.loads(contents)
         return cls(**data)
 
     def determine_values(self) -> None:
@@ -124,5 +129,8 @@ pkg = GreatExpectationsContribPackage(
     version="",
 )
 
-foo = pkg.to_json_dict()
-print(GreatExpectationsContribPackage.from_json(foo))
+__import__("pprint").pprint(
+    GreatExpectationsContribPackage.from_json_file(
+        "accounting_expectations/.great_expectations_package.json"
+    )
+)
