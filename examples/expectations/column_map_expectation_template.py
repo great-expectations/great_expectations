@@ -25,6 +25,16 @@ class ColumnValuesMatchSomeCriteria(ColumnMapMetricProvider):
     def _pandas(cls, column, **kwargs):
         raise NotImplementedError
 
+    # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(cls, column, _dialect, **kwargs):
+        raise NotImplementedError
+
+    # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+        raise NotImplementedError
+
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
@@ -44,18 +54,16 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
-    # This dictionary contains metadata for display in the public gallery
+    # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
-        ],
+        "maturity": "concept_only",  # "concept_only", "experimental", "beta", or "production"
+        "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
+            # "@your_name_here", # Don't forget to add your github handle here!
         ],
-        # "package": "experimental_expectations", # This should be auto-populated.
     }
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToMatchSomeCriteria().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    print(
+        ExpectColumnValuesToMatchSomeCriteria().generate_diagnostic_checklist()
+    )

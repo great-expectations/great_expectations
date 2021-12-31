@@ -52,7 +52,7 @@ mv column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_eq
   </div>
 </details>
 
-#### 3. Run checklist diagnostics on your file
+#### 3. Generate a diagnostic checklist for your Expectation
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -64,16 +64,16 @@ The template file is set up so that this will run the Expectation's `generate_di
 
 ```
 Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
-  ✔ library_metadata object exists
+  ✔ Has a library_metadata object
     Has a docstring, including a one-line short description
     Has at least one positive and negative example case
-    Core logic exists and passes tests on at least one Execution Engine
+    Has core logic and passes tests on at least one Execution Engine
+    Has basic input validation and type checking
     Has all four statement Renderers: question, descriptive, prescriptive, diagnostic
-    Has default ParameterBuilders and Domain hooks to support Profiling
-    Core logic exists and passes tests for all applicable Execution Engines and backends
-    All Renderers exist and produce typed output
-    Linting for type hints and other code standards passes
-    Input validation exists
+    Has core logic that passes tests for all applicable Execution Engines and SQL dialects
+  ✔ Passes all linting checks
+    Has a full suite of tests, as determined by project code standards
+    Has passed a manual review by a code owner for code standards and style guides
 ```
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first four steps on the checklist.
@@ -122,24 +122,21 @@ At this point you can re-run your diagnostic checklist. You should see something
 $ python expect_column_values_to_equal_three.py
 
 Completeness checklist for ExpectColumnValuesToEqualThree:
-  ✔ library_metadata object exists
+  ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
     Has at least one positive and negative example case
-    Core logic exists and passes tests on at least one Execution Engine
 ...
 ```
 
 Congratulations! You're one step closer to implementing a Custom Expectation.
 
-#### 5. Add test cases
+#### 5. Add example cases
 
-Next, we're going to search for `examples = []` in your file, and replace it at least two test examples.
+Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
 
-These examples serve a dual purpose:
+1. They provide test fixtures that Great Expectations can execute automatically via pytest.
 
-1. They provide test cases that the Great Expectations testing framework can execute automatically.
-
-2. They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery to help illustrate its logic.
+2. They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery.
 
 Your examples will look something like this:
 
@@ -184,7 +181,7 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 
 * `data`: defines the input data of the example as a table/data frame. In this example the table has one column named `all_threes` and a second column named `some_zeroes`. Both columns have 5 rows. (Note: if you define multiple columns, make sure that they have the same number of rows.)
 
-* `tests`: a list of test cases that use the data defined above as input to validate
+* `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
 	* `include_in_gallery`: set it to `True` if you want this test case to be visible in the Gallery as an example.
 	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mostly_threes", "mostly": 0.6}` in the example above is equivalent to `expect_column_values_to_equal_three(column="mostly_threes, mostly=0.6)`
@@ -192,29 +189,32 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
 
-Run your Expectation file again. The newly added examples will appear in the output. They are not executed as tests yet, because the Expectation itself hasn't been implemented yet, but they'll check the box for example cases.
+Run your Expectation file again. The newly added examples won't pass as tests yet, because the Expectation itself hasn't been implemented yet, but they'll check the box for example cases.
 
 ```
 $ python expect_column_values_to_equal_three.py
 
 Completeness checklist for ExpectColumnValuesToEqualThree:
-  ✔ library_metadata object exists
+  ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
   ✔ Has at least one positive and negative example case
-    Core logic exists and passes tests on at least one Execution Engine
-...
+    Has core logic and passes tests on at least one Execution Engine
 ```
 
 #### 6. Implement your Metric and connect it to your Expectation
 
-This is the stage where you implement the actual business logic for your Expectation.
+This is the stage where you implement the actual business logic for your `Expectation`. To do so, you'll need to implement a function within a `Metric` class, and link it to your `Expectation`. By the time your Expectation is complete, your Metric will have functions for all three Execution Engines supported by Great Expectations. For now, we're only going to define one.
 
+Your Metric function will have the `@column_condition_partial` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate whether values equal 3 using the PandasExecutionEngine.
 
-Metric class name : ColumnValuesEqualThree
-condition_metric_name = "column_values.equal_three"
+```python
+# This method implements the core logic for the PandasExecutionEngine
+@column_condition_partial(engine=PandasExecutionEngine)
+def _pandas(cls, column, **kwargs):
+    return column == 3
+```
 
-map_metric = "column_values.equal_three"
-
+This is all that you need to define for now. The `ColumnMapMetricProvider` and `ColumnMapExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
 
 <details>
   <summary>Other Expectation parameters: <code>success_keys</code> and <code>default_kwarg_values</code></summary>
@@ -229,45 +229,87 @@ An example of Expectation Parameters is shown below (notice that we are now in a
   </div>
 </details>
 
+Next, choose a Metric Identifier for your Metric. By convention, Metric Identifiers for Column Map Expectations start with `column_values.`. The remainder of the Metric Identifier simply describes what the Metric compute, in snake case. For this example, we'll use `column_values.equal_three`.
 
-#### 7. Update `library_metadata`
+You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
 ```python
+# condition_metric_name = "column_values.equal_three"
+```
+
+with
+
+```python
+condition_metric_name = "column_values.equal_three"
+```
+
+Second, in the Expectation class, replace
+
+```python
+# map_metric = "METRIC NAME GOES HERE"
+```
+
+with
+
+```python
+map_metric = "column_values.equal_three"
+```
+
+It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
+
+Finally, rename the Metric class name itself, using the camel case verion of the Metric Identifier, minus any periods.
+
+For example, replace:
+
+```python 
+class ColumnValuesMatchSomeCriteria(ColumnMapMetricProvider):
+```
+
+with 
+
+```python
+class ColumnValuesEqualThree(ColumnMapMetricProvider):
+```
+
+Running your diagnostic checklist at this point should return something like this:
+```
+$ python expect_column_values_to_equal_three.py
+
+Completeness checklist for ExpectColumnValuesToEqualThree:
+  ✔ Has a library_metadata object
+  ✔ Has a docstring, including a one-line short description
+  ✔ Has at least one positive and negative example case
+  ✔ Has core logic and passes tests on at least one Execution Engine
+...
+```
+
+Congratulations, you now have a minimal working version of a Custom Expectation!
+
+#### 7. Update `library_metadata` (Optional)
+
+If you plan to contribute your Expectation to the pubilc open source project, you should update the `library_metadata` object before submitting your PR. For example:
+
+```python
+# This object contains metadata for display in the public Gallery
 library_metadata = {
-    "maturity": "experimental",  # "experimental", "beta", or "production"
-    "tags": [  # Tags for this Expectation in the gallery
-        #         "experimental"
-    ],
+    "maturity": "concept_only",  # "concept_only", "experimental", "beta", or "production"
+    "tags": [],  # Tags for this Expectation in the Gallery
     "contributors": [  # Github handles for all contributors to this Expectation.
-        #         "@your_name_here", # Don't forget to add your github handle here!
+        # "@your_name_here", # Don't forget to add your github handle here!
     ],
-    # "package": "experimental_expectations", # This should be auto-populated.
 }
 ```
 
-Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Metrics](../../../reference/metrics.md).
+would become
 
-If your Metric does not yet exist within the framework, you will need to implement it yourself in a new class - a task that is quick and simple within the new modular framework. The convention is to implement a new Metric Provider (a class that can compute a metric) that your Expectation depends on in the same file as the Expectation itself.
-
-The parent class expects the variable `condition_metric_name` to be set. Change the value of `condition_metric_name` to something that fits your Metric. Follow these two naming conventions:
-
-* The name should start with `column_values.`, because it is a column map Metric
-* The second part of the name (after the `.`) should be in snake_case format
-
-The parent class of your Metric Provider class is `ColumnMapMetricProvider`. It uses Python Decorators to hide most of the complexity from you, and give you a clear and simple API to implement one method per backend that computes the metric.
-Implement the computation of the metric in your new Metric Provider class for at least one of the three backends ([**Execution Engines**](../../../reference/execution_engine.md)) that Great Expectations supports: Pandas, SQLAlchemy, and Spark.
-
-Here is the implementation of our example metric for Pandas:
-
-:::caution Under Construction
-:::
-
-This means that the method `_pandas` is a metric function that is decorated as a `column_condition_partial`. It will be called with the engine-specific column type. It must return a boolean value for each row of the column. 
-The `engine` argument of `column_condition_partial` is set to `PandasExecutionEngine` to signal to the method in the parent class that this method computes the Metric for the Pandas backend.
-
-:::note
-If you have never used Python Decorators and don’t know what they are and how they work, no worries - this should not stop you from successfully implementing your Expectation. Decorators allow the parent class to “wrap” your methods, which means to execute some code before and after your method runs. All you need to know is the name of the Decorator to add (with “@”) above your method definition.
-:::
-
-
-## Next Steps
+```python
+library_metadata = {
+    "maturity": "experimental",  # "concept_only", "experimental", "beta", or "production"
+    "tags": [  # Tags for this Expectation in the gallery
+        "extremely basic math",
+    ],
+    "contributors": [  # Github handles for all contributors to this Expectation.
+        "@joegargery"
+    ],
+}
+```
