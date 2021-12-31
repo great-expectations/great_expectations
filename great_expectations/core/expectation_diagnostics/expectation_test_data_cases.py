@@ -1,11 +1,14 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
+from great_expectations.types import SerializableDictDot
+
 class TestData(dict):
+    __test__ = False # Tell pytest not to try to collect this class as a test
     pass
 
 @dataclass
-class ExpectationTestCase:
+class ExpectationTestCase(SerializableDictDot):
     title: str
     input: Dict[str, Any]
     output: Dict[str, Any]
@@ -38,6 +41,6 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
         )
 
 @dataclass
-class ExpectationTestDataCases:
+class ExpectationTestDataCases(SerializableDictDot):
     data : TestData
     tests : List[ExpectationTestCase]
