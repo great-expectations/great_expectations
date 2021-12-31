@@ -19,6 +19,8 @@ class DictDot:
     def __len__(self):
         return len(self.__dict__)
 
+    def keys(self):
+        return self.__dict__.keys()
 
 class SerializableDictDot(DictDot):
     def to_json_dict(self) -> dict:
