@@ -40,7 +40,7 @@ assert actual_existing_expectations_store == yaml.safe_load(
     expected_existing_expectations_store_yaml
 )
 
-
+# adding expectations store
 configured_expectations_store_yaml = """
 stores:
   expectations_GCS_store:
@@ -120,6 +120,7 @@ assert actual_existing_validations_store == yaml.safe_load(
     expected_existing_validations_store_yaml
 )
 
+# adding validations store
 configured_validations_store_yaml = """
 stores:
   validations_GCS_store:
@@ -241,11 +242,11 @@ batch_request = BatchRequest(
 )
 
 context.create_expectation_suite(
-    expectation_suite_name="yellow_tripdata_suite", overwrite_existing=True
+    expectation_suite_name="yellow_tripdata_gcs_suite", overwrite_existing=True
 )
 
 validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="yellow_tripdata_suite"
+    batch_request=batch_request, expectation_suite_name="yellow_tripdata_gcs_suite"
 )
 
 validator.expect_column_values_to_not_be_null(column="passenger_count")
@@ -256,7 +257,7 @@ validator.expect_column_values_to_be_between(
 
 validator.save_expectation_suite(discard_failed_expectations=False)
 
-my_checkpoint_name = "insert_your_checkpoint_name_here"
+my_checkpoint_name = "gcs_taxi_check"
 checkpoint_config = f"""
 name: {my_checkpoint_name}
 config_version: 1.0
@@ -267,10 +268,12 @@ validations:
       datasource_name: my_gcs_datasource
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01
-    expectation_suite_name: yellow_tripdata_suite
+    expectation_suite_name: yellow_tripdata_gcs_suite
 """
 
 context.add_checkpoint(**yaml.load(checkpoint_config))
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
 )
+
+assert checkpoint_result.success is True

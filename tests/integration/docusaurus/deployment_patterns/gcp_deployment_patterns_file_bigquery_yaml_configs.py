@@ -224,7 +224,7 @@ great_expectations_yaml["data_docs_sites"] = yaml.safe_load(data_docs_site_yaml)
 with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
-######
+###### CHANGE THIS BEFORE MERGING #####
 gcp_project = "support-sandbox-297615"
 bigquery_dataset = "test_ci"
 
@@ -265,7 +265,7 @@ batch_request = RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "default_identifier"},
     batch_spec_passthrough={
         "bigquery_temp_table": "ge_temp"
-    },  # this is the name of the table you would like to use a 'temp_table'
+    },  # this is the name of the table you would like to use as 'temp_table'
 )
 
 context.create_expectation_suite(
@@ -284,7 +284,7 @@ validator.expect_column_values_to_be_between(
 
 validator.save_expectation_suite(discard_failed_expectations=False)
 
-my_checkpoint_name = "insert_your_checkpoint_name_here"
+my_checkpoint_name = "bigquery_taxi_check"
 checkpoint_config = f"""
 name: {my_checkpoint_name}
 config_version: 1.0
@@ -308,3 +308,5 @@ context.add_checkpoint(**yaml.load(checkpoint_config))
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
 )
+
+assert checkpoint_result.success is True

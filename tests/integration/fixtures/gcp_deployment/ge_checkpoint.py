@@ -20,7 +20,7 @@ dag = DAG(
 # priority_weight has type int in Airflow DB, uses the maximum.
 t1 = BashOperator(
     task_id='checkpoint_run',
-    bash_command='(cd /home/airflow/gcsfuse/great_expectations/ ; great_expectations --v3-api checkpoint run new_taxi_check ) ',
+    bash_command='(cd /home/airflow/gcsfuse/great_expectations/ ; great_expectations --v3-api checkpoint run gcs_taxi_check ) ',
     dag=dag,
     depends_on_past=False,
     priority_weight=2**31-1)
