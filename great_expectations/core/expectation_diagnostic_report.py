@@ -21,19 +21,32 @@ class Maturity(Enum):
     BETA = "BETA"
     PRODUCTION = "PRODUCTION"
 
-@dataclass
-class TestData:
-    columns: str
+class TestData(dict):
+    pass
 
 @dataclass
-class ExpectationTestCase:
+class ExpectationTestCaseBaseClass:
     title: str
     exact_match_out: bool
     out: Dict[str, Any]
     suppress_test_for: List[str]
+    _in: Dict[str, Any]
 
-    def asdict(self):
-       return {** self.__dict__, "in": "Dict[str, Any]"}
+class ExpectationTestCase(ExpectationTestCaseBaseClass):
+    def __init__(self,
+        title,
+        exact_match_out,
+        suppress_test_for,
+        out,
+        **kwargs,
+    ):
+        super().__init__(
+            title,
+            exact_match_out,
+            suppress_test_for,
+            out,
+            _in=kwargs["in"]
+        )
 
 @dataclass
 class ExpectationTestDataCases:
