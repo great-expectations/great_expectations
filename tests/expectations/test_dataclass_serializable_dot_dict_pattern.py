@@ -58,6 +58,14 @@ def test_access_uding_dict_notation():
     assert my_A["foo"] == "a string"
     assert my_A["bar"] == 1
 
+def test_has_keys():
+    "Keys can be accessed using dot notation"
+    my_A = MyClassA(**{
+        "foo": "a string",
+        "bar": 1,
+    })
+    assert my_A.keys() == {"foo", "bar"}
+
 @pytest.mark.skip(reason="Not sure what our preferred pattern for this is")
 def test_incorrect_type():
     "Throws an error if instantiated with an incorrect type"
