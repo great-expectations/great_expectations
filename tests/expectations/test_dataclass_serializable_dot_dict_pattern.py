@@ -1,3 +1,9 @@
+"""
+This file is intended to
+1. test the basic behavior of SerializableDictDot, in combination with @dataclass, and
+2. provides examples of best practice for working with typed objects within the Great Expectations codebase
+"""
+
 from pytest import raises
 from dataclasses import (
     dataclass,
