@@ -94,7 +94,6 @@ data_docs_sites:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>
       bucket: <YOUR GCS BUCKET NAME>
-      prefix: <YOUR GCS BUCKET NAME>
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 
