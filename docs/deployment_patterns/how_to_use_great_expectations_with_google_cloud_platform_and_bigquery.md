@@ -240,7 +240,7 @@ For more details on how to configure the BatchRequest, as well as an example of 
 
 ### 5. Build and Run Checkpoint 
 
-For our example, we will 
+For our example, we will create a basic Checkpoint configuration using the `SimpleCheckpoint` class. For [additional examples](https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint), information on [how to add validations, data, or suites to existing checkpoints](https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint), and [more complex configurations](https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config) please refer to the documentation under `How to Guides` -> `Validating your data` -> `Checkpoints`.
 
 <Tabs
   groupId="checkpoint-gcs-bigquery"
@@ -250,12 +250,61 @@ For our example, we will
   {label: 'Data in BigQuery', value:'bigquery'},
   ]}>
 <TabItem value="gcs">
+
+Add the following checkpoint `gcs_taxi_check` to the DataContext.
+
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L260-L274
+```
+
+Run the checkpoint directly in-code 
+
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L275-L277
+```
+
+or through the CLI 
+
+```bash
+great_expectations --v3-api checkpoint run gcs_taxi_check
+```
+
+If you have successfully configured the local prototype, you will have the following:
+
+1. You should have an ExpectationSuite in the GCS bucket configured in `expectations_GCS_store` (ExpectationSuite is named `yellow_tripdata_suite` in our example).
+2. You should have a new Validation Result in the GCS bucket configured in `validation_GCS_store`.
+3. You should have Data Docs in the GCS bucket configured in `gs_site` and accessible by running `gcloud app browse`.
+
+Now you are ready to migrate the local configuration to Google Cloud Composer.
+
 </TabItem>
 <TabItem value="bigquery">
+
+Add the following checkpoint `bigquery_taxi_check` to the DataContext 
+
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L287-L307
+```
+
+Run the checkpoint directly in-code 
+
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L308-L310
+```
+
+or through the CLI 
+
+```bash
+great_expectations --v3-api checkpoint run gcs_taxi_check
+```
+
+If you have successfully configured the local prototype, you will have the following:
+
+1. You should have an ExpectationSuite in the GCS bucket configured in `expectations_GCS_store` (ExpectationSuite is named `yellow_tripdata_suite` in our example).
+2. You should have a new Validation Result in the GCS bucket configured in `validation_GCS_store`.
+3. You should have Data Docs in the GCS bucket configured in `gs_site` and accessible by running `gcloud app browse`.
+
+Now you are ready to migrate the local configuration to Google Cloud Composer.
+
+
 </TabItem>
 </Tabs>
-
-Success. you can see whether your validation results have appeared in the correct DataDocs place. You can go and see you should be abel to see the
 
 
 ## Part 2: Migrating our Local Configuration to Google Cloud Composer

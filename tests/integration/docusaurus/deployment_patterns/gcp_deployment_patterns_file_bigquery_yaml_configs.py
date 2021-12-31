@@ -299,7 +299,7 @@ validations:
         default_identifier_name: 1
       runtime_parameters:
         query: SELECT * from demo.taxi_data LIMIT 10
-      batch_speck_passthrough:
+      batch_spec_passthrough:
         bigquery_temp_table: ge_temp
     expectation_suite_name: yellow_tripdata_bigquery_suite
 """
