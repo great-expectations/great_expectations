@@ -149,20 +149,11 @@ stages:
           - script: |
               # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install dgtest
 
-              # Run script and save output to a $VAR
-              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
-              EXIT_STATUS=$?
-              printf "Tests identified by dependency graph test runner [dgtest]:\n%s" "$TESTS"
-
-              # If the script found any matches, feed them into pytest
-              if [[ ! -z "$TESTS" ]]; then
-                echo "$TESTS" | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
-                EXIT_STATUS=$?
-              fi
-              exit $EXIT_STATUS
+              # Run dgtest
+              dgtest run great_expectations/ --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
 
@@ -226,20 +217,11 @@ stages:
           - script: |
               # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install dgtest
 
-              # Run script and save output to a $VAR
-              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
-              EXIT_STATUS=$?
-              printf "Tests identified by dependency graph test runner [dgtest]:\n%s" "$TESTS"
-
-              # If the script found any matches, feed them into pytest
-              if [[ ! -z "$TESTS" ]]; then
-                echo "$TESTS" | xargs pytest $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
-                EXIT_STATUS=$?
-              fi
-              exit $EXIT_STATUS
+              # Run dgtest
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
 
@@ -303,20 +285,11 @@ stages:
               # Install dependencies
               pip install --requirement requirements.txt
               pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install dgtest
 
-              # Run script and save output to a $VAR
-              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
-              EXIT_STATUS=$?
-              printf "Tests identified by dependency graph test runner [dgtest]:\n%s" "$TESTS"
-
-              # If the script found any matches, feed them into pytest
-              if [[ ! -z "$TESTS" ]]; then
-                echo "$TESTS" | xargs pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
-                EXIT_STATUS=$?
-              fi
-              exit $EXIT_STATUS
+              # Run dgtest
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+                --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
 
@@ -350,20 +323,11 @@ stages:
           - script: |
               # Install dependencies
               pip install pytest pytest-cov pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install dgtest
 
-              # Run script and save output to a $VAR
-              TESTS=$(dgtest run great_expectations --tests tests --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics')
-              EXIT_STATUS=$?
-              printf "Tests identified by dependency graph test runner [dgtest]:\n%s" "$TESTS"
-
-              # If the script found any matches, feed them into pytest
-              if [[ ! -z "$TESTS" ]]; then
-                echo "$TESTS" | xargs pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
-                EXIT_STATUS=$?
-              fi
-              exit $EXIT_STATUS
+              # Run dgtest
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+                --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
 
@@ -405,19 +369,9 @@ stages:
           - script: |
               # Install dependencies
               pip install pytest pytest-azurepipelines
-              git clone https://github.com/superconductive/dgtest.git
-              pip install -e dgtest
+              pip install dgtest
 
-              # Run script and save output to a $VAR
-              TESTS=$(dgtest run great_expectations --tests tests --filter 'tests/cli')
-              EXIT_STATUS=$?
-              printf "Tests identified by dependency graph test runner [dgtest]:\n%s" "$TESTS"
-
-              # If the script found any matches, feed them into pytest
-              if [[ ! -z "$TESTS" ]]; then
-                echo "$TESTS" | xargs pytest --aws-integration -v
-                EXIT_STATUS=$?
-              fi
-              exit $EXIT_STATUS
+              # Run dgtest
+              dgtest run great_expectations --filter 'tests/cli' --aws-integration -v
 
             displayName: 'pytest'
