@@ -217,14 +217,17 @@ def _pandas(cls, column, **kwargs):
 This is all that you need to define for now. The `ColumnMapMetricProvider` and `ColumnMapExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
 
 <details>
-  <summary>Other Expectation parameters: <code>success_keys</code> and <code>default_kwarg_values</code></summary>
+  <summary>Other parameters</summary>
   <div>
     <p>
-* **Success Keys** - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
+        <b>Expectation Success Keys</b> - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
     </p>
     <p>
-* **Default Kwarg Values** (Optional) - Default values for success keys and the defined domain, among other values.
+        <b>Expectation Default Kwarg Values</b> (Optional) - Default values for success keys and the defined domain, among other values.
 An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class):
+    </p>
+    <p>
+        <b>Metric Condition Value Keys</b> (Optional) - Contains any the additional arguments passed as parameters to compute the Metric.
     </p>
   </div>
 </details>
