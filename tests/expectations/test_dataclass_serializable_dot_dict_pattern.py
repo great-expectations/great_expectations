@@ -40,7 +40,7 @@ def test_basic_instantiation_from_a_dictionary():
         "bar": 1,
     })
 
-def test_access_uding_dot_notation():
+def test_access_using_dot_notation():
     "Keys can be accessed using dot notation"
     my_A = MyClassA(**{
         "foo": "a string",
@@ -49,7 +49,7 @@ def test_access_uding_dot_notation():
     assert my_A.foo == "a string"
     assert my_A.bar == 1
     
-def test_access_uding_dict_notation():
+def test_access_using_dict_notation():
     "Keys can be accessed using dict notation"
     my_A = MyClassA(**{
         "foo": "a string",
