@@ -58,10 +58,10 @@ expectations_store_name: expectations_GCS_store
 configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "project"
-] = "support-sandbox-297615"
+] = "superconductive-internal"
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "bucket"
-] = "integration-test-sandbox-bucket"
+] = "superconductive-integration-tests"
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "prefix"
 ] = "metadata/expectations"
@@ -138,10 +138,10 @@ validations_store_name: validations_GCS_store
 configured_validations_store = yaml.safe_load(configured_validations_store_yaml)
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "project"
-] = "support-sandbox-297615"
+] = "superconductive-internal"
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "bucket"
-] = "integration-test-sandbox-bucket"
+] = "superconductive-integration-tests"
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "prefix"
 ] = "metadata/validations"
@@ -177,18 +177,14 @@ data_docs_sites:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>
       bucket: <YOUR GCS BUCKET NAME>
-      prefix : <YOUR GCS PREFIX NAME>
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 """
 data_docs_site_yaml = data_docs_site_yaml.replace(
-    "<YOUR GCP PROJECT NAME>", "support-sandbox-297615"
+    "<YOUR GCP PROJECT NAME>", "superconductive-internal"
 )
 data_docs_site_yaml = data_docs_site_yaml.replace(
-    "<YOUR GCS BUCKET NAME>", "integration-test-sandbox-bucket"
-)
-data_docs_site_yaml = data_docs_site_yaml.replace(
-    "<YOUR GCS PREFIX NAME>", "metadata/data_docs"
+    "<YOUR GCS BUCKET NAME>", "superconductive-integration-datadocs-tests"
 )
 great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
