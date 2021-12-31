@@ -11,8 +11,8 @@ If you follow the steps of the [Getting Started](../tutorials/getting_started/in
 However, you might not have these components available in hosted environments, such as Databricks, AWS EMR, Google Cloud Composer, and others. This workflow guide will outline the main steps required to successfully use Great Expectations in a hosted environment.
 
 
-Step 1: Configure your Data Context   
---------------------------------------
+Step 1: Configure your Data Context
+-------------------------------------
  Instead of using the Great Expectations CLI, you can create a Data Context directly in code. Your Data Context also manages the following components described in this guide:
 
 - Datasources to connect to data
