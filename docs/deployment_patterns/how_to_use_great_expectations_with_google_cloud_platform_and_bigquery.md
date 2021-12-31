@@ -157,12 +157,12 @@ Then, load your DataContext into memory using the `get_context()` method.
 
 Next, load the following Datasource configuration that will connect to data in GCS,
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L233-L247
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L210-L224
 ```
 
 Save the configuration into your DataContext by using the `add_datasource()` function.
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L257
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L234
 ```
 
 For more details on how to configure the BigQuery Datasource, please refer to [How to connect to a BigQuery database](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery)
@@ -213,22 +213,22 @@ For our example, we will be creating our ExpectationSuite with [instant feedback
 
 First, load a batch of data by specifying a SQL query in a `RuntimeBatchRequest`.
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L260-L269
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L237-L246
 ```
 
 Next, create an ExpectationSuite (`yellow_tripdata_bigquery_suite` in our example), and use it to get a `Validator`. 
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L271-L277
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L248-L254
 ```
 
 Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between`. 
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L279-L283
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L256-L260
 ```
 
 Lastly, save the ExpectationSuite, which now contains our two Expectations.
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L285
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L262
 ```
 
 For more details on how to configure the BatchRequest, as well as an example of how you can load data by specifying a table name, please refer to [How to connect to a BigQuery database](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery)
@@ -279,12 +279,12 @@ Now you are ready to migrate the local configuration to Cloud Composer.
 Add the following Checkpoint `bigquery_taxi_check` to the DataContext.  Here we are using the same `RuntimeBatchRequest` and `ExpectationSuite` name that we used to create our Validator above, translated into a YAML configuration.
 
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L287-L307
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L264-L284
 ```
 
 Next, you can either run the Checkpoint directly in-code,
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L308-L310
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L285-L287
 ```
 
 or through the following CLI command.
