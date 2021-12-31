@@ -66,16 +66,6 @@ configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend
     "prefix"
 ] = "metadata/expectations"
 
-# try:
-#     # remove this bucket if there was a failure in the script last time
-#     result = subprocess.run(
-#         "gsutil rm -r gs://superconductive-integration-tests/how_to_configure_an_expectation_store_in_gcs/expectations".split(),
-#         check=True,
-#         stderr=subprocess.PIPE,
-#     )
-# except Exception as e:
-#     pass
-#
 # add and set the new expectation store
 context.add_store(
     store_name=configured_expectations_store["expectations_store_name"],
@@ -155,20 +145,6 @@ configured_validations_store["stores"]["validations_GCS_store"]["store_backend"]
     "prefix"
 ] = "metadata/validations"
 
-# try:
-#     # clean up validation store from last time if there was a failure mid-script
-#     delete_validation_store_files = (
-#         f"gsutil -m rm gs://{configured_validations_store['stores']['validations_GCS_store']['store_backend']['bucket']}"
-#         + f"/{configured_validations_store['stores']['validations_GCS_store']['store_backend']['prefix']}/**"
-#     )
-#     result = subprocess.run(
-#         delete_validation_store_files, check=True, stderr=subprocess.PIPE, shell=True
-#     )
-#     stderr = result.stderr.decode("utf-8")
-#     assert "Operation completed" in stderr
-# except Exception as e:
-#     pass
-#
 # add and set the new validation store
 context.add_store(
     store_name=configured_validations_store["validations_store_name"],
