@@ -5,22 +5,24 @@ from airflow import DAG
 from airflow.operators.bash import BashOperator
 
 default_args = {
-    'start_date': airflow.utils.dates.days_ago(0),
-    'retries': 1,
-    'retry_delay': timedelta(days=1)
+    "start_date": airflow.utils.dates.days_ago(0),
+    "retries": 1,
+    "retry_delay": timedelta(days=1),
 }
 
 dag = DAG(
-    'GE_checkpoint_run',
+    "GE_checkpoint_run",
     default_args=default_args,
-    description='running GE checkpoint',
+    description="running GE checkpoint",
     schedule_interval=None,
-    dagrun_timeout=timedelta(minutes=5))
+    dagrun_timeout=timedelta(minutes=5),
+)
 
 # priority_weight has type int in Airflow DB, uses the maximum.
 t1 = BashOperator(
-    task_id='checkpoint_run',
-    bash_command='(cd /home/airflow/gcsfuse/great_expectations/ ; great_expectations --v3-api checkpoint run bigquery_taxi_check ) ',
+    task_id="checkpoint_run",
+    bash_command="(cd /home/airflow/gcsfuse/great_expectations/ ; great_expectations --v3-api checkpoint run bigquery_taxi_check ) ",
     dag=dag,
     depends_on_past=False,
-    priority_weight=2**31-1)
+    priority_weight=2 ** 31 - 1,
+)
