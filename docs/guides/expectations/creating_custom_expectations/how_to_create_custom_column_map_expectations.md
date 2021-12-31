@@ -158,7 +158,7 @@ examples = [
                 "out": {
                     "success": True,
                 },
-            }
+            },
             {
                 "title": "negative_test",
                 "exact_match_out": False,
@@ -168,8 +168,8 @@ examples = [
                 },
                 "out": {
                     "success": False,
-                    "unexpected_index_list": [3, 4],
-                    "unexpected_list": [0, None],
+                    "unexpected_index_list": [3],
+                    "unexpected_list": [0],
                 },
             }
         ],
