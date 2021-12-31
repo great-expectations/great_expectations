@@ -26,12 +26,12 @@ We recommend that you use Great Expectations in GCP by using the following servi
 
 We also recommend that you deploy Great Expectations to GCP in two steps:
 1. Developing a local configuration for GE that uses GCP services to connect to your data, store Great Expectations metadata, and run a Checkpoint.
-2. Migrating the local configuration to Google Cloud Composer so that the workflow can be orchestrated automatically on GCP.
+2. Migrating the local configuration to Cloud Composer so that the workflow can be orchestrated automatically on GCP.
 
 In line with our recommendation this document is presented in 2 parts:
 
 In [Part 1](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) we will be building a local configuration of Great Expectations to connect to the correct Metadata Stores on GCP (for [Expectation Suites](../reference/expectations/expectations.md), [Validation Results](../reference/validation.md), and [Data Docs](../reference/data_docs.md)), as well as connect to your data in BigQuery or Google Cloud Storage.
-We will test our local configuration by running a Checkpoint. Then in [Part 2](#part-2-migrating-our-local-configuration-to-google-cloud-composer), we wil migrate the local Great Expectations configuration to Google Cloud Composer and run the same Checkpoint as part of our automated workflow.
+We will test our local configuration by running a Checkpoint. Then in [Part 2](#part-2-migrating-our-local-configuration-to-google-cloud-composer), we wil migrate the local Great Expectations configuration to Cloud Composer and run the same Checkpoint as part of our automated workflow.
 
 The following diagram shows the recommended components for a Great Expectations deployment in GCP:  
 
@@ -107,7 +107,7 @@ If successful, the `gcloud` CLI will provide the URL to your app and launch it i
 
 ### 3. Connect to your Data
 
-The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery) and eventually build a [Checkpoint](../reference/checkpoints_and_actions.md) that will be migrated to Google Cloud Composer. The following code can be run either in an interacrtive Python session or Jupyter Notebook that is in your `great_expectations/` folder.
+The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery) and eventually build a [Checkpoint](../reference/checkpoints_and_actions.md) that will be migrated to Cloud Composer. The following code can be run either in an interacrtive Python session or Jupyter Notebook that is in your `great_expectations/` folder.
 More details can be found in the corresponding How to Guides, which have been linked.
 
 <Tabs
@@ -271,7 +271,7 @@ At this point, if you have successfully configured the local prototype, you will
 2. A new Validation Result in the GCS bucket configured in `validation_GCS_store`.
 3. Data Docs in the GCS bucket configured in `gs_site` that is accessible by running `gcloud app browse`.
 
-Now you are ready to migrate the local configuration to Google Cloud Composer.
+Now you are ready to migrate the local configuration to Cloud Composer.
 
 </TabItem>
 <TabItem value="bigquery">
@@ -299,31 +299,29 @@ At this point, if you have successfully configured the local prototype, you will
 2. A new Validation Result in the GCS bucket configured in `validation_GCS_store`.
 3. Data Docs in the GCS bucket configured in `gs_site` that is accessible by running `gcloud app browse`.
 
-Now you are ready to migrate the local configuration to Google Cloud Composer.
+Now you are ready to migrate the local configuration to Cloud Composer.
 
 </TabItem>
 </Tabs>
 
 
-## Part 2: Migrating our Local Configuration to Google Cloud Composer
+## Part 2: Migrating our Local Configuration to Cloud Composer
 
-In this section we are going to take the local GE configuration from [Part 1](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) and migrate it to a Google Cloud Composer environment so that we can automate the workflow.
+We will now take the local GE configuration from [Part 1](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) and migrate it to a Cloud Composer environment so that we can automate the workflow.
 
-There are a number of ways that Great Expectations can be run in Google Cloud Composer or Airflow.
+There are a number of ways that Great Expectations can be run in Cloud Composer or Airflow.
 
 1. [Running a Checkpoint in Airflow using a `bash operator`](how_to_run_a_checkpoint_in_airflow.md#option-1-running-a-checkpoint-with-a-bashoperator)
 2. [Running a Checkpoint in Airflow using a `python operator`](how_to_run_a_checkpoint_in_airflow.md#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
 3. [Running a Checkpoint in Airflow using a `Airflow operator`](https://legacy.docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_astronomer.html)
 
-For our purposes we are going to use the `bash operator` to run the Checkpoint, which is one of the simplest ways to perform the migration.
-
-Also, this portion of the guide can also be found in the following Zoom video.
+For our example, we are going to use the `bash operator` to run the Checkpoint. This portion of the guide can also be found in the following [Zoom Video](http://www.zoom.us).
 
 ### 1. Create and Configure a Service Account
 
-Create and configure a Service Account on GCS with the appropriate privileges needed to run Cloud Composer.
+Create and configure a Service Account on GCS with the appropriate privileges needed to run Cloud Composer. Please follow the steps described in the [official Google Cloud documentation](https://cloud.google.com/iam/docs/service-accounts) to create a Service Account on GCP.
 
-In order to run Great Expectations in a Google Cloud Composer environment, your Service Account will need the following privileges:
+In order to run Great Expectations in a Cloud Composer environment, your Service Account will need the following privileges:
 
 - `Composer Worker`
 - `Logs Viewer`
@@ -331,45 +329,37 @@ In order to run Great Expectations in a Google Cloud Composer environment, your 
 - `Storage Object Creator`
 - `Storage Object Viewer`
 
-If you are accessing data in BigQuery, please ensure your Service account also has privileges for
+If you are accessing data in BigQuery, please ensure your Service account also has privileges for:
 
 - `BigQuery Data Editor`
 - `BigQuery Job User`
 - `BigQuery Read Session User`
 
-Please follow the steps described in the [official Google Cloud documentation](https://cloud.google.com/iam/docs/service-accounts) to create a Service Account on GCP.
-
-### 2. Create Google Cloud Composer environment
+### 2. Create Cloud Composer environment
 
 Create a Cloud Composer environment in the project you will be running Great Expectations. Please follow the steps described in the [official Google Cloud documentation](https://cloud.google.com/composer/docs/composer-2/create-environments) to create an environment that is suited for your needs.
 
 :::info Note on Versions.
-The current Deployment Guide was developed and tested in Great Expectations 0.13.49, Composer 1.17.7 and Airflow 2.0.2. Please ensure your Environment is equal or greater.
+The current Deployment Guide was developed and tested in Great Expectations 0.13.49, Composer 1.17.7 and Airflow 2.0.2. Please ensure your Environment is equivalent or newer than this configuration.
 :::
 
-### 3. Install Great Expectations in Google Cloud Composer
+### 3. Install Great Expectations in Cloud Composer
 
-Installing Python dependencies in Cloud Composer can be done through the web Console, `gcloud` or through a REST query.  Please follow the steps described in [Installing Python dependencies in Google Cloud](https://cloud.google.com/composer/docs/how-to/using/installing-python-dependencies#console) to install `great-expectations` in Google Cloud Composer.
+Installing Python dependencies in Cloud Composer can be done through the web Console, `gcloud` or through a REST query.  Please follow the steps described in [Installing Python dependencies in Google Cloud](https://cloud.google.com/composer/docs/how-to/using/installing-python-dependencies#console) to install `great-expectations` in Cloud Composer.
 
 :::info Troubleshooting Installation
 If you run into trouble while installing Great Expectations in Cloud Composer, the [official Google Cloud documentation offers the following guide on troubleshooting PyPI package installations.](https://cloud.google.com/composer/docs/troubleshooting-package-installation)
 :::
 
-### 4. Move local configuration to Google Cloud Composer
+### 4. Move local configuration to Cloud Composer
 
-Cloud Composer uses Cloud Storage to store Apache Airflow DAGs (also known as workflows), with each Environment having an associated Cloud Storage bucket. Move the local configuration from [Part 1](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) to Google Cloud Composer so that it can be orchestrated. 
+Cloud Composer uses Cloud Storage to store Apache Airflow DAGs (also known as workflows), with each Environment having an associated Cloud Storage bucket. The simplest way to perform the migration is to move the entire local `great_expectations/` folder from [Part 1](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) to the Cloud Storage bucket where Composer can access the configuration.
 
-The simplest way to do the migration is to move the entire `great_expectations/` folder to the GCS, where Composer can access the configuration.
+To access the Cloud Storage bucket associated with current Cloud Composer environment, first open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page. On the Configuration tab, the name of the Cloud Storage bucket can be found to the right of the DAGs folder. The bucket can then be shown in the Cloud Storage console by clicking the bucket name, and the `great_expectations/` folder can be uploaded by dragging and dropping, or clicking the upload folder button.
 
-To access the Cloud Storage bucket associated with current Cloud Composer environment,
+Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, it will be mapped to the Airflow instances in your Cloud Composer. The folder will now be accessible from the Airflow Worker nodes through the path : `/home/airflow/gcsfuse/great_expectations`.
 
-First, open the Environments page in the Cloud Console, the click on the name of the environment to open the Environment details page.
-
-On the Configuration tab, the name of the Cloud Storage bucket can be found to the right of the DAGs folder. The bucket can then be shown in the Cloud Storage console by clicking the bucket name, and the `great_expectations/` folder can be uploaded by dragging and dropping, or clicking `Upload Folder.`
-
-Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, it will be mapped to the Airflow instances in your Cloud Composer it will be accessible from the Airflow Worker nodes in the `/home/airflow/gcsfuse/` folder.
-
-### 5. Write DAG and Add to Google Cloud Composer
+### 5. Write DAG and Add to Cloud Composer
 <Tabs
   groupId="run-check-gcs-bigquery"
   defaultValue='gcs'
@@ -379,7 +369,7 @@ Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, i
   ]}>
 <TabItem value="gcs">
 
-In our case we will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: `ge_checkpoint_gcs.py`.
+We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: `ge_checkpoint_gcs.py`.
 
 ```python file=../../tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py
 ```
@@ -398,7 +388,7 @@ For more details, please consult the [official documentation for Cloud Composer]
 </TabItem>
 <TabItem value="bigquery">
 
-In our case we will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  `ge_checkpoint_bigquery.py`.
+We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  `ge_checkpoint_bigquery.py`.
 
 ```python file=../../tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py
 ```
@@ -425,21 +415,17 @@ Now that the DAG has been uploaded, we can [trigger the DAG](https://cloud.googl
 2. [Trigger the DAG on a schedule, which we have set to be once-per-day in our DAG](https://cloud.google.com/composer/docs/triggering-dags#schedule)
 3. [Trigger the DAG in response to events.](http://airflow.apache.org/docs/apache-airflow/stable/concepts/sensors.html)
 
-For our purposes we will trigger the DAG manually to test that it works.
-
-First, open the Environments page in the Cloud Console, the click on the name of the environment to open the Environment details page. Next, in the Airflow webserver column, follow the Airflow link for your environment.
-
-This will open the Airflow web interface for your Cloud Composer environment. In the interface, click on the Trigger Dag button on the DAGs page to run your DAG configuration.
+In order to trigger the DAG manually, first open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page. In the Airflow webserver column, follow the Airflow link for your environment. This will open the Airflow web interface for your Cloud Composer environment. In the interface, click on the Trigger Dag button on the DAGs page to run your DAG configuration.
 
 ### 7. Check that DAG / Checkpoint has run successfully
 
-If the DAG run was successful, we should first see the `SUCCESS` status appear on the DAGs page of the Airflow Web UI. We can also check so check that new Data Docs have been generated by running `gcloud app browse`.
+If the DAG run was successful, we should see the `Success` status appear on the DAGs page of the Airflow Web UI. We can also check so check that new Data Docs have been generated by accessing the URL to our `gcloud` app.
 
 ### 8. Congratulations!
 
-You've successfully migrated your Great Expectations configuration to Cloud Composer viewed the resulting human-readable Data Docs. There are many other ways to iterate and improve this version, including more sophisticated ways of triggering Checkpoints, building our DAGs and dividing our Data Assets into Batches using DataConnectors.
+You've successfully migrated your Great Expectations configuration to Cloud Composer! 
 
-For more information, please refer to the following documentation: 
+There are many ways to iterate and improve this initial version, including more sophisticated ways of triggering Checkpoints, building our DAGs and dividing our Data Assets into Batches using DataConnectors. For more information, please refer to the following documentation: 
 
 - [How to run a Checkpoint in Airflow using a `python operator`](how_to_run_a_checkpoint_in_airflow.md#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
 - [How to run a Checkpoint in Airflow using a `Airflow operator`](https://legacy.docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_astronomer.html)
