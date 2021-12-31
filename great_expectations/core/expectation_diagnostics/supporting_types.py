@@ -4,61 +4,25 @@ from typing import Any, Dict, List, Optional
 
 from great_expectations.types import SerializableDictDot
 
-@dataclass
-class ExpectationDiagnosticReportDescription:
-    camel_name : str
-    snake_name : str
-    short_description : str
-    docstring : str
-
-@dataclass
-class RendererDiagnostics:
-    pass
-
 class Maturity(Enum):
     SCAFFOLDED = "SCAFFOLDED"
     EXPERIMENTAL = "EXPERIMENTAL"
     BETA = "BETA"
     PRODUCTION = "PRODUCTION"
 
-class TestData(dict):
-    pass
-
 @dataclass
-class ExpectationTestCaseBaseClass:
-    title: str
-    exact_match_out: bool
-    out: Dict[str, Any]
-    suppress_test_for: List[str]
-    _in: Dict[str, Any]
-
-class ExpectationTestCase(ExpectationTestCaseBaseClass):
-    def __init__(self,
-        title,
-        exact_match_out,
-        suppress_test_for,
-        out,
-        **kwargs,
-    ):
-        super().__init__(
-            title,
-            exact_match_out,
-            suppress_test_for,
-            out,
-            _in=kwargs["in"]
-        )
-
-@dataclass
-class ExpectationTestDataCases:
-    data : TestData
-    tests : List[ExpectationTestCase]
-
-@dataclass
-class LibraryMetadata:
+class GalleryMetadata:
     maturity: Maturity
     # package: str,
     tags: List[str]
     contributors: List[str] #Maybe List[Github contributor?]
+
+@dataclass
+class ExpectationDescriptionDiagnostics:
+    camel_name : str
+    snake_name : str
+    short_description : str
+    docstring : str
 
 @dataclass
 class ExpectationRendererDiagnostics:
@@ -79,7 +43,7 @@ class ExpectationRendererDiagnostics:
     pass
 
 @dataclass
-class ExpectationMetricsDiagnostics:
+class ExpectationMetricDiagnostics:
     """
     [
       "column_values.nonnull.unexpected_count",
@@ -96,12 +60,14 @@ class ExpectationExecutionEngineDiagnostics:
     SqlAlchemyExecutionEngine : bool
     SparkDFExecutionEngine : bool
 
+@dataclass
+class ExpectationTestDiagnostics:
+    pass
 
 @dataclass
-class ExpectationDiagnosticReport:
-    description: ExpectationDiagnosticReportDescription
-    library_metadata: LibraryMetadata # Actually, this needs to be something different. Distinguish input from output.
-    renderers: ExpectationRendererDiagnostics 
-    examples: List[ExpectationTestDataCases]
-    metrics: List[ExpectationMetricsDiagnostics]
-    execution_engines: ExpectationExecutionEngineDiagnostics
+class ExpectationDiagnosticChecklist:
+    pass
+
+@dataclass
+class ExpectationGalleryDiagnosticMetadata:
+    pass

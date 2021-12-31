@@ -1,17 +1,23 @@
 import pytest
 
-from great_expectations.core.expectation_diagnostic_report import (
-    ExpectationDiagnosticReportDescription,
-    LibraryMetadata,
-    RendererDiagnostics,
+from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     TestData,
     ExpectationTestCase,
     ExpectationTestDataCases,
-    ExpectationDiagnosticReport,
+    ExpectationLegacyTestCaseAdapter,
+)
+from great_expectations.core.expectation_diagnostics.supporting_types import (
+    ExpectationDescriptionDiagnostics,
+    GalleryMetadata,
+    ExpectationRendererDiagnostics,
 )
 
-def test_basic_instantiation_of_ExpectatationDiagnosticReportDescription():
-    ExpectationDiagnosticReportDescription(**{
+from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
+    ExpectationDiagnostics,
+)
+
+def test_basic_instantiation_of_ExpectationDescriptionDiagnostics():
+    ExpectationDescriptionDiagnostics(**{
         "camel_name": "ExpectColumnValuesToMatchRegex",
         "snake_name": "expect_column_values_to_match_regex",
         "short_description": "Expect column entries to be strings that match a given regular expression.",
@@ -46,7 +52,7 @@ def test_basic_instantiation_of_TestData():
 
 @pytest.mark.skip(reason="Not yet supported")
 def test_basic_instantiation_of_ExpectationTestCase():
-    ExpectationTestCase(**{
+    ExpectationLegacyTestCaseAdapter(**{
         "title": "basic_negative_test",
         "exact_match_out": False,
         "in": {
@@ -86,7 +92,7 @@ def test_ExpectationDiagnosticReport():
             "column_name with space": [ "aaa", "abb", "acc", "add", "bee"],
         }),
         tests = [
-            ExpectationTestCase(**{
+            ExpectationLegacyTestCaseAdapter(**{
                 "title": "negative_test_insufficient_mostly_and_one_non_matching_value",
                 "exact_match_out": False,
                 "in": {
@@ -108,7 +114,7 @@ def test_ExpectationDiagnosticReport():
                     "mssql"
                 ]
             }),
-            ExpectationTestCase(**{
+            ExpectationLegacyTestCaseAdapter(**{
                 "title": "positive_test_exact_mostly_w_one_non_matching_value",
                 "exact_match_out": False,
                 "in": {
@@ -133,14 +139,14 @@ def test_ExpectationDiagnosticReport():
         ]
     )
 
-    edr = ExpectationDiagnosticReport(
-        description = ExpectationDiagnosticReportDescription(**{
+    edr = ExpectationDiagnostics(
+        description = ExpectationDescriptionDiagnostics(**{
             "camel_name": "ExpectColumnValuesToMatchRegex",
             "snake_name": "expect_column_values_to_match_regex",
             "short_description": "Expect column entries to be strings that match a given regular expression.",
             "docstring": "Expect column entries to be strings that match a given regular expression.\n    \n    Valid matches can be found     anywhere in the string, for example \"[at]+\" will identify the following strings as expected: \"cat\", \"hat\",     \"aa\", \"a\", and \"t\", and the following strings as unexpected: \"fish\", \"dog\".\n\n    expect_column_values_to_match_regex is a     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine\n    .column_map_expectation>`.\n\n    Args:\n        column (str):             The column name.\n        regex (str):             The regular expression the column entries should match.\n\n    Keyword Args:\n        mostly (None or a float between 0 and 1):             Return `\"success\": True` if at least mostly fraction of values match the expectation.             For more detail, see :ref:`mostly`.\n\n    Other Parameters:\n        result_format (str or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n            For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n    See Also:\n        :func:`expect_column_values_to_not_match_regex         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_values_to_not_match_regex>`\n\n        :func:`expect_column_values_to_match_regex_list         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_values_to_match_regex_list>`\n\n    "
         }),
-        library_metadata = LibraryMetadata(**{
+        library_metadata = GalleryMetadata(**{
             "maturity": "production",
             # "package": "great_expectations",
             "tags": [
@@ -153,7 +159,7 @@ def test_ExpectationDiagnosticReport():
                 "@abegong"
             ]
         }),
-        renderers = RendererDiagnostics(),
+        renderers = ExpectationRendererDiagnostics(),
         # **{
         #     "standard": {
         #         "renderer.answer": "Less than 90.0% of values in column \"a\" match the regular expression ^a.",
@@ -177,7 +183,10 @@ def test_ExpectationDiagnosticReport():
             "PandasExecutionEngine": True,
             "SqlAlchemyExecutionEngine": True,
             "SparkDFExecutionEngine": True
-        }
+        },
+        tests=[],
+        checklist=[],
+        gallery_metadata={},
     )
 
     print(edr)
