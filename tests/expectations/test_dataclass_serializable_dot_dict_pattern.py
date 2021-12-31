@@ -314,7 +314,13 @@ def test_immutability():
 
 
 def test_reserved_word_key():
-    "Can be instantiated with a key that's also a reserved word"
+    """Can be instantiated with a key that's also a reserved word
+    
+This pattern is helpful for cases where we're migrating from dictionary-based objects to typed objects,
+and the dictionary contains keys that are reserved words in python.
+
+For example, test cases use the reserved word: "in" as one of their required fields.
+    """
 
     @dataclass
     class MyClassE(SerializableDictDot):
