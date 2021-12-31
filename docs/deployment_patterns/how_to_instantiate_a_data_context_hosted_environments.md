@@ -13,7 +13,7 @@ However, you might not have these components available in hosted environments, s
 
 Step 1: Configure your Data Context   
 --------------------------------------
-Instead of using the Great Expectati  
+ Instead of using the Great Expectations CLI, you can create a Data Context directly in code. Your Data Context also manages the following components described in this guide:
 
 - Datasources to connect to data
 - Stores to save Expectations and Validation Results

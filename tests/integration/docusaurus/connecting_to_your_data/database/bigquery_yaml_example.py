@@ -7,11 +7,8 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 # GCP project and BigQuery dataset information
 # Not for general use. It is only to support testing.
-# gcp_project = os.environ.get("GCP_PROJECT")
-# bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET")
-
-gcp_project = "support-sandbox-297615"
-bigquery_dataset = "test_ci"
+gcp_project = os.environ.get("GCP_PROJECT")
+bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET")
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
@@ -60,7 +57,7 @@ context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
 validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="yellow_tripdata_suite"
+    batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
 
