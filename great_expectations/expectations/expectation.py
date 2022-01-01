@@ -1049,7 +1049,7 @@ class Expectation(metaclass=MetaExpectation):
         """
 
         diagnostics : ExpectationDiagnostics = self.run_diagnostics()
-        return diagnostics.checklist_str
+        return diagnostics.print_checklist()
 
     # @staticmethod
     # def _add_error_to_diagnostics_report(

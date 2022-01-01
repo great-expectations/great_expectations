@@ -21,71 +21,102 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
 class ExpectationDiagnostics(SerializableDictDot):
     """An immutable object created by Expectation.run_diagnostics.
     It contains information introspected from the Expectation class, in formats that can be renderered at the command line, and by the Gallery.
+
+    It has three external-facing use cases:
+
+    1. `ExpectationDiagnostics.to_dict()` creates the JSON object that populates the Gallery.
+    2. `ExpectationDiagnostics.print_checklist()`
     """
 
-    # These two objects are taken directly from the Expectation class, without modification
-    library_metadata: AugmentedLibraryMetadata
+    # This object is taken directly from the Expectation class, without modification
     examples: List[ExpectationTestDataCases]
 
     # These objects are derived from the Expectation class
     # They're a combination of direct introspection of existing properties, and instantiating the Expectation with test data and actually executing methods.
     # For example, we can verify the existence of certain Renderers through introspection alone, but in order to see what they return, we need to instantiate the Expectation and actually run the method.
+    library_metadata: AugmentedLibraryMetadata
     description: ExpectationDescriptionDiagnostics
     execution_engines: ExpectationExecutionEngineDiagnostics
+
     renderers: List[ExpectationRendererDiagnostics] 
     metrics: List[ExpectationMetricDiagnostics]
     tests: List[ExpectationTestDiagnostics]
     errors: List[ExpectationErrorDiagnostics]
 
-    # These objects are rollups of other information, formatted for display at the command line and in the Gallery
-    @property
-    def checklist_str(self) -> str:
-        return self._convert_checks_into_output_message(
-            self.description["camel_name"],
-            self.checklist,
-        )
-
     @property
     def checklist(self) -> List[ExpectationDiagnosticCheckMessage] :
+        """Build a list of ExpectationDiagnosticCheckMessages corresponding to the steps for creating a custom expectation.
+        
+        By design, this method is a rollup of information already contained within ExpectationDiagnostics.
+        Querying or introspecting the Expectation again should not be necessary.
+        """
 
         checks: List[ExpectationDiagnosticCheckMessage] = []
 
-        # Check whether this Expectation has a library_metadata object
-        checks.append(
-            {
-                "message": "library_metadata object exists",
-                "passed": self.library_metadata.library_metadata_passed_checks,
-            }
+        #Experimental checks
+        checks.append(self._check_library_metadata(self.library_metadata))
+        checks.append(self._check_docstring(self.description))
+        checks.append(self._check_example_cases(self.examples, self.tests))
+        checks.append(self._check_core_logic_for_at_least_one_execution_engine(self.execution_engines))
+
+        return checks
+
+    @property
+    def print_checklist(self) -> str:
+        print(
+            self._convert_checks_into_output_message(
+                self.description["camel_name"],
+                self.checklist,
+            )
         )
 
-        # Check whether this Expectation has an informative docstring
+    @staticmethod
+    def _check_library_metadata(
+        library_metadata : AugmentedLibraryMetadata
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check whether the Expectation has a library_metadata object"""
+
+        return ExpectationDiagnosticCheckMessage(**{
+            "message": "library_metadata object exists",
+            "passed": library_metadata.library_metadata_passed_checks,
+        })
+
+    @staticmethod
+    def _check_docstring(
+        description : ExpectationDescriptionDiagnostics
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check whether the Expectation has an informative docstring"""
+
         message = "Has a docstring, including a one-line short description"
-        if "short_description" in self.description:
-            short_description = self.description["short_description"]
+        if "short_description" in description:
+            short_description = description["short_description"]
         else:
             short_description = None
         if short_description not in {"", "\n", "TODO: Add a docstring here", None}:
-            checks.append(
-                {
-                    "message": message,
-                    "sub_messages": [
-                        {
-                            "message": '"' + short_description + '"',
-                            "passed": True,
-                        }
-                    ],
-                    "passed": True,
-                }
-            )
-        else:
-            checks.append(
-                {
-                    "message": message,
-                    "passed": False,
-                }
-            )
+            return ExpectationDiagnosticCheckMessage(**{
+                "message": message,
+                "sub_messages": [
+                    {
+                        "message": '"' + short_description + '"',
+                        "passed": True,
+                    }
+                ],
+                "passed": True,
+            })
 
-        # Check whether this Expectation has at least one positive and negative example case (and all test cases return the expected output)
+        else:
+            return ExpectationDiagnosticCheckMessage(**{
+                "message": message,
+                "passed": False,
+            })
+
+    @staticmethod
+    def _check_example_cases(
+        examples : ExpectationTestDataCases,
+        tests : ExpectationTestDiagnostics,
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check whether this Expectation has at least one positive and negative example case (and all test cases return the expected output)"""
+
         message = "Has at least one positive and negative example case, and all test cases pass"
         (
             positive_cases,
@@ -100,43 +131,38 @@ class ExpectationDiagnostics(SerializableDictDot):
             (positive_cases > 0) and (negative_cases > 0) and (unexpected_cases == 0)
         )
         if passed:
-            checks.append(
-                {
-                    "message": message,
-                    "passed": passed,
-                }
-            )
+            return ExpectationDiagnosticCheckMessage(**{
+                "message": message,
+                "passed": passed,
+            })
         else:
-            checks.append(
-                {
-                    "message": message,
-                    "passed": passed,
-                }
-            )
+            return ExpectationDiagnosticCheckMessage(**{
+                "message": message,
+                "passed": passed,
+            })
 
-        # Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine
+    @staticmethod
+    def _check_core_logic_for_at_least_one_execution_engine(
+        execution_engines : ExpectationExecutionEngineDiagnostics,
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""
+
         message = "Core logic exists and passes tests on at least one Execution Engine"
         successful_execution_engines = 0
-        for k, v in self.execution_engines.items():
+        for k, v in execution_engines.items():
             if v == True:
                 successful_execution_engines += 1
 
         if successful_execution_engines > 0:
-            checks.append(
-                {
-                    "message": message,
-                    "passed": True,
-                }
-            )
+            return ExpectationDiagnosticCheckMessage(**{
+                "message": message,
+                "passed": True,
+            })
         else:
-            checks.append(
-                {
-                    "message": message,
-                    "passed": False,
-                }
-            )
-
-        return checks
+            return ExpectationDiagnosticCheckMessage(**{
+                "message": message,
+                "passed": False,
+            })
 
     @staticmethod
     def _count_positive_and_negative_example_cases(
