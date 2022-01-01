@@ -5,11 +5,8 @@ This file is intended to
 """
 
 from pytest import raises
-from dataclasses import (
-    dataclass,
-    FrozenInstanceError,
-)
-from enum import Enum
+from pydantic.dataclasses import dataclass
+from dataclasses import FrozenInstanceError
 from typing import Any, Dict, List, Optional
 
 import pytest
@@ -65,12 +62,33 @@ def test_access_uding_dict_notation():
     assert my_A["bar"] == 1
 
 def test_has_keys():
-    "Keys can be accessed using dot notation"
+    "the .keys method works"
     my_A = MyClassA(**{
         "foo": "a string",
         "bar": 1,
     })
-    assert my_A.keys() == {"foo", "bar"}
+    assert set(my_A.keys()) == {"foo", "bar"}
+
+def test_has_items():
+    "the .items method works"
+    my_A = MyClassA(**{
+        "foo": "a string",
+        "bar": 1,
+    })
+    items = list(my_A.items())
+    assert items == [("foo", "a string"), ("bar", 1)]
+
+def test_has_to_dict():
+    "the .to_dict method works"
+    my_A = MyClassA(**{
+        "foo": "a string",
+        "bar": 1,
+    })
+    assert my_A.to_dict() == {
+        "foo": "a string",
+        "bar": 1,
+    }
+
 
 @pytest.mark.skip(reason="Not sure what our preferred pattern for this is")
 def test_incorrect_type():
@@ -334,7 +352,7 @@ For example, test cases use the reserved word: "in" as one of their required fie
     class MyClassE(SerializableDictDot):
         foo: str
         bar: int
-        _in : int
+        input : int
 
 
     class MyClassF(MyClassE):
@@ -346,7 +364,7 @@ For example, test cases use the reserved word: "in" as one of their required fie
             super().__init__(
                 foo=foo,
                 bar=bar,
-                _in=kwargs["in"]
+                input=kwargs["in"]
             )
 
 
@@ -357,8 +375,8 @@ For example, test cases use the reserved word: "in" as one of their required fie
     )
     assert my_F["foo"] == "a string"
     assert my_F["bar"] == 1
-    assert my_F["_in"] == 10
-    assert my_F._in == 10
+    assert my_F["input"] == 10
+    assert my_F.input == 10
 
     my_F = MyClassF(**{
         "foo": "a string",
@@ -367,5 +385,5 @@ For example, test cases use the reserved word: "in" as one of their required fie
     })
     assert my_F["foo"] == "a string"
     assert my_F["bar"] == 1
-    assert my_F["_in"] == 10
-    assert my_F._in == 10
+    assert my_F["input"] == 10
+    assert my_F.input == 10
