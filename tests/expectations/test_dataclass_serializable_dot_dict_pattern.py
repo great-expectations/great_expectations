@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional
 
 import pytest
 from great_expectations.types import (
+    DictDot,
     SerializableDictDot,
 )
 
@@ -28,6 +29,21 @@ class MyClassB(MyClassA):
     @property
     def num_bazzes(self):
         return len(self.baz)
+
+@dataclass
+class MyClassC(SerializableDictDot):
+    alpha_var: int
+    beta_var: str
+    A_list: List[MyClassA]
+    B_list: List[MyClassB]
+
+    @property
+    def num_As(self):
+        return len(self.A_list)
+
+    @property
+    def num_Bs(self):
+        return len(self.B_list)
 
 def test_basic_instantiation_with_arguments():
     "Can be instantiated with arguments"
@@ -261,22 +277,6 @@ def test_can_use_positional_arguments():
 def test_can_be_nested():
     "Objects of this type can be nested"
 
-    @dataclass
-    class MyClassC(SerializableDictDot):
-        alpha_var: int
-        beta_var: str
-        A_list: List[MyClassA]
-        B_list: List[MyClassB]
-
-        @property
-        def num_As(self):
-            return len(self.A_list)
-
-        @property
-        def num_Bs(self):
-            return len(self.B_list)
-
-    
     my_C = MyClassC(
         alpha_var=20,
         beta_var="beta, I guess",
@@ -307,6 +307,65 @@ def test_can_be_nested():
     assert my_C["B_list"][0]["quux"] == 43
 
     # Note: we don't currently support dot notation access within lists: `assert my_C["A_list"].1.bar == 102`
+
+def test_to_dict_works_recursively():
+    "the .to_dict method recursively"
+
+    my_C = MyClassC(
+        alpha_var=20,
+        beta_var="beta, I guess",
+        A_list=[
+            MyClassA(
+                foo="A-1",
+                bar=101,
+            ),
+            MyClassA(**{
+                "foo": "A-2",
+                "bar": 102,
+            }),
+        ],
+        B_list=[
+            MyClassB(**{
+                "foo": "B-1",
+                "bar": 201,
+                "baz": ["a", "b", "c"],
+                "qux": -100,
+                "quux": 43,
+            })
+        ]
+    )
+
+    C_dict = my_C.to_dict()
+
+    #Make sure it's a dictionary, not a DictDot
+    assert type(C_dict) == dict
+    assert isinstance(C_dict, DictDot) == False
+    #Dictionaries don't support dot notation.
+    with raises(AttributeError):
+        C_dict.A_list
+
+    assert type(C_dict["A_list"][0]) == dict
+    assert type(C_dict["B_list"][0]) == dict
+
+    assert C_dict == {
+        "alpha_var" : 20,
+        "beta_var" : "beta, I guess",
+        "A_list" : [{
+            "foo": "A-1",
+            "bar":101,
+        },{
+            "foo": "A-2",
+            "bar":102,
+        }],
+        "B_list" : [{
+            "foo": "B-1",
+            "bar": 201,
+            "baz": ["a", "b", "c"],
+            "qux": -100,
+            "quux": 43,
+        }]
+    }
+
 
 
 def test_immutability():
