@@ -21,7 +21,7 @@ from great_expectations.core.expectation_configuration import (
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import ExpectationDiagnostics
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import ExpectationTestDataCases
 from great_expectations.core.expectation_diagnostics.supporting_types import (
-    AugmentedLibraryMetadata,
+    LegacyAugmentedLibraryMetadataAdapter,
     ExpectationDescriptionDiagnostics,
     ExpectationErrorDiagnostics,
     ExpectationExecutionEngineDiagnostics,
@@ -1347,7 +1347,7 @@ class Expectation(metaclass=MetaExpectation):
             if set(self.library_metadata.keys()) == {"maturity", "tags", "contributors"}:
                 augmented_library_metadata["library_metadata_passed_checks"] = True
 
-        return AugmentedLibraryMetadata(**augmented_library_metadata)
+        return LegacyAugmentedLibraryMetadataAdapter.from_dict(augmented_library_metadata)
 
 
 class TableExpectation(Expectation, ABC):

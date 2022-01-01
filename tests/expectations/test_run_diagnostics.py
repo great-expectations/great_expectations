@@ -41,6 +41,8 @@ def test_expectation_self_check():
             "maturity": "CONCEPT_ONLY",
             "tags": [],
             "contributors": [],
+            "library_metadata_passed_checks": False,
+            "package": None,
         },
         "tests": [],
         "errors": [],

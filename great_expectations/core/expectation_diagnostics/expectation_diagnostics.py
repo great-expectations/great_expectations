@@ -38,7 +38,6 @@ class ExpectationDiagnostics(SerializableDictDot):
     errors: List[ExpectationErrorDiagnostics]
 
     # These objects are rollups of other information, formatted for display at the command line and in the Gallery
-
     @property
     def checklist_str(self) -> str:
         return self._convert_checks_into_output_message(
