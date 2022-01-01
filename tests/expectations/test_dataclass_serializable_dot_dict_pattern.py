@@ -1,6 +1,9 @@
-from dataclasses import FrozenInstanceError
-from typing import Any, Dict, List, Optional
-
+from dataclasses import (
+    field,
+    FrozenInstanceError,
+)
+from typing import List, Optional
+from enum import Enum
 import pytest
 # from pydantic.dataclasses import dataclass
 from dataclasses import dataclass
@@ -25,13 +28,18 @@ class MyClassB(MyClassA):
     def num_bazzes(self):
         return len(self.baz)
 
+class MyEnum(Enum):
+    VALUE_X = "x"
+    VALUE_Y = "y"
+    VALUE_Z = "z"
 
 @dataclass
 class MyClassC(SerializableDictDot):
     alpha_var: int
-    beta_var: str
+    beta_var: MyEnum
     A_list: List[MyClassA]
     B_list: List[MyClassB]
+    enum_list: List[MyEnum] = field(default_factory=list)
 
     @property
     def num_As(self):
@@ -305,7 +313,7 @@ def test_can_be_nested():
 
     my_C = MyClassC(
         alpha_var=20,
-        beta_var="beta, I guess",
+        beta_var=MyEnum("x"),
         A_list=[
             MyClassA(
                 foo="A-1",
@@ -338,13 +346,16 @@ def test_can_be_nested():
 
     # Note: we don't currently support dot notation access within lists: `assert my_C["A_list"].1.bar == 102`
 
+    # Demonstrate that we can access Enum sub-objects
+    assert my_C["beta_var"] == MyEnum("x")
+
 
 def test_to_dict_works_recursively():
-    "the .to_dict method recursively"
+    "the .to_dict method works recursively on both DotDicts and Enums"
 
     my_C = MyClassC(
         alpha_var=20,
-        beta_var="beta, I guess",
+        beta_var=MyEnum("x"),
         A_list=[
             MyClassA(
                 foo="A-1",
@@ -368,6 +379,11 @@ def test_to_dict_works_recursively():
                 }
             )
         ],
+        enum_list=[
+            MyEnum("x"),
+            MyEnum("y"),
+            MyEnum("z"),
+        ]
     )
 
     C_dict = my_C.to_dict()
@@ -384,7 +400,7 @@ def test_to_dict_works_recursively():
 
     assert C_dict == {
         "alpha_var": 20,
-        "beta_var": "beta, I guess",
+        "beta_var": "x",
         "A_list": [
             {
                 "foo": "A-1",
@@ -404,6 +420,11 @@ def test_to_dict_works_recursively():
                 "quux": 43,
             }
         ],
+        "enum_list": [
+            "x",
+            "y",
+            "z",
+        ]
     }
 
 

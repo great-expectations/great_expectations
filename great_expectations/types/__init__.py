@@ -1,4 +1,5 @@
 import copy
+from enum import Enum
 
 from .configurations import ClassConfig
 
@@ -43,11 +44,17 @@ class DictDot:
             if isinstance(value, DictDot):
                 new_dict[key] = value.to_dict()
 
-            # ...and when DictDots are nested one layer deeper in lists.
+            # ...and Enums...
+            elif isinstance(value, Enum):
+                new_dict[key] = value.value
+
+            # ...and when DictDots and Enums are nested one layer deeper in lists.
             if isinstance(value, list):
                 for i, element in enumerate(value):
                     if isinstance(element, DictDot):
                         new_dict[key][i] = element.to_dict()
+                    elif isinstance(element, Enum):
+                        new_dict[key][i] = element.value
 
             # Note: conversion will not work automatically if there are additional layers in between.
 
