@@ -5,20 +5,24 @@ This file is intended to
 """
 
 from pytest import raises
-from pydantic.dataclasses import dataclass
-from dataclasses import FrozenInstanceError
+from dataclasses import (
+    dataclass,
+    FrozenInstanceError,
+)
 from typing import Any, Dict, List, Optional
 
 import pytest
-from great_expectations.types import (
-    DictDot,
-    SerializableDictDot,
-)
+from pydantic.dataclasses import dataclass
+from pytest import raises
+
+from great_expectations.types import DictDot, SerializableDictDot
+
 
 @dataclass
 class MyClassA(SerializableDictDot):
     foo: str
     bar: int
+
 
 @dataclass
 class MyClassB(MyClassA):
@@ -29,6 +33,7 @@ class MyClassB(MyClassA):
     @property
     def num_bazzes(self):
         return len(self.baz)
+
 
 @dataclass
 class MyClassC(SerializableDictDot):
@@ -45,6 +50,7 @@ class MyClassC(SerializableDictDot):
     def num_Bs(self):
         return len(self.B_list)
 
+
 def test_basic_instantiation_with_arguments():
     "Can be instantiated with arguments"
     MyClassA(
@@ -52,54 +58,70 @@ def test_basic_instantiation_with_arguments():
         bar=1,
     )
 
+
 def test_basic_instantiation_from_a_dictionary():
     "Can be instantiated from a dictionary"
-    MyClassA(**{
-        "foo": "a string",
-        "bar": 1,
-    })
+    MyClassA(
+        **{
+            "foo": "a string",
+            "bar": 1,
+        }
+    )
+
 
 def test_access_uding_dot_notation():
     "Keys can be accessed using dot notation"
-    my_A = MyClassA(**{
-        "foo": "a string",
-        "bar": 1,
-    })
+    my_A = MyClassA(
+        **{
+            "foo": "a string",
+            "bar": 1,
+        }
+    )
     assert my_A.foo == "a string"
     assert my_A.bar == 1
-    
-def test_access_uding_dict_notation():
+def test_access_using_dict_notation():
     "Keys can be accessed using dict notation"
-    my_A = MyClassA(**{
-        "foo": "a string",
-        "bar": 1,
-    })
+    my_A = MyClassA(
+        **{
+            "foo": "a string",
+            "bar": 1,
+        }
+    )
     assert my_A["foo"] == "a string"
     assert my_A["bar"] == 1
 
+
 def test_has_keys():
     "the .keys method works"
-    my_A = MyClassA(**{
-        "foo": "a string",
-        "bar": 1,
-    })
+    my_A = MyClassA(
+        **{
+            "foo": "a string",
+            "bar": 1,
+        }
+    )
     assert set(my_A.keys()) == {"foo", "bar"}
+
 
 def test_has_items():
     "the .items method works"
-    my_A = MyClassA(**{
-        "foo": "a string",
-        "bar": 1,
-    })
+    my_A = MyClassA(
+        **{
+            "foo": "a string",
+            "bar": 1,
+        }
+    )
     items = list(my_A.items())
     assert items == [("foo", "a string"), ("bar", 1)]
 
+
 def test_has_to_dict():
     "the .to_dict method works"
-    my_A = MyClassA(**{
-        "foo": "a string",
-        "bar": 1,
-    })
+    my_A = MyClassA(
+        **{
+            "foo": "a string",
+            "bar": 1,
+        }
+    )
     assert my_A.to_dict() == {
         "foo": "a string",
         "bar": 1,
@@ -109,29 +131,30 @@ def test_has_to_dict():
 @pytest.mark.skip(reason="Not sure what our preferred pattern for this is")
 def test_incorrect_type():
     "Throws an error if instantiated with an incorrect type"
-    MyClassA(**{
-        "foo": "a string",
-        "bar": "SHOULD BE AN INT",
-        "baz": ["a", "b", "c"]
-    })
+    MyClassA(**{"foo": "a string", "bar": "SHOULD BE AN INT", "baz": ["a", "b", "c"]})
+
 
 def test_renders_to_a_useful_str():
     "Renders to a string that exposes the internals of the object"
-    assert MyClassA(
-        foo="a string",
-        bar=1,    
-    ).__str__() == """MyClassA(foo='a string', bar=1)"""
+    assert (
+        MyClassA(
+            foo="a string",
+            bar=1,
+        ).__str__()
+        == """MyClassA(foo='a string', bar=1)"""
+    )
 
 
 @pytest.mark.skip(reason="hmmm. We should be able to make this work by default")
 def test_is_json_serializable():
-    assert MyClassA(
-        foo="a string",
-        bar=1,    
-    ).to_json_dict() == {
-        "foo": "a string",
-        "bar": 1
-    }
+    assert (
+        MyClassA(
+            foo="a string",
+            bar=1,
+        ).to_json_dict()
+        == {"foo": "a string", "bar": 1}
+    )
+
 
 def test_missing_keys():
     "Throws a TypeError if instantiated with missing arguments"
@@ -145,27 +168,25 @@ def test_missing_keys():
         )
 
     with raises(TypeError):
-        MyClassA(
-            bar=1
-        )
+        MyClassA(bar=1)
+
 
 def test_extra_keys():
     "Throws a TypeError if instantiated with extra arguments"
 
     with raises(TypeError):
-        MyClassA(**{
-            "foo": "a string",
-            "bar": 1,
-            "baz": ["a", "b", "c"]
-        })
+        MyClassA(**{"foo": "a string", "bar": 1, "baz": ["a", "b", "c"]})
+
 
 def test_update_after_instantiation():
     "Can be updated after instantiation, using both dot and dict notation"
 
-    my_A = MyClassA(**{
-        "foo": "a string",
-        "bar": 1,
-    })
+    my_A = MyClassA(
+        **{
+            "foo": "a string",
+            "bar": 1,
+        }
+    )
     assert my_A["foo"] == "a string"
     assert my_A["bar"] == 1
 
@@ -199,13 +220,15 @@ def test_can_be_subclassed():
     assert my_B.qux == -100
     assert my_B.quux == 43
 
-    my_B = MyClassB(**{
-        "foo": "a string",
-        "bar": 1,
-        "baz": ["a", "b", "c"],
-        "qux": -100,
-        "quux": 43,
-    })
+    my_B = MyClassB(
+        **{
+            "foo": "a string",
+            "bar": 1,
+            "baz": ["a", "b", "c"],
+            "qux": -100,
+            "quux": 43,
+        }
+    )
 
     assert my_B["foo"] == "a string"
     assert my_B["bar"] == 1
@@ -219,35 +242,45 @@ def test_can_be_subclassed():
     assert my_B.qux == -100
     assert my_B.quux == 43
 
+
 def test_can_have_derived_properties():
     "Can have derived properties"
-    my_B = MyClassB(**{
-        "foo": "a string",
-        "bar": 1,
-        "baz": ["a", "b", "c"],
-        "qux": -100,
-    })
+    my_B = MyClassB(
+        **{
+            "foo": "a string",
+            "bar": 1,
+            "baz": ["a", "b", "c"],
+            "qux": -100,
+        }
+    )
     assert my_B.num_bazzes == 3
+
 
 def test_can_have_optional_arguments():
     "Can have optional arguments"
-    my_B = MyClassB(**{
-        "foo": "a string",
-        "bar": 1,
-        "baz": ["a", "b", "c"],
-        # "qux": -100, #Optional property
-    })
+    my_B = MyClassB(
+        **{
+            "foo": "a string",
+            "bar": 1,
+            "baz": ["a", "b", "c"],
+            # "qux": -100, #Optional property
+        }
+    )
     assert my_B.qux == None
+
 
 def test_can_have_default_values():
     "Can have default values"
-    my_B = MyClassB(**{
-        "foo": "a string",
-        "bar": 1,
-        "baz": ["a", "b", "c"],
-        "qux": -100, #Optional property
-    })
+    my_B = MyClassB(
+        **{
+            "foo": "a string",
+            "bar": 1,
+            "baz": ["a", "b", "c"],
+            "qux": -100,  # Optional property
+        }
+    )
     assert my_B.quux == 42
+
 
 def test_can_use_positional_arguments():
     "Can use a normal mix of positional and keyword arguments"
@@ -285,20 +318,24 @@ def test_can_be_nested():
                 foo="A-1",
                 bar=101,
             ),
-            MyClassA(**{
-                "foo": "A-2",
-                "bar": 102,
-            }),
+            MyClassA(
+                **{
+                    "foo": "A-2",
+                    "bar": 102,
+                }
+            ),
         ],
         B_list=[
-            MyClassB(**{
-                "foo": "B-1",
-                "bar": 201,
-                "baz": ["a", "b", "c"],
-                "qux": -100,
-                "quux": 43,
-            })
-        ]
+            MyClassB(
+                **{
+                    "foo": "B-1",
+                    "bar": 201,
+                    "baz": ["a", "b", "c"],
+                    "qux": -100,
+                    "quux": 43,
+                }
+            )
+        ],
     )
 
     # Demonstrate that we can access sub-objects using a mix of dict and dot notation:
@@ -307,6 +344,7 @@ def test_can_be_nested():
     assert my_C["B_list"][0]["quux"] == 43
 
     # Note: we don't currently support dot notation access within lists: `assert my_C["A_list"].1.bar == 102`
+
 
 def test_to_dict_works_recursively():
     "the .to_dict method recursively"
@@ -319,28 +357,32 @@ def test_to_dict_works_recursively():
                 foo="A-1",
                 bar=101,
             ),
-            MyClassA(**{
-                "foo": "A-2",
-                "bar": 102,
-            }),
+            MyClassA(
+                **{
+                    "foo": "A-2",
+                    "bar": 102,
+                }
+            ),
         ],
         B_list=[
-            MyClassB(**{
-                "foo": "B-1",
-                "bar": 201,
-                "baz": ["a", "b", "c"],
-                "qux": -100,
-                "quux": 43,
-            })
-        ]
+            MyClassB(
+                **{
+                    "foo": "B-1",
+                    "bar": 201,
+                    "baz": ["a", "b", "c"],
+                    "qux": -100,
+                    "quux": 43,
+                }
+            )
+        ],
     )
 
     C_dict = my_C.to_dict()
 
-    #Make sure it's a dictionary, not a DictDot
+    # Make sure it's a dictionary, not a DictDot
     assert type(C_dict) == dict
     assert isinstance(C_dict, DictDot) == False
-    #Dictionaries don't support dot notation.
+    # Dictionaries don't support dot notation.
     with raises(AttributeError):
         C_dict.A_list
 
@@ -348,24 +390,28 @@ def test_to_dict_works_recursively():
     assert type(C_dict["B_list"][0]) == dict
 
     assert C_dict == {
-        "alpha_var" : 20,
-        "beta_var" : "beta, I guess",
-        "A_list" : [{
-            "foo": "A-1",
-            "bar":101,
-        },{
-            "foo": "A-2",
-            "bar":102,
-        }],
-        "B_list" : [{
-            "foo": "B-1",
-            "bar": 201,
-            "baz": ["a", "b", "c"],
-            "qux": -100,
-            "quux": 43,
-        }]
+        "alpha_var": 20,
+        "beta_var": "beta, I guess",
+        "A_list": [
+            {
+                "foo": "A-1",
+                "bar": 101,
+            },
+            {
+                "foo": "A-2",
+                "bar": 102,
+            },
+        ],
+        "B_list": [
+            {
+                "foo": "B-1",
+                "bar": 201,
+                "baz": ["a", "b", "c"],
+                "qux": -100,
+                "quux": 43,
+            }
+        ],
     }
-
 
 
 def test_immutability():
@@ -376,10 +422,12 @@ def test_immutability():
         foo: str
         bar: int
 
-    my_D = MyClassD(**{
-        "foo": "a string",
-        "bar": 1,
-    })
+    my_D = MyClassD(
+        **{
+            "foo": "a string",
+            "bar": 1,
+        }
+    )
     assert my_D["foo"] == "a string"
     assert my_D["bar"] == 1
 
@@ -396,8 +444,6 @@ def test_immutability():
     assert my_D.foo == "a string"
 
 
-
-
 def test_reserved_word_key():
     """Can be instantiated with a key that's also a reserved word
     
@@ -411,25 +457,20 @@ For example, test cases use the reserved word: "in" as one of their required fie
     class MyClassE(SerializableDictDot):
         foo: str
         bar: int
-        input : int
-
+        input: int
 
     class MyClassF(MyClassE):
-        def __init__(self,
+        def __init__(
+            self,
             foo,
             bar,
             **kwargs,
         ):
-            super().__init__(
-                foo=foo,
-                bar=bar,
-                input=kwargs["in"]
-            )
-
+            super().__init__(foo=foo, bar=bar, input=kwargs["in"])
 
     my_F = MyClassF(
-        foo= "a string",
-        bar= 1,
+        foo="a string",
+        bar=1,
         **{"in": 10},
     )
     assert my_F["foo"] == "a string"
@@ -437,11 +478,13 @@ For example, test cases use the reserved word: "in" as one of their required fie
     assert my_F["input"] == 10
     assert my_F.input == 10
 
-    my_F = MyClassF(**{
-        "foo": "a string",
-        "bar": 1,
-        "in": 10,
-    })
+    my_F = MyClassF(
+        **{
+            "foo": "a string",
+            "bar": 1,
+            "in": 10,
+        }
+    )
     assert my_F["foo"] == "a string"
     assert my_F["bar"] == 1
     assert my_F["input"] == 10

@@ -1,5 +1,7 @@
-from .configurations import ClassConfig
 import copy
+
+from .configurations import ClassConfig
+
 
 class DictDot:
     def __getitem__(self, item):
@@ -40,7 +42,7 @@ class DictDot:
             # Recursive conversion works on keys that are DictDots...
             if isinstance(value, DictDot):
                 new_dict[key] = value.to_dict()
-            
+
             # ...and when DictDots are nested one layer deeper in lists.
             if isinstance(value, list):
                 for i, element in enumerate(value):
