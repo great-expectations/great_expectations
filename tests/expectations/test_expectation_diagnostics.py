@@ -319,10 +319,6 @@ def test__count_unexpected_cases_and_get_sub_messages__with_an_error():
 
 def test__count_positive_and_negative_example_cases():
     assert (
-        edr._count_positive_and_negative_example_cases(expectation_test_data_case)
-        == (0, 0)
-    )
-    assert edr._count_positive_and_negative_example_cases(expectation_test_data_case) == (
-        1,
-        2,
+        edr._count_positive_and_negative_example_cases([expectation_test_data_case])
+        == (1, 1)
     )

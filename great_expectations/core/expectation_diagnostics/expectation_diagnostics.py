@@ -168,6 +168,10 @@ class ExpectationDiagnostics(SerializableDictDot):
         positive_cases: int = 0
         negative_cases: int = 0
 
+        print("*"*80)
+        print(type(examples))
+        print(examples)
+        print("*"*80)
         for test_data_cases in examples:
             for test in test_data_cases["tests"]:
                 if test["output"]["success"] == True:
