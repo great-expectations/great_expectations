@@ -168,7 +168,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     def _count_unexpected_cases(
         test_diagnostics : ExpectationTestDiagnostics
     ) -> int:
-        """Scans self.examples and returns a 2-ple with the number of cases that did not pass, and a list of dictionaries containing each test_title and whether or not it passed."""
+        """Scans self.examples and returns the number of cases that did not pass."""
 
         unexpected_cases: int = 0
 
