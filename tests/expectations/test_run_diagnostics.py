@@ -197,8 +197,10 @@ def test_expectation__get_renderers():
 
     renderer_diagnostics = my_expectation._get_renderer_diagnostics(
         expectation_name,
-        my_expectation_config,
-        my_validation_result,
+        [{
+            "expectation_config": my_expectation_config,
+            "validation_result": my_validation_result,
+        }]
     )
     assert isinstance(renderer_diagnostics, list)
     assert len(renderer_diagnostics) == 10
@@ -252,8 +254,10 @@ def test_expectation__get_renderers():
 
     renderer_diagnostics = my_expectation._get_renderer_diagnostics(
         expectation_name,
-        my_expectation_config,
-        my_validation_result,
+        [{
+            "expectation_config": my_expectation_config,
+            "validation_result": my_validation_result,
+        }]
     )
     assert isinstance(renderer_diagnostics, list)
     for element in renderer_diagnostics:
@@ -296,8 +300,10 @@ def test_expectation__get_renderers():
 
     renderer_diagnostics = my_expectation._get_renderer_diagnostics(
         expectation_name,
-        my_expectation_config,
-        my_validation_result,
+        [{
+            "expectation_config": my_expectation_config,
+            "validation_result": my_validation_result,
+        }]
     )
     assert isinstance(renderer_diagnostics, list)
     assert len(renderer_diagnostics) == 10
