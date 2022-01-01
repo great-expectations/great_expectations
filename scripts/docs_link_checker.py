@@ -23,26 +23,42 @@ class LinkReport:
 
 
 class LinkChecker:
-    def __init__(self, doc_path: str, site_prefix: str, skip_external: False):
-        self._doc_path = doc_path.strip(os.path.sep)
+    def __init__(
+        self, docs_path: str, docs_root: str, site_prefix: str, skip_external: False
+    ):
+        self._docs_path = docs_path.strip(os.path.sep)
+        self._docs_root = docs_root.strip(os.path.sep)
         self._site_prefix = site_prefix.strip("/")
         self._skip_external = skip_external
 
-        markdown_link_regex = (
-            r"\[(.*?)\]\((.*?)\)"  # inline links, like [Description](link)
-        )
+        markdown_link_regex = r"!?\[(.*?)\]\((.*?)\)"  # inline links, like [Description](link), images start with !
         self._markdown_link_pattern = re.compile(markdown_link_regex)
 
         external_link_regex = r"^https?:\/\/"  # links that start with http or https
         self._external_link_pattern = re.compile(external_link_regex)
 
         # links that being with /{site_prefix}/(?P<path>), may end with #abc
-        absolute_link_regex = r"^\/" + site_prefix + r"\/(?P<path>.*)(?:#\S+)?"
+        absolute_link_regex = r"^\/" + site_prefix + r"\/(?P<path>.*?)(?:#\S+)?$"
         self._absolute_link_pattern = re.compile(absolute_link_regex)
 
         # links starting with . or .., may end with #abc
-        relative_link_regex = r"^(?P<path>\.\.?.*\.md)(?:#\S+)?"
+        relative_link_regex = r"^(?P<path>\.\.?.*\.md)(?:#\S+)?$"
         self._relative_link_pattern = re.compile(relative_link_regex)
+
+        absolute_image_regex = r"^\/" + site_prefix + r"\/(?P<path>.*\.\w{3,4})$"
+        self._absolute_image_pattern = re.compile(absolute_image_regex)
+
+        relative_image_regex = r"^(?P<path>\.\.?.*\.\w{3,4})$"
+        self._relative_image_pattern = re.compile(relative_image_regex)
+
+    def _is_image_link(self, markdown_link: str):
+        return markdown_link.startswith("!")
+
+    def _is_doc_link(self, markdown_link: str):
+        return not self._is_image_link(markdown_link)
+
+    def _is_anchor_link(self, link: str):
+        return link.startswith("#")
 
     def _check_external_link(self, link: str, file: str) -> LinkReport:
         if self._skip_external:
@@ -73,11 +89,19 @@ class LinkChecker:
                 "External link %s in file %s raised a connection error", link, file
             )
 
+    def _get_absolute_path(self, path: str):
+        return os.path.join(self._docs_root, path)
+
+    def _get_relative_path(self, file: str, path: str):
+        # link should be relative to the location of the current file
+        directory = os.path.dirname(file)
+        return os.path.join(directory, path)
+
     def _check_absolute_link(self, link: str, file: str, path: str) -> LinkReport:
         logger.debug("Checking absolute link %s in file %s", link, file)
 
         # absolute links should point to files that exist (with the .md extension added)
-        md_file = os.path.join(self._doc_path, path.rstrip("/")) + ".md"
+        md_file = self._get_absolute_path(path).rstrip("/") + ".md"
         logger.debug("Absolute link %s resolved to path %s", link, md_file)
 
         if not os.path.isfile(md_file):
@@ -87,12 +111,32 @@ class LinkChecker:
             logger.debug("Absolute link %s in file %s found", link, file)
             return None
 
+    def _check_absolute_image(self, link: str, file: str, path: str) -> LinkReport:
+        logger.debug("Cheking absolute image %s in file %s", link, file)
+
+        image_file = self._get_absolute_path(path)
+        if not os.path.isfile(image_file):
+            logger.info("Absolute image %s in file %s was not found", link, file)
+            return LinkReport(link, file, f"Image {image_file} not found")
+        else:
+            logger.debug("Absolute image %s in file %s found", link, file)
+            return None
+
+    def _check_relative_image(self, link: str, file: str, path: str) -> LinkReport:
+        logger.debug("Cheking relative image %s in file %s", link, file)
+
+        image_file = self._get_relative_path(file, path)
+        if not os.path.isfile(image_file):
+            logger.info("Relative image %s in file %s was not found", link, file)
+            return LinkReport(link, file, f"Image {image_file} not found")
+        else:
+            logger.debug("Relative image %s in file %s found", link, file)
+            return None
+
     def _check_relative_link(self, link: str, file: str, path: str) -> LinkReport:
         logger.debug("Checking relative link %s in file %s", link, file)
 
-        # link should be relative to the location of the current file
-        directory = os.path.dirname(file)
-        md_file = os.path.join(self._doc_path, directory, path)
+        md_file = self._get_relative_path(file, path)
         logger.debug("Relative link %s resolved to path %s", link, md_file)
 
         if not os.path.isfile(md_file):
@@ -102,26 +146,35 @@ class LinkChecker:
             logger.debug("Relative link %s in file %s found", link, file)
             return None
 
-    def check_link(self, link: str, file: str) -> LinkReport:
-        has_match = False
+    def check_link(self, match: re.Match, file: str) -> LinkReport:
+        link = match.group(2)
+
+        # skip links that are anchor only (start with #)
+        if self._is_anchor_link(link):
+            return None
 
         if self._external_link_pattern.match(link):
-            has_match = True
             result = self._check_external_link(link, file)
+        elif self._is_image_link(match.group(0)):
+            match = self._relative_image_pattern.match(link)
+            if match:
+                result = self._check_relative_image(link, file, match.group("path"))
+            else:
+                match = self._absolute_image_pattern.match(link)
+                if match:
+                    result = self._check_absolute_image(link, file, match.group("path"))
+                else:
+                    result = LinkReport(link, file, "Invalid image link format")
         else:
             match = self._relative_link_pattern.match(link)
             if match:
-                has_match = True
                 result = self._check_relative_link(link, file, match.group("path"))
             else:
                 match = self._absolute_link_pattern.match(link)
                 if match:
-                    has_match = True
                     result = self._check_absolute_link(link, file, match.group("path"))
-
-        if not has_match:
-            logger.info("Link %s in file %s is an invalid format", link, file)
-            result = LinkReport(link, file, "Invalid link format")
+                else:
+                    result = LinkReport(link, file, "Invalid link format")
 
         return result
 
@@ -129,13 +182,12 @@ class LinkChecker:
         with open(file) as f:
             contents = f.read()
 
-        matches = self._markdown_link_pattern.findall(contents)
+        matches = self._markdown_link_pattern.finditer(contents)
 
         result: List[LinkReport] = []
 
         for match in matches:
-            _, link = match
-            report = self.check_link(link, file)
+            report = self.check_link(match, file)
             if report is not None:
                 result.append(report)
 
@@ -143,20 +195,32 @@ class LinkChecker:
 
 
 @click.command()
-@click.option("--path", "-p", default=".", help="Path to markdown files")
+@click.option("--path", "-p", default=".", help="Path to markdown files to check")
 @click.option(
-    "--site-prefix", "-s", default="", help="Prefix for resolving absolute paths"
+    "--docs-root", "-r", default=None, help="Root to all docs for link checking"
+)
+@click.option(
+    "--site-prefix",
+    "-s",
+    default="",
+    help="Top-most folder in the docs URL for resolving absolute paths",
 )
 @click.option("--skip-external", is_flag=True)
-def scan_docs(path: str, site_prefix: str, skip_external: bool):
+def scan_docs(path: str, docs_root: str, site_prefix: str, skip_external: bool):
     # verify that our path is correct
     if not os.path.isdir(path):
         print(f"Docs path: {path} is not a directory")
         exit(1)
 
+    if docs_root is None:
+        docs_root = path
+    elif not os.path.isdir(docs_root):
+        print(f"Docs root path: {docs_root} is not a directory")
+        exit(1)
+
     # prepare our return value
     result: List[LinkReport] = list()
-    checker = LinkChecker(path, site_prefix, skip_external)
+    checker = LinkChecker(path, docs_root, site_prefix, skip_external)
 
     for file in glob.glob(f"{path}/**/*.md", recursive=True):
         report = checker.check_file(file)
