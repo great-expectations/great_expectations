@@ -9,6 +9,8 @@ class TestData(dict):
 
 @dataclass
 class ExpectationTestCase(SerializableDictDot):
+    """A single test case, with input arguments and output"""
+
     title: str
     input: Dict[str, Any]
     output: Dict[str, Any]
@@ -42,5 +44,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
 
 @dataclass
 class ExpectationTestDataCases(SerializableDictDot):
+    """Pairs a test dataset and a list of test cases to execute against that data."""
+
     data : TestData
     tests : List[ExpectationTestCase]
