@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-# from pydantic.dataclasses import dataclass
+# from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
 from great_expectations.types import SerializableDictDot
@@ -25,7 +25,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     It has three external-facing use cases:
 
     1. `ExpectationDiagnostics.to_dict()` creates the JSON object that populates the Gallery.
-    2. `ExpectationDiagnostics.print_checklist()`
+    2. `ExpectationDiagnostics.generate_checklist()` creates CLI-type string output to assist with development.
     """
 
     # This object is taken directly from the Expectation class, without modification
@@ -61,13 +61,12 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         return checks
 
-    def print_checklist(self) -> str:
-        """Print the checklist in string format. Also return it as a string, for convenience in tests."""
+    def generate_checklist(self) -> str:
+        """Generates the checklist in CLI-appropriate string format."""
         str_ = self._convert_checks_into_output_message(
             self.description["camel_name"],
             self.checklist,
         )
-        print(str_)
         return(str_)
 
     @staticmethod

@@ -179,7 +179,7 @@ def test_expectation__get_renderers():
     expectation_name = "expect_column_values_to_match_regex"
     my_expectation = _registered_expectations[expectation_name]()
 
-    supported_renderers = my_expectation._get_supported_renderers(expectation_name)
+    supported_renderers = my_expectation._get_registered_renderers(expectation_name)
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
 
@@ -236,7 +236,7 @@ def test_expectation__get_renderers():
     expectation_name = "expect_column_values_to_equal_three___second_iteration"
     my_expectation = _registered_expectations[expectation_name]()
 
-    supported_renderers = my_expectation._get_supported_renderers(expectation_name)
+    supported_renderers = my_expectation._get_registered_renderers(expectation_name)
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
 
@@ -283,7 +283,7 @@ def test_expectation__get_renderers():
     expectation_name = "expect_column_values_to_equal_three___third_iteration"
     my_expectation = _registered_expectations[expectation_name]()
 
-    supported_renderers = my_expectation._get_supported_renderers(expectation_name)
+    supported_renderers = my_expectation._get_registered_renderers(expectation_name)
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
     my_batch = Batch(data=pd.DataFrame(example_data))

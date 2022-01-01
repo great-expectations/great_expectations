@@ -7,9 +7,8 @@ from .fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree__BrokenIteration,
 )
 
-def test_generate_diagnostic_checklist__first_iteration():
-    output_message = ExpectColumnValuesToEqualThree().generate_diagnostic_checklist()
-    print(output_message)
+def test_print_diagnostic_checklist__first_iteration():
+    output_message = ExpectColumnValuesToEqualThree().print_diagnostic_checklist()
 
     assert (
         output_message
@@ -23,9 +22,9 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
     )
 
 
-def test_generate_diagnostic_checklist__second_iteration():
+def test_print_diagnostic_checklist__second_iteration():
     output_message = (
-        ExpectColumnValuesToEqualThree__SecondIteration().generate_diagnostic_checklist()
+        ExpectColumnValuesToEqualThree__SecondIteration().print_diagnostic_checklist()
     )
     print(output_message)
 
@@ -42,9 +41,9 @@ Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration:
     )
 
 
-def test_generate_diagnostic_checklist__third_iteration():
+def test_print_diagnostic_checklist__third_iteration():
     output_message = (
-        ExpectColumnValuesToEqualThree__ThirdIteration().generate_diagnostic_checklist()
+        ExpectColumnValuesToEqualThree__ThirdIteration().print_diagnostic_checklist()
     )
     print(output_message)
 

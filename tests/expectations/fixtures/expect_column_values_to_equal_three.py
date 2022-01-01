@@ -95,7 +95,10 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
         mostly = configuration.kwargs.get("mostly")
         regex = configuration.kwargs.get("regex")
 
-        return f'Do at least {mostly * 100}% of values in column "{column}" equal 3?'
+        if mostly:
+            return f'Do at least {mostly * 100}% of values in column "{column}" equal 3?'
+        else:
+            return f'Do all the values in column "{column}" equal 3?'
 
     @classmethod
     @renderer(renderer_type="renderer.answer")
@@ -105,10 +108,18 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
         regex = result.expectation_config.kwargs.get("regex")
-        if result.success:
-            return f'At least {mostly * 100}% of values in column "{column}" equal 3.'
+
+        if mostly:
+            if result.success:
+                return f'At least {mostly * 100}% of values in column "{column}" equal 3.'
+            else:
+                return f'Less than {mostly * 100}% of values in column "{column}" equal 3.'
         else:
-            return f'Less than {mostly * 100}% of values in column "{column}" equal 3.'
+            if result.success:
+                return f'All of the values in column "{column}" equal 3.'
+            else:
+                return f'Not all of the values in column "{column}" equal 3.'
+
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
