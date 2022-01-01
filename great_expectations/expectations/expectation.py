@@ -1167,9 +1167,6 @@ class Expectation(metaclass=MetaExpectation):
             test_data_cases=test_data_cases,
             execution_engine_diagnostics=execution_engines,
         )
-        print(execution_engines)
-        print(len(test_data_cases))
-        print(len(exp_tests))
 
         for exp_test in exp_tests:
             try:
@@ -1208,7 +1205,6 @@ class Expectation(metaclass=MetaExpectation):
         retrofitted_examples = []
         for test_data_cases in test_data_cases:
             retro_test_data_case = test_data_cases.to_dict()
-            print(retro_test_data_case)
 
             retro_test_cases = []
             for test_case in test_data_cases.tests:
@@ -1332,8 +1328,6 @@ class Expectation(metaclass=MetaExpectation):
                 has_question_renderer= False,
             )
             metric_diagnostics_list.append(new_metric_diagnostics)
-
-        print(metric_diagnostics_list)
 
         return metric_diagnostics_list
 
