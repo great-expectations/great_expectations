@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
 from great_expectations.types import SerializableDictDot
@@ -13,7 +13,7 @@ class ExpectationTestCase(SerializableDictDot):
     input: Dict[str, Any]
     output: Dict[str, Any]
     exact_match_out: bool
-    suppress_test_for: List[str]
+    suppress_test_for: List[str] = field(default_factory=list)
 
 class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
     """This class provides an adapter between the test cases developed prior to Great Expectations' 0.14 release and the newer ExpectationTestCase dataclass
@@ -28,8 +28,8 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
         *,
         title,
         exact_match_out,
-        suppress_test_for,
         out,
+        suppress_test_for = [],
         **kwargs,
     ):
         super().__init__(

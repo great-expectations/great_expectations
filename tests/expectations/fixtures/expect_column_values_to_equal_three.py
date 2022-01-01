@@ -74,8 +74,8 @@ class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualT
     ]
 
     library_metadata = {
-        "maturity": "experimental",
-        "package": "great_expectations",
+        "maturity": "EXPERIMENTAL",
+        # "package": "great_expectations",
         "tags": ["tag", "other_tag"],
         "contributors": [
             "@abegong",

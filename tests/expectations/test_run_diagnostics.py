@@ -1,8 +1,8 @@
 import json
-
 import pandas as pd
 
 from great_expectations.core.batch import Batch
+from great_expectations.core.expectation_diagnostics.supporting_types import ExpectationRendererDiagnostics
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ExpectationConfiguration,
@@ -20,7 +20,7 @@ def test_expectation_self_check():
 
     my_expectation = ExpectColumnValuesToEqualThree()
     report_object = my_expectation.run_diagnostics()
-    print(json.dumps(report_object, indent=2))
+    # print(json.dumps(report_object, indent=2))
 
     assert report_object == {
         "description": {
@@ -29,18 +29,21 @@ def test_expectation_self_check():
             "short_description": "",
             "docstring": "",
         },
-        "renderers": {},
+        "renderers": [],
         "examples": [],
         "metrics": [],
-        "execution_engines": {},
+        "execution_engines": {
+            "PandasExecutionEngine": False,
+            "SqlAlchemyExecutionEngine": False,
+            "SparkDFExecutionEngine": False,
+        },
         "library_metadata": {
-            "maturity": None,
-            "package": None,
+            "maturity": "CONCEPT_ONLY",
             "tags": [],
             "contributors": [],
         },
-        "test_report": [],
-        "diagnostics_report": [],
+        "tests": [],
+        "errors": [],
     }
 
 
@@ -48,15 +51,15 @@ def test_include_in_gallery_flag():
 
     my_expectation = ExpectColumnValuesToEqualThree__SecondIteration()
     report_object = my_expectation.run_diagnostics()
-    print(json.dumps(report_object["examples"], indent=2))
+    # print(json.dumps(report_object["examples"], indent=2))
 
     assert len(report_object["examples"][0]["tests"]) == 1
     assert report_object["examples"][0]["tests"][0] == {
         "title": "positive_test_with_mostly",
         "exact_match_out": False,
-        "in": {"column": "mostly_threes", "mostly": 0.6},
+        "input": {"column": "mostly_threes", "mostly": 0.6},
         "include_in_gallery": True,
-        "out": {
+        "output": {
             "success": True,
             "unexpected_index_list": [6, 7],
             "unexpected_list": [2, -1],
@@ -69,7 +72,7 @@ def test_self_check_on_an_existing_expectation():
     expectation = _registered_expectations[expectation_name]
 
     report_object = expectation().run_diagnostics()
-    print(json.dumps(report_object, indent=2))
+    # print(json.dumps(report_object, indent=2))
 
     report_object["description"].pop(
         "docstring"
@@ -77,9 +80,9 @@ def test_self_check_on_an_existing_expectation():
 
     # one of the test cases in the examples for this expectation is failing on our CI
     # and the number of items depends on the flags
-    # we will not verify the content of test_report
-    test_report = report_object.pop("test_report")
-    report_object.pop("diagnostics_report")
+    # we will not verify the contents of `tests` or `errors`
+    report_object.pop("tests")
+    report_object.pop("errors")
 
     assert report_object == {
         "description": {
@@ -149,18 +152,18 @@ def test_self_check_on_an_existing_expectation():
         "library_metadata": {
             "contributors": ["@great_expectations"],
             "maturity": "production",
-            "package": "great_expectations",
+            # "package": "great_expectations",
             "requirements": [],
             "tags": ["core expectation", "column map expectation"],
         },
         # "test_report": [
         #     {
-        #         "test title": "negative_test_insufficient_mostly_and_one_non_matching_value",
+        #         "test_title": "negative_test_insufficient_mostly_and_one_non_matching_value",
         #         "backend": "pandas",
         #         "success": "true",
         #     },
         #     {
-        #         "test title": "positive_test_exact_mostly_w_one_non_matching_value",
+        #         "test_title": "positive_test_exact_mostly_w_one_non_matching_value",
         #         "backend": "pandas",
         #         "success": "true",
         #     },
@@ -189,26 +192,39 @@ def test_expectation__get_renderers():
     )
     my_validation_result = my_validation_results[0]
 
-    renderer_dict = my_expectation._get_renderer_dict(
+    renderer_diagnostics = my_expectation._get_renderer_diagnostics(
         expectation_name,
         my_expectation_config,
         my_validation_result,
     )
+    assert isinstance(renderer_diagnostics, list)
+    assert len(renderer_diagnostics) == 10
+    for element in renderer_diagnostics:
+        print(json.dumps(element.to_dict(), indent=2))
+        assert isinstance(element, ExpectationRendererDiagnostics)
 
-    print(json.dumps(renderer_dict, indent=2))
-
-    assert renderer_dict == {
-        "standard": {
-            "renderer.answer": 'Less than 90.0% of values in column "a" match the regular expression ^a.',
-            "renderer.diagnostic.unexpected_statement": "\n\n1 unexpected values found. 20% of 5 total rows.",
-            "renderer.diagnostic.observed_value": "20% unexpected",
-            "renderer.diagnostic.status_icon": "",
-            "renderer.diagnostic.unexpected_table": None,
-            "renderer.prescriptive": "a values must match this regular expression: ^a, at least 90 % of the time.",
-            "renderer.question": 'Do at least 90.0% of values in column "a" match the regular expression ^a?',
-        },
-        "custom": [],
+    print([rd.name for rd in renderer_diagnostics])
+    assert set([rd.name for rd in renderer_diagnostics]) == {
+        'renderer.diagnostic.unexpected_statement',
+        'renderer.diagnostic.meta_properties',
+        'renderer.diagnostic.unexpected_table',
+        'renderer.diagnostic.status_icon',
+        'renderer.answer',
+        'atomic.prescriptive.summary',
+        'atomic.diagnostic.observed_value',
+        'renderer.question',
+        'renderer.prescriptive',
+        'renderer.diagnostic.observed_value'
     }
+
+    # assert renderer_diagnostics[0].to_dict() == {
+    #     "name": "renderer.diagnostic.meta_properties",
+    #     "is_supported": True,
+    #     "is_standard": False,
+    #     "samples": [
+    #         ""
+    #     ]
+    # }
 
     # Expectation with no new renderers specified
     print([x for x in _registered_expectations.keys() if "second" in x])
@@ -231,25 +247,28 @@ def test_expectation__get_renderers():
     )
     my_validation_result = my_validation_results[0]
 
-    renderer_dict = my_expectation._get_renderer_dict(
+    renderer_diagnostics = my_expectation._get_renderer_diagnostics(
         expectation_name,
         my_expectation_config,
         my_validation_result,
     )
+    assert isinstance(renderer_diagnostics, list)
+    for element in renderer_diagnostics:
+        print(json.dumps(element.to_dict(), indent=2))
+        assert isinstance(element, ExpectationRendererDiagnostics)
 
-    print(json.dumps(renderer_dict, indent=2))
-
-    assert renderer_dict == {
-        "standard": {
-            "renderer.answer": None,
-            "renderer.diagnostic.observed_value": "25% unexpected",
-            "renderer.diagnostic.status_icon": "",
-            "renderer.diagnostic.unexpected_statement": "",
-            "renderer.diagnostic.unexpected_table": None,
-            "renderer.prescriptive": "expect_column_values_to_equal_three___second_iteration(**{'column': 'mostly_threes', 'mostly': 0.6})",
-            "renderer.question": None,
-        },
-        "custom": [],
+    assert len(renderer_diagnostics) == 10
+    assert set([rd.name for rd in renderer_diagnostics]) == {
+        'renderer.diagnostic.observed_value',
+        'renderer.prescriptive',
+        'renderer.diagnostic.meta_properties',
+        'renderer.diagnostic.status_icon',
+        'renderer.diagnostic.unexpected_table',
+        'atomic.diagnostic.observed_value',
+        'atomic.prescriptive.summary',
+        'renderer.answer',
+        'renderer.question',
+        'renderer.diagnostic.unexpected_statement'
     }
 
     # Expectation with no renderers specified
@@ -272,25 +291,29 @@ def test_expectation__get_renderers():
     )
     my_validation_result = my_validation_results[0]
 
-    renderer_dict = my_expectation._get_renderer_dict(
+    renderer_diagnostics = my_expectation._get_renderer_diagnostics(
         expectation_name,
         my_expectation_config,
         my_validation_result,
     )
+    assert isinstance(renderer_diagnostics, list)
+    assert len(renderer_diagnostics) == 10
+    for element in renderer_diagnostics:
+        print(json.dumps(element.to_dict(), indent=2))
+        assert isinstance(element, ExpectationRendererDiagnostics)
 
-    print(json.dumps(renderer_dict, indent=2))
-
-    assert renderer_dict == {
-        "standard": {
-            "renderer.answer": 'At least 60.0% of values in column "mostly_threes" equal 3.',
-            "renderer.diagnostic.observed_value": "25% unexpected",
-            "renderer.diagnostic.status_icon": "",
-            "renderer.diagnostic.unexpected_statement": "",
-            "renderer.diagnostic.unexpected_table": None,
-            "renderer.prescriptive": "mostly_threes values must be equal to 3, at least 60 % of the time.",
-            "renderer.question": 'Do at least 60.0% of values in column "mostly_threes" equal 3?',
-        },
-        "custom": [],
+    assert len(renderer_diagnostics) == 10
+    assert set([rd.name for rd in renderer_diagnostics]) == {
+        'renderer.diagnostic.observed_value',
+        'renderer.prescriptive',
+        'renderer.diagnostic.meta_properties',
+        'renderer.diagnostic.status_icon',
+        'renderer.diagnostic.unexpected_table',
+        'atomic.diagnostic.observed_value',
+        'atomic.prescriptive.summary',
+        'renderer.answer',
+        'renderer.question',
+        'renderer.diagnostic.unexpected_statement'
     }
 
 
@@ -335,32 +358,34 @@ def test_expectation_is_abstract():
 
 
 def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
-    diagnostic_report = ExpectColumnValuesToEqualThree__BrokenIteration().run_diagnostics()
-    print(json.dumps(diagnostic_report, indent=2))
+    expectation_diagnostics = ExpectColumnValuesToEqualThree__BrokenIteration().run_diagnostics()
+    # print(json.dumps(expectation_diagnostics.to_dict(), indent=2))
 
-    test_report = diagnostic_report["test_report"]
+    tests = expectation_diagnostics["tests"]
     
-    assert len(test_report)==5
-    assert test_report[0] == {
-        "test title": "positive_test_with_mostly",
+    assert len(tests)==5
+    assert tests[0].to_dict() == {
+        "test_title": "positive_test_with_mostly",
         "backend": "pandas",
-        "test_passed": "true"
+        "test_passed": True,
+        "error_message": None,
+        "stack_trace": None,
     }
 
-    assert set(test_report[3].keys()) == {
-        "test title",
+    assert set(tests[3].keys()) == {
+        "test_title",
         "backend",
         "test_passed",
         "error_message",
         "stack_trace"
     }
-    assert test_report[3]["test_passed"] == "false"
+    assert tests[3]["test_passed"] == False
 
-    assert set(test_report[4].keys()) == {
-        "test title",
+    assert set(tests[4].keys()) == {
+        "test_title",
         "backend",
         "test_passed",
         "error_message",
         "stack_trace"
     }
-    assert test_report[4]["test_passed"] == "false"
+    assert tests[4]["test_passed"] == False
