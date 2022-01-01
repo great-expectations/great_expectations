@@ -61,14 +61,14 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         return checks
 
-    @property
     def print_checklist(self) -> str:
-        print(
-            self._convert_checks_into_output_message(
-                self.description["camel_name"],
-                self.checklist,
-            )
+        """Print the checklist in string format. Also return it as a string, for convenience in tests."""
+        str_ = self._convert_checks_into_output_message(
+            self.description["camel_name"],
+            self.checklist,
         )
+        print(str_)
+        return(str_)
 
     @staticmethod
     def _check_library_metadata(
@@ -110,8 +110,9 @@ class ExpectationDiagnostics(SerializableDictDot):
                 "passed": False,
             })
 
-    @staticmethod
+    @classmethod
     def _check_example_cases(
+        cls,
         examples : ExpectationTestDataCases,
         tests : ExpectationTestDiagnostics,
     ) -> ExpectationDiagnosticCheckMessage:
@@ -121,12 +122,8 @@ class ExpectationDiagnostics(SerializableDictDot):
         (
             positive_cases,
             negative_cases,
-        ) = self._count_positive_and_negative_example_cases(
-            self.examples
-        )
-        unexpected_cases = self._count_unexpected_test_cases(
-            self.tests
-        )
+        ) = cls._count_positive_and_negative_example_cases(examples)
+        unexpected_cases = cls._count_unexpected_test_cases(tests)
         passed = (
             (positive_cases > 0) and (negative_cases > 0) and (unexpected_cases == 0)
         )
