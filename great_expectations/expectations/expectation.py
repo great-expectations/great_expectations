@@ -986,8 +986,6 @@ class Expectation(metaclass=MetaExpectation):
         #         SqlAlchemyExecutionEngine=False,
         #         SparkDFExecutionEngine=False
         #     )
-        print(library_metadata)
-        print(renderers)
         return ExpectationDiagnostics(
             library_metadata= library_metadata,
             examples= examples,
@@ -1283,11 +1281,18 @@ class Expectation(metaclass=MetaExpectation):
 
             return "\n".join(sub_result_list)
 
-        elif type(rendered_result) == RenderedStringTemplateContent:
+        elif isinstance(rendered_result, RenderedStringTemplateContent):
+            return rendered_result.__str__()
+
+        elif isinstance(rendered_result, CollapseContent):
+            return rendered_result.__str__()
+
+        elif isinstance(rendered_result, RenderedAtomicContent):
             return rendered_result.__str__()
 
         else:
-            print(type(rendered_result))
+            raise TypeError(f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string.")
+            # print(type(rendered_result))
 
     def _get_renderer_diagnostics(
         self,
@@ -1318,8 +1323,9 @@ class Expectation(metaclass=MetaExpectation):
                         configuration=executed_test_example["expectation_config"],
                         result=executed_test_example["validation_result"],
                     )
-                    rendered_result_str = self._get_rendered_result_as_string(rendered_result)
-                    samples.append(rendered_result_str)
+                    if rendered_result != None:
+                        rendered_result_str = self._get_rendered_result_as_string(rendered_result)
+                        samples.append(rendered_result_str)
 
             new_renderer_diagnostics = ExpectationRendererDiagnostics(
                 name = renderer_name,
