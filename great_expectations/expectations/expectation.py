@@ -955,27 +955,23 @@ class Expectation(metaclass=MetaExpectation):
         #         stack_trace= traceback.format_exc(),
         #     ))
 
-        introspected_execution_engines = ExpectationExecutionEngineDiagnostics(
-            PandasExecutionEngine=False,
-            SqlAlchemyExecutionEngine=False,
-            SparkDFExecutionEngine=False
+        introspected_execution_engines : ExpectationExecutionEngineDiagnostics = self._get_execution_engine_diagnostics(
+            metric_diagnostics_list,
         )
-        if metric_diagnostics_list is not []:
-            introspected_execution_engines : ExpectationExecutionEngineDiagnostics = self._get_execution_engine_diagnostics(
-                metric_diagnostics_list,
-            )
-            # report_obj.update({"execution_engines": introspected_execution_engines})
 
-        # test_results = []
-        # try:
+        test_results : List[ExpectationTestDiagnostics] = self._get_test_results(
+            expectation_type=description_diagnostics.snake_name,
+            test_data_cases=self._get_examples(return_only_gallery_examples=False),
+            execution_engine_diagnostics=introspected_execution_engines,
+        )
 
-        tests = self._get_examples(return_only_gallery_examples=False)
-        if len(tests) > 0 and introspected_execution_engines is not None:
-            test_results = self._get_test_results(
-                description_diagnostics.snake_name,
-                tests,
-                introspected_execution_engines,
-            )
+        # tests = self._get_examples(return_only_gallery_examples=False)
+        # if len(tests) > 0 and introspected_execution_engines is not None:
+        #     test_results = self._get_test_results(
+        #         description_diagnostics.snake_name,
+        #         tests,
+        #         introspected_execution_engines,
+        #     )
                 # report_obj.update({"tests": test_results})
         # except Exception as e:
         #     # report_obj = self._add_error_to_diagnostics_report(
@@ -1181,16 +1177,24 @@ class Expectation(metaclass=MetaExpectation):
     @classmethod
     def _get_test_results(
         cls,
-        snake_name,
-        test_data_cases,
-        execution_engines,
-    ):
+        expectation_type: str,
+        test_data_cases: List[ExpectationTestDataCases],
+        execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
+    ) -> List[ExpectationTestDiagnostics]:
+        # test_data_cases = cls._get_examples(return_only_gallery_examples=False)
+        # if len(tests) > 0 and introspected_execution_engines is not None:
+        #     test_results = self._get_test_results(
+        #         description_diagnostics.snake_name,
+        #         tests,
+        #         introspected_execution_engines,
+        #     )
+
         test_results = []
 
         exp_tests = cls._generate_expectation_tests(
-            snake_name=snake_name,
+            snake_name=expectation_type,
             test_data_cases=test_data_cases,
-            execution_engine_diagnostics=execution_engines,
+            execution_engine_diagnostics=execution_engine_diagnostics,
         )
 
         for exp_test in exp_tests:
@@ -1317,22 +1321,28 @@ class Expectation(metaclass=MetaExpectation):
     @staticmethod
     def _get_execution_engine_diagnostics(
         metric_diagnostics_list : List[ExpectationMetricDiagnostics],
-    ) -> ExpectationExecutionEngineDiagnostics:
-        expectation_engines = {}
-        for provider in [
+        execution_engine_names : List[str] = [
             "PandasExecutionEngine",
             "SqlAlchemyExecutionEngine",
             "SparkDFExecutionEngine",
-        ]:
+        ],
+    ) -> ExpectationExecutionEngineDiagnostics:
+        """Check to see which execution_engines are fully supported for this Exepctation.
+        
+        In order for a given execution engine to count, *every* metric must have support on that execution engines.
+        """
+
+        execution_engines = {}
+        for provider in execution_engine_names:
             all_true = True
             for metric_diagnostics in metric_diagnostics_list:
-                if not provider in _registered_metrics[metric_diagnostics.name]["providers"]:
+                has_provider = provider in _registered_metrics[metric_diagnostics.name]["providers"]
+                if not has_provider:
                     all_true = False
-                    break
 
-            expectation_engines[provider] = all_true
+            execution_engines[provider] = all_true
 
-        return ExpectationExecutionEngineDiagnostics(**expectation_engines)
+        return ExpectationExecutionEngineDiagnostics(**execution_engines)
         
 
     def _get_metric_diagnostics_list(
