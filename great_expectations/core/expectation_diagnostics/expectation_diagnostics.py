@@ -1,5 +1,5 @@
-# from dataclasses import dataclass
-from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
+# from pydantic.dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
 from great_expectations.types import SerializableDictDot
