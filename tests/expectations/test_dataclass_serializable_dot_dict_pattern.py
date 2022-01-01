@@ -2,7 +2,8 @@ from dataclasses import FrozenInstanceError
 from typing import Any, Dict, List, Optional
 
 import pytest
-from pydantic.dataclasses import dataclass
+# from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
 from pytest import raises
 
 from great_expectations.types import DictDot, SerializableDictDot

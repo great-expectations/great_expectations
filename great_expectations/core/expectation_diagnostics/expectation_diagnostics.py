@@ -1,5 +1,5 @@
-# from dataclasses import dataclass
-from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
+# from pydantic.dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
 from great_expectations.types import SerializableDictDot
@@ -101,10 +101,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         ) = self._count_positive_and_negative_example_cases(
             self.examples
         )
-        (
-            unexpected_cases,
-            sub_messages,
-        ) = self._count_unexpected_cases_and_get_sub_messages(
+        unexpected_cases = self._count_unexpected_cases(
             self.tests
         )
         passed = (
@@ -121,7 +118,6 @@ class ExpectationDiagnostics(SerializableDictDot):
             checks.append(
                 {
                     "message": message,
-                    "sub_messages": sub_messages,
                     "passed": passed,
                 }
             )
@@ -129,16 +125,9 @@ class ExpectationDiagnostics(SerializableDictDot):
         # Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine
         message = "Core logic exists and passes tests on at least one Execution Engine"
         successful_execution_engines = 0
-        sub_messages = []
         for k, v in self.execution_engines.items():
-            if v:
+            if v == True:
                 successful_execution_engines += 1
-            sub_messages += [
-                {
-                    "message": k,
-                    "passed": v,
-                }
-            ]
 
         if successful_execution_engines > 0:
             checks.append(
@@ -151,12 +140,10 @@ class ExpectationDiagnostics(SerializableDictDot):
             checks.append(
                 {
                     "message": message,
-                    "sub_messages": sub_messages,
                     "passed": False,
                 }
             )
 
-        # output_message = self._convert_checks_into_output_message(checks)
         return checks
 
     @staticmethod
