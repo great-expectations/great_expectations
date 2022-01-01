@@ -1,7 +1,7 @@
 from dataclasses import field
 import dataclasses
-from pydantic.dataclasses import dataclass
-# from dataclasses import dataclass
+# from pydantic.dataclasses import dataclass
+from dataclasses import dataclass
 from enum import Enum
 import inspect
 import logging
