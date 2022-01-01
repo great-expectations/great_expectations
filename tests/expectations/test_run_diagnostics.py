@@ -19,10 +19,10 @@ from .fixtures.expect_column_values_to_equal_three import (
 def test_expectation_self_check():
 
     my_expectation = ExpectColumnValuesToEqualThree()
-    report_object = my_expectation.run_diagnostics()
-    # print(json.dumps(report_object, indent=2))
+    expectation_diagnostic = my_expectation.run_diagnostics()
+    # print(json.dumps(expectation_diagnostic.to_dict(), indent=2))
 
-    assert report_object == {
+    assert expectation_diagnostic.to_dict() == {
         "description": {
             "camel_name": "ExpectColumnValuesToEqualThree",
             "snake_name": "expect_column_values_to_equal_three",
@@ -54,11 +54,12 @@ def test_include_in_gallery_flag():
     # print(json.dumps(report_object["examples"], indent=2))
 
     assert len(report_object["examples"][0]["tests"]) == 1
-    assert report_object["examples"][0]["tests"][0] == {
+    assert report_object["examples"][0]["tests"][0].to_dict() == {
         "title": "positive_test_with_mostly",
         "exact_match_out": False,
         "input": {"column": "mostly_threes", "mostly": 0.6},
-        "include_in_gallery": True,
+        # "include_in_gallery": True,
+        "suppress_test_for": [],
         "output": {
             "success": True,
             "unexpected_index_list": [6, 7],
