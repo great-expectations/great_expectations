@@ -20,13 +20,7 @@ class DictDot:
         return len(self.__dict__)
 
     def keys(self) -> set:
-        # This is needed to play nice with pydantic.
-        # Yes, this means that this method returns a different object than an dict
-        keys = set(self.__dict__.keys())
-        if "__initialised__" in keys:
-            keys.remove("__initialised__")
-
-        return keys
+        return self.to_dict().keys()
 
     def items(self):
         return self.to_dict().items()
@@ -40,6 +34,20 @@ class DictDot:
         # This is needed to play nice with pydantic.
         if "__initialised__" in new_dict:
             del new_dict["__initialised__"]
+
+        # DictDot's to_dict method works recursively, when a DictDot contains other DictDots.
+        for key, value in new_dict.items():
+            # Recursive conversion works on keys that are DictDots...
+            if isinstance(value, DictDot):
+                new_dict[key] = value.to_dict()
+            
+            # ...and when DictDots are nested one layer deeper in lists.
+            if isinstance(value, list):
+                for i, element in enumerate(value):
+                    if isinstance(element, DictDot):
+                        new_dict[key][i] = element.to_dict()
+
+            # Note: conversion will not work automatically if there are additional layers in between.
 
         return new_dict
 
