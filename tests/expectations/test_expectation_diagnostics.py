@@ -193,7 +193,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
     )
 
 
-def test__count_unexpected_cases_and_get_sub_messages__with_everything_passing():
+def test__count_unexpected_cases___with_everything_passing():
     tests = [
         {
             "test_title": "positive_test_with_mostly",
@@ -211,27 +211,15 @@ def test__count_unexpected_cases_and_get_sub_messages__with_everything_passing()
             "test_passed": "true",
         },
     ]
-    print(
-        edr._count_unexpected_cases_and_get_sub_messages(
-            tests
-        )
-    )
     assert (
-        edr._count_unexpected_cases_and_get_sub_messages(
+        edr._count_unexpected_cases(
             tests
         )
-        == (
-            0,
-            [
-                {"message": "positive_test_with_mostly", "passed": True},
-                {"message": "negative_test_with_mostly", "passed": True},
-                {"message": "other_negative_test_with_mostly", "passed": True},
-            ],
-        )
+        == 0
     )
 
 
-def test__count_unexpected_cases_and_get_sub_messages__with_one_failure():
+def test__count_unexpected_cases__with_one_failure():
     tests = [
         {
             "test_title": "positive_test_with_mostly",
@@ -249,26 +237,14 @@ def test__count_unexpected_cases_and_get_sub_messages__with_one_failure():
             "test_passed": "true",
         },
     ]
-    print(
-        edr._count_unexpected_cases_and_get_sub_messages(
-            tests
-        )
-    )
     assert (
-        edr._count_unexpected_cases_and_get_sub_messages(
+        edr._count_unexpected_cases(
             tests
         )
-        == (
-            1,
-            [
-                {"message": "positive_test_with_mostly", "passed": False},
-                {"message": "negative_test_with_mostly", "passed": True},
-                {"message": "other_negative_test_with_mostly", "passed": True},
-            ],
-        )
+        == 1
     )
 
-def test__count_unexpected_cases_and_get_sub_messages__with_an_error():
+def test__count_unexpected_cases__with_an_error():
     tests = [
         {
             "test_title": "positive_test_with_mostly",
@@ -301,19 +277,10 @@ def test__count_unexpected_cases_and_get_sub_messages__with_an_error():
         }
     ]
     assert (
-        edr._count_unexpected_cases_and_get_sub_messages(
+        edr._count_unexpected_cases(
             tests
         )
-        == (
-            3,
-            [
-                {"message": "positive_test_with_mostly", "passed": True},
-                {"message": "negative_test_with_mostly", "passed": True},
-                {"message": "other_negative_test_with_mostly", "passed": False},
-                {"message": "test_that_will_error_out", "passed": False},
-                {"message": "another_test_that_will_error_out", "passed": False},
-            ],
-        )
+        == 3
     )
 
 

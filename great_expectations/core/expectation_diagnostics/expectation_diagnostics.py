@@ -165,26 +165,19 @@ class ExpectationDiagnostics(SerializableDictDot):
         return positive_cases, negative_cases
 
     @staticmethod
-    def _count_unexpected_cases_and_get_sub_messages(
+    def _count_unexpected_cases(
         test_diagnostics : ExpectationTestDiagnostics
-    ) -> Tuple[int, List[ExpectationDiagnosticCheckMessage]]:
+    ) -> int:
         """Scans self.examples and returns a 2-ple with the number of cases that did not pass, and a list of dictionaries containing each test_title and whether or not it passed."""
 
         unexpected_cases: int = 0
-        sub_messages: List[Dict] = []
 
         for test in test_diagnostics:
             passed = test["test_passed"] == "true"
-            sub_messages.append(
-                {
-                    "message": test["test_title"],
-                    "passed": passed,
-                }
-            )
             if not passed:
                 unexpected_cases += 1
 
-        return unexpected_cases, sub_messages
+        return unexpected_cases
 
     @staticmethod
     def _convert_checks_into_output_message(
