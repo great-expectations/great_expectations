@@ -21,6 +21,7 @@ from great_expectations.core.expectation_configuration import (
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import ExpectationDiagnostics
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import ExpectationTestDataCases
 from great_expectations.core.expectation_diagnostics.supporting_types import (
+    AugmentedLibraryMetadata,
     ExpectationDescriptionDiagnostics,
     ExpectationErrorDiagnostics,
     ExpectationExecutionEngineDiagnostics,
@@ -925,7 +926,7 @@ class Expectation(metaclass=MetaExpectation):
 
         errors :List[ExpectationErrorDiagnostics] = []
 
-        library_metadata : ExpectationDescriptionDiagnostics = self._get_library_metadata()
+        library_metadata : ExpectationDescriptionDiagnostics = self._get_augmented_library_metadata()
         examples : List[ExpectationTestDataCases] = self._get_examples()
         description_diagnostics : ExpectationDescriptionDiagnostics = self._get_description_diagnostics()
 
@@ -1331,18 +1332,22 @@ class Expectation(metaclass=MetaExpectation):
 
         return metric_diagnostics_list
 
-    def _get_library_metadata(self):
-        library_metadata = {
+    def _get_augmented_library_metadata(self):
+        augmented_library_metadata = {
             "maturity": "CONCEPT_ONLY",
-            # "package": None,
             "tags": [],
             "contributors": [],
+            # "package": sys.modules[__name__],
+            "library_metadata_passed_checks": False
         }
 
         if hasattr(self, "library_metadata"):
-            library_metadata.update(self.library_metadata)
+            augmented_library_metadata.update(self.library_metadata)
 
-        return library_metadata
+            if set(self.library_metadata.keys()) == {"maturity", "tags", "contributors"}:
+                augmented_library_metadata["library_metadata_passed_checks"] = True
+
+        return AugmentedLibraryMetadata(**augmented_library_metadata)
 
 
 class TableExpectation(Expectation, ABC):

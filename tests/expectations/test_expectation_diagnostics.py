@@ -8,7 +8,7 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationDescriptionDiagnostics,
-    GalleryMetadata,
+    AugmentedLibraryMetadata,
     ExpectationRendererDiagnostics,
 )
 
@@ -95,7 +95,7 @@ edr = ExpectationDiagnostics(
         "short_description": "Expect column entries to be strings that match a given regular expression.",
         "docstring": "Expect column entries to be strings that match a given regular expression.\n    \n    Valid matches can be found     anywhere in the string, for example \"[at]+\" will identify the following strings as expected: \"cat\", \"hat\",     \"aa\", \"a\", and \"t\", and the following strings as unexpected: \"fish\", \"dog\".\n\n    expect_column_values_to_match_regex is a     :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine\n    .column_map_expectation>`.\n\n    Args:\n        column (str):             The column name.\n        regex (str):             The regular expression the column entries should match.\n\n    Keyword Args:\n        mostly (None or a float between 0 and 1):             Return `\"success\": True` if at least mostly fraction of values match the expectation.             For more detail, see :ref:`mostly`.\n\n    Other Parameters:\n        result_format (str or None):             Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.\n            For more detail, see :ref:`result_format <result_format>`.\n        include_config (boolean):             If True, then include the expectation config as part of the result object.             For more detail, see :ref:`include_config`.\n        catch_exceptions (boolean or None):             If True, then catch exceptions and include them as part of the result object.             For more detail, see :ref:`catch_exceptions`.\n        meta (dict or None):             A JSON-serializable dictionary (nesting allowed) that will be included in the output without             modification. For more detail, see :ref:`meta`.\n\n    Returns:\n        An ExpectationSuiteValidationResult\n\n        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and\n        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.\n\n    See Also:\n        :func:`expect_column_values_to_not_match_regex         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_values_to_not_match_regex>`\n\n        :func:`expect_column_values_to_match_regex_list         <great_expectations.execution_engine.execution_engine.ExecutionEngine\n        .expect_column_values_to_match_regex_list>`\n\n    "
     }),
-    library_metadata = GalleryMetadata(**{
+    library_metadata = AugmentedLibraryMetadata(**{
         "maturity": "PRODUCTION",
         # "package": "great_expectations",
         "tags": [
@@ -106,7 +106,8 @@ edr = ExpectationDiagnostics(
         "contributors": [
             "@shinnyshinshin",
             "@abegong"
-        ]
+        ],
+        "library_metadata_passed_checks": True,
     }),
     renderers = [
         ExpectationRendererDiagnostics(

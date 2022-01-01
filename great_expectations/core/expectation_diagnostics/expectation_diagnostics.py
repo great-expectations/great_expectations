@@ -1,17 +1,15 @@
-from dataclasses import dataclass
-# from pydantic.dataclasses import dataclass
+# from dataclasses import dataclass
+from pydantic.dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
 from great_expectations.types import SerializableDictDot
 from great_expectations.core.expectation_diagnostics.supporting_types import (
-    GalleryMetadata,
-    AumentedGalleryMetadata,
+    AugmentedLibraryMetadata,
     ExpectationDescriptionDiagnostics,
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
     ExpectationMetricDiagnostics,
     ExpectationExecutionEngineDiagnostics,
-    ExpectationDiagnosticChecklist,
     ExpectationDiagnosticCheckMessage,
     ExpectationErrorDiagnostics,
 )
@@ -26,7 +24,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     """
 
     # These two objects are taken directly from the Expectation class, without modification
-    library_metadata: GalleryMetadata
+    library_metadata: AugmentedLibraryMetadata
     examples: List[ExpectationTestDataCases]
 
     # These objects are derived from the Expectation class
@@ -40,8 +38,6 @@ class ExpectationDiagnostics(SerializableDictDot):
     errors: List[ExpectationErrorDiagnostics]
 
     # These objects are rollups of other information, formatted for display at the command line and in the Gallery
-    # checklist: ExpectationDiagnosticChecklist
-    # augmented_gallery_metadata: AugmentedGalleryMetadata
 
     @property
     def checklist_str(self) -> str:
@@ -51,18 +47,15 @@ class ExpectationDiagnostics(SerializableDictDot):
         )
 
     @property
-    def checklist(self) -> ExpectationDiagnosticChecklist:
+    def checklist(self) -> List[ExpectationDiagnosticCheckMessage] :
 
-        checks: List(ExpectationDiagnosticCheckMessage) = []
+        checks: List[ExpectationDiagnosticCheckMessage] = []
 
         # Check whether this Expectation has a library_metadata object
         checks.append(
             {
                 "message": "library_metadata object exists",
-                "passed": hasattr(self, "library_metadata")
-                and type(self.library_metadata) == dict
-                and set(self.library_metadata.keys())
-                == {"maturity", "package", "tags", "contributors"},
+                "passed": self.library_metadata.library_metadata_passed_checks,
             }
         )
 
