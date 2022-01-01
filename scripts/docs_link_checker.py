@@ -38,17 +38,18 @@ class LinkChecker:
         self._external_link_pattern = re.compile(external_link_regex)
 
         # links that being with /{site_prefix}/(?P<path>), may end with #abc
-        absolute_link_regex = r"^\/" + site_prefix + r"\/(?P<path>.*?)(?:#\S+)?$"
+        absolute_link_regex = r"^\/" + site_prefix + r"\/(?P<path>[\w\/-]+?)(?:#\S+)?$"
         self._absolute_link_pattern = re.compile(absolute_link_regex)
 
-        # links starting with . or .., may end with #abc
-        relative_link_regex = r"^(?P<path>\.\.?.*\.md)(?:#\S+)?$"
+        # links starting without a /, file ends with .md, may include an anchor with #abc
+        relative_link_regex = r"^(?P<path>[\.\w\/-]+\.md)(?:#\S+)?$"
         self._relative_link_pattern = re.compile(relative_link_regex)
 
-        absolute_image_regex = r"^\/" + site_prefix + r"\/(?P<path>.*\.\w{3,4})$"
+        absolute_image_regex = r"^\/" + site_prefix + r"\/(?P<path>[\w\/-]+\.\w{3,4})$"
         self._absolute_image_pattern = re.compile(absolute_image_regex)
 
-        relative_image_regex = r"^(?P<path>\.\.?.*\.\w{3,4})$"
+        # ending with a 3-4 character suffix
+        relative_image_regex = r"^(?P<path>[\.\w\/-]+\.\w{3,4})$"
         self._relative_image_pattern = re.compile(relative_image_regex)
 
     def _is_image_link(self, markdown_link: str):
