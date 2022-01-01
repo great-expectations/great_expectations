@@ -1,9 +1,6 @@
 from pytest import raises
-from dataclasses import (
-    dataclass,
-    FrozenInstanceError,
-)
-from enum import Enum
+from pydantic.dataclasses import dataclass
+from dataclasses import FrozenInstanceError
 from typing import Any, Dict, List, Optional
 
 import pytest
@@ -59,12 +56,33 @@ def test_access_using_dict_notation():
     assert my_A["bar"] == 1
 
 def test_has_keys():
-    "Keys can be accessed using dot notation"
+    "the .keys method works"
     my_A = MyClassA(**{
         "foo": "a string",
         "bar": 1,
     })
-    assert my_A.keys() == {"foo", "bar"}
+    assert set(my_A.keys()) == {"foo", "bar"}
+
+def test_has_items():
+    "the .items method works"
+    my_A = MyClassA(**{
+        "foo": "a string",
+        "bar": 1,
+    })
+    items = list(my_A.items())
+    assert items == [("foo", "a string"), ("bar", 1)]
+
+def test_has_to_dict():
+    "the .to_dict method works"
+    my_A = MyClassA(**{
+        "foo": "a string",
+        "bar": 1,
+    })
+    assert my_A.to_dict() == {
+        "foo": "a string",
+        "bar": 1,
+    }
+
 
 @pytest.mark.skip(reason="Not sure what our preferred pattern for this is")
 def test_incorrect_type():
@@ -322,7 +340,7 @@ def test_reserved_word_key():
     class MyClassE(SerializableDictDot):
         foo: str
         bar: int
-        _in : int
+        input : int
 
 
     class MyClassF(MyClassE):
@@ -334,7 +352,7 @@ def test_reserved_word_key():
             super().__init__(
                 foo=foo,
                 bar=bar,
-                _in=kwargs["in"]
+                input=kwargs["in"]
             )
 
 
@@ -345,8 +363,8 @@ def test_reserved_word_key():
     )
     assert my_F["foo"] == "a string"
     assert my_F["bar"] == 1
-    assert my_F["_in"] == 10
-    assert my_F._in == 10
+    assert my_F["input"] == 10
+    assert my_F.input == 10
 
     my_F = MyClassF(**{
         "foo": "a string",
@@ -355,5 +373,5 @@ def test_reserved_word_key():
     })
     assert my_F["foo"] == "a string"
     assert my_F["bar"] == 1
-    assert my_F["_in"] == 10
-    assert my_F._in == 10
+    assert my_F["input"] == 10
+    assert my_F.input == 10
