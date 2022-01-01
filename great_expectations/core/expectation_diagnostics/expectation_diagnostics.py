@@ -93,7 +93,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         ) = self._count_positive_and_negative_example_cases(
             self.examples
         )
-        unexpected_cases = self._count_unexpected_cases(
+        unexpected_cases = self._count_unexpected_test_cases(
             self.tests
         )
         passed = (
@@ -157,7 +157,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         return positive_cases, negative_cases
 
     @staticmethod
-    def _count_unexpected_cases(
+    def _count_unexpected_test_cases(
         test_diagnostics : ExpectationTestDiagnostics
     ) -> int:
         """Scans self.examples and returns the number of cases that did not pass."""

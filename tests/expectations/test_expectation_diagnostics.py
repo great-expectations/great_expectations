@@ -194,7 +194,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
     )
 
 
-def test__count_unexpected_cases___with_everything_passing():
+def test__count_unexpected_test_cases___with_everything_passing():
     tests = [
         {
             "test_title": "positive_test_with_mostly",
@@ -213,14 +213,14 @@ def test__count_unexpected_cases___with_everything_passing():
         },
     ]
     assert (
-        edr._count_unexpected_cases(
+        edr._count_unexpected_test_cases(
             tests
         )
         == 0
     )
 
 
-def test__count_unexpected_cases__with_one_failure():
+def test__count_unexpected_test_cases__with_one_failure():
     tests = [
         {
             "test_title": "positive_test_with_mostly",
@@ -239,13 +239,13 @@ def test__count_unexpected_cases__with_one_failure():
         },
     ]
     assert (
-        edr._count_unexpected_cases(
+        edr._count_unexpected_test_cases(
             tests
         )
         == 1
     )
 
-def test__count_unexpected_cases__with_an_error():
+def test__count_unexpected_test_cases__with_an_error():
     tests = [
         {
             "test_title": "positive_test_with_mostly",
@@ -278,7 +278,7 @@ def test__count_unexpected_cases__with_an_error():
         }
     ]
     assert (
-        edr._count_unexpected_cases(
+        edr._count_unexpected_test_cases(
             tests
         )
         == 3
