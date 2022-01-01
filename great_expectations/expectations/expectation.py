@@ -22,7 +22,7 @@ from great_expectations.core.expectation_configuration import (
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import ExpectationDiagnostics
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import ExpectationTestDataCases, TestData
 from great_expectations.core.expectation_diagnostics.supporting_types import (
-    LegacyAugmentedLibraryMetadataAdapter,
+    AugmentedLibraryMetadata,
     ExpectationDescriptionDiagnostics,
     ExpectationErrorDiagnostics,
     ExpectationExecutionEngineDiagnostics,
@@ -986,7 +986,8 @@ class Expectation(metaclass=MetaExpectation):
         #         SqlAlchemyExecutionEngine=False,
         #         SparkDFExecutionEngine=False
         #     )
-
+        print(library_metadata)
+        print(renderers)
         return ExpectationDiagnostics(
             library_metadata= library_metadata,
             examples= examples,
@@ -1402,7 +1403,9 @@ class Expectation(metaclass=MetaExpectation):
             if set(self.library_metadata.keys()) == {"maturity", "tags", "contributors"}:
                 augmented_library_metadata["library_metadata_passed_checks"] = True
 
-        return LegacyAugmentedLibraryMetadataAdapter.from_dict(augmented_library_metadata)
+        return AugmentedLibraryMetadata.from_legacy_dict(
+            augmented_library_metadata
+        )
 
 
 class TableExpectation(Expectation, ABC):

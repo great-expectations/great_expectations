@@ -27,18 +27,15 @@ class AugmentedLibraryMetadata(SerializableDictDot):
     library_metadata_passed_checks: bool
     package: Union[str, None] = None
 
-@dataclass
-class LegacyAugmentedLibraryMetadataAdapter(AugmentedLibraryMetadata):
-    """This class is a temporary adaopter to allow typing of legacy library_metadata objects, without needing to immediately clean up every object."""
-
-    maturity_level_substitutions = {
+    legacy_maturity_level_substitutions = {
         "experimental": "EXPERIMENTAL",
         "beta": "BETA",
         "production": "PRODUCTION",
     }
 
     @classmethod
-    def from_dict(cls, dict):
+    def from_legacy_dict(cls, dict):
+        """This method is a temporary adapter to allow typing of legacy library_metadata objects, without needing to immediately clean up every object."""
         temp_dict = {}
         for k, v in dict.items():
             #Ignore parameters that don't match the type definition
@@ -46,14 +43,14 @@ class LegacyAugmentedLibraryMetadataAdapter(AugmentedLibraryMetadata):
                 temp_dict[k] = v
             else:
                 logging.warning(
-                    f'WARNING: Got extra parameter: {k} while instantiating LegacyAugmentedLibraryMetadataAdapter.'
+                    f'WARNING: Got extra parameter: {k} while instantiating AugmentedLibraryMetadata.'
                     'This parameter will be ignored.'
                     'You probably need to clean up a library_metadata object.'
                 )
 
             # If necessary, substitute strings for precise Enum values.
-            if "maturity" in temp_dict and temp_dict["maturity"] in cls.maturity_level_substitutions:
-                temp_dict["maturity"] = cls.maturity_level_substitutions[temp_dict["maturity"]]
+            if "maturity" in temp_dict and temp_dict["maturity"] in cls.legacy_maturity_level_substitutions:
+                temp_dict["maturity"] = cls.legacy_maturity_level_substitutions[temp_dict["maturity"]]
 
         return cls(**temp_dict)
 

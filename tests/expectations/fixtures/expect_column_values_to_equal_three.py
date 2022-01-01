@@ -93,7 +93,6 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
     ):
         column = configuration.kwargs.get("column")
         mostly = configuration.kwargs.get("mostly")
-        regex = configuration.kwargs.get("regex")
 
         if mostly:
             return f'Do at least {mostly * 100}% of values in column "{column}" equal 3?'
@@ -107,7 +106,6 @@ class ExpectColumnValuesToEqualThree__ThirdIteration(
     ):
         column = result.expectation_config.kwargs.get("column")
         mostly = result.expectation_config.kwargs.get("mostly")
-        regex = result.expectation_config.kwargs.get("regex")
 
         if mostly:
             if result.success:
