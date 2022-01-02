@@ -29,7 +29,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationMetricDiagnostics,
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
-    OtherExpectationTestDiagnostics,
+    ExecutedExpectationTestCase,
     RendererTestDiagnostics,
 )
 from great_expectations.core.expectation_validation_result import (
@@ -927,18 +927,18 @@ class Expectation(metaclass=MetaExpectation):
         examples : List[ExpectationTestDataCases] = self._get_examples()
         description_diagnostics : ExpectationDescriptionDiagnostics = self._get_description_diagnostics()
 
-        executed_test_examples : OtherExpectationTestDiagnostics = self._execute_test_examples(
+        executed_test_cases : ExecutedExpectationTestCase = self._execute_test_examples(
             expectation_type=description_diagnostics.snake_name,
             examples=examples,
         )
 
         renderers : List[ExpectationRendererDiagnostics] = self._get_renderer_diagnostics(
             expectation_type=description_diagnostics.snake_name,
-            executed_test_examples=executed_test_examples,
+            executed_test_cases=executed_test_cases,
         )
 
         metric_diagnostics_list : List[ExpectationMetricDiagnostics] = self._get_metric_diagnostics_list(
-            executed_test_examples=executed_test_examples,
+            executed_test_cases=executed_test_cases,
         )
             # report_obj.update({"metrics": upstream_metrics})
         # except GreatExpectationsError as e:
@@ -993,7 +993,7 @@ class Expectation(metaclass=MetaExpectation):
             metrics= metric_diagnostics_list,
             execution_engines= introspected_execution_engines,
             tests= test_results,
-            errors= errors,
+            errors= [], #!!!FIXME!!!
         )
 
     def print_diagnostic_checklist(self) -> str:
@@ -1096,7 +1096,7 @@ class Expectation(metaclass=MetaExpectation):
         self,
         expectation_type: str,
         examples: List[ExpectationTestDataCases],
-    ) -> List[OtherExpectationTestDiagnostics]:
+    ) -> List[ExecutedExpectationTestCase]:
         """Executes a set of test examples.
         
         This method is an internal, intermediate step within run_diagnostics.
@@ -1107,7 +1107,7 @@ class Expectation(metaclass=MetaExpectation):
 
         example_data, example_test = self._choose_example(examples)
 
-        expectation_test_diagnostics: List[dict] = []
+        executed_expectation_test_cases: List[ExecutedExpectationTestCase] = []
         for test_data, test_case in [(example_data, example_test)]:
 
             # TODO: this should be creating a Batch using an engine
@@ -1141,15 +1141,17 @@ class Expectation(metaclass=MetaExpectation):
                 error_diagnostics = None
                 validation_result = validation_results[0]
             
-            expectation_test_diagnostics.append(
-                OtherExpectationTestDiagnostics(
+            executed_expectation_test_cases.append(
+                ExecutedExpectationTestCase(
+                    data=test_data,
+                    test_case=test_case,
                     expectation_configuration=expectation_config,
                     validation_result=validation_result,
                     error_diagnostics=error_diagnostics,
                 )
             )
 
-        return expectation_test_diagnostics
+        return executed_expectation_test_cases
 
     @staticmethod
     def _choose_example(
@@ -1299,7 +1301,7 @@ class Expectation(metaclass=MetaExpectation):
     def _get_renderer_diagnostics(
         self,
         expectation_type: str,
-        executed_test_examples: List[dict],
+        executed_test_cases: List[ExecutedExpectationTestCase],
         standard_renderers: List[str] = [
             "renderer.answer",
             "renderer.diagnostic.unexpected_statement",
@@ -1310,7 +1312,7 @@ class Expectation(metaclass=MetaExpectation):
             "renderer.question",
         ],
     ) -> List[ExpectationRendererDiagnostics]:
-        """Generate Renderer diagnostics for this Expectation, based primarily on a list of executed_test_examples."""
+        """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExecutedExpectationTestCases."""
 
         supported_renderers = self._get_registered_renderers(expectation_type)
 
@@ -1320,14 +1322,13 @@ class Expectation(metaclass=MetaExpectation):
             if renderer_name in supported_renderers:
                 _, renderer = _registered_renderers[expectation_type][renderer_name]
 
-                for executed_test_example in executed_test_examples:
-                    print(executed_test_example)
-                    test_title = executed_test_example["expectation_config"]["kwargs"]["title"]
+                for executed_test_case in executed_test_cases:
+                    test_title = executed_test_case["test_case"]["title"]
 
                     try:
                         rendered_result = renderer(
-                            configuration=executed_test_example["expectation_config"],
-                            result=executed_test_example["validation_result"],
+                            configuration=executed_test_case["expectation_configuration"].to_dict(),
+                            result=executed_test_case["validation_result"],
                         )
                         rendered_result_str = self._get_rendered_result_as_string(rendered_result)
 
@@ -1389,17 +1390,17 @@ class Expectation(metaclass=MetaExpectation):
 
     def _get_metric_diagnostics_list(
         self,
-        executed_test_examples: List[dict],
+        executed_test_cases: List[ExecutedExpectationTestCase],
     ) -> List[ExpectationMetricDiagnostics]:
         """Check to see which Metrics are upstream dependencies for this Expectation."""
 
         # NOTE: Abe 20210102: Strictly speaking, identifying upstream metrics shouldn't need to rely on an expectation config.
         # There's probably some part of get_validation_dependencies that can be factored out to remove the dependency.
 
-        if len(executed_test_examples) < 1:
+        if len(executed_test_cases) < 1:
             return []
         
-        expectation_config = executed_test_examples[0]["expectation_config"]
+        expectation_config = executed_test_cases[0]["expectation_configuration"]
 
         validation_dependencies = self.get_validation_dependencies(
             configuration=expectation_config
