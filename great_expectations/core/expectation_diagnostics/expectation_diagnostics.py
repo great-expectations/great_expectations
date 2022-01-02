@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple
+from typing import List, Tuple
 
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases,
@@ -35,8 +35,13 @@ class ExpectationDiagnostics(SerializableDictDot):
     gallery_examples: List[ExpectationTestDataCases]
 
     # These objects are derived from the Expectation class
-    # They're a combination of direct introspection of existing properties, and instantiating the Expectation with test data and actually executing methods.
-    # For example, we can verify the existence of certain Renderers through introspection alone, but in order to see what they return, we need to instantiate the Expectation and actually run the method.
+    # They're a combination of direct introspection of existing properties,
+    # and instantiating the Expectation with test data and actually executing
+    # methods.
+    # For example, we can verify the existence of certain Renderers through
+    # introspection alone, but in order to see what they return, we need to
+    # instantiate the Expectation and actually run the method.
+    
     library_metadata: AugmentedLibraryMetadata
     description: ExpectationDescriptionDiagnostics
     execution_engines: ExpectationExecutionEngineDiagnostics
@@ -158,7 +163,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         message = "Core logic exists and passes tests on at least one Execution Engine"
         successful_execution_engines = 0
         for k, v in execution_engines.items():
-            if v == True:
+            if v is True:
                 successful_execution_engines += 1
 
         if successful_execution_engines > 0:
@@ -187,9 +192,9 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         for test_data_cases in examples:
             for test in test_data_cases["tests"]:
-                if test["output"]["success"] == True:
+                if test["output"]["success"] is True:
                     positive_cases += 1
-                elif test["output"]["success"] == False:
+                elif test["output"]["success"] is False:
                     negative_cases += 1
 
         return positive_cases, negative_cases
@@ -203,7 +208,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         unexpected_cases: int = 0
 
         for test in test_diagnostics:
-            passed = test["test_passed"] == True
+            passed = test["test_passed"] is True
             if not passed:
                 unexpected_cases += 1
 

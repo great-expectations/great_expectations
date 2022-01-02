@@ -1,4 +1,3 @@
-import dataclasses
 import inspect
 import logging
 from dataclasses import dataclass, field
