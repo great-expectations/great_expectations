@@ -9,7 +9,7 @@ import requests
 
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 class LinkReport:
@@ -41,15 +41,19 @@ class LinkChecker:
         absolute_link_regex = r"^\/" + site_prefix + r"\/(?P<path>[\w\/-]+?)(?:#\S+)?$"
         self._absolute_link_pattern = re.compile(absolute_link_regex)
 
-        # links starting without a /, file ends with .md, may include an anchor with #abc
-        relative_link_regex = r"^(?P<path>[\.\w\/-]+\.md)(?:#\S+)?$"
+        # docroot links start without a . or a slash
+        docroot_link_regex = r"^(?P<path>\w[\.\w\/-]+\.md)(?:#\S+)?$"
+        self._docroot_link_pattern = re.compile(docroot_link_regex)
+
+        # links starting a . or .., file ends with .md, may include an anchor with #abc
+        relative_link_regex = r"^(?P<path>\.\.?[\.\w\/-]+\.md)(?:#\S+)?$"
         self._relative_link_pattern = re.compile(relative_link_regex)
 
         absolute_image_regex = r"^\/" + site_prefix + r"\/(?P<path>[\w\/-]+\.\w{3,4})$"
         self._absolute_image_pattern = re.compile(absolute_image_regex)
 
         # ending with a 3-4 character suffix
-        relative_image_regex = r"^(?P<path>[\.\w\/-]+\.\w{3,4})$"
+        relative_image_regex = r"^(?P<path>\.\.?[\.\w\/-]+\.\w{3,4})$"
         self._relative_image_pattern = re.compile(relative_image_regex)
 
     def _is_image_link(self, markdown_link: str):
@@ -90,13 +94,20 @@ class LinkChecker:
                 "External link %s in file %s raised a connection error", link, file
             )
 
-    def _get_absolute_path(self, path: str):
-        return os.path.join(self._docs_root, path)
+    def _get_os_path(self, path: str) -> str:
+        """Gets an os-specific path from a path found in a markdown file"""
+        return path.replace("/", os.path.sep)
 
-    def _get_relative_path(self, file: str, path: str):
+    def _get_absolute_path(self, path: str) -> str:
+        return os.path.join(self._docs_root, self._get_os_path(path))
+
+    def _get_relative_path(self, file: str, path: str) -> str:
         # link should be relative to the location of the current file
         directory = os.path.dirname(file)
-        return os.path.join(directory, path)
+        return os.path.join(directory, self._get_os_path(path))
+
+    def _get_docroot_path(self, path: str) -> str:
+        return os.path.join(self._docs_root, self._get_os_path(path))
 
     def _check_absolute_link(self, link: str, file: str, path: str) -> LinkReport:
         logger.debug("Checking absolute link %s in file %s", link, file)
@@ -123,17 +134,6 @@ class LinkChecker:
             logger.debug("Absolute image %s in file %s found", link, file)
             return None
 
-    def _check_relative_image(self, link: str, file: str, path: str) -> LinkReport:
-        logger.debug("Cheking relative image %s in file %s", link, file)
-
-        image_file = self._get_relative_path(file, path)
-        if not os.path.isfile(image_file):
-            logger.info("Relative image %s in file %s was not found", link, file)
-            return LinkReport(link, file, f"Image {image_file} not found")
-        else:
-            logger.debug("Relative image %s in file %s found", link, file)
-            return None
-
     def _check_relative_link(self, link: str, file: str, path: str) -> LinkReport:
         logger.debug("Checking relative link %s in file %s", link, file)
 
@@ -145,6 +145,28 @@ class LinkChecker:
             return LinkReport(link, file, f"Linked file {md_file} does not exist")
         else:
             logger.debug("Relative link %s in file %s found", link, file)
+            return None
+
+    def _check_relative_image(self, link: str, file: str, path: str) -> LinkReport:
+        logger.debug("Cheking relative image %s in file %s", link, file)
+
+        image_file = self._get_relative_path(file, path)
+        if not os.path.isfile(image_file):
+            logger.info("Relative image %s in file %s was not found", link, file)
+            return LinkReport(link, file, f"Image {image_file} not found")
+        else:
+            logger.debug("Relative image %s in file %s found", link, file)
+            return None
+
+    def _check_docroot_link(self, link: str, file: str, path: str) -> LinkReport:
+        logger.debug("Checking docroot link %s in file %s", link, file)
+
+        md_file = self._get_docroot_path(path)
+        if not os.path.isfile(md_file):
+            logger.info("Docroot link %s in file %s was not found", link, file)
+            return LinkReport(link, file, f"Image {image_file} not found")
+        else:
+            logger.debug("Docroot link %s in file %s found", link, file)
             return None
 
     def check_link(self, match: re.Match, file: str) -> LinkReport:
@@ -175,7 +197,13 @@ class LinkChecker:
                 if match:
                     result = self._check_absolute_link(link, file, match.group("path"))
                 else:
-                    result = LinkReport(link, file, "Invalid link format")
+                    match = self._docroot_link_pattern.match(link)
+                    if match:
+                        result = self._check_docroot_link(
+                            link, file, match.group("path")
+                        )
+                    else:
+                        result = LinkReport(link, file, "Invalid link format")
 
         return result
 
