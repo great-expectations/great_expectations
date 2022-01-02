@@ -4,7 +4,10 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
     TestData,
     ExpectationTestCase,
 )
-from great_expectations.core.expectation_validation_result import ExpectationValidationResult
+from great_expectations.core.expectation_validation_result import (
+    ExpectationValidationResult,
+)
+
 # import dataclasses
 from pydantic.dataclasses import dataclass
 from dataclasses import dataclass
@@ -15,6 +18,7 @@ from typing import List, Union
 
 from great_expectations.types import SerializableDictDot
 
+
 class Maturity(Enum):
     """The four levels of maturity for features within Great Expectations"""
 
@@ -22,6 +26,7 @@ class Maturity(Enum):
     EXPERIMENTAL = "EXPERIMENTAL"
     BETA = "BETA"
     PRODUCTION = "PRODUCTION"
+
 
 @dataclass
 class AugmentedLibraryMetadata(SerializableDictDot):
@@ -44,30 +49,37 @@ class AugmentedLibraryMetadata(SerializableDictDot):
         """This method is a temporary adapter to allow typing of legacy library_metadata objects, without needing to immediately clean up every object."""
         temp_dict = {}
         for k, v in dict.items():
-            #Ignore parameters that don't match the type definition
+            # Ignore parameters that don't match the type definition
             if k in inspect.signature(cls).parameters:
                 temp_dict[k] = v
             else:
                 logging.warning(
-                    f'WARNING: Got extra parameter: {k} while instantiating AugmentedLibraryMetadata.'
-                    'This parameter will be ignored.'
-                    'You probably need to clean up a library_metadata object.'
+                    f"WARNING: Got extra parameter: {k} while instantiating AugmentedLibraryMetadata."
+                    "This parameter will be ignored."
+                    "You probably need to clean up a library_metadata object."
                 )
 
             # If necessary, substitute strings for precise Enum values.
-            if "maturity" in temp_dict and temp_dict["maturity"] in cls.legacy_maturity_level_substitutions:
-                temp_dict["maturity"] = cls.legacy_maturity_level_substitutions[temp_dict["maturity"]]
+            if (
+                "maturity" in temp_dict
+                and temp_dict["maturity"] in cls.legacy_maturity_level_substitutions
+            ):
+                temp_dict["maturity"] = cls.legacy_maturity_level_substitutions[
+                    temp_dict["maturity"]
+                ]
 
         return cls(**temp_dict)
+
 
 @dataclass
 class ExpectationDescriptionDiagnostics(SerializableDictDot):
     """Captures basic descriptive info about an Expectation. Used within the ExpectationDiagnostic object."""
 
-    camel_name : str
-    snake_name : str
-    short_description : str
-    docstring : str
+    camel_name: str
+    snake_name: str
+    short_description: str
+    docstring: str
+
 
 @dataclass
 class RendererTestDiagnostics(SerializableDictDot):
@@ -79,6 +91,7 @@ class RendererTestDiagnostics(SerializableDictDot):
     error_message: Union[str, None] = None
     stack_trace: Union[str, None] = None
 
+
 @dataclass
 class ExpectationRendererDiagnostics(SerializableDictDot):
     """Captures information about a specific Renderer within an Expectation. Used within the ExpectationDiagnostic object."""
@@ -88,20 +101,23 @@ class ExpectationRendererDiagnostics(SerializableDictDot):
     is_standard: bool
     samples: List[RendererTestDiagnostics]
 
+
 @dataclass
 class ExpectationMetricDiagnostics(SerializableDictDot):
     """Captures information about a specific Metric dependency for an Expectation. Used within the ExpectationDiagnostic object."""
-    
+
     name: str
     has_question_renderer: bool
+
 
 @dataclass
 class ExpectationExecutionEngineDiagnostics(SerializableDictDot):
     """Captures which of the three Execution Engines are supported by an Expectation. Used within the ExpectationDiagnostic object."""
 
-    PandasExecutionEngine : bool
-    SqlAlchemyExecutionEngine : bool
-    SparkDFExecutionEngine : bool
+    PandasExecutionEngine: bool
+    SqlAlchemyExecutionEngine: bool
+    SparkDFExecutionEngine: bool
+
 
 @dataclass
 class ExpectationTestDiagnostics(SerializableDictDot):
@@ -113,15 +129,17 @@ class ExpectationTestDiagnostics(SerializableDictDot):
     error_message: Union[str, None] = None
     stack_trace: Union[str, None] = None
 
+
 @dataclass
 class ExpectationErrorDiagnostics(SerializableDictDot):
     error_msg: str
     stack_trace: str
 
+
 @dataclass
 class ExecutedExpectationTestCase(SerializableDictDot):
     """Captures information from executing Expectation test cases. Used within the ExpectationDiagnostic object.
-    
+
     This may turn out to be the same thing as ExpectationTestDiagnostics.
     """
 
@@ -137,10 +155,13 @@ class ExecutedExpectationTestCase(SerializableDictDot):
     # error_message: Union[str, None] = None
     # stack_trace: Union[str, None] = None
 
+
 @dataclass
 class ExpectationDiagnosticCheckMessage(SerializableDictDot):
     """Summarizes the result of a diagnostic Check. Used within the ExpectationDiagnostic object."""
 
     message: str
     passed: bool
-    sub_messages: List['ExpectationDiagnosticCheckMessage'] = field(default_factory=list)
+    sub_messages: List["ExpectationDiagnosticCheckMessage"] = field(
+        default_factory=list
+    )

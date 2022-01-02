@@ -13,11 +13,15 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
     ExpectationTestCase,
     ExpectationTestDataCases,
 )
-from great_expectations.execution_engine.pandas_execution_engine import PandasExecutionEngine
-from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine.pandas_execution_engine import (
+    PandasExecutionEngine,
+)
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    Expectation
+    Expectation,
 )
 
 from .fixtures.expect_column_values_to_equal_three import (
@@ -29,25 +33,32 @@ from .fixtures.expect_column_values_to_equal_three import (
 
 ### Tests for _get_augmented_library_metadata
 
+
 def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_object():
-    augmented_library_metadata = ExpectColumnValuesToEqualThree()._get_augmented_library_metadata()
+    augmented_library_metadata = (
+        ExpectColumnValuesToEqualThree()._get_augmented_library_metadata()
+    )
     assert augmented_library_metadata == AugmentedLibraryMetadata(
-        maturity='CONCEPT_ONLY',
+        maturity="CONCEPT_ONLY",
         tags=[],
         contributors=[],
         library_metadata_passed_checks=False,
-        package=None
+        package=None,
     )
 
+
 def test__get_augmented_library_metadata_on_a_class_with_a_basic_library_metadata_object():
-    augmented_library_metadata = ExpectColumnValuesToEqualThree__SecondIteration()._get_augmented_library_metadata()
+    augmented_library_metadata = (
+        ExpectColumnValuesToEqualThree__SecondIteration()._get_augmented_library_metadata()
+    )
     assert augmented_library_metadata == AugmentedLibraryMetadata(
-        maturity='EXPERIMENTAL',
+        maturity="EXPERIMENTAL",
         tags=["tag", "other_tag"],
         contributors=["@abegong"],
         library_metadata_passed_checks=True,
-        package=None
+        package=None,
     )
+
 
 def test__get_augmented_library_metadata_on_a_class_with_a_package_in_its_library_metadata_object():
     class MyExpectation(ExpectColumnValuesToEqualThree__SecondIteration):
@@ -62,17 +73,20 @@ def test__get_augmented_library_metadata_on_a_class_with_a_package_in_its_librar
 
     augmented_library_metadata = MyExpectation()._get_augmented_library_metadata()
     assert augmented_library_metadata == AugmentedLibraryMetadata(
-        maturity='EXPERIMENTAL',
+        maturity="EXPERIMENTAL",
         tags=["tag", "other_tag"],
         contributors=["@abegong"],
         library_metadata_passed_checks=True,
-        package="whatsit_expectations"
+        package="whatsit_expectations",
     )
+
 
 ### Tests for _get_examples
 
+
 def test__get_examples_from_a_class_with_no_examples():
     assert ExpectColumnValuesToEqualThree()._get_examples() == []
+
 
 def test__get_examples_from_a_class_with_some_examples():
     examples = ExpectColumnValuesToEqualThree__SecondIteration()._get_examples()
@@ -80,8 +94,11 @@ def test__get_examples_from_a_class_with_some_examples():
 
     first_example = examples[0]
     assert isinstance(first_example, ExpectationTestDataCases)
-    assert first_example.data == {'mostly_threes': [3, 3, 3, 3, 3, 3, 2, -1, None, None]}
+    assert first_example.data == {
+        "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None]
+    }
     assert len(first_example.tests) == 1
+
 
 def test__get_examples_from_a_class_with_return_only_gallery_examples_equals_false():
     examples = ExpectColumnValuesToEqualThree__SecondIteration()._get_examples(
@@ -91,74 +108,92 @@ def test__get_examples_from_a_class_with_return_only_gallery_examples_equals_fal
 
     first_example = examples[0]
     assert isinstance(first_example, ExpectationTestDataCases)
-    assert first_example.data == {'mostly_threes': [3, 3, 3, 3, 3, 3, 2, -1, None, None]}
+    assert first_example.data == {
+        "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None]
+    }
     assert len(first_example.tests) == 3
 
+
 ### Tests for _get_description_diagnostics
+
 
 def test__get_description_diagnostics():
     class ExpectColumnValuesToBeAwesome(ColumnMapExpectation):
         """Lo, here is a docstring
-        
+
         It has more to it.
         """
 
-    description_diagnostics = ExpectColumnValuesToBeAwesome()._get_description_diagnostics()
+    description_diagnostics = (
+        ExpectColumnValuesToBeAwesome()._get_description_diagnostics()
+    )
     assert description_diagnostics == ExpectationDescriptionDiagnostics(
-        camel_name= "ExpectColumnValuesToBeAwesome",
-        snake_name= "expect_column_values_to_be_awesome",
-        short_description= "Lo, here is a docstring",
-        docstring= """Lo, here is a docstring
+        camel_name="ExpectColumnValuesToBeAwesome",
+        snake_name="expect_column_values_to_be_awesome",
+        short_description="Lo, here is a docstring",
+        docstring="""Lo, here is a docstring
         
         It has more to it.
         """,
     )
 
+
 ### Tests for _execute_test_examples
 
+
 def test__execute_test_examples__with_an_empty_list():
-    executed_test_examples = ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
-        expectation_type="expect_column_values_to_equal_three",
-        examples=[],
+    executed_test_examples = (
+        ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
+            expectation_type="expect_column_values_to_equal_three",
+            examples=[],
+        )
     )
     assert executed_test_examples == []
 
+
 def test__execute_test_examples__with_a_single_example():
     example = ExpectationTestDataCases(
-        data=TestData(**{
-            "mostly_threes": [3, 3, 3, 5, None],
-        }),
+        data=TestData(
+            **{
+                "mostly_threes": [3, 3, 3, 5, None],
+            }
+        ),
         tests=[
             ExpectationTestCase(
-                title= "positive_test_with_mostly",
-                include_in_gallery= True,
-                exact_match_out= False,
-                input= {"column": "mostly_threes", "mostly": 0.6},
-                output= {
+                title="positive_test_with_mostly",
+                include_in_gallery=True,
+                exact_match_out=False,
+                input={"column": "mostly_threes", "mostly": 0.6},
+                output={
                     "success": True,
                     "unexpected_index_list": [6, 7],
                     "unexpected_list": [2, -1],
-                }
+                },
             )
-        ]
+        ],
     )
 
-    executed_test_cases = ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
-        expectation_type="expect_column_values_to_equal_three",
-        examples=[example],
+    executed_test_cases = (
+        ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
+            expectation_type="expect_column_values_to_equal_three",
+            examples=[example],
+        )
     )
     print(executed_test_cases)
     print(json.dumps(executed_test_cases[0].to_dict(), indent=2))
     print(type(executed_test_cases[0]))
     assert len(executed_test_cases) == 1
-    
-    #FIXME: Need more here?
+
+    # FIXME: Need more here?
+
 
 ### Tests for _get_metric_diagnostics_list
 def test__get_metric_diagnostics_list_on_a_class_without_metrics():
     executed_test_cases = []
-    metric_diagnostics_list = ExpectColumnValuesToEqualThree()._get_metric_diagnostics_list(
-        executed_test_cases=executed_test_cases
+    metric_diagnostics_list = (
+        ExpectColumnValuesToEqualThree()._get_metric_diagnostics_list(
+            executed_test_cases=executed_test_cases
+        )
     )
     print(metric_diagnostics_list)
     assert len(metric_diagnostics_list) == 0
@@ -167,10 +202,13 @@ def test__get_metric_diagnostics_list_on_a_class_without_metrics():
         has_question_renderer=False,
     )
 
+
 def test__get_metric_diagnostics_list_on_a_class_with_metrics():
     executed_test_cases = []
-    metric_diagnostics_list = ExpectColumnValuesToEqualThree__ThirdIteration()._get_metric_diagnostics_list(
-        executed_test_cases=executed_test_cases
+    metric_diagnostics_list = (
+        ExpectColumnValuesToEqualThree__ThirdIteration()._get_metric_diagnostics_list(
+            executed_test_cases=executed_test_cases
+        )
     )
     print(metric_diagnostics_list)
     assert len(metric_diagnostics_list) == 0
@@ -181,11 +219,13 @@ def test__get_metric_diagnostics_list_on_a_class_with_metrics():
 
 
 ### Tests for _get_execution_engine_diagnostics
-@pytest.mark.skip("""
+@pytest.mark.skip(
+    """
 The business logic for _get_execution_engine_diagnostics is just plain wrong.
 We should be verifying that all expectations test cases run on any given Execution Engine.
 Metrics could be used to make inferences, but they'd never provide comparably compelling evidence.
-""")
+"""
+)
 def test__get_execution_engine_diagnostics_with_no_metrics_diagnostics():
 
     assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
@@ -197,11 +237,14 @@ def test__get_execution_engine_diagnostics_with_no_metrics_diagnostics():
         SparkDFExecutionEngine=False,
     )
 
-@pytest.mark.skip("""
+
+@pytest.mark.skip(
+    """
 The business logic for _get_execution_engine_diagnostics is just plain wrong.
 We should be verifying that all expectations test cases run on any given Execution Engine.
 Metrics could be used to make inferences, but they'd never provide comparably compelling evidence.
-""")
+"""
+)
 def test__get_execution_engine_diagnostics_with_one_metrics_diagnostics():
     metrics_diagnostics_list = [
         ExpectationMetricDiagnostics(
@@ -210,9 +253,7 @@ def test__get_execution_engine_diagnostics_with_one_metrics_diagnostics():
         )
     ]
     registered_metrics = {
-        "colum_values.something" : {
-            "providers" : ["PandasExecutionEngine"]
-        }
+        "colum_values.something": {"providers": ["PandasExecutionEngine"]}
     }
     assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
         metric_diagnostics_list=metrics_diagnostics_list,
@@ -228,7 +269,9 @@ def test__get_execution_engine_diagnostics_with_one_metrics_diagnostics():
 def test__get_test_results():
     test_results = ExpectColumnValuesToEqualThree__ThirdIteration()._get_test_results(
         expectation_type="expect_column_values_to_equal_three",
-        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration()._get_examples(return_only_gallery_examples=False),
+        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration()._get_examples(
+            return_only_gallery_examples=False
+        ),
         execution_engine_diagnostics=ExpectationExecutionEngineDiagnostics(
             PandasExecutionEngine=True,
             SqlAlchemyExecutionEngine=False,
@@ -242,7 +285,9 @@ def test__get_test_results():
 
     test_results = ExpectColumnValuesToEqualThree__ThirdIteration()._get_test_results(
         expectation_type="expect_column_values_to_equal_three",
-        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration()._get_examples(return_only_gallery_examples=False),
+        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration()._get_examples(
+            return_only_gallery_examples=False
+        ),
         execution_engine_diagnostics=ExpectationExecutionEngineDiagnostics(
             PandasExecutionEngine=True,
             SqlAlchemyExecutionEngine=True,
@@ -259,6 +304,7 @@ def test__get_test_results():
             assert result.test_passed == False
         # print(result.to_dict())
 
+
 # executed_test_examples, errors = self._execute_test_examples(
 #     expectation_type=description_diagnostics.snake_name,
 #     examples=examples,
@@ -267,9 +313,8 @@ def test__get_test_results():
 #     expectation_name=description_diagnostics.snake_name,
 #     executed_test_examples=executed_test_examples,
 # )
-    # from great_expectations.expectations.registry import _registered_metrics
-    # print(_registered_metrics)
-    # print(_registered_metrics.keys())
-    # print(len(_registered_metrics))
-    # supported_renderers = []
-
+# from great_expectations.expectations.registry import _registered_metrics
+# print(_registered_metrics)
+# print(_registered_metrics.keys())
+# print(len(_registered_metrics))
+# supported_renderers = []

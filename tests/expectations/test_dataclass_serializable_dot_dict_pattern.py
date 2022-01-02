@@ -5,6 +5,7 @@ from dataclasses import (
 from typing import List, Optional
 from enum import Enum
 import pytest
+
 # from pydantic.dataclasses import dataclass
 from dataclasses import dataclass
 from pytest import raises
@@ -28,10 +29,12 @@ class MyClassB(MyClassA):
     def num_bazzes(self):
         return len(self.baz)
 
+
 class MyEnum(Enum):
     VALUE_X = "x"
     VALUE_Y = "y"
     VALUE_Z = "z"
+
 
 @dataclass
 class MyClassC(SerializableDictDot):
@@ -383,7 +386,7 @@ def test_to_dict_works_recursively():
             MyEnum("x"),
             MyEnum("y"),
             MyEnum("z"),
-        ]
+        ],
     )
 
     C_dict = my_C.to_dict()
@@ -424,7 +427,7 @@ def test_to_dict_works_recursively():
             "x",
             "y",
             "z",
-        ]
+        ],
     }
 
 

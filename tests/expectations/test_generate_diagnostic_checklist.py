@@ -7,7 +7,10 @@ from .fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree__BrokenIteration,
 )
 
-@pytest.mark.skip("This is broken because Expectation._get_execution_engine_diagnostics is broken")
+
+@pytest.mark.skip(
+    "This is broken because Expectation._get_execution_engine_diagnostics is broken"
+)
 def test_print_diagnostic_checklist__first_iteration():
     output_message = ExpectColumnValuesToEqualThree().print_diagnostic_checklist()
 

@@ -33,18 +33,18 @@ def test_expectation_self_check():
             "tags": [],
             "contributors": [],
             "library_metadata_passed_checks": False,
-            "package": None
+            "package": None,
         },
         "description": {
             "camel_name": "ExpectColumnValuesToEqualThree",
             "snake_name": "expect_column_values_to_equal_three",
             "short_description": "",
-            "docstring": ""
+            "docstring": "",
         },
         "execution_engines": {
             "PandasExecutionEngine": True,
             "SqlAlchemyExecutionEngine": True,
-            "SparkDFExecutionEngine": True
+            "SparkDFExecutionEngine": True,
         },
         "gallery_examples": [],
         "renderers": [
@@ -52,67 +52,68 @@ def test_expectation_self_check():
                 "name": "atomic.diagnostic.observed_value",
                 "is_supported": True,
                 "is_standard": False,
-                "samples": []
+                "samples": [],
             },
             {
                 "name": "atomic.prescriptive.summary",
                 "is_supported": True,
                 "is_standard": False,
-                "samples": []
+                "samples": [],
             },
             {
                 "name": "renderer.answer",
                 "is_supported": False,
                 "is_standard": True,
-                "samples": []
+                "samples": [],
             },
             {
                 "name": "renderer.diagnostic.meta_properties",
                 "is_supported": True,
                 "is_standard": False,
-                "samples": []
+                "samples": [],
             },
             {
                 "name": "renderer.diagnostic.observed_value",
                 "is_supported": True,
                 "is_standard": True,
-                "samples": []
+                "samples": [],
             },
             {
                 "name": "renderer.diagnostic.status_icon",
                 "is_supported": True,
                 "is_standard": True,
-                "samples": []
+                "samples": [],
             },
             {
                 "name": "renderer.diagnostic.unexpected_statement",
                 "is_supported": True,
                 "is_standard": True,
-                "samples": []
+                "samples": [],
             },
             {
                 "name": "renderer.diagnostic.unexpected_table",
                 "is_supported": True,
                 "is_standard": True,
-                "samples": []
+                "samples": [],
             },
             {
                 "name": "renderer.prescriptive",
                 "is_supported": True,
                 "is_standard": True,
-                "samples": []
+                "samples": [],
             },
             {
                 "name": "renderer.question",
                 "is_supported": False,
                 "is_standard": True,
-                "samples": []
-            }
+                "samples": [],
+            },
         ],
         "metrics": [],
         "tests": [],
-        "errors": []
+        "errors": [],
     }
+
 
 def test_include_in_gallery_flag():
 
@@ -133,6 +134,7 @@ def test_include_in_gallery_flag():
             "unexpected_list": [2, -1],
         },
     }
+
 
 @pytest.mark.skip("This raises a Spark error on my machine.")
 def test_self_check_on_an_existing_expectation():
@@ -276,7 +278,7 @@ def test_expectation__get_renderers():
                 error_diagnostics=None,
             )
         ],
-        _registered_renderers
+        _registered_renderers,
     )
     assert isinstance(renderer_diagnostics, list)
     assert len(renderer_diagnostics) == 10
@@ -286,16 +288,16 @@ def test_expectation__get_renderers():
 
     print([rd.name for rd in renderer_diagnostics])
     assert set([rd.name for rd in renderer_diagnostics]) == {
-        'renderer.diagnostic.unexpected_statement',
-        'renderer.diagnostic.meta_properties',
-        'renderer.diagnostic.unexpected_table',
-        'renderer.diagnostic.status_icon',
-        'renderer.answer',
-        'atomic.prescriptive.summary',
-        'atomic.diagnostic.observed_value',
-        'renderer.question',
-        'renderer.prescriptive',
-        'renderer.diagnostic.observed_value'
+        "renderer.diagnostic.unexpected_statement",
+        "renderer.diagnostic.meta_properties",
+        "renderer.diagnostic.unexpected_table",
+        "renderer.diagnostic.status_icon",
+        "renderer.answer",
+        "atomic.prescriptive.summary",
+        "atomic.diagnostic.observed_value",
+        "renderer.question",
+        "renderer.prescriptive",
+        "renderer.diagnostic.observed_value",
     }
 
     # assert renderer_diagnostics[0].to_dict() == {
@@ -351,16 +353,16 @@ def test_expectation__get_renderers():
 
     assert len(renderer_diagnostics) == 10
     assert set([rd.name for rd in renderer_diagnostics]) == {
-        'renderer.diagnostic.observed_value',
-        'renderer.prescriptive',
-        'renderer.diagnostic.meta_properties',
-        'renderer.diagnostic.status_icon',
-        'renderer.diagnostic.unexpected_table',
-        'atomic.diagnostic.observed_value',
-        'atomic.prescriptive.summary',
-        'renderer.answer',
-        'renderer.question',
-        'renderer.diagnostic.unexpected_statement'
+        "renderer.diagnostic.observed_value",
+        "renderer.prescriptive",
+        "renderer.diagnostic.meta_properties",
+        "renderer.diagnostic.status_icon",
+        "renderer.diagnostic.unexpected_table",
+        "atomic.diagnostic.observed_value",
+        "atomic.prescriptive.summary",
+        "renderer.answer",
+        "renderer.question",
+        "renderer.diagnostic.unexpected_statement",
     }
 
     # Expectation with no renderers specified
@@ -397,7 +399,7 @@ def test_expectation__get_renderers():
                 error_diagnostics=None,
             )
         ],
-        _registered_renderers
+        _registered_renderers,
     )
     assert isinstance(renderer_diagnostics, list)
     assert len(renderer_diagnostics) == 10
@@ -407,16 +409,16 @@ def test_expectation__get_renderers():
 
     assert len(renderer_diagnostics) == 10
     assert set([rd.name for rd in renderer_diagnostics]) == {
-        'renderer.diagnostic.observed_value',
-        'renderer.prescriptive',
-        'renderer.diagnostic.meta_properties',
-        'renderer.diagnostic.status_icon',
-        'renderer.diagnostic.unexpected_table',
-        'atomic.diagnostic.observed_value',
-        'atomic.prescriptive.summary',
-        'renderer.answer',
-        'renderer.question',
-        'renderer.diagnostic.unexpected_statement'
+        "renderer.diagnostic.observed_value",
+        "renderer.prescriptive",
+        "renderer.diagnostic.meta_properties",
+        "renderer.diagnostic.status_icon",
+        "renderer.diagnostic.unexpected_table",
+        "atomic.diagnostic.observed_value",
+        "atomic.prescriptive.summary",
+        "renderer.answer",
+        "renderer.question",
+        "renderer.diagnostic.unexpected_statement",
     }
 
 
@@ -459,14 +461,15 @@ def test_expectation_is_abstract():
     assert not ExpectColumnValuesToEqualThree.is_abstract()
 
 
-
 def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
-    expectation_diagnostics = ExpectColumnValuesToEqualThree__BrokenIteration().run_diagnostics()
+    expectation_diagnostics = (
+        ExpectColumnValuesToEqualThree__BrokenIteration().run_diagnostics()
+    )
     # print(json.dumps(expectation_diagnostics.to_dict(), indent=2))
 
     tests = expectation_diagnostics["tests"]
-    
-    assert len(tests)==5
+
+    assert len(tests) == 5
     assert tests[0].to_dict() == {
         "test_title": "positive_test_with_mostly",
         "backend": "pandas",
@@ -480,7 +483,7 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "backend",
         "test_passed",
         "error_message",
-        "stack_trace"
+        "stack_trace",
     }
     assert tests[3]["test_passed"] == False
 
@@ -489,6 +492,6 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "backend",
         "test_passed",
         "error_message",
-        "stack_trace"
+        "stack_trace",
     }
     assert tests[4]["test_passed"] == False

@@ -14,8 +14,9 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationErrorDiagnostics,
 )
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestDataCases
+    ExpectationTestDataCases,
 )
+
 
 @dataclass(frozen=True)
 class ExpectationDiagnostics(SerializableDictDot):
@@ -39,26 +40,30 @@ class ExpectationDiagnostics(SerializableDictDot):
     description: ExpectationDescriptionDiagnostics
     execution_engines: ExpectationExecutionEngineDiagnostics
 
-    renderers: List[ExpectationRendererDiagnostics] 
+    renderers: List[ExpectationRendererDiagnostics]
     metrics: List[ExpectationMetricDiagnostics]
     tests: List[ExpectationTestDiagnostics]
     errors: List[ExpectationErrorDiagnostics]
 
     @property
-    def checklist(self) -> List[ExpectationDiagnosticCheckMessage] :
+    def checklist(self) -> List[ExpectationDiagnosticCheckMessage]:
         """Build a list of ExpectationDiagnosticCheckMessages corresponding to the steps for creating a custom expectation.
-        
+
         By design, this method is a rollup of information already contained within ExpectationDiagnostics.
         Querying or introspecting the Expectation again should not be necessary.
         """
 
         checks: List[ExpectationDiagnosticCheckMessage] = []
 
-        #Experimental checks
+        # Experimental checks
         checks.append(self._check_library_metadata(self.library_metadata))
         checks.append(self._check_docstring(self.description))
         checks.append(self._check_example_cases(self.examples, self.tests))
-        checks.append(self._check_core_logic_for_at_least_one_execution_engine(self.execution_engines))
+        checks.append(
+            self._check_core_logic_for_at_least_one_execution_engine(
+                self.execution_engines
+            )
+        )
 
         return checks
 
@@ -68,22 +73,24 @@ class ExpectationDiagnostics(SerializableDictDot):
             self.description["camel_name"],
             self.checklist,
         )
-        return(str_)
+        return str_
 
     @staticmethod
     def _check_library_metadata(
-        library_metadata : AugmentedLibraryMetadata
+        library_metadata: AugmentedLibraryMetadata,
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has a library_metadata object"""
 
-        return ExpectationDiagnosticCheckMessage(**{
-            "message": "library_metadata object exists",
-            "passed": library_metadata.library_metadata_passed_checks,
-        })
+        return ExpectationDiagnosticCheckMessage(
+            **{
+                "message": "library_metadata object exists",
+                "passed": library_metadata.library_metadata_passed_checks,
+            }
+        )
 
     @staticmethod
     def _check_docstring(
-        description : ExpectationDescriptionDiagnostics
+        description: ExpectationDescriptionDiagnostics,
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has an informative docstring"""
 
@@ -93,28 +100,32 @@ class ExpectationDiagnostics(SerializableDictDot):
         else:
             short_description = None
         if short_description not in {"", "\n", "TODO: Add a docstring here", None}:
-            return ExpectationDiagnosticCheckMessage(**{
-                "message": message,
-                "sub_messages": [
-                    {
-                        "message": '"' + short_description + '"',
-                        "passed": True,
-                    }
-                ],
-                "passed": True,
-            })
+            return ExpectationDiagnosticCheckMessage(
+                **{
+                    "message": message,
+                    "sub_messages": [
+                        {
+                            "message": '"' + short_description + '"',
+                            "passed": True,
+                        }
+                    ],
+                    "passed": True,
+                }
+            )
 
         else:
-            return ExpectationDiagnosticCheckMessage(**{
-                "message": message,
-                "passed": False,
-            })
+            return ExpectationDiagnosticCheckMessage(
+                **{
+                    "message": message,
+                    "passed": False,
+                }
+            )
 
     @classmethod
     def _check_example_cases(
         cls,
-        examples : List[ExpectationTestDataCases],
-        tests : List[ExpectationTestDiagnostics],
+        examples: List[ExpectationTestDataCases],
+        tests: List[ExpectationTestDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether this Expectation has at least one positive and negative example case (and all test cases return the expected output)"""
 
@@ -125,17 +136,21 @@ class ExpectationDiagnostics(SerializableDictDot):
         ) = cls._count_positive_and_negative_example_cases(examples)
         unexpected_case_count = cls._count_unexpected_test_cases(tests)
         passed = (
-            (positive_case_count > 0) and (negative_case_count > 0) and (unexpected_case_count == 0)
+            (positive_case_count > 0)
+            and (negative_case_count > 0)
+            and (unexpected_case_count == 0)
         )
         print(positive_case_count, negative_case_count, unexpected_case_count, passed)
-        return ExpectationDiagnosticCheckMessage(**{
-            "message": message,
-            "passed": passed,
-        })
+        return ExpectationDiagnosticCheckMessage(
+            **{
+                "message": message,
+                "passed": passed,
+            }
+        )
 
     @staticmethod
     def _check_core_logic_for_at_least_one_execution_engine(
-        execution_engines : ExpectationExecutionEngineDiagnostics,
+        execution_engines: ExpectationExecutionEngineDiagnostics,
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""
 
@@ -146,19 +161,23 @@ class ExpectationDiagnostics(SerializableDictDot):
                 successful_execution_engines += 1
 
         if successful_execution_engines > 0:
-            return ExpectationDiagnosticCheckMessage(**{
-                "message": message,
-                "passed": True,
-            })
+            return ExpectationDiagnosticCheckMessage(
+                **{
+                    "message": message,
+                    "passed": True,
+                }
+            )
         else:
-            return ExpectationDiagnosticCheckMessage(**{
-                "message": message,
-                "passed": False,
-            })
+            return ExpectationDiagnosticCheckMessage(
+                **{
+                    "message": message,
+                    "passed": False,
+                }
+            )
 
     @staticmethod
     def _count_positive_and_negative_example_cases(
-        examples : List[ExpectationTestDataCases]
+        examples: List[ExpectationTestDataCases],
     ) -> Tuple[int, int]:
         """Scans examples and returns a 2-ple with the numbers of cases with success == True and success == False"""
 
@@ -176,7 +195,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _count_unexpected_test_cases(
-        test_diagnostics : ExpectationTestDiagnostics
+        test_diagnostics: ExpectationTestDiagnostics,
     ) -> int:
         """Scans test_diagnostics and returns the number of cases that did not pass."""
 
@@ -190,10 +209,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         return unexpected_cases
 
     @staticmethod
-    def _convert_checks_into_output_message(
-        class_name : str,
-        checks: List[dict]
-    ) -> str:
+    def _convert_checks_into_output_message(class_name: str, checks: List[dict]) -> str:
         """Converts a list of checks into an output string (potentially nested), with ✔ to indicate checks that passed."""
 
         output_message = f"Completeness checklist for {class_name}:"
