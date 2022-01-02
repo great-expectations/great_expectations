@@ -30,6 +30,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     # This object is taken directly from the Expectation class, without modification
     examples: List[ExpectationTestDataCases]
+    gallery_examples: List[ExpectationTestDataCases]
 
     # These objects are derived from the Expectation class
     # They're a combination of direct introspection of existing properties, and instantiating the Expectation with test data and actually executing methods.
@@ -112,30 +113,25 @@ class ExpectationDiagnostics(SerializableDictDot):
     @classmethod
     def _check_example_cases(
         cls,
-        examples : ExpectationTestDataCases,
-        tests : ExpectationTestDiagnostics,
+        examples : List[ExpectationTestDataCases],
+        tests : List[ExpectationTestDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether this Expectation has at least one positive and negative example case (and all test cases return the expected output)"""
 
         message = "Has at least one positive and negative example case, and all test cases pass"
         (
-            positive_cases,
-            negative_cases,
+            positive_case_count,
+            negative_case_count,
         ) = cls._count_positive_and_negative_example_cases(examples)
-        unexpected_cases = cls._count_unexpected_test_cases(tests)
+        unexpected_case_count = cls._count_unexpected_test_cases(tests)
         passed = (
-            (positive_cases > 0) and (negative_cases > 0) and (unexpected_cases == 0)
+            (positive_case_count > 0) and (negative_case_count > 0) and (unexpected_case_count == 0)
         )
-        if passed:
-            return ExpectationDiagnosticCheckMessage(**{
-                "message": message,
-                "passed": passed,
-            })
-        else:
-            return ExpectationDiagnosticCheckMessage(**{
-                "message": message,
-                "passed": passed,
-            })
+        print(positive_case_count, negative_case_count, unexpected_case_count, passed)
+        return ExpectationDiagnosticCheckMessage(**{
+            "message": message,
+            "passed": passed,
+        })
 
     @staticmethod
     def _check_core_logic_for_at_least_one_execution_engine(
@@ -164,7 +160,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     def _count_positive_and_negative_example_cases(
         examples : List[ExpectationTestDataCases]
     ) -> Tuple[int, int]:
-        """Scans self.examples and returns a 2-ple with the numbers of cases with success == True and success == False"""
+        """Scans examples and returns a 2-ple with the numbers of cases with success == True and success == False"""
 
         positive_cases: int = 0
         negative_cases: int = 0
@@ -182,12 +178,12 @@ class ExpectationDiagnostics(SerializableDictDot):
     def _count_unexpected_test_cases(
         test_diagnostics : ExpectationTestDiagnostics
     ) -> int:
-        """Scans self.examples and returns the number of cases that did not pass."""
+        """Scans test_diagnostics and returns the number of cases that did not pass."""
 
         unexpected_cases: int = 0
 
         for test in test_diagnostics:
-            passed = test["test_passed"] == "true"
+            passed = test["test_passed"] == True
             if not passed:
                 unexpected_cases += 1
 

@@ -924,12 +924,13 @@ class Expectation(metaclass=MetaExpectation):
         # errors :List[ExpectationErrorDiagnostics] = []
 
         library_metadata : ExpectationDescriptionDiagnostics = self._get_augmented_library_metadata()
-        examples : List[ExpectationTestDataCases] = self._get_examples()
+        gallery_examples : List[ExpectationTestDataCases] = self._get_examples()
+        examples : List[ExpectationTestDataCases] = self._get_examples(return_only_gallery_examples=False)
         description_diagnostics : ExpectationDescriptionDiagnostics = self._get_description_diagnostics()
 
         executed_test_cases : ExecutedExpectationTestCase = self._execute_test_examples(
             expectation_type=description_diagnostics.snake_name,
-            examples=examples,
+            examples=examples
         )
 
         renderers : List[ExpectationRendererDiagnostics] = self._get_renderer_diagnostics(
@@ -958,7 +959,7 @@ class Expectation(metaclass=MetaExpectation):
 
         test_results : List[ExpectationTestDiagnostics] = self._get_test_results(
             expectation_type=description_diagnostics.snake_name,
-            test_data_cases=self._get_examples(return_only_gallery_examples=False),
+            test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
         )
 
@@ -990,6 +991,7 @@ class Expectation(metaclass=MetaExpectation):
         return ExpectationDiagnostics(
             library_metadata= library_metadata,
             examples= examples,
+            gallery_examples= gallery_examples,
             description= description_diagnostics,
             renderers= renderers,
             metrics= metric_diagnostics_list,
@@ -1006,6 +1008,8 @@ class Expectation(metaclass=MetaExpectation):
         """
 
         diagnostics : ExpectationDiagnostics = self.run_diagnostics()
+        import json
+        print(json.dumps([e.to_dict() for e in self._get_examples(return_only_gallery_examples=False)], indent=2))
         checklist : str = diagnostics.generate_checklist()
         print(checklist)
 
@@ -1047,21 +1051,22 @@ class Expectation(metaclass=MetaExpectation):
         included_examples = []
         for example in all_examples:
 
-            included_tests = []
+            included_test_cases = []
             for test in example["tests"]:
                 if (
                     test.get("include_in_gallery") == True
                     or return_only_gallery_examples == False
                 ):
-                    included_tests.append(
-                        ExpectationLegacyTestCaseAdapter(**test)
+                    copied_test = deepcopy(test)
+                    included_test_cases.append(
+                        ExpectationLegacyTestCaseAdapter(**copied_test)
                     )
 
             # If at least one ExpectationTestCase from the ExpectationTestDataCases was selected,
             # then keep a copy of the ExpectationTestDataCases including data and the selected ExpectationTestCases.
-            if len(included_tests) > 0:
+            if len(included_test_cases) > 0:
                 copied_example = deepcopy(example)
-                copied_example["tests"] = included_tests
+                copied_example["tests"] = included_test_cases
                 included_examples.append(
                     ExpectationTestDataCases(**copied_example)
                 )

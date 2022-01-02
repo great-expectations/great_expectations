@@ -46,6 +46,7 @@ def test_expectation_self_check():
             "SqlAlchemyExecutionEngine": True,
             "SparkDFExecutionEngine": True
         },
+        "gallery_examples": [],
         "renderers": [
             {
                 "name": "atomic.diagnostic.observed_value",
@@ -119,8 +120,8 @@ def test_include_in_gallery_flag():
     report_object = my_expectation.run_diagnostics()
     # print(json.dumps(report_object["examples"], indent=2))
 
-    assert len(report_object["examples"][0]["tests"]) == 1
-    assert report_object["examples"][0]["tests"][0].to_dict() == {
+    assert len(report_object["gallery_examples"][0]["tests"]) == 1
+    assert report_object["gallery_examples"][0]["tests"][0].to_dict() == {
         "title": "positive_test_with_mostly",
         "exact_match_out": False,
         "input": {"column": "mostly_threes", "mostly": 0.6},
