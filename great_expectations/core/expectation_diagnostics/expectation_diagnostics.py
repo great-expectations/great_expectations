@@ -41,7 +41,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     # For example, we can verify the existence of certain Renderers through
     # introspection alone, but in order to see what they return, we need to
     # instantiate the Expectation and actually run the method.
-    
+
     library_metadata: AugmentedLibraryMetadata
     description: ExpectationDescriptionDiagnostics
     execution_engines: ExpectationExecutionEngineDiagnostics
