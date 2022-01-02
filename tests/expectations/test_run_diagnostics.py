@@ -63,7 +63,7 @@ def test_include_in_gallery_flag():
         "title": "positive_test_with_mostly",
         "exact_match_out": False,
         "input": {"column": "mostly_threes", "mostly": 0.6},
-        # "include_in_gallery": True,
+        "include_in_gallery": False,
         "suppress_test_for": [],
         "output": {
             "success": True,
