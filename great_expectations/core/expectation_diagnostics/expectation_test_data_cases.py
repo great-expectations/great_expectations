@@ -16,6 +16,7 @@ class ExpectationTestCase(SerializableDictDot):
     output: Dict[str, Any]
     exact_match_out: bool
     suppress_test_for: List[str] = field(default_factory=list)
+    include_in_gallery: bool = False
 
 class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
     """This class provides an adapter between the test cases developed prior to Great Expectations' 0.14 release and the newer ExpectationTestCase dataclass

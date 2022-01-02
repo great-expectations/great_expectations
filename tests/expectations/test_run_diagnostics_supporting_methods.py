@@ -4,11 +4,16 @@ import pandas as pd
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
     ExpectationDescriptionDiagnostics,
+    ExpectationMetricDiagnostics,
     ExpectationRendererDiagnostics,
 )
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestDataCases
+    TestData,
+    ExpectationTestCase,
+    ExpectationTestDataCases,
 )
+from great_expectations.execution_engine.pandas_execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     Expectation
@@ -89,6 +94,7 @@ def test__get_examples_from_a_class_with_return_only_gallery_examples_equals_fal
     assert len(first_example.tests) == 3
 
 ### Tests for _get_description_diagnostics
+
 def test__get_description_diagnostics():
     class ExpectColumnValuesToBeAwesome(ColumnMapExpectation):
         """Lo, here is a docstring
@@ -107,11 +113,54 @@ def test__get_description_diagnostics():
         """,
     )
 
+### Tests for _execute_test_examples
 
-# description_diagnostics : ExpectationDescriptionDiagnostics = self._get_description_diagnostics()
-# metric_diagnostics_list : List[ExpectationMetricDiagnostics] = self._get_metric_diagnostics_list(
-#     executed_test_examples
-# )
+def test__execute_test_examples__with_an_empty_list():
+    executed_test_examples, errors = ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
+        expectation_type="expect_column_values_to_equal_three",
+        examples=[],
+    )
+
+def test__execute_test_examples__with_a_single_example():
+    example = ExpectationTestDataCases(
+        data=TestData(**{
+            "mostly_threes": [3, 3, 3, 5, None],
+
+
+        }),
+        tests=[
+            ExpectationTestCase(
+                title= "positive_test_with_mostly",
+                include_in_gallery= True,
+                exact_match_out= False,
+                input= {"column": "mostly_threes", "mostly": 0.6},
+                output= {
+                    "success": True,
+                    "unexpected_index_list": [6, 7],
+                    "unexpected_list": [2, -1],
+                }
+            )
+        ]
+    )
+
+    executed_test_examples = ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
+        expectation_type="expect_column_values_to_equal_three",
+        examples=[example],
+    )
+    print(executed_test_examples)
+    print(json.dumps(executed_test_examples[0].to_dict(), indent=2))
+    print(type(executed_test_examples[0]))
+    assert len(executed_test_examples) == 1
+
+# ### Tests for _get_metric_diagnostics_list
+# def test__get_metric_diagnostics_list_on_a_class_without_metrics():
+#     metric_diagnostics_list = ExpectColumnValuesToEqualThree()._get_metric_diagnostics_list(executed_test_examples)
+#     print(metric_diagnostics_list)
+#     assert len(metric_diagnostics_list) == 0
+#     ExpectationMetricDiagnostics(
+#         has_question_renderer=False
+#     )
+
 # def test__get_execution_engine_diagnostics():
 #     pass
 # introspected_execution_engines : ExpectationExecutionEngineDiagnostics = self._get_execution_engine_diagnostics(

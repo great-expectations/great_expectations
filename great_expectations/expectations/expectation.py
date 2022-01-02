@@ -29,6 +29,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationMetricDiagnostics,
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
+    OtherExpectationTestDiagnostics,
     RendererTestDiagnostics,
 )
 from great_expectations.core.expectation_validation_result import (
@@ -926,7 +927,7 @@ class Expectation(metaclass=MetaExpectation):
         examples : List[ExpectationTestDataCases] = self._get_examples()
         description_diagnostics : ExpectationDescriptionDiagnostics = self._get_description_diagnostics()
 
-        executed_test_examples, errors = self._execute_test_examples(
+        executed_test_examples : OtherExpectationTestDiagnostics = self._execute_test_examples(
             expectation_type=description_diagnostics.snake_name,
             examples=examples,
         )
@@ -1095,7 +1096,7 @@ class Expectation(metaclass=MetaExpectation):
         self,
         expectation_type: str,
         examples: List[ExpectationTestDataCases],
-    ) -> Tuple[List[dict], List[ExpectationErrorDiagnostics]]:
+    ) -> List[OtherExpectationTestDiagnostics]:
         """Executes a set of test examples.
         
         This method is an internal, intermediate step within run_diagnostics.
@@ -1106,26 +1107,22 @@ class Expectation(metaclass=MetaExpectation):
 
         example_data, example_test = self._choose_example(examples)
 
-        executed_test_examples: List[dict] = []
-        errors :List[ExpectationErrorDiagnostics] = []
-
-        for test_data, test_kwargs in [(example_data, example_test)]:
+        expectation_test_diagnostics: List[dict] = []
+        for test_data, test_case in [(example_data, example_test)]:
 
             # TODO: this should be creating a Batch using an engine
             test_batch = Batch(data=pd.DataFrame(test_data))
 
             expectation_config = ExpectationConfiguration(**{
                 "expectation_type": expectation_type,
-                "kwargs": test_kwargs.to_dict(), # .to_dict is necessary, because the Expectation initializeer currently does a type check for `dict`.
+                "kwargs": test_case.input
             })
 
-            validation_result = None
             try:
                 validation_results = self._instantiate_example_validation_results(
                     test_batch=test_batch,
                     expectation_config=expectation_config,
                 )
-                validation_result = validation_results[0]
             except (
                 GreatExpectationsError,
                 AttributeError,
@@ -1134,20 +1131,25 @@ class Expectation(metaclass=MetaExpectation):
                 ValueError,
                 SyntaxError,
             ) as e:
-                errors.append(ExpectationErrorDiagnostics(
+                error_diagnostics = ExpectationErrorDiagnostics(
                     error_msg= str(e),
                     stack_trace= traceback.format_exc(),
-                ))
+                )
+                validation_result = None
             
-            executed_test_examples.append({
-                "expectation_config": expectation_config,
-                "validation_result": validation_result,
-            })
+            else:
+                error_diagnostics = None
+                validation_result = validation_results[0]
+            
+            expectation_test_diagnostics.append(
+                OtherExpectationTestDiagnostics(
+                    expectation_configuration=expectation_config,
+                    validation_result=validation_result,
+                    error_diagnostics=error_diagnostics,
+                )
+            )
 
-        return (
-            executed_test_examples,
-            errors,
-        )
+        return expectation_test_diagnostics
 
     @staticmethod
     def _choose_example(

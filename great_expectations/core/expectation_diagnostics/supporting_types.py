@@ -1,4 +1,6 @@
 from dataclasses import field
+from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.expectation_validation_result import ExpectationValidationResult
 # import dataclasses
 from pydantic.dataclasses import dataclass
 from dataclasses import dataclass
@@ -111,6 +113,24 @@ class ExpectationTestDiagnostics(SerializableDictDot):
 class ExpectationErrorDiagnostics(SerializableDictDot):
     error_msg: str
     stack_trace: str
+
+@dataclass
+class OtherExpectationTestDiagnostics(SerializableDictDot):
+    """Captures information from executing Expectation test cases. Used within the ExpectationDiagnostic object.
+    
+    Name is temporary.
+    This may turn out to be the same thing as ExpectationTestDiagnostics.
+    """
+
+    expectation_configuration: ExpectationConfiguration
+    validation_result: ExpectationValidationResult
+    error_diagnostics: ExpectationErrorDiagnostics
+
+    # test_title: str
+    # backend: str
+    # test_passed: bool
+    # error_message: Union[str, None] = None
+    # stack_trace: Union[str, None] = None
 
 @dataclass
 class ExpectationDiagnosticCheckMessage(SerializableDictDot):
