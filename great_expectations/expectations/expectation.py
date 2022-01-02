@@ -1360,6 +1360,9 @@ class Expectation(metaclass=MetaExpectation):
             )
             renderer_diagnostic_list.append(new_renderer_diagnostics)
 
+        # Sort to enforce consistency for testing
+        renderer_diagnostic_list.sort(key=lambda x: x.name)
+
         return renderer_diagnostic_list
 
     @staticmethod
