@@ -1,11 +1,9 @@
+import dataclasses
 import inspect
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Union
-
-import dataclasses
-# from pydantic.dataclasses import dataclass
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -16,6 +14,8 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.types import SerializableDictDot
+
+# from pydantic.dataclasses import dataclass
 
 
 class Maturity(Enum):

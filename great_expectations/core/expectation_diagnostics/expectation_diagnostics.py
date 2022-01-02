@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
-# from pydantic.dataclasses import dataclass
-
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases,
 )
@@ -17,6 +15,8 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationTestDiagnostics,
 )
 from great_expectations.types import SerializableDictDot
+
+# from pydantic.dataclasses import dataclass
 
 
 @dataclass(frozen=True)
