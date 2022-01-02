@@ -1,13 +1,9 @@
-from dataclasses import (
-    field,
-    FrozenInstanceError,
-)
-from typing import List, Optional
-from enum import Enum
-import pytest
-
 # from pydantic.dataclasses import dataclass
-from dataclasses import dataclass
+from dataclasses import FrozenInstanceError, dataclass, field
+from enum import Enum
+from typing import List, Optional
+
+import pytest
 from pytest import raises
 
 from great_expectations.types import DictDot, SerializableDictDot

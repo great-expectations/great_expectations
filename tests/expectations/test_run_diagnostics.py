@@ -1,11 +1,12 @@
 import json
+
 import pandas as pd
 import pytest
 
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_diagnostics.supporting_types import (
-    ExpectationRendererDiagnostics,
     ExecutedExpectationTestCase,
+    ExpectationRendererDiagnostics,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -15,8 +16,8 @@ from great_expectations.expectations.registry import _registered_expectations
 
 from .fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
-    ExpectColumnValuesToEqualThree__SecondIteration,
     ExpectColumnValuesToEqualThree__BrokenIteration,
+    ExpectColumnValuesToEqualThree__SecondIteration,
 )
 
 

@@ -1,11 +1,12 @@
 import pytest
 
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    TestData,
+    ExpectationLegacyTestCaseAdapter,
     ExpectationTestCase,
     ExpectationTestDataCases,
-    ExpectationLegacyTestCaseAdapter,
+    TestData,
 )
+
 
 # @pytest.mark.skip(reason="Not yet supported")
 def test_basic_instantiation_of_TestData():

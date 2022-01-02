@@ -1,23 +1,22 @@
 import pytest
 
-from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    TestData,
-    ExpectationTestCase,
-    ExpectationTestDataCases,
-    ExpectationLegacyTestCaseAdapter,
-)
-from great_expectations.core.expectation_diagnostics.supporting_types import (
-    ExpectationDescriptionDiagnostics,
-    AugmentedLibraryMetadata,
-    RendererTestDiagnostics,
-    ExpectationRendererDiagnostics,
-    ExpectationExecutionEngineDiagnostics,
-    ExpectationDiagnosticCheckMessage,
-    ExpectationTestDiagnostics,
-)
-
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
+)
+from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
+    ExpectationLegacyTestCaseAdapter,
+    ExpectationTestCase,
+    ExpectationTestDataCases,
+    TestData,
+)
+from great_expectations.core.expectation_diagnostics.supporting_types import (
+    AugmentedLibraryMetadata,
+    ExpectationDescriptionDiagnostics,
+    ExpectationDiagnosticCheckMessage,
+    ExpectationExecutionEngineDiagnostics,
+    ExpectationRendererDiagnostics,
+    ExpectationTestDiagnostics,
+    RendererTestDiagnostics,
 )
 
 expectation_test_data_case = ExpectationTestDataCases(

@@ -13,6 +13,7 @@ from dateutil.parser import parse
 from numpy import negative
 
 from great_expectations import __version__ as ge_version
+from great_expectations import execution_engine
 from great_expectations.core import expectation_configuration
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import (
@@ -23,18 +24,20 @@ from great_expectations.core.expectation_diagnostics.expectation_diagnostics imp
     ExpectationDiagnostics,
 )
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
+    ExpectationLegacyTestCaseAdapter,
+    ExpectationTestCase,
     ExpectationTestDataCases,
     TestData,
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
+    ExecutedExpectationTestCase,
     ExpectationDescriptionDiagnostics,
     ExpectationErrorDiagnostics,
     ExpectationExecutionEngineDiagnostics,
     ExpectationMetricDiagnostics,
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
-    ExecutedExpectationTestCase,
     RendererTestDiagnostics,
 )
 from great_expectations.core.expectation_validation_result import (
@@ -62,14 +65,6 @@ from great_expectations.self_check.util import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
-from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
-    ExpectationDiagnostics,
-)
-from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationLegacyTestCaseAdapter,
-    ExpectationTestDataCases,
-    ExpectationTestCase,
-)
 
 from ..core.util import convert_to_json_serializable, nested_update
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
@@ -84,7 +79,6 @@ from ..render.types import (
 )
 from ..render.util import num_to_str
 from ..util import is_parseable_date
-from great_expectations import execution_engine
 
 logger = logging.getLogger(__name__)
 
