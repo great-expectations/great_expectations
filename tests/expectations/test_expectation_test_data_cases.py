@@ -60,6 +60,7 @@ def test_basic_instantiation_of_ExpectationTestCase():
         "output",
         "suppress_test_for",
         "exact_match_out",
+        "include_in_gallery",
     }
 
     assert my_test_case.input == {
