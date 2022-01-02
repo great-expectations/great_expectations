@@ -64,13 +64,23 @@ class ExpectationDescriptionDiagnostics(SerializableDictDot):
     docstring : str
 
 @dataclass
+class RendererTestDiagnostics(SerializableDictDot):
+    """Captures information from executing Renderer test cases. Used within the ExpectationRendererDiagnostics object."""
+
+    test_title: str
+    rendered_successfully: bool
+    renderered_str: Union[str, None]
+    error_message: Union[str, None] = None
+    stack_trace: Union[str, None] = None
+
+@dataclass
 class ExpectationRendererDiagnostics(SerializableDictDot):
     """Captures information about a specific Renderer within an Expectation. Used within the ExpectationDiagnostic object."""
 
     name: str
     is_supported: bool
     is_standard: bool
-    samples: List[str]
+    samples: List[RendererTestDiagnostics]
 
 @dataclass
 class ExpectationMetricDiagnostics(SerializableDictDot):

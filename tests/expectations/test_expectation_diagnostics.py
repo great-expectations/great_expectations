@@ -9,6 +9,7 @@ from great_expectations.core.expectation_diagnostics.expectation_test_data_cases
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationDescriptionDiagnostics,
     AugmentedLibraryMetadata,
+    RendererTestDiagnostics,
     ExpectationRendererDiagnostics,
 )
 
@@ -115,7 +116,11 @@ edr = ExpectationDiagnostics(
             is_supported=True,
             is_standard=True,
             samples=[
-                "a values must match this regular expression: ^a, at least 90 % of the time."
+                RendererTestDiagnostics(
+                    test_title="basic_positive_test",
+                    rendered_successfully=True,
+                    renderered_str="a values must match this regular expression: ^a, at least 90 % of the time.",
+                )
             ],
         )
     ],

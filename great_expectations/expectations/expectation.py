@@ -29,6 +29,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationMetricDiagnostics,
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
+    RendererTestDiagnostics,
 )
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -931,16 +932,13 @@ class Expectation(metaclass=MetaExpectation):
         )
 
         renderers : List[ExpectationRendererDiagnostics] = self._get_renderer_diagnostics(
-            expectation_name=description_diagnostics.snake_name,
+            expectation_type=description_diagnostics.snake_name,
             executed_test_examples=executed_test_examples,
-            # expectation_config=executed_test_examples[0]["expectation_config"],
-            # validation_result=executed_test_examples[0]["validation_result"],
         )
 
-        # errors = []
-        # upstream_metrics = None
-        # try:
-        metric_diagnostics_list : List[ExpectationMetricDiagnostics] = self._get_metric_diagnostics_list(executed_test_examples)
+        metric_diagnostics_list : List[ExpectationMetricDiagnostics] = self._get_metric_diagnostics_list(
+            executed_test_examples=executed_test_examples,
+        )
             # report_obj.update({"metrics": upstream_metrics})
         # except GreatExpectationsError as e:
         #     # report_obj = self._add_error_to_diagnostics_report(
@@ -1007,6 +1005,8 @@ class Expectation(metaclass=MetaExpectation):
         diagnostics : ExpectationDiagnostics = self.run_diagnostics()
         checklist : str = diagnostics.generate_checklist()
         print(checklist)
+
+        return checklist
 
     # @staticmethod
     # def _add_error_to_diagnostics_report(
@@ -1296,7 +1296,7 @@ class Expectation(metaclass=MetaExpectation):
 
     def _get_renderer_diagnostics(
         self,
-        expectation_name: str,
+        expectation_type: str,
         executed_test_examples: List[dict],
         standard_renderers: List[str] = [
             "renderer.answer",
@@ -1310,22 +1310,43 @@ class Expectation(metaclass=MetaExpectation):
     ) -> List[ExpectationRendererDiagnostics]:
         """Generate Renderer diagnostics for this Expectation, based primarily on a list of executed_test_examples."""
 
-        supported_renderers = self._get_registered_renderers(expectation_name)
+        supported_renderers = self._get_registered_renderers(expectation_type)
 
         renderer_diagnostic_list = []
         for renderer_name in set(standard_renderers).union(set(supported_renderers)):
             samples = []
             if renderer_name in supported_renderers:
-                _, renderer = _registered_renderers[expectation_name][renderer_name]
+                _, renderer = _registered_renderers[expectation_type][renderer_name]
 
                 for executed_test_example in executed_test_examples:
-                    rendered_result = renderer(
-                        configuration=executed_test_example["expectation_config"],
-                        result=executed_test_example["validation_result"],
-                    )
-                    if rendered_result != None:
+                    print(executed_test_example)
+                    test_title = executed_test_example["expectation_config"]["kwargs"]["title"]
+
+                    try:
+                        rendered_result = renderer(
+                            configuration=executed_test_example["expectation_config"],
+                            result=executed_test_example["validation_result"],
+                        )
                         rendered_result_str = self._get_rendered_result_as_string(rendered_result)
-                        samples.append(rendered_result_str)
+
+                    except Exception as e:
+                        new_sample = RendererTestDiagnostics(
+                            test_title=test_title,
+                            renderered_str= None,
+                            rendered_successfully= False,
+                            error_message=str(e),
+                            stack_trace=traceback.format_exc(),
+                        )
+                    
+                    else:
+                        new_sample = RendererTestDiagnostics(
+                            test_title=test_title,
+                            renderered_str=rendered_result_str,
+                            rendered_successfully=True,
+                        )
+
+                    finally:
+                        samples.append(new_sample)
 
             new_renderer_diagnostics = ExpectationRendererDiagnostics(
                 name = renderer_name,
