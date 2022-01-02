@@ -942,15 +942,6 @@ class Expectation(metaclass=MetaExpectation):
         metric_diagnostics_list : List[ExpectationMetricDiagnostics] = self._get_metric_diagnostics_list(
             executed_test_cases=executed_test_cases,
         )
-            # report_obj.update({"metrics": upstream_metrics})
-        # except GreatExpectationsError as e:
-        #     # report_obj = self._add_error_to_diagnostics_report(
-        #     #     report_obj, e, traceback.format_exc()
-        #     # )
-        #     errors.append(ExpectationErrorDiagnostics(
-        #         error_msg= str(e),
-        #         stack_trace= traceback.format_exc(),
-        #     ))
 
         introspected_execution_engines : ExpectationExecutionEngineDiagnostics = self._get_execution_engine_diagnostics(
             metric_diagnostics_list=metric_diagnostics_list,
@@ -963,31 +954,6 @@ class Expectation(metaclass=MetaExpectation):
             execution_engine_diagnostics=introspected_execution_engines,
         )
 
-        # tests = self._get_examples(return_only_gallery_examples=False)
-        # if len(tests) > 0 and introspected_execution_engines is not None:
-        #     test_results = self._get_test_results(
-        #         description_diagnostics.snake_name,
-        #         tests,
-        #         introspected_execution_engines,
-        #     )
-                # report_obj.update({"tests": test_results})
-        # except Exception as e:
-        #     # report_obj = self._add_error_to_diagnostics_report(
-        #     #     report_obj, e, traceback.format_exc()
-        #     # )
-        #     errors.append(ExpectationErrorDiagnostics(
-        #         error_msg= str(e),
-        #         stack_trace= traceback.format_exc(),
-        #     ))
-        # else:
-        #     test_results = []
-        #     renderers = []
-        #     metric_diagnostics_list = []
-        #     introspected_execution_engines = ExpectationExecutionEngineDiagnostics(
-        #         PandasExecutionEngine=False,
-        #         SqlAlchemyExecutionEngine=False,
-        #         SparkDFExecutionEngine=False
-        #     )
         return ExpectationDiagnostics(
             library_metadata= library_metadata,
             examples= examples,
@@ -1014,24 +980,6 @@ class Expectation(metaclass=MetaExpectation):
         print(checklist)
 
         return checklist
-
-    # @staticmethod
-    # def _add_error_to_diagnostics_report(
-    #     report_obj: Dict, error: Exception, stack_trace: str
-    # ) -> dict:
-    #     error_entries = report_obj.get("errors")
-    #     if error_entries is None:
-    #         error_entries = []
-    #         report_obj["errors"] = error_entries
-
-    #     error_entries.append(
-    #         {
-    #             "error_message": str(error),
-    #             "stack_trace": stack_trace,
-    #         }
-    #     )
-
-    #     return report_obj
 
     def _get_examples(
         self,
