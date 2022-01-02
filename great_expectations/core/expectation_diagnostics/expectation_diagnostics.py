@@ -1,7 +1,7 @@
-# from dataclasses import dataclass
+from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
-from pydantic.dataclasses import dataclass
+# from pydantic.dataclasses import dataclass
 
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases,

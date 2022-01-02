@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Union
 
-# import dataclasses
-from pydantic.dataclasses import dataclass
+import dataclasses
+# from pydantic.dataclasses import dataclass
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
