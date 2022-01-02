@@ -3,12 +3,14 @@ import pandas as pd
 
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
+    ExpectationDescriptionDiagnostics,
     ExpectationRendererDiagnostics,
 )
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases
 )
 from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
     Expectation
 )
 
@@ -18,6 +20,8 @@ from .fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree__BrokenIteration,
     ExpectColumnValuesToEqualThree__ThirdIteration,
 )
+
+### Tests for _get_augmented_library_metadata
 
 def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_object():
     augmented_library_metadata = ExpectColumnValuesToEqualThree()._get_augmented_library_metadata()
@@ -59,6 +63,8 @@ def test__get_augmented_library_metadata_on_a_class_with_a_package_in_its_librar
         package="whatsit_expectations"
     )
 
+### Tests for _get_examples
+
 def test__get_examples_from_a_class_with_no_examples():
     assert ExpectColumnValuesToEqualThree()._get_examples() == []
 
@@ -82,8 +88,26 @@ def test__get_examples_from_a_class_with_return_only_gallery_examples_equals_fal
     assert first_example.data == {'mostly_threes': [3, 3, 3, 3, 3, 3, 2, -1, None, None]}
     assert len(first_example.tests) == 3
 
+### Tests for _get_description_diagnostics
+def test__get_description_diagnostics():
+    class ExpectColumnValuesToBeAwesome(ColumnMapExpectation):
+        """Lo, here is a docstring
+        
+        It has more to it.
+        """
 
-# examples : List[ExpectationTestDataCases] = self._get_examples()
+    description_diagnostics = ExpectColumnValuesToBeAwesome()._get_description_diagnostics()
+    assert description_diagnostics == ExpectationDescriptionDiagnostics(
+        camel_name= "ExpectColumnValuesToBeAwesome",
+        snake_name= "expect_column_values_to_be_awesome",
+        short_description= "Lo, here is a docstring",
+        docstring= """Lo, here is a docstring
+        
+        It has more to it.
+        """,
+    )
+
+
 # description_diagnostics : ExpectationDescriptionDiagnostics = self._get_description_diagnostics()
 # metric_diagnostics_list : List[ExpectationMetricDiagnostics] = self._get_metric_diagnostics_list(
 #     executed_test_examples
