@@ -935,6 +935,7 @@ class Expectation(metaclass=MetaExpectation):
         renderers : List[ExpectationRendererDiagnostics] = self._get_renderer_diagnostics(
             expectation_type=description_diagnostics.snake_name,
             executed_test_cases=executed_test_cases,
+            registered_renderers=_registered_renderers,
         )
 
         metric_diagnostics_list : List[ExpectationMetricDiagnostics] = self._get_metric_diagnostics_list(
@@ -951,7 +952,8 @@ class Expectation(metaclass=MetaExpectation):
         #     ))
 
         introspected_execution_engines : ExpectationExecutionEngineDiagnostics = self._get_execution_engine_diagnostics(
-            metric_diagnostics_list,
+            metric_diagnostics_list=metric_diagnostics_list,
+            registered_metrics=_registered_metrics,
         )
 
         test_results : List[ExpectationTestDiagnostics] = self._get_test_results(
@@ -1103,7 +1105,7 @@ class Expectation(metaclass=MetaExpectation):
         """
 
         if examples == []:
-            return ([], [])
+            return []
 
         example_data, example_test = self._choose_example(examples)
 
@@ -1182,9 +1184,12 @@ class Expectation(metaclass=MetaExpectation):
         return validation_results
 
     @staticmethod
-    def _get_registered_renderers(snake_name: str) -> List[str]:
+    def _get_registered_renderers(
+        expectation_type: str,
+        registered_renderers: dict,
+    ) -> List[str]:
         """Get a list of supported renderers for this Expectation, in sorted order."""
-        supported_renderers = list(_registered_renderers[snake_name].keys())
+        supported_renderers = list(registered_renderers[expectation_type].keys())
         supported_renderers.sort()
         return supported_renderers
 
@@ -1196,14 +1201,6 @@ class Expectation(metaclass=MetaExpectation):
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
-        # test_data_cases = cls._get_examples(return_only_gallery_examples=False)
-        # if len(tests) > 0 and introspected_execution_engines is not None:
-        #     test_results = self._get_test_results(
-        #         description_diagnostics.snake_name,
-        #         tests,
-        #         introspected_execution_engines,
-        #     )
-
         test_results = []
 
         exp_tests = cls._generate_expectation_tests(
@@ -1214,7 +1211,7 @@ class Expectation(metaclass=MetaExpectation):
 
         for exp_test in exp_tests:
             try:
-                evaluate_json_test_cfe(
+                result = evaluate_json_test_cfe(
                     validator=exp_test["validator_with_data"],
                     expectation_type=exp_test["expectation_type"],
                     test=exp_test["test"],
@@ -1302,6 +1299,7 @@ class Expectation(metaclass=MetaExpectation):
         self,
         expectation_type: str,
         executed_test_cases: List[ExecutedExpectationTestCase],
+        registered_renderers: List[str],
         standard_renderers: List[str] = [
             "renderer.answer",
             "renderer.diagnostic.unexpected_statement",
@@ -1314,13 +1312,16 @@ class Expectation(metaclass=MetaExpectation):
     ) -> List[ExpectationRendererDiagnostics]:
         """Generate Renderer diagnostics for this Expectation, based primarily on a list of ExecutedExpectationTestCases."""
 
-        supported_renderers = self._get_registered_renderers(expectation_type)
+        supported_renderers = self._get_registered_renderers(
+            expectation_type=expectation_type,
+            registered_renderers=registered_renderers,
+        )
 
         renderer_diagnostic_list = []
         for renderer_name in set(standard_renderers).union(set(supported_renderers)):
             samples = []
             if renderer_name in supported_renderers:
-                _, renderer = _registered_renderers[expectation_type][renderer_name]
+                _, renderer = registered_renderers[expectation_type][renderer_name]
 
                 for executed_test_case in executed_test_cases:
                     test_title = executed_test_case["test_case"]["title"]
@@ -1364,6 +1365,7 @@ class Expectation(metaclass=MetaExpectation):
     @staticmethod
     def _get_execution_engine_diagnostics(
         metric_diagnostics_list : List[ExpectationMetricDiagnostics],
+        registered_metrics : dict,
         execution_engine_names : List[str] = [
             "PandasExecutionEngine",
             "SqlAlchemyExecutionEngine",
@@ -1379,7 +1381,7 @@ class Expectation(metaclass=MetaExpectation):
         for provider in execution_engine_names:
             all_true = True
             for metric_diagnostics in metric_diagnostics_list:
-                has_provider = provider in _registered_metrics[metric_diagnostics.name]["providers"]
+                has_provider = provider in registered_metrics[metric_diagnostics.name]["providers"]
                 if not has_provider:
                     all_true = False
 

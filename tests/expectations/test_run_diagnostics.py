@@ -2,7 +2,10 @@ import json
 import pandas as pd
 
 from great_expectations.core.batch import Batch
-from great_expectations.core.expectation_diagnostics.supporting_types import ExpectationRendererDiagnostics
+from great_expectations.core.expectation_diagnostics.supporting_types import (
+    ExpectationRendererDiagnostics,
+    ExecutedExpectationTestCase,
+)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     ExpectationConfiguration,
@@ -179,14 +182,19 @@ def test_expectation__get_renderers():
     expectation_name = "expect_column_values_to_match_regex"
     my_expectation = _registered_expectations[expectation_name]()
 
-    supported_renderers = my_expectation._get_registered_renderers(expectation_name)
+    from great_expectations.expectations.registry import _registered_renderers
+
+    # supported_renderers = my_expectation._get_registered_renderers(
+    #     expectation_name,
+    #     _registered_renderers,
+    # )
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
 
     my_batch = Batch(data=pd.DataFrame(example_data))
 
     my_expectation_config = ExpectationConfiguration(
-        **{"expectation_type": expectation_name, "kwargs": example_test}
+        **{"expectation_type": expectation_name, "kwargs": example_test.input}
     )
 
     my_validation_results = my_expectation._instantiate_example_validation_results(
@@ -197,10 +205,16 @@ def test_expectation__get_renderers():
 
     renderer_diagnostics = my_expectation._get_renderer_diagnostics(
         expectation_name,
-        [{
-            "expectation_config": my_expectation_config,
-            "validation_result": my_validation_result,
-        }]
+        [
+            ExecutedExpectationTestCase(
+                data=example_data,
+                test_case=example_test,
+                expectation_configuration=my_expectation_config,
+                validation_result=my_validation_result,
+                error_diagnostics=None,
+            )
+        ],
+        _registered_renderers
     )
     assert isinstance(renderer_diagnostics, list)
     assert len(renderer_diagnostics) == 10
@@ -236,14 +250,17 @@ def test_expectation__get_renderers():
     expectation_name = "expect_column_values_to_equal_three___second_iteration"
     my_expectation = _registered_expectations[expectation_name]()
 
-    supported_renderers = my_expectation._get_registered_renderers(expectation_name)
+    # supported_renderers = my_expectation._get_registered_renderers(
+    #     expectation_name,
+    #     _registered_renderers,
+    # )
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
 
     my_batch = Batch(data=pd.DataFrame(example_data))
 
     my_expectation_config = ExpectationConfiguration(
-        **{"expectation_type": expectation_name, "kwargs": example_test}
+        **{"expectation_type": expectation_name, "kwargs": example_test.input}
     )
 
     my_validation_results = my_expectation._instantiate_example_validation_results(
@@ -254,10 +271,16 @@ def test_expectation__get_renderers():
 
     renderer_diagnostics = my_expectation._get_renderer_diagnostics(
         expectation_name,
-        [{
-            "expectation_config": my_expectation_config,
-            "validation_result": my_validation_result,
-        }]
+        [
+            ExecutedExpectationTestCase(
+                data=example_data,
+                test_case=example_test,
+                expectation_configuration=my_expectation_config,
+                validation_result=my_validation_result,
+                error_diagnostics=None,
+            )
+        ],
+        _registered_renderers,
     )
     assert isinstance(renderer_diagnostics, list)
     for element in renderer_diagnostics:
@@ -283,13 +306,16 @@ def test_expectation__get_renderers():
     expectation_name = "expect_column_values_to_equal_three___third_iteration"
     my_expectation = _registered_expectations[expectation_name]()
 
-    supported_renderers = my_expectation._get_registered_renderers(expectation_name)
+    # supported_renderers = my_expectation._get_registered_renderers(
+    #     expectation_name,
+    #     _registered_renderers,
+    # )
     examples = my_expectation._get_examples()
     example_data, example_test = my_expectation._choose_example(examples)
     my_batch = Batch(data=pd.DataFrame(example_data))
 
     my_expectation_config = ExpectationConfiguration(
-        **{"expectation_type": expectation_name, "kwargs": example_test}
+        **{"expectation_type": expectation_name, "kwargs": example_test.input}
     )
 
     my_validation_results = my_expectation._instantiate_example_validation_results(
@@ -300,10 +326,16 @@ def test_expectation__get_renderers():
 
     renderer_diagnostics = my_expectation._get_renderer_diagnostics(
         expectation_name,
-        [{
-            "expectation_config": my_expectation_config,
-            "validation_result": my_validation_result,
-        }]
+        [
+            ExecutedExpectationTestCase(
+                data=example_data,
+                test_case=example_test,
+                expectation_configuration=my_expectation_config,
+                validation_result=my_validation_result,
+                error_diagnostics=None,
+            )
+        ],
+        _registered_renderers
     )
     assert isinstance(renderer_diagnostics, list)
     assert len(renderer_diagnostics) == 10

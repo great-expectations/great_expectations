@@ -1,10 +1,11 @@
 import json
-import pandas as pd
+import pytest
 
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
     ExpectationDescriptionDiagnostics,
     ExpectationMetricDiagnostics,
+    ExpectationExecutionEngineDiagnostics,
     ExpectationRendererDiagnostics,
 )
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -116,17 +117,16 @@ def test__get_description_diagnostics():
 ### Tests for _execute_test_examples
 
 def test__execute_test_examples__with_an_empty_list():
-    executed_test_examples, errors = ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
+    executed_test_examples = ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
         expectation_type="expect_column_values_to_equal_three",
         examples=[],
     )
+    assert executed_test_examples == []
 
 def test__execute_test_examples__with_a_single_example():
     example = ExpectationTestDataCases(
         data=TestData(**{
             "mostly_threes": [3, 3, 3, 5, None],
-
-
         }),
         tests=[
             ExpectationTestCase(
@@ -143,34 +143,122 @@ def test__execute_test_examples__with_a_single_example():
         ]
     )
 
-    executed_test_examples = ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
+    executed_test_cases = ExpectColumnValuesToEqualThree__ThirdIteration()._execute_test_examples(
         expectation_type="expect_column_values_to_equal_three",
         examples=[example],
     )
-    print(executed_test_examples)
-    print(json.dumps(executed_test_examples[0].to_dict(), indent=2))
-    print(type(executed_test_examples[0]))
-    assert len(executed_test_examples) == 1
+    print(executed_test_cases)
+    print(json.dumps(executed_test_cases[0].to_dict(), indent=2))
+    print(type(executed_test_cases[0]))
+    assert len(executed_test_cases) == 1
+    
+    #FIXME: Need more here?
 
-# ### Tests for _get_metric_diagnostics_list
-# def test__get_metric_diagnostics_list_on_a_class_without_metrics():
-#     metric_diagnostics_list = ExpectColumnValuesToEqualThree()._get_metric_diagnostics_list(executed_test_examples)
-#     print(metric_diagnostics_list)
-#     assert len(metric_diagnostics_list) == 0
-#     ExpectationMetricDiagnostics(
-#         has_question_renderer=False
-#     )
+### Tests for _get_metric_diagnostics_list
+def test__get_metric_diagnostics_list_on_a_class_without_metrics():
+    executed_test_cases = []
+    metric_diagnostics_list = ExpectColumnValuesToEqualThree()._get_metric_diagnostics_list(
+        executed_test_cases=executed_test_cases
+    )
+    print(metric_diagnostics_list)
+    assert len(metric_diagnostics_list) == 0
+    ExpectationMetricDiagnostics(
+        name="column_values.something",
+        has_question_renderer=False,
+    )
 
-# def test__get_execution_engine_diagnostics():
-#     pass
-# introspected_execution_engines : ExpectationExecutionEngineDiagnostics = self._get_execution_engine_diagnostics(
-#     metric_diagnostics_list,
-# )
-# test_results : List[ExpectationTestDiagnostics] = self._get_test_results(
-#     expectation_type=description_diagnostics.snake_name,
-#     test_data_cases=self._get_examples(return_only_gallery_examples=False),
-#     execution_engine_diagnostics=introspected_execution_engines,
-# )
+def test__get_metric_diagnostics_list_on_a_class_with_metrics():
+    executed_test_cases = []
+    metric_diagnostics_list = ExpectColumnValuesToEqualThree__ThirdIteration()._get_metric_diagnostics_list(
+        executed_test_cases=executed_test_cases
+    )
+    print(metric_diagnostics_list)
+    assert len(metric_diagnostics_list) == 0
+    ExpectationMetricDiagnostics(
+        name="column_values.something",
+        has_question_renderer=False,
+    )
+
+
+### Tests for _get_execution_engine_diagnostics
+@pytest.mark.skip("""
+The business logic for _get_execution_engine_diagnostics is just plain wrong.
+We should be verifying that all expectations test cases run on any given Execution Engine.
+Metrics could be used to make inferences, but they'd never provide comparably compelling evidence.
+""")
+def test__get_execution_engine_diagnostics_with_no_metrics_diagnostics():
+
+    assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
+        metric_diagnostics_list=[],
+        registered_metrics={},
+    ) == ExpectationExecutionEngineDiagnostics(
+        PandasExecutionEngine=False,
+        SqlAlchemyExecutionEngine=False,
+        SparkDFExecutionEngine=False,
+    )
+
+@pytest.mark.skip("""
+The business logic for _get_execution_engine_diagnostics is just plain wrong.
+We should be verifying that all expectations test cases run on any given Execution Engine.
+Metrics could be used to make inferences, but they'd never provide comparably compelling evidence.
+""")
+def test__get_execution_engine_diagnostics_with_one_metrics_diagnostics():
+    metrics_diagnostics_list = [
+        ExpectationMetricDiagnostics(
+            name="colum_values.something",
+            has_question_renderer=True,
+        )
+    ]
+    registered_metrics = {
+        "colum_values.something" : {
+            "providers" : ["PandasExecutionEngine"]
+        }
+    }
+    assert ExpectColumnValuesToEqualThree__ThirdIteration._get_execution_engine_diagnostics(
+        metric_diagnostics_list=metrics_diagnostics_list,
+        registered_metrics=registered_metrics,
+    ) == ExpectationExecutionEngineDiagnostics(
+        PandasExecutionEngine=False,
+        SqlAlchemyExecutionEngine=False,
+        SparkDFExecutionEngine=False,
+    )
+
+
+### Tests for _get_test_results
+def test__get_test_results():
+    test_results = ExpectColumnValuesToEqualThree__ThirdIteration()._get_test_results(
+        expectation_type="expect_column_values_to_equal_three",
+        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration()._get_examples(return_only_gallery_examples=False),
+        execution_engine_diagnostics=ExpectationExecutionEngineDiagnostics(
+            PandasExecutionEngine=True,
+            SqlAlchemyExecutionEngine=False,
+            SparkDFExecutionEngine=False,
+        ),
+    )
+    assert len(test_results) == 3
+    for result in test_results:
+        assert result.test_passed
+        # print(result.to_dict())
+
+    test_results = ExpectColumnValuesToEqualThree__ThirdIteration()._get_test_results(
+        expectation_type="expect_column_values_to_equal_three",
+        test_data_cases=ExpectColumnValuesToEqualThree__ThirdIteration()._get_examples(return_only_gallery_examples=False),
+        execution_engine_diagnostics=ExpectationExecutionEngineDiagnostics(
+            PandasExecutionEngine=True,
+            SqlAlchemyExecutionEngine=True,
+            SparkDFExecutionEngine=False,
+        ),
+    )
+    assert len(test_results) == 6
+    for result in test_results:
+        # Abe: 1/1/2022: I'm not sure this is the behavior we want long term. How does backend relate to ExecutionEngine?
+        assert result.backend in ["pandas", "sqlite"]
+        if result.backend == "pandas":
+            assert result.test_passed == True
+        elif result.backend == "sqlite":
+            assert result.test_passed == False
+        # print(result.to_dict())
+
 # executed_test_examples, errors = self._execute_test_examples(
 #     expectation_type=description_diagnostics.snake_name,
 #     examples=examples,
@@ -179,4 +267,9 @@ def test__execute_test_examples__with_a_single_example():
 #     expectation_name=description_diagnostics.snake_name,
 #     executed_test_examples=executed_test_examples,
 # )
+    # from great_expectations.expectations.registry import _registered_metrics
+    # print(_registered_metrics)
+    # print(_registered_metrics.keys())
+    # print(len(_registered_metrics))
+    # supported_renderers = []
 
