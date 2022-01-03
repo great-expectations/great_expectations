@@ -126,7 +126,7 @@ class LinkChecker:
 
         if not os.path.isfile(md_file):
             logger.info("Absolute link %s in file %s was not found", link, file)
-            return LinkReport(link, file, f"Linked file {md_file} does not exist")
+            return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
             logger.debug("Absolute link %s in file %s found", link, file)
             return None
@@ -150,7 +150,7 @@ class LinkChecker:
 
         if not os.path.isfile(md_file):
             logger.info("Relative link %s in file %s was not found", link, file)
-            return LinkReport(link, file, f"Linked file {md_file} does not exist")
+            return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
             logger.debug("Relative link %s in file %s found", link, file)
             return None
@@ -172,7 +172,7 @@ class LinkChecker:
         md_file = self._get_docroot_path(path)
         if not os.path.isfile(md_file):
             logger.info("Docroot link %s in file %s was not found", link, file)
-            return LinkReport(link, file, f"Image {md_file} not found")
+            return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
             logger.debug("Docroot link %s in file %s found", link, file)
             return None
