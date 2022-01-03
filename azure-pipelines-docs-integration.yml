@@ -60,6 +60,7 @@ stages:
       vmImage: 'ubuntu-latest'
     jobs:
     - job: link_checker
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
       steps:
       - bash: python scripts/docs_link_checker.py -p docs -r docs -s docs --skip-external
 
