@@ -74,8 +74,13 @@ class LinkChecker:
         try:
             response = requests.get(link)
 
-            if response.status_code >= 400:
-                logger.info("External link %s failed in file %s", link, file)
+            if 400 <= response.status_code < 500:
+                logger.info(
+                    "External link %s failed in file %s with code %i",
+                    link,
+                    file,
+                    response.status_code,
+                )
                 return LinkReport(
                     link,
                     file,
@@ -89,9 +94,12 @@ class LinkChecker:
                     response.status_code,
                 )
                 return None
-        except ConnectionError:
+        except requests.exceptions.ConnectionError as err:
             logger.info(
                 "External link %s in file %s raised a connection error", link, file
+            )
+            return LinkReport(
+                "External link %s in file %s raised a connection error %i", err.errno
             )
 
     def _get_os_path(self, path: str) -> str:
@@ -164,7 +172,7 @@ class LinkChecker:
         md_file = self._get_docroot_path(path)
         if not os.path.isfile(md_file):
             logger.info("Docroot link %s in file %s was not found", link, file)
-            return LinkReport(link, file, f"Image {image_file} not found")
+            return LinkReport(link, file, f"Image {md_file} not found")
         else:
             logger.debug("Docroot link %s in file %s found", link, file)
             return None
@@ -256,11 +264,19 @@ def scan_docs(path: str, docs_root: str, site_prefix: str, skip_external: bool):
         if report:
             result.extend(report)
 
-    print("----------------------------------------------")
-    print("------------- Broken Link Report -------------")
-    print("----------------------------------------------")
-    for line in result:
-        print(line)
+    if result:
+        logger.info("%i broken links found", len(result))
+        print("----------------------------------------------")
+        print("------------- Broken Link Report -------------")
+        print("----------------------------------------------")
+        for line in result:
+            print(line)
+
+        exit(1)
+    else:
+        logger.info("No broken links found")
+        print("No broken links found")
+        exit(0)
 
 
 def main():
