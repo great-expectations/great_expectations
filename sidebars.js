@@ -45,7 +45,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'Metadata Stores',
+              label: 'Stores',
               items: [
                 'guides/setup/configuring_metadata_stores/index',
                 {
@@ -129,7 +129,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'Metadata Stores',
+              label: 'Stores',
               items: [
                 {
                   type: 'category',

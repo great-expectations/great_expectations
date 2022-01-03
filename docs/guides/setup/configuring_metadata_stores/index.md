@@ -1,7 +1,7 @@
 ---
 title: "Index"
 ---
-# [![Setup Icon](../../../images/universal_map/Gear-active.png)](../setup_overview.md) Index: Configuring Metadata Stores
+# [![Setup Icon](../../../images/universal_map/Gear-active.png)](../setup_overview.md) Index: Configuring Stores
 ## Expectation Stores
 - [How to configure an Expectation store to use Amazon S3](how_to_configure_an_expectation_store_in_amazon_s3.md)
 - [How to configure an Expectation store to use Azure Blob Storage](how_to_configure_an_expectation_store_in_azure_blob_storage.md)

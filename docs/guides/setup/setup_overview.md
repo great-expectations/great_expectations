@@ -15,13 +15,13 @@ import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 - Completing [Step 1: Setup](/docs/tutorials/getting_started/initialize_a_data_context) of the Getting Started tutorial is recommended.
 :::
 	
-Getting started with Great Expectations is quick and easy.  Once you have completed setup for your production deployment, you will have access to all of the features of Great Expectations from a single entry point: Your Data Context.  You will also have your Metadata Stores and Data Docs configured in the manner most suitable for your project's purposes.
+Getting started with Great Expectations is quick and easy.  Once you have completed setup for your production deployment, you will have access to all of the features of Great Expectations from a single entry point: Your Data Context.  You will also have your Stores and Data Docs configured in the manner most suitable for your project's purposes.
 
 ## The Setup process
 
 <!-- Brief outline of what the process entails.  -->
 
-Setup entails ensuring your system is prepared to run Great Expectations, installing Great Expectations itself, and initializing your deployment. Optionally, you can also tweak the configuration of some components, such as Metadata Stores and Data Docs. We'll look at each of these things in sequence.
+Setup entails ensuring your system is prepared to run Great Expectations, installing Great Expectations itself, and initializing your deployment. Optionally, you can also tweak the configuration of some components, such as Stores and Data Docs. We'll look at each of these things in sequence.
 
 Note: configuration of Datasources, Expectation Suites, and Checkpoints will be handled separately. We consider those to be configuration of components after your main Great Expectations deployment is set up.
 
@@ -61,15 +61,15 @@ See our [guides for configuring your Data Context](/docs/guides/setup/configurin
 
 Once your Data Context is initialized, you'll be all set to start using Great Expectations.  However, there are a few things that are configured by default to operate locally which you may want to configure to be hosted elsewhere.  We include these optional configurations in our Setup instructions.  Using the Data Context, you can easily create and test your configurations.
 
-### Metadata Stores
+### Stores
 
-Metadata Stores are the locations where your Data Context stores information about your Expectations, your Validation Results, and your Metrics.  By default, these are stored locally.  But you can reconfigure them to work with a variety of backends.  
+Stores are the locations where your Data Context stores information about your Expectations, your Validation Results, and your Metrics.  By default, these are stored locally.  But you can reconfigure them to work with a variety of backends.  
 
-See our [guides for configuring Metadata Stores](/docs/guides/setup/configuring_metadata_stores/index) for more information.
+See our [guides for configuring Stores](/docs/guides/setup/configuring_metadata_stores/index) for more information.
 
 ### Data Docs
 
-Data Docs provide human readable renderings of your Expectation Suites and Validation Results.  As with Metadata Stores, these are built locally by default.  However, you can configure them to be hosted and shared in a variety of different ways.  
+Data Docs provide human readable renderings of your Expectation Suites and Validation Results.  As with Stores, these are built locally by default.  However, you can configure them to be hosted and shared in a variety of different ways.  
 
 See our [guides on configuring Data Docs](/docs/guides/setup/configuring_data_docs/index) for more information.
 
