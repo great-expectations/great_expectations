@@ -3,71 +3,71 @@ id: glossary
 title: Glossary
 ---
 
-**[Batch](/docs/terms/batch):** 
+**Batch:** 
 A selection of records from a Data Asset.
 
 
-**[Batch Request](/docs/terms/batch_request):** 
+**Batch Request:** 
 Provided to a Datasource in order toto create a Batch.
 
 
-**[Checkpoint](/docs/terms/checkpoint):** 
+**Checkpoint:** 
 The primary means for validating data in a production deployment of Great Expectations.
 
 
-**[CLI](/docs/terms/cli):** 
+**CLI:** 
 Command Line Interface
 
 
-**[Custom Expectation](/docs/terms/custom_expectation):** 
+**Custom Expectation:** 
 An extension of the `Expectation` class, developed outside of the Great Expectations library.
 
 
-**[Data Asset](/docs/terms/data_asset):** 
+**Data Asset:** 
 A collection of records within a Datasource which is usually named based on the underlying data system and sliced to correspond to a desired specification.
 
 
-**[Data Connector](/docs/terms/data_connector):** 
+**Data Connector:** 
 Provides the configuration details based on the source data system which are needed by a Datasource to define Data Assets.
 
 
-**[Data Context](/docs/terms/data_context):** 
+**Data Context:** 
 The primary entry point for a Great Expectations deployment, with configurations and methods for all supporting components.
 
 
-**[Data Docs](/docs/terms/data_docs):** 
+**Data Docs:** 
 Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.
 
 
-**[Datasource](/docs/terms/datasource):** 
+**Datasource:** 
 Provides a standard API for accessing and interacting with data from a wide variety of source systems.
 
 
-**[Evaluation Parameter](/docs/terms/evaluation_parameter):** 
+**Evaluation Parameter:** 
 A parameter used during Validation of an Expectation to reference simple expressions or previousl generated metrics.
 
 
-**[Evaluation Parameter Store](/docs/terms/evaluation_parameter_store):** 
+**Evaluation Parameter Store:** 
 A connector to store and retrieve information about parameters used during Validation of an Expectation which reference simple expressions or previously generated metrics.
 
 
-**[Execution Engine](/docs/terms/execution_engine):** 
+**Execution Engine:** 
 A system capable of processing data to compute Metrics
 
 
-**[Expectation](/docs/terms/expectation):** 
+**Expectation:** 
 A verifiable assertion about data.
 
 
-**[Expectation Store](/docs/terms/expectation_store):** 
+**Expectation Store:** 
 A connector to store and retrieve information about collections of verifiable assertions about data.
 
 
-**[Metric](/docs/terms/metric):** 
+**Metric:** 
 A computed attribute of data such as the mean of a column.
 
 
-**[Metric Store](/docs/terms/metric_store):** 
+**Metric Store:** 
 A connector to store and retrieve information about computed attributes of data, such as the mean of a column.
 
 
