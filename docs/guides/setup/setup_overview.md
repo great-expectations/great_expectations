@@ -12,7 +12,7 @@ import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 <!-- Only keep one of the 'To best understand this document' lines.  For processes like the Universal Map steps, use the first one.  For processes like the Architecture Reviews, use the second one. -->
 
 :::note Prerequisites
-- To best understand this document, you must have completed Step 1: Setup of the [Getting Started tutorial](/docs/tutorials/getting_started/initialize_a_data_context).
+- Completing [Step 1: Setup](/docs/tutorials/getting_started/initialize_a_data_context) of the Getting Started tutorial is recommended.
 :::
 	
 Getting started with Great Expectations is quick and easy.  Once you have completed setup for your production deployment, you will have access to all of the features of Great Expectations from a single entry point: Your Data Context.  You will also have your Metadata Stores and Data Docs configured in the manner most suitable for your project's purposes.
@@ -21,7 +21,7 @@ Getting started with Great Expectations is quick and easy.  Once you have comple
 
 <!-- Brief outline of what the process entails.  -->
 
-Setup entails ensuring your system is prepared to run Great Expectations, installing Great Expectations itself, initializing your deployment, and doing some optional configuration of things like Data Docs and Datastores.  We'll look at each of these things in sequence.
+Setup entails ensuring your system is prepared to run Great Expectations, installing Great Expectations itself, and initializing your deployment, and doing some optional configuration of things like Data Docs and Datastores.  We'll look at each of these things in sequence.
 
 <!-- The following subsections should be repeated as necessary.  They should give a high level map of the things that need to be done or optionally can be done in this process, preferably in the order that they should be addressed (assuming there is one). If the process crosses multiple steps of the Universal Map, use the <SetupHeader> <ConnectHeader> <CreateHeader> and <ValidateHeader> tags to indicate which Universal Map step the subsections fall under. -->
 
