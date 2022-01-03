@@ -12,7 +12,7 @@ This is useful if you want to aggregate individual validations (across suites or
 
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
-- Configured a [Checkpoint](./how_to_create_a_new_checkpoint)
+- Configured a [Checkpoint](./how_to_create_a_new_checkpoint.md)
 
 </Prerequisites>
 
