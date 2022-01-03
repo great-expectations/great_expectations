@@ -66,7 +66,7 @@ Since we are using the CLI, you will want to return to your console and the `ge_
 From the `ge_tutorials` folder, type the following into your terminal:
 
 ```console
-great_expectations --v3-api suite new
+great_expectations suite new
 ```
 
 This will bring up the following prompt:

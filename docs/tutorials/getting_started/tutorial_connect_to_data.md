@@ -63,7 +63,7 @@ Let's create and configure your first Datasource: a connection to the data direc
 Start by running the following command from your `ge_tutorials` directory:
 
 ````console
-great_expectations --v3-api datasource new
+great_expectations datasource new
 ````
 
 You will then be presented with a choice that looks like this:

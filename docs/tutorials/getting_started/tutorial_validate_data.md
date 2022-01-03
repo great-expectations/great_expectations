@@ -66,7 +66,7 @@ For the purposes of this tutorial, the Checkpoint we create will run the Expecta
 
 
 ```console
-great_expectations --v3-api checkpoint new getting_started_checkpoint
+great_expectations checkpoint new getting_started_checkpoint
 ```
 
 This will **open a Jupyter Notebook** that will allow you to complete the configuration of your Checkpoint.
