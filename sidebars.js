@@ -303,6 +303,13 @@ module.exports = {
     },
     {
       type: 'category',
+      label: 'Reference',
+      items: [
+        'glossary'
+      ]
+    },
+    {
+      type: 'category',
       label: 'Core Concepts',
       items: [
         { type: 'doc', id: 'reference/core_concepts', label: 'Introduction' },
