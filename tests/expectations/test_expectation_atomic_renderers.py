@@ -1,3 +1,4 @@
+import re
 from pprint import pprint
 from typing import Callable, Dict, Union
 
@@ -178,6 +179,10 @@ def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
 
     res = rendered_content.to_json_dict()
     pprint(res)
+
+    # replace version of vega-lite in res to match snapshot test
+    res["value"]["graph"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"])
+
     snapshot.assert_match(res)
 
 
@@ -219,6 +224,9 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
 
     res = rendered_content.to_json_dict()
     pprint(res)
+
+    # replace version of vega-lite in res to match snapshot test
+    res["value"]["graph"] = re.sub(r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"])
     snapshot.assert_match(res)
 
 
