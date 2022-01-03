@@ -237,7 +237,10 @@ class SlackNotificationAction(ValidationAction):
 
             # this will actually send the POST request to the Slack webapp server
             slack_notif_result = send_slack_notification(
-                query, slack_webhook=self.slack_webhook
+                query,
+                slack_webhook=self.slack_webhook,
+                slack_token=self.slack_token,
+                slack_channel=self.slack_channel,
             )
             return {"slack_notification_result": slack_notif_result}
 
