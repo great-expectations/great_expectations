@@ -178,6 +178,20 @@ class LinkChecker:
             return None
 
     def check_link(self, match: re.Match, file: str) -> LinkReport:
+        """Checks that a link is valid. Valid links are:
+        - Absolute links that begin with a forward slash and the specified site prefix (ex: /docs) with no suffix
+        - Absolute images with an image suffix
+        - Relative links that begin with either . or .. and have a .md suffix
+        - Relative images with an image suffix
+        - Docroot links that begin with a character (neither . or /) are relative to the doc root (ex: /docs) and have a .md suffix
+
+        Args:
+            match: A positive match of a markdown link (ex: [...](...))
+            file: The file where the match was found
+
+        Returns:
+            A LinkReport if the link is broken, otherwise None
+        """
         link = match.group(2)
 
         # skip links that are anchor only (start with #)
@@ -216,6 +230,11 @@ class LinkChecker:
         return result
 
     def check_file(self, file: str) -> List[LinkReport]:
+        """Looks for all the links in a file and checks them.
+
+        Returns:
+            A list of broken links, or an empty list if no links are broken
+        """
         with open(file) as f:
             contents = f.read()
 
