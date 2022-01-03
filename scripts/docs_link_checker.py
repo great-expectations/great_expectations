@@ -1,18 +1,39 @@
+#!/usr/bin/env python3
+"""A command-line tool used to check links in docusaurus markdown documentation
+
+To check all of our markdown documentation, run:
+python docs_link_checker.py -p docs -r docs -s docs --skip-external
+
+The above command:
+    - -p docs (also --path): The path to the markdown files you want to check. For example, if you wanted to check only the tutorial files, you could specify docs/tutorials
+    - -r docs (also --docs-root): The root of the docs folder, used to resolve absolute and docroot paths
+    - -s docs (also --site-prefix): The site path prefix, used to resolve abosulte paths (ex: in http://blah/docs, it is the docs part)
+    - --skip-external: If present, external (http) links are not checked
+"""
+
 import glob
 import logging
 import os
 import re
-from typing import List
+from typing import List, Optional
 
 import click
 import requests
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
 
 class LinkReport:
+    """Used to capture the details of a broken link
+
+    Attributes:
+        link: The link that is broken.
+        file: The file in which the link is found.
+        message: A message describing the failure.
+    """
+
     def __init__(self, link: str, file: str, message: str):
         self.link = link
         self.file = file
@@ -23,9 +44,23 @@ class LinkReport:
 
 
 class LinkChecker:
+    """Checks image and file links in a set of markdown files."""
+
     def __init__(
-        self, docs_path: str, docs_root: str, site_prefix: str, skip_external: False
+        self,
+        docs_path: str,
+        docs_root: str,
+        site_prefix: str,
+        skip_external: bool = False,
     ):
+        """Initializes LinkChecker
+
+        Args:
+            docs_path: The directory of markdown (.md) files whose links you want to check
+            docs_root: The root directory, used to resolve absolute and docroot paths
+            site_prefix: The top-level folder (ex: /docs) used to resolve absolute links to local files
+            skip_external: Whether or not to skip checking external (http..) links
+        """
         self._docs_path = docs_path.strip(os.path.sep)
         self._docs_root = docs_root.strip(os.path.sep)
         self._site_prefix = site_prefix.strip("/")
@@ -56,16 +91,16 @@ class LinkChecker:
         relative_image_regex = r"^(?P<path>\.\.?[\.\w\/-]+\.\w{3,4})$"
         self._relative_image_pattern = re.compile(relative_image_regex)
 
-    def _is_image_link(self, markdown_link: str):
+    def _is_image_link(self, markdown_link: str) -> bool:
         return markdown_link.startswith("!")
 
-    def _is_doc_link(self, markdown_link: str):
+    def _is_doc_link(self, markdown_link: str) -> bool:
         return not self._is_image_link(markdown_link)
 
-    def _is_anchor_link(self, link: str):
+    def _is_anchor_link(self, link: str) -> bool:
         return link.startswith("#")
 
-    def _check_external_link(self, link: str, file: str) -> LinkReport:
+    def _check_external_link(self, link: str, file: str) -> Optional[LinkReport]:
         if self._skip_external:
             return None
 
@@ -117,7 +152,9 @@ class LinkChecker:
     def _get_docroot_path(self, path: str) -> str:
         return os.path.join(self._docs_root, self._get_os_path(path))
 
-    def _check_absolute_link(self, link: str, file: str, path: str) -> LinkReport:
+    def _check_absolute_link(
+        self, link: str, file: str, path: str
+    ) -> Optional[LinkReport]:
         logger.debug("Checking absolute link %s in file %s", link, file)
 
         # absolute links should point to files that exist (with the .md extension added)
@@ -131,7 +168,9 @@ class LinkChecker:
             logger.debug("Absolute link %s in file %s found", link, file)
             return None
 
-    def _check_absolute_image(self, link: str, file: str, path: str) -> LinkReport:
+    def _check_absolute_image(
+        self, link: str, file: str, path: str
+    ) -> Optional[LinkReport]:
         logger.debug("Cheking absolute image %s in file %s", link, file)
 
         image_file = self._get_absolute_path(path)
@@ -142,7 +181,9 @@ class LinkChecker:
             logger.debug("Absolute image %s in file %s found", link, file)
             return None
 
-    def _check_relative_link(self, link: str, file: str, path: str) -> LinkReport:
+    def _check_relative_link(
+        self, link: str, file: str, path: str
+    ) -> Optional[LinkReport]:
         logger.debug("Checking relative link %s in file %s", link, file)
 
         md_file = self._get_relative_path(file, path)
@@ -155,7 +196,9 @@ class LinkChecker:
             logger.debug("Relative link %s in file %s found", link, file)
             return None
 
-    def _check_relative_image(self, link: str, file: str, path: str) -> LinkReport:
+    def _check_relative_image(
+        self, link: str, file: str, path: str
+    ) -> Optional[LinkReport]:
         logger.debug("Cheking relative image %s in file %s", link, file)
 
         image_file = self._get_relative_path(file, path)
@@ -166,7 +209,9 @@ class LinkChecker:
             logger.debug("Relative image %s in file %s found", link, file)
             return None
 
-    def _check_docroot_link(self, link: str, file: str, path: str) -> LinkReport:
+    def _check_docroot_link(
+        self, link: str, file: str, path: str
+    ) -> Optional[LinkReport]:
         logger.debug("Checking docroot link %s in file %s", link, file)
 
         md_file = self._get_docroot_path(path)
@@ -177,7 +222,7 @@ class LinkChecker:
             logger.debug("Docroot link %s in file %s found", link, file)
             return None
 
-    def check_link(self, match: re.Match, file: str) -> LinkReport:
+    def _check_link(self, match: re.Match, file: str) -> Optional[LinkReport]:
         """Checks that a link is valid. Valid links are:
         - Absolute links that begin with a forward slash and the specified site prefix (ex: /docs) with no suffix
         - Absolute images with an image suffix
@@ -186,7 +231,7 @@ class LinkChecker:
         - Docroot links that begin with a character (neither . or /) are relative to the doc root (ex: /docs) and have a .md suffix
 
         Args:
-            match: A positive match of a markdown link (ex: [...](...))
+            match: A positive match of a markdown link (ex: [...](...)) or image
             file: The file where the match was found
 
         Returns:
@@ -243,17 +288,27 @@ class LinkChecker:
         result: List[LinkReport] = []
 
         for match in matches:
-            report = self.check_link(match, file)
+            report = self._check_link(match, file)
             if report is not None:
                 result.append(report)
 
         return result
 
 
-@click.command()
-@click.option("--path", "-p", default=".", help="Path to markdown files to check")
+@click.command(help="Checks links and images in Docusaurus markdown files")
 @click.option(
-    "--docs-root", "-r", default=None, help="Root to all docs for link checking"
+    "--path",
+    "-p",
+    type=click.Path(exists=True, file_okay=False),
+    default=".",
+    help="Path to markdown files to check",
+)
+@click.option(
+    "--docs-root",
+    "-r",
+    type=click.Path(exists=True, file_okay=False),
+    default=None,
+    help="Root to all docs for link checking",
 )
 @click.option(
     "--site-prefix",
@@ -262,16 +317,18 @@ class LinkChecker:
     help="Top-most folder in the docs URL for resolving absolute paths",
 )
 @click.option("--skip-external", is_flag=True)
-def scan_docs(path: str, docs_root: str, site_prefix: str, skip_external: bool):
+def scan_docs(
+    path: str, docs_root: Optional[str], site_prefix: str, skip_external: bool
+) -> None:
     # verify that our path is correct
     if not os.path.isdir(path):
-        print(f"Docs path: {path} is not a directory")
+        click.echo(f"Docs path: {path} is not a directory")
         exit(1)
 
     if docs_root is None:
         docs_root = path
     elif not os.path.isdir(docs_root):
-        print(f"Docs root path: {docs_root} is not a directory")
+        click.echo(f"Docs root path: {docs_root} is not a directory")
         exit(1)
 
     # prepare our return value
@@ -285,16 +342,16 @@ def scan_docs(path: str, docs_root: str, site_prefix: str, skip_external: bool):
 
     if result:
         logger.info("%i broken links found", len(result))
-        print("----------------------------------------------")
-        print("------------- Broken Link Report -------------")
-        print("----------------------------------------------")
+        click.echo("----------------------------------------------")
+        click.echo("------------- Broken Link Report -------------")
+        click.echo("----------------------------------------------")
         for line in result:
-            print(line)
+            click.echo(line)
 
         exit(1)
     else:
         logger.info("No broken links found")
-        print("No broken links found")
+        click.echo("No broken links found")
         exit(0)
 
 
