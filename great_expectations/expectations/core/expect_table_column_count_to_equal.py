@@ -69,9 +69,7 @@ class ExpectTableColumnCountToEqual(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
-    args_keys = (
-        "value",
-    )
+    args_keys = ("value",)
 
     """ A Metric Decorator for the Column Count"""
 

@@ -63,9 +63,7 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
-    args_keys = (
-        "other_table_name",
-    )
+    args_keys = ("other_table_name",)
 
     @classmethod
     def _atomic_prescriptive_template(

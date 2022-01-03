@@ -78,10 +78,7 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
-    args_keys = (
-        "column",
-        "threshold"
-    )
+    args_keys = ("column", "threshold")
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

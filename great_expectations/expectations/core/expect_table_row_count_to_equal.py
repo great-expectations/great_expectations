@@ -72,9 +72,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
-    args_keys = (
-        "value",
-    )
+    args_keys = ("value",)
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

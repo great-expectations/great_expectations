@@ -1017,22 +1017,25 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
         "Only one of batch_request or batch_request_list may be specified",
     )
 
-def test_validate_expectation(
-        multi_batch_taxi_validator
-):
+
+def test_validate_expectation(multi_batch_taxi_validator):
     validator: Validator = multi_batch_taxi_validator
-    expect_column_values_to_be_between_config = validator.validate_expectation("expect_column_values_to_be_between")("passenger_count", 0, 5).expectation_config.kwargs
+    expect_column_values_to_be_between_config = validator.validate_expectation(
+        "expect_column_values_to_be_between"
+    )("passenger_count", 0, 5).expectation_config.kwargs
     assert expect_column_values_to_be_between_config == {
-        'column': 'passenger_count',
-        'min_value': 0,
-        'max_value': 5,
-        'batch_id': '90bb41c1fbd7c71c05dbc8695320af71'
+        "column": "passenger_count",
+        "min_value": 0,
+        "max_value": 5,
+        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
-    expect_column_values_to_be_of_type_config = validator.validate_expectation("expect_column_values_to_be_of_type")("passenger_count", "int").expectation_config.kwargs
+    expect_column_values_to_be_of_type_config = validator.validate_expectation(
+        "expect_column_values_to_be_of_type"
+    )("passenger_count", "int").expectation_config.kwargs
 
     assert expect_column_values_to_be_of_type_config == {
-        'column': 'passenger_count',
-        'type_': 'int',
-        'batch_id': '90bb41c1fbd7c71c05dbc8695320af71'
+        "column": "passenger_count",
+        "type_": "int",
+        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }

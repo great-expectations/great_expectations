@@ -112,13 +112,7 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
         "parse_strings_as_datetimes": False,
     }
-    args_keys = (
-        "column",
-        "min_value",
-        "max_value",
-        "strict_min",
-        "strict_max"
-    )
+    args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
 
     """ A Column Map MetricProvider Decorator for the Maximum"""
 

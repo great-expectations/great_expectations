@@ -80,9 +80,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
-    args_keys = (
-        "column_list",
-    )
+    args_keys = ("column_list",)
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
