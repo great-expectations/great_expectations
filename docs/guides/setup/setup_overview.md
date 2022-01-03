@@ -77,7 +77,7 @@ See our [guides on configuring Data Docs](/docs/guides/setup/configuring_data_do
 
 <!-- This section is essentially a victory lap.  It should reiterate what they have accomplished/are now capable of doing.  If there is a next process (such as the universal map steps) this should state that the reader is now ready to move on to it. -->
 
-And that's all there is to the Setup step.  Once you have your Data Context initialized you will almost always start from your Data Context (as illustrated below) for everything else you do through Great Expectations.
+That's all there is to the Setup step.  Once you have your Data Context initialized you will almost always start from your Data Context (as illustrated below) for everything else you do through Great Expectations.
 
 ```markdown title="Python code:"
 import great_expectations as ge
