@@ -21,7 +21,9 @@ Getting started with Great Expectations is quick and easy.  Once you have comple
 
 <!-- Brief outline of what the process entails.  -->
 
-Setup entails ensuring your system is prepared to run Great Expectations, installing Great Expectations itself, initializing your deployment, and doing some optional configuration of things like Data Docs and Datastores.  We'll look at each of these things in sequence.
+Setup entails ensuring your system is prepared to run Great Expectations, installing Great Expectations itself, and initializing your deployment. Optionally, you can also tweak the configuration of some components, such as Metadata Stores and Data Docs. We'll look at each of these things in sequence.
+
+Note: configuration of Datasources, Expectation Suites, and Checkpoints will be handled separately. We consider those to be configuration of components after your main Great Expectations deployment is set up.
 
 <!-- The following subsections should be repeated as necessary.  They should give a high level map of the things that need to be done or optionally can be done in this process, preferably in the order that they should be addressed (assuming there is one). If the process crosses multiple steps of the Universal Map, use the <SetupHeader> <ConnectHeader> <CreateHeader> and <ValidateHeader> tags to indicate which Universal Map step the subsections fall under. -->
 
