@@ -84,4 +84,4 @@ import great_expectations as ge
 context = ge.get_context()
 ```
 
-And from here you arel all set to move on to the next step of working with Great Expectations: Connecting to Data.
+From here you will move on to the next step of working with Great Expectations: Connecting to Data.
