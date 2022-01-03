@@ -12,10 +12,10 @@ import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 <!-- Only keep one of the 'To best understand this document' lines.  For processes like the Universal Map steps, use the first one.  For processes like the Architecture Reviews, use the second one. -->
 
 :::note Prerequisites
-- To best understand this document, you must have completed Step 1: Setup of the [Getting Started tutorial](../../tutorials/getting_started/initialize_a_data_context.md).
+- To best understand this document, you must have completed Step 1: Setup of the [Getting Started tutorial](/docs/tutorials/getting_started/initialize_a_data_context).
 :::
 	
-Getting started with Great Expectations is quick and easy.  Once you have completed your setup, you will have access to all of the features of Great Expectations from a single entry point: Your Data Context.  You will also have your Metadata Stores and Data Docs configured in the manner most suitable for your project's purposes.
+Getting started with Great Expectations is quick and easy.  Once you have completed setup for your production deployment, you will have access to all of the features of Great Expectations from a single entry point: Your Data Context.  You will also have your Metadata Stores and Data Docs configured in the manner most suitable for your project's purposes.
 
 ## The Setup process
 
@@ -29,7 +29,7 @@ Setup entails ensuring your system is prepared to run Great Expectations, instal
 
 The first thing to take care of is making sure your work environment has the utilities you need to install and run Great Expectations.  These include a working Python install (version 3.8 or greater), the ability to pip install Python packages, an internet connection, and a browser so that you can use Jupyter notebooks.  Best practices are to use a virtual environment for your project's workspace.
 
-If you are having trouble with any of these, our documentation on [Supporting Resources](../../reference/supporting_resources.md) will direct you to more information and helpful tutorials.
+If you are having trouble with any of these, our documentation on [Supporting Resources](/docs/reference/supporting_resources) will direct you to more information and helpful tutorials.
 
 ## 2. Installation
 
@@ -39,7 +39,9 @@ Installing Great Expectations is a simple pip command.  From the terminal, execu
 pip install great_expectations
 ```
 
-Running this command in an environment configured to accept Python pip install commands will handle the entire installation process for Great Expectations and its dependencies.
+Running this command in an environment configured to accept Python pip install commands will handle the entire installation process for Great Expectations and its dependencies.  
+
+See our [guides for the installation process](/docs/guides/setup/installation/index) for more information.
 
 ## 3. Initialize a Data Context
 
@@ -51,20 +53,33 @@ great_expectations --v3-api init
 
 Running this command will initialize your Data Context in the directory that the command is run from.  It will create the folder structure a Data Context requires to organize your project.
 
+See our [guides for configuring your Data Context](/docs/guides/setup/configuring_data_contexts/index) for more information.
+
 ## 4. Optional Configurations
 
 Once your Data Context is initialized, you'll be all set to start using Great Expectations.  However, there are a few things that are configured by default to operate locally which you may want to configure to be hosted elsewhere.  We include these optional configurations in our Setup instructions.  Using the Data Context, you can easily create and test your configurations.
 
 ### Metadata Stores
 
-Metadata Stores are the locations where your Data Context stores information about your Expectations, your Validation Results, and your Metrics.  By default, these are stored locally.  But you can reconfigure them to work with a variety of backends.  See our documentation on Metadata Stores for more information.
+Metadata Stores are the locations where your Data Context stores information about your Expectations, your Validation Results, and your Metrics.  By default, these are stored locally.  But you can reconfigure them to work with a variety of backends.  
+
+See our [guides for configuring Metadata Stores](/docs/guides/setup/configuring_metadata_stores/index) for more information.
 
 ### Data Docs
 
-Data Docs provide human readable renderings of your Expectation Suites and Validation Results.  As with Metadata Stores, these are built locally by default.  However, you can configure them to be hosted and shared in a variety of different ways.  See our documentation on Data Docs for more information.
+Data Docs provide human readable renderings of your Expectation Suites and Validation Results.  As with Metadata Stores, these are built locally by default.  However, you can configure them to be hosted and shared in a variety of different ways.  
+
+See our [guides on configuring Data Docs](/docs/guides/setup/configuring_data_docs/index) for more information.
 
 ## Wrapping up
 
 <!-- This section is essentially a victory lap.  It should reiterate what they have accomplished/are now capable of doing.  If there is a next process (such as the universal map steps) this should state that the reader is now ready to move on to it. -->
 
-And that's all there is to the Setup step.  Once you have your Data Context initialized and you've done the optional configurations that you need for your specific project, you will be all set to move on to the next step of working with Great Expectations: Connecting to Data.
+And that's all there is to the Setup step.  Once you have your Data Context initialized you will almost always start from your Data Context (as illustrated below) for everything else you do through Great Expectations.
+
+```markdown title="Python code:"
+import great_expectations as ge
+context = ge.get_context()
+```
+
+And from here you arel all set to move on to the next step of working with Great Expectations: Connecting to Data.
