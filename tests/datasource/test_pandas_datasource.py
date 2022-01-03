@@ -406,7 +406,10 @@ def test_process_batch_parameters():
     assert batch_kwargs == {"dataset_options": {"caching": False}}
 
 
-def test_pandas_datasource_processes_dataset_options(test_folder_connection_path_csv):
+def test_pandas_datasource_processes_dataset_options(
+    test_folder_connection_path_csv, empty_data_context
+):
+    context: DataContext = empty_data_context
     datasource = PandasDatasource(
         "PandasCSV",
         batch_kwargs_generators={
@@ -421,7 +424,9 @@ def test_pandas_datasource_processes_dataset_options(test_folder_connection_path
     )
     batch_kwargs["dataset_options"] = {"caching": False}
     batch = datasource.get_batch(batch_kwargs)
-    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(
+        batch, ExpectationSuite(expectation_suite_name="foo", data_context=context)
+    )
     dataset = validator.get_dataset()
     assert dataset.caching is False
 

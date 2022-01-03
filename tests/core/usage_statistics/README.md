@@ -27,5 +27,8 @@ We ensure:
 - Anonymizers work as expected
   - tests/core/usage_statistics/test_usage_statistics.py
   - tests/core/usage_statistics/test_anonymizer.py
+  - tests/datasource/test_datasource_anonymizer.py
+  - tests/execution_engine/test_execution_engine_anonymizer.py - TODO: implement
+  - TODO: Other anonymizer tests
 - Graceful failure with no internet
   - tests/integration/usage_statistics/test_integration_usage_statistics.py
