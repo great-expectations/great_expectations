@@ -58,7 +58,7 @@ For a tutorial for older versions of Great Expectations, please see older versio
     </td>
     <td>
         <h4>Validate Data</h4>
-        <p>Finally, we will show you how to use this Expectation Suite to <b>validate</b> a new batch of data, and take a deeper look at the Data Docs which will show your Validation Results.</p>
+        <p>Finally, we will show you how to use this Expectation Suite to <b>Validate</b> a new batch of data, and take a deeper look at the Data Docs which will show your <b>Validation Results.</b></p>
     </td>
 </tr>
 </table>
