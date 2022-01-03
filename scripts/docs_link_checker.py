@@ -134,7 +134,7 @@ class LinkChecker:
                 "External link %s in file %s raised a connection error", link, file
             )
             return LinkReport(
-                "External link %s in file %s raised a connection error %i", err.errno
+                f"External link raised a connection error {err.errno}", link, file
             )
 
     def _get_os_path(self, path: str) -> str:
