@@ -4,6 +4,7 @@ This file is intended to
 2. provides examples of best practice for working with typed objects within the Great Expectations codebase
 """
 
+import pytest
 from pytest import raises
 from dataclasses import (
     dataclass,
@@ -54,34 +55,6 @@ class MyClassC(SerializableDictDot):
         return len(self.B_list)
 
 
-def test_basic_instantiation_with_arguments():
-    "Can be instantiated with arguments"
-    MyClassA(
-        foo="a string",
-        bar=1,
-    )
-
-
-def test_basic_instantiation_from_a_dictionary():
-    "Can be instantiated from a dictionary"
-    MyClassA(
-        **{
-            "foo": "a string",
-            "bar": 1,
-        }
-    )
-
-
-def test_access_uding_dot_notation():
-    "Keys can be accessed using dot notation"
-    my_A = MyClassA(
-        **{
-            "foo": "a string",
-            "bar": 1,
-        }
-    )
-    assert my_A.foo == "a string"
-    assert my_A.bar == 1
 def test_access_using_dict_notation():
     "Keys can be accessed using dict notation"
     my_A = MyClassA(
@@ -430,36 +403,6 @@ def test_to_dict_works_recursively():
     }
 
 
-def test_immutability():
-    "Can be made immutable"
-
-    @dataclass(frozen=True)
-    class MyClassD(SerializableDictDot):
-        foo: str
-        bar: int
-
-    my_D = MyClassD(
-        **{
-            "foo": "a string",
-            "bar": 1,
-        }
-    )
-    assert my_D["foo"] == "a string"
-    assert my_D["bar"] == 1
-
-    with raises(FrozenInstanceError):
-        my_D.foo = "different string"
-
-    assert my_D["foo"] == "a string"
-    assert my_D.foo == "a string"
-
-    with raises(FrozenInstanceError):
-        my_D["foo"] = "a third string"
-
-    assert my_D["foo"] == "a string"
-    assert my_D.foo == "a string"
-
-
 def test_reserved_word_key():
     """Can be instantiated with a key that's also a reserved word
     
@@ -505,3 +448,19 @@ For example, test cases use the reserved word: "in" as one of their required fie
     assert my_F["bar"] == 1
     assert my_F["input"] == 10
     assert my_F.input == 10
+
+    # Note that after instantiation, the class does NOT have an "in" property
+    with raises(AttributeError):
+        my_F["in"] == 10
+
+    # Because `in` is a reserved word, this will raise a SyntaxError:
+    # my_F.in == 100
+
+    # Because `in` is a reserved word, this will also raise a SyntaxError:
+    # my_F.in = 100
+
+    # You can use the assigment operator, but it's not recommended
+    my_F["in"] = 100
+
+    assert my_F["in"] == 100
+
