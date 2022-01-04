@@ -76,7 +76,7 @@ class DictDot:
 
     def to_dict(self):
         """Convert this object into a standard dictionary, recursively.
-        
+
         This is often convenient for serialization, and in cases where an untyped version of the object is required.
         """
 

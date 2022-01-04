@@ -4,15 +4,12 @@ This file is intended to
 2. provides examples of best practice for working with typed objects within the Great Expectations codebase
 """
 
+from dataclasses import FrozenInstanceError, dataclass, field
+from enum import Enum
+from typing import Any, Dict, List, Optional
+
 import pytest
 from pytest import raises
-from dataclasses import (
-    dataclass,
-    field,
-    FrozenInstanceError,
-)
-from typing import Any, Dict, List, Optional
-from enum import Enum
 
 from great_expectations.types import DictDot, SerializableDictDot
 
@@ -33,10 +30,12 @@ class MyClassB(MyClassA):
     def num_bazzes(self):
         return len(self.baz)
 
+
 class MyEnum(Enum):
     VALUE_X = "x"
     VALUE_Y = "y"
     VALUE_Z = "z"
+
 
 @dataclass
 class MyClassC(SerializableDictDot):
@@ -358,7 +357,7 @@ def test_to_dict_works_recursively():
             MyEnum("x"),
             MyEnum("y"),
             MyEnum("z"),
-        ]
+        ],
     )
 
     C_dict = my_C.to_dict()
@@ -399,17 +398,17 @@ def test_to_dict_works_recursively():
             "x",
             "y",
             "z",
-        ]
+        ],
     }
 
 
 def test_reserved_word_key():
     """Can be instantiated with a key that's also a reserved word
-    
-This pattern is helpful for cases where we're migrating from dictionary-based objects to typed objects,
-and the dictionary contains keys that are reserved words in python.
 
-For example, test cases use the reserved word: "in" as one of their required fields.
+    This pattern is helpful for cases where we're migrating from dictionary-based objects to typed objects,
+    and the dictionary contains keys that are reserved words in python.
+
+    For example, test cases use the reserved word: "in" as one of their required fields.
     """
 
     @dataclass
@@ -463,4 +462,3 @@ For example, test cases use the reserved word: "in" as one of their required fie
     my_F["in"] = 100
 
     assert my_F["in"] == 100
-
