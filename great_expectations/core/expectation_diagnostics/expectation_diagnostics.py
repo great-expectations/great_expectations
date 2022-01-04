@@ -8,6 +8,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
     ExpectationDescriptionDiagnostics,
     ExpectationDiagnosticCheckMessage,
+    ExpectationDiagnosticMaturityMessages,
     ExpectationErrorDiagnostics,
     ExpectationExecutionEngineDiagnostics,
     ExpectationMetricDiagnostics,
@@ -52,26 +53,31 @@ class ExpectationDiagnostics(SerializableDictDot):
     errors: List[ExpectationErrorDiagnostics]
 
     @property
-    def checklist(self) -> List[ExpectationDiagnosticCheckMessage]:
+    def checklist(self) -> ExpectationDiagnosticMaturityMessages:
         """Build a list of ExpectationDiagnosticCheckMessages corresponding to the steps for creating a custom expectation.
 
         By design, this method is a rollup of information already contained within ExpectationDiagnostics.
         Querying or introspecting the Expectation again should not be necessary.
         """
 
-        checks: List[ExpectationDiagnosticCheckMessage] = []
-
-        # Experimental checks
-        checks.append(self._check_library_metadata(self.library_metadata))
-        checks.append(self._check_docstring(self.description))
-        checks.append(self._check_example_cases(self.examples, self.tests))
-        checks.append(
+        experimental_checks = []
+        experimental_checks.append(self._check_library_metadata(self.library_metadata))
+        experimental_checks.append(self._check_docstring(self.description))
+        experimental_checks.append(self._check_example_cases(self.examples, self.tests))
+        experimental_checks.append(
             self._check_core_logic_for_at_least_one_execution_engine(
                 self.execution_engines
             )
         )
 
-        return checks
+        beta_checks = []
+        production_checks = []
+
+        return ExpectationDiagnosticMaturityMessages(
+            experimental=experimental_checks,
+            beta=beta_checks,
+            production=production_checks,
+        )
 
     def generate_checklist(self) -> str:
         """Generates the checklist in CLI-appropriate string format."""
@@ -215,10 +221,16 @@ class ExpectationDiagnostics(SerializableDictDot):
         return unexpected_cases
 
     @staticmethod
-    def _convert_checks_into_output_message(class_name: str, checks: List[dict]) -> str:
+    def _convert_checks_into_output_message(
+        class_name: str,
+        maturity_messages: ExpectationDiagnosticMaturityMessages
+    ) -> str:
         """Converts a list of checks into an output string (potentially nested), with ✔ to indicate checks that passed."""
 
         output_message = f"Completeness checklist for {class_name}:"
+
+        checks = maturity_messages.experimental + maturity_messages.beta + maturity_messages.production
+
         for check in checks:
             if check["passed"]:
                 output_message += "\n ✔ " + check["message"]
