@@ -445,8 +445,8 @@ You've successfully migrated your Great Expectations configuration to Cloud Comp
 
 There are many ways to iterate and improve this initial version, including more sophisticated ways of triggering Checkpoints, building our DAGs and dividing our Data Assets into Batches using DataConnectors. For more information, please refer to the following documentation: 
 
-- [How to run a Checkpoint in Airflow using a `python operator`](how_to_run_a_checkpoint_in_airflow.md#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
-- [How to run a Checkpoint in Airflow using a `Airflow operator`](https://legacy.docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_astronomer.html)
+- [How to run a Checkpoint in Airflow using a `python operator`](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow.html#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
+- [How to run a Checkpoint in Airflow using a `Airflow operator`](https://greatexpectations.io/blog/airflow-operator/)
 - [How to trigger the DAG on a schedule](https://cloud.google.com/composer/docs/triggering-dags#schedule)
 - [How to trigger the DAG in response to events.](http://airflow.apache.org/docs/apache-airflow/stable/concepts/sensors.html)
 - [How to configure a DataConnector to introspect and partition tables in SQL](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql/)
