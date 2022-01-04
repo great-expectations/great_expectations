@@ -97,7 +97,7 @@ class DictDot:
                 new_dict[key] = value.value
 
             # ...and when DictDots and Enums are nested one layer deeper in lists.
-            if isinstance(value, list):
+            if isinstance(value, list) or isinstance(value, tuple):
                 for i, element in enumerate(value):
                     if isinstance(element, DictDot):
                         new_dict[key][i] = element.to_dict()
