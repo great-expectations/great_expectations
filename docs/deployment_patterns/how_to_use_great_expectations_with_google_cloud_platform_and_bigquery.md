@@ -323,8 +323,8 @@ We will now take the local GE configuration from [Part 1](#part-1-local-configur
 
 There are a number of ways that Great Expectations can be run in Cloud Composer or Airflow.
 
-1. [Running a Checkpoint in Airflow using a `bash operator`](how_to_run_a_checkpoint_in_airflow.md#option-1-running-a-checkpoint-with-a-bashoperator)
-2. [Running a Checkpoint in Airflow using a `python operator`](how_to_run_a_checkpoint_in_airflow.md#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
+1. [Running a Checkpoint in Airflow using a `bash operator`](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow.html#option-1-running-a-checkpoint-with-a-bashoperator)
+2. [Running a Checkpoint in Airflow using a `python operator`](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow.html#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
 3. [Running a Checkpoint in Airflow using a `Airflow operator`](https://legacy.docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_astronomer.html)
 
 For our example, we are going to use the `bash operator` to run the Checkpoint. This portion of the guide can also be found in the following [Zoom Video](https://superconductive.zoom.us/rec/share/xUmgdpl05JFlsrdN3IjmLsP0GAnBeRQNRwSnM1fzDY0Aot_97arxPbCCOdHl9UE_.oPEtiRH0e6lD6Buq?startTime=1640906304000).
