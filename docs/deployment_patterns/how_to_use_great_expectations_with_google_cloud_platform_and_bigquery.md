@@ -67,6 +67,12 @@ The following sections describe how you can take a basic local configuration of 
 
 The full configuration used in this guide can be found in the [`great-expectations` repository](https://github.com/great-expectations/great_expectations/tests/integration/fixtures/gcp_deployment/) and is also linked at the bottom of this document.
 
+:::note Trailing Slashes in Metadata Store names
+
+  When specifying `prefix` values for Metadata Stores in GCS, please ensure that an extra trailing slash `/` is not included (ie `prefix: my_prefix/` ). Currently this creates an additional folder with the name `/` and stores metadata in the `/` folder instead of `my_prefix`. 
+
+:::
+
 #### Add Expectations Store
 By default, newly profiled Expectations are stored in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder. A new Expectations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information. 
 
@@ -208,25 +214,24 @@ Lastly, save the ExpectationSuite, which now contains our two Expectations.
 ```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L273
 ```
 
-For more details on how to configure the RuntimeBatchRequest, as well as an example of how you can load data by specifying a GCS path to a single CSV, please refer to [How to connect to data on GCS using Pandas
-](https://deploy-preview-3926--niobium-lead-7998.netlify.app/docs/guides/connecting_to_your_data/cloud/gcs/pandas
+For more details on how to configure the RuntimeBatchRequest, as well as an example of how you can load data by specifying a GCS path to a single CSV, please refer to [How to connect to data on GCS using Pandas](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas)
 
 </TabItem>
 <TabItem value="bigquery">
 
 For our example, we will be creating our ExpectationSuite with [instant feedback from a sample Batch of data](https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data), which we will describe in our `RuntimeBatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly) or using the [User Configurable Profiler](https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`. 
 
-First, load a batch of data by specifying a SQL query in a `RuntimeBatchRequest`.
+First, load a batch of data by specifying an SQL query in a `RuntimeBatchRequest` (`SELECT * from demo.taxi_data LIMIT 10` is an example query for our test data and can be replaced with any query you would like).
 
 ```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L233-L242
 ```
 
-Next, create an ExpectationSuite (`yellow_tripdata_bigquery_suite` in our example), and use it to get a `Validator`. 
+Next, create an ExpectationSuite (`test_bigquery_suite` in our example), and use it to get a `Validator`. 
 
 ```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L244-L250
 ```
 
-Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between`. 
+Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data).
 
 ```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L252-L256
 ```
@@ -283,7 +288,7 @@ Now you are ready to migrate the local configuration to Cloud Composer.
 </TabItem>
 <TabItem value="bigquery">
 
-Add the following Checkpoint `bigquery_taxi_check` to the DataContext.  Here we are using the same `RuntimeBatchRequest` and `ExpectationSuite` name that we used to create our Validator above, translated into a YAML configuration.
+Add the following Checkpoint `bigquery_checkpoint` to the DataContext.  Here we are using the same `RuntimeBatchRequest` and `ExpectationSuite` name that we used to create our Validator above, translated into a YAML configuration.
 
 
 ```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L260-L280
@@ -364,11 +369,11 @@ Cloud Composer uses Cloud Storage to store Apache Airflow DAGs (also known as wo
 
 The simplest way to perform the migration is to move the entire local `great_expectations/` folder from [Part 1](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) to the Cloud Storage bucket where Composer can access the configuration.
 
-First open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page. On the Configuration tab, the name of the Cloud Storage bucket can be found to the right of the DAGs folder. 
+First open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page. In the Configuration tab, the name of the Cloud Storage bucket can be found to the right of the DAGs folder. 
 
-This will take you to the folder where DAGs are stored (Bucket > BucketName > Dags), which can be accessed from the Airflow worker nodes at: `/home/airflow/gcsfuse/dags`. The location we want to uploads `great_expectations/` is **one level above the `/dags` folder**.
+This will take you to the folder where DAGs are stored, which can be accessed from the Airflow worker nodes at: `/home/airflow/gcsfuse/dags`. The location we want to uploads `great_expectations/` is **one level above the `/dags` folder**.
 
-Upload the local `great_expectations/` folder by dragging and dropping, using [`gsutil cp`](https://cloud.google.com/storage/docs/gsutil/commands/cp), or by clicking the `Upload Folder` button.
+Upload the local `great_expectations/` folder either dragging and dropping it into the window, using [`gsutil cp`](https://cloud.google.com/storage/docs/gsutil/commands/cp), or by clicking the `Upload Folder` button.
 
 Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, it will be mapped to the Airflow instances in your Cloud Composer and be accessible from the Airflow Worker nodes at the location: `/home/airflow/gcsfuse/great_expectations`.
 
@@ -390,7 +395,7 @@ We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`
 The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.
 Then we will run the Checkpoint using same CLI command we used to run the Checkpoint locally: 
 
-`great_expectations --v3-api checkpoint run gcs_taxi_check`
+`great_expectations --v3-api checkpoint run gcs_checkpoint`
 
 To add the DAG to Cloud Composer, move `ge_checkpoint_gcs.py` to the environment's dags folder in Cloud Storage. First, open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page.
 
@@ -409,7 +414,7 @@ We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`
 The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.
 Then we will run the Checkpoint using same CLI command we used to run the Checkpoint locally:
 
-`great_expectations --v3-api checkpoint run bigquery_taxi_check`
+`great_expectations --v3-api checkpoint run bigquery_checkpoint`
 
 To add the DAG to Cloud Composer, move `ge_checkpoint_bigquery.py` to the environment's dags folder in Cloud Storage. First, open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page.
 
