@@ -198,8 +198,8 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # GCP project and BigQuery dataset information and not for general use. It is only to support testing.
-gcp_project = os.environ.get("GCP_PROJECT")
-bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET")
+gcp_project = os.environ.get("GCP_PROJECT", "superconductive-internal")
+bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET", "demo")
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
@@ -233,7 +233,7 @@ context.add_datasource(**yaml.load(datasource_yaml))
 batch_request = RuntimeBatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="default_name",  # this can be anything that identifies this data
+    data_asset_name="taxi_data",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
     batch_spec_passthrough={
@@ -242,11 +242,11 @@ batch_request = RuntimeBatchRequest(
 )
 
 context.create_expectation_suite(
-    expectation_suite_name="yellow_tripdata_bigquery_suite", overwrite_existing=True
+    expectation_suite_name="test_bigquery_suite", overwrite_existing=True
 )
 
 validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="yellow_tripdata_bigquery_suite"
+    batch_request=batch_request, expectation_suite_name="test_bigquery_suite"
 )
 
 validator.expect_column_values_to_not_be_null(column="passenger_count")
@@ -257,7 +257,7 @@ validator.expect_column_values_to_be_between(
 
 validator.save_expectation_suite(discard_failed_expectations=False)
 
-my_checkpoint_name = "bigquery_taxi_check"
+my_checkpoint_name = "bigquery_checkpoint"
 checkpoint_config = f"""
 name: {my_checkpoint_name}
 config_version: 1.0
@@ -267,19 +267,18 @@ validations:
   - batch_request:
       datasource_name: my_bigquery_datasource
       data_connector_name: default_runtime_data_connector_name
-      data_asset_name: default_taxi_table
+      data_asset_name: taxi_data
       batch_identifiers:
         default_identifier_name: 1
       runtime_parameters:
         query: SELECT * from demo.taxi_data LIMIT 10
       batch_spec_passthrough:
         bigquery_temp_table: ge_temp
-    expectation_suite_name: yellow_tripdata_bigquery_suite
+    expectation_suite_name: test_bigquery_suite
 """
 
 context.add_checkpoint(**yaml.load(checkpoint_config))
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
 )
-
 assert checkpoint_result.success is True

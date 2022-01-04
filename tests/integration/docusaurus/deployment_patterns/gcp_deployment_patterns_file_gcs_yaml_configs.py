@@ -234,16 +234,35 @@ context.add_datasource(**yaml.load(datasource_yaml))
 batch_request = BatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
+    data_asset_name="<YOUR_DATA_ASSET_NAME>",
+)
+
+# Please note this override is only to provide good UX for docs and tests.
+# In normal usage you'd set your data asset name directly in the BatchRequest above.
+batch_request.data_asset_name = (
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
 context.create_expectation_suite(
-    expectation_suite_name="yellow_tripdata_gcs_suite", overwrite_existing=True
+    expectation_suite_name="test_gcs_suite", overwrite_existing=True
 )
 
 validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="yellow_tripdata_gcs_suite"
+    batch_request=batch_request, expectation_suite_name="test_gcs_suite"
 )
+
+# NOTE: The following code is only for testing and can be ignored by users.
+assert isinstance(validator, ge.validator.validator.Validator)
+assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
+assert set(
+    context.get_available_data_asset_names()["my_gcs_datasource"][
+        "default_inferred_data_connector_name"
+    ]
+) == {
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03",
+}
 
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
@@ -253,7 +272,7 @@ validator.expect_column_values_to_be_between(
 
 validator.save_expectation_suite(discard_failed_expectations=False)
 
-my_checkpoint_name = "gcs_taxi_check"
+my_checkpoint_name = "gcs_checkpoint"
 checkpoint_config = f"""
 name: {my_checkpoint_name}
 config_version: 1.0
@@ -263,13 +282,15 @@ validations:
   - batch_request:
       datasource_name: my_gcs_datasource
       data_connector_name: default_inferred_data_connector_name
-      data_asset_name: data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01
-    expectation_suite_name: yellow_tripdata_gcs_suite
+      data_asset_name: <YOUR_DATA_ASSET_NAME>
+    expectation_suite_name: test_gcs_suite
 """
-
+checkpoint_config = checkpoint_config.replace(
+    "<YOUR_DATA_ASSET_NAME>",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
+)
 context.add_checkpoint(**yaml.load(checkpoint_config))
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
 )
-
 assert checkpoint_result.success is True

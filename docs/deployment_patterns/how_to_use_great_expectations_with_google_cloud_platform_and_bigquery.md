@@ -193,19 +193,19 @@ First, load a batch of data by specifying a `data_asset_name` in a `BatchRequest
 ```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L234-L238
 ```
 
-Next, create an ExpectationSuite (`yellow_tripdata_gcs_suite` in our example), and use it to get a `Validator`. 
+Next, create an ExpectationSuite (`test_gcs_suite` in our example), and use it to get a `Validator`. 
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L240-L246
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L246-L252
 ```
 
-Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between`. 
+Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data). 
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L248-L252
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L267-L271
 ```
 
 Lastly, save the ExpectationSuite, which now contains our two Expectations.
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L254
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L273
 ```
 
 For more details on how to configure the RuntimeBatchRequest, as well as an example of how you can load data by specifying a GCS path to a single CSV, please refer to [How to connect to data on GCS using Pandas
@@ -254,25 +254,27 @@ For our example, we will create a basic Checkpoint configuration using the `Simp
   ]}>
 <TabItem value="gcs">
 
-Add the following Checkpoint `gcs_taxi_check` to the DataContext.  Here we are using the same `BatchRequest` and `ExpectationSuite` name that we used to create our Validator above, translated into a YAML configuration.
+Add the following Checkpoint `gcs_checkpoint` to the DataContext.  Here we are using the same `BatchRequest` and `ExpectationSuite` name that we used to create our Validator above, translated into a YAML configuration.
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L256-L270
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L275-L287
+```
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L292
 ```
 
 Next, you can either run the Checkpoint directly in-code, 
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L271-L273
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L293-L295
 ```
 
 or through the following CLI command.
 
 ```bash
-great_expectations --v3-api checkpoint run gcs_taxi_check
+great_expectations --v3-api checkpoint run gcs_checkpoint
 ```
 
 At this point, if you have successfully configured the local prototype, you will have the following:
 
-1. An ExpectationSuite in the GCS bucket configured in `expectations_GCS_store` (ExpectationSuite is named `yellow_tripdata_suite` in our example).
+1. An ExpectationSuite in the GCS bucket configured in `expectations_GCS_store` (ExpectationSuite is named `test_gcs_suite` in our example).
 2. A new Validation Result in the GCS bucket configured in `validation_GCS_store`.
 3. Data Docs in the GCS bucket configured in `gs_site` that is accessible by running `gcloud app browse`.
 
@@ -300,7 +302,7 @@ great_expectations --v3-api checkpoint run bigquery_taxi_check
 
 At this point, if you have successfully configured the local prototype, you will have the following:
 
-1. An ExpectationSuite in the GCS bucket configured in `expectations_GCS_store` (ExpectationSuite is named `yellow_tripdata_suite` in our example).
+1. An ExpectationSuite in the GCS bucket configured in `expectations_GCS_store` (ExpectationSuite is named `test_bigquery_suite` in our example).
 2. A new Validation Result in the GCS bucket configured in `validation_GCS_store`.
 3. Data Docs in the GCS bucket configured in `gs_site` that is accessible by running `gcloud app browse`.
 
