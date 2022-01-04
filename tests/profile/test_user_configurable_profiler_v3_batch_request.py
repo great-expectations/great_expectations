@@ -1217,7 +1217,7 @@ def test_user_configurable_profiler_progress_bar_config_disabled(
 ):
     data_context = cardinality_validator.data_context
     data_context.project_config_with_variables_substituted.progress_bars = (
-        ProgressBarsConfig(globally=False)
+        ProgressBarsConfig(profilers=False)
     )
 
     semantic_types = {

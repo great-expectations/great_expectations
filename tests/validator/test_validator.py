@@ -1030,14 +1030,11 @@ def test_validator_progress_bar_config_enabled(
     validator = Validator(engine, data_context=data_context)
 
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
-    mock_validation_graph.edges = [
-        MetricEdge(MetricConfiguration("foo", {}), None) for _ in range(5)
-    ]
+    mock_validation_graph.edges.__len__ = lambda _: 3
     validator.resolve_validation_graph(mock_validation_graph, {})
 
-    assert (
-        mock_tqdm.called is True
-    )  # Still invoked but doesn't actually do anything due to `disabled`
+    # Still invoked but doesn't actually do anything due to `disabled`
+    assert mock_tqdm.called is True
     assert mock_tqdm.call_args[1]["disable"] is False
 
 
@@ -1053,9 +1050,7 @@ def test_validator_progress_bar_config_disabled(
     validator = Validator(engine, data_context=data_context)
 
     # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
-    mock_validation_graph.edges = [
-        MetricEdge(MetricConfiguration("foo", {}), None) for _ in range(5)
-    ]
+    mock_validation_graph.edges.__len__ = lambda _: 3
     validator.resolve_validation_graph(mock_validation_graph, {})
 
     assert mock_tqdm.called is True
