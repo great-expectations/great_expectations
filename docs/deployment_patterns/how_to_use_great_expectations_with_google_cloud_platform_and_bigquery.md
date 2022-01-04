@@ -327,7 +327,7 @@ There are a number of ways that Great Expectations can be run in Cloud Composer 
 2. [Running a Checkpoint in Airflow using a `python operator`](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow.html#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
 3. [Running a Checkpoint in Airflow using a `Airflow operator`](https://legacy.docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_astronomer.html)
 
-For our example, we are going to use the `bash operator` to run the Checkpoint. This portion of the guide can also be found in the following [Zoom Video](https://drive.google.com/file/d/1YhEMqSRkp5JDIQA_7fleiKTTlEmYx2K8/view?usp=sharing).
+For our example, we are going to use the `bash operator` to run the Checkpoint. This portion of the guide can also be found in the following [Walkthrough Video](https://drive.google.com/file/d/1YhEMqSRkp5JDIQA_7fleiKTTlEmYx2K8/view?usp=sharing).
 
 ### 1. Create and Configure a Service Account
 
