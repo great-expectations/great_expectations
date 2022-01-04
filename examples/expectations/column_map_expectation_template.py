@@ -17,12 +17,13 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
+
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
 class ColumnValuesMatchSomeCriteria(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    # condition_metric_name = "METRIC NAME GOES HERE"
+    condition_metric_name = "METRIC NAME GOES HERE"
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -50,7 +51,7 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    # map_metric = "METRIC NAME GOES HERE"
+    map_metric = "METRIC NAME GOES HERE"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = ("mostly",)
@@ -63,11 +64,10 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
         "maturity": "concept_only",  # "concept_only", "experimental", "beta", or "production"
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            # "@your_name_here", # Don't forget to add your github handle here!
+            "@your_name_here",  # Don't forget to add your github handle here!
         ],
     }
 
+
 if __name__ == "__main__":
-    print(
-        ExpectColumnValuesToMatchSomeCriteria().generate_diagnostic_checklist()
-    )
+    print(ExpectColumnValuesToMatchSomeCriteria().generate_diagnostic_checklist())

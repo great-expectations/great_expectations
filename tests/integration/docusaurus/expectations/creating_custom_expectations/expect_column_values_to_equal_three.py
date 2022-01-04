@@ -15,7 +15,7 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.equal_three"
 
-    # Description needed
+    # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         return column == 3
@@ -23,28 +23,37 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
-    """TODO: Add a docstring here"""
+    """Expect values in this column to equal 3."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": {
-                "all_threes": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-                "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
+                "all_threes": [3, 3, 3, 3, 3],
+                "some_zeroes": [3, 3, 3, 0, None],
             },
             "tests": [
                 {
-                    "title": "positive_test_with_mostly",
+                    "title": "positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "mostly_threes", "mostly": 0.6},
+                    "in": {"column": "all_threes"},
                     "out": {
                         "success": True,
-                        "unexpected_index_list": [6, 7],
-                        "unexpected_list": [2, -1],
                     },
-                }
+                },
+                {
+                    "title": "negative_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "some_zeroes", "mostly": 0.6},
+                    "out": {
+                        "success": False,
+                        "unexpected_index_list": [3],
+                        "unexpected_list": [0],
+                    },
+                },
             ],
         }
     ]
@@ -63,17 +72,11 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": [  # Tags for this Expectation in the gallery
-            #         "experimental"
-        ],
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            #         "@your_name_here", # Don't forget to add your github handle here!
-        ],
-        # "package": "experimental_expectations", # This should be auto-populated.
+        "maturity": "experimental",
+        "tags": ["extremely basic math"],
+        "contributors": ["@joegargery"],
     }
 
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToEqualThree().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    print(ExpectColumnValuesToEqualThree().generate_diagnostic_checklist())
