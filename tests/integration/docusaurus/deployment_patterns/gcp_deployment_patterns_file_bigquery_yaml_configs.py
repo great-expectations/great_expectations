@@ -227,7 +227,7 @@ datasource_yaml = datasource_yaml.replace(
 )
 
 context.test_yaml_config(datasource_yaml)
-context.add_datasource(**yaml.load(datasource_yaml))
+context.add_datasource(**yaml.safe_load(datasource_yaml))
 
 # Test for RuntimeBatchRequest using a query. bigquery_temp_table name is passed in as batch_spec_passthrough
 batch_request = RuntimeBatchRequest(
@@ -277,7 +277,7 @@ validations:
     expectation_suite_name: test_bigquery_suite
 """
 
-context.add_checkpoint(**yaml.load(checkpoint_config))
+context.add_checkpoint(**yaml.safe_load(checkpoint_config))
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
 )

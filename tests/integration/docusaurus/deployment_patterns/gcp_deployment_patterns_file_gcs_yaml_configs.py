@@ -228,7 +228,7 @@ datasource_yaml = datasource_yaml.replace(
 )
 
 context.test_yaml_config(datasource_yaml)
-context.add_datasource(**yaml.load(datasource_yaml))
+context.add_datasource(**yaml.safe_load(datasource_yaml))
 
 # adding datasource
 batch_request = BatchRequest(
@@ -289,7 +289,7 @@ checkpoint_config = checkpoint_config.replace(
     "<YOUR_DATA_ASSET_NAME>",
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
 )
-context.add_checkpoint(**yaml.load(checkpoint_config))
+context.add_checkpoint(**yaml.safe_load(checkpoint_config))
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
 )

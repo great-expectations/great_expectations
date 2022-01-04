@@ -302,7 +302,7 @@ Next, you can either run the Checkpoint directly in-code,
 or through the following CLI command.
 
 ```bash
-great_expectations --v3-api checkpoint run bigquery_taxi_check
+great_expectations --v3-api checkpoint run bigquery_checkpoint
 ```
 
 At this point, if you have successfully configured the local prototype, you will have the following:
@@ -327,7 +327,7 @@ There are a number of ways that Great Expectations can be run in Cloud Composer 
 2. [Running a Checkpoint in Airflow using a `python operator`](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow.html#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
 3. [Running a Checkpoint in Airflow using a `Airflow operator`](https://legacy.docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_astronomer.html)
 
-For our example, we are going to use the `bash operator` to run the Checkpoint. This portion of the guide can also be found in the following [Zoom Video](https://superconductive.zoom.us/rec/share/xUmgdpl05JFlsrdN3IjmLsP0GAnBeRQNRwSnM1fzDY0Aot_97arxPbCCOdHl9UE_.oPEtiRH0e6lD6Buq?startTime=1640906304000).
+For our example, we are going to use the `bash operator` to run the Checkpoint. This portion of the guide can also be found in the following [Zoom Video](https://drive.google.com/file/d/1YhEMqSRkp5JDIQA_7fleiKTTlEmYx2K8/view?usp=sharing).
 
 ### 1. Create and Configure a Service Account
 
