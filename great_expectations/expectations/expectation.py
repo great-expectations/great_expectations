@@ -986,17 +986,6 @@ class Expectation(metaclass=MetaExpectation):
         """
 
         diagnostics: ExpectationDiagnostics = self.run_diagnostics()
-        import json
-
-        print(
-            json.dumps(
-                [
-                    e.to_dict()
-                    for e in self._get_examples(return_only_gallery_examples=False)
-                ],
-                indent=2,
-            )
-        )
         checklist: str = diagnostics.generate_checklist()
         print(checklist)
 
