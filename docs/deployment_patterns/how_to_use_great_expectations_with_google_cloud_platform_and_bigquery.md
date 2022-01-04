@@ -67,9 +67,9 @@ The following sections describe how you can take a basic local configuration of 
 
 The full configuration used in this guide can be found in the [`great-expectations` repository](https://github.com/great-expectations/great_expectations/tests/integration/fixtures/gcp_deployment/) and is also linked at the bottom of this document.
 
-:::note Trailing Slashes in Metadata Store names
+:::note Note on Trailing Slashes in Metadata Store prefixes
 
-  When specifying `prefix` values for Metadata Stores in GCS, please ensure that an extra trailing slash `/` is not included (ie `prefix: my_prefix/` ). Currently this creates an additional folder with the name `/` and stores metadata in the `/` folder instead of `my_prefix`. 
+  When specifying `prefix` values for Metadata Stores in GCS, please ensure that a trailing slash `/` is not included (ie `prefix: my_prefix/` ). Currently this creates an additional folder with the name `/` and stores metadata in the `/` folder instead of `my_prefix`. 
 
 :::
 
@@ -325,7 +325,7 @@ There are a number of ways that Great Expectations can be run in Cloud Composer 
 
 1. [Running a Checkpoint in Airflow using a `bash operator`](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow.html#option-1-running-a-checkpoint-with-a-bashoperator)
 2. [Running a Checkpoint in Airflow using a `python operator`](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow.html#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
-3. [Running a Checkpoint in Airflow using a `Airflow operator`](https://legacy.docs.greatexpectations.io/en/latest/guides/workflows_patterns/deployment_astronomer.html)
+3. [Running a Checkpoint in Airflow using a `Airflow operator`](https://github.com/great-expectations/airflow-provider-great-expectations)
 
 For our example, we are going to use the `bash operator` to run the Checkpoint. This portion of the guide can also be found in the following [Walkthrough Video](https://drive.google.com/file/d/1YhEMqSRkp5JDIQA_7fleiKTTlEmYx2K8/view?usp=sharing).
 
@@ -387,7 +387,7 @@ Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, i
   ]}>
 <TabItem value="gcs">
 
-We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: `ge_checkpoint_gcs.py`.
+We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py).
 
 ```python file=../../tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py
 ```
@@ -395,9 +395,11 @@ We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`
 The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.
 Then we will run the Checkpoint using same CLI command we used to run the Checkpoint locally: 
 
-`great_expectations --v3-api checkpoint run gcs_checkpoint`
+```bash
+great_expectations --v3-api checkpoint run gcs_checkpoint
+````
 
-To add the DAG to Cloud Composer, move `ge_checkpoint_gcs.py` to the environment's dags folder in Cloud Storage. First, open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page.
+To add the DAG to Cloud Composer, move `ge_checkpoint_gcs.py` to the environment's DAGs folder in Cloud Storage. First, open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page.
 
 On the Configuration tab, click on the name of the Cloud Storage bucket that is found to the right of the DAGs folder. Upload the local copy of the DAG you want to upload.
 
@@ -406,7 +408,7 @@ For more details, please consult the [official documentation for Cloud Composer]
 </TabItem>
 <TabItem value="bigquery">
 
-We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  `ge_checkpoint_bigquery.py`.
+We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py).
 
 ```python file=../../tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py
 ```
@@ -414,9 +416,12 @@ We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`
 The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.
 Then we will run the Checkpoint using same CLI command we used to run the Checkpoint locally:
 
-`great_expectations --v3-api checkpoint run bigquery_checkpoint`
 
-To add the DAG to Cloud Composer, move `ge_checkpoint_bigquery.py` to the environment's dags folder in Cloud Storage. First, open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page.
+```bash
+great_expectations --v3-api checkpoint run bigquery_checkpoint
+```
+
+To add the DAG to Cloud Composer, move `ge_checkpoint_bigquery.py` to the environment's DAGs folder in Cloud Storage. First, open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page.
 
 On the Configuration tab, click on the name of the Cloud Storage bucket that is found to the right of the DAGs folder. Upload the local copy of the DAG you want to upload.
 
@@ -445,15 +450,15 @@ You've successfully migrated your Great Expectations configuration to Cloud Comp
 
 There are many ways to iterate and improve this initial version, including more sophisticated ways of triggering Checkpoints, building our DAGs and dividing our Data Assets into Batches using DataConnectors. For more information, please refer to the following documentation: 
 
-- [How to run a Checkpoint in Airflow using a `python operator`](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow.html#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
-- [How to run a Checkpoint in Airflow using a `Airflow operator`](https://greatexpectations.io/blog/airflow-operator/)
-- [How to trigger the DAG on a schedule](https://cloud.google.com/composer/docs/triggering-dags#schedule)
-- [How to trigger the DAG in response to events.](http://airflow.apache.org/docs/apache-airflow/stable/concepts/sensors.html)
-- [How to configure a DataConnector to introspect and partition tables in SQL](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql/)
-- [How to configure a DataConnector to introspect and partition a file system or blob store](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store)
+- [How to run a Checkpoint in Airflow using a `python operator`](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow.html#option-2-running-the-checkpoint-script-output-with-a-pythonoperator).
+- [How to run a Checkpoint in Airflow using a `Airflow operator`](https://github.com/great-expectations/airflow-provider-great-expectations)(recommended).
+- [How to trigger the DAG on a schedule](https://cloud.google.com/composer/docs/triggering-dags#schedule).
+- [How to trigger the DAG in response to events](http://airflow.apache.org/docs/apache-airflow/stable/concepts/sensors.html).
+- [How to configure a DataConnector to introspect and partition tables in SQL](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql/).
+- [How to configure a DataConnector to introspect and partition a file system or blob store](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store).
 
 Also, the following scripts and configurations can be found here:
  
-- Local GE configuration used in this guide can be found in the [`great-expectations` GIT repository](https://github.com/great-expectations/great_expectations/tests/integration/fixtures/gcp_deployment/)
-- [Script to test BigQuery configuration](https://github.com/great-expectations/great_expectations/tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py)
-- [Script to test GCS configuration](https://github.com/great-expectations/great_expectations/tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py)
+- Local GE configuration used in this guide can be found in the [`great-expectations` GIT repository](https://github.com/great-expectations/great_expectations/tests/integration/fixtures/gcp_deployment/).
+- [Script to test BigQuery configuration](https://github.com/great-expectations/great_expectations/tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py).
+- [Script to test GCS configuration](https://github.com/great-expectations/great_expectations/tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py).
