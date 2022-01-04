@@ -22,6 +22,5 @@ See the links below for good, practical tutorials for these tools.
 
 #### Git
 * [https://git-scm.com/](https://git-scm.com/)
-* [https://reference.github.com/](https://reference.github.com/)
 * [https://www.atlassian.com/git/tutorials](https://www.atlassian.com/git/tutorials)
 
