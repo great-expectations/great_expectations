@@ -184,7 +184,7 @@ For more details on how to configure the BigQuery Datasource, please refer to [H
 ### 4. Get Batch and Create ExpectationSuite
 
 <Tabs
-  groupId="get-batch-gcs-bigquery"
+  groupId="connect-to-data-gcs-bigquery"
   defaultValue='gcs'
   values={[
   {label: 'Data in GCS', value:'gcs'},
@@ -251,7 +251,7 @@ For more details on how to configure the BatchRequest, as well as an example of 
 For our example, we will create a basic Checkpoint configuration using the `SimpleCheckpoint` class. For [additional examples](https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint), information on [how to add validations, data, or suites to existing checkpoints](https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint), and [more complex configurations](https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config) please refer to the documentation under `How to Guides` -> `Validating your data` -> `Checkpoints`.
 
 <Tabs
-  groupId="checkpoint-gcs-bigquery"
+  groupId="connect-to-data-gcs-bigquery"
   defaultValue='gcs'
   values={[
   {label: 'Data in GCS', value:'gcs'},
@@ -357,7 +357,7 @@ The current Deployment Guide was developed and tested in Great Expectations 0.13
 
 ### 3. Install Great Expectations in Cloud Composer
 
-Installing Python dependencies in Cloud Composer can be done through the Composer web Console (recommended), `gcloud` or through a REST query.  Please follow the steps described in [Installing Python dependencies in Google Cloud](https://cloud.google.com/composer/docs/how-to/using/installing-python-dependencies#install-package) to install `great-expectations` in Cloud Composer.
+Installing Python dependencies in Cloud Composer can be done through the Composer web Console (recommended), `gcloud` or through a REST query.  Please follow the steps described in [Installing Python dependencies in Google Cloud](https://cloud.google.com/composer/docs/how-to/using/installing-python-dependencies#install-package) to install `great-expectations` in Cloud Composer. If you are connecting to data in BigQuery, please ensure `pybigquery` is also installed in your Cloud Composer environment.
 
 :::info Troubleshooting Installation
 If you run into trouble while installing Great Expectations in Cloud Composer, the [official Google Cloud documentation offers the following guide on troubleshooting PyPI package installations.](https://cloud.google.com/composer/docs/troubleshooting-package-installation)
@@ -378,8 +378,8 @@ Upload the local `great_expectations/` folder either dragging and dropping it in
 Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, it will be mapped to the Airflow instances in your Cloud Composer and be accessible from the Airflow Worker nodes at the location: `/home/airflow/gcsfuse/great_expectations`.
 
 ### 5. Write DAG and Add to Cloud Composer
-<Tabs
-  groupId="run-check-gcs-bigquery"
+<Tabs 
+  groupId="connect-to-data-gcs-bigquery"
   defaultValue='gcs'
   values={[
   {label: 'Data in GCS', value:'gcs'},
