@@ -291,7 +291,9 @@ Now you are ready to migrate the local configuration to Cloud Composer.
 Add the following Checkpoint `bigquery_checkpoint` to the DataContext.  Here we are using the same `RuntimeBatchRequest` and `ExpectationSuite` name that we used to create our Validator above, translated into a YAML configuration.
 
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L260-L280
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L260-L279
+```
+```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L280
 ```
 
 Next, you can either run the Checkpoint directly in-code,
