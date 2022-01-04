@@ -1035,7 +1035,9 @@ def test_validator_progress_bar_config_enabled(
     ]
     validator.resolve_validation_graph(mock_validation_graph, {})
 
-    assert mock_tqdm.called is True
+    assert (
+        mock_tqdm.called is True
+    )  # Still invoked but doesn't actually do anything due to `disabled`
     assert mock_tqdm.call_args[1]["disable"] is False
 
 
