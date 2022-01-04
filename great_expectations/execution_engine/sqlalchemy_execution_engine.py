@@ -236,9 +236,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             self.engine = engine
         else:
-            concurrency = (
-                concurrency if concurrency is not None else ConcurrencyConfig()
-            )
+            concurrency: ConcurrencyConfig
+            if data_context is None or data_context.concurrency is None:
+                concurrency = ConcurrencyConfig()
+            else:
+                concurrency = data_context.concurrency
+
             concurrency.add_sqlalchemy_create_engine_parameters(kwargs)
 
             if credentials is not None:
