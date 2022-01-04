@@ -370,8 +370,8 @@ def test_to_dict_works_recursively():
                 baz=["a", "b", "c"],
                 qux=-100,
                 quux=43,
-            )
-        )
+            ),
+        ),
     )
 
     C_dict = my_C.to_dict()
@@ -424,14 +424,14 @@ def test_to_dict_works_recursively():
                 "baz": ["a", "b", "c"],
                 "qux": -100,
                 "quux": 43,
-            }
-        ]
+            },
+        ],
     }
 
 
 def test_instantiation_with_a_from_legacy_dict_method():
     """Can be instantiated from a legacy dictionary.
-    
+
     Note: This pattern is helpful for cases where we're migrating from dictionary-based objects to typed objects.
     One especially thorny example is when the dictionary contains keys that are reserved words in python.
 
@@ -448,7 +448,7 @@ def test_instantiation_with_a_from_legacy_dict_method():
         input: int
 
         @classmethod
-        def from_legacy_dict( cls, dict ):
+        def from_legacy_dict(cls, dict):
             """This method is an adapter to allow typing of legacy my_class_e dictionary objects, without needing to immediately clean up every object."""
             temp_dict = {}
             for k, v in dict.items():
@@ -467,11 +467,13 @@ def test_instantiation_with_a_from_legacy_dict_method():
 
             return cls(**temp_dict)
 
-    my_E = MyClassE.from_legacy_dict({
-        "foo": "a string",
-        "bar": 1,
-        "in": 10,
-    })
+    my_E = MyClassE.from_legacy_dict(
+        {
+            "foo": "a string",
+            "bar": 1,
+            "in": 10,
+        }
+    )
     assert my_E["foo"] == "a string"
     assert my_E["bar"] == 1
     assert my_E["input"] == 10
