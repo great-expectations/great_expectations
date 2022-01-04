@@ -163,3 +163,13 @@ class ExpectationDiagnosticCheckMessage(SerializableDictDot):
     sub_messages: List["ExpectationDiagnosticCheckMessage"] = field(
         default_factory=list
     )
+
+
+@dataclass
+class ExpectationDiagnosticMaturityMessages(SerializableDictDot):
+    """A holder for ExpectationDiagnosticCheckMessages, grouping them by maturity level. Used within the ExpectationDiagnostic object."""
+
+    experimental: List[ExpectationDiagnosticCheckMessage]
+    beta: List[ExpectationDiagnosticCheckMessage]
+    production: List[ExpectationDiagnosticCheckMessage]
+

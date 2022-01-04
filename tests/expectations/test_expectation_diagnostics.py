@@ -13,6 +13,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
     ExpectationDescriptionDiagnostics,
     ExpectationDiagnosticCheckMessage,
+    ExpectationDiagnosticMaturityMessages,
     ExpectationExecutionEngineDiagnostics,
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
@@ -112,35 +113,40 @@ def test_ExpectationDiagnosticReport():
 
 
 def test__convert_checks_into_output_message():
-    checks = [
-        ExpectationDiagnosticCheckMessage(
-            message="AAA",
-            passed=True,
-        ),
-        ExpectationDiagnosticCheckMessage(
-            message="BBB",
-            passed=False,
-        ),
-        ExpectationDiagnosticCheckMessage(
-            message="CCC",
-            passed=False,
-            sub_messages=[
-                ExpectationDiagnosticCheckMessage(
-                    message="ddd",
-                    passed=True,
-                ),
-                ExpectationDiagnosticCheckMessage(
-                    message="eee",
-                    passed=False,
-                ),
-            ],
-        ),
-    ]
+    checks = ExpectationDiagnosticMaturityMessages(
+        experimental= [
+            ExpectationDiagnosticCheckMessage(
+                message="AAA",
+                passed=True,
+            ),
+            ExpectationDiagnosticCheckMessage(
+                message="BBB",
+                passed=False,
+            ),
+        ],
+        beta = [],
+        production= [
+            ExpectationDiagnosticCheckMessage(
+                message="CCC",
+                passed=False,
+                sub_messages=[
+                    ExpectationDiagnosticCheckMessage(
+                        message="ddd",
+                        passed=True,
+                    ),
+                    ExpectationDiagnosticCheckMessage(
+                        message="eee",
+                        passed=False,
+                    ),
+                ],
+            ),
+        ]
+    )
 
     assert (
         edr._convert_checks_into_output_message(
             class_name="ExpectColumnValuesToEqualThree",
-            checks=checks,
+            maturity_messages=checks,
         )
         == """\
 Completeness checklist for ExpectColumnValuesToEqualThree:
