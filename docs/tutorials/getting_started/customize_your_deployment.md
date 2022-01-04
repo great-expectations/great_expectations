@@ -97,3 +97,6 @@ Most teams will want to configure various Checkpoints and Validation Actions as 
 * [How to implement custom notifications](/docs/guides/validation/advanced/how_to_implement_custom_notifications)
 * [How to validate data without a Checkpoint](/docs/guides/validation/advanced/how_to_validate_data_without_a_checkpoint)
 * [How to run a Checkpoint in Airflow](/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow)
+
+## Not interested in managing your own configuration or infrastructure?
+Learn more about Great Expectations Cloud — our fully managed SaaS offering. Sign up for our weekly cloud workshop [here](https://greatexpectations.io/cloud). You’ll get to see our newest features and apply for our private Alpha program!
