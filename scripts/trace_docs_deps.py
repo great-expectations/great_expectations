@@ -46,7 +46,9 @@ def find_docusaurus_refs(dir: str) -> List[str]:
             if re.search(pattern, line):
                 file: str = _parse_file_from_docusaurus_link(line)
                 path: str = os.path.join(os.path.dirname(doc), file)
-                linked_files.add(path)
+                # only interested in looking at .py files for now (excludes .yml files)
+                if path[-3:] == ".py":
+                    linked_files.add(path)
 
     return [file for file in linked_files]
 

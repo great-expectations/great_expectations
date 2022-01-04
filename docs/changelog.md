@@ -4,6 +4,8 @@ title: Changelog
 
 ### Develop
 
+* [BUGFIX] SlackNotificationAction must send slack_token and slack_channel to send_slack_notification function
+
 ### 0.13.49
 * [FEATURE] PandasExecutionEngine is able to instantiate Google Storage client in Google Cloud Composer (#3896)
 * [BUGFIX] Revert change to ExpectationSuite constructor (#3902)
