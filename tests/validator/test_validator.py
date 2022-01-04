@@ -20,6 +20,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.data_context.types.base import ProgressBarsConfig
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
@@ -31,7 +32,7 @@ from great_expectations.expectations.core.expect_column_value_z_scores_to_be_les
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validation_graph import ValidationGraph
+from great_expectations.validator.validation_graph import MetricEdge, ValidationGraph
 from great_expectations.validator.validator import (
     MAX_METRIC_COMPUTATION_RETRIES,
     Validator,
@@ -1016,3 +1017,44 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
     assert ve.value.args == (
         "Only one of batch_request or batch_request_list may be specified",
     )
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.validator.validation_graph.ValidationGraph")
+@mock.patch("great_expectations.validator.validator.tqdm")
+def test_validator_progress_bar_config_enabled(
+    mock_tqdm, mock_validation_graph, mock_data_context
+):
+    data_context = mock_data_context()
+    engine = PandasExecutionEngine()
+    validator = Validator(engine, data_context=data_context)
+
+    # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
+    mock_validation_graph.edges = [
+        MetricEdge(MetricConfiguration("foo", {}), None) for _ in range(5)
+    ]
+    validator.resolve_validation_graph(mock_validation_graph, {})
+
+    assert mock_tqdm.called is True
+    assert mock_tqdm.call_args[1]["disable"] is False
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.validator.validation_graph.ValidationGraph")
+@mock.patch("great_expectations.validator.validator.tqdm")
+def test_validator_progress_bar_config_disabled(
+    mock_tqdm, mock_validation_graph, mock_data_context
+):
+    data_context = mock_data_context()
+    data_context.progress_bars = ProgressBarsConfig(metric_calculations=False)
+    engine = PandasExecutionEngine()
+    validator = Validator(engine, data_context=data_context)
+
+    # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
+    mock_validation_graph.edges = [
+        MetricEdge(MetricConfiguration("foo", {}), None) for _ in range(5)
+    ]
+    validator.resolve_validation_graph(mock_validation_graph, {})
+
+    assert mock_tqdm.called is True
+    assert mock_tqdm.call_args[1]["disable"] is True
