@@ -2,7 +2,7 @@ import inspect
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Union
+from typing import List, Union, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -27,6 +27,14 @@ class Maturity(Enum):
 
 
 @dataclass
+class Package:
+    """A package name, link to its pypi or Gallery page, and (optional) version number"""
+
+    text: str
+    link: str
+    version: Optional[str]
+
+@dataclass
 class AugmentedLibraryMetadata(SerializableDictDot):
     """An augmented version of the Expectation.library_metadata object, used within ExpectationDiagnostics"""
 
@@ -34,7 +42,7 @@ class AugmentedLibraryMetadata(SerializableDictDot):
     tags: List[str]
     contributors: List[str]
     library_metadata_passed_checks: bool
-    package: Union[str, None] = None
+    package: Optional[Package] = None
 
     legacy_maturity_level_substitutions = {
         "experimental": "EXPERIMENTAL",
@@ -160,6 +168,7 @@ class ExpectationDiagnosticCheckMessage(SerializableDictDot):
 
     message: str
     passed: bool
+    doc_url: Optional[str] = None
     sub_messages: List["ExpectationDiagnosticCheckMessage"] = field(
         default_factory=list
     )
