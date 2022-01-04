@@ -429,14 +429,17 @@ def test_to_dict_works_recursively():
     }
 
 
-def test_reserved_word_key():
-    """Can be instantiated with a key that's also a reserved word
-
-    This pattern is helpful for cases where we're migrating from dictionary-based objects to typed objects,
-    and the dictionary contains keys that are reserved words in python.
+def test_instantiation_with_a_from_legacy_dict_method():
+    """Can be instantiated from a legacy dictionary.
+    
+    Note: This pattern is helpful for cases where we're migrating from dictionary-based objects to typed objects.
+    One especially thorny example is when the dictionary contains keys that are reserved words in python.
 
     For example, test cases use the reserved word: "in" as one of their required fields.
     """
+
+    import inspect
+    import logging
 
     @dataclass
     class MyClassE(SerializableDictDot):
@@ -444,48 +447,42 @@ def test_reserved_word_key():
         bar: int
         input: int
 
-    class MyClassF(MyClassE):
-        def __init__(
-            self,
-            foo,
-            bar,
-            **kwargs,
-        ):
-            super().__init__(foo=foo, bar=bar, input=kwargs["in"])
+        @classmethod
+        def from_legacy_dict( cls, dict ):
+            """This method is an adapter to allow typing of legacy my_class_e dictionary objects, without needing to immediately clean up every object."""
+            temp_dict = {}
+            for k, v in dict.items():
+                # Ignore parameters that don't match the type definition
+                if k in inspect.signature(cls).parameters:
+                    temp_dict[k] = v
+                else:
+                    if k == "in":
+                        temp_dict["input"] = v
+                    else:
+                        logging.warning(
+                            f"WARNING: Got extra parameter: {k} while instantiating MyClassE."
+                            "This parameter will be ignored."
+                            "You probably need to clean up a library_metadata object."
+                        )
 
-    my_F = MyClassF(
-        foo="a string",
-        bar=1,
-        **{"in": 10},
-    )
-    assert my_F["foo"] == "a string"
-    assert my_F["bar"] == 1
-    assert my_F["input"] == 10
-    assert my_F.input == 10
+            return cls(**temp_dict)
 
-    my_F = MyClassF(
-        **{
-            "foo": "a string",
-            "bar": 1,
-            "in": 10,
-        }
-    )
-    assert my_F["foo"] == "a string"
-    assert my_F["bar"] == 1
-    assert my_F["input"] == 10
-    assert my_F.input == 10
+    my_E = MyClassE.from_legacy_dict({
+        "foo": "a string",
+        "bar": 1,
+        "in": 10,
+    })
+    assert my_E["foo"] == "a string"
+    assert my_E["bar"] == 1
+    assert my_E["input"] == 10
+    assert my_E.input == 10
 
     # Note that after instantiation, the class does NOT have an "in" property
     with raises(AttributeError):
-        my_F["in"] == 10
+        my_E["in"] == 10
 
     # Because `in` is a reserved word, this will raise a SyntaxError:
     # my_F.in == 100
 
     # Because `in` is a reserved word, this will also raise a SyntaxError:
     # my_F.in = 100
-
-    # You can use the assigment operator, but it's not recommended
-    my_F["in"] = 100
-
-    assert my_F["in"] == 100
