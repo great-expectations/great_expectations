@@ -9,7 +9,7 @@ By default, newly profiled Expectations are stored in JSON format in the ``expec
 
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
-- Configured an [Azure Storage account](https://docs.microsoft.com/en_us/azure/storage) and get the [connection string](https://docs.microsoft.com/en_us/azure/storage/common/storage-account-keys-manage?tabs=azure-portal).
+- Configured an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
 - Create the Azure Blob container. If you also wish to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may setup this first and then use the ``$web`` existing container to store your expectations.
 - Identify the prefix (folder) where Expectations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
 
@@ -68,7 +68,7 @@ Steps
 
 4. **Copy existing Expectation JSON files to the Azure blob**. (This step is optional).
 
-    One way to copy Expectations into Azure Blob Storage is by using the ``az storage blob upload`` command, which is part of the Azure SDK. The following example will copy one Expectation, ``exp1`` from a local folder to the Azure blob.   Information on other ways to copy Expectation JSON files, like the Azure Storage browser in the Azure Portal, can be found in the [Documentation for Azure](https://docs.microsoft.com/en_us/azure/storage/blobs/storage-quickstart-blobs-portal).
+    One way to copy Expectations into Azure Blob Storage is by using the ``az storage blob upload`` command, which is part of the Azure SDK. The following example will copy one Expectation, ``exp1`` from a local folder to the Azure blob.   Information on other ways to copy Expectation JSON files, like the Azure Storage browser in the Azure Portal, can be found in the [Documentation for Azure](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction).
 
     ```bash
     export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
