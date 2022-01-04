@@ -75,11 +75,6 @@ def construct_data_context_config():
                 "enabled": True,
             },
             "concurrency": {"enabled": False},
-            "progress_bars": {
-                "globally": True,
-                "profilers": True,
-                "metric_calculations": True,
-            },
         }
 
     return _construct_data_context_config
@@ -1347,11 +1342,6 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
         },
         "validations_store_name": "validations_store",
         "concurrency": {"enabled": False},
-        "progress_bars": {
-            "globally": True,
-            "profilers": True,
-            "metric_calculations": True,
-        },
     }
 
     data_context_config_schema = DataContextConfigSchema()
