@@ -4,9 +4,9 @@ This file is intended to
 2. provides examples of best practice for working with typed objects within the Great Expectations codebase
 """
 
-from dataclasses import FrozenInstanceError, dataclass, field
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import List, Optional, Tuple
 
 import pytest
 from pytest import raises
@@ -44,6 +44,7 @@ class MyClassC(SerializableDictDot):
     A_list: List[MyClassA]
     B_list: List[MyClassB]
     enum_list: List[MyEnum] = field(default_factory=list)
+    some_tuple: Optional[Tuple[MyClassA, MyClassB]] = None
 
     @property
     def num_As(self):
@@ -358,6 +359,19 @@ def test_to_dict_works_recursively():
             MyEnum("y"),
             MyEnum("z"),
         ],
+        some_tuple=(
+            MyClassA(
+                foo="A-1",
+                bar=101,
+            ),
+            MyClassB(
+                foo="B-1",
+                bar=201,
+                baz=["a", "b", "c"],
+                qux=-100,
+                quux=43,
+            )
+        )
     )
 
     C_dict = my_C.to_dict()
@@ -399,6 +413,19 @@ def test_to_dict_works_recursively():
             "y",
             "z",
         ],
+        "some_tuple": [
+            {
+                "foo": "A-1",
+                "bar": 101,
+            },
+            {
+                "foo": "B-1",
+                "bar": 201,
+                "baz": ["a", "b", "c"],
+                "qux": -100,
+                "quux": 43,
+            }
+        ]
     }
 
 
