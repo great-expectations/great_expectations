@@ -61,7 +61,7 @@ class DomainExpert:
 
 
 class Maturity(Enum):
-    SCAFFOLDED = "SCAFFOLDED"
+    CONCEPT_ONLY = "CONCEPT_ONLY"
     EXPERIMENTAL = "EXPERIMENTAL"
     BETA = "BETA"
     PRODUCTION = "PRODUCTION"
@@ -121,16 +121,10 @@ pkg = GreatExpectationsContribPackage(
     expectations=[],
     expectation_count=0,
     dependencies=[],
-    maturity=Maturity.SCAFFOLDED,
+    maturity=Maturity.CONCEPT_ONLY,
     status=PackageCompletenessStatus(0, 0, 0, 0, 0),
     owners=[],
     contributors=[],
     domain_experts=[],
     version="",
-)
-
-__import__("pprint").pprint(
-    GreatExpectationsContribPackage.from_json_file(
-        "accounting_expectations/.great_expectations_package.json"
-    )
 )
