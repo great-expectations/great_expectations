@@ -41,7 +41,7 @@ stores:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>
       bucket: <YOUR GCS BUCKET NAME>
-      prefix: <YOUR GCS BUCKET NAME>
+      prefix: <YOUR GCS PREFIX NAME>
 
   validations_store:
     class_name: ValidationsStore
@@ -55,7 +55,7 @@ stores:
       class_name: TupleGCSStoreBackend
       project: <YOUR GCP PROJECT NAME>
       bucket: <YOUR GCS BUCKET NAME>
-      prefix: <YOUR GCS BUCKET NAME>
+      prefix: <YOUR GCS PREFIX NAME>
 
   evaluation_parameter_store:
     # Evaluation Parameters enable dynamic expectations. Read more here:

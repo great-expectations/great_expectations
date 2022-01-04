@@ -7,7 +7,7 @@ import TabItem from '@theme/TabItem';
 import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
 
 This guide will help you integrate Great Expectations (GE) with [Google Cloud Platform](https://cloud.google.com/gcp) (GCP) using our recommended workflow.
-
+    
 <Prerequisites>
 
 - Have a working local installation of Great Expectations that is at least version 0.13.49.
@@ -26,7 +26,7 @@ We recommend that you use Great Expectations in GCP by using the following servi
 
 We also recommend that you deploy Great Expectations to GCP in two steps:
 1. [Developing a local configuration for GE that uses GCP services to connect to your data, store Great Expectations metadata, and run a Checkpoint.](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) 
-2. [Migrating the local configuration to Cloud Composer so that the workflow can be orchestrated automatically on GCP.](#part-2-migrating-our-local-configuration-to-google-cloud-composer)
+2. [Migrating the local configuration to Cloud Composer so that the workflow can be orchestrated automatically on GCP.](#part-2-migrating-our-local-configuration-to-cloud-composer)
 
 The following diagram shows the recommended components for a Great Expectations deployment in GCP:  
 
@@ -39,6 +39,16 @@ Relevant documentation for the components can also be found here:
 - [How to host and share Data Docs on GCS](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs)
 - Optionally, you can also use a [Secret Manager for GCP Credentials](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
 
+:::note Note on V3 Expectations for BigQuery
+
+  A small number of V3 Expectations have not been migrated to BigQuery, and will be very soon. These include:
+  - `expect_column_values_to_be_in_set`
+  - `expect_column_values_to_be_in_type_list`
+  - `expect_column_values_to_be_between`
+  - `expect_column_quantile_values_to_be_between`
+  - `expect_column_mean_to_be_between`
+:::
+    
 ## Part 1: Local Configuration of Great Expectations that connects to Google Cloud Platform
 
 ### 1. If necessary, upgrade your Great Expectations version
@@ -199,7 +209,7 @@ Lastly, save the ExpectationSuite, which now contains our two Expectations.
 ```
 
 For more details on how to configure the RuntimeBatchRequest, as well as an example of how you can load data by specifying a GCS path to a single CSV, please refer to [How to connect to data on GCS using Pandas
-](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery)
+](https://deploy-preview-3926--niobium-lead-7998.netlify.app/docs/guides/connecting_to_your_data/cloud/gcs/pandas
 
 </TabItem>
 <TabItem value="bigquery">
@@ -340,7 +350,7 @@ The current Deployment Guide was developed and tested in Great Expectations 0.13
 
 ### 3. Install Great Expectations in Cloud Composer
 
-Installing Python dependencies in Cloud Composer can be done through the web Console, `gcloud` or through a REST query.  Please follow the steps described in [Installing Python dependencies in Google Cloud](https://cloud.google.com/composer/docs/how-to/using/installing-python-dependencies#console) to install `great-expectations` in Cloud Composer.
+Installing Python dependencies in Cloud Composer can be done through the Composer web Console (recommended), `gcloud` or through a REST query.  Please follow the steps described in [Installing Python dependencies in Google Cloud](https://cloud.google.com/composer/docs/how-to/using/installing-python-dependencies#install-package) to install `great-expectations` in Cloud Composer.
 
 :::info Troubleshooting Installation
 If you run into trouble while installing Great Expectations in Cloud Composer, the [official Google Cloud documentation offers the following guide on troubleshooting PyPI package installations.](https://cloud.google.com/composer/docs/troubleshooting-package-installation)
@@ -348,11 +358,17 @@ If you run into trouble while installing Great Expectations in Cloud Composer, t
 
 ### 4. Move local configuration to Cloud Composer
 
-Cloud Composer uses Cloud Storage to store Apache Airflow DAGs (also known as workflows), with each Environment having an associated Cloud Storage bucket. The simplest way to perform the migration is to move the entire local `great_expectations/` folder from [Part 1](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) to the Cloud Storage bucket where Composer can access the configuration.
+Cloud Composer uses Cloud Storage to store Apache Airflow DAGs (also known as workflows), with each Environment having an associated Cloud Storage bucket (typically the name of the bucket will follow the pattern `[region]-[composer environment name]-[UUID]-bucket`). 
 
-To access the Cloud Storage bucket associated with current Cloud Composer environment, first open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page. On the Configuration tab, the name of the Cloud Storage bucket can be found to the right of the DAGs folder. The bucket can then be shown in the Cloud Storage console by clicking the bucket name, and the `great_expectations/` folder can be uploaded by dragging and dropping, or clicking the upload folder button.
+The simplest way to perform the migration is to move the entire local `great_expectations/` folder from [Part 1](#part-1-local-configuration-of-great-expectations-that-connects-to-google-cloud-platform) to the Cloud Storage bucket where Composer can access the configuration.
 
-Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, it will be mapped to the Airflow instances in your Cloud Composer. The folder will now be accessible from the Airflow Worker nodes through the path : `/home/airflow/gcsfuse/great_expectations`.
+First open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page. On the Configuration tab, the name of the Cloud Storage bucket can be found to the right of the DAGs folder. 
+
+This will take you to the folder where DAGs are stored (Bucket > BucketName > Dags), which can be accessed from the Airflow worker nodes at: `/home/airflow/gcsfuse/dags`. The location we want to uploads `great_expectations/` is **one level above the `/dags` folder**.
+
+Upload the local `great_expectations/` folder by dragging and dropping, using [`gsutil cp`](https://cloud.google.com/storage/docs/gsutil/commands/cp), or by clicking the `Upload Folder` button.
+
+Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, it will be mapped to the Airflow instances in your Cloud Composer and be accessible from the Airflow Worker nodes at the location: `/home/airflow/gcsfuse/great_expectations`.
 
 ### 5. Write DAG and Add to Cloud Composer
 <Tabs
