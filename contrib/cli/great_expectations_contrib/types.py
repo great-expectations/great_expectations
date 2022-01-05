@@ -110,9 +110,15 @@ class GreatExpectationsContribPackage:
         expectations = self._retrieve_expectations_from_module(expectations_module)
         diagnostics = self._gather_diagnostics(expectations)
 
+        self.expectations = diagnostics
+
         self._determine_core_values()
         self._determine_user_values()
         self._determine_metadata()
+
+        with open(".great_expectations_package.json", "w") as f:
+            data = json.dumps(self.to_json_dict(), indent=4)
+            f.write(data)
 
     def _determine_core_values(self) -> None:
         pass
@@ -148,9 +154,7 @@ class GreatExpectationsContribPackage:
         expectations = []
         names = []
         for name, obj in inspect.getmembers(expectations_module):
-            if inspect.isclass(obj) and name.endswith(
-                "Expectation"
-            ):  # Maybe use 'isinstance'?
+            if inspect.isclass(obj) and issubclass(obj, Expectation):
                 expectations.append(obj)
                 names.append(name)
 
