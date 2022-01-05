@@ -5,6 +5,7 @@ from collections import namedtuple
 
 import click
 from cookiecutter.main import cookiecutter
+from great_expectations_contrib.types import GreatExpectationsContribPackage
 
 Command = namedtuple("Command", ["name", "full_command", "error_message"])
 
@@ -24,7 +25,11 @@ def check_cmd() -> None:
     Performs a series of checks on a contributor package.
     These include code style, testing, docstrings, and more.
     """
-    perform_check(suppress_output=False)
+    pkg = GreatExpectationsContribPackage.from_json_file(
+        ".great_expectations_package.json"
+    )
+    pkg.determine_values()
+    # perform_check(suppress_output=False)
 
 
 def publish_cmd() -> None:

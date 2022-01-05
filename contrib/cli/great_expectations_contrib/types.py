@@ -1,6 +1,8 @@
+import importlib
 import inspect
 import json
 import os
+import sys
 from dataclasses import asdict, dataclass
 from enum import Enum
 from typing import Any, List, Optional
@@ -103,6 +105,11 @@ class GreatExpectationsContribPackage:
         return cls(**data)
 
     def determine_values(self) -> None:
+        package = self._identify_user_package()
+        expectations_module = self._import_expectations_module(package)
+        expectations = self._retrieve_expectations_from_module(expectations_module)
+        diagnostics = self._gather_diagnostics(expectations)
+
         self._determine_core_values()
         self._determine_user_values()
         self._determine_metadata()
@@ -116,12 +123,6 @@ class GreatExpectationsContribPackage:
     def _determine_metadata(self) -> None:
         pass
 
-    # def main():
-    #     package = _identify_user_package()
-    #     expectations_module = _import_expectations_module(package)
-    #     expectations = _retrieve_expectations_from_module(expectations_module)
-    #     diagnostics = _gather_diagnostics(expectations)
-
     def _identify_user_package(self):
         packages = [d for d in os.listdir() if os.path.isdir(d) and "expectations" in d]
         if len(packages) == 0:
@@ -134,12 +135,12 @@ class GreatExpectationsContribPackage:
 
     def _import_expectations_module(self, package: str) -> Any:
         try:
-            expectations_module = __import__(f"{package}.expectations")
-        except ImportError:
+            cwd = os.getcwd()
+            sys.path.append(cwd)
+            expectations_module = importlib.import_module(f"{package}.expectations")
+            return expectations_module
+        except ModuleNotFoundError:
             print(f"Could not import user expectations")
-            raise
-
-        return expectations_module
 
     def _retrieve_expectations_from_module(
         self, expectations_module: Any
