@@ -1,9 +1,11 @@
 ---
-title: "Setup: Connect to data"
+title: "Connect to data: Overview"
 ---
-# [![Connect to data icon](../../images/universal_map/Outlet-active.png)](setup_overview.md) Setup: Overview 
+# [![Connect to data icon](../../images/universal_map/Outlet-active.png)](setup_overview.md) Connect to data: Overview 
 
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
 
@@ -15,33 +17,155 @@ import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 - Completing [Step 2: Connect to data](/docs/tutorials/getting_started/connect_to_data) of the Getting Started tutorial is recommended.
 :::
 	
-Connecting to your data in Great Expectations is designed to be a painless process.  Once you have performed this step, you will have a unified API with which to interact with your data in Great Expectations, regardless of the source data system.
+Connecting to your data in Great Expectations is designed to be a painless process.  Once you have performed this step, you will have a consistent API for accessing and validating data on all kinds of source data systems: SQL-type data sources, local and remote file stores, in-memory data frames, and more.
 
 ## The connect to data process
 
 <!-- Brief outline of what the process entails.  -->
 
-Connecting to your data is built around the Datasource object.  A Datasource provides a standard API for accessing and interacting with data from a wide variety of source systems.  It does this by providing an interface for a Data Connector and an Execution Engine.  In the connect to data process you will configure your Datasources' Data Connectors according to the requirements of the source data system that contains the data you will be working with, along with specifications that will alow you to determine what slice of data your Datasources will provide access to.  At the same time, you will specify the Execution Engine that will be used to work with the data.  From that point forward you will only need to use the Datasource API to access and interact with your data, regardless of the original source system that your data is stored in.
+Connecting to your data is built around the Datasource object.  A Datasource provides a standard API for accessing and interacting with data from a wide variety of source systems.  It does this by providing an interface for a Data Connector and an Execution Engine to work together.
+
+The majority of the connect to data process is a simple matter of configuring a new Datasource according to the requirements of your underlying data system.  Once your Datasources are configured and saved to your Data Context you will only need to use the Datasource API to access and interact with your data, regardless of the original source system (or systems) that your data is stored in.
 
 <!-- The following subsections should be repeated as necessary.  They should give a high level map of the things that need to be done or optionally can be done in this process, preferably in the order that they should be addressed (assuming there is one). If the process crosses multiple steps of the Universal Map, use the <SetupHeader> <ConnectHeader> <CreateHeader> and <ValidateHeader> tags to indicate which Universal Map step the subsections fall under. -->
 
-## 1. Create a Datasource
-## 2. Specify your Execution Engine
-## 3. Choose your Data Connector
+### 1. Create a Datasource
+
+If you use the Great Expectations CLI, you can run this command to automatically generate a pre-configured Jupyter Notebook:
+
+```console
+great_expectations --v3-api datasource new
+```
+
+From there, you will be able to follow along a YAML based workflow for configuring and saving your Datasource.  Regardless, 
+
+
+### 2. Configure your Datasource
+
+Because the underlying data systems are different, configuration for each type of Datasource is slightly different.  We have step by step how-to guides that cover many common cases, and core concepts documentation to help you with more exotic kinds of configuration.  The following will give you a broad overview of what you will be doing regardless of what your underlying data systems are.
+
+Datasource configurations can be written as YAML files or Python dictionaries.  Regardless of variations due to the underlying data systems, your Datasource's configuration will look roughly like this:
+
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='yaml'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+  <TabItem value="yaml">
+
+```python
+datasource_yaml = fr"""
+name: <name_of_your_datasource>
+class_name: Datasource
+execution_engine:
+    class_name: <class_of_execution_engine>
+data_connectors:
+    <name_of_your_data_connector>:
+        class_name: <class_of_data_connector>
+        <additional_keys_based_on_source_data_system>: <corresponding_values>
+"""
+```
+
+</TabItem>
+<TabItem value="python">
+
+```python
+datasource_config = {
+    "name": "<name_of_your_datasource>",
+    "class_name": "Datasource",
+    "execution_engine": {"class_name": "<class_of_execution_engine>"},
+    "data_connectors": {
+        "<name_of_your_data_connector>": {
+            "class_name": "<class_of_data_connector>",
+            "<additional_keys_based_on_source_data_system": "<corresponding_values>"
+        }
+    }
+}
+
+```
+
+</TabItem>
+</Tabs>
+
+Some things to note:
+
+- First, unless you are extending Great Expectations and using a subclass of Datasource, you will almost never need to use a `class_name` other than `Datasource` for the top level `class_name` value.
+- Second, inside the `execution_engine` dictionary you will also include a `connection_string` key if the source data system you are connecting to requires one.
+- Third, in the `data_connectors` dictionary you may define multiple Data Connectors, including different types of Data Connectors, so long as they all have unique values in the place of the `<name_of_your_data_connector>` key.
+- Fourth, the `<additional_keys_based_on_source_data_system>` will be things like `base_directory` and `default_regex` for filesystems, or  `batch_identifiers` for SQL based data systems.
+- Finally: This is just a broad outline of the configuration you will be making.  You will find much more detailed examples in our documentation on how to connect to specific source data systems.
+
+
+#### Configuring your Datasource's Execution Engine
+
+After your Datasource's configuration has a `name` and `class_name` defined, you will need to define the `execution_engine`.  In your configuration the value of your `execution_engine` will at the very least contain the `class_name` of your Execution Engine, and may also include a `connection_string` if your source data system requires one.
+
+Great Expectations supports Pandas, Spark, and SqlAlchemy as execution engines.
+
+#### Configuring your Datasource's Data Connectors
 
 Great Expectations provides three types of `DataConnector` classes, which are useful in various situations.  Which Data Connector you will want to use will depend on the format of your source data systems.
 - An InferredAssetDataConnector infers the `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure.  If your source data system is designed so that it can easily be parsed by regex, this will allow new data to be included by the Datasource automatically.
 - A ConfiguredAssetDataConnector, which allows you to have the most fine-tuning by requiring an explicit listing of each Data Asset you want to connect to.  This Data Connector would be ideal
 - A `RuntimeDataConnector` which enables you to use a `RuntimeBatchRequest` to wrap either an in-memory dataframe, filepath, or SQL query.
 
+We provide detailed guidance to help you decide on a Data Connector in our guide: [How to choose which DataConnector to use](/docs/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use).
 
-## 3. Configure your Data Connector for a source system
-## 4. Configure your Data Connector for slices of data
+For specifics on the additional keys that you can use in your Data Connectors' configurations, please see the corresponding guide for connecting to a specific source data system (since the keys you will need to define will depend on the source data system you are connecting to).
+
+### 3. Test your configuration
+
+Because the configurations for Datasources can vary depending on the underlying data system they are connecting to, Great Expectations provides a convenience function that will help you determine if there are errors in your configuration.  This function can be accessed from your Data Context, like so:
+
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='yaml'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+  <TabItem value="yaml">
+
+```python
+import great_expectations as ge
+
+datasource_yaml = ""  # Replace this with the yaml string you want to check for errors.
+
+context = ge.get_context()
+context.test_yaml_config(datasource_yaml)
+```
+
+</TabItem>
+<TabItem value="python">
+
+```python
+import great_expectations as ge
+from ruamel import yaml
+
+datasource_config = {}  # Replace this with the Python dictionary you want to check for errors.
+
+context = ge.get_context()
+context.test_yaml_config(yaml.dump(datasource_config))
+```
+
+</TabItem>
+</Tabs>
+
+
+
+### 4. Save the Datasource configuration to your Data Context.
+
+### 5. Test your new Datasource.
+
+To test your Datasource you will load data from it into a Validator using a Batch Request.  All of our guides on how to configure a Datasource conclude with an example of how to do this for that guide's particular source data system.
 
 ## Accessing your Datasource from your Data Context
 
-## Retrieving Batches of data from your Datasource
-This is primarily done when running Profilers in the the Create Expectation step, or when running Checkpoints in the Validate Data step, and will be covered in more detail in those sections of the documentation.
+## Retrieving Batches of data with your Datasource
+
+This is primarily done when running Profilers in the Create Expectation step, or when running Checkpoints in the Validate Data step, and will be covered in more detail in those sections of the documentation.
 
 ## Wrapping up
 
