@@ -45,7 +45,7 @@ Steps
 
    :::caution
 
-      If you are also storing Expectations in S3 ([How to configure an Expectation store to use Amazon S3](./how_to_configure_an_expectation_store_in_amazon_s3)), or DataDocs in S3 ([How to host and share Data Docs on Amazon S3](../configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3)), then please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
+      If you are also storing Expectations in S3 ([How to configure an Expectation store to use Amazon S3](./how_to_configure_an_expectation_store_in_amazon_s3.md)), or DataDocs in S3 ([How to host and share Data Docs on Amazon S3](../configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md)), then please ensure that the ``prefix`` values are disjoint and one is not a substring of the other.
 
    :::
 

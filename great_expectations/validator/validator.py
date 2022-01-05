@@ -213,6 +213,10 @@ class Validator:
         return list(combined_dir)
 
     @property
+    def data_context(self) -> Optional["DataContext"]:
+        return self._data_context
+
+    @property
     def expose_dataframe_methods(self) -> bool:
         return self._expose_dataframe_methods
 
@@ -694,12 +698,26 @@ class Validator:
                 validation_graph=graph, metrics=metrics
             )
 
+            # Check to see if the user has disabled progress bars
+            disable = False
+            if self._data_context:
+                progress_bars = self._data_context.progress_bars
+                # If progress_bars are not present, assume we want them enabled
+                if progress_bars is not None:
+                    if "globally" in progress_bars:
+                        disable = not progress_bars["globally"]
+                    if "metric_calculations" in progress_bars:
+                        disable = not progress_bars["metric_calculations"]
+
+            if len(graph.edges) < 3:
+                disable = True
+
             if pbar is None:
                 # noinspection PyProtectedMember,SpellCheckingInspection
                 pbar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
                     desc="Calculating Metrics",
-                    disable=len(graph.edges) < 3,
+                    disable=disable,
                 )
                 pbar.update(0)
 
