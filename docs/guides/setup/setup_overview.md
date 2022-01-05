@@ -33,7 +33,7 @@ The first thing to take care of is making sure your work environment has the uti
 
 If you are having trouble with any of these, our documentation on [Supporting Resources](/docs/reference/supporting_resources) will direct you to more information and helpful tutorials.
 
-## 2. Installation
+### 2. Installation
 
 Installing Great Expectations is a simple pip command.  From the terminal, execute:
 
@@ -45,7 +45,7 @@ Running this command in an environment configured to accept Python pip install c
 
 See our [guides for the installation process](/docs/guides/setup/installation/index) for more information.
 
-## 3. Initialize a Data Context
+### 3. Initialize a Data Context
 
 Your Data Context contains the entirety of your Great Expectations project and provides the entry point for all of the primary methods you will use to configure and interact with Great Expectations.  That's why the first thing you'll do once you've installed Great Expectations will be to initialize your Data Context.  This is another one-line command.  Simply go to the root folder for your project and execute:
 
@@ -57,17 +57,17 @@ Running this command will initialize your Data Context in the directory that the
 
 See our [guides for configuring your Data Context](/docs/guides/setup/configuring_data_contexts/index) for more information.
 
-## 4. Optional Configurations
+### 4. Optional Configurations
 
 Once your Data Context is initialized, you'll be all set to start using Great Expectations.  However, there are a few things that are configured by default to operate locally which you may want to configure to be hosted elsewhere.  We include these optional configurations in our Setup instructions.  Using the Data Context, you can easily create and test your configurations.
 
-### Stores
+#### Stores
 
 Stores are the locations where your Data Context stores information about your Expectations, your Validation Results, and your Metrics.  By default, these are stored locally.  But you can reconfigure them to work with a variety of backends.  
 
 See our [guides for configuring Stores](/docs/guides/setup/configuring_metadata_stores/index) for more information.
 
-### Data Docs
+#### Data Docs
 
 Data Docs provide human readable renderings of your Expectation Suites and Validation Results.  As with Stores, these are built locally by default.  However, you can configure them to be hosted and shared in a variety of different ways.  
 
