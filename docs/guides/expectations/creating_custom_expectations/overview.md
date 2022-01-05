@@ -3,7 +3,7 @@ title: Overview
 ---
 import Prerequisites from './components/prerequisites.jsx'
 
-You can extend the functionality of Great Expectations by creating your own custom [**Expectations**](docs/reference/expectations/expectations). You can also enrich Great Expectations as a shared standard for data quality by contributing new Expectations to the open source project.
+You can extend the functionality of Great Expectations by creating your own custom [**Expectations**](../../../reference/expectations/expectations). You can also enrich Great Expectations as a shared standard for data quality by contributing new Expectations to the open source project.
 
 These processes compliment each other and their steps are streamlined so that one flows into the other. Once you have created a custom Expectation, it is simple to contribute it to the open source project. This section will teach you how to do both.
 
@@ -19,7 +19,7 @@ A fully-developed, Production-ready Expectation needs to do a lot of things:
 
 In order to make development of Expectations as easy as possible, we've broken up the steps to create custom Expectations into a series of bite-sized steps. Each step can be completed in minutes. They can be completed (and contributed) incrementally, unlocking value at each step along the way.
 
-Grouped together, they constitute a Definition of Done for Expectations at each [Level of Maturity](/docs/contributing/contributing_maturity).
+Grouped together, they constitute a Definition of Done for Expectations at each [Level of Maturity](../../../contributing/contributing_maturity).
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
 <i class="fas fa-circle" style={{color: "#dc3545"}}></i> An Experimental Expectation...
@@ -27,7 +27,7 @@ Grouped together, they constitute a Definition of Done for Expectations at each 
 * Has a `library_metadata` object
 * Has a docstring, including a one-line short description
 * Has at least one positive and negative example case
-* Has core logic and passes tests on at least one [**Execution Engine**](/docs/reference/execution_engine)
+* Has core logic and passes tests on at least one [**Execution Engine**](../../../reference/execution_engine)
 
 <i class="fas fa-circle" style={{color: "#ffc107"}}></i> A Beta Expectation...
 
@@ -72,6 +72,6 @@ Beyond the first four steps, additional features are generally similar across al
 
 ## Publishing your Expectation as an open source contribution
 
-You can find more detailed instructions in the [Contributing](/docs/contributing/contributing) section of the docs.
+You can find more detailed instructions in the [Contributing](../../../contributing/contributing) section of the docs.
 
 ## Wrapping up

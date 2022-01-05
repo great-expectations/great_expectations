@@ -20,7 +20,7 @@ This guide will walk you through the process of creating your own custom ColumnE
 #### 1. Choose a name for your Expectation
 
 First, decide on a name for your own Expectation. By convention, `ColumnExpectations` always start with `expect_column_`. 
-For more on Expectation naming conventions, see the [Expectations section](/docs/contributing/style_guides/code_style#expectations) of the Code Style Guide.
+For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style#expectations) of the Code Style Guide.
 
 Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
@@ -31,7 +31,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom ColumnExpectation [here](/examples/expectations/column_aggregate_expectation_template.py).
+You can find the template file for a custom ColumnExpectation [here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_aggregate_expectation_template.py).
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash 
@@ -163,7 +163,7 @@ Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
 ```
 #### 6. Implement your Metric and connect it to your Expectation
 
-This is the stage where you implement the actual business logic for your `Expectation`. To do so, you'll need to implement a function within a [**Metric**](/docs/reference/metrics.md) class, and link it to your `Expectation`. By the time your Expectation is complete, your Metric will have functions for all three Execution Engines supported by Great Expectations. For now, we're only going to define one.
+This is the stage where you implement the actual business logic for your `Expectation`. To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your `Expectation`. By the time your Expectation is complete, your Metric will have functions for all three Execution Engines supported by Great Expectations. For now, we're only going to define one.
 
 Your Metric function will have the `@column_aggregate_value` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate the max of a column using the PandasExecutionEngine.
 

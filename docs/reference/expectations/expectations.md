@@ -69,9 +69,9 @@ did.
 There are several paths to generating Expectations:
 
 1. Automated inspection of datasets. Currently, the profiler mechanism in Great Expectations produces Expectation Suites
-   that can be used for validation. In some cases, the goal is [profiling](/docs/reference/profilers) your data, and in other cases automated
+   that can be used for validation. In some cases, the goal is [profiling](../profilers) your data, and in other cases automated
    inspection can produce Expectations that will be used in validating future batches of data.
-1. Expertise. Rich experience from subject matter experts, Analysts, and data owners is often a critical source of
+1. Expertise. Rich experience from subject-matter experts, Analysts, and data owners is often a critical source of
    Expectations. Interviewing experts and encoding their tacit knowledge of common distributions, values, or failure
    conditions can be can excellent way to generate Expectations.
 1. Exploratory Analysis. Using Great Expectations in an exploratory analysis workflow (e.g. within Jupyter Notebooks)
@@ -95,6 +95,6 @@ These Expectations aren't included in the default set, but could be very useful 
 Fear not! Great Expectations is designed for customization and extensibility.
 
 Building custom Expectations is easy and allows your custom logic to become part of the validation, documentation, and
-even profiling workflows that make Great Expectations stand out. See the guide on [creating custom Expectations](/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations)
+even profiling workflows that make Great Expectations stand out. See the guide on [creating custom Expectations](../../guides/expectations/creating_custom_expectations/overview.md)
 for more information on building Expectations and updating Data Context configurations to automatically load batches of
 data with custom Data Assets.
