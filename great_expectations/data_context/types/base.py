@@ -145,6 +145,7 @@ class AssetConfig(DictDot):
         prefix=None,
         delimiter=None,
         max_keys=None,
+        schema_name=None,
         batch_spec_passthrough=None,
         **kwargs,
     ):
@@ -160,6 +161,8 @@ class AssetConfig(DictDot):
             self.delimiter = delimiter
         if max_keys is not None:
             self.max_keys = max_keys
+        if schema_name is not None:
+            self.schema_name = schema_name
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
         for k, v in kwargs.items():
@@ -195,6 +198,7 @@ class AssetConfigSchema(Schema):
     prefix = fields.String(required=False, allow_none=True)
     delimiter = fields.String(required=False, allow_none=True)
     max_keys = fields.Integer(required=False, allow_none=True)
+    schema_name = fields.String(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
     # Necessary addition for Cloud assets
@@ -1082,6 +1086,24 @@ class NotebooksConfigSchema(Schema):
         return NotebooksConfig(**data)
 
 
+class ProgressBarsConfig(DictDot):
+    def __init__(
+        self,
+        globally: bool = True,
+        profilers: bool = True,
+        metric_calculations: bool = True,
+    ):
+        self.globally = globally
+        self.profilers = profilers
+        self.metric_calculations = metric_calculations
+
+
+class ProgressBarsConfigSchema(Schema):
+    globally = fields.Boolean(default=True)
+    profilers = fields.Boolean(default=True)
+    metric_calculations = fields.Boolean(default=True)
+
+
 class ConcurrencyConfig(DictDot):
     """WARNING: This class is experimental."""
 
@@ -1173,10 +1195,28 @@ class DataContextConfigSchema(Schema):
     )
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
-    concurrency = fields.Nested(ConcurrencyConfigSchema)
+    progress_bars = fields.Nested(
+        ProgressBarsConfigSchema, required=False, allow_none=True
+    )
+    concurrency = fields.Nested(
+        ConcurrencyConfigSchema, required=False, allow_none=True
+    )
 
-    # noinspection PyMethodMayBeStatic
-    # noinspection PyUnusedLocal
+    # To ensure backwards compatability, we need to ensure that new options are "opt-in"
+    # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook
+    REMOVE_KEYS_IF_NONE = [
+        "concurrency",  # 0.13.33
+        "progress_bars",  # 0.13.49
+    ]
+
+    @post_dump
+    def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
+        data = copy.deepcopy(data)
+        for key in self.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
+
     def handle_error(self, exc, data, **kwargs):
         """Log and raise our custom exception when (de)serialization fails."""
         if (
@@ -1783,6 +1823,7 @@ class DataContextConfig(BaseYamlConfig):
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
+        progress_bars: Optional[ProgressBarsConfig] = None,
     ):
         # Set defaults
         if config_version is None:
@@ -1829,11 +1870,10 @@ class DataContextConfig(BaseYamlConfig):
                 **anonymous_usage_statistics
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
-        if concurrency is None:
-            concurrency = ConcurrencyConfig()
-        elif isinstance(concurrency, dict):
+        if isinstance(concurrency, dict):
             concurrency = ConcurrencyConfig(**concurrency)
-        self.concurrency: ConcurrencyConfig = concurrency
+        self.concurrency = concurrency
+        self.progress_bars = progress_bars
 
         super().__init__(commented_map=commented_map)
 
@@ -2429,3 +2469,4 @@ anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
+progressBarsConfigSchema = ProgressBarsConfigSchema()
