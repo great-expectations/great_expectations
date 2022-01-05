@@ -946,12 +946,25 @@ def lint_code(code: str) -> str:
         return code
 
 
-def convert_nulls_to_None(code: str) -> str:
-    """
-    Substitute instances of 'null' with 'None' in string representations of Python dictionaries.
+def convert_json_string_to_be_python_compliant(code: str) -> str:
+    """Cleans JSON-formatted string to adhere to Python syntax
 
-    Designed to provide security when serializing GE objects and writing them to Jupyter Notebooks.
+    Substitute instances of 'null' with 'None' in string representations of Python dictionaries.
+    Additionally, substitutes instances of 'true' or 'false' with their Python equivalents.
+
+    Args:
+        code: JSON string to update
+
+    Returns:
+        Clean, Python-compliant string
+
     """
+    code = _convert_nulls_to_None(code)
+    code = _convert_json_bools_to_python_bools(code)
+    return code
+
+
+def _convert_nulls_to_None(code: str) -> str:
     pattern = r'"([a-zA-Z0-9_]+)": null'
     result = re.findall(pattern, code)
     for match in result:
@@ -959,6 +972,18 @@ def convert_nulls_to_None(code: str) -> str:
         logger.info(
             f"Replaced '{match}: null' with '{match}: None' before writing to file"
         )
+    return code
+
+
+def _convert_json_bools_to_python_bools(code: str) -> str:
+    pattern = r'"([a-zA-Z0-9_]+)": (true|false)'
+    result = re.findall(pattern, code)
+    for match in result:
+        identifier, boolean = match
+        curr = f'"{identifier}": {boolean}'
+        updated = f'"{identifier}": {boolean.title()}'  # true -> True | false -> False
+        code = code.replace(curr, updated)
+        logger.info(f"Replaced '{curr}' with '{updated}' before writing to file")
     return code
 
 
