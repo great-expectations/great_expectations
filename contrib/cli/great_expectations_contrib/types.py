@@ -109,16 +109,19 @@ class GreatExpectationsContribPackage:
         Any null values are excluded.
 
         """
-        # Convert to JSON and remove nulls
-        json_dict = asdict(self)
-        for k, v in json_dict.items():
-            if v is None:
-                json_dict.pop(k)
-
+        json_dict = self._to_json_dict()
         data = json.dumps(json_dict, indent=4)
         with open(self.config_file, "w") as f:
             f.write(data)
             logger.info(f"Succesfully wrote state to {self.config_file}.")
+
+    def _to_json_dict(self) -> Dict[str, Any]:
+        # Convert to JSON and remove nulls
+        json_dict = asdict(self)
+        to_delete = [key for key, val in json_dict.items() if val is None]
+        for key in to_delete:
+            del json_dict[key]
+        return json_dict
 
     @classmethod
     def from_json_file(cls) -> "GreatExpectationsContribPackage":

@@ -25,11 +25,7 @@ def check_cmd() -> None:
     Performs a series of checks on a contributor package.
     These include code style, testing, docstrings, and more.
     """
-    pkg = GreatExpectationsContribPackage.from_json_file(
-        ".great_expectations_package.json"
-    )
-    pkg.determine_values()
-    # perform_check(suppress_output=False)
+    perform_check(suppress_output=False)
 
 
 def publish_cmd() -> None:

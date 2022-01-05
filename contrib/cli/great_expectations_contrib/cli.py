@@ -7,6 +7,7 @@ URL = "https://github.com/great-expectations/great-expectations-contrib-cookiecu
 
 
 @click.group()
+@click.pass_context
 def cli(ctx: click.Context) -> None:
     """
     Welcome to the great_expectations_contrib CLI!
