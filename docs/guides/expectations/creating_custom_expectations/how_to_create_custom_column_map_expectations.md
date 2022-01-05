@@ -91,7 +91,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L45
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L46
 ```
 
 with something like:
@@ -100,11 +100,11 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L72
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L73
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L92
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L82
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -133,7 +133,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L30-L63
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L30-L59
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -191,7 +191,7 @@ Next, choose a Metric Identifier for your Metric. By convention, Metric Identifi
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L25
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L26
 ```
 
 with
@@ -201,12 +201,12 @@ with
 
 Second, in the Expectation class, replace
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L53
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L54
 ```
 
 with
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L68
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L63
 ```
 
 It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
@@ -215,7 +215,7 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L22
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L23
 ```
 
 with 
@@ -241,10 +241,10 @@ Congratulations, you now have a minimal working version of a Custom Expectation!
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your PR. For example:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L62-L68
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L63-L69
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L79-L87
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L74-L78
 ```
