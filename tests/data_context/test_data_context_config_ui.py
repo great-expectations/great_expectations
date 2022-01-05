@@ -74,7 +74,6 @@ def construct_data_context_config():
                 "data_context_id": data_context_id,
                 "enabled": True,
             },
-            "concurrency": {"enabled": False},
         }
 
     return _construct_data_context_config
@@ -1341,7 +1340,6 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
             },
         },
         "validations_store_name": "validations_store",
-        "concurrency": {"enabled": False},
     }
 
     data_context_config_schema = DataContextConfigSchema()
