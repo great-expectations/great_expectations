@@ -34,8 +34,11 @@ This grid provides guidelines for how the maintainers of Great Expectations eval
 | Bug risk                                 | High                                 | Moderate                         | Low                                 |
 
 
-* Experimental classes log warning-level messages when initialized: “Warning: great_expectations.some_module.SomeClass is experimental. Methods, APIs, and core behavior may change in the future.”
+:::note
+Experimental classes log warning-level messages when initialized: 
 
+`Warning: great_expectations.some_module.SomeClass is experimental. Methods, APIs, and core behavior may change in the future.`
+:::
 
 ## Contributing Expectations
 
@@ -43,14 +46,14 @@ The workflow detailed in our initial guides on [Creating Custom Expectations](/d
 the first four checks are required for Experimental acceptance, the following three are additionally required for Beta acceptance, and the final three (a full checklist!) are required for Production acceptance. Supplemental guides are available to help you satisfy each of these requirements.
 
 | Criteria                                 | <i class="fas fa-circle" style={{color: "#dc3545"}}></i> Experimental <br/>Try, but do not rely | <i class="fas fa-circle" style={{color: "#ffc107"}}></i> Beta <br/>Ready for early adopters | <i class="fas fa-check-circle" style={{color: "#28a745"}}></i> Production <br/>Ready for general use |
-|------------------------------------------|--------------------------------------|----------------------------------|-------------------------------------|
-| Has a library_metadata object            |<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|
-| Has a docstring, including a one-line short description|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|
-| Has at least one positive and negative example case|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|
-| Has core logic and passes tests on at least one Execution Engine |<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|
-| Has basic input validation and type checking | |<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|
-| Has all four statement Renderers: question, descriptive, prescriptive, diagnostic | |<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|
-| Has core logic that passes tests for all applicable Execution Engines and SQL dialects | |<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|
-| Passes all linting checks | | |<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|
-| Has a full suite of tests, as determined by project code standards | | |<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|
-| Has passed a manual review by a code owner for code standards and style guides | | |<i class="fas fa-check-circle" style={{color: "#28a745"}}></i>|
+|------------------------------------------|:------------------------------------:|:--------------------------------:|:-----------------------------------:|
+| Has a library_metadata object            | &#10004; | &#10004; | &#10004; |
+| Has a docstring, including a one-line short description| &#10004; | &#10004; | &#10004; |
+| Has at least one positive and negative example case| &#10004; | &#10004; | &#10004; |
+| Has core logic and passes tests on at least one Execution Engine | &#10004; | &#10004; | &#10004; |
+| Has basic input validation and type checking | &#8213; | &#10004; | &#10004; |
+| Has all four statement Renderers: question, descriptive, prescriptive, diagnostic | &#8213; | &#10004; | &#10004; |
+| Has core logic that passes tests for all applicable Execution Engines and SQL dialects | &#8213; | &#10004; | &#10004; |
+| Passes all linting checks | &#8213; | &#8213; | &#10004; |
+| Has a full suite of tests, as determined by project code standards | &#8213; | &#8213; | &#10004; |
+| Has passed a manual review by a code owner for code standards and style guides | &#8213; | &#8213; | &#10004; |
