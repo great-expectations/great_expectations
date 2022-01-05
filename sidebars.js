@@ -47,7 +47,6 @@ module.exports = {
               type: 'category',
               label: 'Stores',
               items: [
-                'guides/setup/configuring_metadata_stores/index',
                 {
                   type: 'category',
                   label: 'Expectation Stores',
@@ -76,18 +75,19 @@ module.exports = {
                   items: [
                     'guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore'
                   ]
-                }
+                },
+                'guides/setup/configuring_metadata_stores/index'
               ]
             },
             {
               type: 'category',
               label: 'Data Docs',
               items: [
-                'guides/setup/configuring_data_docs/index',
                 'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem',
                 'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage',
                 'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs',
-                'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3'
+                'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3',
+                'guides/setup/configuring_data_docs/index'
               ]
             }
           ]
