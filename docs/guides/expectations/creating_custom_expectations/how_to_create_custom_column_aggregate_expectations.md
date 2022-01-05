@@ -11,7 +11,7 @@ This guide will walk you through the process of creating your own custom ColumnE
 
 <Prerequisites>
 
-- Read the [overview for creating Custom Expectations](overview).
+- Read the [overview for creating Custom Expectations](overview.md).
 
 </Prerequisites>
 
@@ -20,7 +20,7 @@ This guide will walk you through the process of creating your own custom ColumnE
 #### 1. Choose a name for your Expectation
 
 First, decide on a name for your own Expectation. By convention, `ColumnExpectations` always start with `expect_column_`. 
-For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style#expectations) of the Code Style Guide.
+For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
 
 Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
