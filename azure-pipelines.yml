@@ -272,7 +272,7 @@ stages:
 
           - script: |
               pip install pytest pytest-azurepipelines
-              pytest ---durations=0 -no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+              pytest --durations=0 -no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
             displayName: 'pytest'
 
   - stage: db_integration
