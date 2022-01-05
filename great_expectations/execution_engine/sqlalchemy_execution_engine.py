@@ -502,7 +502,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     domain_kwargs["row_condition"]
                 )
                 selectable = (
-                    sa.select(sa.text("*"))
+                    sa.select([sa.text("*")])
                     .select_from(selectable)
                     .where(parsed_condition)
                 )

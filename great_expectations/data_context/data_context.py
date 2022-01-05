@@ -78,6 +78,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     DatasourceConfig,
     GeCloudConfig,
+    ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
@@ -823,6 +824,10 @@ class BaseDataContext:
     @property
     def concurrency(self) -> Optional[ConcurrencyConfig]:
         return self.project_config_with_variables_substituted.concurrency
+
+    @property
+    def progress_bars(self) -> Optional[ProgressBarsConfig]:
+        return self.project_config_with_variables_substituted.progress_bars
 
     @property
     def notebooks(self):
