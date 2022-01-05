@@ -143,7 +143,7 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 * `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
 	* `include_in_gallery`: set it to `True` if you want this test case to be visible in the Gallery as an example.
-	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mostly_threes", "mostly": 0.6}` in the example above is equivalent to `expect_column_values_to_equal_three(column="mostly_threes, mostly=0.6)`
+	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mostly_threes", "mostly": 0.6}` in the example above is equivalent to `expect_column_values_to_equal_three(column=mostly_threes, mostly=0.6)`
 	* `out` is based on the Validation Result returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
@@ -182,7 +182,7 @@ This is all that you need to define for now. The `ColumnMapMetricProvider` and `
 An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class):
     </p>
     <p>
-        <b>Metric Condition Value Keys</b> (Optional) - Contains any the additional arguments passed as parameters to compute the Metric.
+        <b>Metric Condition Value Keys</b> (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
     </p>
   </div>
 </details>
