@@ -37,7 +37,6 @@ datasource_config = {
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
 context.test_yaml_config(yaml.dump(datasource_config))
-
 context.add_datasource(**datasource_config)
 
 # Test for RuntimeBatchRequest using a query. bigquery_temp_table name is passed in as batch_spec_passthrough
