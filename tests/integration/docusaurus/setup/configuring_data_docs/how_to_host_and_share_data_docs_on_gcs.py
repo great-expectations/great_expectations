@@ -162,7 +162,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 build_data_docs_command = """
-great_expectations --v3-api docs build --site-name gs_site
+great_expectations docs build --site-name gs_site
 """
 
 result = subprocess.Popen(
