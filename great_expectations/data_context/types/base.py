@@ -1198,12 +1198,15 @@ class DataContextConfigSchema(Schema):
     progress_bars = fields.Nested(
         ProgressBarsConfigSchema, required=False, allow_none=True
     )
-    concurrency = fields.Nested(ConcurrencyConfigSchema)
+    concurrency = fields.Nested(
+        ConcurrencyConfigSchema, required=False, allow_none=True
+    )
 
     # To ensure backwards compatability, we need to ensure that new options are "opt-in"
     # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook
     REMOVE_KEYS_IF_NONE = [
-        "progress_bars",  # 0.13.46
+        "concurrency",  # 0.13.33
+        "progress_bars",  # 0.13.49
     ]
 
     @post_dump
@@ -1214,8 +1217,6 @@ class DataContextConfigSchema(Schema):
                 data.pop(key)
         return data
 
-    # noinspection PyMethodMayBeStatic
-    # noinspection PyUnusedLocal
     def handle_error(self, exc, data, **kwargs):
         """Log and raise our custom exception when (de)serialization fails."""
         if (
@@ -1869,11 +1870,9 @@ class DataContextConfig(BaseYamlConfig):
                 **anonymous_usage_statistics
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
-        if concurrency is None:
-            concurrency = ConcurrencyConfig()
-        elif isinstance(concurrency, dict):
+        if isinstance(concurrency, dict):
             concurrency = ConcurrencyConfig(**concurrency)
-        self.concurrency: ConcurrencyConfig = concurrency
+        self.concurrency = concurrency
         self.progress_bars = progress_bars
 
         super().__init__(commented_map=commented_map)
