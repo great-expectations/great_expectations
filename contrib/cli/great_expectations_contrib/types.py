@@ -1,7 +1,11 @@
+import inspect
 import json
+import os
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import List, Optional
+from typing import Any, List, Optional
+
+from great_expectations.expectations.expectation import Expectation
 
 
 @dataclass
@@ -111,3 +115,51 @@ class GreatExpectationsContribPackage:
 
     def _determine_metadata(self) -> None:
         pass
+
+    # def main():
+    #     package = _identify_user_package()
+    #     expectations_module = _import_expectations_module(package)
+    #     expectations = _retrieve_expectations_from_module(expectations_module)
+    #     diagnostics = _gather_diagnostics(expectations)
+
+    def _identify_user_package(self):
+        packages = [d for d in os.listdir() if os.path.isdir(d) and "expectations" in d]
+        if len(packages) == 0:
+            pass
+        elif len(packages) > 1:
+            pass
+
+        package = packages[0]
+        return package
+
+    def _import_expectations_module(self, package: str) -> Any:
+        try:
+            expectations_module = __import__(f"{package}.expectations")
+        except ImportError:
+            print(f"Could not import user expectations")
+            raise
+
+        return expectations_module
+
+    def _retrieve_expectations_from_module(
+        self, expectations_module: Any
+    ) -> List[Expectation]:
+        expectations = []
+        names = []
+        for name, obj in inspect.getmembers(expectations_module):
+            if inspect.isclass(obj) and name.endswith(
+                "Expectation"
+            ):  # Maybe use 'isinstance'?
+                expectations.append(obj)
+                names.append(name)
+
+        print(f"Found {len(names)} expectation(s): {names}")
+        return expectations
+
+    def _gather_diagnostics(self, expectations: List[Expectation]) -> List[dict]:
+        diagnostics_list = []
+        for expectation in expectations:
+            instance = expectation()
+            diagnostics = instance.run_diagnostics()
+            diagnostics_list.append(diagnostics)
+        return diagnostics_list
