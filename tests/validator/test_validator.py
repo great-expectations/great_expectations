@@ -1041,7 +1041,7 @@ def test_validate_expectation(multi_batch_taxi_validator):
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
-    
+
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 @mock.patch("great_expectations.validator.validation_graph.ValidationGraph")
 @mock.patch("great_expectations.validator.validator.tqdm")
@@ -1078,4 +1078,3 @@ def test_validator_progress_bar_config_disabled(
 
     assert mock_tqdm.called is True
     assert mock_tqdm.call_args[1]["disable"] is True
-
