@@ -71,12 +71,12 @@ Steps
    upload: uncommitted/validations/val2/val2.json to s3://'<your_s3_bucket_name>'/'<your_s3_bucket_folder_name>'/val2.json
    ```
 
-5. **Confirm that the new Validations store has been added by running** ``great_expectations --v3-api store list`` **.**
+5. **Confirm that the new Validations store has been added by running** ``great_expectations store list`` **.**
 
     Notice the output contains two Validations Stores: the original ``validations_store`` on the local filesystem and the ``validations_S3_store`` we just configured.  This is ok, since Great Expectations will look for Validation results on the S3 bucket as long as we set the ``validations_store_name`` variable to ``validations_S3_store``.
 
    ```bash
-   great_expectations --v3-api store list
+   great_expectations store list
 
    - name: validations_store
      class_name: ValidationsStore
