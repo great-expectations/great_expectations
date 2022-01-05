@@ -111,20 +111,3 @@ class GreatExpectationsContribPackage:
 
     def _determine_metadata(self) -> None:
         pass
-
-
-# Just testing serialization/deserialization
-pkg = GreatExpectationsContribPackage(
-    package_name="my_package",
-    icon="my_icon",
-    description="my_description",
-    expectations=[],
-    expectation_count=0,
-    dependencies=[],
-    maturity=Maturity.CONCEPT_ONLY,
-    status=PackageCompletenessStatus(0, 0, 0, 0, 0),
-    owners=[],
-    contributors=[],
-    domain_experts=[],
-    version="",
-)
