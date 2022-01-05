@@ -11,7 +11,7 @@ Let’s set up our first Checkpoint! **Go back to your terminal** and shut down 
 
 
 ```console
-great_expectations --v3-api checkpoint new getting_started_checkpoint
+great_expectations checkpoint new getting_started_checkpoint
 ```
 
 This will open a **Jupyter Notebook** that will allow you to complete the configuration of your Checkpoint.

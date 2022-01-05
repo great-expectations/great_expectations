@@ -18,7 +18,7 @@ In this tutorial, you will develop hands-on experience with configuring a Rule-B
 ### 1. Create a new Great Expectations project
 - Create a new directory, called `taxi_profiling_tutorial`
 - Within this directory, create another directory called `data`
-- Navigate to the top level of `taxi_profiling_tutorial` in a terminal and run `great_expectations --v3-api init`
+- Navigate to the top level of `taxi_profiling_tutorial` in a terminal and run `great_expectations init`
 
 ### 2. Download the data
 - Download [this directory](https://github.com/great-expectations/great_expectations/tree/develop/tests/test_sets/taxi_yellow_tripdata_samples) of yellow taxi trip `csv` files from the Great Expectations GitHub repo. You can use a tool like [DownGit](https://downgit.github.io/) to do so
