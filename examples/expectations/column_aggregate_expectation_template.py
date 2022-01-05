@@ -53,7 +53,7 @@ class ExpectColumnAggregateToMatchSomeCriteria(ColumnExpectation):
     examples = []
 
     # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
-    metric_dependencies = "METRIC NAME GOES HERE"
+    metric_dependencies = ("METRIC NAME GOES HERE",)
 
     # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
@@ -71,9 +71,9 @@ class ExpectColumnAggregateToMatchSomeCriteria(ColumnExpectation):
     ):
         raise NotImplementedError
 
-    # This dictionary contains metadata for display in the public gallery
+    # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "maturity": "concept_only",  # "concept_only, "experimental", "beta", or "production"
+        "maturity": "concept_only",  # "concept_only", "experimental", "beta", or "production"
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@your_name_here",  # Don't forget to add your github handle here!

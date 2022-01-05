@@ -107,102 +107,165 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L97
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L139
 ```
 
-:::warning Under Construction:::
+Later, you can go back and write a more thorough docstring.
 
-Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Metrics](../../../reference/metrics.md).
+At this point you can re-run your diagnostic checklist. You should see something like this:
+```
+$ python expect_column_max_to_be_between_custom.py
 
-If your Metric does not yet exist within the framework, you will need to implement it yourself in a new class - a task that is quick and simple within the new modular framework. The convention is to implement a new Metric Provider (a class that can compute a metric) that your Expectation depends on in the same file as the Expectation itself.
+Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
+  ✔ Has a library_metadata object
+  ✔ Has a docstring, including a one-line short description
+    Has at least one positive and negative example case
+    Has core logic and passes tests on at least one Execution Engine
+...
+```
 
-The parent class expects the variable `metric_name` to be set. Change the value of `metric_name` to something that fits your Metric. Follow these two naming conventions:
+Congratulations! You're one step closer to implementing a Custom Expectation.
 
-* The name should start with `column.`, because it is a column Metric
-* The second part of the name (after the `.`) should be in snake_case format
+#### 5. Add example cases
 
-The parent class of your Metric Provider class is `ColumnMetricProvider`. It uses Python Decorators to hide most of the complexity from you, and give you a clear and simple API to implement one method per backend that computes the metric.
-Implement the computation of the metric in your new Metric Provider class for at least one of the three backends ([**Execution Engines**](../../../reference/execution_engine.md)) that Great Expectations supports: Pandas, SQLAlchemy, and Spark.
+Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
 
-Here is the implementation of our example metric for Pandas:
+1. They provide test fixtures that Great Expectations can execute automatically via pytest.
+2. They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery.
+
+your examples will look something like this:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L44-L76
+```
+
+Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
+
+* `data`: defines the input data of the example as a table/data frame. In this example the table has one column named `x` and a second column named `y`. Both columns have 5 rows. (Note: if you define multiple columns, make sure that they have the same number of rows.)
+
+* `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
+	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
+	* `include_in_gallery`: set it to `True` if you want this test case to be visible in the Gallery as an example.
+	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "x", "min_value": 4, "strict_min": True}` in the example above is equivalent to `expect_column_max_to_be_between_custom(column="x", min_value=4, strict_min=True)`
+	* `out` is based on the Validation Result returned when executing the Expectation.
+	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
 
 
-This means that the method `_pandas` is a metric function that is decorated as a `column_aggregate_value`. It will be called with the engine-specific column type. It must return a value that is computed over this column. 
-The `engine` argument of `column_aggregate_value` is set to `PandasExecutionEngine` to signal to the method in the parent class that this method computes the Metric for the Pandas backend.
+Run your Expectation file again. The newly added examples won't pass as tests yet, because the Expectation itself hasn't been implemented yet, but they'll check the box for example cases.
 
-:::note
-If you have never used Python Decorators and don’t know what they are and how they work, no worries - this should not stop you from successfully implementing your Expectation. Decorators allow the parent class to “wrap” your methods, which means to execute some code before and after your method runs. All you need to know is the name of the Decorator to add (with “@”) above your method definition.
-:::
+```
+$ python expect_column_column_max_to_be_between_custom.py
 
-Below lies the full implementation of an aggregate metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark Dialects.
+Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
+  ✔ Has a library_metadata object
+  ✔ Has a docstring, including a one-line short description
+  ✔ Has at least one positive and negative example case
+    Has core logic and passes tests on at least one Execution Engine
+```
+#### 6. Implement your Metric and connect it to your Expectation
 
+This is the stage where you implement the actual business logic for your `Expectation`. To do so, you'll need to implement a function within a [**Metric**](/docs/reference/metrics.md) class, and link it to your `Expectation`. By the time your Expectation is complete, your Metric will have functions for all three Execution Engines supported by Great Expectations. For now, we're only going to define one.
 
+Your Metric function will have the `@column_aggregate_value` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate the max of a column using the PandasExecutionEngine.
 
-#### 3. Define Parameters
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L24-L27
+```
 
-The structure of a Modular Expectation now exists within its own specialized class. This structure has 3 fundamental components: Metric Dependencies, Configuration Validation, and Expectation Validation. In this step, we will address setting up our parameters.
+This is all that you need to define for now. 
+The `ColumnMetricProvider` and `ColumnExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
 
-In this guide, we're focusing on a `ColumnExpectation`, which can define metric dependencies simply using the metric_dependencies property.
-
-Add the following attributes to your Expectation class:
-
-* **Metric Dependencies** - A tuple consisting of the names of all metrics necessary to evaluate the Expectation. Using this shortcut tuple will provide the dependent metric with the same domain kwargs and value kwargs as the Expectation.
-
-* **Success Keys** - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
-
-* **Default Kwarg Values** (Optional) - Default values for success keys and the defined domain, among other values.
-
+<details>
+  <summary>Other parameters</summary>
+  <div>
+    <p>
+        <b>Expectation Success Keys</b> - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
+    </p>
+    <p>
+        <b>Expectation Default Kwarg Values</b> (Optional) - Default values for success keys and the defined domain, among other values.
 An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class):
+    </p>
+    <p>
+        <b>Metric Condition Value Keys</b> (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
+    </p>
+  </div>
+</details>
 
+Next, choose a Metric Identifier for your Metric. By convention, Metric Identifiers for Column Map Expectations start with `column.`. 
+The remainder of the Metric Identifier simply describes what the Metric compute, in snake case. For this example, we'll use `column.custom_max`.
 
+You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-#### 4. Validate Configuration
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L29
+```
 
-We have almost reached the end of our journey in implementing an Expectation! 
-Now, if we have requested certain parameters from the user, we would like to validate that the user has entered them correctly via a `validate_configuration` method, and raise an error if the Expectation has been incorrectly configured.
+with
 
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L22
+```
 
+Second, in the Expectation class, replace
 
-In this method, the user provides a configuration, and we check that certain conditions are satisfied by the configuration. We need to verify that the basic configuration parameters are set:
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L56
+```
 
+with
 
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L79
+```
 
-And validate optional configuration parameters. For example, if the user has given us a minimum and maximum threshold, it is important to verify that our minimum threshold does not exceed our maximum threshold:
+It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
 
+Finally, rename the Metric class name itself, using the camel case version of the Metric Identifier, minus any periods.
 
-#### 5. Validate
+For example, replace:
+
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L26
+```
+
+with 
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L19
+```
+
+#### 7. Validate
 
 In this step, we simply need to validate that the results of our Metrics meet our Expectation.
 
-The validate method is implemented as `_validate`. 
+The validate method is implemented as `_validate`:
+
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L64-L71
+```
+
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
-and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not:
+and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not.
 
+To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
+For example, here is the definition of a `_validate` method to validate the results of our `column.custom_max` Metric against our success keys:
 
-You have now implemented your own Custom Expectation! For more information about Expectations and Metrics, please reference the [Core Concepts](../../../reference/core_concepts.md) documentation.
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L93-L128
+```
 
-:::note
-To use a custom Expectation, you need to ensure it has been placed into your `plugins/` directory and imported into the running Python interpreter.
-:::
+Running your diagnostic checklist at this point should return something like this:
+```
+$ python expect_column_max_to_be_between_custom.py
 
-## Next Steps
+Completeness checklist for ExpectColumnMaxToBeBetweenCustom:
+  ✔ Has a library_metadata object
+  ✔ Has a docstring, including a one-line short description
+  ✔ Has at least one positive and negative example case
+  ✔ Has core logic and passes tests on at least one Execution Engine
+...
+```
 
-When developing an Expectation, we highly encourage the writing of tests and implementation of renderers to verify that the Expectation works as intended and is providing the best possible results in your Data Docs.
-If you plan on contributing your Custom Expectation into the `contrib` library of Great Expectations, there are certain baseline requirements that must be met with regard to backend implementation, renderer implementation, and testing.
+Congratulations, you now have a minimal working version of a Custom Expectation!
 
-Great Expectations provides templates to get you started on developing Custom Expectations for contribution, including renderers & test cases. The ColumnExpectation template can be found [here](../../../../examples/expectations/column_aggregate_expectation_template.py).
+#### 8. Update `library_metadata` (Optional)
 
-:::caution Under Construction
-Please see the following documentation for more on:
-* Maturity Levels
-* Creating Example Cases & Tests For Custom Expectations
-* Implementing Renderers For Custom Expectations
-* Contributing Expectations To Great Expectations
-:::
+If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your PR. For example:
 
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L75-L81
+```
 
-In the new Modular Expectation design, Expectations rely on [**Metrics**](../../../reference/metrics.md) defined by separate MetricProvider Classes, which are then referenced within the Expectation and used for computation. For more on Metric naming conventions, see our guide [here](../../../reference/metrics.md#metrics-naming-conventions).
+would become
 
-Once you’ve decided on an Expectation to implement, think of the different aggregations, mappings, or metadata you’ll need to validate your data within the Expectation - each of these will be a separate Metric that must be implemented prior to validating your Expectation.
-
-Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is possible you will find that the Metric you’d like to implement already exists within the Great Expectations framework and can be readily deployed. If so, you can skip to [Step 3](#3-define-parameters)!
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L131-L135
+```

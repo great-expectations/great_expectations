@@ -19,7 +19,7 @@ from great_expectations.expectations.metrics.import_manager import F, sa
 class ColumnCustomMax(ColumnMetricProvider):
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
 
-    metric_name = "column.aggregate.custom.max"
+    metric_name = "column.custom_max"
 
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
@@ -40,8 +40,43 @@ class ColumnCustomMax(ColumnMetricProvider):
 class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
     """Expect column max to be between a given range."""
 
+    # Defining test cases
+    examples = [
+        {
+            "data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
+            "tests": [
+                {
+                    "title": "positive_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "x",
+                        "min_value": 4,
+                        "strict_min": True,
+                        "max_value": 5,
+                        "strict_max": False,
+                    },
+                    "out": {"success": True},
+                },
+                {
+                    "title": "negative_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "y",
+                        "min_value": -2,
+                        "strict_min": False,
+                        "max_value": 3,
+                        "strict_max": True,
+                    },
+                    "out": {"success": False},
+                },
+            ],
+        }
+    ]
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
-    metric_dependencies = ("column.aggregate.custom.max",)
+    metric_dependencies = ("column.custom_max",)
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
     # Default values
@@ -63,7 +98,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         execution_engine: ExecutionEngine = None,
     ):
         """Validates the given data against the set minimum and maximum value thresholds for the column max"""
-        column_max = metrics["column.aggregate.custom.max"]
+        column_max = metrics["column.custom_max"]
 
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
@@ -91,6 +126,13 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         success = above_min and below_max
 
         return {"success": success, "result": {"observed_value": column_max}}
+
+    # This dictionary contains metadata for display in the public gallery
+    library_metadata = {
+        "maturity": "experimental",
+        "tags": ["flexible max comparisons"],
+        "contributors": ["@joegargery"],
+    }
 
 
 if __name__ == "__main__":
