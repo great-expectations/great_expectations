@@ -27,20 +27,20 @@ module.exports = {
               type: 'category',
               label: 'Installation',
               items: [
-                'guides/setup/installation/index',
                 'guides/setup/installation/local',
-                'guides/setup/installation/hosted_environment'
+                'guides/setup/installation/hosted_environment',
+                'guides/setup/installation/index'
               ]
             },
             {
               type: 'category',
               label: 'Data Contexts',
               items: [
-                'guides/setup/configuring_data_contexts/index',
                 'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
                 'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
                 'guides/setup/configuring_data_contexts/how_to_configure_credentials',
-                'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file'
+                'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file',
+                'guides/setup/configuring_data_contexts/index'
               ]
             },
             {
