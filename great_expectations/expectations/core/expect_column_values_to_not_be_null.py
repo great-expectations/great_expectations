@@ -73,6 +73,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     }
 
     map_metric = "column_values.nonnull"
+    args_keys = ("column",)
 
     @classmethod
     def _atomic_prescriptive_template(
