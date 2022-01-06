@@ -69,9 +69,19 @@ def checkpoint(ctx):
     A Checkpoint can be as complex as many batches of data across different
     datasources paired with one or more Expectation Suites each.
     """
+    directory: str = toolkit.parse_cli_config_file_location(
+        config_file_location=ctx.obj.config_file_location
+    ).get("directory")
+    context: DataContext = toolkit.load_data_context_with_error_handling(
+        directory=directory,
+        from_cli_upgrade_command=False,
+    )
+    # TODO consider moving this all the way up in to the CLIState constructor
+    ctx.obj.data_context = context
+
     usage_stats_prefix = f"cli.checkpoint.{ctx.invoked_subcommand}"
     send_usage_message(
-        data_context=ctx.obj.data_context,
+        data_context=context,
         event=f"{usage_stats_prefix}.begin",
         success=True,
     )

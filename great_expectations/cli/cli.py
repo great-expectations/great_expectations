@@ -8,7 +8,6 @@ from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.pretty_printing import cli_message
-from great_expectations.cli import toolkit
 
 try:
     from colorama import init as init_colorama
@@ -23,23 +22,13 @@ class CLIState:
         self,
         v3_api: bool = True,
         config_file_location: Optional[str] = None,
-        data_context: Optional[DataContext] = None,
+        data_context: DataContext = None,
         assume_yes: bool = False,
     ):
         self.v3_api = v3_api
         self.config_file_location = config_file_location
         self._data_context = data_context
         self.assume_yes = assume_yes
-
-    def get_data_context_from_config_file(self) -> DataContext:
-        directory: str = toolkit.parse_cli_config_file_location(
-            config_file_location=self.config_file_location
-        ).get("directory")
-        context: DataContext = toolkit.load_data_context_with_error_handling(
-            directory=directory,
-            from_cli_upgrade_command=False,
-        )
-        return context
 
     @property
     def data_context(self):
