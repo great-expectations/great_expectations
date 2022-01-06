@@ -36,17 +36,22 @@ class CLIState:
         self.assume_yes = assume_yes
 
         if self.data_context is None:
-            self.data_context = self._get_data_context_from_config_file()
+            context: Optional[DataContext] = self._get_data_context_from_config_file()
+            if context is not None:
+                self.data_context = context
 
-    def _get_data_context_from_config_file(self) -> DataContext:
+    def _get_data_context_from_config_file(self) -> Optional[DataContext]:
         directory: str = toolkit.parse_cli_config_file_location(
             config_file_location=self.config_file_location
         ).get("directory")
-        context: DataContext = toolkit.load_data_context_with_error_handling(
+
+        if not directory:
+            return None
+
+        return toolkit.load_data_context_with_error_handling(
             directory=directory,
             from_cli_upgrade_command=False,
         )
-        return context
 
     @property
     def data_context(self):
