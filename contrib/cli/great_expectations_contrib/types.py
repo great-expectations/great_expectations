@@ -136,7 +136,9 @@ class GreatExpectationsContribPackage:
         # If config file isn't found, create a blank JSON and write to disk
         if not os.path.exists(cls.config_file):
             instance = cls()
-            logger.info(f"Could not find existing package JSON; instantiated a new one")
+            logger.debug(
+                f"Could not find existing package JSON; instantiated a new one"
+            )
             return instance
 
         with open(cls.config_file) as f:
@@ -157,6 +159,7 @@ class GreatExpectationsContribPackage:
 
     def _update_attrs_with_diagnostics(self, diagnostics: List[Diagnostics]) -> None:
         # TODO: Write logic to assign values to attrs
+        # This is a black box for now (don't have the full context just yet)
         for diagnostic in diagnostics:
             pass
 
@@ -179,10 +182,10 @@ class GreatExpectationsContribPackage:
         ]
 
         if len(packages) == 0:
-            logger.info("Could not find a user-defined package")
+            logger.debug("Could not find a user-defined package")
             return ""
         elif len(packages) > 1:
-            logger.info("Found multiple user-defined packages")
+            logger.debug("Found multiple user-defined packages")
             return ""
 
         return packages[0]
@@ -195,7 +198,7 @@ class GreatExpectationsContribPackage:
             expectations_module = importlib.import_module(f"{package}.expectations")
             return expectations_module
         except ModuleNotFoundError as e:
-            logger.info(f"Could not import user expectations: {e}")
+            logger.debug(f"Could not import user expectations: {e}")
             return None
 
     def _retrieve_expectations_from_module(
