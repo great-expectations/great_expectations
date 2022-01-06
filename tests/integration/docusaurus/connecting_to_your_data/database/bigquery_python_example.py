@@ -28,7 +28,7 @@ datasource_config = {
         },
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetSqlDataConnector",
-            "name": "whole_table",
+            "name": "WHOLE",
         },
     },
 }

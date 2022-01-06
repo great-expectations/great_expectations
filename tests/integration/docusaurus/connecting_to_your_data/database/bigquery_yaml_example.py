@@ -27,7 +27,7 @@ data_connectors:
            - default_identifier_name
    default_inferred_data_connector_name:
        class_name: InferredAssetSqlDataConnector
-       name: whole_table
+       name: WHOLE
 """
 
 # Please note this override is only to provide good UX for docs and tests.
