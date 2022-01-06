@@ -40,12 +40,13 @@ def parse_definition_nodes_from_source_code(directory: str) -> Dict[str, Set[str
     """
     definition_map: Dict[str, Set[str]] = {}
     for file in glob.glob(f"{directory}/**/*.py", recursive=True):
-        file_definition_map = _parse_definition_nodes_from_file(file)
+        file_definition_map = parse_definition_nodes_from_file(file)
         _update_dict(definition_map, file_definition_map)
     return definition_map
 
 
-def _parse_definition_nodes_from_file(file: str) -> Dict[str, Set[str]]:
+def parse_definition_nodes_from_file(file: str) -> Dict[str, Set[str]]:
+    """See `parse_definition_nodes_from_source_code`"""
     with open(file) as f:
         root = ast.parse(f.read(), file)
 
@@ -78,7 +79,7 @@ def _update_dict(A: Dict[str, Set[str]], B: Dict[str, Set[str]]) -> None:
             A[key] = {v for v in val}
 
 
-def find_docusaurus_refs(directory: str) -> List[str]:
+def find_docusaurus_refs_in_docs(directory: str) -> List[str]:
     """Finds any Docusaurus links within a target directory (i.e. ```python file=...#L10-20)
 
     Args:
@@ -89,30 +90,39 @@ def find_docusaurus_refs(directory: str) -> List[str]:
 
     """
     linked_files: Set[str] = set()
-    pattern: str = (
-        r"```python file=([\.\/l\w]+)"  # Format of internal links used by Docusaurus
-    )
-
-    r = re.compile(pattern)
 
     for doc in glob.glob(f"{directory}/**/*.md", recursive=True):
-        with open(doc) as f:
-            contents = f.read()
+        file_refs = find_docusaurus_refs_in_file(doc)
+        linked_files.update(file_refs)
 
-        logger.debug(f"Reviewing {doc} for Docusaurus links")
+    return sorted(linked_files)
 
-        matches = r.findall(contents)
-        if not matches:
-            logger.info(f"Could not find any Docusaurs links in {doc}")
-        for match in matches:
-            path: str = os.path.join(os.path.dirname(doc), match)
-            # only interested in looking at .py files for now (excludes .yml files)
-            if path[-3:] == ".py":
-                linked_files.add(path)
-            else:
-                logger.info(f"Excluding {path} due to not being *.py file")
 
-    return [file for file in linked_files]
+def find_docusaurus_refs_in_file(file: str) -> Set[str]:
+    """See `find_docusaurus_refs_in_docs`"""
+    with open(file) as f:
+        contents = f.read()
+
+    logger.debug(f"Reviewing {file} for Docusaurus links")
+
+    file_refs: Set[str] = set()
+
+    # Format of internal links used by Docusaurus
+    r = re.compile(r"```python file=([\.\/l\w]+)")
+    matches = r.findall(contents)
+    if not matches:
+        logger.info(f"Could not find any Docusaurs links in {file}")
+        return file_refs
+
+    for match in matches:
+        path: str = os.path.join(os.path.dirname(file), match)
+        # only interested in looking at .py files for now (excludes .yml files)
+        if path[-3:] == ".py":
+            file_refs.add(path)
+        else:
+            logger.info(f"Excluding {path} due to not being a .py file")
+
+    return file_refs
 
 
 def determine_relevant_source_files(
@@ -130,7 +140,7 @@ def determine_relevant_source_files(
     """
     relevant_source_files = set()
     for file in files:
-        symbols = _retrieve_symbols_from_file(file)
+        symbols = retrieve_symbols_from_file(file)
         for symbol in symbols:
             paths = definition_map.get(symbol, set())
             relevant_source_files.update(paths)
@@ -138,7 +148,8 @@ def determine_relevant_source_files(
     return sorted(relevant_source_files)
 
 
-def _retrieve_symbols_from_file(file: str) -> Set[str]:
+def retrieve_symbols_from_file(file: str) -> Set[str]:
+    """See `retrieve_symbols_from_file`"""
     with open(file) as f:
         root = ast.parse(f.read(), file)
 
@@ -159,7 +170,7 @@ def _retrieve_symbols_from_file(file: str) -> Set[str]:
 
 def main() -> None:
     definition_map = parse_definition_nodes_from_source_code("great_expectations")
-    files_referenced_in_docs = find_docusaurus_refs("docs")
+    files_referenced_in_docs = find_docusaurus_refs_in_docs("docs")
     paths = determine_relevant_source_files(files_referenced_in_docs, definition_map)
     for path in paths:
         print(path)
