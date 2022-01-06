@@ -11,7 +11,7 @@ stages:
 
         strategy:
           matrix:
-            performance:
+#            performance:
 #              test_script: 'tests/performance/test_bigquery_benchmarks.py'
 #              extra_args: '--bigquery --performance-tests --no-spark --no-postgresql --benchmark-json=junit/benchmark.json -k test_taxi_trips_benchmark[1-True] '
             expectations_cfe:
