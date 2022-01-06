@@ -70,7 +70,6 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         "like_pattern_list",
         "mostly",
     )
-
     default_kwarg_values = {
         "like_pattern_list": None,
         "row_condition": None,
@@ -80,6 +79,10 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": True,
     }
+    args_keys = (
+        "column",
+        "like_pattern_list",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
