@@ -35,7 +35,7 @@ class CLIState:
         self._data_context = data_context
         self.assume_yes = assume_yes
 
-        if self.data_context is None:
+        if self.data_context is None and config_file_location is not None:
             self.data_context = self._get_data_context_from_config_file()
 
     def _get_data_context_from_config_file(self) -> DataContext:
