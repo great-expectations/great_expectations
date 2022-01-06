@@ -31,7 +31,7 @@ import glob
 import os
 import re
 import sys
-from typing import List, Set
+from typing import List, Set, Union
 
 
 def find_docusaurus_refs(dir: str) -> List[str]:
@@ -45,6 +45,8 @@ def find_docusaurus_refs(dir: str) -> List[str]:
         for line in open(doc):
             if re.search(pattern, line):
                 file: str = _parse_file_from_docusaurus_link(line)
+                if not file:
+                    continue
                 path: str = os.path.join(os.path.dirname(doc), file)
                 # only interested in looking at .py files for now (excludes .yml files)
                 if path[-3:] == ".py":
@@ -55,8 +57,10 @@ def find_docusaurus_refs(dir: str) -> List[str]:
 
 def _parse_file_from_docusaurus_link(line: str) -> str:
     pattern: str = "=(.+?)#"  # Parse just the path from the Docusaurus link
-    search: re.Match[str] = re.search(pattern, line)
-    return search.group(1)
+    search: Union[re.Match[str], None] = re.search(pattern, line)
+    if search:
+        return search.group(1)
+    return ""
 
 
 def get_local_imports(files: List[str]) -> List[str]:
