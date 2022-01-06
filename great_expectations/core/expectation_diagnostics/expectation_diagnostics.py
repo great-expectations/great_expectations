@@ -222,14 +222,17 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _convert_checks_into_output_message(
-        class_name: str,
-        maturity_messages: ExpectationDiagnosticMaturityMessages
+        class_name: str, maturity_messages: ExpectationDiagnosticMaturityMessages
     ) -> str:
         """Converts a list of checks into an output string (potentially nested), with ✔ to indicate checks that passed."""
 
         output_message = f"Completeness checklist for {class_name}:"
 
-        checks = maturity_messages.experimental + maturity_messages.beta + maturity_messages.production
+        checks = (
+            maturity_messages.experimental
+            + maturity_messages.beta
+            + maturity_messages.production
+        )
 
         for check in checks:
             if check["passed"]:

@@ -114,7 +114,7 @@ def test_ExpectationDiagnosticReport():
 
 def test__convert_checks_into_output_message():
     checks = ExpectationDiagnosticMaturityMessages(
-        experimental= [
+        experimental=[
             ExpectationDiagnosticCheckMessage(
                 message="AAA",
                 passed=True,
@@ -124,8 +124,8 @@ def test__convert_checks_into_output_message():
                 passed=False,
             ),
         ],
-        beta = [],
-        production= [
+        beta=[],
+        production=[
             ExpectationDiagnosticCheckMessage(
                 message="CCC",
                 passed=False,
@@ -140,7 +140,7 @@ def test__convert_checks_into_output_message():
                     ),
                 ],
             ),
-        ]
+        ],
     )
 
     assert (

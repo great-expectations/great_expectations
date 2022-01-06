@@ -2,7 +2,7 @@ import inspect
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -33,6 +33,7 @@ class Package:
     text: str
     link: str
     version: Optional[str]
+
 
 @dataclass
 class AugmentedLibraryMetadata(SerializableDictDot):
@@ -181,4 +182,3 @@ class ExpectationDiagnosticMaturityMessages(SerializableDictDot):
     experimental: List[ExpectationDiagnosticCheckMessage]
     beta: List[ExpectationDiagnosticCheckMessage]
     production: List[ExpectationDiagnosticCheckMessage]
-
