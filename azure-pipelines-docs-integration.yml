@@ -52,8 +52,9 @@ stages:
                 tests/integration/fixtures/**
                 tests/test_sets/**
 
+          - bash: echo "0"
 #          - bash: ./scripts/check_for_docs_deps_changes
-#            name: CheckDocsDependenciesChanges
+            name: CheckDocsDependenciesChanges
 
   - stage: custom_checks
     pool:
