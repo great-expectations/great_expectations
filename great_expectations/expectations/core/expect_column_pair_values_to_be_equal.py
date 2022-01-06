@@ -61,7 +61,6 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "ignore_row_if",
         "mostly",
     )
-
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -71,6 +70,10 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column_A",
+        "column_B",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
