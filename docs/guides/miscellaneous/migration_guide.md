@@ -187,6 +187,12 @@ Migrating Datasource configurations that contain connections to the cloud or dat
 
 In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature, which allowed Checkpoints to utilize features the V3 API. As a result, Checkpoints are now able to [filter and sort batches from configured datasources](/docs/guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource), [introspect and partition tables as batches](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql), with multi-batch Expectations soon to come.  As part of these design improvements, Validation Operators (originally located in the `great_expectations.yml` file) were combined into the Checkpoint configuration itself as `action_list` items.
 
+:::note Note on V3 Checkpoints and Validation Operators
+
+  In V2, you were able to run Validation Operators directly from the DataContext, but in V3 the functionality has been migrated to the action_list field in Checkpoints. This change offers a convenient abstraction for running Validations and ensures that all actions associated with running validations are included in one place, rather than split up between the great_expectations.yml file and Checkpoint configuration. 
+
+:::
+
 The example below demonstrates how a V2 to V3 migration can be performed for an existing V2  Checkpoint.
 
 The example V2-style Checkpoint contains:
