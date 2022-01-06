@@ -29,13 +29,12 @@ class DataContext(BaseDataContext):
     definition_map = parse_definition_nodes_from_file(f)
     pprint.pprint(definition_map)
 
+    # Only parses from global scope
     assert all(
         symbol in definition_map
         for symbol in (
             "test_yaml_config",
             "DataContext",
-            "add_store",
-            "find_context_root_dir",
         )
     )
     assert all(len(paths) == 1 and f in paths for paths in definition_map.values())
