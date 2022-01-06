@@ -14,12 +14,12 @@ stages:
             performance:
               test_script: 'tests/performance/test_bigquery_benchmarks.py'
               extra_args: '--bigquery --performance-tests --no-spark --no-postgresql --benchmark-json=junit/benchmark.json -k test_taxi_trips_benchmark[1-True] '
-            expectations_cfe:
-              test_script: 'tests/test_definitions/test_expectations_cfe.py'
-              extra_args: ''
-            expectations:
-              test_script: 'tests/test_definitions/test_expectations.py'
-              extra_args: ''
+#            expectations_cfe:
+#              test_script: 'tests/test_definitions/test_expectations_cfe.py'
+#              extra_args: ''
+#            expectations:
+#              test_script: 'tests/test_definitions/test_expectations.py'
+#              extra_args: ''
           maxParallel: 1
 
         steps:
@@ -35,6 +35,10 @@ stages:
               pip install -r requirements-dev.txt --constraint constraints-dev.txt
 
             displayName: 'Install dependencies'
+          - script: |
+              pip install google-cloud-bigquery-storage
+
+            displayName: 'Install Google Cloud dependencies'
 
           - task: DownloadSecureFile@1
             name: gcp_authkey
