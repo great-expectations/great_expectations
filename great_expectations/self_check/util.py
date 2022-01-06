@@ -34,6 +34,8 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.core.expectation_diagnostics.supporting_types import ExpectationExecutionEngineDiagnostics
+from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import ExpectationTestCase, ExpectationTestDataCases
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -1374,7 +1376,9 @@ def build_test_backends_list(
     include_mysql=False,
     include_mssql=False,
     include_bigquery=False,
-):
+) -> List[str]:
+    """Attempts to identify supported backends by checking which imports are available."""
+
     test_backends = []
 
     if include_pandas:
@@ -1463,13 +1467,15 @@ def build_test_backends_list(
 
 
 def generate_expectation_tests(
-    expectation_type, examples_config, expectation_execution_engines_dict=None
+    expectation_type : str,
+    test_data_cases: List[ExpectationTestDataCases],
+    execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
 ):
     """
 
     :param expectation_type: snake_case name of the expectation type
     :param examples_config: a dictionary that defines the data and test cases for the expectation
-    :param expectation_execution_engines_dict: (optional) a dictionary that shows which backends/execution engines the
+    :param expectation_execution_engines_dict: shows which backends/execution engines the
             expectation is implemented for. It can be obtained from the output of the expectation's self_check method
             Example:
             {
@@ -1481,298 +1487,242 @@ def generate_expectation_tests(
     """
     parametrized_tests = []
 
-    # If Expectation.examples defines "test_backends", use that to determine backends and dialects to use.
-    # Otherwise, use the introspected expectation_execution_engines_dict.
-    for d in examples_config:
+    for d in test_data_cases:
+        print(d)
         d = copy.deepcopy(d)
-        if expectation_execution_engines_dict is not None:
-            example_backends_is_defined = "test_backends" in d
-            example_backends = [
-                backend_dict.get("backend")
-                for backend_dict in d.get("test_backends", [])
-            ]
-            example_sqlalchemy_dialects = [
-                dialect
-                for backend_dict in d.get("test_backends", {})
-                if (backend_dict.get("backend") == "sqlalchemy")
-                for dialect in backend_dict.get("dialects", [])
-            ]
-            include_sqlalchemy = (
-                ("sqlalchemy" in example_backends)
-                if example_backends_is_defined
-                else (
-                    expectation_execution_engines_dict.get("SqlAlchemyExecutionEngine")
-                    == True
-                )
-            )
-            backends = build_test_backends_list(
-                include_pandas=("pandas" in example_backends)
-                if example_backends_is_defined
-                else (
-                    expectation_execution_engines_dict.get("PandasExecutionEngine")
-                    == True
-                ),
-                include_spark=("spark" in example_backends)
-                if example_backends_is_defined
-                else (
-                    expectation_execution_engines_dict.get("SparkDFExecutionEngine")
-                    == True
-                ),
-                include_sqlalchemy=include_sqlalchemy,
-                include_sqlite=("sqlite" in example_sqlalchemy_dialects)
-                if example_backends_is_defined
-                else include_sqlalchemy,
-                include_postgresql=("postgresql" in example_sqlalchemy_dialects),
-                include_mysql=("mysql" in example_sqlalchemy_dialects),
-                include_mssql=("mssql" in example_sqlalchemy_dialects),
-            )
-        else:
-            backends = build_test_backends_list()
+        print("*", d)
+
+        backends = build_test_backends_list(
+            include_pandas=execution_engine_diagnostics.PandasExecutionEngine,
+            include_spark=execution_engine_diagnostics.SparkDFExecutionEngine,
+            include_sqlalchemy=execution_engine_diagnostics.SqlAlchemyExecutionEngine,
+            include_sqlite=True,
+            include_postgresql=False,
+            include_mysql=False,
+            include_mssql=False,
+            include_bigquery=False,
+        )
 
         for c in backends:
 
-            datasets = []
-            if candidate_test_is_on_temporary_notimplemented_list_cfe(
-                c, expectation_type
-            ):
-                skip_expectation = True
-                schemas = validator_with_data = None
-            else:
-                skip_expectation = False
-                if isinstance(d["data"], list):
-                    sqlite_db_path = os.path.abspath(
-                        os.path.join(
-                            tmp_dir,
-                            "sqlite_db"
-                            + "".join(
-                                [
-                                    random.choice(string.ascii_letters + string.digits)
-                                    for _ in range(8)
-                                ]
-                            )
-                            + ".db",
-                        )
-                    )
-                    for dataset in d["data"]:
-                        datasets.append(
-                            get_test_validator_with_data(
-                                c,
-                                dataset["data"],
-                                dataset.get("schemas"),
-                                table_name=dataset.get("dataset_name"),
-                                sqlite_db_path=sqlite_db_path,
-                            )
-                        )
-                    validator_with_data = datasets[0]
-                else:
-                    schemas = d["schemas"] if "schemas" in d else None
-                    validator_with_data = get_test_validator_with_data(
-                        c, d["data"], schemas=schemas
-                    )
+            try:
+                validator_with_data = get_test_validator_with_data(
+                    c, d["data"], d["schemas"]
+                )
+            except Exception as e:
+                
+                continue
 
             for test in d["tests"]:
-
-                # use the expectation_execution_engines_dict of the expectation
-                # to exclude unimplemented backends from the testing
-                if expectation_execution_engines_dict is not None:
-                    supress_test_for = test.get("suppress_test_for")
-                    if supress_test_for is None:
-                        supress_test_for = []
-                    if not expectation_execution_engines_dict.get(
-                        "PandasExecutionEngine"
-                    ):
-                        supress_test_for.append("pandas")
-                    if not expectation_execution_engines_dict.get(
-                        "SqlAlchemyExecutionEngine"
-                    ):
-                        supress_test_for.append("sqlalchemy")
-                    if not expectation_execution_engines_dict.get(
-                        "SparkDFExecutionEngine"
-                    ):
-                        supress_test_for.append("spark")
-
-                    if len(supress_test_for) > 0:
-                        test["suppress_test_for"] = supress_test_for
-
-                generate_test = True
-                skip_test = False
-                if "only_for" in test:
-                    # if we're not on the "only_for" list, then never even generate the test
-                    generate_test = False
-                    if not isinstance(test["only_for"], list):
-                        raise ValueError("Invalid test specification.")
-
-                    if validator_with_data and isinstance(
-                        validator_with_data.execution_engine.active_batch_data,
-                        SqlAlchemyBatchData,
-                    ):
-                        # Call out supported dialects
-                        if "sqlalchemy" in test["only_for"]:
-                            generate_test = True
-                        elif (
-                            "sqlite" in test["only_for"]
-                            and sqliteDialect is not None
-                            and isinstance(
-                                validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                sqliteDialect,
-                            )
-                        ):
-                            generate_test = True
-                        elif (
-                            "postgresql" in test["only_for"]
-                            and postgresqlDialect is not None
-                            and isinstance(
-                                validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                postgresqlDialect,
-                            )
-                        ):
-                            generate_test = True
-                        elif (
-                            "mysql" in test["only_for"]
-                            and mysqlDialect is not None
-                            and isinstance(
-                                validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                mysqlDialect,
-                            )
-                        ):
-                            generate_test = True
-                        elif (
-                            "mssql" in test["only_for"]
-                            and mssqlDialect is not None
-                            and isinstance(
-                                validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                mssqlDialect,
-                            )
-                        ):
-                            generate_test = True
-                    elif validator_with_data and isinstance(
-                        validator_with_data.execution_engine.active_batch_data,
-                        pandas_DataFrame,
-                    ):
-                        if "pandas" in test["only_for"]:
-                            generate_test = True
-                        if (
-                            "pandas_022" in test["only_for"]
-                            or "pandas_023" in test["only_for"]
-                        ) and int(pd.__version__.split(".")[1]) in [22, 23]:
-                            generate_test = True
-                        if ("pandas>=24" in test["only_for"]) and int(
-                            pd.__version__.split(".")[1]
-                        ) > 24:
-                            generate_test = True
-                    elif validator_with_data and isinstance(
-                        validator_with_data.execution_engine.active_batch_data,
-                        spark_DataFrame,
-                    ):
-                        if "spark" in test["only_for"]:
-                            generate_test = True
-
-                if not generate_test:
+                if not should_we_generate_this_test(
+                    backend=c,
+                    expectation_test_case=test,
+                    execution_engine_diagnostics=execution_engine_diagnostics,
+                ):
                     continue
 
-                if "suppress_test_for" in test and (
-                    (
-                        "sqlalchemy" in test["suppress_test_for"]
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            SqlAlchemyBatchData,
-                        )
-                    )
-                    or (
-                        "sqlite" in test["suppress_test_for"]
-                        and sqliteDialect is not None
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            SqlAlchemyBatchData,
-                        )
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                            sqliteDialect,
-                        )
-                    )
-                    or (
-                        "postgresql" in test["suppress_test_for"]
-                        and postgresqlDialect is not None
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            SqlAlchemyBatchData,
-                        )
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                            postgresqlDialect,
-                        )
-                    )
-                    or (
-                        "mysql" in test["suppress_test_for"]
-                        and mysqlDialect is not None
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            SqlAlchemyBatchData,
-                        )
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                            mysqlDialect,
-                        )
-                    )
-                    or (
-                        "mssql" in test["suppress_test_for"]
-                        and mssqlDialect is not None
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            SqlAlchemyBatchData,
-                        )
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                            mssqlDialect,
-                        )
-                    )
-                    or (
-                        "pandas" in test["suppress_test_for"]
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            pandas_DataFrame,
-                        )
-                    )
-                    or (
-                        "spark" in test["suppress_test_for"]
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            spark_DataFrame,
-                        )
-                    )
-                ):
-                    skip_test = True
                 # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-                if (
-                    "allow_cross_type_comparisons" in test["in"]
-                    and validator_with_data
-                    and isinstance(
-                        validator_with_data.execution_engine.active_batch_data,
-                        SqlAlchemyBatchData,
-                    )
-                ):
-                    skip_test = True
+                # if (
+                #     "allow_cross_type_comparisons" in test["in"]
+                #     and validator_with_data
+                #     and isinstance(
+                #         validator_with_data.execution_engine.active_batch_data,
+                #         SqlAlchemyBatchData,
+                #     )
+                # ):
+                #     skip_test = True
 
-                if not skip_test:
-                    parametrized_tests.append(
-                        {
-                            "expectation_type": expectation_type,
-                            "validator_with_data": validator_with_data,
-                            "test": test,
-                            "skip": skip_expectation or skip_test,
-                            "backend": c,
-                        }
-                    )
+                parametrized_tests.append(
+                    {
+                        "expectation_type": expectation_type,
+                        "validator_with_data": validator_with_data,
+                        "test": test,
+                        "backend": c,
+                    }
+                )
 
     return parametrized_tests
 
+def should_we_generate_this_test(
+    backend : str,
+    expectation_test_case : ExpectationTestCase,
+    execution_engine_diagnostics : ExpectationExecutionEngineDiagnostics,
+):
+    # print(backend)
+    # print(expectation_test_case) # suppress_test_for, only_for
+    if backend in expectation_test_case.suppress_test_for:
+        return False
+    if expectation_test_case.only_for != None and not backend in expectation_test_case.only_for:
+        return False
+    print(execution_engine_diagnostics)
+
+    return True
+                # # use the expectation_execution_engines_dict of the expectation
+                # # to exclude unimplemented backends from the testing
+                # if execution_engine_diagnostics is not None:
+                #     supress_test_for = test.get("suppress_test_for")
+                #     if supress_test_for is None:
+                #         supress_test_for = []
+                #     if not execution_engine_diagnostics.PandasExecutionEngine:
+                #         supress_test_for.append("pandas")
+                #     if not execution_engine_diagnostics.SqlAlchemyExecutionEngine:
+                #         supress_test_for.append("sqlalchemy")
+                #     if not execution_engine_diagnostics.SparkDFExecutionEngine:
+                #         supress_test_for.append("spark")
+
+                #     if len(supress_test_for) > 0:
+                #         test["suppress_test_for"] = supress_test_for
+
+                # generate_test = True
+                # skip_test = False
+                # if "only_for" in test:
+                #     # if we're not on the "only_for" list, then never even generate the test
+                #     generate_test = False
+
+                #     if isinstance(
+                #         validator_with_data.execution_engine.active_batch_data,
+                #         SqlAlchemyBatchData,
+                #     ):
+                #         # Call out supported dialects
+                #         if "sqlalchemy" in test["only_for"]:
+                #             generate_test = True
+                #         elif (
+                #             "sqlite" in test["only_for"]
+                #             and sqliteDialect is not None
+                #             and isinstance(
+                #                 validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                #                 sqliteDialect,
+                #             )
+                #         ):
+                #             generate_test = True
+                #         elif (
+                #             "postgresql" in test["only_for"]
+                #             and postgresqlDialect is not None
+                #             and isinstance(
+                #                 validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                #                 postgresqlDialect,
+                #             )
+                #         ):
+                #             generate_test = True
+                #         elif (
+                #             "mysql" in test["only_for"]
+                #             and mysqlDialect is not None
+                #             and isinstance(
+                #                 validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                #                 mysqlDialect,
+                #             )
+                #         ):
+                #             generate_test = True
+                #         elif (
+                #             "mssql" in test["only_for"]
+                #             and mssqlDialect is not None
+                #             and isinstance(
+                #                 validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                #                 mssqlDialect,
+                #             )
+                #         ):
+                #             generate_test = True
+                #     elif validator_with_data and isinstance(
+                #         validator_with_data.execution_engine.active_batch_data,
+                #         pandas_DataFrame,
+                #     ):
+                #         if "pandas" in test["only_for"]:
+                #             generate_test = True
+                #         if (
+                #             "pandas_022" in test["only_for"]
+                #             or "pandas_023" in test["only_for"]
+                #         ) and int(pd.__version__.split(".")[1]) in [22, 23]:
+                #             generate_test = True
+                #         if ("pandas>=24" in test["only_for"]) and int(
+                #             pd.__version__.split(".")[1]
+                #         ) > 24:
+                #             generate_test = True
+                #     elif validator_with_data and isinstance(
+                #         validator_with_data.execution_engine.active_batch_data,
+                #         spark_DataFrame,
+                #     ):
+                #         if "spark" in test["only_for"]:
+                #             generate_test = True
+
+                # if "suppress_test_for" in test and (
+                #     (
+                #         "sqlalchemy" in test["suppress_test_for"]
+                #         and validator_with_data
+                #         and isinstance(
+                #             validator_with_data.execution_engine.active_batch_data,
+                #             SqlAlchemyBatchData,
+                #         )
+                #     )
+                #     or (
+                #         "sqlite" in test["suppress_test_for"]
+                #         and sqliteDialect is not None
+                #         and validator_with_data
+                #         and isinstance(
+                #             validator_with_data.execution_engine.active_batch_data,
+                #             SqlAlchemyBatchData,
+                #         )
+                #         and isinstance(
+                #             validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                #             sqliteDialect,
+                #         )
+                #     )
+                #     or (
+                #         "postgresql" in test["suppress_test_for"]
+                #         and postgresqlDialect is not None
+                #         and validator_with_data
+                #         and isinstance(
+                #             validator_with_data.execution_engine.active_batch_data,
+                #             SqlAlchemyBatchData,
+                #         )
+                #         and isinstance(
+                #             validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                #             postgresqlDialect,
+                #         )
+                #     )
+                #     or (
+                #         "mysql" in test["suppress_test_for"]
+                #         and mysqlDialect is not None
+                #         and validator_with_data
+                #         and isinstance(
+                #             validator_with_data.execution_engine.active_batch_data,
+                #             SqlAlchemyBatchData,
+                #         )
+                #         and isinstance(
+                #             validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                #             mysqlDialect,
+                #         )
+                #     )
+                #     or (
+                #         "mssql" in test["suppress_test_for"]
+                #         and mssqlDialect is not None
+                #         and validator_with_data
+                #         and isinstance(
+                #             validator_with_data.execution_engine.active_batch_data,
+                #             SqlAlchemyBatchData,
+                #         )
+                #         and isinstance(
+                #             validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
+                #             mssqlDialect,
+                #         )
+                #     )
+                #     or (
+                #         "pandas" in test["suppress_test_for"]
+                #         and validator_with_data
+                #         and isinstance(
+                #             validator_with_data.execution_engine.active_batch_data,
+                #             pandas_DataFrame,
+                #         )
+                #     )
+                #     or (
+                #         "spark" in test["suppress_test_for"]
+                #         and validator_with_data
+                #         and isinstance(
+                #             validator_with_data.execution_engine.active_batch_data,
+                #             spark_DataFrame,
+                #         )
+                #     )
+                # ):
+                #     skip_test = True
 
 def sort_unexpected_values(test_value_list, result_value_list):
     # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
