@@ -25,24 +25,24 @@ Connecting to your data in Great Expectations is designed to be a painless proce
 
 Connecting to your data is built around the Datasource object.  A Datasource provides a standard API for accessing and interacting with data from a wide variety of source systems.  It does this by providing an interface for a Data Connector and an Execution Engine to work together.
 
-The majority of the connect to data process is a simple matter of configuring a new Datasource according to the requirements of your underlying data system.  Once your Datasources are configured and saved to your Data Context you will only need to use the Datasource API to access and interact with your data, regardless of the original source system (or systems) that your data is stored in.
+The majority of the work involved in connecting to data is a simple matter of configuring a new Datasource according to the requirements of your underlying data system.  Once your Datasource is configured and saved to your Data Context you will only need to use the Datasource API to access and interact with your data, regardless of the original source system (or systems) that your data is stored in.
 
 <!-- The following subsections should be repeated as necessary.  They should give a high level map of the things that need to be done or optionally can be done in this process, preferably in the order that they should be addressed (assuming there is one). If the process crosses multiple steps of the Universal Map, use the <SetupHeader> <ConnectHeader> <CreateHeader> and <ValidateHeader> tags to indicate which Universal Map step the subsections fall under. -->
 
-### 1. Create a Datasource
+### 1. Boilerplate
 
 If you use the Great Expectations CLI, you can run this command to automatically generate a pre-configured Jupyter Notebook:
 
 ```console
-great_expectations --v3-api datasource new
+great_expectations datasource new
 ```
 
-From there, you will be able to follow along a YAML based workflow for configuring and saving your Datasource.  Regardless, 
+From there, you will be able to follow along a YAML based workflow for configuring and saving your Datasource.  Whether you prefer to work with the Jupyter Notebook's boilerplate for creating a datasource, or would rather dive in from scratch with a Python script, however, most of the work will take place in the configuring of the Datasource in question.
 
 
 ### 2. Configure your Datasource
 
-Because the underlying data systems are different, configuration for each type of Datasource is slightly different.  We have step by step how-to guides that cover many common cases, and core concepts documentation to help you with more exotic kinds of configuration.  The following will give you a broad overview of what you will be doing regardless of what your underlying data systems are.
+Because the underlying data systems are different, configuration for each type of Datasource is slightly different.  We have step by step how-to guides that cover many common cases, and core concepts documentation to help you with more exotic kinds of configuration.  It is strongly advised that you find the guide that pertains to your use case and follow it.  If you are simply interested in learning about the process, however, the following will give you a broad overview of what you will be doing regardless of what your underlying data systems are.
 
 Datasource configurations can be written as YAML files or Python dictionaries.  Regardless of variations due to the underlying data systems, your Datasource's configuration will look roughly like this:
 
@@ -89,14 +89,9 @@ datasource_config = {
 </TabItem>
 </Tabs>
 
-Some things to note:
+Please note that this is just a broad outline of the configuration you will be making.  You will find much more detailed examples in our documentation on how to connect to specific source data systems.
 
-- First, unless you are extending Great Expectations and using a subclass of Datasource, you will almost never need to use a `class_name` other than `Datasource` for the top level `class_name` value.
-- Second, inside the `execution_engine` dictionary you will also include a `connection_string` key if the source data system you are connecting to requires one.
-- Third, in the `data_connectors` dictionary you may define multiple Data Connectors, including different types of Data Connectors, so long as they all have unique values in the place of the `<name_of_your_data_connector>` key.
-- Fourth, the `<additional_keys_based_on_source_data_system>` will be things like `base_directory` and `default_regex` for filesystems, or  `batch_identifiers` for SQL based data systems.
-- Finally: This is just a broad outline of the configuration you will be making.  You will find much more detailed examples in our documentation on how to connect to specific source data systems.
-
+The `name` and `class_name` top level keys will be the first you need to define.  The `name` key can be anything you want, but it is best to use a descriptive name as you will use this to reference your Datasource in the future. Unless you are extending Great Expectations and using a subclass of Datasource, you will almost never need to use a `class_name` other than `Datasource` for the top level `class_name` value.
 
 #### Configuring your Datasource's Execution Engine
 
@@ -111,9 +106,9 @@ Great Expectations provides three types of `DataConnector` classes, which are us
 - A ConfiguredAssetDataConnector, which allows you to have the most fine-tuning by requiring an explicit listing of each Data Asset you want to connect to.  This Data Connector would be ideal
 - A `RuntimeDataConnector` which enables you to use a `RuntimeBatchRequest` to wrap either an in-memory dataframe, filepath, or SQL query.
 
-We provide detailed guidance to help you decide on a Data Connector in our guide: [How to choose which DataConnector to use](/docs/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use).
+In the `data_connectors` dictionary you may define multiple Data Connectors, including different types of Data Connectors, so long as they all have unique values in the place of the `<name_of_your_data_connector>` key.  We provide detailed guidance to help you decide on which Data Connectors to use in our guide: [How to choose which DataConnector to use](/docs/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use).
 
-For specifics on the additional keys that you can use in your Data Connectors' configurations, please see the corresponding guide for connecting to a specific source data system (since the keys you will need to define will depend on the source data system you are connecting to).
+The `<additional_keys_based_on_source_data_system>` will be things like `base_directory` and `default_regex` for filesystems, or  `batch_identifiers` for SQL based data systems. For specifics on the additional keys that you can use in your Data Connectors' configurations, please see the corresponding guide for connecting to a specific source data system (since the keys you will need to define will depend on the source data system you are connecting to).
 
 ### 3. Test your configuration
 
@@ -153,15 +148,51 @@ context.test_yaml_config(yaml.dump(datasource_config))
 </TabItem>
 </Tabs>
 
-
-
 ### 4. Save the Datasource configuration to your Data Context.
+
+What is the point of configuring a Datasource if you can't easily use it in the future?  It this point you will want to save your Datasource configuration to your Data Context.  This can be done easily by using the `add_datasource()` function, which is conveniently accessible from your Data Context.  
+
+<Tabs
+  groupId="yaml-or-python"
+  defaultValue='yaml'
+  values={[
+  {label: 'YAML', value:'yaml'},
+  {label: 'Python', value:'python'},
+  ]}>
+  <TabItem value="yaml">
+
+This convenience function takes in a series of named arguements corresponding to the keys in your `datasource_yaml` string.  Fortunately, python and the `yaml` module provide a convenient way to unpack yaml strings into named arguements so you don't have to. 
+
+First, you will want to import the yaml module with the command:
+
+```python
+from ruamel import yaml
+```
+
+After that, the following code snippet will unpack your yaml string and save your Datasource configuration to the Data Context:
+
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L44
+```
+
+</TabItem>
+<TabItem value="python">
+
+This convenience function takes in a series of named arguements corresponding to the keys in your `datasource_config` dictionary.  Fortunately, python provides a convenient way to unpack dictionaries into named arguements, so you don't have to. The following code snippet will unpack the dictionary and save your Datasource configuration to the Data Context.
+
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py#L44
+```
+
+</TabItem>
+</Tabs>
+
 
 ### 5. Test your new Datasource.
 
-To test your Datasource you will load data from it into a Validator using a Batch Request.  All of our guides on how to configure a Datasource conclude with an example of how to do this for that guide's particular source data system.
+To test your Datasource you will load data from it into a Validator using a Batch Request.  All of our guides on how to configure a Datasource conclude with an example of how to do this for that guide's particular source data system.  This is also a core part of using Profilers and Checkpoints, so we will discuss it in more depth in the Create Expectations and Validate Data steps.
 
 ## Accessing your Datasource from your Data Context
+
+If you need to directly access your Datasource in the future, the `get_datasource()` method of your Data Context will provide a convenient way to do so.  You can also use the `list_datasources()` method of your Data Context to retrieve a list containing your datasource configurations.
 
 ## Retrieving Batches of data with your Datasource
 
@@ -171,4 +202,4 @@ This is primarily done when running Profilers in the Create Expectation step, or
 
 <!-- This section is essentially a victory lap.  It should reiterate what they have accomplished/are now capable of doing.  If there is a next process (such as the universal map steps) this should state that the reader is now ready to move on to it. -->
 
-From here you will move on to the next step of working with Great Expectations: Create Expectations.
+With your datasources defined, you will now have access to the data in your source systems from a single, consistent API.  From here you will move on to the next step of working with Great Expectations: Create Expectations.
