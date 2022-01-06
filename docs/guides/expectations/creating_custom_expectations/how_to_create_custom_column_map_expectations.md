@@ -115,7 +115,7 @@ To use a custom Expectation, you need to ensure it has been placed into your `pl
 When developing an Expectation, we highly encourage the writing of tests and implementation of renderers to verify that the Expectation works as intended and is providing the best possible results in your Data Docs.
 If you plan on contributing your Custom Expectation into the `contrib` library of Great Expectations, there are certain baseline requirements that must be met with regard to backend implementation, renderer implementation, and testing.
 
-Great Expectations provides templates to get you started on developing Custom Expectations for contribution, including renderers & test cases. The ColumnMapExpectation template can be found [here](../../../../examples/expectations/column_map_expectation_template.py).
+Great Expectations provides templates to get you started on developing Custom Expectations for contribution, including renderers & test cases. The ColumnMapExpectation template can be found [here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py).
 
 :::caution Under Construction
 Please see the following documentation for more on:

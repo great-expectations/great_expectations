@@ -1,7 +1,12 @@
-# from pydantic.dataclasses import dataclass
-from dataclasses import FrozenInstanceError, dataclass, field
+"""
+This file is intended to
+1. test the basic behavior of SerializableDictDot, in combination with @dataclass, and
+2. provides examples of best practice for working with typed objects within the Great Expectations codebase
+"""
+
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import pytest
 from pytest import raises
@@ -39,6 +44,7 @@ class MyClassC(SerializableDictDot):
     A_list: List[MyClassA]
     B_list: List[MyClassB]
     enum_list: List[MyEnum] = field(default_factory=list)
+    some_tuple: Optional[Tuple[MyClassA, MyClassB]] = None
 
     @property
     def num_As(self):
@@ -47,36 +53,6 @@ class MyClassC(SerializableDictDot):
     @property
     def num_Bs(self):
         return len(self.B_list)
-
-
-def test_basic_instantiation_with_arguments():
-    "Can be instantiated with arguments"
-    MyClassA(
-        foo="a string",
-        bar=1,
-    )
-
-
-def test_basic_instantiation_from_a_dictionary():
-    "Can be instantiated from a dictionary"
-    MyClassA(
-        **{
-            "foo": "a string",
-            "bar": 1,
-        }
-    )
-
-
-def test_access_using_dot_notation():
-    "Keys can be accessed using dot notation"
-    my_A = MyClassA(
-        **{
-            "foo": "a string",
-            "bar": 1,
-        }
-    )
-    assert my_A.foo == "a string"
-    assert my_A.bar == 1
 
 
 def test_access_using_dict_notation():
@@ -383,6 +359,19 @@ def test_to_dict_works_recursively():
             MyEnum("y"),
             MyEnum("z"),
         ],
+        some_tuple=(
+            MyClassA(
+                foo="A-1",
+                bar=101,
+            ),
+            MyClassB(
+                foo="B-1",
+                bar=201,
+                baz=["a", "b", "c"],
+                qux=-100,
+                quux=43,
+            ),
+        ),
     )
 
     C_dict = my_C.to_dict()
@@ -424,41 +413,33 @@ def test_to_dict_works_recursively():
             "y",
             "z",
         ],
+        "some_tuple": [
+            {
+                "foo": "A-1",
+                "bar": 101,
+            },
+            {
+                "foo": "B-1",
+                "bar": 201,
+                "baz": ["a", "b", "c"],
+                "qux": -100,
+                "quux": 43,
+            },
+        ],
     }
 
 
-def test_immutability():
-    "Can be made immutable"
+def test_instantiation_with_a_from_legacy_dict_method():
+    """Can be instantiated from a legacy dictionary.
 
-    @dataclass(frozen=True)
-    class MyClassD(SerializableDictDot):
-        foo: str
-        bar: int
+    Note: This pattern is helpful for cases where we're migrating from dictionary-based objects to typed objects.
+    One especially thorny example is when the dictionary contains keys that are reserved words in python.
 
-    my_D = MyClassD(
-        **{
-            "foo": "a string",
-            "bar": 1,
-        }
-    )
-    assert my_D["foo"] == "a string"
-    assert my_D["bar"] == 1
+    For example, test cases use the reserved word: "in" as one of their required fields.
+    """
 
-    with raises(FrozenInstanceError):
-        my_D.foo = "different string"
-
-    assert my_D["foo"] == "a string"
-    assert my_D.foo == "a string"
-
-    with raises(FrozenInstanceError):
-        my_D["foo"] = "a third string"
-
-    assert my_D["foo"] == "a string"
-    assert my_D.foo == "a string"
-
-
-def test_reserved_word_key():
-    "Can be instantiated with a key that's also a reserved word"
+    import inspect
+    import logging
 
     @dataclass
     class MyClassE(SerializableDictDot):
@@ -466,33 +447,45 @@ def test_reserved_word_key():
         bar: int
         input: int
 
-    class MyClassF(MyClassE):
-        def __init__(
-            self,
-            foo,
-            bar,
-            **kwargs,
-        ):
-            super().__init__(foo=foo, bar=bar, input=kwargs["in"])
+        @classmethod
+        def from_legacy_dict(cls, dict):
+            """This method is an adapter to allow typing of legacy my_class_e dictionary objects, without needing to immediately clean up every object."""
+            temp_dict = {}
+            for k, v in dict.items():
+                # Ignore parameters that don't match the type definition
+                if k in inspect.signature(cls).parameters:
+                    temp_dict[k] = v
+                else:
+                    if k == "in":
+                        temp_dict["input"] = v
+                    else:
+                        logging.warning(
+                            f"WARNING: Got extra parameter: {k} while instantiating MyClassE."
+                            "This parameter will be ignored."
+                            "You probably need to clean up a library_metadata object."
+                        )
 
-    my_F = MyClassF(
-        foo="a string",
-        bar=1,
-        **{"in": 10},
-    )
-    assert my_F["foo"] == "a string"
-    assert my_F["bar"] == 1
-    assert my_F["input"] == 10
-    assert my_F.input == 10
+            return cls(**temp_dict)
 
-    my_F = MyClassF(
-        **{
+    my_E = MyClassE.from_legacy_dict(
+        {
             "foo": "a string",
             "bar": 1,
             "in": 10,
         }
     )
-    assert my_F["foo"] == "a string"
-    assert my_F["bar"] == 1
-    assert my_F["input"] == 10
-    assert my_F.input == 10
+
+    assert my_E["foo"] == "a string"
+    assert my_E["bar"] == 1
+    assert my_E["input"] == 10
+    assert my_E.input == 10
+
+    # Note that after instantiation, the class does NOT have an "in" property
+    with raises(AttributeError):
+        my_E["in"] == 10
+
+    # Because `in` is a reserved word, this will raise a SyntaxError:
+    # my_F.in == 100
+
+    # Because `in` is a reserved word, this will also raise a SyntaxError:
+    # my_F.in = 100
