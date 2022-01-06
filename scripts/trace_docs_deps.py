@@ -30,21 +30,76 @@ import ast
 import glob
 import os
 import re
-import sys
-from typing import List, Set, Union
+from collections import defaultdict
+from typing import DefaultDict, Dict, List, Optional, Set, Union
 
 
-def find_docusaurus_refs(dir: str) -> List[str]:
-    """Finds any Docusaurus links within a target directory (i.e. ```python file=...#L10-20)"""
+def parse_definition_nodes_from_source_code(directory: str) -> Dict[str, Set[str]]:
+    """Utility to parse all class/function definitions from a given codebase
+
+    Args:
+        source_files: A list of files from the codebase
+
+    Returns:
+        A mapping between class/function definition and the origin of that symbol.
+        Using this, one can immediately tell where to look when encountering a class instance or method invocation.
+
+    """
+    definition_map: Dict[str, Set[str]] = {}
+    for file in glob.glob(f"{directory}/**/*.py", recursive=True):
+        file_definition_map = _parse_definition_nodes_from_file(file)
+        _update_dict(definition_map, file_definition_map)
+    return definition_map
+
+
+def _parse_definition_nodes_from_file(file: str) -> Dict[str, Set[str]]:
+    with open(file) as f:
+        root = ast.parse(f.read(), file)
+
+    definition_nodes = []
+    for node in root.body:
+        if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+            definition_nodes.append(node.name)
+
+    file_definition_map: DefaultDict[str, Set[str]] = defaultdict(set)
+    for name in definition_nodes:
+        file_definition_map[name].add(file)
+
+    return file_definition_map
+
+
+def _update_dict(A: Dict[str, Set[str]], B: Dict[str, Set[str]]) -> None:
+    for key, val in A.items():
+        if key in B:
+            A[key] = val.union(B[key])
+
+    for key, val in B.items():
+        if key not in A:
+            A[key] = {v for v in val}
+
+
+def find_docusaurus_refs(directory: str) -> List[str]:
+    """Finds any Docusaurus links within a target directory (i.e. ```python file=...#L10-20)
+
+    Args:
+        directory: The directory that contains your Docusaurus files (docs/)
+
+    Returns:
+        A list of test files that are referenced within docs under test
+
+    """
     linked_files: Set[str] = set()
     pattern: str = (
         r"\`\`\`[a-zA-Z]+ file"  # Format of internal links used by Docusaurus
     )
 
-    for doc in glob.glob(f"{dir}/**/*.md", recursive=True):
-        for line in open(doc):
+    for doc in glob.glob(f"{directory}/**/*.md", recursive=True):
+        with open(doc) as f:
+            lines = f.readlines()
+
+        for line in lines:
             if re.search(pattern, line):
-                file: str = _parse_file_from_docusaurus_link(line)
+                file = _parse_file_from_docusaurus_link(line)
                 if not file:
                     continue
                 path: str = os.path.join(os.path.dirname(doc), file)
@@ -55,62 +110,52 @@ def find_docusaurus_refs(dir: str) -> List[str]:
     return [file for file in linked_files]
 
 
-def _parse_file_from_docusaurus_link(line: str) -> str:
+def _parse_file_from_docusaurus_link(line: str) -> Optional[str]:
     pattern: str = "=(.+?)#"  # Parse just the path from the Docusaurus link
     search: Union[re.Match[str], None] = re.search(pattern, line)
     if search:
         return search.group(1)
-    return ""
+    return None
 
 
-def get_local_imports(files: List[str]) -> List[str]:
-    """Parses a list of files to determine local imports; external dependencies are discarded"""
-    imports: Set[str] = set()
+def determine_relevant_source_files(
+    files: List[str], definition_map: Dict[str, Set[str]]
+) -> List[str]:
+    """Uses AST to parse all symbols from an input list of files and maps them to their origins
 
+    Args:
+        files: List of files to evaluate with AST
+        definition_map: An association between symbol and the origin of that symbol in the source code
+
+    Returns:
+        List of source files that are relevant to the Docusaurus docs
+
+    """
+    relevant_source_files = set()
     for file in files:
-        with open(file) as f:
-            root: ast.Module = ast.parse(f.read(), file)
+        symbols = _retrieve_symbols_from_file(file)
+        for symbol in symbols:
+            paths = definition_map.get(symbol, set())
+            relevant_source_files.update(paths)
 
-        for node in ast.walk(root):
-            # ast.Import is only used for external deps
-            if not isinstance(node, ast.ImportFrom):
-                continue
-
-            # Only consider imports relevant to GE (note that "import great_expectations as ge" is discarded)
-            if (
-                isinstance(node.module, str)
-                and "great_expectations" in node.module
-                and node.module.count(".") > 0
-            ):
-                imports.add(node.module)
-
-    return [imp for imp in imports]
+    return sorted(relevant_source_files)
 
 
-def get_import_paths(imports: List[str]) -> List[str]:
-    """Takes a list of imports and determines the relative path to each source file or module"""
-    paths: List[str] = []
+def _retrieve_symbols_from_file(file: str) -> Set[str]:
+    with open(file) as f:
+        root = ast.parse(f.read(), file)
 
-    for imp in imports:
-        path: str = imp.replace(
-            ".", "/"
-        )  # AST nodes are formatted as great_expectations.module.file
-        _update_paths(paths, path)
+    symbols = set()
+    for node in ast.walk(root):
+        if isinstance(node, ast.Name):
+            symbols.add(node.id)
 
-    return paths
-
-
-def _update_paths(paths: List[str], path: str) -> None:
-    if os.path.isfile(f"{path}.py"):
-        paths.append(f"{path}.py")
-    elif os.path.isdir(path):
-        for file in glob.glob(f"{path}/**/*.py", recursive=True):
-            paths.append(file)
+    return symbols
 
 
 if __name__ == "__main__":
-    files: List[str] = find_docusaurus_refs(sys.argv[1])
-    imports: List[str] = get_local_imports(files)
-    paths: List[str] = get_import_paths(imports)
+    definition_map = parse_definition_nodes_from_source_code("great_expectations")
+    files_referenced_in_docs = find_docusaurus_refs("docs")
+    paths = determine_relevant_source_files(files_referenced_in_docs, definition_map)
     for path in paths:
         print(path)
