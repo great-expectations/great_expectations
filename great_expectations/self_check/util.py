@@ -1209,10 +1209,7 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_multicolumn_sum_to_equal",
-            "expect_column_values_to_be_between",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
             "expect_column_values_to_be_of_type",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
-            "expect_column_values_to_be_in_set",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
-            "expect_column_values_to_be_in_type_list",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
             "expect_column_values_to_match_like_pattern_list",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
             "expect_column_values_to_not_match_like_pattern_list",  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
         ]
@@ -1277,7 +1274,6 @@ def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_
         ###
         return expectation_type in [
             "expect_column_kl_divergence_to_be_less_than",  # TODO: Takes over 64 minutes to "collect" (haven't actually seen it complete yet) -- https://github.com/great-expectations/great_expectations/issues/3260
-            "expect_column_values_to_be_between",  # TODO: "400 No matching signature for operator >=" -- https://github.com/great-expectations/great_expectations/issues/3260
             "expect_column_quantile_values_to_be_between",  # TODO: takes over 15 minutes to "collect" (haven't actually seen it complete yet) -- https://github.com/great-expectations/great_expectations/issues/3260
             "expect_column_mean_to_be_between",  # TODO: "400 No matching signature for operator *" -- https://github.com/great-expectations/great_expectations/issues/3260
             "expect_column_values_to_be_increasing",
@@ -2104,7 +2100,7 @@ def generate_test_table_name(
 
 
 def _create_bigquery_engine() -> Engine:
-    gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT")
+    gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT", "support-sandbox-297615")
     if not gcp_project:
         raise ValueError(
             "Environment Variable GE_TEST_BIGQUERY_PROJECT is required to run BigQuery expectation tests"
@@ -2113,7 +2109,7 @@ def _create_bigquery_engine() -> Engine:
 
 
 def _bigquery_dataset() -> str:
-    dataset = os.getenv("GE_TEST_BIGQUERY_DATASET")
+    dataset = os.getenv("GE_TEST_BIGQUERY_DATASET", "test_ci")
     if not dataset:
         raise ValueError(
             "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"
