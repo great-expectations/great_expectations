@@ -84,12 +84,12 @@ Steps
     ```
 
 
-5. **Confirm that the new Expectations store has been added by running** ``great_expectations --v3-api store list``
+5. **Confirm that the new Expectations store has been added by running** ``great_expectations store list``
 
     Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_AZ_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in Azure Blob as long as we set the ``expectations_store_name`` variable to ``expectations_AZ_store``, which we did in the previous step.  The config for ``expectations_store`` can be removed if you would like.
 
     ```bash
-    great_expectations --v3-api store list
+    great_expectations store list
 
      - name: expectations_store
        class_name: ExpectationsStore
@@ -107,12 +107,12 @@ Steps
     ```
 
 
-6. **Confirm that Expectations can be accessed from Azure Blob Storage by running** ``great_expectations --v3-api suite list``.
+6. **Confirm that Expectations can be accessed from Azure Blob Storage by running** ``great_expectations suite list``.
 
     If you followed Step 4, the output should include the Expectation we copied to Azure Blob: ``exp1``.  If you did not copy Expectations to the new Store, you will see a message saying no Expectations were found.
 
     ```bash
-    great_expectations --v3-api suite list
+    great_expectations suite list
 
     Using v2 (Batch Kwargs) API
     1 Expectation Suite found:

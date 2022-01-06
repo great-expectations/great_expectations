@@ -682,7 +682,7 @@ def test_cloud_notification_action(
             validation_result_suite_identifier=validation_result_suite_ge_cloud_identifier,
             data_asset=None,
         )
-        == "Cloud notification succeeded."
+        == {"cloud_notification_result": "Cloud notification succeeded."}
     )
     mock_post_method.assert_called_with(
         url=expected_ge_cloud_url, headers=expected_headers
@@ -711,7 +711,11 @@ def test_cloud_notification_action_bad_response(
         "Content-Type": "application/vnd.api+json",
         "Authorization": f"Bearer {ge_cloud_access_token}",
     }
-    expected_error_message = "Cloud Notification request at https://app.test.greatexpectations.io/accounts/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/contracts/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/suite-validation-results/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/notification-actions returned error 418: test_text"
+    expected_result = {
+        "cloud_notification_result": "Cloud Notification request at "
+        "https://app.test.greatexpectations.io/accounts/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/contracts/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/suite-validation-results/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/notification-actions "
+        "returned error 418: test_text"
+    }
 
     assert (
         cloud_action.run(
@@ -719,7 +723,7 @@ def test_cloud_notification_action_bad_response(
             validation_result_suite_identifier=validation_result_suite_ge_cloud_identifier,
             data_asset=None,
         )
-        == expected_error_message
+        == expected_result
     )
     mock_post_method.assert_called_with(
         url=expected_ge_cloud_url, headers=expected_headers

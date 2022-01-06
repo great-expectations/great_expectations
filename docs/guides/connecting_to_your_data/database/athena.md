@@ -18,7 +18,7 @@ Steps
 1. Run the following CLI command to begin the interactive Datasource creation process:
 
     ```bash
-    great_expectations --v3-api datasource new
+    great_expectations datasource new
     ```
 
 2. Choose "other" from the list of database engines, when prompted.
