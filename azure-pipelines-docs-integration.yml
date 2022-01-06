@@ -52,8 +52,7 @@ stages:
                 tests/integration/fixtures/**
                 tests/test_sets/**
 
-          - bash: echo "0"
-#          - bash: ./scripts/check_for_docs_deps_changes
+          - bash: ./scripts/check_for_docs_deps_changes
             name: CheckDocsDependenciesChanges
 
   - stage: custom_checks
@@ -71,7 +70,7 @@ stages:
       vmImage: 'ubuntu-latest'
     jobs:
     - job: test_docs
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      # condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
       variables:
         python.version: '3.8'
       services:
