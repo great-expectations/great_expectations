@@ -87,7 +87,7 @@ def datasource_new(ctx, name, jupyter):
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
@@ -158,7 +158,7 @@ def datasource_list(ctx):
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
@@ -201,6 +201,8 @@ What data would you like Great Expectations to connect to?
             return None
         selected_database = _prompt_user_for_database_backend()
         helper = _get_sql_yaml_helper_class(selected_database, datasource_name)
+    else:
+        helper = None
 
     helper.send_backend_choice_usage_message(context)
     if not helper.verify_libraries_installed():
@@ -400,6 +402,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         username: str = "YOUR_USERNAME",
         password: str = "YOUR_PASSWORD",
         database: str = "YOUR_DATABASE",
+        schema_name: str = "YOUR_SCHEMA",
     ):
         super().__init__(
             datasource_type=DatasourceTypes.SQL,
@@ -412,6 +415,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         self.username = username
         self.password = password
         self.database = database
+        self.schema_name = schema_name
 
     def credentials_snippet(self) -> str:
         return f'''\
@@ -419,7 +423,8 @@ host = "{self.host}"
 port = "{self.port}"
 username = "{self.username}"
 password = "{self.password}"
-database = "{self.database}"'''
+database = "{self.database}"
+schema_name = "{self.schema_name}"'''
 
     def yaml_snippet(self) -> str:
         yaml_str = '''f"""
@@ -440,7 +445,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
         return yaml_str
 
     def _yaml_innards(self) -> str:
@@ -451,7 +456,8 @@ data_connectors:
     port: '{port}'
     username: {username}
     password: {password}
-    database: {database}"""
+    database: {database}
+    schema_name: {schema_name}"""
 
     def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
@@ -498,7 +504,6 @@ class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
             },
             driver="postgresql",
             port=5432,
-            database="postgres",
         )
 
     def verify_libraries_installed(self) -> bool:
@@ -728,7 +733,7 @@ What are you processing your files with?
 
 def _get_files_helper(
     selection: str, context_root_dir: str, datasource_name: Optional[str] = None
-) -> Union[PandasYamlHelper, SparkYamlHelper,]:
+) -> Union[PandasYamlHelper, SparkYamlHelper]:
     helper_class_by_selection = {
         "1": PandasYamlHelper,
         "2": SparkYamlHelper,

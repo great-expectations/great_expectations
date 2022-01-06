@@ -190,7 +190,6 @@ def test_get_config(empty_data_context):
         "data_docs_sites",
         "anonymous_usage_statistics",
         "notebooks",
-        "concurrency",
     }
 
 
