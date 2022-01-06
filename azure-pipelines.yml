@@ -155,7 +155,7 @@ stages:
 
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
-              pytest --durations=0 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest --durations=0 -vv $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
