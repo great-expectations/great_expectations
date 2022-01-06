@@ -7,7 +7,7 @@ a change has been made in the `great_expectations/` directory that change impact
 The script takes the following steps:
     1. Uses AST to parse the source code in `great_expectations/`; the result is a mapping between function/class definition and the origin file of that symbol
     2. Parses all markdown files in `docs/`, using regex to find any Docusaurus links (i.e. ```python file=...#L10-20)
-    3. Evalutes each linked file using AST and uses the definition map from step #1 to determine which source files are relevant to docs under test
+    3. Evaluates each linked file using AST and leverages the definition map from step #1 to determine which source files are relevant to docs under test
 
 The resulting output list is all of the dependencies `docs/` has on the primary `great_expectations/` directory.
 If a change is identified in any of these files during the pipeline runtime, we know that a docs dependency has possibly
@@ -17,10 +17,14 @@ been impacted and the pipeline should run to ensure adequate test coverage.
 
 import ast
 import glob
+import logging
 import os
 import re
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Set
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def parse_definition_nodes_from_source_code(directory: str) -> Dict[str, Set[str]]:
@@ -45,16 +49,21 @@ def _parse_definition_nodes_from_file(file: str) -> Dict[str, Set[str]]:
     with open(file) as f:
         root = ast.parse(f.read(), file)
 
+    logger.debug(f"Parsing {file} for function/class definnitions")
+
     # Parse all 'def ...' and 'class ...' statements in the source code
     definition_nodes = []
     for node in ast.walk(root):
         if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
-            definition_nodes.append(node.name)
+            name = node.name
+            definition_nodes.append(name)
+            logger.debug(f"Found symbol {name}")
 
     # Associate the function/class name with the file it comes from
     file_definition_map: DefaultDict[str, Set[str]] = defaultdict(set)
     for name in definition_nodes:
         file_definition_map[name].add(file)
+    logger.debug(f"Added {len(definition_nodes)} definitions to map")
 
     return file_definition_map
 
@@ -90,12 +99,18 @@ def find_docusaurus_refs(directory: str) -> List[str]:
         with open(doc) as f:
             contents = f.read()
 
+        logger.debug(f"Reviewing {doc} for Docusaurus links")
+
         matches = r.findall(contents)
+        if not matches:
+            logger.info(f"Could not find any Docusaurs links in {doc}")
         for match in matches:
             path: str = os.path.join(os.path.dirname(doc), match)
             # only interested in looking at .py files for now (excludes .yml files)
             if path[-3:] == ".py":
                 linked_files.add(path)
+            else:
+                logger.info(f"Excluding {path} due to not being *.py file")
 
     return [file for file in linked_files]
 
@@ -133,9 +148,12 @@ def _retrieve_symbols_from_file(file: str) -> Set[str]:
             func = node.func
             if isinstance(func, ast.Attribute):
                 symbols.add(func.attr)
+                logger.debug(f"Identified symbol {func.attr}")
             elif isinstance(func, ast.Name):
                 symbols.add(func.id)
+                logger.debug(f"Identified symbol {func.id}")
 
+    logger.debug(f"parsed {len(symbols)} symbols from {file}")
     return symbols
 
 
