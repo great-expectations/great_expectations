@@ -132,7 +132,7 @@ assert copy_expectation_output.strip() in stderr
 
 # list expectation stores
 list_expectation_stores_command = """
-great_expectations --v3-api store list
+great_expectations store list
 """
 
 result = subprocess.run(
@@ -159,7 +159,7 @@ assert "TupleGCSStoreBackend" in stdout
 
 # list expectation suites
 list_expectation_suites_command = """
-great_expectations --v3-api suite list
+great_expectations suite list
 """
 
 result = subprocess.run(
