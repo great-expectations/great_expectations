@@ -1,7 +1,6 @@
-# Get the longest functions by line count
-
 import ast
 import glob
+import re
 
 
 def get_n_longest_funcs(dir, n):
@@ -20,10 +19,20 @@ def get_n_longest_funcs(dir, n):
     return function_definitions[:n]
 
 
-print("===== Great Expectations =====")
-for func in get_n_longest_funcs("great_expectations", 20):
-    print(func)
+def parse_test_results():
+    with open("test_performance.txt") as f:
+        contents = f.read()
 
-print("\n===== Tests =====")
-for func in get_n_longest_funcs("tests", 20):
-    print(func)
+    print(contents.split(" ").count("call"))
+
+
+if __name__ == "__main__":
+    # print("========== Great Expectations ==========")
+    # for func in get_n_longest_funcs("great_expectations", 20):
+    #     print(func)
+
+    # print("\n========== Tests ==========")
+    # for func in get_n_longest_funcs("tests", 20):
+    #     print(func)
+
+    parse_test_results()
