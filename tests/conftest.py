@@ -7,7 +7,7 @@ import os
 import random
 import shutil
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -37,7 +37,11 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.datasource import SqlAlchemyDatasource
+from great_expectations.datasource import (
+    SqlAlchemyDatasource,
+    LegacyDatasource,
+    SimpleSqlalchemyDatasource,
+)
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.self_check.util import (
@@ -140,9 +144,13 @@ def build_test_backends_list(metafunc):
         "spark": "SparkDFDataset",
     }
     backend_name: str
+    """
+    In order to get the support for the "trino" SQLAlchemy dialect as well as receive the benefits of other latest
+    capabilities, users are encouraged to upgrade their Great Expectations installation to the latest version.
+    """
     return [
         (backend_name_class_name_map.get(backend_name) or backend_name)
-        for backend_name in test_backend_names
+        for backend_name in test_backend_names if backend_name != "trino"
     ]
 
 
@@ -4438,8 +4446,65 @@ SELECT EXISTS (
 
 
 @pytest.fixture
+def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch(
+    sa,
+    empty_data_context,
+    test_db_connection_string,
+):
+    context: DataContext = empty_data_context
+
+    sqlite_engine: sa.engine.base.Engine = sa.create_engine(test_db_connection_string)
+    # noinspection PyUnusedLocal
+    conn: sa.engine.base.Connection = sqlite_engine.connect()
+    datasource_config: str = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: SqlAlchemyExecutionEngine
+            connection_string: {test_db_connection_string}
+
+        data_connectors:
+            my_runtime_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: RuntimeDataConnector
+                batch_identifiers:
+                    - pipeline_stage_name
+                    - airflow_run_id
+            my_inferred_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: InferredAssetSqlDataConnector
+                include_schema_name: true
+            my_configured_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: ConfiguredAssetSqlDataConnector
+                assets:
+                    my_first_data_asset:
+                        table_name: table_1
+                    my_second_data_asset:
+                        schema_name: main
+                        table_name: table_2
+                    table_1: {{}}
+                    table_2:
+                        schema_name: main
+    """
+
+    try:
+        # noinspection PyUnusedLocal
+        my_sql_datasource: Optional[
+            Union[SimpleSqlalchemyDatasource, LegacyDatasource]
+        ] = context.add_datasource(
+            "test_sqlite_db_datasource", **yaml.load(datasource_config)
+        )
+    except AttributeError:
+        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
+
+    return context
+
+
+@pytest.fixture
 def data_context_with_runtime_sql_datasource_for_testing_get_batch(
-    sa, empty_data_context
+    sa,
+    empty_data_context,
 ):
     context: DataContext = empty_data_context
     db_file_path: str = file_relative_path(

@@ -65,6 +65,7 @@ def get_batch_request(
     available_data_asset_names_by_data_connector_dict: Dict[
         str, List[str]
     ] = datasource.get_available_data_asset_names()
+    print(f'[ALEX_TEST] [CLI.BATCH_REQUEST.GET_BATCH_REQUEST] AVAILABLE_DATA_ASSET_NAMES_BY_DATA_CONNECTOR_DICT: {available_data_asset_names_by_data_connector_dict} ; TYPE: {str(type(available_data_asset_names_by_data_connector_dict))}')
     data_connector_name: Optional[str] = select_data_connector_name(
         available_data_asset_names_by_data_connector_dict=available_data_asset_names_by_data_connector_dict,
     )

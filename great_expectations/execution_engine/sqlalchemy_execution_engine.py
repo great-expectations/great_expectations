@@ -1122,6 +1122,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     batch_spec=batch_spec
                 )
 
+            print(f'[ALEX_TEST] [SQLALCHEMY_EXECUTION_ENGINE] BATCH_SPEC:\n{batch_spec} ; TYPE: {str(type(batch_spec))}')
+            print(f'[ALEX_TEST] [SQLALCHEMY_EXECUTION_ENGINE] SOURCE_TABLE_NAME: {source_table_name} ; TYPE: {str(type(source_table_name))}')
+            print(f'[ALEX_TEST] [SQLALCHEMY_EXECUTION_ENGINE] SOURCE_SCHEMA_NAME: {source_schema_name} ; TYPE: {str(type(source_schema_name))}')
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,

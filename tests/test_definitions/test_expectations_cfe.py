@@ -27,6 +27,7 @@ from tests.test_definitions.test_expectations import tmp_dir
 
 
 def pytest_generate_tests(metafunc):
+    print(f'\n[ALEX_TEST] WOUTPUT-BEGIN')
     # Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))
     expectation_dirs = [
@@ -44,17 +45,28 @@ def pytest_generate_tests(metafunc):
             dir_path + "/" + expectation_category + "/*.json"
         )
         for c in backends:
+            # TODO: <Alex>ALEX</Alex>
+            if c != "trino":
+                continue
+            # TODO: <Alex>ALEX</Alex>
             for filename in test_configuration_files:
+                print(f'[ALEX_TEST] [CFE] FILENAME: {filename} ; TYPE: {str(type(filename))}')
                 file = open(filename)
                 test_configuration = json.load(file)
 
                 for d in test_configuration["datasets"]:
                     datasets = []
+                    print(f'[ALEX_TEST] [CFE] CONSIDERING_BACKEND: {c} ; TYPE: {str(type(c))}')
+                    print(f'[ALEX_TEST] [CFE] CONSIDERING_CONFIGURATION: {test_configuration["expectation_type"]} ; TYPE: {str(type(test_configuration["expectation_type"]))}')
                     if candidate_test_is_on_temporary_notimplemented_list_cfe(
                         c, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True
+                        print(f'[ALEX_TEST] [CFE] SKIPPING_BACKEND: {c} ; TYPE: {str(type(c))}')
+                        print(f'[ALEX_TEST] [CFE] SKIPPING_CONFIGURATION: {test_configuration["expectation_type"]} ; TYPE: {str(type(test_configuration["expectation_type"]))}')
                     else:
+                        print(f'[ALEX_TEST] [CFE] INCLUDING_BACKEND: {c} ; TYPE: {str(type(c))}')
+                        print(f'[ALEX_TEST] [CFE] INCLUDING_CONFIGURATION: {test_configuration["expectation_type"]} ; TYPE: {str(type(test_configuration["expectation_type"]))}')
                         skip_expectation = False
                         if isinstance(d["data"], list):
                             sqlite_db_path = os.path.abspath(

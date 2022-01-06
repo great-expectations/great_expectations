@@ -6,6 +6,7 @@ import pytest
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations import DataContext
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
@@ -864,3 +865,9 @@ introspection:
             date_format_string: "%Y-%m-%d"
     """
         )
+
+
+def test_batch_request_sql_with_schema(
+    data_context_with_sql_data_connectors_including_schema_for_testing_get_batch,
+):
+    context: DataContext = data_context_with_sql_data_connectors_including_schema_for_testing_get_batch

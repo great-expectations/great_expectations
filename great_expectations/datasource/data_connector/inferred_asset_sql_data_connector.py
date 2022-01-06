@@ -98,6 +98,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
     @property
     def assets(self) -> Dict[str, Asset]:
+        print(f'[ALEX_TEST] [INFERRED_ASSET_SQL_DATA_CONNECTOR] SELF._INTROSPECTED_ASSETS_CACHE: {self._introspected_assets_cache} ; TYPE: {str(type(self._introspected_assets_cache))}')
         return self._introspected_assets_cache
 
     def _refresh_data_references_cache(self):

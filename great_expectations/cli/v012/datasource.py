@@ -943,15 +943,20 @@ Great Expectations will now add a new Datasource '{:s}' to your deployment, by a
 def select_batch_kwargs_generator(
     context, datasource_name, available_data_assets_dict=None
 ):
+    print(f'[ALEX_TEST] [CLI-V012-DATASOURCE] DATASOURCE_NAME: {datasource_name} ; TYPE: {str(type(datasource_name))}')
+    print(f'[ALEX_TEST] [CLI-V012-DATASOURCE] AVAILABLE_DATA_ASSETS_DICT-0: {available_data_assets_dict} ; TYPE: {str(type(available_data_assets_dict))}')
     msg_prompt_select_generator = "Select batch kwarg generator"
 
     if available_data_assets_dict is None:
         available_data_assets_dict = context.get_available_data_asset_names(
             datasource_names=datasource_name
         )
+        print(f'[ALEX_TEST] [CLI-V012-DATASOURCE] AVAILABLE_DATA_ASSETS_DICT-1: {available_data_assets_dict} ; TYPE: {str(type(available_data_assets_dict))}')
 
     available_data_asset_names_by_generator = {}
     for key, value in available_data_assets_dict[datasource_name].items():
+        print(f'[ALEX_TEST] [CLI-V012-DATASOURCE] AVAILABLE_DATA_ASSETS_DICT-LOOP_KEY: {key} ; TYPE: {str(type(key))}')
+        print(f'[ALEX_TEST] [CLI-V012-DATASOURCE] AVAILABLE_DATA_ASSETS_DICT-LOOP_VALUE: {value} ; TYPE: {str(type(value))}')
         if len(value["names"]) > 0:
             available_data_asset_names_by_generator[key] = value["names"]
 
