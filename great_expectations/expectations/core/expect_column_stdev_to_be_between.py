@@ -99,6 +99,13 @@ class ExpectColumnStdevToBeBetween(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "min_value",
+        "max_value",
+        "strict_min",
+        "strict_max",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
