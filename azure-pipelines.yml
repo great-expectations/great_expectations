@@ -38,7 +38,6 @@ variables:
 
 stages:
   - stage: required
-    dependsOn: [scope_check, lint]
     pool:
       vmImage: 'ubuntu-18.04'
 
