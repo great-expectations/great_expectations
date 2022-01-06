@@ -12,6 +12,8 @@ from great_expectations.exceptions import DataContextError
 @click.pass_context
 def docs(ctx):
     """Data Docs operations"""
+    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
+
     usage_stats_prefix = f"cli.docs.{ctx.invoked_subcommand}"
     send_usage_message(
         data_context=ctx.obj.data_context,

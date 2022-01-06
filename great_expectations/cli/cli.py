@@ -35,23 +35,15 @@ class CLIState:
         self._data_context = data_context
         self.assume_yes = assume_yes
 
-        if self.data_context is None:
-            context: Optional[DataContext] = self._get_data_context_from_config_file()
-            if context is not None:
-                self.data_context = context
-
-    def _get_data_context_from_config_file(self) -> Optional[DataContext]:
+    def get_data_context_from_config_file(self) -> DataContext:
         directory: str = toolkit.parse_cli_config_file_location(
             config_file_location=self.config_file_location
         ).get("directory")
-
-        if not directory:
-            return None
-
-        return toolkit.load_data_context_with_error_handling(
+        context: DataContext = toolkit.load_data_context_with_error_handling(
             directory=directory,
             from_cli_upgrade_command=False,
         )
+        return context
 
     @property
     def data_context(self):
@@ -179,7 +171,9 @@ def cli(ctx, v3_api, verbose, config_file_location, assume_yes):
     else:
         cli_message("Using v2 (Batch Kwargs) API")
 
-        ge_config_version: float = ctx.obj.data_context.get_config().config_version
+        ge_config_version: float = (
+            ctx.obj.get_data_context_from_config_file().get_config().config_version
+        )
         if ge_config_version >= FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE:
             raise ge_exceptions.InvalidDataContextConfigError(
                 f"Using the legacy v2 (Batch Kwargs) API with a recent config version ({ge_config_version}) is illegal."

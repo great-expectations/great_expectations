@@ -10,6 +10,8 @@ from great_expectations.core.usage_statistics.util import send_usage_message
 @click.pass_context
 def store(ctx):
     """Store operations"""
+    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
+
     usage_stats_prefix = f"cli.store.{ctx.invoked_subcommand}"
     send_usage_message(
         data_context=ctx.obj.data_context,

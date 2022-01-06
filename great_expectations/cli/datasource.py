@@ -46,6 +46,7 @@ class SupportedDatabaseBackends(enum.Enum):
 @click.pass_context
 def datasource(ctx):
     """Datasource operations"""
+    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
     usage_stats_prefix = f"cli.datasource.{ctx.invoked_subcommand}"
     send_usage_message(
         data_context=ctx.obj.data_context,
@@ -723,9 +724,7 @@ What are you processing your files with?
 
 
 def _get_files_helper(
-    selection: str,
-    context_root_dir: str,
-    datasource_name: Optional[str] = None,
+    selection: str, context_root_dir: str, datasource_name: Optional[str] = None
 ) -> Union[PandasYamlHelper, SparkYamlHelper]:
     helper_class_by_selection = {
         "1": PandasYamlHelper,
