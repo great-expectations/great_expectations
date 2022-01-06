@@ -8,9 +8,7 @@ from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.pretty_printing import cli_message
-from great_expectations.data_context.types.base import FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE
 from great_expectations.cli import toolkit
-import great_expectations.exceptions as ge_exceptions
 
 try:
     from colorama import init as init_colorama
@@ -168,16 +166,6 @@ def cli(ctx, v3_api, verbose, config_file_location, assume_yes):
         cli_message("Using v3 (Batch Request) API")
     else:
         cli_message("Using v2 (Batch Kwargs) API")
-
-        print(f'[ALEX_TEST] [V3-CLI] CTX: {ctx} ; TYPE: {str(type(ctx))}')
-        print(f'[ALEX_TEST] [V3-CLI] CTX.OBJ: {ctx.obj} ; TYPE: {str(type(ctx.obj))}')
-        print(f'[ALEX_TEST] [V3-CLI] CTX.OBJ.DATA_CONTEXT: {ctx.obj.data_context} ; TYPE: {str(type(ctx.obj.data_context))}')
-        print(f'[ALEX_TEST] [V3-CLI] CTX.OBJ.DATA_CONTEXT-GOTTEN: {ctx.obj.get_data_context_from_config_file()} ; TYPE: {str(type(ctx.obj.get_data_context_from_config_file()))}')
-        ge_config_version: float = ctx.obj.get_data_context_from_config_file().get_config().config_version
-        if ge_config_version >= FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE:
-            raise ge_exceptions.InvalidDataContextConfigError(
-                f"Using the legacy v2 (Batch Kwargs) API with a recent config version ({ge_config_version}) is illegal."
-            )
 
 
 def main():

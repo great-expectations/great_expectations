@@ -48,7 +48,7 @@ Steps
 1. Checkpoints can be run like applications from the command line by running:
 
 ```bash
-great_expectations --v3-api checkpoint run my_checkpoint
+great_expectations checkpoint run my_checkpoint
 Validation failed!
 ```
 
@@ -77,7 +77,7 @@ Steps
 1. First, generate the Python script with the command:
 
 ```bash
-great_expectations --v3-api checkpoint script my_checkpoint
+great_expectations checkpoint script my_checkpoint
 ```
 
 2. Next, you will see a message about where the Python script was created like:

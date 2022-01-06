@@ -5,12 +5,24 @@ import random
 import pytest
 from ruamel.yaml import YAML
 
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+    logger.debug(
+        "Unable to load pandas; install optional pandas dependency for support."
+    )
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
+from great_expectations.validator.validator import Validator
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -870,4 +882,147 @@ introspection:
 def test_batch_request_sql_with_schema(
     data_context_with_sql_data_connectors_including_schema_for_testing_get_batch,
 ):
-    context: DataContext = data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
+    context: DataContext = (
+        data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
+    )
+
+    df_table_expected_my_first_data_asset: pd.DataFrame = pd.DataFrame(
+        {"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]}
+    )
+    df_table_expected_my_second_data_asset: pd.DataFrame = pd.DataFrame(
+        {"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]}
+    )
+
+    batch_request: dict
+    validator: Validator
+    df_table_actual: pd.DataFrame
+
+    # Exercise RuntimeDataConnector using SQL query against database table with empty schema name.
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_runtime_data_connector",
+        "data_asset_name": "test_asset",
+        "runtime_parameters": {"query": "SELECT * FROM table_1"},
+        "batch_identifiers": {
+            "pipeline_stage_name": "core_processing",
+            "airflow_run_id": 1234567890,
+        },
+    }
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_first_data_asset)
+
+    # Exercise RuntimeDataConnector using SQL query against database table with non-empty ("main") schema name.
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_runtime_data_connector",
+        "data_asset_name": "test_asset",
+        "runtime_parameters": {"query": "SELECT * FROM main.table_2"},
+        "batch_identifiers": {
+            "pipeline_stage_name": "core_processing",
+            "airflow_run_id": 1234567890,
+        },
+    }
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_second_data_asset)
+
+    # Exercise InferredAssetSqlDataConnector using data_asset_name introspected with schema from table, named "table_1".
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_inferred_data_connector",
+        "data_asset_name": "main.table_1",
+    }
+    validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_first_data_asset)
+
+    # Exercise InferredAssetSqlDataConnector using data_asset_name introspected with schema from table, named "table_2".
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_inferred_data_connector",
+        "data_asset_name": "main.table_2",
+    }
+    validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_second_data_asset)
+
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_1" (implicitly).
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_configured_data_connector",
+        "data_asset_name": "my_first_data_asset",
+    }
+    validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_first_data_asset)
+
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_2" (implicitly).
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_configured_data_connector",
+        "data_asset_name": "my_second_data_asset",
+    }
+    validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_second_data_asset)
+
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_1" (explicitly).
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_configured_data_connector",
+        "data_asset_name": "table_1",
+    }
+    validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_first_data_asset)
+
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_2" (explicitly).
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_configured_data_connector",
+        "data_asset_name": "table_2",
+    }
+    validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_second_data_asset)

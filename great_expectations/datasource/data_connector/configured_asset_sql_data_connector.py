@@ -85,8 +85,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             )
 
             sqlalchemy_execution_engine: SqlAlchemyExecutionEngine = cast(
-                SqlAlchemyExecutionEngine,
-                self._execution_engine
+                SqlAlchemyExecutionEngine, self._execution_engine
             )
             rows = sqlalchemy_execution_engine.engine.execute(split_query).fetchall()
 

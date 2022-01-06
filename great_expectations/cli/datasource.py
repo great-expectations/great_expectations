@@ -723,9 +723,7 @@ What are you processing your files with?
 
 
 def _get_files_helper(
-    selection: str,
-    context_root_dir: str,
-    datasource_name: Optional[str] = None,
+    selection: str, context_root_dir: str, datasource_name: Optional[str] = None
 ) -> Union[PandasYamlHelper, SparkYamlHelper]:
     helper_class_by_selection = {
         "1": PandasYamlHelper,

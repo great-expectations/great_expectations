@@ -4,6 +4,37 @@ title: Changelog
 
 ### Develop
 
+### 0.14.0
+* [FEATURE] Cloud-399/Cloud-519: Add Cloud Notification Action (#3891)
+* [FEATURE] `great_expectations_contrib` CLI tool (#3909)
+* [FEATURE] Update `dependency_graph` pipeline to use `dgtest` CLI (#3912)
+* [FEATURE] Incorporate updated dgtest CLI tool in experimental pipeline (#3927)
+* [FEATURE] Add YAML config option to disable progress bars (#3794)
+* [FEATURE] Change Default CLI Flag To V3 (#3943)
+* [BUGFIX] Fix internal links to docs that may be rendered incorrectly (#3915)
+* [BUGFIX] Update SlackNotificationAction to send slack_token and slack_channel to send_slack_notification function (#3873) (thanks @Calvo94)
+* [BUGFIX] `CheckDocsDependenciesChanges` to only handle `.py` files (#3936)
+* [BUGFIX] Provide ability to capture schema_name for SQL-based datasources; fix method usage bugs. (#3938)
+* [BUGFIX] Ensure that Jupyter Notebook cells convert JSON strings to Python-compliant syntax (#3939)
+* [BUGFIX] Cloud-519/cloud notification action return type (#3942)
+* [BUGFIX] Fix issue with regex groups in `check_docs_deps` (#3949)
+* [DOCS] Created link checker, fixed broken links (#3930)
+* [DOCS] adding the link checker to the build (#3933)
+* [DOCS] Add name to link checker in build (#3935)
+* [DOCS] GCP Deployment Pattern (#3926)
+* [DOCS] remove v3api flag in documentation (#3944)
+* [DOCS] Make corrections in HOWTO Guides for Getting Data from SQL Sources (#3945)
+* [DOCS] Tiny doc fix (#3948)
+* [MAINTENANCE] Fix breaking change caused by the new version of ruamel.yaml (#3908)
+* [MAINTENANCE] Drop extraneous print statement in self_check/util.py. (#3905)
+* [MAINTENANCE] Raise exceptions on init in cloud mode (#3913)
+* [MAINTENANCE] removing commented requirement (#3920)
+* [MAINTENANCE] Patch for atomic renderer snapshot tests (#3918)
+* [MAINTENANCE] Remove types/expectations.py (#3928)
+* [MAINTENANCE] Tests/test data class serializable dot dict (#3924)
+* [MAINTENANCE] Ensure that concurrency is backwards compatible (#3872)
+* [MAINTENANCE] Fix issue where meta was not recognized as a kwarg (#3852)
+
 ### 0.13.49
 * [FEATURE] PandasExecutionEngine is able to instantiate Google Storage client in Google Cloud Composer (#3896)
 * [BUGFIX] Revert change to ExpectationSuite constructor (#3902)

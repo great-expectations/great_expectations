@@ -27,6 +27,12 @@ class ExpectColumnBootstrappedKsTestPValueToBeGreaterThan(TableExpectation):
     metric_dependencies = tuple()
     success_keys = ()
     default_kwarg_values = {}
+    args_keys = (
+        "column",
+        "distribution",
+        "p_value",
+        "params",
+    )
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

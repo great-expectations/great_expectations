@@ -38,9 +38,9 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.datasource import (
-    SqlAlchemyDatasource,
     LegacyDatasource,
     SimpleSqlalchemyDatasource,
+    SqlAlchemyDatasource,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine

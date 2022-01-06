@@ -34,7 +34,7 @@ Thus, the intention is for this Expectation Suite to be edited and updated to be
 :::note
 You can access this same functionality from the Great Expectations CLI by running
 ```console
-great_expectations --v3-api suite new --profile
+great_expectations suite new --profile
 ```
 
 If you go that route, you can follow along in the resulting Jupyter Notebook instead of using this guide.
