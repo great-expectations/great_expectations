@@ -133,7 +133,7 @@ def test__get_description_diagnostics():
         snake_name="expect_column_values_to_be_awesome",
         short_description="Lo, here is a docstring",
         docstring="""Lo, here is a docstring
-        
+
         It has more to it.
         """,
     )
