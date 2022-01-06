@@ -54,7 +54,7 @@ def parse_definition_nodes_from_file(file: str) -> Dict[str, Set[str]]:
 
     # Parse all 'def ...' and 'class ...' statements in the source code
     definition_nodes = []
-    for node in ast.walk(root):
+    for node in root.body:
         if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
             name = node.name
             definition_nodes.append(name)
@@ -155,6 +155,7 @@ def retrieve_symbols_from_file(file: str) -> Set[str]:
 
     symbols = set()
     for node in ast.walk(root):
+        # If there is a function/constructor call, make sure we pick it up
         if isinstance(node, ast.Call):
             func = node.func
             if isinstance(func, ast.Attribute):
