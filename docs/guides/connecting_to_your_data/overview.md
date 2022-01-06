@@ -1,7 +1,7 @@
 ---
 title: "Connect to data: Overview"
 ---
-# [![Connect to data icon](../../images/universal_map/Outlet-active.png)](setup_overview.md) Connect to data: Overview 
+# [![Connect to data icon](../../images/universal_map/Outlet-active.png)](overview.md) Connect to data: Overview 
 
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import Tabs from '@theme/Tabs';
@@ -79,7 +79,7 @@ datasource_config = {
     "data_connectors": {
         "<name_of_your_data_connector>": {
             "class_name": "<class_of_data_connector>",
-            "<additional_keys_based_on_source_data_system": "<corresponding_values>"
+            "<additional_keys_based_on_source_data_system>": "<corresponding_values>"
         }
     }
 }
@@ -161,7 +161,7 @@ What is the point of configuring a Datasource if you can't easily use it in the 
   ]}>
   <TabItem value="yaml">
 
-This convenience function takes in a series of named arguements corresponding to the keys in your `datasource_yaml` string.  Fortunately, python and the `yaml` module provide a convenient way to unpack yaml strings into named arguements so you don't have to. 
+The function `add_datasource()` takes in a series of named arguments corresponding to the keys in your `datasource_yaml` string.  Fortunately, python and the `yaml` module provide a convenient way to unpack yaml strings into named arguements so you don't have to. 
 
 First, you will want to import the yaml module with the command:
 
@@ -171,15 +171,15 @@ from ruamel import yaml
 
 After that, the following code snippet will unpack your yaml string and save your Datasource configuration to the Data Context:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L44
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L44
 ```
 
 </TabItem>
 <TabItem value="python">
 
-This convenience function takes in a series of named arguements corresponding to the keys in your `datasource_config` dictionary.  Fortunately, python provides a convenient way to unpack dictionaries into named arguements, so you don't have to. The following code snippet will unpack the dictionary and save your Datasource configuration to the Data Context.
+The function `add_datasource()` takes in a series of named arguments corresponding to the keys in your `datasource_config` dictionary.  Fortunately, python provides a convenient way to unpack dictionaries into named arguements, so you don't have to. The following code snippet will unpack the dictionary and save your Datasource configuration to the Data Context.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py#L44
+```python file=../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py#L44
 ```
 
 </TabItem>
