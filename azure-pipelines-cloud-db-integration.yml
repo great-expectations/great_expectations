@@ -69,8 +69,8 @@ stages:
               searchFolder: junit
               testResultsFiles: test-results.xml
 
-          - publish: junit/benchmark.json
-            artifact: BenchmarkResult
+#          - publish: junit/benchmark.json
+#            artifact: BenchmarkResult
 
           # The pip freeze output could be helpful to reproduce performance test results.
           - publish: pip-freeze.txt
