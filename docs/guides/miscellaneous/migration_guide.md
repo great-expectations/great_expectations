@@ -187,7 +187,7 @@ Migrating Datasource configurations that contain connections to the cloud or dat
 
 :::tip
 
-Before doing the migration, we recommend that you create a backup copy of your V2 Checkpoints folder.
+Before doing the migration, we recommend that you create a backup of your V2 Checkpoints.
 
 :::
 
