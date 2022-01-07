@@ -247,6 +247,12 @@ Congratulations!<br/>&#127881; You've just built your first Custom Expectation! 
 </b></p>  
 </div>
 
+:::note
+If you've already built a [Custom Column Aggregate Expectation](how_to_create_custom_column_aggregate_expectations.md),
+you may notice that we didn't implement a `_validate` method here. While we have to explicitly create this functionality for Column Aggregate Expectations,
+Column Map Expectations come with that functionality built in; no extra `_validate` needed!
+:::
+
 #### 7. Update `library_metadata` (Optional)
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your PR. For example:
