@@ -33,10 +33,7 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.util import (
-    legacy_method_parameters,
-    render_evaluation_parameter_string,
-)
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
@@ -139,7 +136,7 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
-    legacy_method_parameters = legacy_method_parameters
+    args_keys = None
 
     def __init__(self, configuration: Optional[ExpectationConfiguration] = None):
         if configuration is not None:
@@ -878,7 +875,8 @@ class Expectation(metaclass=MetaExpectation):
             meta=meta,
         )
 
-    def run_diagnostics(self):
+
+    def run_diagnostics(self, pretty_print=True):
         """
         Produce a diagnostic report about this expectation.
         The current uses for this method's output are

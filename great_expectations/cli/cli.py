@@ -4,10 +4,15 @@ from typing import Optional
 
 import click
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
+from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.data_context.types.base import (
+    FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE,
+)
 
 try:
     from colorama import init as init_colorama
@@ -22,13 +27,23 @@ class CLIState:
         self,
         v3_api: bool = True,
         config_file_location: Optional[str] = None,
-        data_context: DataContext = None,
+        data_context: Optional[DataContext] = None,
         assume_yes: bool = False,
     ):
         self.v3_api = v3_api
         self.config_file_location = config_file_location
         self._data_context = data_context
         self.assume_yes = assume_yes
+
+    def get_data_context_from_config_file(self) -> DataContext:
+        directory: str = toolkit.parse_cli_config_file_location(
+            config_file_location=self.config_file_location
+        ).get("directory")
+        context: DataContext = toolkit.load_data_context_with_error_handling(
+            directory=directory,
+            from_cli_upgrade_command=False,
+        )
+        return context
 
     @property
     def data_context(self):
@@ -155,6 +170,14 @@ def cli(ctx, v3_api, verbose, config_file_location, assume_yes):
         cli_message("Using v3 (Batch Request) API")
     else:
         cli_message("Using v2 (Batch Kwargs) API")
+
+        ge_config_version: float = (
+            ctx.obj.get_data_context_from_config_file().get_config().config_version
+        )
+        if ge_config_version >= FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE:
+            raise ge_exceptions.InvalidDataContextConfigError(
+                f"Using the legacy v2 (Batch Kwargs) API with a recent config version ({ge_config_version}) is illegal."
+            )
 
 
 def main():
