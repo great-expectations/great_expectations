@@ -23,7 +23,7 @@ datasources:
     batch_kwargs_generators:
       subdir_reader:
         class_name: SubdirReaderBatchKwargsGenerator
-        base_directory: ../../
+        base_directory: ../../../
 
 
 # This config file supports variable substitution which enables: 1) keeping
