@@ -51,7 +51,7 @@ title: 'Review and next steps'
 
 :::note Prerequisites
 
-- Completed [Step 4: Validate Data](tutorial_validate_data.md) of this tutorial.
+- Completed [Step 4: Validate Data](./tutorial_validate_data.md) of this tutorial.
 
 :::
 

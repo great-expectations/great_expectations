@@ -51,7 +51,7 @@ title: 'Tutorial, Step 3: Create Expectations'
 
 :::note Prerequisites
 
-- Completed [Step 2: Connect to Data](tutorial_connect_to_data.md) of this tutorial.
+- Completed [Step 2: Connect to Data](./tutorial_connect_to_data.md) of this tutorial.
 
 :::
 
@@ -151,7 +151,7 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 **Cell 4**
 ![Cell4](../../images/getting_started_tutorial/tutorial_create_expectations_cell4.png)
 
-4. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the Validation Results. *We will explain the validation step later in the next step, [Step 4: Validate Data](tutorial_validate_data.md).*
+4. The last cell does several things again: It saves the Expectation Suite to disk, runs the validation against the loaded data batch, and then builds and opens Data Docs, so you can look at the Validation Results. *We will explain the validation step later in the next step, [Step 4: Validate Data](./tutorial_validate_data.md).*
 
 For purposes of this tutorial, the default values in all of these cells (except for the second one, which we changed to include the `passenger_count` field) provide the configurations and execute the steps that we need them to.  So as long as you've made that one change, you're ready to continue.
 
@@ -190,4 +190,4 @@ These Expectations are not intended to be very smart. Instead, the goal is to qu
   </div>
 </details>
 
-For the purposes of this tutorial, the Expectations created by the Profiler are all we need.  On to [Step 4: Validate your data](tutorial_validate_data.md)!
+For the purposes of this tutorial, the Expectations created by the Profiler are all we need.  On to [Step 4: Validate your data](./tutorial_validate_data.md)!

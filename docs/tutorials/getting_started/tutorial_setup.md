@@ -177,4 +177,4 @@ Your Data Context will contain the entirety of your Great Expectations project. 
   </div>
 </details>
 
-Congratulations, that's all there is to Step 1: Setup with Great Expectations.  You've finished the first step!  Let's move on to [Step 2: Connect to Data](tutorial_connect_to_data.md)
+Congratulations, that's all there is to Step 1: Setup with Great Expectations.  You've finished the first step!  Let's move on to [Step 2: Connect to Data](./tutorial_connect_to_data.md)
