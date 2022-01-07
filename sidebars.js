@@ -126,7 +126,7 @@ module.exports = {
               items: [
                 'guides/connecting_to_your_data/database/athena',
                 'guides/connecting_to_your_data/database/bigquery',
-                // 'guides/connecting_to_your_data/database/mssql',
+                'guides/connecting_to_your_data/database/mssql',
                 'guides/connecting_to_your_data/database/mysql',
                 'guides/connecting_to_your_data/database/postgres',
                 'guides/connecting_to_your_data/database/redshift',
