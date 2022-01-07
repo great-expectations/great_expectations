@@ -47,7 +47,13 @@ See our [guides for the installation process](/docs/guides/setup/installation/in
 
 ### 3. Initialize a Data Context
 
-Your Data Context contains the entirety of your Great Expectations project and provides the entry point for all of the primary methods you will use to configure and interact with Great Expectations.  That's why the first thing you'll do once you've installed Great Expectations will be to initialize your Data Context.  This is another one-line command.  Simply go to the root folder for your project and execute:
+Your Data Context contains the entirety of your Great Expectations project and provides the entry point for all of the primary methods you will use to configure and interact with Great Expectations.  At every step in your use of Great Expectations, the Data Context provides easy access to the key elements you will need to interact with.  Furthermore, the Data Context will internally manage various classes so that you don't have to.  Because of this, once you have completed the configurations in your Setup there will be relatively few objects you will need to manage to get Great Expectations working for you.
+
+That's why the first thing you'll do once you've installed Great Expectations will be to initialize your Data Context.  
+
+![what the data context does for you](../images/overview_illustrations/data_context_does_for_you.png)
+
+Initializing your Data Context is another one-line command.  Simply go to the root folder for your project and execute:
 
 ```markdown title="Terminal command:"
 great_expectations init
