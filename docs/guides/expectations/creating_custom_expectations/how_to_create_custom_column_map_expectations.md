@@ -142,7 +142,7 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 
 * `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
-	* `include_in_gallery`: set it to `True` if you want this test case to be visible in the Gallery as an example.
+	* `include_in_gallery`: This must be set to `True` if you want this test case to be visible in the Gallery as an example.
 	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mostly_threes", "mostly": 0.6}` in the example above is equivalent to `expect_column_values_to_equal_three(column=mostly_threes, mostly=0.6)`
 	* `out` is based on the Validation Result returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
@@ -162,7 +162,13 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 
 #### 6. Implement your Metric and connect it to your Expectation
 
-This is the stage where you implement the actual business logic for your `Expectation`. To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your `Expectation`. By the time your Expectation is complete, your Metric will have functions for all three Execution Engines supported by Great Expectations. For now, we're only going to define one.
+This is the stage where you implement the actual business logic for your Expectation.   
+To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your Expectation.  
+By the time your Expectation is complete, your Metric will have functions for all three Execution Engines supported by Great Expectations. For now, we're only going to define one.  
+  
+:::note  
+Metrics answer questions about your data posed by your Expectation, <br/> and allow your Expectation to judge whether your data meets ***your*** expectations.  
+:::
 
 Your Metric function will have the `@column_condition_partial` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate whether values equal 3 using the PandasExecutionEngine.
 
@@ -235,7 +241,11 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 ...
 ```
 
-Congratulations, you now have a minimal working version of a Custom Expectation!
+<div style={{"text-align":"center"}}>  
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>  
+Congratulations!<br/>&#127881; You've just built your first Custom Expectation! &#127881;  
+</b></p>  
+</div>
 
 #### 7. Update `library_metadata` (Optional)
 
