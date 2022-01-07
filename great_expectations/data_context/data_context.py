@@ -12,7 +12,7 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
 
 import requests
 from dateutil.parser import parse
@@ -104,6 +104,7 @@ from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
+from great_expectations.profile.base import DataAssetProfiler
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.util import verify_dynamic_loading_support
@@ -2620,18 +2621,18 @@ class BaseDataContext:
 
     def profile_datasource(
         self,
-        datasource_name,
-        batch_kwargs_generator_name=None,
-        data_assets=None,
-        max_data_assets=20,
-        profile_all_data_assets=True,
-        profiler=BasicDatasetProfiler,
-        profiler_configuration=None,
-        dry_run=False,
-        run_id=None,
-        additional_batch_kwargs=None,
-        run_name=None,
-        run_time=None,
+        datasource_name: str,
+        batch_kwargs_generator_name: Optional[str] = None,
+        data_assets: Optional[List[str]] = None,
+        max_data_assets: int = 20,
+        profile_all_data_assets: bool = True,
+        profiler: Type[DataAssetProfiler] = BasicDatasetProfiler,
+        profiler_configuration: Optional[dict] = None,
+        dry_run: bool = False,
+        run_id: Optional[str] = None,
+        additional_batch_kwargs: Optional[dict] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[str] = None,
     ):
         """Profile the named datasource using the named profiler.
 
@@ -2659,7 +2660,11 @@ class BaseDataContext:
 
         # We don't need the datasource object, but this line serves to check if the datasource by the name passed as
         # an arg exists and raise an error if it does not.
-        datasource = self.get_datasource(datasource_name)
+        try:
+            self.get_datasource(datasource_name)
+        except ValueError as e:
+            logger.error("Could not profile datasource: %s", e)
+            raise
 
         if not dry_run:
             logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
@@ -2670,64 +2675,12 @@ class BaseDataContext:
 
         data_asset_names_dict = self.get_available_data_asset_names(datasource_name)
 
-        available_data_asset_name_list = []
-        try:
-            datasource_data_asset_names_dict = data_asset_names_dict[datasource_name]
-        except KeyError:
-            # KeyError will happen if there is not datasource
-            raise ge_exceptions.ProfilerError(f"No datasource {datasource_name} found.")
-
-        if batch_kwargs_generator_name is None:
-            # if no generator name is passed as an arg and the datasource has only
-            # one generator with data asset names, use it.
-            # if ambiguous, raise an exception
-            for name in datasource_data_asset_names_dict.keys():
-                if batch_kwargs_generator_name is not None:
-                    profiling_results = {
-                        "success": False,
-                        "error": {
-                            "code": DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
-                        },
-                    }
-                    return profiling_results
-
-                if len(datasource_data_asset_names_dict[name]["names"]) > 0:
-                    available_data_asset_name_list = datasource_data_asset_names_dict[
-                        name
-                    ]["names"]
-                    batch_kwargs_generator_name = name
-
-            if batch_kwargs_generator_name is None:
-                profiling_results = {
-                    "success": False,
-                    "error": {
-                        "code": DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
-                    },
-                }
-                return profiling_results
-        else:
-            # if the generator name is passed as an arg, get this generator's available data asset names
-            try:
-                available_data_asset_name_list = datasource_data_asset_names_dict[
-                    batch_kwargs_generator_name
-                ]["names"]
-            except KeyError:
-                raise ge_exceptions.ProfilerError(
-                    "batch kwargs Generator {} not found. Specify the name of a generator configured in this datasource".format(
-                        batch_kwargs_generator_name
-                    )
-                )
-
-        available_data_asset_name_list = sorted(
-            available_data_asset_name_list, key=lambda x: x[0]
+        available_data_asset_name_list = (
+            self._populate_available_data_asset_name_list_from_datasource(
+                data_asset_names_dict, datasource_name, batch_kwargs_generator_name
+            )
         )
 
-        if len(available_data_asset_name_list) == 0:
-            raise ge_exceptions.ProfilerError(
-                "No Data Assets found in Datasource {}. Used batch kwargs generator: {}.".format(
-                    datasource_name, batch_kwargs_generator_name
-                )
-            )
         total_data_assets = len(available_data_asset_name_list)
 
         if isinstance(data_assets, list) and len(data_assets) > 0:
@@ -2850,6 +2803,70 @@ class BaseDataContext:
 
         profiling_results["success"] = True
         return profiling_results
+
+    def _populate_available_data_asset_name_list_from_datasource(
+        self, data_asset_names_dict, datasource_name, batch_kwargs_generator_name
+    ):
+        available_data_asset_name_list = []
+        try:
+            datasource_data_asset_names_dict = data_asset_names_dict[datasource_name]
+        except KeyError as e:
+            # KeyError will happen if there is not datasource
+            logger.error("Could not profile datasource: %s", e)
+            raise ge_exceptions.ProfilerError(f"No datasource {datasource_name} found.")
+
+        if batch_kwargs_generator_name is None:
+            # if no generator name is passed as an arg and the datasource has only
+            # one generator with data asset names, use it.
+            # if ambiguous, raise an exception
+            for name in datasource_data_asset_names_dict.keys():
+                if batch_kwargs_generator_name is not None:
+                    profiling_results = {
+                        "success": False,
+                        "error": {
+                            "code": DataContext.PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND
+                        },
+                    }
+                    return profiling_results
+
+                if len(datasource_data_asset_names_dict[name]["names"]) > 0:
+                    available_data_asset_name_list = datasource_data_asset_names_dict[
+                        name
+                    ]["names"]
+                    batch_kwargs_generator_name = name
+
+            if batch_kwargs_generator_name is None:
+                profiling_results = {
+                    "success": False,
+                    "error": {
+                        "code": DataContext.PROFILING_ERROR_CODE_NO_BATCH_KWARGS_GENERATORS_FOUND
+                    },
+                }
+                return profiling_results
+        else:
+            # if the generator name is passed as an arg, get this generator's available data asset names
+            try:
+                available_data_asset_name_list = datasource_data_asset_names_dict[
+                    batch_kwargs_generator_name
+                ]["names"]
+            except KeyError:
+                raise ge_exceptions.ProfilerError(
+                    "batch kwargs Generator {} not found. Specify the name of a generator configured in this datasource".format(
+                        batch_kwargs_generator_name
+                    )
+                )
+
+        available_data_asset_name_list = sorted(
+            available_data_asset_name_list, key=lambda x: x[0]
+        )
+
+        if len(available_data_asset_name_list) == 0:
+            raise ge_exceptions.ProfilerError(
+                "No Data Assets found in Datasource {}. Used batch kwargs generator: {}.".format(
+                    datasource_name, batch_kwargs_generator_name
+                )
+            )
+        return available_data_asset_name_list
 
     def profile_data_asset(
         self,
