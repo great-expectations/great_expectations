@@ -79,6 +79,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         data_docs_exception_message: str,
         kwargs: dict,
     ) -> Optional[_rendered_component_type]:
+        """Helper method to render list render_objects - refer to `render` for more context"""
         blocks = []
         has_failed_evr = (
             False if isinstance(render_object[0], ExpectationValidationResult) else None
@@ -215,6 +216,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
         data_docs_exception_message: str,
         kwargs: dict,
     ) -> Any:
+        """Helper method to render non-list render_objects - refer to `render` for more context"""
         expectation_type = cls._get_expectation_type(render_object)
 
         content_block_fn = get_renderer_impl(
