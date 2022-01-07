@@ -1,1 +1,0 @@
-great_expectations checkpoint run test_v2_checkpoint_v2_suite
