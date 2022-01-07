@@ -22,7 +22,7 @@ Here are some reasons why you may wish to do this but please contact us if there
 <Prerequisites>
 
 - Configured a [Data Context](../../tutorials/getting_started/initialize_a_data_context.md).
-- Have your Data Context configured to save Expectations to your filesystem (please see [How to configure an Expectation store to use a filesystem](../../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem)) or another Expectation Store if you are in a hosted environment.
+- Have your Data Context configured to save Expectations to your filesystem (please see [How to configure an Expectation store to use a filesystem](../../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)) or another Expectation Store if you are in a hosted environment.
 
 </Prerequisites>
 
@@ -34,7 +34,7 @@ Steps
    From the command line, run:
 
    ```bash
-   great_expectations --v3-api suite new
+   great_expectations suite new
    ```
 
 2. **Create Expectation Configurations in the helper notebook**
@@ -123,4 +123,4 @@ Steps
 
     Run the final cell in the helper notebook to save your Expectation Suite.
 
-    This will create a JSON file with your Expectation Suite in the Store you have configured, which you can then load and use for [Validation](../../reference/validation).
+    This will create a JSON file with your Expectation Suite in the Store you have configured, which you can then load and use for [Validation](../../reference/validation.md).

@@ -277,6 +277,7 @@ def test_cli_datasource_new_connection_string(
                 "default_inferred_data_connector_name": {
                     "class_name": "InferredAssetSqlDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
+                    "include_schema_name": True,
                 },
             },
             "name": "my_datasource",

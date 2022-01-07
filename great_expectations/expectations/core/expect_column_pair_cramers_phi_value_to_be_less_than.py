@@ -41,6 +41,10 @@ class ExpectColumnPairCramersPhiValueToBeLessThan(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column_A",
+        "column_B",
+    )
 
     @classmethod
     def _atomic_prescriptive_template(

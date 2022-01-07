@@ -70,6 +70,10 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column_set",
+        "exact_match",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
