@@ -1,0 +1,45 @@
+{
+  "data_asset_type": "Dataset",
+  "expectation_suite_name": "finally",
+  "expectations": [
+    {
+      "expectation_type": "expect_table_columns_to_match_ordered_list",
+      "kwargs": {
+        "column_list": [
+          "Unnamed: 0",
+          "Name",
+          "PClass",
+          "Age",
+          "Sex",
+          "Survived",
+          "SexCode"
+        ]
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "kwargs": {
+        "max_value": 1313,
+        "min_value": 1313
+      },
+      "meta": {}
+    }
+  ],
+  "meta": {
+    "citations": [
+      {
+        "batch_kwargs": {
+          "data_asset_name": "Titanic",
+          "datasource": ".__dir",
+          "path": "/Users/work/Development/migration_guide_sandbox/old_vs_new_expectation_suite/v2/great_expectations/.././Titanic.csv"
+        },
+        "batch_markers": null,
+        "batch_parameters": null,
+        "citation_date": "20220106T222442.829640Z",
+        "comment": "New suite added via CLI"
+      }
+    ],
+    "great_expectations_version": "0.13.1"
+  }
+}
