@@ -39,8 +39,8 @@ class ContentBlockRenderer(Renderer):
         cls, render_object: Any, **kwargs
     ) -> Union[_rendered_component_type, Any, None]:
         cls.validate_input(render_object)
-        exception_list_content_block: Optional[bool] = kwargs.get(
-            "exception_list_content_block"
+        exception_list_content_block: bool = kwargs.get(
+            "exception_list_content_block", False
         )
 
         data_docs_exception_message = f"""\
@@ -74,7 +74,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
     def _render_list(
         cls,
         render_object: list,
-        exception_list_content_block: Optional[bool],
+        exception_list_content_block: bool,
         runtime_configuration: dict,
         data_docs_exception_message: str,
         kwargs: dict,
@@ -138,9 +138,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
             else:
                 if isinstance(obj_, ExpectationValidationResult):
                     content_block_fn = (
-                        cls._get_content_block_fn("_missing_content_block_fn")
-                        if not exception_list_content_block
-                        else cls._missing_content_block_fn
+                        cls._missing_content_block_fn
+                        if exception_list_content_block
+                        else cls._get_content_block_fn("_missing_content_block_fn")
                     )
                     expectation_config = obj_.expectation_config
                     result = content_block_fn(
@@ -211,7 +211,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
     def _render_other(
         cls,
         render_object: Any,
-        exception_list_content_block: Optional[bool],
+        exception_list_content_block: bool,
         runtime_configuration: dict,
         data_docs_exception_message: str,
         kwargs: dict,
@@ -264,9 +264,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
         else:
             if isinstance(render_object, ExpectationValidationResult):
                 content_block_fn = (
-                    cls._get_content_block_fn("_missing_content_block_fn")
-                    if not exception_list_content_block
-                    else cls._missing_content_block_fn
+                    cls._missing_content_block_fn
+                    if exception_list_content_block
+                    else cls._get_content_block_fn("_missing_content_block_fn")
                 )
                 result = content_block_fn(
                     result=render_object,
