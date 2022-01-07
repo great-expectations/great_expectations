@@ -155,56 +155,8 @@ class ValidationResultsPageRenderer(Renderer):
         collapse_content_blocks = [
             self._render_validation_info(validation_results=validation_results)
         ]
-
-        if validation_results.meta.get("batch_markers"):
-            collapse_content_blocks.append(
-                self._render_nested_table_from_dict(
-                    input_dict=validation_results["meta"].get("batch_markers"),
-                    header="Batch Markers",
-                )
-            )
-
-        if validation_results.meta.get("batch_kwargs"):
-            collapse_content_blocks.append(
-                self._render_nested_table_from_dict(
-                    input_dict=validation_results.meta.get("batch_kwargs"),
-                    header="Batch Kwargs",
-                )
-            )
-
-        if validation_results.meta.get("batch_parameters"):
-            collapse_content_blocks.append(
-                self._render_nested_table_from_dict(
-                    input_dict=validation_results.meta.get("batch_parameters"),
-                    header="Batch Parameters",
-                )
-            )
-
-        if validation_results.meta.get("batch_spec"):
-            collapse_content_blocks.append(
-                self._render_nested_table_from_dict(
-                    input_dict=validation_results.meta.get("batch_spec"),
-                    header="Batch Spec",
-                )
-            )
-
-        if validation_results.meta.get("batch_request"):
-            collapse_content_blocks.append(
-                self._render_nested_table_from_dict(
-                    input_dict=validation_results.meta.get("batch_request"),
-                    header="Batch Definition",
-                )
-            )
-
-        collapse_content_block = CollapseContent(
-            **{
-                "collapse_toggle_link": "Show more info...",
-                "collapse": collapse_content_blocks,
-                "styling": {
-                    "body": {"classes": ["card", "card-body"]},
-                    "classes": ["col-12", "p-1"],
-                },
-            }
+        collapse_content_block = self._generate_collapse_content_block(
+            collapse_content_blocks, validation_results
         )
 
         if not self.run_info_at_end:
@@ -281,6 +233,42 @@ class ValidationResultsPageRenderer(Renderer):
                 "utm_medium": "validation-results-page",
             }
         )
+
+    def _generate_collapse_content_block(
+        self,
+        collapse_content_blocks: List[RenderedTableContent],
+        validation_results: ExpectationSuiteValidationResult,
+    ) -> CollapseContent:
+
+        attrs = [
+            ("batch_markers", "Batch Markers"),
+            ("batch_kwargs", "Batch Kwargs"),
+            ("batch_parameters", "Batch Parameters"),
+            ("batch_spec", "Batch Spec"),
+            ("batch_request", "Batch Definition"),
+        ]
+
+        for attr, header in attrs:
+            if validation_results.meta.get(attr):
+                collapse_content_blocks.append(
+                    self._render_nested_table_from_dict(
+                        input_dict=validation_results.meta.get(attr),
+                        header=header,
+                    )
+                )
+
+        collapse_content_block = CollapseContent(
+            **{
+                "collapse_toggle_link": "Show more info...",
+                "collapse": collapse_content_blocks,
+                "styling": {
+                    "body": {"classes": ["card", "card-body"]},
+                    "classes": ["col-12", "p-1"],
+                },
+            }
+        )
+
+        return collapse_content_block
 
     @classmethod
     def _get_meta_properties_notes(cls, suite_meta):
