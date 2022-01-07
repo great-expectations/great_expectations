@@ -66,7 +66,9 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # Need all columns of the table for the purposes of reporting entire rows satisfying unexpected condition logic.
         table_columns = kwargs.get("_table_columns")
 
-        table = kwargs.get("_table")
+        table = kwargs.get(
+            "_table"
+        )  # Note that here, "table" is of the "sqlalchemy.sql.selectable.Subquery" type.
 
         # First, obtain the SQLAlchemy "FromClause" version of the original "table" for the purposes of gaining the
         # "FromClause.c" attribute, which is a namespace of all the columns contained within the "FROM" clause (these
@@ -74,10 +76,11 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         table_columns_selector = [
             sa.column(column_name) for column_name in table_columns
         ]
-        original_table_clause = sa.table(
-            table.name,
-            *tuple(table_columns_selector),
-        ).alias("original_table_clause")
+        original_table_clause = (
+            sa.select(table_columns_selector)
+            .select_from(table)
+            .alias("original_table_clause")
+        )
 
         # Second, "SELECT FROM" the original table, represented by the "FromClause" object, querying all columns of the
         # table and the count of occurrences of distinct "compound" (i.e., group, as specified by "column_list") values.
@@ -94,7 +97,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # The above "group_count_query", if executed, will produce the result set containing the number of rows that
         # equals the number of distinct values of the group -- unique grouping (e.g., as in a multi-column primary key).
         # Hence, in order for the "_num_rows" column values to provide an entry for each row of the original table, the
-        # "SELECT FROM" of "group_count_query" must undergo an "INNER JOIN" operation with the "original_table"
+        # "SELECT FROM" of "group_count_query" must undergo an "INNER JOIN" operation with the "original_table_clause"
         # object, whereby all table columns in the two "FromClause" objects must match, respectively, as the conditions.
         conditions = sa.and_(
             *(
