@@ -337,7 +337,7 @@ def column_reflection_fallback(
             sa.column("schema_id"),
             sa.column("name"),
             schema="sys",
-        ).alias("sys_tables_table")
+        ).alias("sys_tables_table_clause")
         tables_table_query: Select = (
             sa.select(
                 [
@@ -349,7 +349,7 @@ def column_reflection_fallback(
             .select_from(tables_table)
             .alias("sys_tables_table_subquery")
         )
-        columns_table: TableClause = sa.table(
+        columns_table_clause: TableClause = sa.table(
             "columns",
             sa.column("object_id"),
             sa.column("user_type_id"),
@@ -358,35 +358,35 @@ def column_reflection_fallback(
             sa.column("max_length"),
             sa.column("precision"),
             schema="sys",
-        ).alias("sys_columns_table")
+        ).alias("sys_columns_table_clause")
         columns_table_query: Select = (
             sa.select(
                 [
-                    columns_table.c.object_id.label("object_id"),
-                    columns_table.c.user_type_id.label("user_type_id"),
-                    columns_table.c.column_id.label("column_id"),
-                    columns_table.c.name.label("column_name"),
-                    columns_table.c.max_length.label("column_max_length"),
-                    columns_table.c.precision.label("column_precision"),
+                    columns_table_clause.c.object_id.label("object_id"),
+                    columns_table_clause.c.user_type_id.label("user_type_id"),
+                    columns_table_clause.c.column_id.label("column_id"),
+                    columns_table_clause.c.name.label("column_name"),
+                    columns_table_clause.c.max_length.label("column_max_length"),
+                    columns_table_clause.c.precision.label("column_precision"),
                 ]
             )
-            .select_from(columns_table)
+            .select_from(columns_table_clause)
             .alias("sys_columns_table_subquery")
         )
-        types_table: TableClause = sa.table(
+        types_table_clause: TableClause = sa.table(
             "types",
             sa.column("user_type_id"),
             sa.column("name"),
             schema="sys",
-        ).alias("sys_types_table")
+        ).alias("sys_types_table_clause")
         types_table_query: Select = (
             sa.select(
                 [
-                    types_table.c.user_type_id.label("user_type_id"),
-                    types_table.c.name.label("column_data_type"),
+                    types_table_clause.c.user_type_id.label("user_type_id"),
+                    types_table_clause.c.name.label("column_data_type"),
                 ]
             )
-            .select_from(types_table)
+            .select_from(types_table_clause)
             .alias("sys_types_table_subquery")
         )
         inner_join_conditions: BinaryExpression = sa.and_(

@@ -74,10 +74,10 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         table_columns_selector = [
             sa.column(column_name) for column_name in table_columns
         ]
-        original_table = sa.table(
+        original_table_clause = sa.table(
             table.name,
             *tuple(table_columns_selector),
-        ).alias("original_table")
+        ).alias("original_table_clause")
 
         # Second, "SELECT FROM" the original table, represented by the "FromClause" object, querying all columns of the
         # table and the count of occurrences of distinct "compound" (i.e., group, as specified by "column_list") values.
@@ -87,7 +87,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         group_count_query = (
             sa.select(count_selector)
             .group_by(*column_list)
-            .select_from(original_table)
+            .select_from(original_table_clause)
             .alias("group_counts_subquery")
         )
 
@@ -98,17 +98,20 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # object, whereby all table columns in the two "FromClause" objects must match, respectively, as the conditions.
         conditions = sa.and_(
             *(
-                group_count_query.c[name] == original_table.c[name]
+                group_count_query.c[name] == original_table_clause.c[name]
                 for name in column_names
             )
         )
         # noinspection PyProtectedMember
         compound_columns_count_query = (
             sa.select(
-                [original_table, group_count_query.c._num_rows.label("_num_rows")]
+                [
+                    original_table_clause,
+                    group_count_query.c._num_rows.label("_num_rows"),
+                ]
             )
             .select_from(
-                original_table.join(
+                original_table_clause.join(
                     right=group_count_query, onclause=conditions, isouter=False
                 )
             )
