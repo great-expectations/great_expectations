@@ -219,12 +219,11 @@ class ValidationResultsPageRenderer(Renderer):
 
         for attr, header in attrs:
             if validation_results.meta.get(attr):
-                collapse_content_blocks.append(
-                    self._render_nested_table_from_dict(
-                        input_dict=validation_results.meta.get(attr),
-                        header=header,
-                    )
+                table = self._render_nested_table_from_dict(
+                    input_dict=validation_results.meta.get(attr),
+                    header=header,
                 )
+                collapse_content_blocks.append(table)
 
         collapse_content_block = CollapseContent(
             **{
