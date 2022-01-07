@@ -1,6 +1,6 @@
 import logging
 import traceback
-from typing import Any, Callable
+from typing import Any, Callable, Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
@@ -35,9 +35,13 @@ class ContentBlockRenderer(Renderer):
         pass
 
     @classmethod
-    def render(cls, render_object, **kwargs):
+    def render(
+        cls, render_object: Any, **kwargs
+    ) -> Union[_rendered_component_type, Any, None]:
         cls.validate_input(render_object)
-        exception_list_content_block = kwargs.get("exception_list_content_block")
+        exception_list_content_block: Optional[bool] = kwargs.get(
+            "exception_list_content_block"
+        )
 
         data_docs_exception_message = f"""\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
@@ -50,30 +54,30 @@ diagnose and repair the underlying issue.  Detailed information follows:
             "include_column_name": kwargs.pop("include_column_name", None),
         }
 
-        func: Callable
+        render_fn: Callable
         if isinstance(render_object, list):
-            func = cls._render_list
+            render_fn = cls._render_list
         else:
-            func = cls._render_other
+            render_fn = cls._render_other
 
-        res = func(
+        result = render_fn(
             render_object,
             exception_list_content_block,
             runtime_configuration,
             data_docs_exception_message,
             kwargs,
         )
-        return res
+        return result
 
     @classmethod
     def _render_list(
         cls,
         render_object: list,
-        exception_list_content_block,
-        runtime_configuration,
-        data_docs_exception_message,
-        kwargs,
-    ):
+        exception_list_content_block: Optional[bool],
+        runtime_configuration: dict,
+        data_docs_exception_message: str,
+        kwargs: dict,
+    ) -> Optional[_rendered_component_type]:
         blocks = []
         has_failed_evr = (
             False if isinstance(render_object[0], ExpectationValidationResult) else None
@@ -204,12 +208,12 @@ diagnose and repair the underlying issue.  Detailed information follows:
     @classmethod
     def _render_other(
         cls,
-        render_object,
-        exception_list_content_block,
-        runtime_configuration,
-        data_docs_exception_message,
-        kwargs,
-    ):
+        render_object: Any,
+        exception_list_content_block: Optional[bool],
+        runtime_configuration: dict,
+        data_docs_exception_message: str,
+        kwargs: dict,
+    ) -> Any:
         expectation_type = cls._get_expectation_type(render_object)
 
         content_block_fn = get_renderer_impl(
