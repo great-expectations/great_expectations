@@ -54,6 +54,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             "include_column_name": kwargs.pop("include_column_name", None),
         }
 
+        # The specific way we render the render_object is contingent on the type of the object
         render_fn: Callable
         if isinstance(render_object, list):
             render_fn = cls._render_list
