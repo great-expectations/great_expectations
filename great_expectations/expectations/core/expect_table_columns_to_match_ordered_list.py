@@ -69,7 +69,6 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         "row_condition",
         "condition_parser",
     )
-
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -81,6 +80,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
+    args_keys = ("column_list",)
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

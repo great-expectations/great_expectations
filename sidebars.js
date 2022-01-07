@@ -57,8 +57,7 @@ module.exports = {
               items: [
                 'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
                 'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
-                'guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables',
-                'guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_secrets_store',
+                'guides/setup/configuring_data_contexts/how_to_configure_credentials',
                 'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file'
               ]
             },
@@ -66,17 +65,35 @@ module.exports = {
               type: 'category',
               label: 'Metadata Stores',
               items: [
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3',
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage',
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs',
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem',
-                'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql',
-                'guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore'
+                {
+                  type: 'category',
+                  label: 'Expectation Stores',
+                  items: [
+                    'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql'
+                  ]
+                },
+                {
+                  type: 'category',
+                  label: 'Validation Result Stores',
+                  items: [
+                    'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem',
+                    'guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql'
+                  ]
+                },
+                {
+                  type: 'category',
+                  label: 'Metric Stores',
+                  items: [
+                    'guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore'
+                  ]
+                }
               ]
             },
             {
@@ -123,7 +140,7 @@ module.exports = {
               items: [
                 'guides/connecting_to_your_data/database/athena',
                 'guides/connecting_to_your_data/database/bigquery',
-                // 'guides/connecting_to_your_data/database/mssql',
+                'guides/connecting_to_your_data/database/mssql',
                 'guides/connecting_to_your_data/database/mysql',
                 'guides/connecting_to_your_data/database/postgres',
                 'guides/connecting_to_your_data/database/redshift',
@@ -162,7 +179,6 @@ module.exports = {
               type: 'category',
               label: 'Advanced',
               items: [
-                'guides/connecting_to_your_data/advanced/database_credentials',
                 'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store',
                 'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql'
                 // 'guides/connecting_to_your_data/advanced/how_to_create_a_batch_from_a_sql_query',
@@ -286,6 +302,7 @@ module.exports = {
       items: [
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_use_great_expectations_in_databricks',
+        'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_flyte'

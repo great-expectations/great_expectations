@@ -183,3 +183,8 @@
 /docs/tutorials/getting_started/check_out_data_docs https://docs.greatexpectations.io/docs/reference/data_docs
 /docs/tutorials/getting_started/validate_your_data https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_validate_data
 /docs/tutorials/getting_started/customize_your_deployment https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_review
+
+/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
+/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_secrets_store https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
+/docs/guides/connecting_to_your_data/advanced/database_credentials https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
+

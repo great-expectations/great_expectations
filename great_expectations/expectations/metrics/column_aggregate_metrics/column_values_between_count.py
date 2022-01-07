@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 import numpy as np
 
@@ -35,7 +35,7 @@ class ColumnValuesBetweenCount(MetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         min_value = metric_value_kwargs.get("min_value")
@@ -89,7 +89,7 @@ class ColumnValuesBetweenCount(MetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         min_value = metric_value_kwargs.get("min_value")
@@ -204,7 +204,7 @@ class ColumnValuesBetweenCount(MetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         min_value = metric_value_kwargs.get("min_value")

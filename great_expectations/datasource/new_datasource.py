@@ -45,6 +45,10 @@ class BaseDatasource:
         self._name = name
 
         self._data_context_root_directory = data_context_root_directory
+        if execution_engine is None:
+            raise ge_exceptions.ExecutionEngineError(
+                message="No ExecutionEngine configuration provided."
+            )
 
         try:
             self._execution_engine = instantiate_class_from_config(

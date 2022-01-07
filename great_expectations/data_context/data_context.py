@@ -78,6 +78,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     DatasourceConfig,
     GeCloudConfig,
+    ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
@@ -454,6 +455,7 @@ class BaseDataContext:
                     datasource_name=datasource_name
                 )
             except ge_exceptions.DatasourceInitializationError as e:
+                logger.warn(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
@@ -462,7 +464,6 @@ class BaseDataContext:
                     # init time.
                     raise
                 else:
-                    logger.warn(f"Cannot initialize datasource {datasource_name}: {e}")
                     pass
 
     def _apply_global_config_overrides(self):
@@ -821,8 +822,12 @@ class BaseDataContext:
         return self.project_config_with_variables_substituted.anonymous_usage_statistics
 
     @property
-    def concurrency(self) -> ConcurrencyConfig:
+    def concurrency(self) -> Optional[ConcurrencyConfig]:
         return self.project_config_with_variables_substituted.concurrency
+
+    @property
+    def progress_bars(self) -> Optional[ProgressBarsConfig]:
+        return self.project_config_with_variables_substituted.progress_bars
 
     @property
     def notebooks(self):
@@ -2074,6 +2079,21 @@ class BaseDataContext:
             validation_operators.append(value)
         return validation_operators
 
+    def send_usage_message(
+        self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
+    ):
+        """helper method to send a usage method using DataContext. Used when sending usage events from
+            classes like ExpectationSuite.
+            event
+        Args:
+            event (str): str representation of event
+            event_payload (dict): optional event payload
+            success (bool): optional success param
+        Returns:
+            None
+        """
+        send_usage_message(self, event, event_payload, success)
+
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
@@ -2095,7 +2115,7 @@ class BaseDataContext:
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
         expectation_suite: ExpectationSuite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name
+            expectation_suite_name=expectation_suite_name, data_context=self
         )
         if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
@@ -2175,7 +2195,10 @@ class BaseDataContext:
             )
 
         if self.expectations_store.has_key(key):
-            return self.expectations_store.get(key)
+            expectations_schema_dict: dict = self.expectations_store.get(key)
+            # create the ExpectationSuite from constructor
+            return ExpectationSuite(**expectations_schema_dict, data_context=self)
+
         else:
             raise ge_exceptions.DataContextError(
                 "expectation_suite %s not found" % expectation_suite_name
@@ -2365,9 +2388,12 @@ class BaseDataContext:
         # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
         # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
         for key in self.expectations_store.list_keys():
-            expectation_suite = self.expectations_store.get(key)
-            if not expectation_suite:
+            expectation_suite_dict: dict = self.expectations_store.get(key)
+            if not expectation_suite_dict:
                 continue
+            expectation_suite: ExpectationSuite = ExpectationSuite(
+                **expectation_suite_dict, data_context=self
+            )
 
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
             if len(dependencies) > 0:

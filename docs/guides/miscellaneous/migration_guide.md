@@ -29,7 +29,7 @@ The migration involves two parts: first, using an automated CLI tool to upgrade 
 The Great Expectations CLI contains a tool that will check your configuration and determine if it needs to be migrated. To perform this check, run the `project check-config` command in your project folder:
 
 ```bash
-great_expectations --v3-api project check-config
+great_expectations project check-config
 ```
 
 If your configuration is up-to-date and does not need to be upgraded, you will see the following message:
@@ -58,7 +58,7 @@ upgrade your Great Expectations configuration to version 3.0 in order to take ad
 If the `check-config` method has recommended that you upgrade your configuration, you can run the following `project upgrade` command in your project directory.
 
 ```bash
-great_expectations --v3-api project upgrade
+great_expectations project upgrade
 ```
 
 Then you will see the following prompt:
@@ -187,6 +187,12 @@ Migrating Datasource configurations that contain connections to the cloud or dat
 
 In Great Expectations version 0.13.7, we introduced an improved Checkpoints feature, which allowed Checkpoints to utilize features the V3 API. As a result, Checkpoints are now able to [filter and sort batches from configured datasources](/docs/guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource), [introspect and partition tables as batches](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql), with multi-batch Expectations soon to come.  As part of these design improvements, Validation Operators (originally located in the `great_expectations.yml` file) were combined into the Checkpoint configuration itself as `action_list` items.
 
+:::note Note on V3 Checkpoints and Validation Operators
+
+  In V2, you were able to run Validation Operators directly from the DataContext, but in V3 the functionality has been migrated to the action_list field in Checkpoints. This change offers a convenient abstraction for running Validations and ensures that all actions associated with running validations are included in one place, rather than split up between the great_expectations.yml file and Checkpoint configuration. 
+
+:::
+
 The example below demonstrates how a V2 to V3 migration can be performed for an existing V2  Checkpoint.
 
 The example V2-style Checkpoint contains:
@@ -222,7 +228,7 @@ For additional examples on how to configure V3-style checkpoints, including how 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
 ```
 
-If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations --v3-api checkpoint list`.
+If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations checkpoint list`.
 
 ```bash
 Using v3 (Batch Request) API
@@ -233,7 +239,7 @@ Found 1 Checkpoint.
 Finally, you can check if your migration has worked by running your new V3-style Checkpoint.
 
 ```bash
-great_expectations --v3-api checkpoint run test_v3_checkpoint
+great_expectations checkpoint run test_v3_checkpoint
 ```
 
 If everything is successful, then you should see output similar to below.:
@@ -493,7 +499,7 @@ Follow these steps to upgrade your existing Great Expectations project:
 - Run this command:
 
 ```bash
-    great_expectations --v3-api project check-config
+    great_expectations project check-config
 ```
 
 
@@ -720,7 +726,7 @@ Some specific changes:
  - Several modules are now refactored into different names including all datasources
  - `InMemoryBatchKwargs` use the key dataset instead of df to be more explicit
 
-Pre-0.8.x configuration files `great_expectations.yml` are not compatible with 0.8.x. Run `great_expectations --v3-api project check-config` - it will offer to create a new config file. The new config file will not have any customizations you made, so you will have to copy these from the old file.
+Pre-0.8.x configuration files `great_expectations.yml` are not compatible with 0.8.x. Run `great_expectations project check-config` - it will offer to create a new config file. The new config file will not have any customizations you made, so you will have to copy these from the old file.
 
 If you run into any issues, please ask for help on [Slack](https://greatexpectations.io/slack).
 

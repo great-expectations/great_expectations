@@ -1,6 +1,7 @@
 import json
 import logging
 from unittest import mock
+from urllib.parse import urljoin
 
 import pytest
 from freezegun import freeze_time
@@ -17,6 +18,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.validation_operators import (
+    CloudNotificationAction,
     EmailAction,
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
@@ -35,6 +37,13 @@ class MockTeamsResponse:
 
 
 class MockSlackResponse:
+    def __init__(self, status_code):
+        self.status_code = status_code
+        self.text = "test_text"
+        self.content = json.dumps({"ok": "True"})
+
+
+class MockCloudResponse:
     def __init__(self, status_code):
         self.status_code = status_code
         self.text = "test_text"
@@ -642,3 +651,80 @@ def test_EmailAction(
 #         from_string="ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
 #     )) == {}
 #
+
+
+@mock.patch.object(Session, "post", return_value=MockCloudResponse(200))
+def test_cloud_notification_action(
+    mock_post_method,
+    cloud_data_context_with_datasource_pandas_engine,
+    validation_result_suite_with_ge_cloud_id,
+    validation_result_suite_ge_cloud_identifier,
+    checkpoint_ge_cloud_id,
+    ge_cloud_access_token,
+):
+    cloud_action: CloudNotificationAction = CloudNotificationAction(
+        data_context=cloud_data_context_with_datasource_pandas_engine,
+        checkpoint_ge_cloud_id=checkpoint_ge_cloud_id,
+    )
+    expected_ge_cloud_url = urljoin(
+        cloud_action.data_context.ge_cloud_config.base_url,
+        f"/accounts/{cloud_action.data_context.ge_cloud_config.account_id}/contracts/"
+        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
+    )
+    expected_headers = {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {ge_cloud_access_token}",
+    }
+
+    assert (
+        cloud_action.run(
+            validation_result_suite=validation_result_suite_with_ge_cloud_id,
+            validation_result_suite_identifier=validation_result_suite_ge_cloud_identifier,
+            data_asset=None,
+        )
+        == {"cloud_notification_result": "Cloud notification succeeded."}
+    )
+    mock_post_method.assert_called_with(
+        url=expected_ge_cloud_url, headers=expected_headers
+    )
+
+
+@mock.patch.object(Session, "post", return_value=MockCloudResponse(418))
+def test_cloud_notification_action_bad_response(
+    mock_post_method,
+    cloud_data_context_with_datasource_pandas_engine,
+    validation_result_suite_with_ge_cloud_id,
+    validation_result_suite_ge_cloud_identifier,
+    checkpoint_ge_cloud_id,
+    ge_cloud_access_token,
+):
+    cloud_action: CloudNotificationAction = CloudNotificationAction(
+        data_context=cloud_data_context_with_datasource_pandas_engine,
+        checkpoint_ge_cloud_id=checkpoint_ge_cloud_id,
+    )
+    expected_ge_cloud_url = urljoin(
+        cloud_action.data_context.ge_cloud_config.base_url,
+        f"/accounts/{cloud_action.data_context.ge_cloud_config.account_id}/contracts/"
+        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
+    )
+    expected_headers = {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {ge_cloud_access_token}",
+    }
+    expected_result = {
+        "cloud_notification_result": "Cloud Notification request at "
+        "https://app.test.greatexpectations.io/accounts/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/contracts/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/suite-validation-results/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/notification-actions "
+        "returned error 418: test_text"
+    }
+
+    assert (
+        cloud_action.run(
+            validation_result_suite=validation_result_suite_with_ge_cloud_id,
+            validation_result_suite_identifier=validation_result_suite_ge_cloud_identifier,
+            data_asset=None,
+        )
+        == expected_result
+    )
+    mock_post_method.assert_called_with(
+        url=expected_ge_cloud_url, headers=expected_headers
+    )

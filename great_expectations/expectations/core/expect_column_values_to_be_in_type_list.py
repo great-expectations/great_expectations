@@ -118,6 +118,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "type_list",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
