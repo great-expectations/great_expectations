@@ -1,7 +1,7 @@
 import logging
 import os
-from collections import OrderedDict
-from typing import List, Tuple, Union
+from collections import OrderedDict, defaultdict
+from typing import Dict, List, Tuple, Union
 
 from dateutil.parser import parse
 
@@ -176,8 +176,8 @@ class ValidationResultsPageRenderer(Renderer):
         self,
         validation_results: ExpectationSuiteValidationResult,
         expectation_suite_name: str,
-    ) -> dict:
-        columns = {}
+    ) -> Dict[str, list]:
+        columns = defaultdict(list)
         try:
             suite_meta = (
                 self._data_context.get_expectation_suite(expectation_suite_name).meta
@@ -197,8 +197,6 @@ class ValidationResultsPageRenderer(Renderer):
             else:
                 column = "Table-Level Expectations"
 
-            if column not in columns:
-                columns[column] = []
             columns[column].append(evr)
 
         return columns
@@ -243,7 +241,7 @@ class ValidationResultsPageRenderer(Renderer):
         validation_results: ExpectationSuiteValidationResult,
         overview_content_blocks: List[RenderedComponentContent],
         collapse_content_blocks: List[RenderedTableContent],
-        columns: dict,
+        columns: Dict[str, list],
     ) -> List[RenderedSectionContent]:
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
         sections = [
