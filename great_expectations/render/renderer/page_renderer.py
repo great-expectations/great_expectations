@@ -1,7 +1,7 @@
 import logging
 import os
 from collections import OrderedDict
-from typing import List
+from typing import List, Tuple, Union
 
 from dateutil.parser import parse
 
@@ -88,23 +88,7 @@ class ValidationResultsPageRenderer(Renderer):
         validation_results: ExpectationSuiteValidationResult,
         evaluation_parameters=None,
     ):
-        run_id = validation_results.meta["run_id"]
-        if isinstance(run_id, str):
-            try:
-                run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-            except (ValueError, TypeError):
-                run_time = "__none__"
-            run_name = run_id
-        elif isinstance(run_id, dict):
-            run_name = run_id.get("run_name") or "__none__"
-            try:
-                run_time = parse(run_id.get("run_time")).strftime("%Y-%m-%dT%H:%M:%SZ")
-            except (ValueError, TypeError):
-                run_time = "__none__"
-        elif isinstance(run_id, RunIdentifier):
-            run_name = run_id.run_name or "__none__"
-            run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-
+        run_name, run_time = self._parse_run_values(validation_results)
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         batch_kwargs = (
             validation_results.meta.get("batch_kwargs", {})
@@ -116,35 +100,9 @@ class ValidationResultsPageRenderer(Renderer):
         if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
             # check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
             if len(expectation_suite_name.split(".")) == 4:
-                if "batch_kwargs" in validation_results.meta:
-                    batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
-                else:
-                    batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
+                batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]
 
-        # Group EVRs by column
-        columns = {}
-        try:
-            suite_meta = (
-                self._data_context.get_expectation_suite(expectation_suite_name).meta
-                if self._data_context is not None
-                else None
-            )
-        except:
-            suite_meta = None
-        meta_properties_to_render = self._get_meta_properties_notes(suite_meta)
-        for evr in validation_results.results:
-            if meta_properties_to_render is not None:
-                evr.expectation_config.kwargs[
-                    "meta_properties_to_render"
-                ] = meta_properties_to_render
-            if "column" in evr.expectation_config.kwargs:
-                column = evr.expectation_config.kwargs["column"]
-            else:
-                column = "Table-Level Expectations"
-
-            if column not in columns:
-                columns[column] = []
-            columns[column].append(evr)
+        columns = self._group_evrs_by_column(validation_results, expectation_suite_name)
 
         ordered_columns = Renderer._get_column_list_from_evrs(validation_results)
         overview_content_blocks = [
@@ -233,6 +191,60 @@ class ValidationResultsPageRenderer(Renderer):
                 "utm_medium": "validation-results-page",
             }
         )
+
+    def _parse_run_values(
+        self, validation_results: ExpectationSuiteValidationResult
+    ) -> Tuple[str, str]:
+        run_id: Union[str, dict, RunIdentifier] = validation_results.meta["run_id"]
+        if isinstance(run_id, str):
+            try:
+                run_time = parse(run_id).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            except (ValueError, TypeError):
+                run_time = "__none__"
+            run_name = run_id
+        elif isinstance(run_id, dict):
+            run_name = run_id.get("run_name") or "__none__"
+            try:
+                t = run_id.get("run_time", "")
+                run_time = parse(t).strftime("%Y-%m-%dT%H:%M:%SZ")
+            except (ValueError, TypeError):
+                run_time = "__none__"
+        elif isinstance(run_id, RunIdentifier):
+            run_name = run_id.run_name or "__none__"
+            run_time = run_id.run_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+        return run_name, run_time
+
+    def _group_evrs_by_column(
+        self,
+        validation_results: ExpectationSuiteValidationResult,
+        expectation_suite_name: str,
+    ) -> dict:
+        columns = {}
+        try:
+            suite_meta = (
+                self._data_context.get_expectation_suite(expectation_suite_name).meta
+                if self._data_context is not None
+                else None
+            )
+        except:
+            suite_meta = None
+        meta_properties_to_render = self._get_meta_properties_notes(suite_meta)
+        for evr in validation_results.results:
+            if meta_properties_to_render is not None:
+                evr.expectation_config.kwargs[
+                    "meta_properties_to_render"
+                ] = meta_properties_to_render
+            if "column" in evr.expectation_config.kwargs:
+                column = evr.expectation_config.kwargs["column"]
+            else:
+                column = "Table-Level Expectations"
+
+            if column not in columns:
+                columns[column] = []
+            columns[column].append(evr)
+
+        return columns
 
     def _generate_collapse_content_block(
         self,
