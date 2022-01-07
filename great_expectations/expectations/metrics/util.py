@@ -331,7 +331,7 @@ def column_reflection_fallback(
     if dialect.name.lower() == "mssql":
         # Get column names and types from the database
         # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
-        tables_table: TableClause = sa.table(
+        tables_table_clause: TableClause = sa.table(
             "tables",
             sa.column("object_id"),
             sa.column("schema_id"),
@@ -341,12 +341,14 @@ def column_reflection_fallback(
         tables_table_query: Select = (
             sa.select(
                 [
-                    tables_table.c.object_id.label("object_id"),
-                    sa.func.schema_name(tables_table.c.schema_id).label("schema_name"),
-                    tables_table.c.name.label("table_name"),
+                    tables_table_clause.c.object_id.label("object_id"),
+                    sa.func.schema_name(tables_table_clause.c.schema_id).label(
+                        "schema_name"
+                    ),
+                    tables_table_clause.c.name.label("table_name"),
                 ]
             )
-            .select_from(tables_table)
+            .select_from(tables_table_clause)
             .alias("sys_tables_table_subquery")
         )
         columns_table_clause: TableClause = sa.table(
