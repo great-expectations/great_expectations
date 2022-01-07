@@ -1,29 +1,33 @@
 ---
-title: How to create example cases for a custom Expectation
+title: How to create example cases for a Custom Expectation
 ---
-import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
-import Tabs from '@theme/Tabs'
-import TabItem from '@theme/TabItem'
+import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
 This guide will help you add example cases to document and test the behavior of your Expectation. 
 
 <Prerequisites>
 
-  * [Set up your dev environment](/docs/contributing/contributing_setup) to contribute
-  * [Signed the Contributor License Agreement](/docs/contributing/contributing_checklist) (CLA)
+ - Created a [Custom Expectation](../creating_custom_expectations/overview.md)
 
 </Prerequisites>
 
-### Steps
 
 Example cases in Great Expectations serve a dual purpose:
+* They help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate;
+* And provide test cases that the Great Expectations testing framework can execute automatically.
 
-* help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate as valid and as invalid. When your Expectation is released, its entry in the Expectations Gallery site will render these examples.
+If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will render these examples.
 
+### Steps
+
+
+* help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate as valid and as invalid. 
 * provide test cases that the Great Expectations testing framework can execute automatically
+
+
 We will explain the structure of these tests using the example provided in one of the templates that implements `expect_column_values_to_equal_three`:
 
-To illustrate, search for `examples = [` in the template file you are modifying for your new custom Expectation.
+To illustrate, search for `examples = []` in the template file you are modifying for your new custom Expectation.
 
 ````python
 examples = [{
