@@ -303,12 +303,12 @@ class ValidationResultsPageRenderer(Renderer):
         if run_name_as_time != run_time_datetime and run_name_as_time != "__none__":
             include_run_name = True
 
-        page_title = "Validations / " + str(expectation_suite_name)
+        page_title = f"Validations / {expectation_suite_name}"
         if data_asset_name:
-            page_title += " / " + str(data_asset_name)
+            page_title += f" / {data_asset_name}"
         if include_run_name:
-            page_title += " / " + str(run_name)
-        page_title += " / " + str(run_time)
+            page_title += f" / {run_name}"
+        page_title += f" / {run_time}"
 
         return page_title
 
