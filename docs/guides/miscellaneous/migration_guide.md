@@ -203,7 +203,7 @@ The example V3-style Checkpoint contains:
 
 :::note Migrating ExpectationSuites
   
-  `ExpectationSuites` that were created in the V2-API will work in the V3-API without needing to be modified. However, `ExpectationSuites` also contain `metadata` describing the `batch` that was used to create the original `ExpectationSuite` object (under the `citations` field). For a suite that was created in V2, this will metadata will contain `batch_kwargs`, and V3 suites will contain a `batch_request`. 
+  `ExpectationSuites` that were created in the V2-API will work in the V3-API **without needing to be modified**. However, `ExpectationSuites` also contain `metadata` describing the `batch` that was used to create the original `ExpectationSuite` object (under the `citations` field). For a suite that was created in V2, this metadata will contain `batch_kwargs`, and V3 suites will contain a `batch_request`. 
   
   If you choose to do so, the `citation` metadata can be migrated using the same pattern for migrating `batch_kwargs` to `batch_request` described below. 
 
