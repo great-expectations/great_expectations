@@ -3,7 +3,6 @@ title: How to create a Custom Column Aggregate Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
-
 **ColumnExpectations** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). 
 They are evaluated for a single column, and produce an aggregate metric, such as a mean, standard deviation, number of unique values, column type, etc. If that metric meets the conditions you set, the Expectation considers that data valid.
 
@@ -65,6 +64,7 @@ python expect_column_max_to_be_between_custom.py
 ```
 
 The template file is set up so that this will run the Expectation's `generate_diagnostic_checklist` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
+This guide will walk you through the first four steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](../../../contributing/contributing_maturity.md#contributing-expectations) at an Experimental level.
 
 ```
 Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
@@ -144,7 +144,7 @@ Here's a quick overview of how to create test cases to populate `examples`. The 
 
 * `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
-	* `include_in_gallery`: set it to `True` if you want this test case to be visible in the Gallery as an example.
+	* `include_in_gallery`: This must be set to `True` if you want this test case to be visible in the Gallery as an example.
 	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "x", "min_value": 4, "strict_min": True}` in the example above is equivalent to `expect_column_max_to_be_between_custom(column="x", min_value=4, strict_min=True)`
 	* `out` is based on the Validation Result returned when executing the Expectation.
 	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
@@ -163,7 +163,13 @@ Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
 ```
 #### 6. Implement your Metric and connect it to your Expectation
 
-This is the stage where you implement the actual business logic for your `Expectation`. To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your `Expectation`. By the time your Expectation is complete, your Metric will have functions for all three Execution Engines supported by Great Expectations. For now, we're only going to define one.
+This is the stage where you implement the actual business logic for your Expectation. 
+To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your Expectation.
+By the time your Expectation is complete, your Metric will have functions for all three Execution Engines supported by Great Expectations. For now, we're only going to define one.
+
+:::note
+Metrics answer questions about your data posed by your Expectation, <br/> and allow your Expectation to judge whether your data meets ***your*** expectations.
+:::
 
 Your Metric function will have the `@column_aggregate_value` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate the max of a column using the PandasExecutionEngine.
 
@@ -232,7 +238,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate`:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L64-L71
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L65-L71
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
@@ -256,7 +262,11 @@ Completeness checklist for ExpectColumnMaxToBeBetweenCustom:
 ...
 ```
 
-Congratulations, you now have a minimal working version of a Custom Expectation!
+<div style={{"text-align":"center"}}>
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
+Congratulations!<br/>&#127881; You've just built your first Custom Expectation! &#127881;
+</b></p>
+</div>
 
 #### 8. Update `library_metadata` (Optional)
 
