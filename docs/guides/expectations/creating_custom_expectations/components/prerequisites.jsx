@@ -30,14 +30,16 @@ export default class Prerequisites extends React.Component {
     }
   }
 
-defaultPrerequisiteItems () {
-  return [
-      <li key={0.1}>
- <li>Completed the <a href='/docs/tutorials/getting_started/intro'>Getting Started Tutorial</a></li>
- <li><a href='/docs/contributing/contributing_setup'>Set up your dev environment</a></li>
- </li>]
-}
 
+  defaultPrerequisiteItems () {
+    return [
+        <li key={0.1}>
+          <li>Completed the <a href='/docs/tutorials/getting_started/intro'>Getting Started Tutorial</a></li>
+          <li><a href='/docs/contributing/contributing_setup'>Set up your dev environment</a></li>
+      </li>]
+  }
+
+  
   render () {
     return (
       <div className='admonition admonition-note alert alert--secondary'>

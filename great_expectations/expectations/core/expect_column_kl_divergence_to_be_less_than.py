@@ -186,6 +186,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "partition_object",
+        "threshold",
+    )
 
     def get_validation_dependencies(
         self,

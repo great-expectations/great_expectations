@@ -8,7 +8,7 @@ from great_expectations.data_context.types.base import (
 
 def test_concurrency_disabled_by_default():
     data_context_config = DataContextConfig()
-    assert not data_context_config.concurrency.enabled
+    assert data_context_config.concurrency is None
 
 
 def test_concurrency_enabled_with_dict():

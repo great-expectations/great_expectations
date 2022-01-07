@@ -99,6 +99,11 @@ class ExpectColumnUniqueValueCountToBeBetween(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "min_value",
+        "max_value",
+    )
 
     """ A Column Aggregate Metric Decorator for the Unique Value Count"""
 

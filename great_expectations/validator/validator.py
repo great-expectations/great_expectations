@@ -213,6 +213,10 @@ class Validator:
         return list(combined_dir)
 
     @property
+    def data_context(self) -> Optional["DataContext"]:
+        return self._data_context
+
+    @property
     def expose_dataframe_methods(self) -> bool:
         return self._expose_dataframe_methods
 
@@ -249,6 +253,10 @@ class Validator:
 
         def inst_expectation(*args, **kwargs):
             # this is used so that exceptions are caught appropriately when they occur in expectation config
+
+            # TODO: JPC - THIS LOGIC DOES NOT RESPECT DEFAULTS SET BY USERS IN THE VALIDATOR VS IN THE EXPECTATION
+            # DEVREL has action to develop a new plan in coordination with MarioPod
+
             basic_default_expectation_args = {
                 k: v
                 for k, v in self.default_expectation_args.items()
@@ -264,19 +272,19 @@ class Validator:
 
             expectation_kwargs = recursively_convert_to_json_serializable(kwargs)
 
-            meta = None
+            meta = expectation_kwargs.pop("meta", None)
 
-            # This section uses Expectation class' legacy_method_parameters attribute to maintain support for passing
-            # positional arguments to expectation methods
-            legacy_arg_names = expectation_impl.legacy_method_parameters.get(
-                name, tuple()
-            )
+            args_keys = expectation_impl.args_keys or tuple()
+
             for idx, arg in enumerate(args):
                 try:
-                    arg_name = legacy_arg_names[idx]
+                    arg_name = args_keys[idx]
                     if arg_name in allowed_config_keys:
                         expectation_kwargs[arg_name] = arg
                     if arg_name == "meta":
+                        logger.warning(
+                            "Setting meta via args could be ambiguous; please use a kwarg instead."
+                        )
                         meta = arg
                 except IndexError:
                     raise InvalidExpectationConfigurationError(
@@ -690,12 +698,26 @@ class Validator:
                 validation_graph=graph, metrics=metrics
             )
 
+            # Check to see if the user has disabled progress bars
+            disable = False
+            if self._data_context:
+                progress_bars = self._data_context.progress_bars
+                # If progress_bars are not present, assume we want them enabled
+                if progress_bars is not None:
+                    if "globally" in progress_bars:
+                        disable = not progress_bars["globally"]
+                    if "metric_calculations" in progress_bars:
+                        disable = not progress_bars["metric_calculations"]
+
+            if len(graph.edges) < 3:
+                disable = True
+
             if pbar is None:
                 # noinspection PyProtectedMember,SpellCheckingInspection
                 pbar = tqdm(
                     total=len(ready_metrics) + len(needed_metrics),
                     desc="Calculating Metrics",
-                    disable=len(graph.edges) < 3,
+                    disable=disable,
                 )
                 pbar.update(0)
 
