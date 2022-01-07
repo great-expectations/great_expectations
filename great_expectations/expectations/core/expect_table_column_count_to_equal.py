@@ -61,9 +61,7 @@ class ExpectTableColumnCountToEqual(TableExpectation):
     }
 
     metric_dependencies = ("table.column_count",)
-
     success_keys = ("value",)
-
     default_kwarg_values = {
         "value": None,
         "result_format": "BASIC",
@@ -71,6 +69,7 @@ class ExpectTableColumnCountToEqual(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
+    args_keys = ("value",)
 
     """ A Metric Decorator for the Column Count"""
 
