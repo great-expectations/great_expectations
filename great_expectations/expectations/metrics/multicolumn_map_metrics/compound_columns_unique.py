@@ -74,9 +74,10 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         table_columns_selector = [
             sa.column(column_name) for column_name in table_columns
         ]
-        original_table_query = (
-            sa.select(table_columns_selector).select_from(table).alias("original_table")
-        )
+        original_table = sa.table(
+            table.name,
+            *tuple(table_columns_selector),
+        ).alias("original_table")
 
         # Second, "SELECT FROM" the original table, represented by the "FromClause" object, querying all columns of the
         # table and the count of occurrences of distinct "compound" (i.e., group, as specified by "column_list") values.
@@ -86,32 +87,32 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         group_count_query = (
             sa.select(count_selector)
             .group_by(*column_list)
-            .select_from(original_table_query)
-            .alias("group_counts")
+            .select_from(original_table)
+            .alias("group_counts_subquery")
         )
 
         # The above "group_count_query", if executed, will produce the result set containing the number of rows that
         # equals the number of distinct values of the group -- unique grouping (e.g., as in a multi-column primary key).
         # Hence, in order for the "_num_rows" column values to provide an entry for each row of the original table, the
-        # "SELECT FROM" of "group_count_query" must undergo an "INNER JOIN" operation with the "original_table_query"
+        # "SELECT FROM" of "group_count_query" must undergo an "INNER JOIN" operation with the "original_table"
         # object, whereby all table columns in the two "FromClause" objects must match, respectively, as the conditions.
         conditions = sa.and_(
             *(
-                group_count_query.c[name] == original_table_query.c[name]
+                group_count_query.c[name] == original_table.c[name]
                 for name in column_names
             )
         )
         # noinspection PyProtectedMember
         compound_columns_count_query = (
             sa.select(
-                [original_table_query, group_count_query.c._num_rows.label("_num_rows")]
+                [original_table, group_count_query.c._num_rows.label("_num_rows")]
             )
             .select_from(
-                original_table_query.join(
+                original_table.join(
                     right=group_count_query, onclause=conditions, isouter=False
                 )
             )
-            .alias("records_with_grouped_column_counts")
+            .alias("records_with_grouped_column_counts_subquery")
         )
 
         # The returned SQLAlchemy "FromClause" "compound_columns_count_query" object realizes the "map" metric function.

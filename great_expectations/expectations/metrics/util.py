@@ -337,7 +337,7 @@ def column_reflection_fallback(
             sa.column("schema_id"),
             sa.column("name"),
             schema="sys",
-        )
+        ).alias("sys_tables_table")
         tables_table_query: Select = (
             sa.select(
                 [
@@ -347,7 +347,7 @@ def column_reflection_fallback(
                 ]
             )
             .select_from(tables_table)
-            .alias("sys_tables_table")
+            .alias("sys_tables_table_subquery")
         )
         columns_table: TableClause = sa.table(
             "columns",
@@ -358,7 +358,7 @@ def column_reflection_fallback(
             sa.column("max_length"),
             sa.column("precision"),
             schema="sys",
-        )
+        ).alias("sys_columns_table")
         columns_table_query: Select = (
             sa.select(
                 [
@@ -371,14 +371,14 @@ def column_reflection_fallback(
                 ]
             )
             .select_from(columns_table)
-            .alias("sys_columns_table")
+            .alias("sys_columns_table_subquery")
         )
         types_table: TableClause = sa.table(
             "types",
             sa.column("user_type_id"),
             sa.column("name"),
             schema="sys",
-        )
+        ).alias("sys_types_table")
         types_table_query: Select = (
             sa.select(
                 [
@@ -387,7 +387,7 @@ def column_reflection_fallback(
                 ]
             )
             .select_from(types_table)
-            .alias("sys_types_table")
+            .alias("sys_types_table_subquery")
         )
         inner_join_conditions: BinaryExpression = sa.and_(
             *(tables_table_query.c.object_id == columns_table_query.c.object_id,)
