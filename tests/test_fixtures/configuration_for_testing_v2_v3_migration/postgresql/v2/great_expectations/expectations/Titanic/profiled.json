@@ -22,8 +22,8 @@
       "expectation_type": "expect_table_row_count_to_be_between",
       "ge_cloud_id": null,
       "kwargs": {
-        "max_value": 10,
-        "min_value": 10
+        "max_value": 1313,
+        "min_value": 1313
       },
       "meta": {}
     }

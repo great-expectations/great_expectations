@@ -6,7 +6,7 @@ class_name: LegacyCheckpoint
 validation_operator_name: action_list_operator
 batches:
   - batch_kwargs:
-      query: SELECT * from public.titanic LIMIT 10
+      query: SELECT * from public.titanic
       datasource: my_postgres_datasource
     expectation_suite_names:
       - Titanic.profiled

@@ -26,7 +26,7 @@ validations:
       data_connector_name: default_runtime_data_connector_name
       data_asset_name: titanic
       runtime_parameters:
-        query: SELECT * from public.titanic LIMIT 10
+        query: SELECT * from public.titanic
       batch_identifiers:
         default_identifier_name: default_identifier
     expectation_suite_name: Titanic.profiled
