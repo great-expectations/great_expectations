@@ -342,8 +342,10 @@ Please check your config."""
                 "reader_method": "read_csv",
                 "reader_options": {"compression": "gzip"},
             }
+        elif path.endswith(".sas7bdat") or path.endswith(".xpt"):
+            return {"reader_method": "read_sas"}       
 
-        raise ge_exceptions.ExecutionEngineError(
+        else: raise ge_exceptions.ExecutionEngineError(
             f'Unable to determine reader method from path: "{path}".'
         )
 
