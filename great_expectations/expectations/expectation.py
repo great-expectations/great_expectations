@@ -55,10 +55,7 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.util import (
-    legacy_method_parameters,
-    render_evaluation_parameter_string,
-)
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
@@ -161,7 +158,7 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
-    legacy_method_parameters = legacy_method_parameters
+    args_keys = None
 
     def __init__(self, configuration: Optional[ExpectationConfiguration] = None):
         if configuration is not None:

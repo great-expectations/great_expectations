@@ -58,6 +58,10 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column_list",
+        "sum_total",
+    )
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

@@ -57,6 +57,12 @@ class ExpectColumnPairValuesToBeInSet(ColumnPairMapExpectation):
         "catch_exceptions": False,
     }
 
+    args_keys = (
+        "column_A",
+        "column_B",
+        "value_pairs_set",
+    )
+
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
         if configuration is None:
