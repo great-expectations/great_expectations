@@ -72,4 +72,4 @@ res.get_metric(
 )
 ```
 
-See the [How to configure a MetricsStore](../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore) guide for more information.
+See the [How to configure a MetricsStore](../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md) guide for more information.

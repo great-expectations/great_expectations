@@ -227,7 +227,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
 
             for table_name in inspector.get_table_names(schema=schema_name):
 
-                if (ignore_information_schemas_and_system_tables) and (
+                if ignore_information_schemas_and_system_tables and (
                     table_name in system_tables
                 ):
                     continue

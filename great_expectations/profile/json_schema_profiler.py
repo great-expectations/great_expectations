@@ -45,6 +45,9 @@ class JsonSchemaProfiler(Profiler):
         JsonSchemaTypes.BOOLEAN.value: ProfilerTypeMapping.BOOLEAN_TYPE_NAMES,
     }
 
+    def __init__(self, configuration: dict = None):
+        super().__init__(configuration)
+
     def validate(self, schema: dict) -> bool:
         if not isinstance(schema, dict):
             raise TypeError(
@@ -107,7 +110,9 @@ class JsonSchemaProfiler(Profiler):
                     "content": [f"### Description:\n{description}"],
                 }
             }
-        suite = ExpectationSuite(suite_name, expectations=expectations, meta=meta)
+        suite = ExpectationSuite(
+            suite_name, expectations=expectations, meta=meta, data_context=None
+        )
         suite.add_citation(
             comment=f"This suite was built by the {self.__class__.__name__}",
         )

@@ -4,10 +4,15 @@ from typing import Optional
 
 import click
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
+from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.data_context.types.base import (
+    FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE,
+)
 
 try:
     from colorama import init as init_colorama
@@ -20,15 +25,25 @@ except ImportError:
 class CLIState:
     def __init__(
         self,
-        v2_api: bool = False,
+        v3_api: bool = True,
         config_file_location: Optional[str] = None,
-        data_context: DataContext = None,
+        data_context: Optional[DataContext] = None,
         assume_yes: bool = False,
     ):
-        self.v2_api = v2_api
+        self.v3_api = v3_api
         self.config_file_location = config_file_location
         self._data_context = data_context
         self.assume_yes = assume_yes
+
+    def get_data_context_from_config_file(self) -> DataContext:
+        directory: str = toolkit.parse_cli_config_file_location(
+            config_file_location=self.config_file_location
+        ).get("directory")
+        context: DataContext = toolkit.load_data_context_with_error_handling(
+            directory=directory,
+            from_cli_upgrade_command=False,
+        )
+        return context
 
     @property
     def data_context(self):
@@ -40,15 +55,14 @@ class CLIState:
         self._data_context = data_context
 
     def __repr__(self):
-        return f"CLIState(v2_api={self.v2_api}, config_file_location={self.config_file_location})"
+        return f"CLIState(v3_api={self.v3_api}, config_file_location={self.config_file_location})"
 
 
 class CLI(click.MultiCommand):
     def list_commands(self, ctx):
         # note that if --help is called this method is invoked before any flags
         # are parsed or context set.
-
-        return [
+        commands = [
             "checkpoint",
             "datasource",
             "docs",
@@ -56,15 +70,16 @@ class CLI(click.MultiCommand):
             "project",
             "store",
             "suite",
-            "validation_operator",
         ]
+
+        return commands
 
     def get_command(self, ctx, name):
         module_name = name.replace("-", "_")
         legacy_module = ""
-
-        if self.is_v2_api(ctx):
+        if not self.is_v3_api(ctx):
             legacy_module += ".v012"
+
         try:
             requested_module = f"great_expectations.cli{legacy_module}.{module_name}"
             module = importlib.import_module(requested_module)
@@ -88,27 +103,27 @@ class CLI(click.MultiCommand):
         print(f"ctx.find_root().protected_args: {ctx.find_root().protected_args}")
 
     @staticmethod
-    def is_v2_api(ctx):
-        """Determine if v2 api is requested by searching context params."""
+    def is_v3_api(ctx):
+        """Determine if v3 api is requested by searching context params."""
         if ctx.params:
-            return ctx.params and "v2_api" in ctx.params.keys() and ctx.params["v2_api"]
+            return ctx.params and "v3_api" in ctx.params.keys() and ctx.params["v3_api"]
 
         root_ctx_params = ctx.find_root().params
         return (
             root_ctx_params
-            and "v2_api" in root_ctx_params.keys()
-            and root_ctx_params["v2_api"]
+            and "v3_api" in root_ctx_params.keys()
+            and root_ctx_params["v3_api"]
         )
 
 
 @click.group(cls=CLI, name="great_expectations")
 @click.version_option(version=ge_version)
 @click.option(
-    "--v2-api/--v3-api",
-    "v2_api",
+    "--v3-api/--v2-api",
+    "v3_api",
     is_flag=True,
     default=True,
-    help="Default to v2 (Batch Kwargs) API. Use --v3-api for v3 (Batch Request) API",
+    help="Default to v3 (Batch Request) API. Use --v2-api for v2 (Batch Kwargs) API",
 )
 @click.option(
     "--verbose",
@@ -133,7 +148,7 @@ class CLI(click.MultiCommand):
     help='Assume "yes" for all prompts.',
 )
 @click.pass_context
-def cli(ctx, v2_api, verbose, config_file_location, assume_yes):
+def cli(ctx, v3_api, verbose, config_file_location, assume_yes):
     """
     Welcome to the great_expectations CLI!
 
@@ -148,13 +163,21 @@ def cli(ctx, v2_api, verbose, config_file_location, assume_yes):
         # more control over console UI.
         logger.setLevel(logging.DEBUG)
     ctx.obj = CLIState(
-        v2_api=v2_api, config_file_location=config_file_location, assume_yes=assume_yes
+        v3_api=v3_api, config_file_location=config_file_location, assume_yes=assume_yes
     )
 
-    if v2_api:
-        cli_message("Using v2 (Batch Kwargs) API")
-    else:
+    if v3_api:
         cli_message("Using v3 (Batch Request) API")
+    else:
+        cli_message("Using v2 (Batch Kwargs) API")
+
+        ge_config_version: float = (
+            ctx.obj.get_data_context_from_config_file().get_config().config_version
+        )
+        if ge_config_version >= FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE:
+            raise ge_exceptions.InvalidDataContextConfigError(
+                f"Using the legacy v2 (Batch Kwargs) API with a recent config version ({ge_config_version}) is illegal."
+            )
 
 
 def main():
