@@ -187,7 +187,7 @@ Migrating Datasource configurations that contain connections to the cloud or dat
 
 :::tip
 
-Before doing the migration, we recommend that you create a backup of your V2 Checkpoints.
+Before doing the migration, we recommend that you create a backup of your V2 Checkpoints. Checkpoints are typically stored as `.yml` configuration files in the `checkpoints/` directory of your `great_expectations/` folder.  We recommend that you make a backup copy of these files or the directory.  
 
 :::
 
