@@ -216,7 +216,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'Metadata Stores',
+              label: 'Stores',
               items: [
                 {
                   type: 'category',
