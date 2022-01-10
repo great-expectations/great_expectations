@@ -1,0 +1,1322 @@
+============================ slowest test durations ============================
+7.94s call     tests/cli/test_suite.py::test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_runs_notebook_opens_jupyter
+7.93s call     tests/cli/test_suite.py::test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_without_citations_runs_notebook_opens_jupyter[test_backends0]
+7.73s call     tests/cli/test_suite.py::test_suite_edit_multiple_datasources_with_no_additional_args_without_citations_runs_notebook_opens_jupyter
+7.71s call     tests/cli/test_suite.py::test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_citations_runs_notebook_opens_jupyter[test_backends0]
+7.35s call     tests/cli/test_suite.py::test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_runs_notebook_no_jupyter
+6.98s call     tests/cli/test_suite.py::test_suite_new_profile_runs_notebook_no_jupyter
+6.98s call     tests/cli/test_suite.py::test_suite_new_profile_runs_notebook_opens_jupyter
+6.46s call     tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_successful_validation_spark[test_backends0]
+6.02s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_successful_validation_spark[test_backends0]
+5.81s call     tests/cli/test_suite.py::test_suite_new_non_interactive_with_suite_name_prompted_default_runs_notebook_opens_jupyter
+5.68s call     tests/cli/test_suite.py::test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook_opens_jupyter
+5.63s call     tests/cli/test_suite.py::test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_jupyter
+5.58s call     tests/cli/test_suite.py::test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_opens_jupyter
+5.58s call     tests/cli/test_datasource_pandas.py::test_cli_datasource_new
+5.53s call     tests/cli/test_checkpoint.py::test_checkpoint_script_happy_path_executable_failed_validation_pandas
+5.46s call     tests/cli/test_datasource_sqlite.py::test_cli_datasource_new_connection_string[test_backends0]
+5.45s call     tests/cli/test_checkpoint.py::test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint
+5.26s call     tests/cli/test_checkpoint.py::test_checkpoint_script_happy_path_executable_successful_validation_pandas
+5.26s call     tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_misc_dir_using_config_flag_relative_data_path
+5.24s call     tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_ge_dir_relative_data_path
+5.20s call     tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_misc_dir_using_config_flag_absolute_data_path
+5.20s call     tests/cli/test_datasource_pandas.py::test_cli_datasource_new_with_name_param
+5.16s call     tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_adjacent_dir_relative_data_path
+5.14s call     tests/cli/test_datasource_pandas.py::test_cli_datasource_new_from_misc_directory
+5.11s call     tests/cli/test_checkpoint.py::test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_data_pandas
+5.08s call     tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_adjacent_dir_absolute_data_path
+5.04s call     tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_ge_dir_absolute_data_path
+4.82s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_script_happy_path_executable_successful_validation_with_ge_config_v2
+4.81s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_script_happy_path_executable_failed_validation_with_ge_config_v2
+3.69s call     tests/cli/v012/test_suite.py::test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg
+3.43s call     tests/cli/v012/test_suite.py::test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations
+3.41s call     tests/cli/v012/test_suite.py::test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations
+3.27s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations
+3.27s call     tests/cli/v012/test_suite.py::test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
+3.24s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations
+3.16s call     tests/cli/v012/test_suite.py::test_suite_demo_multiple_datasources_with_generator_without_suite_name_argument
+2.98s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_multiple_datasources_with_generator_without_suite_name_argument
+2.96s call     tests/cli/v012/test_docs.py::test_docs_build_no_view
+2.93s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
+2.89s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg
+2.33s call     tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_no_suite_create_one[test_backends0]
+2.32s call     tests/cli/v012/test_docs.py::test_docs_build_view
+2.29s call     tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one
+2.28s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations
+2.28s call     tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one[test_backends0]
+2.27s call     tests/cli/v012/test_docs_pre_v013.py::test_docs_build_view
+2.24s call     tests/cli/v012/test_docs_pre_v013.py::test_docs_build_no_view
+2.13s call     tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_no_suite_create_one
+2.12s call     tests/cli/v012/test_init.py::test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist
+2.10s setup    tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no[test_backends0]
+2.01s call     tests/cli/v012/test_docs_pre_v013.py::test_docs_build_assume_yes
+1.94s call     tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_spark[test_backends0]
+1.93s call     tests/cli/v012/test_docs.py::test_docs_build_assume_yes
+1.89s call     tests/cli/upgrade_helpers/test_upgrade_helper.py::test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints
+1.89s call     tests/cli/v012/test_init.py::test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them
+1.68s call     tests/cli/upgrade_helpers/test_upgrade_helper.py::test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_validation_operators
+1.67s call     tests/cli/v012/test_suite.py::test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations
+1.65s call     tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes
+1.62s call     tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes[test_backends0]
+1.60s call     tests/cli/v012/test_init_sqlite.py::test_cli_init_on_new_project[test_backends0]
+1.59s setup    tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one
+1.57s call     tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with_limit[test_backends0]
+1.56s call     tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_multiple_datasources_exist_do_nothing[test_backends0]
+1.53s call     tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_datasource_arg[test_backends0]
+1.52s call     tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_no_datasource_args[test_backends0]
+1.52s setup    tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes
+1.52s call     tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg[test_backends0]
+1.51s setup    tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_multiple_datasources_exist_do_nothing
+1.50s call     tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_valid_data_asset_arg[test_backends0]
+1.50s setup    tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_no_suite_create_one
+1.49s setup    tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no
+1.47s call     tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_already_up_to_date
+1.44s setup    tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_no_suite_create_one[test_backends0]
+1.43s call     tests/cli/v012/test_init_sqlite.py::test_cli_init_on_new_project_extra_whitespace_in_url[test_backends0]
+1.43s call     tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_multiple_datasources_exist_do_nothing
+1.41s setup    tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes[test_backends0]
+1.41s call     tests/cli/v012/test_init_pandas.py::test_cli_init_on_new_project
+1.40s setup    tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one[test_backends0]
+1.40s setup    tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_multiple_datasources_exist_do_nothing[test_backends0]
+1.39s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_one_datasource_without_generator_without_suite_name_argument
+1.36s call     tests/cli/v012/test_suite.py::test_suite_demo_one_datasource_without_generator_without_suite_name_argument
+1.36s call     tests/cli/upgrade_helpers/test_upgrade_helper.py::test_v2_to_v3_project_upgrade_without_manual_steps
+1.31s call     tests/cli/upgrade_helpers/test_upgrade_helper.py::test_basic_project_upgrade
+1.21s call     tests/cli/v012/test_init_pandas.py::test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different_file
+1.21s setup    tests/cli/v012/test_docs.py::test_docs_build_assume_yes
+1.20s setup    tests/cli/v012/test_suite.py::test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
+1.19s setup    tests/cli/v012/test_docs.py::test_docs_build_view
+1.16s setup    tests/cli/v012/test_suite.py::test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations
+1.16s setup    tests/cli/v012/test_docs_pre_v013.py::test_docs_build_assume_yes
+1.16s setup    tests/cli/v012/test_suite.py::test_suite_demo_multiple_datasources_with_generator_without_suite_name_argument
+1.16s setup    tests/cli/v012/test_suite.py::test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations
+1.15s setup    tests/cli/v012/test_docs.py::test_docs_build_no_view
+1.15s setup    tests/cli/v012/test_suite.py::test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg
+1.13s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg
+1.13s call     tests/cli/v012/test_suite.py::test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite
+1.12s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_multiple_datasources_with_generator_without_suite_name_argument
+1.11s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations
+1.11s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
+1.10s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations
+1.10s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite
+1.10s call     tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_v2_to_v3_project_upgrade
+1.10s setup    tests/cli/v012/test_docs_pre_v013.py::test_docs_build_no_view
+1.10s setup    tests/cli/v012/test_docs_pre_v013.py::test_docs_build_view
+1.07s call     tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no
+1.06s call     tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_already_up_to_date
+1.05s call     tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no[test_backends0]
+1.00s call     tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_additional_batch_kwargs
+0.99s call     tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_skip_prompt_flag
+0.99s call     tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_datasource_arg
+0.99s call     tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_valid_data_asset_arg
+0.98s call     tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_no_datasource_args
+0.98s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge_config_v2
+0.96s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build -sn local_site-None--1]
+0.89s call     tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark[test_backends0]
+0.86s call     tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_successful_validation_pandas
+0.86s call     tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
+0.86s call     tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_pandas
+0.83s call     tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_basic_project_upgrade
+0.82s call     tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_with_manual_steps[postgresql-test_backends0]
+0.74s call     tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_with_manual_steps[postgresql-test_backends0]
+0.72s call     tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no[test_backends0]
+0.71s call     tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_does_not_overwrite_duplicate_when_overwrite_existing_is_false
+0.71s call     tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_successful_validation_sql[test_backends0]
+0.70s call     tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_sql[test_backends0]
+0.67s setup    tests/cli/test_docs.py::test_docs_list
+0.66s call     tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_list
+0.65s call     tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_list[test_backends0]
+0.63s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2
+0.62s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_run_happy_path_with_successful_validation_with_ge_config_v2
+0.61s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2
+0.59s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_new_creates_empty_suite
+0.59s call     tests/cli/test_datasource_new_helpers.py::test_check_if_datasource_name_exists
+0.59s call     tests/cli/v012/test_suite.py::test_suite_new_creates_empty_suite
+0.59s call     tests/cli/v012/test_validation_operator.py::test_validation_operator_list_with_multiple_validation_operators
+0.59s call     tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_with_exception
+0.58s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_new_empty_with_no_jupyter
+0.58s call     tests/cli/v012/test_suite.py::test_suite_new_empty_with_csv_gz
+0.58s call     tests/cli/v012/test_suite.py::test_suite_new_empty_with_no_jupyter
+0.58s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build-\n-Would you like to proceed? [Y/n]-2-expected_built_site_names0]
+0.58s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build-None--2-expected_built_site_names1]
+0.58s call     tests/cli/test_init.py::test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then_yes_to_fixing_them
+0.53s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_spark[test_backends0]
+0.53s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_pandas
+0.53s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_sql[test_backends0]
+0.53s call     tests/cli/test_datasource_sqlite.py::test_cli_datasource_list[test_backends0]
+0.53s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build -sn team_site --no-view-None--0-expected_built_site_names14]
+0.52s call     tests/cli/v012/test_init.py::test_cli_init_connection_string_non_working_db_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging[test_backends0]
+0.52s call     tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_with_exception
+0.52s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark[test_backends0]
+0.51s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v2
+0.51s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build -sn team_site-\n-Would you like to proceed? [Y/n]-1-expected_built_site_names4]
+0.51s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build --no-view-None--0-expected_built_site_names10]
+0.51s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build --no-view-\n-Would you like to proceed? [Y/n]-0-expected_built_site_names9]
+0.50s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build-\n-Would you like to proceed? [Y/n]-2-expected_built_site_names0]
+0.50s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2
+0.50s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build --site-name team_site --no-view-\n-Would you like to proceed? [Y/n]-0-expected_built_site_names11]
+0.50s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build -sn team_site-None--1-expected_built_site_names5]
+0.49s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build-n\n-Would you like to proceed? [Y/n]-0-expected_built_site_names6]
+0.49s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_script_happy_path_executable_successful_validation_with_ge_config_v2
+0.49s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_script_happy_path_generates_script_with_ge_config_v2
+0.49s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_script_happy_path_executable_failed_validation_with_ge_config_v2
+0.48s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build --no-view-\n-Would you like to proceed? [Y/n]-0-expected_built_site_names9]
+0.48s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build --no-view-None--0-expected_built_site_names10]
+0.48s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_run_happy_path_with_successful_validation_with_ge_config_v2
+0.48s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build --site-name team_site-\n-Would you like to proceed? [Y/n]-1-expected_built_site_names2]
+0.48s call     tests/cli/test_datasource_pandas.py::test_cli_datasource_delete_on_project_with_one_datasource_declining_prompt_does_not_delete
+0.48s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql[test_backends0]
+0.48s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build --site-name team_site-n\n-Would you like to proceed? [Y/n]-0-expected_built_site_names7]
+0.48s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2
+0.48s call     tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no
+0.47s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build -sn team_site-n\n-Would you like to proceed? [Y/n]-0-expected_built_site_names8]
+0.47s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build --site-name team_site --no-view-None--0-expected_built_site_names12]
+0.47s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build -sn team_site --no-view-\n-Would you like to proceed? [Y/n]-0-expected_built_site_names13]
+0.47s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_successful_validation_pandas
+0.47s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build-None--2-expected_built_site_names1]
+0.47s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build --site-name team_site-None--1-expected_built_site_names3]
+0.47s call     tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_answering_no[test_backends0]
+0.47s call     tests/cli/v012/test_init_pandas.py::test_cli_init_on_new_project_with_broken_excel_file_without_trying_again
+0.46s call     tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_on_empty_database[test_backends0]
+0.46s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --site-name local_site -nv-\n-Would you like to proceed? [Y/n]-0]
+0.46s call     tests/cli/test_suite.py::test_suite_new_interactive_malformed_batch_request_json_file_raises_error
+0.46s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_successful_validation_sql[test_backends0]
+0.46s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --site-name local_site-\n-Would you like to proceed? [Y/n]-1]
+0.46s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build --site-name local_site-None--1]
+0.45s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build-\n-Would you like to proceed? [Y/n]-1]
+0.45s call     tests/cli/v012/test_suite.py::test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_error
+0.45s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build-None--1]
+0.45s call     tests/cli/test_suite.py::test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error
+0.45s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -sn local_site-\n-Would you like to proceed? [Y/n]-1]
+0.44s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_error
+0.44s setup    tests/cli/test_checkpoint.py::test_checkpoint_script_happy_path_executable_failed_validation_pandas
+0.44s setup    tests/cli/test_checkpoint.py::test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_data_pandas
+0.44s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build -sn local_site -nv-None--0]
+0.44s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
+0.44s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build --no-view-None--0]
+0.44s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --site-name local_site --no-view-\n-Would you like to proceed? [Y/n]-0]
+0.44s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build --site-name local_site -nv-None--0]
+0.43s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build -sn local_site --no-view-None--0]
+0.43s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build -sn team_site-None--1-expected_built_site_names5]
+0.43s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build --site-name local_site --no-view-None--0]
+0.43s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build -nv-None--0]
+0.43s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build -sn team_site --no-view-\n-Would you like to proceed? [Y/n]-0-expected_built_site_names13]
+0.43s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --no-view-\n-Would you like to proceed? [Y/n]-0]
+0.43s call     tests/cli/test_suite.py::test_suite_delete_with_one_suite_assume_yes_flag
+0.43s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -sn local_site -nv-\n-Would you like to proceed? [Y/n]-0]
+0.43s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build --site-name team_site --no-view-\n-Would you like to proceed? [Y/n]-0-expected_built_site_names11]
+0.42s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -nv-\n-Would you like to proceed? [Y/n]-0]
+0.42s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -sn local_site --no-view-\n-Would you like to proceed? [Y/n]-0]
+0.42s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_new_specify_datasource_with_ge_config_v2
+0.42s call     tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_new_connection_string[test_backends0]
+0.42s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build --site-name team_site-None--1-expected_built_site_names3]
+0.42s setup    tests/cli/test_checkpoint.py::test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint
+0.42s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build --site-name team_site-\n-Would you like to proceed? [Y/n]-1-expected_built_site_names2]
+0.41s call     tests/cli/v012/test_suite.py::test_suite_delete_with_one_suite
+0.41s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_delete_with_one_suite
+0.41s call     tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_new
+0.41s call     tests/cli/v012/test_suite.py::test_suite_list_with_multiple_suites
+0.41s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build -sn team_site-\n-Would you like to proceed? [Y/n]-1-expected_built_site_names4]
+0.40s call     tests/cli/test_checkpoint.py::test_checkpoint_delete_with_single_checkpoint_cancel_success
+0.40s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_ge_config_v2
+0.40s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_list_with_multiple_suites
+0.40s call     tests/cli/test_cli.py::test_assume_yes_using_y_flag_using_checkpoint_delete
+0.40s call     tests/cli/test_cli.py::test_assume_yes_using_full_flag_using_checkpoint_delete
+0.40s call     tests/cli/test_checkpoint.py::test_checkpoint_delete_with_single_checkpoint_confirm_success
+0.40s call     tests/cli/test_cli.py::test_assume_yes_using_yes_flag_using_checkpoint_delete
+0.40s call     tests/cli/v012/test_suite.py::test_suite_demo_enter_existing_suite_name_as_arg
+0.39s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_ge_config_v2
+0.39s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_list_with_one_suite
+0.39s call     tests/cli/test_checkpoint.py::test_checkpoint_delete_with_single_checkpoint_assume_yes_flag
+0.39s setup    tests/cli/test_suite.py::test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_citations_runs_notebook_opens_jupyter[test_backends0]
+0.39s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build --site-name team_site --no-view-None--0-expected_built_site_names12]
+0.39s call     tests/cli/v012/test_suite.py::test_suite_edit_with_non_existent_datasource_shows_helpful_error_message
+0.39s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build -sn team_site --no-view-None--0-expected_built_site_names14]
+0.39s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_batch_kwargs
+0.39s call     tests/cli/v012/test_suite.py::test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error
+0.39s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_with_non_existent_datasource_shows_helpful_error_message
+0.38s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_new_specify_datasource_with_ge_config_v2
+0.38s call     tests/cli/test_init_pandas.py::test_cli_init_on_new_project
+0.38s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error
+0.38s setup    tests/cli/test_suite.py::test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_without_citations_runs_notebook_opens_jupyter[test_backends0]
+0.38s call     tests/cli/v012/test_suite.py::test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_batch_kwargs
+0.38s call     tests/cli/v012/test_suite.py::test_suite_list_with_one_suite
+0.38s call     tests/cli/v012/test_validation_operator.py::test_validation_operator_list_with_zero_validation_operators
+0.37s call     tests/cli/test_datasource_pandas.py::test_cli_datasource_delete_on_project_with_one_datasource
+0.37s call     tests/cli/v012/test_datasource_snowflake.py::test_snowflake_user_password_credentials_exit
+0.36s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error
+0.36s call     tests/cli/test_datasource_pandas.py::test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag
+0.36s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_enter_existing_suite_name_as_arg
+0.35s call     tests/cli/v012/test_suite.py::test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error
+0.35s setup    tests/cli/test_docs.py::test_docs_clean_and_build_raises_helpful_errors[--v3-api docs clean-Please specify either --all to clean all sites or a specific site using --site-name-cli.docs.clean.begin-cli.docs.clean.end]
+0.35s setup    tests/cli/test_docs.py::test_docs_clean_and_build_raises_helpful_errors[--v3-api docs clean --site-name local_site --all-Please specify either --all to clean all sites or a specific site using --site-name-cli.docs.clean.begin-cli.docs.clean.end]
+0.35s setup    tests/cli/test_docs.py::test_docs_clean_and_build_raises_helpful_errors[--v3-api docs build --site-name fake_site-The specified site name `fake_site` does not exist in this project.-cli.docs.build.begin-cli.docs.build.end]
+0.34s call     tests/cli/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error
+0.34s setup    tests/cli/test_docs.py::test_docs_clean_happy_paths_clean_expected_sites[--v3-api docs clean --site-name local_site]
+0.34s setup    tests/cli/test_docs.py::test_docs_clean_happy_paths_clean_expected_sites[--v3-api docs clean --all]
+0.34s setup    tests/cli/test_docs.py::test_docs_clean_happy_paths_clean_expected_sites[--v3-api docs clean -s local_site]
+0.34s setup    tests/cli/test_docs.py::test_docs_clean_and_build_raises_helpful_errors[--v3-api docs clean --site-name fake_site-The specified site name `fake_site` does not exist in this project.-cli.docs.clean.begin-cli.docs.clean.end]
+0.34s setup    tests/cli/test_docs.py::test_docs_clean_happy_paths_clean_expected_sites[--v3-api docs clean -a]
+0.32s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --site-name local_site-n\n-Would you like to proceed? [Y/n]-0]
+0.32s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build-n\n-Would you like to proceed? [Y/n]-0]
+0.32s setup    tests/cli/test_suite.py::test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_runs_notebook_opens_jupyter
+0.31s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build-n\n-Would you like to proceed? [Y/n]-0-expected_built_site_names6]
+0.31s call     tests/cli/v012/test_store.py::test_store_list_with_two_stores
+0.31s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error
+0.31s call     tests/cli/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error
+0.31s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -sn local_site-n\n-Would you like to proceed? [Y/n]-0]
+0.30s setup    tests/cli/test_cli.py::test_using_assume_yes_flag_on_command_with_no_assume_yes_implementation
+0.30s setup    tests/cli/test_checkpoint.py::test_checkpoint_new_raises_error_on_existing_checkpoint
+0.30s setup    tests/cli/test_checkpoint.py::test_checkpoint_list_with_eight_checkpoints
+0.29s call     tests/cli/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error
+0.29s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build --site-name team_site-n\n-Would you like to proceed? [Y/n]-0-expected_built_site_names7]
+0.28s call     tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql[test_backends0]
+0.28s setup    tests/cli/test_suite.py::test_suite_edit_multiple_datasources_with_no_additional_args_without_citations_runs_notebook_opens_jupyter
+0.28s call     tests/cli/test_checkpoint.py::test_checkpoint_run_on_non_existent_validations
+0.28s setup    tests/cli/v012/test_validation_operator.py::test_validation_operator_list_with_multiple_validation_operators
+0.28s call     tests/cli/test_cli.py::test_using_assume_yes_flag_on_command_with_no_assume_yes_implementation
+0.27s call     tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build -sn team_site-n\n-Would you like to proceed? [Y/n]-0-expected_built_site_names8]
+0.27s setup    tests/cli/test_datasource_new_helpers.py::test_BigqueryCredentialYamlHelper
+0.27s call     tests/cli/v012/test_validation_operator.py::test_validation_operator_list_with_one_validation_operator
+0.27s setup    tests/cli/v012/test_validation_operator.py::test_validation_operator_list_with_one_validation_operator
+0.27s setup    tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_ge_dir_absolute_data_path
+0.26s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_delete_with_zero_suites
+0.26s setup    tests/cli/test_checkpoint.py::test_checkpoint_script_raises_error_if_python_file_exists
+0.26s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[error: --interactive --manual --batch-request]
+0.26s setup    tests/cli/test_checkpoint.py::test_checkpoint_delete_with_single_checkpoint_confirm_success
+0.25s setup    tests/cli/test_datasource_new_helpers.py::test_MySQLCredentialYamlHelper
+0.25s call     tests/cli/test_project.py::test_project_check_on_valid_project_says_so
+0.25s setup    tests/cli/test_datasource_new_helpers.py::test_SnowflakeCredentialYamlHelper_key_pair_auth
+0.25s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_raises_error_if_checkpoint_is_not_found
+0.25s call     tests/cli/test_datasource_pandas.py::test_cli_datasource_delete_with_non_existent_datasource_raises_error
+0.25s call     tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_answering_no
+0.25s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--interactive --batch-request]
+0.25s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--interactive --profile --batch-request]
+0.25s setup    tests/cli/v012/test_suite.py::test_suite_delete_with_zero_suites
+0.24s setup    tests/cli/test_checkpoint.py::test_checkpoint_script_happy_path_generates_script_pandas
+0.24s call     tests/cli/test_checkpoint.py::test_checkpoint_list_with_eight_checkpoints
+0.24s setup    tests/cli/test_checkpoint.py::test_checkpoint_delete_with_non_existent_checkpoint
+0.24s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_delete_with_one_suite
+0.24s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_scaffold_on_context_with_no_datasource_raises_error
+0.24s call     tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_works_with_credentials[test_backends0]
+0.24s setup    tests/cli/test_datasource_new_helpers.py::test_SQLCredentialYamlHelper_driver
+0.24s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--profile --batch-request]
+0.24s setup    tests/cli/test_checkpoint.py::test_checkpoint_delete_with_single_checkpoint_assume_yes_flag
+0.24s setup    tests/cli/test_datasource_new_helpers.py::test_RedshiftCredentialYamlHelper
+0.24s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --interactive --manual --datasource-name --batch-request]
+0.24s setup    tests/cli/test_cli.py::test_assume_yes_using_y_flag_using_checkpoint_delete
+0.24s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[prompt: Default Choice 1 - Manual suite edit (default)]
+0.24s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[prompt: Choice 2 - Interactive suite creation]
+0.24s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_scaffold_on_existing_suite_raises_error
+0.24s setup    tests/cli/test_checkpoint.py::test_checkpoint_script_raises_error_if_checkpoint_not_found
+0.24s setup    tests/cli/test_datasource_new_helpers.py::test_SnowflakeCredentialYamlHelper_password_auth
+0.24s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--batch-request]
+0.24s setup    tests/cli/test_suite.py::test_suite_delete_with_zero_suites
+0.24s setup    tests/cli/test_suite.py::test_suite_edit_datasource_and_batch_request_error
+0.24s setup    tests/cli/test_cli.py::test_assume_yes_using_yes_flag_using_checkpoint_delete
+0.24s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --datasource-name --batch-request]
+0.24s setup    tests/cli/test_suite.py::test_suite_edit_with_non_existent_suite_name_raises_error
+0.24s setup    tests/cli/test_datasource_new_helpers.py::test_ConnectionStringCredentialYamlHelper
+0.23s setup    tests/cli/test_datasource_new_helpers.py::test_SnowflakeCredentialYamlHelper_sso_auth
+0.23s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --interactive --manual --batch-request]
+0.23s setup    tests/cli/test_checkpoint.py::test_checkpoint_list_with_single_checkpoint
+0.23s setup    tests/cli/test_suite.py::test_suite_edit_without_suite_name_raises_error
+0.23s call     tests/cli/test_datasource_pandas.py::test_cli_datasource_list_on_project_with_one_datasource
+0.23s setup    tests/cli/v012/test_suite.py::test_suite_delete_with_non_existent_suite
+0.23s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--interactive]
+0.23s call     tests/cli/test_suite.py::test_suite_delete_with_one_suite
+0.23s setup    tests/cli/test_datasource_new_helpers.py::test_PandasYamlHelper
+0.23s setup    tests/cli/test_cli.py::test_assume_yes_using_full_flag_using_checkpoint_delete
+0.23s setup    tests/cli/v012/test_suite.py::test_suite_delete_with_one_suite
+0.23s call     tests/cli/test_checkpoint.py::test_checkpoint_new_raises_error_on_existing_checkpoint
+0.23s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[warning: --manual --batch-request]
+0.23s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[warning: --manual --datasource-name]
+0.23s setup    tests/cli/v012/test_suite.py::test_suite_scaffold_on_existing_suite_raises_error
+0.23s call     tests/cli/test_init_sqlite.py::test_cli_init_on_new_project[test_backends0]
+0.23s setup    tests/cli/test_datasource_new_helpers.py::test_PostgresCredentialYamlHelper
+0.23s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_list_with_no_checkpoints_with_ge_config_v2
+0.23s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[prompt: Choice 2 - Interactive suite edit]
+0.23s setup    tests/cli/test_checkpoint.py::test_checkpoint_delete_with_single_checkpoint_cancel_success
+0.23s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[error: --interactive --manual --profile]
+0.23s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--manual]
+0.23s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --interactive --manual]
+0.23s setup    tests/cli/test_suite.py::test_suite_new_profile_on_context_with_no_datasource_raises_error
+0.23s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[error: --interactive --manual]
+0.23s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[prompt: Default Choice 1 - Manual suite creation (default)]
+0.23s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--interactive --datasource-name]
+0.23s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[prompt: Choice 1 - Manual suite creation (default)]
+0.23s setup    tests/cli/test_suite.py::test_suite_new_profile_on_existing_suite_raises_error
+0.23s setup    tests/cli/test_suite.py::test_suite_delete_with_one_suite_assume_yes_flag
+0.23s call     tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_works_without_credentials[test_backends0]
+0.23s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--manual --datasource-name --batch-request]
+0.23s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --interactive --manual --datasource-name]
+0.23s call     tests/cli/test_suite.py::test_suite_list_with_multiple_suites
+0.23s setup    tests/cli/test_suite.py::test_suite_list_with_multiple_suites
+0.23s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--profile]
+0.23s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[prompt: Choice 1 - Manual suite edit (default)]
+0.23s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_scaffold_on_existing_suite_raises_error
+0.23s setup    tests/cli/test_checkpoint.py::test_checkpoint_script_happy_path_executable_successful_validation_pandas
+0.23s call     tests/cli/test_init.py::test_cli_init_on_new_project[--v3-api --assume-yes init-]
+0.23s setup    tests/cli/test_suite.py::test_suite_edit_with_non_existent_datasource_shows_helpful_error_message
+0.23s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--interactive --profile]
+0.23s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[warning: --manual --profile --batch-request]
+0.23s setup    tests/cli/test_datasource_new_helpers.py::test_SQLCredentialYamlHelper_defaults
+0.23s setup    tests/cli/test_suite.py::test_suite_edit_interactive_batch_request_without_datasource_json_file_raises_helpful_error
+0.23s setup    tests/cli/test_suite.py::test_suite_delete_canceled_with_one_suite
+0.23s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--interactive]
+0.23s setup    tests/cli/test_datasource_pandas.py::test_cli_datasource_delete_on_project_with_one_datasource
+0.23s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--interactive --datasource-name --batch-request]
+0.23s setup    tests/cli/test_suite.py::test_suite_delete_with_one_suite
+0.23s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[warning: --manual --batch-request]
+0.23s setup    tests/cli/test_suite.py::test_suite_list_with_one_suite
+0.23s setup    tests/cli/test_datasource_new_helpers.py::test_SparkYamlHelper
+0.23s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--manual]
+0.23s setup    tests/cli/test_suite.py::test_suite_demo_deprecation_message
+0.23s setup    tests/cli/test_suite.py::test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_runs_notebook_no_jupyter
+0.23s setup    tests/cli/v012/test_suite.py::test_suite_scaffold_on_context_with_no_datasource_raises_error
+0.22s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[error: --interactive --manual --profile --batch-request]
+0.22s call     tests/cli/v012/test_suite.py::test_suite_scaffold_on_existing_suite_raises_error
+0.22s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_delete_with_non_existent_suite
+0.22s call     tests/cli/test_suite.py::test_suite_edit_with_non_existent_datasource_shows_helpful_error_message
+0.22s call     tests/cli/test_init_pandas.py::test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different_file
+0.22s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--interactive --batch-request]
+0.22s setup    tests/cli/test_suite.py::test_suite_list_with_zero_suites
+0.22s call     tests/cli/test_suite.py::test_suite_delete_canceled_with_one_suite
+0.22s setup    tests/cli/test_suite.py::test_suite_new_profile_runs_notebook_opens_jupyter
+0.22s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[warning: --manual --profile]
+0.22s setup    tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--datasource-name]
+0.22s setup    tests/cli/test_suite.py::test_suite_delete_with_non_existent_suite
+0.22s call     tests/cli/test_init.py::test_cli_init_on_new_project[--v3-api init-Y\n]
+0.22s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_scaffold_creates_notebook_and_opens_jupyter
+0.22s setup    tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[prompt: Choice 3 - Automatic suite creation (profiler)]
+0.22s setup    tests/cli/test_suite.py::test_suite_new_non_interactive_with_suite_name_prompted_default_runs_notebook_opens_jupyter
+0.22s setup    tests/cli/test_datasource_pandas.py::test_cli_datasource_delete_on_project_with_one_datasource_declining_prompt_does_not_delete
+0.22s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_delete_with_non_existent_suite
+0.22s setup    tests/cli/test_store.py::test_store_list_stores
+0.22s setup    tests/cli/test_suite.py::test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_opens_jupyter
+0.22s setup    tests/cli/test_checkpoint.py::test_checkpoint_list_with_no_checkpoints
+0.22s call     tests/cli/test_suite.py::test_suite_delete_with_non_existent_suite
+0.22s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_scaffold_creates_notebook_and_opens_jupyter
+0.22s setup    tests/cli/test_datasource_pandas.py::test_cli_datasource_list_on_project_with_one_datasource
+0.22s call     tests/cli/v012/test_suite.py::test_suite_delete_with_non_existent_suite
+0.22s call     tests/cli/v012/test_suite.py::test_suite_scaffold_creates_notebook_with_no_jupyter_flag
+0.22s call     tests/cli/test_suite.py::test_suite_new_profile_on_existing_suite_raises_error
+0.22s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_scaffold_creates_notebook_with_no_jupyter_flag
+0.22s setup    tests/cli/test_suite.py::test_suite_new_profile_runs_notebook_no_jupyter
+0.22s setup    tests/cli/test_datasource_pandas.py::test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag
+0.22s setup    tests/cli/test_datasource_pandas.py::test_cli_datasource_delete_with_non_existent_datasource_raises_error
+0.22s setup    tests/cli/test_datasource_new_helpers.py::test_check_if_datasource_name_exists
+0.22s call     tests/cli/test_suite.py::test_suite_edit_interactive_batch_request_without_datasource_json_file_raises_helpful_error
+0.22s setup    tests/cli/test_suite.py::test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook_opens_jupyter
+0.21s call     tests/cli/test_suite.py::test_suite_edit_with_non_existent_suite_name_raises_error
+0.21s call     tests/cli/v012/test_datasource.py::test_get_batch_kwargs_for_specific_dataasset
+0.21s setup    tests/cli/test_suite.py::test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error
+0.21s call     tests/cli/v012/test_suite.py::test_suite_scaffold_creates_notebook_and_opens_jupyter
+0.21s call     tests/cli/test_store.py::test_store_list_stores
+0.21s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_delete_with_zero_suites
+0.21s setup    tests/cli/test_suite.py::test_suite_new_interactive_malformed_batch_request_json_file_raises_error
+0.21s setup    tests/cli/v012/test_suite.py::test_suite_scaffold_creates_notebook_with_no_jupyter_flag
+0.21s call     tests/cli/test_suite.py::test_suite_edit_datasource_and_batch_request_error
+0.21s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error
+0.21s setup    tests/cli/test_suite.py::test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_jupyter
+0.21s call     tests/cli/test_checkpoint.py::test_checkpoint_script_raises_error_if_python_file_exists
+0.21s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_on_non_existent_validations
+0.21s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_scaffold_creates_notebook_with_no_jupyter_flag
+0.21s setup    tests/cli/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error
+0.21s setup    tests/cli/test_project.py::test_project_check_on_valid_project_says_so
+0.21s setup    tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_raises_error_on_missing_datasource_name
+0.21s call     tests/cli/test_checkpoint.py::test_checkpoint_script_happy_path_generates_script_pandas
+0.21s call     tests/cli/test_init.py::test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist
+0.21s setup    tests/cli/v012/test_suite.py::test_suite_scaffold_creates_notebook_and_opens_jupyter
+0.21s call     tests/cli/test_datasource_pandas.py::test_cli_datasource_new_no_jupyter_writes_notebook
+0.20s call     tests/cli/test_checkpoint.py::test_checkpoint_script_raises_error_if_checkpoint_not_found
+0.20s setup    tests/cli/v012/test_store.py::test_store_list_with_two_stores
+0.20s setup    tests/cli/v012/test_validation_operator.py::test_validation_operator_list_with_one_operator
+0.20s setup    tests/cli/v012/test_datasource_snowflake.py::test_snowflake_user_password_credentials_exit
+0.20s call     tests/cli/v012/test_suite.py::test_suite_delete_with_zero_suites
+0.20s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_ge_config_v2
+0.20s call     tests/cli/test_checkpoint.py::test_checkpoint_delete_with_non_existent_checkpoint
+0.20s call     tests/cli/test_suite.py::test_suite_list_with_one_suite
+0.20s setup    tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_datasource_arg
+0.20s setup    tests/cli/test_init_pandas.py::test_init_on_existing_project_with_multiple_datasources_exist_do_nothing
+0.20s setup    tests/cli/v012/test_suite.py::test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error
+0.20s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_scaffold_on_context_with_no_datasource_raises_error
+0.20s call     tests/cli/test_checkpoint.py::test_checkpoint_run_raises_error_if_checkpoint_is_not_found
+0.20s call     tests/cli/test_cli.py::test_cli_works_from_random_directory_with_c_flag_fully_specified_yml
+0.20s setup    tests/cli/v012/test_store.py::test_store_list_with_zero_stores
+0.20s setup    tests/cli/v012/test_datasource.py::test_get_batch_kwargs_for_specific_dataasset
+0.20s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_list_with_single_checkpoint_with_ge_config_v2
+0.20s setup    tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_adjacent_dir_relative_data_path
+0.20s call     tests/cli/v012/test_validation_operator.py::test_validation_operator_list_with_one_operator
+0.20s setup    tests/cli/test_init_sqlite.py::test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one[test_backends0]
+0.20s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_error
+0.20s call     tests/cli/v012/test_suite.py::test_suite_scaffold_on_context_with_no_datasource_raises_error
+0.20s call     tests/cli/test_project.py::test_project_check_on_project_with_v2_datasources_and_validation_operators
+0.20s setup    tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_valid_data_asset_arg
+0.20s setup    tests/cli/test_datasource_sqlite.py::test_cli_datasource_list[test_backends0]
+0.20s setup    tests/cli/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_no_suite_create_one[test_backends0]
+0.20s call     tests/cli/v012/test_store.py::test_store_list_with_zero_stores
+0.20s setup    tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_does_not_overwrite_duplicate_when_overwrite_existing_is_false
+0.19s setup    tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_skip_prompt_flag
+0.19s setup    tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no
+0.19s call     tests/cli/test_datasource_pandas.py::test_cli_datasource_list_on_project_with_no_datasources
+0.19s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_on_context_with_no_datasources
+0.19s call     tests/cli/test_checkpoint.py::test_checkpoint_list_with_no_checkpoints
+0.19s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_list_with_single_checkpoint_with_ge_config_v2
+0.19s call     tests/cli/test_cli.py::test_cli_works_from_random_directory_with_c_flag_great_expectations_directory
+0.19s setup    tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_adjacent_dir_absolute_data_path
+0.19s setup    tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_answering_no
+0.19s setup    tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_list
+0.19s setup    tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_no_datasource_args
+0.19s setup    tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_misc_dir_using_config_flag_absolute_data_path
+0.19s call     tests/cli/v012/test_suite.py::test_suite_demo_on_context_with_no_datasources
+0.19s call     tests/cli/test_suite.py::test_suite_delete_with_zero_suites
+0.19s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations
+0.19s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_list_with_no_checkpoints_with_ge_config_v2
+0.19s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_with_non_existent_datasource_shows_helpful_error_message
+0.19s setup    tests/cli/v012/test_suite.py::test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_error
+0.19s setup    tests/cli/v012/test_suite.py::test_suite_demo_one_datasource_without_generator_without_suite_name_argument
+0.19s setup    tests/cli/v012/test_suite.py::test_suite_edit_with_non_existent_datasource_shows_helpful_error_message
+0.19s call     tests/cli/test_suite.py::test_suite_edit_without_suite_name_raises_error
+0.19s setup    tests/cli/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_no_suite_create_one
+0.19s call     tests/cli/test_cli.py::test_cli_works_from_random_directory_with_config_flag_fully_specified_yml
+0.19s setup    tests/cli/v012/test_suite.py::test_suite_demo_on_context_with_no_datasources
+0.19s setup    tests/cli/v012/test_suite.py::test_suite_edit_with_non_existent_suite_name_raises_error
+0.19s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_list_with_one_suite
+0.19s setup    tests/cli/test_cli.py::test_cli_works_from_adjacent_directory_without_config_flag
+0.19s call     tests/cli/test_suite.py::test_suite_list_with_zero_suites
+0.19s setup    tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_answering_no[test_backends0]
+0.19s setup    tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with_limit[test_backends0]
+0.19s setup    tests/cli/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes[test_backends0]
+0.19s call     tests/cli/test_suite.py::test_suite_new_profile_on_context_with_no_datasource_raises_error
+0.19s setup    tests/cli/test_datasource_pandas.py::test_cli_datasource_list_on_project_with_no_datasources
+0.19s call     tests/cli/v012/test_suite.py::test_suite_edit_with_non_existent_suite_name_raises_error
+0.19s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_on_context_with_no_datasources
+0.19s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build -nv-None--0]
+0.19s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_with_non_existent_suite_name_raises_error
+0.19s setup    tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_valid_data_asset_arg[test_backends0]
+0.19s setup    tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_does_overwrite_duplicate_when_overwrite_existing_is_true[test_backends0]
+0.19s setup    tests/cli/v012/test_suite.py::test_suite_list_with_multiple_suites
+0.19s setup    tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_additional_batch_kwargs
+0.19s setup    tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_misc_dir_using_config_flag_relative_data_path
+0.19s setup    tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_ge_dir_relative_data_path
+0.19s call     tests/cli/v012/test_validation_operator.py::test_validation_operator_run_interactive_golden_path
+0.19s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_config_v2
+0.19s call     tests/cli/test_suite.py::test_suite_demo_deprecation_message
+0.19s setup    tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_list[test_backends0]
+0.19s setup    tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no[test_backends0]
+0.19s setup    tests/cli/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no[test_backends0]
+0.19s setup    tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_on_empty_database[test_backends0]
+0.19s setup    tests/cli/test_datasource_pandas.py::test_cli_datasource_new
+0.19s setup    tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_works_with_credentials[test_backends0]
+0.19s setup    tests/cli/test_datasource_pandas.py::test_cli_datasource_new_from_misc_directory
+0.19s call     tests/cli/test_checkpoint.py::test_checkpoint_list_with_single_checkpoint
+0.19s call     tests/cli/v012/test_store.py::test_store_list_with_four_stores
+0.19s setup    tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_no_datasource_args[test_backends0]
+0.19s setup    tests/cli/test_init_sqlite.py::test_init_on_existing_project_with_multiple_datasources_exist_do_nothing[test_backends0]
+0.19s setup    tests/cli/test_datasource_pandas.py::test_cli_datasource_new_no_jupyter_writes_notebook
+0.19s setup    tests/cli/test_datasource_pandas.py::test_cli_datasource_new_with_name_param
+0.19s setup    tests/cli/v012/test_suite.py::test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations
+0.19s call     tests/cli/test_init_sqlite.py::test_cli_init_on_new_project_extra_whitespace_in_url[test_backends0]
+0.18s setup    tests/cli/test_datasource_sqlite.py::test_cli_datasource_new_connection_string[test_backends0]
+0.18s setup    tests/cli/test_cli.py::test_cli_works_from_random_directory_with_c_flag_great_expectations_directory
+0.18s setup    tests/cli/v012/test_validation_operator.py::test_validation_operator_list_with_zero_validation_operators
+0.18s setup    tests/cli/v012/test_suite.py::test_suite_list_with_one_suite
+0.18s setup    tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_new_connection_string[test_backends0]
+0.18s setup    tests/cli/test_cli.py::test_cli_works_from_random_directory_with_config_flag_fully_specified_yml
+0.18s setup    tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_datasource_arg[test_backends0]
+0.18s setup    tests/cli/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no
+0.18s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_one_datasource_without_generator_without_suite_name_argument
+0.18s setup    tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_new
+0.18s setup    tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_raises_error_on_empty_yaml
+0.18s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error
+0.18s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_list_with_zero_suites
+0.18s setup    tests/cli/v012/test_store.py::test_store_list_with_four_stores
+0.18s setup    tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_raises_error_on_non_string
+0.18s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_list_with_zero_suites
+0.18s call     tests/cli/v012/test_suite.py::test_suite_list_with_zero_suites
+0.18s setup    tests/cli/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes
+0.18s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_with_non_existent_suite_name_raises_error
+0.18s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2
+0.18s call     tests/cli/test_cli.py::test_cli_works_from_random_directory_with_config_flag_great_expectations_directory
+0.18s setup    tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg[test_backends0]
+0.18s setup    tests/cli/v012/test_suite.py::test_suite_list_with_zero_suites
+0.18s setup    tests/cli/test_init_pandas.py::test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one
+0.18s call     tests/cli/test_cli.py::test_cli_works_from_great_expectations_directory_without_config_flag
+0.18s setup    tests/cli/test_cli.py::test_cli_works_from_random_directory_with_c_flag_fully_specified_yml
+0.18s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_list_with_multiple_suites
+0.18s setup    tests/cli/test_cli.py::test_cli_works_from_great_expectations_directory_without_config_flag
+0.18s setup    tests/cli/test_cli.py::test_cli_works_from_random_directory_with_config_flag_great_expectations_directory
+0.18s setup    tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_works_without_credentials[test_backends0]
+0.18s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_new_empty_with_no_jupyter
+0.18s call     tests/cli/test_cli.py::test_cli_works_from_adjacent_directory_without_config_flag
+0.18s call     tests/cli/test_init_pandas.py::test_cli_init_on_new_project_with_broken_excel_file_without_trying_again
+0.18s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2
+0.18s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_script_happy_path_generates_script_with_ge_config_v2
+0.18s call     tests/cli/test_docs.py::test_docs_clean_happy_paths_clean_expected_sites[--v3-api docs clean --site-name local_site]
+0.18s setup    tests/cli/v012/test_suite.py::test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite
+0.18s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build --site-name local_site --no-view-None--0]
+0.18s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -sn local_site-\n-Would you like to proceed? [Y/n]-1]
+0.18s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_enter_existing_suite_name_as_arg
+0.18s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build --site-name local_site -nv-None--0]
+0.18s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build -sn local_site --no-view-None--0]
+0.18s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2
+0.18s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2
+0.18s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_run_raises_error_if_checkpoint_is_not_found_with_ge_config_v2
+0.18s setup    tests/cli/v012/test_suite.py::test_suite_new_empty_with_csv_gz
+0.18s call     tests/cli/test_docs.py::test_docs_clean_happy_paths_clean_expected_sites[--v3-api docs clean -a]
+0.18s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge_config_v2
+0.17s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v2
+0.17s call     tests/cli/test_docs.py::test_docs_list
+0.17s setup    tests/cli/v012/test_suite.py::test_suite_new_empty_with_no_jupyter
+0.17s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_config_v2
+0.17s call     tests/cli/v012/test_validation_operator.py::test_validation_operator_run_noninteractive_golden_path
+0.17s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_new_creates_empty_suite
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --site-name local_site -nv-\n-Would you like to proceed? [Y/n]-0]
+0.17s call     tests/cli/test_docs.py::test_docs_clean_happy_paths_clean_expected_sites[--v3-api docs clean -s local_site]
+0.17s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite
+0.17s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge_config_v2
+0.17s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_ge_config_v2
+0.17s setup    tests/cli/v012/test_suite.py::test_suite_new_creates_empty_suite
+0.17s setup    tests/cli/v012/test_checkpoint.py::test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2
+0.17s setup    tests/cli/test_project.py::test_project_check_on_project_with_v2_datasources_and_validation_operators
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build-None--1]
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build --site-name local_site-None--1]
+0.17s setup    tests/cli/v012/test_project.py::test_project_check_on_project_with_missing_config_file_guides_user
+0.17s call     tests/cli/v012/test_project.py::test_project_check_on_valid_project_says_so
+0.17s setup    tests/cli/v012/test_suite.py::test_suite_demo_enter_existing_suite_name_as_arg
+0.17s setup    tests/cli/test_project.py::test_project_check_on_project_with_missing_config_file_guides_user
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build -sn local_site -nv-None--0]
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -nv-\n-Would you like to proceed? [Y/n]-0]
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --no-view-\n-Would you like to proceed? [Y/n]-0]
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --site-name local_site --no-view-\n-Would you like to proceed? [Y/n]-0]
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --site-name local_site-n\n-Would you like to proceed? [Y/n]-0]
+0.17s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error
+0.17s setup    tests/cli/v012/test_validation_operator.py::test_validation_operator_run_noninteractive_golden_path
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -sn local_site --no-view-\n-Would you like to proceed? [Y/n]-0]
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -sn local_site-n\n-Would you like to proceed? [Y/n]-0]
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --site-name local_site-\n-Would you like to proceed? [Y/n]-1]
+0.17s setup    tests/cli/v012/test_suite.py::test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build-\n-Would you like to proceed? [Y/n]-1]
+0.17s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_batch_kwargs
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build-n\n-Would you like to proceed? [Y/n]-0]
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -sn local_site -nv-\n-Would you like to proceed? [Y/n]-0]
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build -sn local_site-None--1]
+0.17s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_run_raises_error_if_checkpoint_is_not_found_with_ge_config_v2
+0.17s setup    tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build --no-view-None--0]
+0.17s setup    tests/cli/v012/test_project.py::test_project_check_on_valid_project_says_so
+0.16s setup    tests/cli/v012/test_suite.py::test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_batch_kwargs
+0.16s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2
+0.16s call     tests/cli/test_docs.py::test_docs_clean_happy_paths_clean_expected_sites[--v3-api docs clean --all]
+0.16s call     tests/cli/v012/test_checkpoint.py::test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge_config_v2
+0.15s setup    tests/cli/test_docs.py::test_docs_list_with_no_sites
+0.15s call     tests/cli/v012/test_validation_operator.py::test_validation_operator_run_interactive_pass_non_existing_operator_name
+0.15s call     tests/cli/test_docs.py::test_docs_list_with_no_sites
+0.15s call     tests/cli/test_docs.py::test_docs_clean_and_build_raises_helpful_errors[--v3-api docs build --site-name fake_site-The specified site name `fake_site` does not exist in this project.-cli.docs.build.begin-cli.docs.build.end]
+0.14s call     tests/cli/test_docs.py::test_docs_clean_and_build_raises_helpful_errors[--v3-api docs clean --site-name local_site --all-Please specify either --all to clean all sites or a specific site using --site-name-cli.docs.clean.begin-cli.docs.clean.end]
+0.14s setup    tests/cli/v012/test_validation_operator.py::test_validation_operator_run_interactive_golden_path
+0.14s call     tests/cli/test_docs.py::test_docs_clean_and_build_raises_helpful_errors[--v3-api docs clean --site-name fake_site-The specified site name `fake_site` does not exist in this project.-cli.docs.clean.begin-cli.docs.clean.end]
+0.14s setup    tests/cli/v012/test_validation_operator.py::test_validation_operator_run_noninteractive_validation_config_file_does_is_misconfigured
+0.14s call     tests/cli/v012/test_validation_operator.py::test_validation_operator_run_noninteractive_validation_config_file_does_not_exist
+0.14s call     tests/cli/v012/test_validation_operator.py::test_validation_operator_run_interactive_pass_non_existing_expectation_suite
+0.14s setup    tests/cli/v012/test_validation_operator.py::test_validation_operator_run_interactive_pass_non_existing_expectation_suite
+0.14s setup    tests/cli/v012/test_validation_operator.py::test_validation_operator_run_interactive_pass_non_existing_operator_name
+0.14s setup    tests/cli/v012/test_validation_operator.py::test_validation_operator_run_noninteractive_validation_config_file_does_not_exist
+0.14s call     tests/cli/v012/test_validation_operator.py::test_validation_operator_run_noninteractive_validation_config_file_does_is_misconfigured
+0.14s call     tests/cli/test_docs.py::test_docs_clean_and_build_raises_helpful_errors[--v3-api docs clean-Please specify either --all to clean all sites or a specific site using --site-name-cli.docs.clean.begin-cli.docs.clean.end]
+0.12s call     tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_does_overwrite_duplicate_when_overwrite_existing_is_true[test_backends0]
+0.08s call     tests/cli/upgrade_helpers/test_upgrade_helper.py::test_upgrade_helper_intervention_on_cli_command
+0.07s call     tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_upgrade_helper_intervention_on_cli_command
+0.04s call     tests/cli/v012/test_cli.py::test_cli_config_not_found_raises_error_for_all_commands
+0.02s call     tests/cli/test_toolkit.py::test_load_data_context_with_error_handling_v1_config
+0.02s call     tests/cli/v012/test_toolkit.py::test_load_data_context_with_error_handling_v1_config
+0.01s teardown tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_v2_to_v3_project_upgrade
+0.01s setup    tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_with_manual_steps[postgresql-test_backends0]
+0.01s setup    tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_with_manual_steps[postgresql-test_backends0]
+0.01s call     tests/cli/v012/test_datasource_snowflake.py::test_snowflake_key_pair_credentials[sqlite]
+0.01s setup    tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_v2_to_v3_project_upgrade
+0.01s setup    tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_upgrade_helper_intervention_on_cli_command
+0.01s setup    tests/cli/upgrade_helpers/test_upgrade_helper.py::test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints
+0.01s setup    tests/cli/upgrade_helpers/test_upgrade_helper.py::test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_validation_operators
+0.01s setup    tests/cli/v012/test_toolkit.py::test_load_data_context_with_error_handling_v1_config
+0.01s setup    tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_with_exception
+0.01s setup    tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_with_manual_steps[PandasDataset-test_backends0]
+0.01s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_project_check_config
+0.01s setup    tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_with_manual_steps[SparkDFDataset-test_backends0]
+0.01s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_docs_clean
+0.01s setup    tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_already_up_to_date
+0.01s setup    tests/cli/upgrade_helpers/test_upgrade_helper.py::test_v2_to_v3_project_upgrade_without_manual_steps
+0.01s setup    tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_with_manual_steps[sqlite-test_backends0]
+0.01s setup    tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_basic_project_upgrade
+0.01s setup    tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_with_manual_steps[PandasDataset-test_backends0]
+0.01s setup    tests/cli/upgrade_helpers/test_upgrade_helper.py::test_upgrade_helper_intervention_on_cli_command
+0.00s setup    tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_with_exception
+0.00s setup    tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_with_manual_steps[SparkDFDataset-test_backends0]
+0.00s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_without_suite_name_raises_error
+0.00s setup    tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_already_up_to_date
+0.00s setup    tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_with_manual_steps[sqlite-test_backends0]
+0.00s setup    tests/cli/upgrade_helpers/test_upgrade_helper.py::test_basic_project_upgrade
+0.00s setup    tests/cli/test_toolkit.py::test_load_data_context_with_error_handling_v1_config
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_project_upgrade
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_docs_build
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_store_list
+0.00s call     tests/cli/test_datasource_new_helpers.py::test_PandasYamlHelper
+0.00s setup    tests/cli/v012/test_init_sqlite.py::test_cli_init_on_new_project[test_backends0]
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[prompt: Choice 2 - Interactive suite edit]
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_checkpoint_new
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_new
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_scaffold
+0.00s call     tests/cli/v012/test_project.py::test_project_check_on_missing_ge_dir_guides_user_to_fix
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_datasource_delete
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_delete
+0.00s call     tests/cli/test_docs.py::test_docs_help_output
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_datasource_list
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_list
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_docs_list
+0.00s setup    tests/cli/v012/test_init_sqlite.py::test_cli_init_on_new_project_extra_whitespace_in_url[test_backends0]
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_edit
+0.00s call     tests/cli/test_cli.py::test_cli_command_help[None]
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_datasource_new
+0.00s setup    tests/cli/test_init.py::test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then_yes_to_fixing_them
+0.00s call     tests/cli/v012/test_toolkit.py::test_launch_jupyter_notebook_env_set_in_env
+0.00s call     tests/cli/v012/test_suite.py::test_suite_edit_without_suite_name_raises_error
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_checkpoint_list
+0.00s call     tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_checkpoint_delete
+0.00s call     tests/cli/test_datasource_new_helpers.py::test_SnowflakeCredentialYamlHelper_password_auth
+0.00s setup    tests/cli/test_init_sqlite.py::test_cli_init_on_new_project[test_backends0]
+0.00s call     tests/cli/test_project.py::test_project_check_on_missing_ge_dir_guides_user_to_fix
+0.00s call     tests/cli/test_cli.py::test_cli_command_invalid_command
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --interactive --manual --datasource-name --batch-request]
+0.00s setup    tests/cli/test_init_sqlite.py::test_cli_init_on_new_project_extra_whitespace_in_url[test_backends0]
+0.00s call     tests/cli/v012/test_docs_pre_v013.py::test_docs_help_output
+0.00s call     tests/cli/v012/test_cli.py::test_cli_command_entrance
+0.00s setup    tests/cli/test_init.py::test_cli_init_on_new_project[--v3-api --assume-yes init-]
+0.00s call     tests/cli/test_validation_operator.py::test_validation_operator_with_new_api_raises_error
+0.00s call     tests/cli/test_init.py::test_cancelled_cli_init_on_new_project
+0.00s call     tests/cli/test_toolkit.py::test_parse_cli_config_file_location_posix_paths
+0.00s call     tests/cli/test_datasource_new_helpers.py::test_SnowflakeCredentialYamlHelper_key_pair_auth
+0.00s setup    tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_directory_and_relative_data_path
+0.00s call     tests/cli/test_cli.py::test_cli_command_help[--help]
+0.00s call     tests/cli/test_suite.py::test_suite_help_output
+0.00s call     tests/cli/test_project.py::test_project_check_on_project_with_missing_config_file_guides_user
+0.00s call     tests/cli/v012/test_project.py::test_project_check_on_project_with_missing_config_file_guides_user
+0.00s call     tests/cli/v012/test_suite_pre_v013.py::test_suite_help_output
+0.00s call     tests/cli/v012/test_suite.py::test_suite_help_output
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[prompt: Choice 1 - Manual suite edit (default)]
+0.00s call     tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_raises_error_on_missing_datasource_name
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --interactive --manual --datasource-name]
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[error: --interactive --manual --batch-request]
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--interactive --datasource-name --batch-request]
+0.00s call     tests/cli/test_cli.py::test_cli_command_help[--v3-api --help]
+0.00s call     tests/cli/v012/test_docs.py::test_docs_help_output
+0.00s call     tests/cli/test_toolkit.py::test_launch_jupyter_notebook_env_set_in_env
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --datasource-name --batch-request]
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[error: --interactive --manual --profile --batch-request]
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[error: --interactive --manual]
+0.00s setup    tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_directory_and_absolute_data_path
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--interactive --profile --batch-request]
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[prompt: Choice 2 - Interactive suite creation]
+0.00s call     tests/cli/test_toolkit.py::test_parse_cli_config_file_location_posix_paths_existing_files_with_no_extension
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[warning: --manual --batch-request]
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[prompt: Choice 1 - Manual suite creation (default)]
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[error: --interactive --manual --profile]
+0.00s call     tests/cli/test_datasource_new_helpers.py::test_SnowflakeCredentialYamlHelper_sso_auth
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--interactive --batch-request]
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--manual --datasource-name --batch-request]
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--interactive]
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[prompt: Default Choice 1 - Manual suite creation (default)]
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --interactive --manual --batch-request]
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[prompt: Default Choice 1 - Manual suite edit (default)]
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_data_pandas
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--profile]
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --interactive --manual]
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--batch-request]
+0.00s setup    tests/cli/v012/test_datasource_snowflake.py::test_snowflake_key_pair_credentials[sqlite]
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[warning: --manual --datasource-name]
+0.00s call     tests/cli/test_datasource_new_helpers.py::test_MySQLCredentialYamlHelper
+0.00s call     tests/cli/test_datasource_new_helpers.py::test_SparkYamlHelper
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[warning: --manual --profile --batch-request]
+0.00s call     tests/cli/test_datasource_new_helpers.py::test_BigqueryCredentialYamlHelper
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--profile --batch-request]
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--datasource-name]
+0.00s setup    tests/cli/test_init.py::test_cli_init_on_new_project[--v3-api init-Y\n]
+0.00s setup    tests/cli/test_init.py::test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist
+0.00s call     tests/cli/test_datasource_new_helpers.py::test_RedshiftCredentialYamlHelper
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[warning: --manual --batch-request]
+0.00s setup    tests/cli/test_init.py::test_cancelled_cli_init_on_new_project
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--manual]
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[warning: --manual --profile]
+0.00s call     tests/cli/v012/test_cli.py::test_cli_command_invalid_command
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--interactive --batch-request]
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--interactive --datasource-name]
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[prompt: Choice 3 - Automatic suite creation (profiler)]
+0.00s call     tests/cli/test_datasource_new_helpers.py::test_PostgresCredentialYamlHelper
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--manual]
+0.00s call     tests/cli/test_datasource_new_helpers.py::test_ConnectionStringCredentialYamlHelper
+0.00s call     tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--interactive]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--profile]
+0.00s call     tests/cli/v012/test_datasource_snowflake.py::test_snowflake_user_password_credentials
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--interactive --datasource-name --batch-request]
+0.00s call     tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--interactive --profile]
+0.00s teardown tests/cli/v012/test_validation_operator.py::test_validation_operator_run_interactive_pass_non_existing_operator_name
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_without_suite_name_raises_error
+0.00s teardown tests/cli/test_suite.py::test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_without_citations_runs_notebook_opens_jupyter[test_backends0]
+0.00s setup    tests/cli/test_cli.py::test_cli_command_help[None]
+0.00s setup    tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent_directory_and_relative_data_path
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_script_happy_path_executable_failed_validation_with_ge_config_v2
+0.00s teardown tests/cli/test_toolkit.py::test_launch_jupyter_notebook_env_none
+0.00s teardown tests/cli/test_toolkit.py::test_load_data_context_with_error_handling_v1_config
+0.00s teardown tests/cli/test_suite.py::test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_citations_runs_notebook_opens_jupyter[test_backends0]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--manual --datasource-name --batch-request]
+0.00s setup    tests/cli/v012/test_init_pandas.py::test_cli_init_on_new_project_with_broken_excel_file_without_trying_again
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_script_happy_path_executable_successful_validation_with_ge_config_v2
+0.00s setup    tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_within_ge_directory_and_absolute_data_path
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[error: --interactive --manual]
+0.00s setup    tests/cli/v012/test_init.py::test_cli_init_connection_string_non_working_db_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging[test_backends0]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[error: --interactive --manual --batch-request]
+0.00s setup    tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_within_ge_directory_and_relative_data_path
+0.00s call     tests/cli/v012/test_cli.py::test_cli_ge_version_exists
+0.00s teardown tests/cli/test_toolkit.py::test_is_cloud_file_path_file_url
+0.00s call     tests/cli/test_cli.py::test_cli_ge_version_exists
+0.00s setup    tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent_directory_and_absolute_data_path
+0.00s call     tests/cli/test_datasource_snowflake.py::test_snowflake_auth_method_prompt_user_and_password
+0.00s teardown tests/cli/upgrade_helpers/test_upgrade_helper.py::test_v2_to_v3_project_upgrade_without_manual_steps
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--interactive --batch-request]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --interactive --manual]
+0.00s teardown tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no[test_backends0]
+0.00s teardown tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_ge_dir_absolute_data_path
+0.00s teardown tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_no_datasource_args[test_backends0]
+0.00s teardown tests/cli/test_suite.py::test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_runs_notebook_opens_jupyter
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--interactive --datasource-name]
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--manual]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[prompt: Choice 3 - Automatic suite creation (profiler)]
+0.00s call     tests/cli/v012/test_datasource_snowflake.py::test_snowflake_sso_credentials
+0.00s setup    tests/cli/v012/test_datasource_snowflake.py::test_snowflake_key_pair_credentials[PandasDataset]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[error: --interactive --manual --profile]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--datasource-name]
+0.00s teardown tests/cli/v012/test_validation_operator.py::test_validation_operator_list_with_multiple_validation_operators
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_script_happy_path_executable_successful_validation_pandas
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_script_happy_path_executable_failed_validation_pandas
+0.00s setup    tests/cli/v012/test_cli.py::test_cli_command_entrance
+0.00s teardown tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_directory_and_absolute_data_path
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--manual]
+0.00s teardown tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_directory_and_relative_data_path
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[prompt: Default Choice 1 - Manual suite creation (default)]
+0.00s teardown tests/cli/test_suite.py::test_suite_edit_multiple_datasources_with_no_additional_args_without_citations_runs_notebook_opens_jupyter
+0.00s teardown tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_no_suite_create_one[test_backends0]
+0.00s call     tests/cli/test_datasource_snowflake.py::test_snowflake_auth_method_prompt_SSO
+0.00s call     tests/cli/v012/test_toolkit.py::test_launch_jupyter_notebook_env_none
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_list_with_no_checkpoints_with_ge_config_v2
+0.00s setup    tests/cli/test_cli.py::test_cli_command_help[--help]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--profile --batch-request]
+0.00s teardown tests/cli/test_datasource_sqlite.py::test_cli_datasource_new_connection_string[test_backends0]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[warning: --manual --profile]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[warning: --manual --batch-request]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[prompt: Choice 1 - Manual suite edit (default)]
+0.00s setup    tests/cli/v012/test_datasource_snowflake.py::test_snowflake_key_pair_credentials[postgresql]
+0.00s setup    tests/cli/test_project.py::test_project_check_on_missing_ge_dir_guides_user_to_fix
+0.00s teardown tests/cli/test_datasource_pandas.py::test_cli_datasource_new_with_name_param
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_list_with_single_checkpoint_with_ge_config_v2
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--interactive]
+0.00s setup    tests/cli/v012/test_datasource_snowflake.py::test_snowflake_key_pair_credentials[SparkDFDataset]
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_scaffold_on_context_with_no_datasource_raises_error
+0.00s teardown tests/cli/test_datasource_pandas.py::test_cli_datasource_delete_with_non_existent_datasource_raises_error
+0.00s teardown tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_within_ge_directory_and_relative_data_path
+0.00s teardown tests/cli/test_suite.py::test_suite_new_profile_runs_notebook_no_jupyter
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_edit_with_non_existent_suite_name_raises_error
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[prompt: Choice 2 - Interactive suite edit]
+0.00s call     tests/cli/test_toolkit.py::test_launch_jupyter_notebook_env_none
+0.00s teardown tests/cli/v012/test_docs.py::test_docs_build_view
+0.00s call     tests/cli/test_datasource_snowflake.py::test_snowflake_auth_method_prompt_keys
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --interactive --manual --batch-request]
+0.00s setup    tests/cli/test_cli.py::test_cli_command_help[--v3-api --help]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --interactive --manual --datasource-name --batch-request]
+0.00s teardown tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent_directory_and_relative_data_path
+0.00s teardown tests/cli/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_no_suite_create_one[test_backends0]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[warning: --manual --profile --batch-request]
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_demo_multiple_datasources_with_generator_without_suite_name_argument
+0.00s setup    tests/cli/v012/test_docs.py::test_docs_help_output
+0.00s teardown tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent_directory_and_absolute_data_path
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_successful_validation_spark[test_backends0]
+0.00s teardown tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_within_ge_directory_and_absolute_data_path
+0.00s setup    tests/cli/v012/test_init_pandas.py::test_cli_init_on_new_project
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--interactive]
+0.00s setup    tests/cli/v012/test_init.py::test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them
+0.00s teardown tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_invalid_data_asset_arg_answering_no
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--interactive --batch-request]
+0.00s setup    tests/cli/test_docs.py::test_docs_help_output
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --datasource-name --batch-request]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[error: --interactive --manual --profile --batch-request]
+0.00s teardown tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_misc_dir_using_config_flag_absolute_data_path
+0.00s teardown tests/cli/test_suite.py::test_suite_new_profile_runs_notebook_opens_jupyter
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_list
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_batch_kwargs
+0.00s teardown tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_does_not_overwrite_duplicate_when_overwrite_existing_is_false
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_error
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[warning: --manual --batch-request]
+0.00s teardown tests/cli/test_suite.py::test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_opens_jupyter
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite
+0.00s teardown tests/cli/v012/test_init.py::test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist
+0.00s teardown tests/cli/test_suite.py::test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_runs_notebook_no_jupyter
+0.00s teardown tests/cli/test_datasource_pandas.py::test_cli_datasource_new
+0.00s teardown tests/cli/test_datasource_pandas.py::test_cli_datasource_new_from_misc_directory
+0.00s teardown tests/cli/test_suite.py::test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_jupyter
+0.00s teardown tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one
+0.00s setup    tests/cli/test_init_pandas.py::test_cli_init_on_new_project
+0.00s teardown tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_misc_dir_using_config_flag_relative_data_path
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[--batch-request]
+0.00s teardown tests/cli/test_suite.py::test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook_opens_jupyter
+0.00s teardown tests/cli/v012/test_init.py::test_cli_init_connection_string_non_working_db_connection_instructs_user_and_leaves_entries_in_config_files_for_debugging[test_backends0]
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2
+0.00s call     tests/cli/test_toolkit.py::test_parse_cli_config_file_location_windows_paths
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build-None--2-expected_built_site_names1]
+0.00s teardown tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_with_manual_steps[postgresql-test_backends0]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[prompt: Choice 2 - Interactive suite creation]
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--interactive --profile]
+0.00s teardown tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_adjacent_dir_relative_data_path
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[--interactive --profile --batch-request]
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_script_happy_path_generates_script_with_ge_config_v2
+0.00s teardown tests/cli/test_suite.py::test_suite_new_non_interactive_with_suite_name_prompted_default_runs_notebook_opens_jupyter
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[prompt: Default Choice 1 - Manual suite edit (default)]
+0.00s setup    tests/cli/test_cli.py::test_cli_ge_version_exists
+0.00s setup    tests/cli/v012/test_init.py::test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_run_happy_path_with_successful_validation_with_ge_config_v2
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_spark[test_backends0]
+0.00s setup    tests/cli/v012/test_project.py::test_project_check_on_missing_ge_dir_guides_user_to_fix
+0.00s teardown tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with_limit[test_backends0]
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_new_empty_with_no_jupyter
+0.00s teardown tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_multiple_datasources_exist_do_nothing
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
+0.00s teardown tests/cli/test_suite.py::test__process_suite_new_flags_and_prompt[prompt: Choice 1 - Manual suite creation (default)]
+0.00s setup    tests/cli/test_cli.py::test_cli_command_invalid_command
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[error: --interactive --manual --datasource-name]
+0.00s teardown tests/cli/test_init_pandas.py::test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one
+0.00s teardown tests/cli/v012/test_validation_operator.py::test_validation_operator_run_noninteractive_validation_config_file_does_not_exist
+0.00s setup    tests/cli/v012/test_init_pandas.py::test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different_file
+0.00s setup    tests/cli/v012/test_docs_pre_v013.py::test_docs_help_output
+0.00s teardown tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_adjacent_dir_absolute_data_path
+0.00s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_help_output
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build-n\n-Would you like to proceed? [Y/n]-0]
+0.00s teardown tests/cli/v012/test_validation_operator.py::test_validation_operator_list_with_zero_validation_operators
+0.00s teardown tests/cli/test_datasource_new_pandas_paths.py::test_cli_datasource_new_run_from_ge_dir_relative_data_path
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg
+0.00s teardown tests/cli/test_suite.py::test__process_suite_edit_flags_and_prompt[warning: --manual --datasource-name]
+0.00s setup    tests/cli/test_init_pandas.py::test_cli_init_on_new_project_with_broken_excel_file_without_trying_again
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_new_creates_empty_suite
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_one_datasource_without_generator_without_suite_name_argument
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_multiple_datasources_with_generator_without_suite_name_argument
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_help_output
+0.00s setup    tests/cli/v012/test_datasource_snowflake.py::test_snowflake_user_password_credentials
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_script_raises_error_if_python_file_exists
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_list_with_eight_checkpoints
+0.00s teardown tests/cli/v012/test_docs.py::test_docs_build_assume_yes
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_store_list
+0.00s teardown tests/cli/v012/test_validation_operator.py::test_validation_operator_list_with_one_validation_operator
+0.00s teardown tests/cli/test_init.py::test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build --site-name team_site --no-view-\n-Would you like to proceed? [Y/n]-0-expected_built_site_names11]
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark[test_backends0]
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_on_context_with_no_datasources
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
+0.00s teardown tests/cli/v012/test_docs_pre_v013.py::test_docs_build_no_view
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build -sn team_site --no-view-\n-Would you like to proceed? [Y/n]-0-expected_built_site_names13]
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v2
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_SnowflakeCredentialYamlHelper_key_pair_auth
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --site-name local_site -nv-\n-Would you like to proceed? [Y/n]-0]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build -sn team_site-None--1-expected_built_site_names5]
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -sn local_site --no-view-\n-Would you like to proceed? [Y/n]-0]
+0.00s teardown tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_list[test_backends0]
+0.00s setup    tests/cli/test_init_pandas.py::test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different_file
+0.00s teardown tests/cli/test_docs.py::test_docs_clean_happy_paths_clean_expected_sites[--v3-api docs clean -s local_site]
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_pandas
+0.00s teardown tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_basic_project_upgrade
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_list_with_multiple_suites
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build --no-view-None--0-expected_built_site_names10]
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg
+0.00s teardown tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one[test_backends0]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build -sn local_site -nv-None--0]
+0.00s teardown tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_new
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_new_specify_datasource_with_ge_config_v2
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build-\n-Would you like to proceed? [Y/n]-2-expected_built_site_names0]
+0.00s teardown tests/cli/test_suite.py::test_suite_demo_deprecation_message
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --site-name local_site-\n-Would you like to proceed? [Y/n]-1]
+0.00s teardown tests/cli/v012/test_docs.py::test_docs_build_no_view
+0.00s teardown tests/cli/test_docs.py::test_docs_list
+0.00s setup    tests/cli/test_suite.py::test_suite_help_output
+0.00s teardown tests/cli/test_cli.py::test_using_assume_yes_flag_on_command_with_no_assume_yes_implementation
+0.00s teardown tests/cli/v012/test_init_pandas.py::test_cli_init_on_new_project
+0.00s teardown tests/cli/v012/test_docs_pre_v013.py::test_docs_build_assume_yes
+0.00s teardown tests/cli/test_init.py::test_cli_init_on_new_project[--v3-api init-Y\n]
+0.00s setup    tests/cli/v012/test_suite.py::test_suite_help_output
+0.00s teardown tests/cli/test_suite.py::test_suite_list_with_one_suite
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build --site-name team_site-\n-Would you like to proceed? [Y/n]-1-expected_built_site_names2]
+0.00s teardown tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg[test_backends0]
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_new_creates_empty_suite
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build-n\n-Would you like to proceed? [Y/n]-0-expected_built_site_names6]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build --site-name local_site-None--1]
+0.00s teardown tests/cli/test_docs.py::test_docs_clean_and_build_raises_helpful_errors[--v3-api docs build --site-name fake_site-The specified site name `fake_site` does not exist in this project.-cli.docs.build.begin-cli.docs.build.end]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build --site-name team_site-None--1-expected_built_site_names3]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build --no-view-\n-Would you like to proceed? [Y/n]-0-expected_built_site_names9]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -sn local_site-n\n-Would you like to proceed? [Y/n]-0]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --site-name local_site --no-view-\n-Would you like to proceed? [Y/n]-0]
+0.00s teardown tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_datasource_arg
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build -sn local_site --no-view-None--0]
+0.00s teardown tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_with_manual_steps[postgresql-test_backends0]
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_scaffold_creates_notebook_and_opens_jupyter
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_new_empty_with_csv_gz
+0.00s teardown tests/cli/v012/test_docs_pre_v013.py::test_docs_build_view
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build -sn team_site --no-view-None--0-expected_built_site_names14]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build -sn team_site-\n-Would you like to proceed? [Y/n]-1-expected_built_site_names4]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build --site-name local_site --no-view-None--0]
+0.00s teardown tests/cli/test_docs.py::test_docs_clean_and_build_raises_helpful_errors[--v3-api docs clean --site-name fake_site-The specified site name `fake_site` does not exist in this project.-cli.docs.clean.begin-cli.docs.clean.end]
+0.00s teardown tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_multiple_datasources_exist_do_nothing[test_backends0]
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_delete_with_one_suite
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_new_empty_with_no_jupyter
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build --site-name team_site-n\n-Would you like to proceed? [Y/n]-0-expected_built_site_names7]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api docs build -sn team_site-n\n-Would you like to proceed? [Y/n]-0-expected_built_site_names8]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -nv-\n-Would you like to proceed? [Y/n]-0]
+0.00s setup    tests/cli/test_toolkit.py::test_is_cloud_file_path_azure_storage
+0.00s teardown tests/cli/test_docs.py::test_docs_clean_happy_paths_clean_expected_sites[--v3-api docs clean --site-name local_site]
+0.00s teardown tests/cli/test_init.py::test_cli_init_on_new_project[--v3-api --assume-yes init-]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build-\n-Would you like to proceed? [Y/n]-1]
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_sql[test_backends0]
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_delete_with_zero_suites
+0.00s teardown tests/cli/upgrade_helpers/test_upgrade_helper.py::test_basic_project_upgrade
+0.00s setup    tests/cli/v012/test_toolkit.py::test_launch_jupyter_notebook_env_none
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_multiple_site_context[--v3-api --assume-yes docs build --site-name team_site --no-view-None--0-expected_built_site_names12]
+0.00s teardown tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_additional_batch_kwargs
+0.00s teardown tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no[test_backends0]
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_error
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_scaffold_creates_notebook_with_no_jupyter_flag
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql[test_backends0]
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_ConnectionStringCredentialYamlHelper
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_successful_validation_sql[test_backends0]
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_list_with_one_suite
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_demo_one_datasource_without_generator_without_suite_name_argument
+0.00s teardown tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_answering_no
+0.00s teardown tests/cli/test_datasource_sqlite.py::test_cli_datasource_list[test_backends0]
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_scaffold_creates_notebook_with_no_jupyter_flag
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
+0.00s setup    tests/cli/v012/test_cli.py::test_cli_command_invalid_command
+0.00s setup    tests/cli/v012/test_datasource_snowflake.py::test_snowflake_sso_credentials
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_ge_config_v2
+0.00s teardown tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_valid_data_asset_arg[test_backends0]
+0.00s teardown tests/cli/test_docs.py::test_docs_clean_and_build_raises_helpful_errors[--v3-api docs clean --site-name local_site --all-Please specify either --all to clean all sites or a specific site using --site-name-cli.docs.clean.begin-cli.docs.clean.end]
+0.00s teardown tests/cli/test_datasource_pandas.py::test_cli_datasource_delete_on_project_with_one_datasource
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error
+0.00s teardown tests/cli/v012/test_validation_operator.py::test_validation_operator_list_with_one_operator
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_scaffold_on_existing_suite_raises_error
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations
+0.00s teardown tests/cli/test_suite.py::test_suite_edit_with_non_existent_datasource_shows_helpful_error_message
+0.00s teardown tests/cli/test_suite.py::test_suite_edit_datasource_and_batch_request_error
+0.00s teardown tests/cli/v012/test_validation_operator.py::test_validation_operator_run_noninteractive_golden_path
+0.00s teardown tests/cli/v012/test_init_pandas.py::test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different_file
+0.00s setup    tests/cli/v012/test_cli.py::test_cli_ge_version_exists
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_checkpoint_list
+0.00s teardown tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no
+0.00s teardown tests/cli/test_docs.py::test_docs_clean_and_build_raises_helpful_errors[--v3-api docs clean-Please specify either --all to clean all sites or a specific site using --site-name-cli.docs.clean.begin-cli.docs.clean.end]
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build --no-view-None--0]
+0.00s teardown tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_does_overwrite_duplicate_when_overwrite_existing_is_true[test_backends0]
+0.00s teardown tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_answering_no[test_backends0]
+0.00s teardown tests/cli/test_suite.py::test_suite_edit_with_non_existent_suite_name_raises_error
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --no-view-\n-Would you like to proceed? [Y/n]-0]
+0.00s teardown tests/cli/v012/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes[test_backends0]
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_PostgresCredentialYamlHelper
+0.00s teardown tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_no_datasource_args
+0.00s teardown tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_list
+0.00s teardown tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_skip_prompt_flag
+0.00s teardown tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_with_exception
+0.00s call     tests/cli/test_datasource_new_helpers.py::test_SQLCredentialYamlHelper_defaults
+0.00s teardown tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_upgrade_helper_intervention_on_cli_command
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2
+0.00s teardown tests/cli/v012/test_datasource.py::test_get_batch_kwargs_for_specific_dataasset
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -sn local_site-\n-Would you like to proceed? [Y/n]-1]
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_scaffold_creates_notebook_and_opens_jupyter
+0.00s teardown tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_datasource_list
+0.00s teardown tests/cli/test_project.py::test_project_check_on_project_with_v2_datasources_and_validation_operators
+0.00s teardown tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_already_up_to_date
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build -sn local_site -nv-\n-Would you like to proceed? [Y/n]-0]
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_list_with_one_suite
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_delete_with_non_existent_suite
+0.00s teardown tests/cli/v012/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_no_suite_create_one
+0.00s teardown tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_with_datasource_arg[test_backends0]
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_list_with_multiple_suites
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build --site-name local_site -nv-None--0]
+0.00s teardown tests/cli/test_suite.py::test_suite_edit_interactive_batch_request_without_datasource_json_file_raises_helpful_error
+0.00s teardown tests/cli/v012/test_datasource_pandas.py::test_cli_datasource_profile_with_valid_data_asset_arg
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build -nv-None--0]
+0.00s setup    tests/cli/test_datasource_snowflake.py::test_snowflake_auth_method_prompt_user_and_password
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_edit_on_exsiting_suite_one_datasources_with_batch_kwargs_without_datasource_raises_helpful_error
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build-None--1]
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_delete_with_one_suite
+0.00s teardown tests/cli/v012/test_validation_operator.py::test_validation_operator_run_interactive_golden_path
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error
+0.00s teardown tests/cli/v012/test_store.py::test_store_list_with_four_stores
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_script_raises_error_if_checkpoint_not_found
+0.00s teardown tests/cli/test_cli.py::test_assume_yes_using_yes_flag_using_checkpoint_delete
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api docs build --site-name local_site-n\n-Would you like to proceed? [Y/n]-0]
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge_config_v2
+0.00s teardown tests/cli/upgrade_helpers/test_upgrade_helper.py::test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_validation_operators
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_edit_with_non_existent_datasource_shows_helpful_error_message
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_delete_with_non_existent_suite
+0.00s teardown tests/cli/test_docs.py::test_docs_build_happy_paths_build_site_on_single_site_context[--v3-api --assume-yes docs build -sn local_site-None--1]
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_delete_with_single_checkpoint_confirm_success
+0.00s teardown tests/cli/test_cli.py::test_assume_yes_using_full_flag_using_checkpoint_delete
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_with_non_existent_datasource_shows_helpful_error_message
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_list_with_no_checkpoints
+0.00s teardown tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_new_connection_string[test_backends0]
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_new_raises_error_on_existing_checkpoint
+0.00s teardown tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_raises_error_on_empty_yaml
+0.00s teardown tests/cli/v012/test_datasource_sqlite.py::test_cli_datasource_profile_on_empty_database[test_backends0]
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_delete_with_zero_suites
+0.00s teardown tests/cli/test_suite.py::test_suite_delete_canceled_with_one_suite
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_list_with_zero_suites
+0.00s teardown tests/cli/v012/test_store.py::test_store_list_with_two_stores
+0.00s teardown tests/cli/v012/test_init_sqlite.py::test_cli_init_on_new_project[test_backends0]
+0.00s teardown tests/cli/v012/test_validation_operator.py::test_validation_operator_run_noninteractive_validation_config_file_does_is_misconfigured
+0.00s setup    tests/cli/test_toolkit.py::test_parse_cli_config_file_location_posix_paths
+0.00s teardown tests/cli/v012/test_validation_operator.py::test_validation_operator_run_interactive_pass_non_existing_expectation_suite
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_BigqueryCredentialYamlHelper
+0.00s teardown tests/cli/test_docs.py::test_docs_clean_happy_paths_clean_expected_sites[--v3-api docs clean --all]
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_demo_enter_existing_suite_name_as_arg
+0.00s teardown tests/cli/test_docs.py::test_docs_clean_happy_paths_clean_expected_sites[--v3-api docs clean -a]
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_ge_config_v2
+0.00s teardown tests/cli/test_datasource_pandas.py::test_cli_datasource_delete_on_project_with_one_datasource_declining_prompt_does_not_delete
+0.00s setup    tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_without_suite_name_raises_error
+0.00s teardown tests/cli/test_suite.py::test_suite_new_profile_on_existing_suite_raises_error
+0.00s teardown tests/cli/v012/test_store.py::test_store_list_with_zero_stores
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_edit_with_non_existent_suite_name_raises_error
+0.00s teardown tests/cli/v012/test_toolkit.py::test_launch_jupyter_notebook_env_set_in_env
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_scaffold_on_existing_suite_raises_error
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error
+0.00s teardown tests/cli/test_suite.py::test_suite_list_with_multiple_suites
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_scaffold_on_context_with_no_datasource_raises_error
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error_with_ge_config_v2
+0.00s setup    tests/cli/test_toolkit.py::test_parse_cli_config_file_location_posix_paths_existing_files_with_no_extension
+0.00s teardown tests/cli/v012/test_suite_pre_v013.py::test_suite_demo_enter_existing_suite_name_as_arg
+0.00s teardown tests/cli/test_init_pandas.py::test_cli_init_on_new_project
+0.00s teardown tests/cli/test_suite.py::test_suite_delete_with_zero_suites
+0.00s teardown tests/cli/test_datasource_pandas.py::test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag
+0.00s teardown tests/cli/v012/test_init_sqlite.py::test_cli_init_on_new_project_extra_whitespace_in_url[test_backends0]
+0.00s teardown tests/cli/test_cli.py::test_assume_yes_using_y_flag_using_checkpoint_delete
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_project_upgrade
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_batch_kwargs
+0.00s setup    tests/cli/v012/test_cli.py::test_cli_config_not_found_raises_error_for_all_commands
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_SparkYamlHelper
+0.00s setup    tests/cli/v012/test_suite.py::test_suite_edit_without_suite_name_raises_error
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_demo_on_context_with_no_datasources
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_happy_path_with_successful_validation_pandas
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_SnowflakeCredentialYamlHelper_sso_auth
+0.00s teardown tests/cli/v012/test_project.py::test_project_check_on_project_with_missing_config_file_guides_user
+0.00s teardown tests/cli/test_store.py::test_store_list_stores
+0.00s teardown tests/cli/test_init.py::test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then_yes_to_fixing_them
+0.00s teardown tests/cli/test_init_sqlite.py::test_init_on_existing_project_with_multiple_datasources_exist_do_nothing[test_backends0]
+0.00s teardown tests/cli/test_init_pandas.py::test_cli_init_on_new_project_with_broken_excel_file_without_trying_again
+0.00s teardown tests/cli/test_init_sqlite.py::test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one[test_backends0]
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2
+0.00s teardown tests/cli/v012/test_init_pandas.py::test_cli_init_on_new_project_with_broken_excel_file_without_trying_again
+0.00s teardown tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_with_manual_steps[sqlite-test_backends0]
+0.00s teardown tests/cli/test_suite.py::test_suite_delete_with_one_suite_assume_yes_flag
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_scaffold
+0.00s teardown tests/cli/v012/test_init_missing_libraries.py::test_cli_init_db_snowflake_without_library_installed_instructs_user
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_docs_list
+0.00s teardown tests/cli/test_datasource_pandas.py::test_cli_datasource_list_on_project_with_no_datasources
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_SnowflakeCredentialYamlHelper_password_auth
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_docs_build
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_delete_with_single_checkpoint_assume_yes_flag
+0.00s teardown tests/cli/v012/test_project.py::test_project_check_on_valid_project_says_so
+0.00s teardown tests/cli/test_datasource_pandas.py::test_cli_datasource_new_no_jupyter_writes_notebook
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_list_with_zero_suites
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge_config_v2
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_raises_error_if_checkpoint_is_not_found
+0.00s teardown tests/cli/v012/test_init.py::test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_yes_to_fixing_them
+0.00s teardown tests/cli/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no[test_backends0]
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_delete_with_single_checkpoint_cancel_success
+0.00s teardown tests/cli/test_suite.py::test_suite_new_interactive_malformed_batch_request_json_file_raises_error
+0.00s teardown tests/cli/test_docs.py::test_docs_list_with_no_sites
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_run_raises_error_if_checkpoint_is_not_found_with_ge_config_v2
+0.00s teardown tests/cli/test_datasource_pandas.py::test_cli_datasource_list_on_project_with_one_datasource
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_delete
+0.00s teardown tests/cli/test_suite.py::test_suite_new_profile_on_context_with_no_datasource_raises_error
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_script_happy_path_generates_script_pandas
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_edit
+0.00s teardown tests/cli/test_suite.py::test_suite_edit_without_suite_name_raises_error
+0.00s teardown tests/cli/upgrade_helpers/test_upgrade_helper.py::test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints
+0.00s teardown tests/cli/test_suite.py::test_suite_delete_with_one_suite
+0.00s teardown tests/cli/v012/test_checkpoint.py::test_checkpoint_new_raises_error_on_no_suite_found_with_ge_config_v2
+0.00s teardown tests/cli/test_suite.py::test_suite_delete_with_non_existent_suite
+0.00s teardown tests/cli/v012/test_datasource_snowflake.py::test_snowflake_user_password_credentials_exit
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_run_on_non_existent_validations
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_datasource_delete
+0.00s teardown tests/cli/test_project.py::test_project_check_on_valid_project_says_so
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_RedshiftCredentialYamlHelper
+0.00s teardown tests/cli/test_suite.py::test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error
+0.00s call     tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_raises_error_on_empty_yaml
+0.00s teardown tests/cli/v012/test_datasource_snowflake.py::test_snowflake_key_pair_credentials[postgresql]
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_datasource_new
+0.00s teardown tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_already_up_to_date
+0.00s teardown tests/cli/test_suite.py::test_suite_list_with_zero_suites
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_SQLCredentialYamlHelper_defaults
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_delete
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_list_with_single_checkpoint
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_docs_clean
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_new
+0.00s teardown tests/cli/test_init_sqlite.py::test_cli_init_on_new_project[test_backends0]
+0.00s teardown tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_works_with_credentials[test_backends0]
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_checkpoint_new
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_checkpoint_delete
+0.00s setup    tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_project_check_config
+0.00s teardown tests/cli/v012/test_datasource_snowflake.py::test_snowflake_key_pair_credentials[sqlite]
+0.00s teardown tests/cli/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes
+0.00s teardown tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_with_exception
+0.00s teardown tests/cli/test_init_sqlite.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes[test_backends0]
+0.00s teardown tests/cli/test_cli.py::test_cli_works_from_random_directory_with_c_flag_fully_specified_yml
+0.00s teardown tests/cli/test_init_pandas.py::test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different_file
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_project_check_config
+0.00s setup    tests/cli/test_toolkit.py::test_parse_cli_config_file_location_windows_paths
+0.00s setup    tests/cli/v012/test_toolkit.py::test_launch_jupyter_notebook_env_set_in_env
+0.00s teardown tests/cli/test_toolkit.py::test_parse_cli_config_file_location_posix_paths_existing_files_with_no_extension
+0.00s teardown tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_with_manual_steps[SparkDFDataset-test_backends0]
+0.00s teardown tests/cli/upgrade_helpers/test_upgrade_helper.py::test_upgrade_helper_intervention_on_cli_command
+0.00s teardown tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_works_without_credentials[test_backends0]
+0.00s setup    tests/cli/test_toolkit.py::test_launch_jupyter_notebook_env_none
+0.00s teardown tests/cli/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_no_suite_create_one
+0.00s teardown tests/cli/test_init.py::test_cancelled_cli_init_on_new_project
+0.00s call     tests/cli/test_toolkit.py::test_is_cloud_file_path_local_posix
+0.00s teardown tests/cli/v012/test_toolkit.py::test_load_data_context_with_error_handling_v1_config
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_check_if_datasource_name_exists
+0.00s teardown tests/cli/test_cli.py::test_cli_works_from_random_directory_with_config_flag_great_expectations_directory
+0.00s setup    tests/cli/test_datasource_snowflake.py::test_snowflake_auth_method_prompt_keys
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_SQLCredentialYamlHelper_driver
+0.00s setup    tests/cli/test_datasource_snowflake.py::test_snowflake_auth_method_prompt_SSO
+0.00s teardown tests/cli/test_checkpoint.py::test_checkpoint_delete_with_non_existent_checkpoint
+0.00s teardown tests/cli/test_cli.py::test_cli_works_from_random_directory_with_config_flag_fully_specified_yml
+0.00s teardown tests/cli/test_init_sqlite.py::test_cli_init_on_new_project_extra_whitespace_in_url[test_backends0]
+0.00s teardown tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_raises_error_on_missing_datasource_name
+0.00s teardown tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_with_manual_steps[PandasDataset-test_backends0]
+0.00s teardown tests/cli/test_init_pandas.py::test_init_on_existing_project_with_multiple_datasources_exist_do_nothing
+0.00s setup    tests/cli/test_toolkit.py::test_is_cloud_file_path_local_posix
+0.00s teardown tests/cli/test_cli.py::test_cli_works_from_great_expectations_directory_without_config_flag
+0.00s teardown tests/cli/v012/upgrade_helpers/test_upgrade_helper_pre_v013.py::test_project_upgrade_with_manual_steps[SparkDFDataset-test_backends0]
+0.00s teardown tests/cli/test_project.py::test_project_check_on_project_with_missing_config_file_guides_user
+0.00s teardown tests/cli/test_cli.py::test_cli_works_from_random_directory_with_c_flag_great_expectations_directory
+0.00s call     tests/cli/test_datasource_new_helpers.py::test_SQLCredentialYamlHelper_driver
+0.00s teardown tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_with_manual_steps[PandasDataset-test_backends0]
+0.00s setup    tests/cli/v012/test_init_missing_libraries.py::test_init_install_sqlalchemy
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_PandasYamlHelper
+0.00s teardown tests/cli/test_init_pandas.py::test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no
+0.00s setup    tests/cli/test_validation_operator.py::test_validation_operator_with_new_api_raises_error
+0.00s setup    tests/cli/test_toolkit.py::test_launch_jupyter_notebook_env_set_in_env
+0.00s teardown tests/cli/test_cli.py::test_cli_works_from_adjacent_directory_without_config_flag
+0.00s teardown tests/cli/v012/test_datasource_snowflake.py::test_snowflake_user_password_credentials
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_help_output
+0.00s teardown tests/cli/v012/test_cli.py::test_cli_ge_version_exists
+0.00s call     tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent_directory_and_relative_data_path
+0.00s teardown tests/cli/v012/test_project.py::test_project_check_on_missing_ge_dir_guides_user_to_fix
+0.00s teardown tests/cli/v012/test_docs.py::test_docs_help_output
+0.00s teardown tests/cli/v012/test_cli.py::test_cli_command_entrance
+0.00s setup    tests/cli/test_toolkit.py::test_is_cloud_file_path_s3
+0.00s setup    tests/cli/test_toolkit.py::test_parse_cli_config_file_location_empty_paths
+0.00s teardown tests/cli/v012/test_toolkit.py::test_launch_jupyter_notebook_env_none
+0.00s setup    tests/cli/test_toolkit.py::test_is_cloud_file_path_ftp_url
+0.00s teardown tests/cli/v012/test_docs_pre_v013.py::test_docs_help_output
+0.00s teardown tests/cli/test_datasource_new_helpers.py::test_MySQLCredentialYamlHelper
+0.00s teardown tests/cli/v012/test_cli.py::test_cli_config_not_found_raises_error_for_all_commands
+0.00s teardown tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_raises_error_on_non_string
+0.00s teardown tests/cli/test_validation_operator.py::test_validation_operator_with_new_api_raises_error
+0.00s setup    tests/cli/test_toolkit.py::test_is_cloud_file_path_google_storage
+0.00s teardown tests/cli/v012/test_cli.py::test_cli_command_invalid_command
+0.00s teardown tests/cli/test_toolkit.py::test_parse_cli_config_file_location_posix_paths
+0.00s setup    tests/cli/test_toolkit.py::test_is_cloud_file_path_file_url
+0.00s setup    tests/cli/test_toolkit.py::test_is_cloud_file_path_http_url
+0.00s teardown tests/cli/v012/test_suite.py::test_suite_edit_without_suite_name_raises_error
+0.00s call     tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_within_ge_directory_and_relative_data_path
+0.00s teardown tests/cli/test_toolkit.py::test_is_cloud_file_path_local_posix
+0.00s teardown tests/cli/test_cli.py::test_cli_command_help[None]
+0.00s call     tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_directory_and_absolute_data_path
+0.00s teardown tests/cli/v012/test_datasource_snowflake.py::test_snowflake_key_pair_credentials[PandasDataset]
+0.00s teardown tests/cli/test_cli.py::test_cli_command_help[--help]
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_new
+0.00s call     tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_directory_and_relative_data_path
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_project_upgrade
+0.00s teardown tests/cli/test_project.py::test_project_check_on_missing_ge_dir_guides_user_to_fix
+0.00s call     tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_within_ge_directory_and_absolute_data_path
+0.00s teardown tests/cli/upgrade_helpers/test_upgrade_helper.py::test_project_upgrade_with_manual_steps[sqlite-test_backends0]
+0.00s teardown tests/cli/v012/test_datasource_snowflake.py::test_snowflake_key_pair_credentials[SparkDFDataset]
+0.00s teardown tests/cli/v012/test_datasource_snowflake.py::test_snowflake_sso_credentials
+0.00s call     tests/cli/test_toolkit.py::test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent_directory_and_absolute_data_path
+0.00s teardown tests/cli/test_toolkit.py::test_is_cloud_file_path_http_url
+0.00s teardown tests/cli/test_suite.py::test_suite_help_output
+0.00s teardown tests/cli/test_toolkit.py::test_launch_jupyter_notebook_env_set_in_env
+0.00s teardown tests/cli/test_cli.py::test_cli_command_help[--v3-api --help]
+0.00s teardown tests/cli/test_datasource_snowflake.py::test_snowflake_auth_method_prompt_SSO
+0.00s teardown tests/cli/test_datasource_snowflake.py::test_snowflake_auth_method_prompt_keys
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_list
+0.00s teardown tests/cli/test_docs.py::test_docs_help_output
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_docs_clean
+0.00s call     tests/cli/test_sanitize_yaml_and_save_datasource.py::test_sanitize_yaml_and_save_datasource_raises_error_on_non_string
+0.00s teardown tests/cli/test_cli.py::test_cli_ge_version_exists
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_store_list
+0.00s teardown tests/cli/test_datasource_snowflake.py::test_snowflake_auth_method_prompt_user_and_password
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_docs_list
+0.00s teardown tests/cli/test_toolkit.py::test_is_cloud_file_path_google_storage
+0.00s teardown tests/cli/test_toolkit.py::test_parse_cli_config_file_location_windows_paths
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_checkpoint_delete
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_docs_build
+0.00s teardown tests/cli/test_toolkit.py::test_is_cloud_file_path_azure_storage
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_checkpoint_list
+0.00s teardown tests/cli/test_toolkit.py::test_is_cloud_file_path_s3
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_edit
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_checkpoint_new
+0.00s teardown tests/cli/test_toolkit.py::test_is_cloud_file_path_ftp_url
+0.00s teardown tests/cli/test_toolkit.py::test_parse_cli_config_file_location_empty_paths
+0.00s teardown tests/cli/v012/test_init_missing_libraries.py::test_cli_init_db_mssql_without_library_installed_instructs_user
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_datasource_list
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_datasource_delete
+0.00s teardown tests/cli/test_cli.py::test_cli_command_invalid_command
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_datasource_new
+0.00s teardown tests/cli/test_cli.py::test_cli_config_not_found_raises_error_for_suite_scaffold
+0.00s teardown tests/cli/v012/test_init_missing_libraries.py::test_cli_init_db_mysql_without_library_installed_instructs_user
+0.00s teardown tests/cli/v012/test_init_missing_libraries.py::test_cli_init_db_redshift_without_library_installed_instructs_user
+0.00s teardown tests/cli/v012/test_init_missing_libraries.py::test_init_install_sqlalchemy
+0.00s teardown tests/cli/v012/test_init_missing_libraries.py::test_cli_init_db_postgres_without_library_installed_instructs_user
+0.00s teardown tests/cli/v012/test_init_missing_libraries.py::test_cli_init_spark_without_library_installed_instructs_user
+0.00s setup    tests/cli/test_init_missing_libraries.py::test_cli_init_spark_without_library_installed_instructs_user
+0.00s setup    tests/cli/v012/test_init_missing_libraries.py::test_cli_init_db_postgres_without_library_installed_instructs_user
+0.00s setup    tests/cli/test_init_missing_libraries.py::test_init_install_sqlalchemy
+0.00s teardown tests/cli/test_init_missing_libraries.py::test_cli_init_spark_without_library_installed_instructs_user
+0.00s setup    tests/cli/v012/test_init_missing_libraries.py::test_cli_init_db_mssql_without_library_installed_instructs_user
+0.00s setup    tests/cli/v012/test_init_missing_libraries.py::test_cli_init_spark_without_library_installed_instructs_user
+0.00s setup    tests/cli/v012/test_init_missing_libraries.py::test_cli_init_db_redshift_without_library_installed_instructs_user
+0.00s teardown tests/cli/test_init_missing_libraries.py::test_init_install_sqlalchemy
+0.00s call     tests/cli/test_toolkit.py::test_is_cloud_file_path_ftp_url
+0.00s setup    tests/cli/v012/test_init_missing_libraries.py::test_cli_init_db_mysql_without_library_installed_instructs_user
+0.00s setup    tests/cli/v012/test_init_missing_libraries.py::test_cli_init_db_snowflake_without_library_installed_instructs_user
+0.00s call     tests/cli/test_toolkit.py::test_is_cloud_file_path_file_url
+0.00s teardown tests/cli/test_init_missing_libraries.py::test_cli_init_db_mysql_without_library_installed_instructs_user
+0.00s teardown tests/cli/test_init_missing_libraries.py::test_cli_init_db_postgres_without_library_installed_instructs_user
+0.00s teardown tests/cli/test_init_missing_libraries.py::test_cli_init_db_snowflake_without_library_installed_instructs_user
+0.00s teardown tests/cli/test_init_missing_libraries.py::test_cli_init_db_redshift_without_library_installed_instructs_user
+0.00s call     tests/cli/test_toolkit.py::test_is_cloud_file_path_http_url
+0.00s teardown tests/cli/test_init_missing_libraries.py::test_cli_init_db_mssql_without_library_installed_instructs_user
+0.00s call     tests/cli/test_toolkit.py::test_is_cloud_file_path_azure_storage
+0.00s call     tests/cli/test_toolkit.py::test_parse_cli_config_file_location_empty_paths
+0.00s call     tests/cli/test_toolkit.py::test_is_cloud_file_path_google_storage
+0.00s call     tests/cli/test_toolkit.py::test_is_cloud_file_path_s3
+0.00s setup    tests/cli/test_init_missing_libraries.py::test_cli_init_db_postgres_without_library_installed_instructs_user
+0.00s setup    tests/cli/test_init_missing_libraries.py::test_cli_init_db_mysql_without_library_installed_instructs_user
+0.00s setup    tests/cli/test_init_missing_libraries.py::test_cli_init_db_snowflake_without_library_installed_instructs_user
+0.00s setup    tests/cli/test_init_missing_libraries.py::test_cli_init_db_redshift_without_library_installed_instructs_user
+0.00s setup    tests/cli/test_init_missing_libraries.py::test_cli_init_db_mssql_without_library_installed_instructs_user
+=========== 413 passed, 23 skipped, 15 xfailed in 469.39s (0:07:49) ============
