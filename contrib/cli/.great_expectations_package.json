@@ -1,0 +1,120 @@
+{
+    "package_name": "Accounting Expectations",
+    "icon": "https://s3.amazonaws.com/bucketname/foldername/imagename.jpg",
+    "description": "A collection of Expectations focused around auditing and taxation.",
+    "expectations": [
+        {
+            "name": "expect_accounts_payable_to_be_within_materiality",
+            "tags": [
+                "column_map_expectation"
+            ],
+            "supported": [
+                "pandas"
+            ],
+            "status": {
+                "experimental": [
+                    {
+                        "message": "Has a library_metadata object",
+                        "passed": false
+                    },
+                    {
+                        "message": "Has a docstring, including a one-line short description",
+                        "passed": false
+                    },
+                    {
+                        "message": "Has at least one positive and negative example case",
+                        "passed": false
+                    },
+                    {
+                        "message": "Has core logic and passes tests on at least one Execution Engine",
+                        "passed": false
+                    }
+                ],
+                "beta": [
+                    {
+                        "message": "Has basic input validation and type checking",
+                        "passed": false
+                    },
+                    {
+                        "message": "Has all four statement Renderers: question, descriptive, prescriptive, diagnostic",
+                        "passed": false
+                    },
+                    {
+                        "message": "Has default Parameter Builders and Domain hooks to support Profiling",
+                        "passed": false
+                    },
+                    {
+                        "message": "Has core logic that passes tests for all applicable Execution Engines and SQL dialects",
+                        "passed": false
+                    }
+                ],
+                "production": [
+                    {
+                        "message": "Passes all linting checks",
+                        "passed": false
+                    },
+                    {
+                        "message": "Has all applicable Renderers, with fully typed and styled output",
+                        "passed": false
+                    },
+                    {
+                        "message": "Has a full suite of tests, as determined by project code standards",
+                        "passed": false
+                    },
+                    {
+                        "message": "Has passed a manual review by a code owner for code standards and style guides",
+                        "passed": false
+                    }
+                ]
+            }
+        }
+    ],
+    "expectation_count": 1,
+    "dependencies": [
+        {
+            "text": "great-expectations",
+            "link": "https://pypi.org/project/great-expectations/",
+            "version": "0.14.0"
+        },
+        {
+            "text": "pyfolio",
+            "link": "https://pypi.org/project/pyfolio/"
+        }
+    ],
+    "maturity": "CONCEPT_ONLY",
+    "status": {
+        "scaffolded": 1,
+        "experimental": 0,
+        "beta": 0,
+        "production": 0,
+        "total": 1
+    },
+    "owners": [
+        {
+            "username": "cdkini",
+            "full_name": "Chetan Kini"
+        }
+    ],
+    "contributors": [
+        {
+            "username": "cdkini",
+            "full_name": "Chetan Kini"
+        },
+        {
+            "username": "anotheruser"
+        }
+    ],
+    "domain_experts": [
+        {
+            "full_name": "Luca Pacioli",
+            "social_links": [
+                {
+                    "account_type": "TWITTER",
+                    "identifier": "lpacioli"
+                }
+            ],
+            "picture": "https://twitter.com/lpacioli/photo"
+        }
+    ],
+    "version": "0.1.0"
+}
