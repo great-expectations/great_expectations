@@ -32,7 +32,7 @@ class ExpectationCompletenessChecklist:
 
 @dataclass
 class PackageCompletenessStatus:
-    scaffolded: int
+    concept_only: int
     experimental: int
     beta: int
     production: int
@@ -60,9 +60,16 @@ class GitHubUser:
     full_name: Optional[str]
 
 
+class SocialLinkType(Enum):
+    TWITTER = "TWITTER"
+    INSTAGRAM = "INSTAGRAM"
+    LINKEDIN = "LINKEDIN"
+    MEDIUM = "MEDIUM"
+
+
 @dataclass
 class SocialLink:
-    account_type: str
+    account_type: SocialLinkType
     identifier: str
 
 
