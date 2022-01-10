@@ -25,6 +25,14 @@ class BackendDependencies(enum.Enum):
 
 docs_test_matrix = [
     {
+        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
@@ -335,26 +343,26 @@ docs_test_matrix = [
         "data_dir": "tests/test_sets/dataconnector_docs",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
     },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-    #     "extra_backend_dependencies": BackendDependencies.MYSQL,
-    # },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-    #     "extra_backend_dependencies": BackendDependencies.MYSQL,
-    # },
-    # {
-    #     "name": "rule_base_profiler_multi_batch_example",
-    #     "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
-    # },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.MYSQL,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.MYSQL,
+    },
+    {
+        "name": "rule_base_profiler_multi_batch_example",
+        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
+    },
     {
         "user_flow_script": "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
