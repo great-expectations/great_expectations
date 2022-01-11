@@ -1,0 +1,7 @@
+{
+  "datasource": {
+    "term": "Datasource",
+    "definition": "Provides a standard API for accessing and interacting with data from a wide variety of source systems.",
+    "url": "terms/datasource"
+  }
+}

@@ -3,15 +3,22 @@ id: glossary
 title: Glossary
 ---
 
-**Batch:** 
+import Datasource from './term_tags/_tag.mdx';
+import Data from './term_tags/terms.json'
+
+But can I insert a tag in the middle of a paragraph? test test test <Datasource tag="datasource" text="Datasource." /> Well, let's see.
+
+
+
+## **Batch:** 
 A selection of records from a Data Asset.
 
 
-**Batch Request:** 
-Provided to a Datasource in order toto create a Batch.
+## **Batch Request:** 
+Provided to a Datasource in order to create a Batch.
 
 
-**Checkpoint:** 
+## **Checkpoint:** 
 The primary means for validating data in a production deployment of Great Expectations.
 
 
@@ -39,8 +46,7 @@ The primary entry point for a Great Expectations deployment, with configurations
 Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.
 
 
-**Datasource:** 
-Provides a standard API for accessing and interacting with data from a wide variety of source systems.
+<p><b>{Data.datasource.term}:</b> {Data.datasource.definition}</p>
 
 
 **Evaluation Parameter:** 
