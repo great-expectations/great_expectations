@@ -1189,15 +1189,15 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
         ]
         if context in ["bigquery"]:
             ###
-            # NOTE: 202201 - will: Below are temporarily not being tested
-            # with BigQuery in v2
+            # NOTE: 202201 - Will: Expectations below are temporarily not being tested
+            # with BigQuery in V2 API
             ###
             expectations_not_implemented_v2_sql.append(
                 "expect_column_kl_divergence_to_be_less_than"
-            )  # TODO: unique to bigquery
+            )  # TODO: unique to bigquery  -- https://github.com/great-expectations/great_expectations/issues/3261
             expectations_not_implemented_v2_sql.append(
                 "expect_column_chisquare_test_p_value_to_be_greater_than"
-            )  # TODO: unique to bigquery
+            )  # TODO: unique to bigquery  -- https://github.com/great-expectations/great_expectations/issues/3261
             expectations_not_implemented_v2_sql.append(
                 "expect_column_values_to_be_between"
             )  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
