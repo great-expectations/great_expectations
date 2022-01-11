@@ -1,9 +1,21 @@
+from typing import Any, Dict, List, Optional
+
 from great_expectations.marshmallow__shade import INCLUDE, Schema, fields
 from great_expectations.types import SerializableDictDot
 
 
 class DomainBuilderConfig(SerializableDictDot):
-    pass
+    def __init__(self, class_name: str, module_name: Optional[str] = None):
+        self._class_name = class_name
+        self._module_name = module_name
+
+    @property
+    def class_name(self) -> str:
+        return self._class_name
+
+    @property
+    def module_name(self) -> Optional[str]:
+        return self._module_name
 
 
 class DomainBuilderConfigSchema(Schema):
@@ -16,7 +28,17 @@ class DomainBuilderConfigSchema(Schema):
 
 
 class ParameterBuilderConfig(SerializableDictDot):
-    pass
+    def __init__(self, class_name: str, module_name: Optional[str] = None):
+        self._class_name = class_name
+        self._module_name = module_name
+
+    @property
+    def class_name(self) -> str:
+        return self._class_name
+
+    @property
+    def module_name(self) -> Optional[str]:
+        return self._module_name
 
 
 class ParameterBuilderConfigSchema(Schema):
@@ -30,7 +52,17 @@ class ParameterBuilderConfigSchema(Schema):
 
 
 class ExpectationConfigurationBuilderConfig(SerializableDictDot):
-    pass
+    def __init__(self, class_name: str, module_name: Optional[str] = None):
+        self._class_name = class_name
+        self._module_name = module_name
+
+    @property
+    def class_name(self) -> str:
+        return self._class_name
+
+    @property
+    def module_name(self) -> Optional[str]:
+        return self._module_name
 
 
 class ExpectationConfigurationBuilderConfigSchema(Schema):
@@ -44,7 +76,17 @@ class ExpectationConfigurationBuilderConfigSchema(Schema):
 
 
 class RuleConfig(SerializableDictDot):
-    pass
+    def __init__(
+        self,
+        name: str,
+        domain_builder: DomainBuilderConfig,
+        parameter_builders: List[ParameterBuilderConfig],
+        expectation_configuration_builders: List[ExpectationConfigurationBuilderConfig],
+    ):
+        self.name = name
+        self.domain_builder = domain_builder
+        self.parameter_builder = parameter_builders
+        self.expectation_configuration_builders = expectation_configuration_builders
 
 
 class RuleConfigSchema(Schema):
@@ -66,7 +108,22 @@ class RuleConfigSchema(Schema):
 
 
 class RuleBasedProfilerConfig(SerializableDictDot):
-    pass
+    def __init__(
+        self,
+        name: str,
+        config_version: str,
+        rules: Dict[str, RuleConfig],
+        variables: Optional[Dict[str, Any]] = None,
+        **kwargs,
+    ):
+        self.name = name
+        self.config_version = config_version
+        self.rules = rules
+        if variables is None:
+            variables = {}
+        self.variables = variables
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
 
 class RuleBasedProfilerConfigSchema(Schema):
@@ -78,7 +135,6 @@ class RuleBasedProfilerConfigSchema(Schema):
     variables = fields.Dict(keys=fields.Str(), required=False, allow_none=True)
     rules = fields.Dict(
         keys=fields.Str(),
-        values=fields.Nested(RuleConfigSchema, required=False, allow_none=True),
-        required=False,
-        allow_none=True,
+        values=fields.Nested(RuleConfigSchema, required=True),
+        required=True,
     )
