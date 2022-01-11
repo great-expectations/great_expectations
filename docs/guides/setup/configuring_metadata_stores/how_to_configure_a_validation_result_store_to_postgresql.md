@@ -106,8 +106,3 @@ Steps
     Run a [Checkpoint](../../../tutorials/getting_started/validate_your_data.md) to store results in the new Validations store in PostgreSQL then visualize the results by re-building [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md).
 
     Behind the scenes, Great Expectations will create a new table in your database called ``ge_validations_store``, and populate the fields with information from the Validation results.
-
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
-
-Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.
