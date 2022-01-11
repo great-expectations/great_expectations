@@ -21,7 +21,6 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
 
     map_metric = "column_values.match_like_pattern_list"
     success_keys = ("mostly", "like_pattern_list", "match_on")
-
     default_kwarg_values = {
         "like_pattern_list": None,
         "match_on": "any",
@@ -32,6 +31,10 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": True,
     }
+    args_keys = (
+        "column",
+        "like_pattern_list",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
