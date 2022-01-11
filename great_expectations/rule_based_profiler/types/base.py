@@ -5,9 +5,11 @@ from great_expectations.types import SerializableDictDot
 
 
 class DomainBuilderConfig(SerializableDictDot):
-    def __init__(self, class_name: str, module_name: Optional[str] = None):
+    def __init__(self, class_name: str, module_name: Optional[str] = None, **kwargs):
         self._class_name = class_name
         self._module_name = module_name
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     @property
     def class_name(self) -> str:
@@ -24,13 +26,21 @@ class DomainBuilderConfigSchema(Schema):
 
     class_name = fields.String(required=True)
     module_name = fields.String(required=False, allow_none=True)
-    ...
 
 
 class ParameterBuilderConfig(SerializableDictDot):
-    def __init__(self, class_name: str, module_name: Optional[str] = None):
+    def __init__(
+        self,
+        parameter_name: str,
+        class_name: str,
+        module_name: Optional[str] = None,
+        **kwargs,
+    ):
+        self.parameter_name = parameter_name
         self._class_name = class_name
         self._module_name = module_name
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     @property
     def class_name(self) -> str:
@@ -52,9 +62,22 @@ class ParameterBuilderConfigSchema(Schema):
 
 
 class ExpectationConfigurationBuilderConfig(SerializableDictDot):
-    def __init__(self, class_name: str, module_name: Optional[str] = None):
+    def __init__(
+        self,
+        expectation_type: str,
+        class_name: str,
+        module_name: Optional[str] = None,
+        mostly: Optional[float] = None,
+        meta: Optional[str] = None,
+        **kwargs,
+    ):
+        self.expectation_type = expectation_type
         self._class_name = class_name
         self._module_name = module_name
+        self.mostly = mostly
+        self.meta = meta
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     @property
     def class_name(self) -> str:
@@ -72,7 +95,8 @@ class ExpectationConfigurationBuilderConfigSchema(Schema):
     class_name = fields.String(required=True)
     module_name = fields.String(required=False, allow_none=True)
     expectation_type = fields.String(required=True)
-    ...
+    mostly = fields.Float(required=False, allow_none=True)
+    meta = fields.String(required=False, allow_none=True)
 
 
 class RuleConfig(SerializableDictDot):
@@ -138,3 +162,6 @@ class RuleBasedProfilerConfigSchema(Schema):
         values=fields.Nested(RuleConfigSchema, required=True),
         required=True,
     )
+
+
+ruleBasedProfilerConfigSchema = RuleBasedProfilerConfigSchema()
