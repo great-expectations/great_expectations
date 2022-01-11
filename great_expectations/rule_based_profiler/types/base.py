@@ -4,6 +4,7 @@ from great_expectations.marshmallow__shade import INCLUDE, Schema, fields
 from great_expectations.types import SerializableDictDot
 
 
+# TODO(cdkini): Add optional BatchRequest
 class DomainBuilderConfig(SerializableDictDot):
     def __init__(self, class_name: str, module_name: Optional[str] = None, **kwargs):
         self._class_name = class_name
@@ -28,6 +29,7 @@ class DomainBuilderConfigSchema(Schema):
     module_name = fields.String(required=False, allow_none=True)
 
 
+# TODO(cdkini): Add optional BatchRequest
 class ParameterBuilderConfig(SerializableDictDot):
     def __init__(
         self,
