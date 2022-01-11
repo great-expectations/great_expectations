@@ -8,7 +8,7 @@ Letâ€™s configure your first Datasource: a connection to the data directory weâ€
 
 Start by running the following command:
 ````console
-great_expectations --v3-api datasource new
+great_expectations datasource new
 ````
 
 ````console

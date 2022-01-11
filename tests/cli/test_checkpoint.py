@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 import unittest
-from typing import List, Optional
+from typing import List, Optional, Union
 from unittest import mock
 
 import nbformat
@@ -36,6 +36,7 @@ yaml.default_flow_style = False
 logger = logging.getLogger(__name__)
 
 
+# TODO: <Alex>ALEX -- This belongs in tests/conftest.py</Alex>
 @pytest.fixture
 def titanic_data_context_with_sql_datasource(
     sa,
@@ -73,7 +74,7 @@ introspection:
     try:
         # noinspection PyUnusedLocal
         my_sql_datasource: Optional[
-            SimpleSqlalchemyDatasource, LegacyDatasource
+            Union[SimpleSqlalchemyDatasource, LegacyDatasource]
         ] = context.add_datasource(
             "test_sqlite_db_datasource", **yaml.load(datasource_config)
         )
@@ -83,6 +84,7 @@ introspection:
     return context
 
 
+# TODO: <Alex>ALEX -- This belongs in tests/conftest.py</Alex>
 @pytest.fixture
 def titanic_data_context_with_spark_datasource(
     tmp_path_factory,
