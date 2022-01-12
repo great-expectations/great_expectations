@@ -40,7 +40,11 @@ class DomainBuilderConfigSchema(Schema):
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(required=False, allow_none=True)
+    module_name = fields.String(
+        required=False,
+        all_none=True,
+        missing="great_expectations.rule_based_profiler.domain_builder",
+    )
     batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
 
     @post_load
@@ -81,7 +85,11 @@ class ParameterBuilderConfigSchema(Schema):
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(required=False, allow_none=True)
+    module_name = fields.String(
+        required=False,
+        all_none=True,
+        missing="great_expectations.rule_based_profiler.parameter_builder",
+    )
     parameter_name = fields.String(required=True)
     batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
 
@@ -127,7 +135,11 @@ class ExpectationConfigurationBuilderConfigSchema(Schema):
         unknown = INCLUDE
 
     class_name = fields.String(required=True)
-    module_name = fields.String(required=False, allow_none=True)
+    module_name = fields.String(
+        required=False,
+        all_none=True,
+        missing="great_expectations.rule_based_profiler.expectation_configuration_builder",
+    )
     expectation_type = fields.String(required=True)
     mostly = fields.Float(required=False, allow_none=True)
     meta = fields.Dict(required=False, allow_none=True)

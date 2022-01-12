@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 import pytest
 
@@ -26,6 +25,15 @@ def test_domain_builder_config_successfully_loads_with_required_args():
     config = schema.load(data)
     assert isinstance(config, DomainBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
+
+
+def test_domain_builder_config_successfully_loads_and_populates_missing_values():
+    data = {
+        "class_name": "DomainBuilder",
+    }
+    schema = DomainBuilderConfigSchema()
+    config = schema.load(data)
+    assert config.module_name == "great_expectations.rule_based_profiler.domain_builder"
 
 
 def test_domain_builder_config_successfully_loads_with_optional_args():
@@ -68,6 +76,15 @@ def test_parameter_builder_config_successfully_loads_with_required_args():
     config = schema.load(data)
     assert isinstance(config, ParameterBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
+
+
+def test_parameter_builder_config_successfully_loads_and_populates_missing_values():
+    data = {"class_name": "ParameterBuilder", "parameter_name": "my_parameter_builder"}
+    schema = ParameterBuilderConfigSchema()
+    config = schema.load(data)
+    assert (
+        config.module_name == "great_expectations.rule_based_profiler.parameter_builder"
+    )
 
 
 def test_parameter_builder_config_successfully_loads_with_optional_args():
@@ -121,6 +138,19 @@ def test_expectation_configuration_builder_config_successfully_loads_with_requir
     config = schema.load(data)
     assert isinstance(config, ExpectationConfigurationBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
+
+
+def test_expectation_configuration_builder_config_successfully_loads_and_populates_missing_values():
+    data = {
+        "class_name": "ExpectationConfigurationBuilder",
+        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    }
+    schema = ExpectationConfigurationBuilderConfigSchema()
+    config = schema.load(data)
+    assert (
+        config.module_name
+        == "great_expectations.rule_based_profiler.expectation_configuration_builder"
+    )
 
 
 def test_expectation_configuration_builder_config_successfully_loads_with_optional_args():
