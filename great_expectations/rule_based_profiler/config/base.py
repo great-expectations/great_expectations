@@ -14,19 +14,31 @@ logger.setLevel(logging.INFO)
 
 class NotNullSchema(Schema):
     """
-    TODO(cdkini): Write docstr!
+    Extension of Marshmallow Schema to facilitate implicit removal of null values before serialization.
     """
 
     @post_load
     def make_config(self, data: dict, **kwargs) -> Type[DictDot]:
-        """
-        TODO(cdkini): Write docstr!
+        """Hook to convert the schema object into its respective config type.
+
+        Checks against config dataclass signature to ensure that unidentified kwargs are omitted
+        from the result object. This design allows us to maintain forwards comptability without
+        altering expected behavior.
+
+        Args:
+            data: The dictionary representation of the configuration object
+            kwargs: Marshmallow-specific kwargs required to maintain hook signature (unused herein)
+
+        Returns:
+            An instance of configuration class, which subclasses the DictDot serialization class
+
         """
         if not hasattr(self, "__config__"):
             raise NotImplementedError(
                 "The subclass extending NotNullSchema must define its own custom __config__"
             )
 
+        # Removing **kwargs before creating config object
         recognized_attrs = {f.name for f in dataclasses.fields(self.__config__)}
         cleaned_data = copy.deepcopy(data)
         for k, v in data.items():
@@ -42,8 +54,15 @@ class NotNullSchema(Schema):
 
     @post_dump
     def remove_nulls(self, data: dict, **kwargs) -> dict:
-        """
-        TODO(cdkini): Write docstr!
+        """Hook to clear the config object of any null values before being written as a dictionary.
+
+        Args:
+            data: The dictionary representation of the configuration object
+            kwargs: Marshmallow-specific kwargs required to maintain hook signature (unused herein)
+
+        Returns:
+            A cleaned dictionary that has no null values
+
         """
         res = copy.deepcopy(data)
         for k, v in data.items():
