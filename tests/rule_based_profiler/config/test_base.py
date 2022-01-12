@@ -70,6 +70,19 @@ def test_domain_builder_config_unsuccessfully_loads_with_missing_required_fields
     assert "'class_name': ['Missing data for required field.']" in str(e.value)
 
 
+def test_domain_builder_config_successfully_dumps_to_dictionary():
+    schema = DomainBuilderConfigSchema()
+    config = DomainBuilderConfig(
+        class_name="DomainBuilder",
+        batch_request={"batch_request": {"datasource_name": "my_datasource"}},
+        timestamp="2017-02-15|20:26:08.937881",
+    )
+
+    data = schema.dump(config)
+    assert isinstance(data, dict)
+    assert all(getattr(config, k) == v for k, v in data.items())
+
+
 def test_parameter_builder_config_successfully_loads_with_required_args():
     data = {"class_name": "ParameterBuilder", "parameter_name": "my_parameter_builder"}
     schema = ParameterBuilderConfigSchema()
@@ -127,6 +140,20 @@ def test_parameter_builder_config_unsuccessfully_loads_with_missing_required_fie
         f"'{attr}': ['Missing data for required field.']" in str(e.value)
         for attr in ("class_name", "parameter_name")
     )
+
+
+def test_parameter_builder_config_successfully_dumps_to_dictionary():
+    schema = ParameterBuilderConfigSchema()
+    config = ParameterBuilderConfig(
+        class_name="ParameterBuilder",
+        parameter_name="my parameter",
+        batch_request={"batch_request": {"datasource_name": "my_datasource"}},
+        timestamp="2017-02-15|20:26:08.937881",
+    )
+
+    data = schema.dump(config)
+    assert isinstance(data, dict)
+    assert all(getattr(config, k) == v for k, v in data.items())
 
 
 def test_expectation_configuration_builder_config_successfully_loads_with_required_args():
@@ -199,6 +226,19 @@ def test_expectation_configuration_builder_config_unsuccessfully_loads_with_miss
     )
 
 
+def test_expectation_configuration_builder_config_successfully_dumps_to_dictionary():
+    schema = ExpectationConfigurationBuilderConfigSchema()
+    config = ExpectationConfigurationBuilderConfig(
+        class_name="DomainBuilder",
+        expectation_type="expect_column_values_to_be_in_set",
+        timestamp="2017-02-15|20:26:08.937881",
+    )
+
+    data = schema.dump(config)
+    assert isinstance(data, dict)
+    assert all(getattr(config, k) == v for k, v in data.items())
+
+
 def test_rule_config_successfully_loads_with_required_args():
     data = {
         "name": "rule_1",
@@ -268,6 +308,36 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
             "parameter_builders",
             "expectation_configuration_builders",
         )
+    )
+
+
+def test_rule_config_successfully_dumps_to_dictionary():
+    schema = RuleConfigSchema()
+    config = RuleConfig(
+        name="rule_1",
+        domain_builder=DomainBuilderConfig(class_name="DomainBuilder"),
+        parameter_builders=[
+            ParameterBuilderConfig(
+                class_name="ParameterBuilder", parameter_name="my_parameter"
+            )
+        ],
+        expectation_configuration_builders=[
+            ExpectationConfigurationBuilderConfig(
+                class_name="ExpectationConfigurationBuilder",
+                expectation_type="expect_column_pair_values_A_to_be_greater_than_B",
+            )
+        ],
+        timestamp="2017-02-15|20:26:08.937881",
+    )
+
+    data = schema.dump(config)
+    assert isinstance(data, dict)
+    assert isinstance(data["domain_builder"], dict)
+    assert len(data["parameter_builders"]) == 1 and isinstance(
+        data["parameter_builders"][0], dict
+    )
+    assert len(data["expectation_configuration_builders"]) == 1 and isinstance(
+        data["expectation_configuration_builders"][0], dict
     )
 
 
@@ -370,3 +440,33 @@ def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_f
             "rules",
         )
     )
+
+
+def test_rule_based_profiler_config_successfully_dumps_to_dictionary():
+    schema = RuleBasedProfilerConfigSchema()
+    config = RuleBasedProfilerConfig(
+        name="my_RBP",
+        config_version=1.0,
+        rules={
+            "rule_1": RuleConfig(
+                name="rule_1",
+                domain_builder=DomainBuilderConfig(class_name="DomainBuilder"),
+                parameter_builders=[
+                    ParameterBuilderConfig(
+                        class_name="ParameterBuilder", parameter_name="my_parameter"
+                    )
+                ],
+                expectation_configuration_builders=[
+                    ExpectationConfigurationBuilderConfig(
+                        class_name="ExpectationConfigurationBuilder",
+                        expectation_type="expect_column_pair_values_A_to_be_greater_than_B",
+                    )
+                ],
+            )
+        },
+        timestamp="2017-02-15|20:26:08.937881",
+    )
+
+    data = schema.dump(config)
+    assert isinstance(data, dict)
+    assert len(data["rules"]) == 1 and isinstance(data["rules"]["rule_1"], dict)
