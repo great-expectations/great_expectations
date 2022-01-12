@@ -42,11 +42,10 @@ Relevant documentation for the components can also be found here:
 :::note Note on V3 Expectations for BigQuery
 
   A small number of V3 Expectations have not been migrated to BigQuery, and will be very soon. These include:
-  - `expect_column_values_to_be_in_set`
-  - `expect_column_values_to_be_in_type_list`
-  - `expect_column_values_to_be_between`
+
   - `expect_column_quantile_values_to_be_between`
-  - `expect_column_mean_to_be_between`
+  - `expect_column_kl_divergence_to_be_less_than`
+
 :::
     
 ## Part 1: Local Configuration of Great Expectations that connects to Google Cloud Platform
