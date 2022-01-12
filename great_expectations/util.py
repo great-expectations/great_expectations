@@ -531,6 +531,7 @@ def read_excel(
     """
     import pandas as pd
 
+    # check for optional dependencies
     try:
         df = pd.read_excel(filename, *args, **kwargs)
     except ImportError:
