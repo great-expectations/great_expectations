@@ -1,5 +1,5 @@
-import copy
-from dataclasses import dataclass, fields
+import dataclasses
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Type
 
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -39,7 +39,7 @@ class NotNullSchema(Schema):
             )
 
         # Removing **kwargs before creating config object
-        recognized_attrs = {f.name for f in fields(self.__config__)}
+        recognized_attrs = {f.name for f in dataclasses.fields(self.__config__)}
         cleaned_data = filter_properties_dict(
             properties=data,
             keep_fields=recognized_attrs,
