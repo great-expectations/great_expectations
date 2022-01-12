@@ -10,6 +10,7 @@ from great_expectations.rule_based_profiler.config.base import (
     ExpectationConfigurationBuilderConfigSchema,
     ParameterBuilderConfig,
     ParameterBuilderConfigSchema,
+    RuleConfigSchema,
 )
 
 
@@ -101,8 +102,10 @@ def test_parameter_builder_config_unsuccessfully_loads_with_missing_required_fie
     with pytest.raises(ValidationError) as e:
         schema.load(data)
 
-    assert "'class_name': ['Missing data for required field.']" in str(e.value)
-    assert "'parameter_name': ['Missing data for required field.']" in str(e.value)
+    assert all(
+        f"'{attr}': ['Missing data for required field.']" in str(e.value)
+        for attr in ("class_name", "parameter_name")
+    )
 
 
 def test_expectation_configuration_builder_config_successfully_loads_with_required_args():
@@ -156,5 +159,49 @@ def test_expectation_configuration_builder_config_unsuccessfully_loads_with_miss
     with pytest.raises(ValidationError) as e:
         schema.load(data)
 
-    assert "'class_name': ['Missing data for required field.']" in str(e.value)
-    assert "'expectation_type': ['Missing data for required field.']" in str(e.value)
+    assert all(
+        f"'{attr}': ['Missing data for required field.']" in str(e.value)
+        for attr in ("class_name", "expectation_type")
+    )
+
+
+def test_rule_config_successfully_loads_with_required_args():
+    pass
+
+
+def test_rule_config_successfully_loads_with_kwargs(caplog):
+    pass
+
+
+def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
+    data = {}
+    schema = RuleConfigSchema()
+
+    with pytest.raises(ValidationError) as e:
+        schema.load(data)
+
+    assert all(
+        f"'{attr}': ['Missing data for required field.']" in str(e.value)
+        for attr in (
+            "name",
+            "domain_builder",
+            "parameter_builders",
+            "expectation_configuration_builders",
+        )
+    )
+
+
+def test_rule_based_profiler_config_successfully_loads_with_required_args():
+    pass
+
+
+def test_rule_based_profiler_config_successfully_loads_with_optional_args():
+    pass
+
+
+def test_rule_based_profiler_config_successfully_loads_with_kwargs(caplog):
+    pass
+
+
+def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_fields():
+    pass
