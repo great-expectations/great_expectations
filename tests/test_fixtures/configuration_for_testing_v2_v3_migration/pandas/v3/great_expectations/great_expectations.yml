@@ -23,7 +23,7 @@ datasources:
     data_connectors:
       default_inferred_data_connector_name:
         class_name: InferredAssetFilesystemDataConnector
-        base_directory: ../../../
+        base_directory: ../../../data/
         module_name: great_expectations.datasource.data_connector
         default_regex:
           group_names:

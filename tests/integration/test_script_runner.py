@@ -433,13 +433,26 @@ redshift_tests = [
     # },
 ]
 
+new_tests = [
+    {
+        "user_flow_script": "tests/integration/docusaurus/miscellaneous/v3/migration_guide_pandas.py",
+        "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations",
+        "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/miscellaneous/v2/migration_guide_pandas.py",
+        "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations",
+        "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
+    },
+]
 
-docs_test_matrix += local_tests
-docs_test_matrix += local_tests_with_db
-docs_test_matrix += gcp_tests
-docs_test_matrix += azure_tests
-docs_test_matrix += aws_s3_tests
-docs_test_matrix += redshift_tests
+
+docs_test_matrix += new_tests
+# docs_test_matrix += local_tests_with_db
+# docs_test_matrix += gcp_tests
+# docs_test_matrix += azure_tests
+# docs_test_matrix += aws_s3_tests
+# docs_test_matrix += redshift_tests
 
 integration_test_matrix = [
     {
