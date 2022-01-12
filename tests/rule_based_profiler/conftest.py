@@ -92,9 +92,9 @@ data_connectors:
         reader_options:
           delimiter: ","
         class_name: Asset
-        base_directory: $data_fixtures_root
+        base_directory: ${{data_fixtures_root}}
         glob_directive: "*.csv"
-    base_directory: $base_directory
+    base_directory: ${{base_directory}}
     module_name: great_expectations.datasource.data_connector
         """
 
