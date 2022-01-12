@@ -112,7 +112,16 @@ The `<additional_keys_based_on_source_data_system>` will be things like `base_di
 
 ### 3. Test your configuration
 
-Because the configurations for Datasources can vary depending on the underlying data system they are connecting to, Great Expectations provides a convenience function that will help you determine if there are errors in your configuration.  This function can be accessed from your Data Context, like so:
+Because the configurations for Datasources can vary depending on the underlying data system they are connecting to, Great Expectations provides a convenience function that will help you determine if there are errors in your configuration.  This function is `test_yaml_config()`.  Using `test_yamal_config` in a Jupyter Notebook is our recommended method for testing Datasource configuration.  Of course, you can always edit and test YAML configs manually, and instantiate Datasources through code.  When executed, `test_yamal_config()` will instantiate the component and run through a self check procedure to verify the component works as expected.
+
+In the case of a Datasource, this means:
+- confirming that the connection works.
+- gathering a list of available DataAssets (e.g. tables in SQL; files or folders in a filesystem)
+- verifying that it can successfully fetch at least one Batch from the source.
+
+If something about your configuration wasn't set up correctly, `test_yamal_config()` will raise an error.  Whenever possible, `test_yamal_config()` provides helpful warnings and error messages.  It can't solve every problem, but it can solve many.
+
+You can call `test_yamal_config()` from your Data Context, like so:
 
 <Tabs
   groupId="yaml-or-python"
@@ -147,6 +156,8 @@ context.test_yaml_config(yaml.dump(datasource_config))
 
 </TabItem>
 </Tabs>
+
+From here, iterate by editing your config to add config blocks for additional introspection,Data Assets, sampling, etc. After each addition re-run `test_yaml_config()` to verify the addition is functional, then move on to the next iteration of editing your config.
 
 ### 4. Save the Datasource configuration to your Data Context.
 
