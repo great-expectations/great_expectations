@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type
 
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_load
@@ -9,6 +9,25 @@ from great_expectations.types import DictDot
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+
+class NotNullSchema(Schema):
+    @post_load
+    def make_config(self, data: dict, **kwargs) -> Type[DictDot]:
+        if not hasattr(self, "__config__"):
+            raise NotImplementedError(
+                "The subclass extending NotNullSchema must define its own custom __config__"
+            )
+        return self.__config__(**data)
+
+    @post_dump
+    def remove_nulls(self, data: dict, **kwargs) -> dict:
+        res = copy.deepcopy(data)
+        for k, v in data.items():
+            if v is None:
+                res.pop(k)
+                logger.info("Removed '%s' due to null value", k)
+        return res
 
 
 class DomainBuilderConfig(DictDot):
@@ -23,9 +42,10 @@ class DomainBuilderConfig(DictDot):
         self._module_name = module_name
         self.batch_request = batch_request
         for k, v in kwargs.items():
-            setattr(self, k, v)
             logger.info(
-                'Set "self.%s = %s" during DomainBuilderConfig instantiation', k, v
+                "Ignoring unknown key-value pair during DomainBuilderConfig instantiation: (%s, %s) ",
+                k,
+                v,
             )
 
     @property
@@ -37,9 +57,11 @@ class DomainBuilderConfig(DictDot):
         return self._module_name
 
 
-class DomainBuilderConfigSchema(Schema):
+class DomainBuilderConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
+
+    __config__ = DomainBuilderConfig
 
     class_name = fields.String(required=True)
     module_name = fields.String(
@@ -48,19 +70,6 @@ class DomainBuilderConfigSchema(Schema):
         missing="great_expectations.rule_based_profiler.domain_builder",
     )
     batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
-
-    @post_load
-    def make_config(self, data: dict, **kwargs) -> DomainBuilderConfig:
-        return DomainBuilderConfig(**data)
-
-    @post_dump
-    def remove_nulls(self, data: dict, **kwargs) -> dict:
-        res = copy.deepcopy(data)
-        for k, v in data.items():
-            if v is None:
-                res.pop(k)
-                logger.info("Removed '%s' due to null value", k)
-        return res
 
 
 class ParameterBuilderConfig(DictDot):
@@ -77,9 +86,10 @@ class ParameterBuilderConfig(DictDot):
         self._module_name = module_name
         self.batch_request = batch_request
         for k, v in kwargs.items():
-            setattr(self, k, v)
             logger.info(
-                'Set "self.%s = %s" during ParameterBuilderConfig instantiation', k, v
+                "Ignoring unknown key-value pair during ParameterBuilderConfig instantiation: (%s, %s) ",
+                k,
+                v,
             )
 
     @property
@@ -91,9 +101,11 @@ class ParameterBuilderConfig(DictDot):
         return self._module_name
 
 
-class ParameterBuilderConfigSchema(Schema):
+class ParameterBuilderConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
+
+    __config__ = ParameterBuilderConfig
 
     class_name = fields.String(required=True)
     module_name = fields.String(
@@ -103,19 +115,6 @@ class ParameterBuilderConfigSchema(Schema):
     )
     parameter_name = fields.String(required=True)
     batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
-
-    @post_load
-    def make_config(self, data: dict, **kwargs) -> ParameterBuilderConfig:
-        return ParameterBuilderConfig(**data)
-
-    @post_dump
-    def remove_nulls(self, data: dict, **kwargs) -> dict:
-        res = copy.deepcopy(data)
-        for k, v in data.items():
-            if v is None:
-                res.pop(k)
-                logger.info("Removed '%s' due to null value", k)
-        return res
 
 
 class ExpectationConfigurationBuilderConfig(DictDot):
@@ -134,9 +133,8 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         self.mostly = mostly
         self.meta = meta or {}
         for k, v in kwargs.items():
-            setattr(self, k, v)
             logger.info(
-                'Set "self.%s = %s" during ExpectationConfigurationBuilderConfig instantiation',
+                "Ignoring unknown key-value pair during ExpectationConfigurationBuilderConfig instantiation: (%s, %s) ",
                 k,
                 v,
             )
@@ -150,9 +148,11 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         return self._module_name
 
 
-class ExpectationConfigurationBuilderConfigSchema(Schema):
+class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
+
+    __config__ = ExpectationConfigurationBuilderConfig
 
     class_name = fields.String(required=True)
     module_name = fields.String(
@@ -163,21 +163,6 @@ class ExpectationConfigurationBuilderConfigSchema(Schema):
     expectation_type = fields.String(required=True)
     mostly = fields.Float(required=False, allow_none=True)
     meta = fields.Dict(required=False, allow_none=True)
-
-    @post_load
-    def make_config(
-        self, data: dict, **kwargs
-    ) -> ExpectationConfigurationBuilderConfig:
-        return ExpectationConfigurationBuilderConfig(**data)
-
-    @post_dump
-    def remove_nulls(self, data: dict, **kwargs) -> dict:
-        res = copy.deepcopy(data)
-        for k, v in data.items():
-            if v is None:
-                res.pop(k)
-                logger.info("Removed '%s' due to null value", k)
-        return res
 
 
 class RuleConfig(DictDot):
@@ -194,17 +179,18 @@ class RuleConfig(DictDot):
         self.parameter_builders = parameter_builders
         self.expectation_configuration_builders = expectation_configuration_builders
         for k, v in kwargs.items():
-            setattr(self, k, v)
             logger.info(
-                'Set "self.%s = %s" during RuleConfig instantiation',
+                "Ignoring unknown key-value pair during RuleConfig instantiation: (%s, %s) ",
                 k,
                 v,
             )
 
 
-class RuleConfigSchema(Schema):
+class RuleConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
+
+    __config__ = RuleConfig
 
     name = fields.String(required=True)
     domain_builder = fields.Nested(DomainBuilderConfigSchema, required=True)
@@ -218,19 +204,6 @@ class RuleConfigSchema(Schema):
         ),
         required=True,
     )
-
-    @post_load
-    def make_config(self, data: dict, **kwargs) -> RuleConfig:
-        return RuleConfig(**data)
-
-    @post_dump
-    def remove_nulls(self, data: dict, **kwargs) -> dict:
-        res = copy.deepcopy(data)
-        for k, v in data.items():
-            if v is None:
-                res.pop(k)
-                logger.info("Removed '%s' due to null value", k)
-        return res
 
 
 class RuleBasedProfilerConfig(BaseYamlConfig):
@@ -247,17 +220,18 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         self.rules = rules
         self.variables = variables or {}
         for k, v in kwargs.items():
-            setattr(self, k, v)
             logger.info(
-                'Set "self.%s = %s" during RuleBasedProfilerConfig instantiation',
+                "Ignoring unknown key-value pair during RuleBasedProfilerConfig instantiation: (%s, %s) ",
                 k,
                 v,
             )
 
 
-class RuleBasedProfilerConfigSchema(Schema):
+class RuleBasedProfilerConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
+
+    __config__ = RuleBasedProfilerConfig
 
     name = fields.String(required=True)
     config_version = fields.Float(required=True)
@@ -267,16 +241,3 @@ class RuleBasedProfilerConfigSchema(Schema):
         values=fields.Nested(RuleConfigSchema, required=True),
         required=True,
     )
-
-    @post_load
-    def make_config(self, data: dict, **kwargs) -> RuleBasedProfilerConfig:
-        return RuleBasedProfilerConfig(**data)
-
-    @post_dump
-    def remove_nulls(self, data: dict, **kwargs) -> dict:
-        res = copy.deepcopy(data)
-        for k, v in data.items():
-            if v is None:
-                res.pop(k)
-                logger.info("Removed '%s' due to null value", k)
-        return res
