@@ -108,7 +108,7 @@ Great Expectations provides three types of `DataConnector` classes, which are us
 
 In the `data_connectors` dictionary you may define multiple Data Connectors, including different types of Data Connectors, so long as they all have unique values in the place of the `<name_of_your_data_connector>` key.  We provide detailed guidance to help you decide on which Data Connectors to use in our guide: [How to choose which DataConnector to use](/docs/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use).
 
-The `<additional_keys_based_on_source_data_system>` will be things like `base_directory` and `default_regex` for filesystems, or  `batch_identifiers` for SQL based data systems. For specifics on the additional keys that you can use in your Data Connectors' configurations, please see the corresponding guide for connecting to a specific source data system (since the keys you will need to define will depend on the source data system you are connecting to).
+The `<additional_keys_based_on_source_data_system>` will be things like `batch_identifiers`, `base_directory`, and `default_regex` for filesystems, or  `batch_identifiers` for SQL based data systems. For specifics on the additional keys that you can use in your Data Connectors' configurations, please see the corresponding guide for connecting to a specific source data system (since the keys you will need to define will depend on the source data system you are connecting to).
 
 ### 3. Test your configuration
 
