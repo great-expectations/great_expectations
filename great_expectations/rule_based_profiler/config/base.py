@@ -15,6 +15,9 @@ logger.setLevel(logging.INFO)
 class NotNullSchema(Schema):
     """
     Extension of Marshmallow Schema to facilitate implicit removal of null values before serialization.
+
+    The __config__ dunder attribute is utilized to point a Schema to a configuration. It is the responsibility
+    of the child class to define its own __config__ to proper serialization/deserialization.
     """
 
     @post_load
