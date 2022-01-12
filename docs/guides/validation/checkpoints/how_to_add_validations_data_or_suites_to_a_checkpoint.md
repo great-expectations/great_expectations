@@ -179,6 +179,4 @@ Additional notes
 This is a good way to aggregate validations in a complex pipeline. You could use this feature to **validate multiple source files before and after their ingestion into your data lake**.
 :::
 
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
-
 If you want to be a real hero, we'd welcome a pull request. Please see our [Contributing guide](../../../contributing/contributing.md) and [How to write a how-to-guide](../../miscellaneous/how_to_write_a_how_to_guide.md) to get started.
