@@ -1401,6 +1401,14 @@ class BaseDataContext:
         Returns:
             ValidationOperatorResult
         """
+        logger.warning(
+            """
+        The `data_context.run_validation_operator` method is deprecated in the V3 (Batch Request) API.
+        Please consider migrating your project from V2 to V3: 
+            https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide/
+        """
+        )
+
         result_format = result_format or {"result_format": "SUMMARY"}
 
         if not assets_to_validate:
