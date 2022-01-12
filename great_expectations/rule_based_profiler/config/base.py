@@ -1,6 +1,6 @@
 import copy
-import dataclasses
 import logging
+from dataclasses import dataclass, fields
 from typing import Any, Dict, List, Optional, Type
 
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -42,7 +42,7 @@ class NotNullSchema(Schema):
             )
 
         # Removing **kwargs before creating config object
-        recognized_attrs = {f.name for f in dataclasses.fields(self.__config__)}
+        recognized_attrs = {f.name for f in fields(self.__config__)}
         cleaned_data = copy.deepcopy(data)
         for k, v in data.items():
             if k not in recognized_attrs:
@@ -75,7 +75,7 @@ class NotNullSchema(Schema):
         return res
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class DomainBuilderConfig(DictDot):
     class_name: str
     module_name: Optional[str] = None
@@ -97,7 +97,7 @@ class DomainBuilderConfigSchema(NotNullSchema):
     batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class ParameterBuilderConfig(DictDot):
     parameter_name: str
     class_name: str
@@ -121,7 +121,7 @@ class ParameterBuilderConfigSchema(NotNullSchema):
     batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class ExpectationConfigurationBuilderConfig(DictDot):
     expectation_type: str
     class_name: str
@@ -147,7 +147,7 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     meta = fields.Dict(required=False, allow_none=True)
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class RuleConfig(DictDot):
     name: str
     domain_builder: DomainBuilderConfig
@@ -175,7 +175,7 @@ class RuleConfigSchema(NotNullSchema):
     )
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class RuleBasedProfilerConfig(BaseYamlConfig):
     name: str
     config_version: float
