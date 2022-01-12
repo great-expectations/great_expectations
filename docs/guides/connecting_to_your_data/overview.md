@@ -102,8 +102,8 @@ Great Expectations supports Pandas, Spark, and SqlAlchemy as execution engines.
 #### Configuring your Datasource's Data Connectors
 
 Great Expectations provides three types of `DataConnector` classes, which are useful in various situations.  Which Data Connector you will want to use will depend on the format of your source data systems.
-- An InferredAssetDataConnector infers the `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure.  If your source data system is designed so that it can easily be parsed by regex, this will allow new data to be included by the Datasource automatically.
-- A ConfiguredAssetDataConnector, which allows you to have the most fine-tuning by requiring an explicit listing of each Data Asset you want to connect to.  This Data Connector would be ideal
+- In filesystems, an `InferredAssetDataConnector` infers the `data_asset_name` by using a regex that takes advantage of patterns that exist in the filename or folder structure.  If your source data system is designed so that it can easily be parsed by regex, this will allow new data to be included by the Datasource automatically.  The `InferredAssetSqlDataConnector` provides similar functionality for SQL based source data systems.
+- A `ConfiguredAssetDataConnector`, which allows you to have the most fine-tuning by requiring an explicit listing of each Data Asset you want to connect to.
 - A `RuntimeDataConnector` which enables you to use a `RuntimeBatchRequest` to wrap either an in-memory dataframe, filepath, or SQL query.
 
 In the `data_connectors` dictionary you may define multiple Data Connectors, including different types of Data Connectors, so long as they all have unique values in the place of the `<name_of_your_data_connector>` key.  We provide detailed guidance to help you decide on which Data Connectors to use in our guide: [How to choose which DataConnector to use](/docs/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use).
