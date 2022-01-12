@@ -97,7 +97,7 @@ Let's review each of these steps and take a look at the important concepts and f
 </table>
 
 - **Expectation Suite**: A collection of Expectations.
-- **Expectations**: A verifiable assertion about data. Great Expectations is a framework for defining Expectations and running them against your data. In the tutorial's example, we asserted that NYC taxi rides should have a minimum of one passenger.  When we ran that expectation against our second set of data Great Expectations reported back that some records in the new data indicated a ride with zero passengers, which failed to meet this expectation.
+- **Expectations**: A verifiable assertion about data. Great Expectations is a framework for defining Expectations and running them against your data. In the tutorial's example, we asserted that NYC taxi rides should have a minimum of one passenger.  When we ran that Expectation against our second set of data Great Expectations reported back that some records in the new data indicated a ride with zero passengers, which failed to meet this Expectation.
 - **Profiler**: A tool that automatically generates Expectations from a Batch of data.
 
 <table class="borderless">
