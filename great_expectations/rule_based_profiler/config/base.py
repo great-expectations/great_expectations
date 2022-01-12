@@ -7,6 +7,7 @@ from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_load
 from great_expectations.marshmallow__shade.decorators import post_dump
 from great_expectations.types import DictDot
+from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -43,15 +44,9 @@ class NotNullSchema(Schema):
 
         # Removing **kwargs before creating config object
         recognized_attrs = {f.name for f in fields(self.__config__)}
-        cleaned_data = copy.deepcopy(data)
-        for k, v in data.items():
-            if k not in recognized_attrs:
-                del cleaned_data[k]
-                logger.info(
-                    f"Ignoring unknown key-value pair during instantiation: (%s, %s)",
-                    k,
-                    v,
-                )
+        cleaned_data = filter_properties_dict(
+            properties=data, keep_fields=recognized_attrs, clean_nulls=True
+        )
 
         return self.__config__(**cleaned_data)
 
@@ -99,7 +94,7 @@ class DomainBuilderConfigSchema(NotNullSchema):
 
 @dataclass(frozen=True)
 class ParameterBuilderConfig(DictDot):
-    parameter_name: str
+    name: str
     class_name: str
     module_name: Optional[str] = None
     batch_request: Optional[Dict[str, Any]] = None
@@ -111,13 +106,13 @@ class ParameterBuilderConfigSchema(NotNullSchema):
 
     __config__ = ParameterBuilderConfig
 
+    name = fields.String(required=True)
     class_name = fields.String(required=True)
     module_name = fields.String(
         required=False,
         all_none=True,
         missing="great_expectations.rule_based_profiler.parameter_builder",
     )
-    parameter_name = fields.String(required=True)
     batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
 
 
