@@ -1,5 +1,4 @@
 import copy
-import logging
 from dataclasses import dataclass, fields
 from typing import Any, Dict, List, Optional, Type
 
@@ -9,16 +8,13 @@ from great_expectations.marshmallow__shade.decorators import post_dump
 from great_expectations.types import DictDot
 from great_expectations.util import filter_properties_dict
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
 
 class NotNullSchema(Schema):
     """
     Extension of Marshmallow Schema to facilitate implicit removal of null values before serialization.
 
-    The __config__ dunder attribute is utilized to point a Schema to a configuration. It is the responsibility
-    of the child class to define its own __config__ to proper serialization/deserialization.
+    The __config__ attribute is utilized to point a Schema to a configuration. It is the responsibility
+    of the child class to define its own __config__ to ensure proper serialization/deserialization.
     """
 
     @post_load
@@ -45,7 +41,10 @@ class NotNullSchema(Schema):
         # Removing **kwargs before creating config object
         recognized_attrs = {f.name for f in fields(self.__config__)}
         cleaned_data = filter_properties_dict(
-            properties=data, keep_fields=recognized_attrs, clean_nulls=True
+            properties=data,
+            keep_fields=recognized_attrs,
+            clean_nulls=False,
+            clean_falsy=False,
         )
 
         return self.__config__(**cleaned_data)
@@ -62,12 +61,12 @@ class NotNullSchema(Schema):
             A cleaned dictionary that has no null values
 
         """
-        res = copy.deepcopy(data)
-        for k, v in data.items():
-            if v is None:
-                res.pop(k)
-                logger.info("Removed '%s' due to null value", k)
-        return res
+        cleaned_data = filter_properties_dict(
+            properties=data,
+            clean_nulls=True,
+            clean_falsy=False,
+        )
+        return cleaned_data
 
 
 @dataclass(frozen=True)
