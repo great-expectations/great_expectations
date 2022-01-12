@@ -37,6 +37,9 @@ class NotNullSchema(Schema):
                     k,
                     v,
                 )
+            elif v is not None:
+                del cleaned_data[k]
+                logger.info(f"Ignoring '%s' due to null value.", k)
 
         return self.__config__(**cleaned_data)
 
