@@ -23,7 +23,7 @@ class DomainBuilderConfig(DictDot):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.info(
-                "Set self.%s: %s attr during DomainBuilderConfig instantiation", k, v
+                'Set "self.%s = %s" during DomainBuilderConfig instantiation', k, v
             )
 
     @property
@@ -64,7 +64,7 @@ class ParameterBuilderConfig(DictDot):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.info(
-                "Set self.%s: %s attr during ParameterBuilderConfig instantiation", k, v
+                'Set "self.%s = %s" during ParameterBuilderConfig instantiation', k, v
             )
 
     @property
@@ -108,7 +108,7 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.info(
-                "Set self.%s: %s attr during ExpectationConfigurationBuilderConfig instantiation",
+                'Set "self.%s = %s" during ExpectationConfigurationBuilderConfig instantiation',
                 k,
                 v,
             )
@@ -148,12 +148,12 @@ class RuleConfig(DictDot):
     ):
         self.name = name
         self.domain_builder = domain_builder
-        self.parameter_builder = parameter_builders
+        self.parameter_builders = parameter_builders
         self.expectation_configuration_builders = expectation_configuration_builders
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.info(
-                "Set self.%s: %s attr during RuleConfig instantiation",
+                'Set "self.%s = %s" during RuleConfig instantiation',
                 k,
                 v,
             )
@@ -197,7 +197,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.info(
-                "Set self.%s: %s attr during RuleBasedProfilerConfig instantiation",
+                'Set "self.%s = %s" during RuleBasedProfilerConfig instantiation',
                 k,
                 v,
             )
