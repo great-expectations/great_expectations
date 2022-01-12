@@ -64,6 +64,7 @@ def multibatch_generic_csv_generator():
             )
             filename = f"csv_batch_{batch_num + 1:03}_of_{num_event_batches:03}.csv"
             file_list.append(filename)
+            # noinspection PyTypeChecker
             df.to_csv(
                 os.path.join(data_path, filename),
                 index_label="intra_batch_index",
@@ -148,7 +149,6 @@ data_connectors:
 
 
 def test_batches_are_accessible(
-    monkeypatch,
     multibatch_generic_csv_generator,
     multibatch_generic_csv_generator_context,
 ):
