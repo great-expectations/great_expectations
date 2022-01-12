@@ -1,3 +1,4 @@
+import os
 from typing import Dict, List
 
 import pytest
@@ -34,8 +35,16 @@ def alice_columnar_table_single_batch(empty_data_context):
     """
 
     verbose_profiler_config_file_path: str = file_relative_path(
-        __file__, "alice_user_workflow_verbose_profiler_config.yml"
+        __file__,
+        os.path.join(
+            "..",
+            "test_fixtures",
+            "rule_based_profiler",
+            "alpha",
+            "alice_user_workflow_verbose_profiler_config.yml",
+        ),
     )
+
     verbose_profiler_config: str
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
