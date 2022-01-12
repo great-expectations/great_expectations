@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import pytest
@@ -18,8 +19,16 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     """
 
     verbose_profiler_config_file_path: str = file_relative_path(
-        __file__, "bobby_user_workflow_verbose_profiler_config.yml"
+        __file__,
+        os.path.join(
+            "..",
+            "test_fixtures",
+            "rule_based_profiler",
+            "alpha",
+            "bobby_user_workflow_verbose_profiler_config.yml",
+        ),
     )
+
     verbose_profiler_config: str
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
