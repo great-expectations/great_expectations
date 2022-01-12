@@ -56,7 +56,14 @@ def alice_columnar_table_single_batch_context(
     # Copy data
     filename: str = alice_columnar_table_single_batch["sample_data_relative_path"]
     shutil.copy(
-        file_relative_path(__file__, f"data/{filename}"),
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "..",
+                "test_sets",
+                f"{filename}",
+            ),
+        ),
         str(os.path.join(data_path, filename)),
     )
 
