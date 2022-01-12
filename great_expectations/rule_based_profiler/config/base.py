@@ -1,8 +1,10 @@
+import copy
 import logging
 from typing import Any, Dict, List, Optional
 
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_load
+from great_expectations.marshmallow__shade.decorators import post_dump
 from great_expectations.types import DictDot
 
 logger = logging.getLogger(__name__)
@@ -48,8 +50,16 @@ class DomainBuilderConfigSchema(Schema):
     batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
 
     @post_load
-    def make_config(self, data, **kwargs) -> DomainBuilderConfig:
+    def make_config(self, data: dict, **kwargs) -> DomainBuilderConfig:
         return DomainBuilderConfig(**data)
+
+    @post_dump
+    def remove_nulls(self, data: dict, **kwargs) -> dict:
+        res = copy.deepcopy(data)
+        for k, v in data.items():
+            if v is None:
+                res.pop(k)
+        return res
 
 
 class ParameterBuilderConfig(DictDot):
@@ -94,8 +104,16 @@ class ParameterBuilderConfigSchema(Schema):
     batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
 
     @post_load
-    def make_config(self, data, **kwargs) -> ParameterBuilderConfig:
+    def make_config(self, data: dict, **kwargs) -> ParameterBuilderConfig:
         return ParameterBuilderConfig(**data)
+
+    @post_dump
+    def remove_nulls(self, data: dict, **kwargs) -> dict:
+        res = copy.deepcopy(data)
+        for k, v in data.items():
+            if v is None:
+                res.pop(k)
+        return res
 
 
 class ExpectationConfigurationBuilderConfig(DictDot):
@@ -145,8 +163,18 @@ class ExpectationConfigurationBuilderConfigSchema(Schema):
     meta = fields.Dict(required=False, allow_none=True)
 
     @post_load
-    def make_config(self, data, **kwargs) -> ExpectationConfigurationBuilderConfig:
+    def make_config(
+        self, data: dict, **kwargs
+    ) -> ExpectationConfigurationBuilderConfig:
         return ExpectationConfigurationBuilderConfig(**data)
+
+    @post_dump
+    def remove_nulls(self, data: dict, **kwargs) -> dict:
+        res = copy.deepcopy(data)
+        for k, v in data.items():
+            if v is None:
+                res.pop(k)
+        return res
 
 
 class RuleConfig(DictDot):
@@ -189,8 +217,16 @@ class RuleConfigSchema(Schema):
     )
 
     @post_load
-    def make_config(self, data, **kwargs) -> RuleConfig:
+    def make_config(self, data: dict, **kwargs) -> RuleConfig:
         return RuleConfig(**data)
+
+    @post_dump
+    def remove_nulls(self, data: dict, **kwargs) -> dict:
+        res = copy.deepcopy(data)
+        for k, v in data.items():
+            if v is None:
+                res.pop(k)
+        return res
 
 
 class RuleBasedProfilerConfig(BaseYamlConfig):
@@ -229,5 +265,13 @@ class RuleBasedProfilerConfigSchema(Schema):
     )
 
     @post_load
-    def make_config(self, data, **kwargs) -> RuleBasedProfilerConfig:
+    def make_config(self, data: dict, **kwargs) -> RuleBasedProfilerConfig:
         return RuleBasedProfilerConfig(**data)
+
+    @post_dump
+    def remove_nulls(self, data: dict, **kwargs) -> dict:
+        res = copy.deepcopy(data)
+        for k, v in data.items():
+            if v is None:
+                res.pop(k)
+        return res
