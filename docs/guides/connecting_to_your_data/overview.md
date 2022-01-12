@@ -95,7 +95,7 @@ The `name` and `class_name` top level keys will be the first you need to define.
 
 #### Configuring your Datasource's Execution Engine
 
-After your Datasource's configuration has a `name` and `class_name` defined, you will need to define the `execution_engine`.  In your configuration the value of your `execution_engine` will at the very least contain the `class_name` of your Execution Engine, and may also include a `connection_string` if your source data system requires one.
+After your Datasource's configuration has a `name` and `class_name` defined, you will need to define a single `execution_engine`.  In your configuration the value of your `execution_engine` will at the very least contain the `class_name` of your Execution Engine, and may also include a `connection_string` if your source data system requires one.
 
 Great Expectations supports Pandas, Spark, and SqlAlchemy as execution engines.
 
@@ -161,7 +161,7 @@ From here, iterate by editing your config to add config blocks for additional in
 
 ### 4. Save the Datasource configuration to your Data Context.
 
-What is the point of configuring a Datasource if you can't easily use it in the future?  It this point you will want to save your Datasource configuration to your Data Context.  This can be done easily by using the `add_datasource()` function, which is conveniently accessible from your Data Context.  
+What is the point of configuring a Datasource if you can't easily use it in the future?  At this point you will want to save your Datasource configuration to your Data Context.  This can be done easily by using the `add_datasource()` function, which is conveniently accessible from your Data Context.  
 
 <Tabs
   groupId="yaml-or-python"
