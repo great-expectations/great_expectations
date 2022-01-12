@@ -14,7 +14,7 @@ This guide will help you run a Great Expectations checkpoint in Apache Airflow, 
 
 </Prerequisites>
 
-Airflow is a data orchestration tool focused on the easy creation and maintenance of data pipelines through DAGs (directed acyclic graphs) written in Python. The base unit of work done in a DAG is the Operator, and this document shows how to use the `GreatExpectationsOperator` to perform data quality checks in the context of an ELT pipeline.
+Airflow is a data orchestration tool for creating and maintaining data pipelines through DAGs (directed acyclic graphs) written in Python. DAGs complete work through operators, which are templates that each encapsulate a specific type of work. This document explains how to use the `GreatExpectationsOperator` to perform data quality work in an Airflow DAG. 
 
 While Airflow alone is a powerful tool, [Astronomer](https://www.astronomer.io/) provides a CLI and cloud platform to bring your DAGs to the next level by providing simple and efficient ways to create Airflow projects, author and publish DAGs, and easily maintain the Kubernetes engine powering DAG runs. To get started quickly with Astronomer’s CLI for use in the steps below, check out the [Astronomer CLI quick start guide](https://docs.astronomer.io/enterprise/cli-quickstart/).
 
@@ -26,11 +26,12 @@ It’s recommended to specify a version in the `requirements.txt` file. To make 
 
 ## Using the Operator
 
-The second step to use the operator is to import it into the DAG. The DAG file is a python file in the `dags/` folder of your Airflow project. To import the Great Expectations provider, add the following line at the top of your DAG file:
+Before you can use the GreatExpectationsOperator, you need to import it in your DAG. To import the Great Expectations provider in a given DAG, add the following line to the top of the DAG file in your `dags` directory:
 
-`from great_expectations_provider.operators.great_expectations import GreatExpectationsOperator`
+```py
+from great_expectations_provider.operators.great_expectations import GreatExpectationsOperator
 
-Using the operator in a DAG is as simple as defining an instance of the `GreatExpectationsOperator` class and assigning it to a variable, like so:
+To use the operator in the DAG, define an instance of the `GreatExpectationsOperator` class and assign it to a variable. In the following example, we define two different instances of the operator to complete to different steps in a data quality check workflow:
 
 ```python
 ge_data_context_root_dir_with_checkpoint_name_pass = GreatExpectationsOperator(
@@ -46,13 +47,12 @@ ge_data_context_config_with_checkpoint_config_pass = GreatExpectationsOperator(
 )
 ```
 
-The above code creates two Great Expectations operators assigned to two distinct variables. Once defined, the operators must be put into the DAG, like so:
+Once you define your work through operators, you need to define the order in which your DAG completes the work. To do this, you can define a [relationship](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html#relationships). For example, adding the following line to your DAG ensures that your name pass task has to complete before your config pass task can start:
 
 ```python
 ge_data_context_root_dir_with_checkpoint_name_pass >> ge_data_context_config_with_checkpoint_config_pass
 ```
 
-The above code defines the DAG as two operations, the first being `ge_data_context_root_dir_with_checkpoint_name_pass` and the second `ge_data_context_config_with_checkpoint_config_pass`, which will run sequentially in that order.
 
 The operator has several optional arguments, but it always requires either a `data_context_root_dir` or a `data_context_config` and either a `checkpoint_name` or `checkpoint_config`.
 
