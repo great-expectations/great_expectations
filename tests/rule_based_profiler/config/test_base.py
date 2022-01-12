@@ -1,3 +1,5 @@
+import logging
+
 import pytest
 
 from great_expectations.marshmallow__shade.exceptions import ValidationError
@@ -33,12 +35,16 @@ def test_domain_builder_config_successfully_loads_with_optional_args():
     assert all(getattr(config, k) == v for k, v in data.items())
 
 
-def test_domain_builder_config_successfully_loads_with_kwargs():
+def test_domain_builder_config_successfully_loads_with_kwargs(caplog):
     data = {"class_name": "DomainBuilder", "author": "Charles Dickens"}
     schema = DomainBuilderConfigSchema()
-    config = schema.load(data)
+
+    with caplog.at_level(logging.INFO):
+        config = schema.load(data)
+
     assert isinstance(config, DomainBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
+    assert len(caplog.messages) == 1  # author kwarg
 
 
 def test_domain_builder_config_unsuccessfully_loads_with_missing_required_fields():
@@ -72,16 +78,20 @@ def test_parameter_builder_config_successfully_loads_with_optional_args():
     assert all(getattr(config, k) == v for k, v in data.items())
 
 
-def tests_parameter_builder_config_successfully_loads_with_kwargs():
+def tests_parameter_builder_config_successfully_loads_with_kwargs(caplog):
     data = {
         "parameter_name": "my_parameter_builder",
         "class_name": "ParameterBuilder",
         "created_on": "2022-01-12",
     }
     schema = ParameterBuilderConfigSchema()
-    config = schema.load(data)
+
+    with caplog.at_level(logging.INFO):
+        config = schema.load(data)
+
     assert isinstance(config, ParameterBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
+    assert len(caplog.messages) == 1  # created_on kwarg
 
 
 def test_parameter_builder_config_unsuccessfully_loads_with_missing_required_fields():
@@ -120,7 +130,9 @@ def test_expectation_configuration_builder_config_successfully_loads_with_option
     assert all(getattr(config, k) == v for k, v in data.items())
 
 
-def tests_expectation_configuration_builder_config_successfully_loads_with_kwargs():
+def tests_expectation_configuration_builder_config_successfully_loads_with_kwargs(
+    caplog,
+):
     data = {
         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
         "class_name": "ExpectationConfigurationBuilder",
@@ -128,9 +140,13 @@ def tests_expectation_configuration_builder_config_successfully_loads_with_kwarg
         "author": "Charles Dickens",
     }
     schema = ExpectationConfigurationBuilderConfigSchema()
-    config = schema.load(data)
+
+    with caplog.at_level(logging.INFO):
+        config = schema.load(data)
+
     assert isinstance(config, ExpectationConfigurationBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
+    assert len(caplog.messages) == 2  # created_on & author kwargs
 
 
 def test_expectation_configuration_builder_config_unsuccessfully_loads_with_missing_required_fields():

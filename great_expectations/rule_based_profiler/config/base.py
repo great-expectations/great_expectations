@@ -1,8 +1,12 @@
+import logging
 from typing import Any, Dict, List, Optional
 
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_load
 from great_expectations.types import DictDot
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class DomainBuilderConfig(DictDot):
@@ -18,6 +22,9 @@ class DomainBuilderConfig(DictDot):
         self.batch_request = batch_request
         for k, v in kwargs.items():
             setattr(self, k, v)
+            logger.info(
+                "Set self.%s: %s attr during DomainBuilderConfig instantiation", k, v
+            )
 
     @property
     def class_name(self) -> str:
@@ -56,6 +63,9 @@ class ParameterBuilderConfig(DictDot):
         self.batch_request = batch_request
         for k, v in kwargs.items():
             setattr(self, k, v)
+            logger.info(
+                "Set self.%s: %s attr during ParameterBuilderConfig instantiation", k, v
+            )
 
     @property
     def class_name(self) -> str:
@@ -97,6 +107,11 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         self.meta = meta or {}
         for k, v in kwargs.items():
             setattr(self, k, v)
+            logger.info(
+                "Set self.%s: %s attr during ExpectationConfigurationBuilderConfig instantiation",
+                k,
+                v,
+            )
 
     @property
     def class_name(self) -> str:
@@ -129,11 +144,19 @@ class RuleConfig(DictDot):
         domain_builder: DomainBuilderConfig,
         parameter_builders: List[ParameterBuilderConfig],
         expectation_configuration_builders: List[ExpectationConfigurationBuilderConfig],
+        **kwargs,
     ):
         self.name = name
         self.domain_builder = domain_builder
         self.parameter_builder = parameter_builders
         self.expectation_configuration_builders = expectation_configuration_builders
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+            logger.info(
+                "Set self.%s: %s attr during RuleConfig instantiation",
+                k,
+                v,
+            )
 
 
 class RuleConfigSchema(Schema):
@@ -173,6 +196,11 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         self.variables = variables or {}
         for k, v in kwargs.items():
             setattr(self, k, v)
+            logger.info(
+                "Set self.%s: %s attr during RuleBasedProfilerConfig instantiation",
+                k,
+                v,
+            )
 
 
 class RuleBasedProfilerConfigSchema(Schema):
