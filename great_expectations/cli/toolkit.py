@@ -17,9 +17,7 @@ from great_expectations.cli.pretty_printing import cli_colorize_string, cli_mess
 from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.usage_statistics.usage_statistics import (
-    send_usage_message as send_usage_stats_message,
-)
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
@@ -36,7 +34,7 @@ except ImportError:
 
 EXIT_UPGRADE_CONTINUATION_MESSAGE = (
     "\nOk, exiting now. To upgrade at a later time, use the following command: "
-    "<cyan>great_expectations --v3-api project upgrade</cyan>\n\nTo learn more about the upgrade "
+    "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade "
     "process, visit "
     "<cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
     "</cyan>.\n"
@@ -76,11 +74,11 @@ def get_or_create_expectation_suite(
     data_context: DataContext,
     data_asset_name: Optional[str] = None,
     usage_event: Optional[str] = None,
-    suppress_usage_message: Optional[bool] = False,
+    suppress_usage_message: bool = False,
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = None,
-    create_if_not_exist: Optional[bool] = True,
+    create_if_not_exist: bool = True,
 ) -> ExpectationSuite:
     if expectation_suite_name is None:
         default_expectation_suite_name: str = get_default_expectation_suite_name(
@@ -142,7 +140,7 @@ def tell_user_suite_exists(
     data_context: DataContext,
     expectation_suite_name: str,
     usage_event: str,
-    suppress_usage_message: Optional[bool] = False,
+    suppress_usage_message: bool = False,
 ):
     exit_with_failure_message_and_stats(
         data_context=data_context,
@@ -189,8 +187,8 @@ def load_expectation_suite(
     data_context: DataContext,
     expectation_suite_name: str,
     usage_event: str,
-    suppress_usage_message: Optional[bool] = False,
-    create_if_not_exist: Optional[bool] = True,
+    suppress_usage_message: bool = False,
+    create_if_not_exist: bool = True,
 ) -> Optional[ExpectationSuite]:
     """
     Load an expectation suite from a given context.
@@ -232,13 +230,17 @@ def load_expectation_suite(
 def exit_with_failure_message_and_stats(
     data_context: DataContext,
     usage_event: str,
-    suppress_usage_message: Optional[bool] = False,
+    suppress_usage_message: bool = False,
     message: Optional[str] = None,
 ):
     if message:
         cli_message(string=message)
     if not suppress_usage_message:
-        send_usage_message(data_context=data_context, event=usage_event, success=False)
+        send_usage_message(
+            data_context=data_context,
+            event=usage_event,
+            success=False,
+        )
     sys.exit(1)
 
 
@@ -353,7 +355,9 @@ def select_datasource(
         data_sources: List[BaseDatasource] = cast(
             List[BaseDatasource],
             list(
-                sorted(context.datasources.values(), key=lambda x: x.name),
+                sorted(
+                    context.datasources.values(), key=lambda x: (len(x.name), x.name)
+                ),
             ),
         )
         if len(data_sources) == 0:
@@ -556,9 +560,11 @@ To learn more about the upgrade process, visit \
 
     # noinspection PyBroadException
     try:
-        context: DataContext = DataContext(context_root_dir=context_root_dir)
+        data_context: DataContext = DataContext(context_root_dir=context_root_dir)
         send_usage_message(
-            data_context=context, event="cli.project.upgrade.end", success=False
+            data_context=data_context,
+            event="cli.project.upgrade.end",
+            success=True,
         )
     except Exception:
         # Do not raise error for usage stats
@@ -868,12 +874,14 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
 
         # If the file or directory exists, treat it appropriately
         # This handles files without extensions
+        filename: Optional[str]
+        directory: Optional[str]
         if config_file_location_path.is_file():
-            filename: Optional[str] = fr"{str(config_file_location_path.name)}"
-            directory: Optional[str] = fr"{str(config_file_location_path.parent)}"
+            filename = fr"{str(config_file_location_path.name)}"
+            directory = fr"{str(config_file_location_path.parent)}"
         elif config_file_location_path.is_dir():
-            filename: Optional[str] = None
-            directory: Optional[str] = config_file_location
+            filename = None
+            directory = config_file_location
 
         else:
             raise ge_exceptions.ConfigNotFoundError()
@@ -884,24 +892,6 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
         filename = None
 
     return {"directory": directory, "filename": filename}
-
-
-def send_usage_message(
-    data_context: DataContext,
-    event: str,
-    event_payload: Optional[dict] = None,
-    success: bool = False,
-):
-    if not ((event is None) or (data_context is None)):
-        if event_payload is None:
-            event_payload = {}
-        event_payload.update({"api_version": "v3"})
-        send_usage_stats_message(
-            data_context=data_context,
-            event=event,
-            event_payload=event_payload,
-            success=success,
-        )
 
 
 def is_cloud_file_url(file_path: str) -> bool:
@@ -1042,7 +1032,7 @@ def get_batch_request_from_json_file(
     batch_request_json_file_path: str,
     data_context: DataContext,
     usage_event: Optional[str] = None,
-    suppress_usage_message: Optional[bool] = False,
+    suppress_usage_message: bool = False,
 ) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
@@ -1060,7 +1050,9 @@ def get_batch_request_from_json_file(
         cli_message(string=f"<red>{e}</red>")
         if not suppress_usage_message:
             send_usage_message(
-                data_context=data_context, event=usage_event, success=False
+                data_context=data_context,
+                event=usage_event,
+                success=False,
             )
         sys.exit(1)
 
@@ -1071,7 +1063,7 @@ def get_batch_request_using_datasource_name(
     data_context: DataContext,
     datasource_name: Optional[str] = None,
     usage_event: Optional[str] = None,
-    suppress_usage_message: Optional[bool] = False,
+    suppress_usage_message: bool = False,
     additional_batch_request_args: Optional[
         Dict[str, Union[str, int, Dict[str, Any]]]
     ] = None,
@@ -1088,7 +1080,9 @@ def get_batch_request_using_datasource_name(
         cli_message(string="<red>No datasources found in the context.</red>")
         if not suppress_usage_message:
             send_usage_message(
-                data_context=data_context, event=usage_event, success=False
+                data_context=data_context,
+                event=usage_event,
+                success=False,
             )
         sys.exit(1)
 

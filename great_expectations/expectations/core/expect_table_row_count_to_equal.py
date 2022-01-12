@@ -64,9 +64,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
     }
 
     metric_dependencies = ("table.row_count",)
-
     success_keys = ("value",)
-
     default_kwarg_values = {
         "value": None,
         "result_format": "BASIC",
@@ -74,6 +72,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
+    args_keys = ("value",)
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

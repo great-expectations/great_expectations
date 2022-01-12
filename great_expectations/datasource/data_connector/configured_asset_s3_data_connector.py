@@ -13,6 +13,9 @@ from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
+from great_expectations.datasource.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+)
 from great_expectations.datasource.data_connector.util import list_s3_keys
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -44,9 +47,9 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        prefix: Optional[str] = "",
-        delimiter: Optional[str] = "/",
-        max_keys: Optional[int] = 1000,
+        prefix: str = "",
+        delimiter: str = "/",
+        max_keys: int = 1000,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -79,7 +82,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._bucket = bucket
-        self._prefix = os.path.join(prefix, "")
+        self._prefix = FilePathDataConnector.sanitize_prefix(prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 

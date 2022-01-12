@@ -28,7 +28,7 @@ datasource_config = {
         },
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetSqlDataConnector",
-            "name": "whole_table",
+            "include_schema_name": True,
         },
     },
 }
@@ -37,7 +37,6 @@ datasource_config = {
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
 context.test_yaml_config(yaml.dump(datasource_config))
-
 context.add_datasource(**datasource_config)
 
 # Test for RuntimeBatchRequest using a query. bigquery_temp_table name is passed in as batch_spec_passthrough
@@ -67,7 +66,7 @@ assert isinstance(validator, ge.validator.validator.Validator)
 batch_request = BatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
+    data_asset_name="demo.taxi_data",  # this is the name of the table you want to retrieve
     batch_spec_passthrough={
         "bigquery_temp_table": "ge_temp"
     },  # this is the name of the table you would like to use a 'temp_table'
@@ -83,7 +82,7 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_bigquery_datasource"]
-assert "taxi_data" in set(
+assert "demo.taxi_data" in set(
     context.get_available_data_asset_names()["my_bigquery_datasource"][
         "default_inferred_data_connector_name"
     ]

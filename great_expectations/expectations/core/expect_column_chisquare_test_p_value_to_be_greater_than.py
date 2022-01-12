@@ -27,6 +27,12 @@ class ExpectColumnChiSquareTestPValueToBeGreaterThan(TableExpectation):
     metric_dependencies = tuple()
     success_keys = ()
     default_kwarg_values = {}
+    args_keys = (
+        "column",
+        "partition_object",
+        "p",
+        "tail_weight_holdout",
+    )
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

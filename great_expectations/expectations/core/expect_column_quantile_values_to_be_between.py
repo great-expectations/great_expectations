@@ -28,7 +28,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                * ``quantiles``: (list of float) increasing ordered list of desired quantile values
 
                * ``value_ranges``: (list of lists): Each element in this list consists of a list with two values, a lower \
-                 and upper bound (inclusive) for the corresponding quantile.
+                 and upper bound (inclusive) for the corresponding quantile. These values must be [min, max] ordered.
 
 
            For each provided range:
@@ -142,17 +142,27 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "quantile_ranges",
+        "allow_relative_error",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)
-
         try:
             assert (
                 "quantile_ranges" in configuration.kwargs
-            ), "quantile ranges must be provided"
+            ), "quantile_ranges must be provided"
             assert isinstance(
                 configuration.kwargs["quantile_ranges"], dict
             ), "quantile_ranges should be a dictionary"
+            assert all(
+                [
+                    True if None in x or x == sorted(x) else False
+                    for x in configuration.kwargs["quantile_ranges"]["value_ranges"]
+                ]
+            ), "quantile_ranges must consist of ordered pairs"
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))

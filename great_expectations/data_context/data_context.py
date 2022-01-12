@@ -2,7 +2,6 @@ import configparser
 import copy
 import datetime
 import errno
-import itertools
 import json
 import logging
 import os
@@ -21,6 +20,7 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
+import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -51,6 +51,7 @@ from great_expectations.core.usage_statistics.anonymizers.store_anonymizer impor
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
     add_datasource_usage_statistics,
+    get_batch_list_usage_statistics,
     run_validation_operator_usage_statistics,
     save_expectation_suite_usage_statistics,
     send_usage_message,
@@ -59,6 +60,8 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store.expectations_store import ExpectationsStore
+from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
     PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED,
@@ -75,13 +78,13 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     DatasourceConfig,
     GeCloudConfig,
+    ProgressBarsConfig,
     anonymizedUsageStatisticsSchema,
     dataContextConfigSchema,
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
     GeCloudIdentifier,
     ValidationResultIdentifier,
@@ -89,7 +92,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import (
     PasswordMasker,
     build_store_from_config,
-    default_checkpoints_exist,
     file_relative_path,
     instantiate_class_from_config,
     load_class,
@@ -104,10 +106,7 @@ from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.util import (
-    filter_properties_dict,
-    verify_dynamic_loading_support,
-)
+from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -291,6 +290,8 @@ class BaseDataContext:
         + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
     )
 
+    _data_context = None
+
     @classmethod
     def validate_config(cls, project_config):
         if isinstance(project_config, DataContextConfig):
@@ -445,19 +446,25 @@ class BaseDataContext:
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
 
-    def _init_datasources(self, config):
+    def _init_datasources(self, config: DataContextConfig) -> None:
         if not config.datasources:
             return
-        for datasource_name, data_source_config in config.datasources.items():
+        for datasource_name in config.datasources:
             try:
                 self._cached_datasources[datasource_name] = self.get_datasource(
                     datasource_name=datasource_name
                 )
-            except ge_exceptions.DatasourceInitializationError:
+            except ge_exceptions.DatasourceInitializationError as e:
+                logger.warn(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
-                pass
+                if self._ge_cloud_mode:
+                    # when running in cloud mode, we want to know if a datasource has been improperly configured at
+                    # init time.
+                    raise
+                else:
+                    pass
 
     def _apply_global_config_overrides(self):
         # check for global usage statistics opt out
@@ -535,7 +542,8 @@ class BaseDataContext:
                     return config_value
         return None
 
-    def _check_global_usage_statistics_opt_out(self):
+    @staticmethod
+    def _check_global_usage_statistics_opt_out():
         if os.environ.get("GE_USAGE_STATS", False):
             ge_usage_stats = os.environ.get("GE_USAGE_STATS")
             if ge_usage_stats in BaseDataContext.FALSEY_STRINGS:
@@ -766,7 +774,7 @@ class BaseDataContext:
         self,
         resource_identifier: Optional[str] = None,
         site_name: Optional[str] = None,
-        only_if_exists: Optional[bool] = True,
+        only_if_exists: bool = True,
     ) -> None:
         """
         A stdlib cross-platform way to open a file in a browser.
@@ -814,8 +822,12 @@ class BaseDataContext:
         return self.project_config_with_variables_substituted.anonymous_usage_statistics
 
     @property
-    def concurrency(self) -> ConcurrencyConfig:
+    def concurrency(self) -> Optional[ConcurrencyConfig]:
         return self.project_config_with_variables_substituted.concurrency
+
+    @property
+    def progress_bars(self) -> Optional[ProgressBarsConfig]:
+        return self.project_config_with_variables_substituted.progress_bars
 
     @property
     def notebooks(self):
@@ -836,10 +848,9 @@ class BaseDataContext:
         try:
             return self.project_config_with_variables_substituted.checkpoint_store_name
         except AttributeError:
-            config_version: float = (
-                self.project_config_with_variables_substituted.config_version
-            )
-            if default_checkpoints_exist(directory_path=self.root_directory):
+            if checkpoint_toolkit.default_checkpoints_exist(
+                directory_path=self.root_directory
+            ):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             if self.root_directory:
                 error_message: str = f'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Checkpoint Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
@@ -852,11 +863,10 @@ class BaseDataContext:
         checkpoint_store_name: str = self.checkpoint_store_name
         try:
             return self.stores[checkpoint_store_name]
-        except KeyError as e:
-            config_version: float = (
-                self.project_config_with_variables_substituted.config_version
-            )
-            if default_checkpoints_exist(directory_path=self.root_directory):
+        except KeyError:
+            if checkpoint_toolkit.default_checkpoints_exist(
+                directory_path=self.root_directory
+            ):
                 logger.warning(
                     f'Checkpoint store named "{checkpoint_store_name}" is not a configured store, so will try to use default Checkpoint store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Checkpoint Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
                 )
@@ -875,7 +885,7 @@ class BaseDataContext:
         return self.project_config_with_variables_substituted.expectations_store_name
 
     @property
-    def expectations_store(self):
+    def expectations_store(self) -> ExpectationsStore:
         return self.stores[self.expectations_store_name]
 
     @property
@@ -1381,7 +1391,11 @@ class BaseDataContext:
             assets_to_validate: a list that specifies the data assets that the operator will validate. The members of
                 the list can be either batches, or a tuple that will allow the operator to fetch the batch:
                 (batch_kwargs, expectation_suite_name)
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: one of several supported formatting directives for expectation validation results
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
@@ -1556,6 +1570,10 @@ class BaseDataContext:
             batch_parameters=batch_parameters,
         )
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.get_batch_list",
+        args_payload_fn=get_batch_list_usage_statistics,
+    )
     def get_batch_list(
         self,
         datasource_name: Optional[str] = None,
@@ -1646,7 +1664,13 @@ class BaseDataContext:
             **kwargs,
         )
         datasource_name = batch_request.datasource_name
-        datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+        if datasource_name in self.datasources:
+            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
+        else:
+            raise ge_exceptions.DatasourceError(
+                datasource_name,
+                f"The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
+            )
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     def get_validator(
@@ -1759,7 +1783,7 @@ class BaseDataContext:
             batch_definition.datasource_name
         ].execution_engine
 
-        validator = Validator(
+        validator: Validator = Validator(
             execution_engine=execution_engine,
             interactive_evaluation=True,
             expectation_suite=expectation_suite,
@@ -2055,10 +2079,25 @@ class BaseDataContext:
             validation_operators.append(value)
         return validation_operators
 
+    def send_usage_message(
+        self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
+    ):
+        """helper method to send a usage method using DataContext. Used when sending usage events from
+            classes like ExpectationSuite.
+            event
+        Args:
+            event (str): str representation of event
+            event_payload (dict): optional event payload
+            success (bool): optional success param
+        Returns:
+            None
+        """
+        send_usage_message(self, event, event_payload, success)
+
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
-        overwrite_existing: Optional[bool] = False,
+        overwrite_existing: bool = False,
         ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> ExpectationSuite:
@@ -2076,7 +2115,7 @@ class BaseDataContext:
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
         expectation_suite: ExpectationSuite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name
+            expectation_suite_name=expectation_suite_name, data_context=self
         )
         if self.ge_cloud_mode:
             key: GeCloudIdentifier = GeCloudIdentifier(
@@ -2156,7 +2195,10 @@ class BaseDataContext:
             )
 
         if self.expectations_store.has_key(key):
-            return self.expectations_store.get(key)
+            expectations_schema_dict: dict = self.expectations_store.get(key)
+            # create the ExpectationSuite from constructor
+            return ExpectationSuite(**expectations_schema_dict, data_context=self)
+
         else:
             raise ge_exceptions.DataContextError(
                 "expectation_suite %s not found" % expectation_suite_name
@@ -2186,7 +2228,7 @@ class BaseDataContext:
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
-        overwrite_existing: Optional[bool] = True,
+        overwrite_existing: bool = True,
         ge_cloud_id: Optional[str] = None,
         **kwargs,
     ):
@@ -2312,14 +2354,7 @@ class BaseDataContext:
 
     def store_evaluation_parameters(self, validation_results, target_store_name=None):
         if not self._evaluation_parameter_dependencies_compiled:
-            # get the expectation suite if it exists, otherwise None
-            expectation_suite_name = validation_results.meta["expectation_suite_name"]
-            if expectation_suite_name in self.list_expectation_suite_names():
-                expectation_suite = self.get_expectation_suite(expectation_suite_name)
-            else:
-                expectation_suite = None
-
-            self._compile_evaluation_parameter_dependencies(expectation_suite)
+            self._compile_evaluation_parameter_dependencies()
 
         if target_store_name is None:
             target_store_name = self.evaluation_parameter_store_name
@@ -2345,20 +2380,21 @@ class BaseDataContext:
         return self.project_config_with_variables_substituted.validations_store_name
 
     @property
-    def validations_store(self):
+    def validations_store(self) -> ValidationsStore:
         return self.stores[self.validations_store_name]
 
-    def _compile_evaluation_parameter_dependencies(self, expectation_suite):
+    def _compile_evaluation_parameter_dependencies(self):
         self._evaluation_parameter_dependencies = {}
+        # NOTE: Chetan - 20211118: This iteration is reverting the behavior performed here: https://github.com/great-expectations/great_expectations/pull/3377
+        # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
+        for key in self.expectations_store.list_keys():
+            expectation_suite_dict: dict = self.expectations_store.get(key)
+            if not expectation_suite_dict:
+                continue
+            expectation_suite: ExpectationSuite = ExpectationSuite(
+                **expectation_suite_dict, data_context=self
+            )
 
-        # only if we don't have an expectation suite do we do a key scan
-        if expectation_suite is None:
-            for key in self.expectations_store.list_keys():
-                expectation_suite = self.expectations_store.get(key)
-                if not expectation_suite:
-                    continue
-
-        if expectation_suite:
             dependencies = expectation_suite.get_evaluation_parameter_dependencies()
             if len(dependencies) > 0:
                 nested_update(self._evaluation_parameter_dependencies, dependencies)
@@ -2427,15 +2463,11 @@ class BaseDataContext:
         )
         results_dict = selected_store.get(key)
 
-        # TODO: This should be a convenience method of ValidationResultSuite
-        if failed_only:
-            failed_results_list = [
-                result for result in results_dict.results if not result.success
-            ]
-            results_dict.results = failed_results_list
-            return results_dict
-        else:
-            return results_dict
+        return (
+            results_dict.get_failed_validation_results()
+            if failed_only
+            else results_dict
+        )
 
     def update_return_obj(self, data_asset, return_obj):
         """Helper called by data_asset.
@@ -3012,6 +3044,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiling_results["success"] = True
         return profiling_results
 
+    def list_checkpoints(self) -> List[str]:
+        return checkpoint_toolkit.list_checkpoints(
+            checkpoint_store=self.checkpoint_store,
+            ge_cloud_mode=self.ge_cloud_mode,
+        )
+
     def add_checkpoint(
         self,
         name: str,
@@ -3038,156 +3076,62 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ge_cloud_id: Optional[str] = None,
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
-
-        checkpoint_config: Union[CheckpointConfig, dict]
-
-        checkpoint_config = {
-            "name": name,
-            "config_version": config_version,
-            "template_name": template_name,
-            "module_name": module_name,
-            "class_name": class_name,
-            "run_name_template": run_name_template,
-            "expectation_suite_name": expectation_suite_name,
-            "batch_request": batch_request,
-            "action_list": action_list,
-            "evaluation_parameters": evaluation_parameters,
-            "runtime_configuration": runtime_configuration,
-            "validations": validations,
-            "profilers": profilers,
+        return checkpoint_toolkit.add_checkpoint(
+            data_context=self,
+            checkpoint_store=self.checkpoint_store,
+            checkpoint_store_name=self.checkpoint_store_name,
+            ge_cloud_mode=self.ge_cloud_mode,
+            name=name,
+            config_version=config_version,
+            template_name=template_name,
+            module_name=module_name,
+            class_name=class_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
             # Next two fields are for LegacyCheckpoint configuration
-            "validation_operator_name": validation_operator_name,
-            "batches": batches,
-            # the following four keys are used by SimpleCheckpoint
-            "site_names": site_names,
-            "slack_webhook": slack_webhook,
-            "notify_on": notify_on,
-            "notify_with": notify_with,
-            "ge_cloud_id": ge_cloud_id,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
-        }
-
-        checkpoint_config = filter_properties_dict(
-            properties=checkpoint_config, clean_falsy=True
+            validation_operator_name=validation_operator_name,
+            batches=batches,
+            # the following four arguments are used by SimpleCheckpoint
+            site_names=site_names,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+            notify_with=notify_with,
+            ge_cloud_id=ge_cloud_id,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
         )
-        new_checkpoint: Union[
-            Checkpoint, LegacyCheckpoint
-        ] = instantiate_class_from_config(
-            config=checkpoint_config,
-            runtime_environment={
-                "data_context": self,
-            },
-            config_defaults={
-                "module_name": "great_expectations.checkpoint.checkpoint",
-            },
-        )
-        if self.ge_cloud_mode:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="contract", ge_cloud_id=ge_cloud_id
-            )
-        else:
-            key: ConfigurationIdentifier = ConfigurationIdentifier(
-                configuration_key=name,
-            )
-        checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
-        checkpoint_ref = self.checkpoint_store.set(key=key, value=checkpoint_config)
-        if isinstance(checkpoint_ref, GeCloudIdAwareRef):
-            ge_cloud_id = checkpoint_ref.ge_cloud_id
-            new_checkpoint.config.ge_cloud_id = uuid.UUID(ge_cloud_id)
-        return new_checkpoint
 
     def get_checkpoint(
-        self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> Union[Checkpoint, LegacyCheckpoint]:
-        if ge_cloud_id:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="contract", ge_cloud_id=ge_cloud_id
-            )
-        else:
-            key: ConfigurationIdentifier = ConfigurationIdentifier(
-                configuration_key=name,
-            )
-        try:
-            checkpoint_config: CheckpointConfig = self.checkpoint_store.get(key=key)
-        except ge_exceptions.InvalidKeyError as exc_ik:
-            raise ge_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
-            )
-        except ValidationError as exc_ve:
-            raise ge_exceptions.InvalidCheckpointConfigError(
-                message="Invalid Checkpoint configuration", validation_error=exc_ve
-            )
-
-        if checkpoint_config.config_version is None:
-            if not (
-                "batches" in checkpoint_config.to_json_dict()
-                and (
-                    len(checkpoint_config.to_json_dict()["batches"]) == 0
-                    or {"batch_kwargs", "expectation_suite_names",}.issubset(
-                        set(
-                            list(
-                                itertools.chain.from_iterable(
-                                    [
-                                        item.keys()
-                                        for item in checkpoint_config.to_json_dict()[
-                                            "batches"
-                                        ]
-                                    ]
-                                )
-                            )
-                        )
-                    )
-                )
-            ):
-                raise ge_exceptions.CheckpointError(
-                    message="Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments."
-                )
-
-        config: dict = checkpoint_config.to_json_dict()
-        if name:
-            config.update({"name": name})
-        config = filter_properties_dict(properties=config, clean_falsy=True)
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
-            config=config,
-            runtime_environment={
-                "data_context": self,
-            },
-            config_defaults={
-                "module_name": "great_expectations.checkpoint",
-            },
+        return checkpoint_toolkit.get_checkpoint(
+            data_context=self,
+            checkpoint_store=self.checkpoint_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
         )
 
-        return checkpoint
-
     def delete_checkpoint(
-        self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
     ):
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id."
+        checkpoint_toolkit.delete_checkpoint(
+            checkpoint_store=self.checkpoint_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
 
-        if ge_cloud_id:
-            key: GeCloudIdentifier = GeCloudIdentifier(
-                resource_type="contract", ge_cloud_id=ge_cloud_id
-            )
-        else:
-            key: ConfigurationIdentifier = ConfigurationIdentifier(
-                configuration_key=name
-            )
-
-        try:
-            self.checkpoint_store.remove_key(key=key)
-        except ge_exceptions.InvalidKeyError as exc_ik:
-            raise ge_exceptions.CheckpointNotFoundError(
-                message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
-            )
-
-    def list_checkpoints(self) -> List[str]:
-        if self.ge_cloud_mode:
-            return self.checkpoint_store.list_keys()
-        else:
-            return [x.configuration_key for x in self.checkpoint_store.list_keys()]
-
+    @usage_statistics_enabled_method(
+        event_name="data_context.run_checkpoint",
+    )
     def run_checkpoint(
         self,
         checkpoint_name: Optional[str] = None,
@@ -3212,61 +3156,48 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         Validate against a pre-defined Checkpoint. (Experimental)
         Args:
             checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
+            template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
+            run_name_template: The template to use for run_name
+            expectation_suite_name: Expectation suite to be used by Checkpoint run
+            batch_request: Batch request to be used by Checkpoint run
+            action_list: List of actions to be performed by the Checkpoint
+            evaluation_parameters: $parameter_name syntax references to be evaluated at runtime
+            runtime_configuration: Runtime configuration override parameters
+            validations: Validations to be performed by the Checkpoint run
+            profilers: Profilers to be used by the Checkpoint run
+            run_id: The run_id for the validation; if None, a default value will be used
             run_name: The run_name for the validation; if None, a default value will be used
+            run_time: The date/time of the run
+            result_format: One of several supported formatting directives for expectation validation results
+            ge_cloud_id: Great Expectations Cloud id for the checkpoint
+            expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
             CheckpointResult
         """
-        # TODO mark experimental
-        batch_request = batch_request or {}
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = self.get_checkpoint(
-            name=checkpoint_name, ge_cloud_id=ge_cloud_id
+        return checkpoint_toolkit.run_checkpoint(
+            data_context=self,
+            checkpoint_store=self.checkpoint_store,
+            ge_cloud_mode=self.ge_cloud_mode,
+            checkpoint_name=checkpoint_name,
+            template_name=template_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            run_id=run_id,
+            run_name=run_name,
+            run_time=run_time,
+            result_format=result_format,
+            ge_cloud_id=ge_cloud_id,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            **kwargs,
         )
-        checkpoint_config_from_store: dict = checkpoint.config.to_json_dict()
-
-        if (
-            "runtime_configuration" in checkpoint_config_from_store
-            and "result_format" in checkpoint_config_from_store["runtime_configuration"]
-        ):
-            result_format = result_format or checkpoint_config_from_store[
-                "runtime_configuration"
-            ].pop("result_format")
-
-        if result_format is None:
-            result_format = {"result_format": "SUMMARY"}
-
-        checkpoint_config_from_call_args: dict = {
-            "template_name": template_name,
-            "run_name_template": run_name_template,
-            "expectation_suite_name": expectation_suite_name,
-            "batch_request": batch_request,
-            "action_list": action_list,
-            "evaluation_parameters": evaluation_parameters,
-            "runtime_configuration": runtime_configuration,
-            "validations": validations,
-            "profilers": profilers,
-            "run_id": run_id,
-            "run_name": run_name,
-            "run_time": run_time,
-            "result_format": result_format,
-            "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
-        }
-
-        checkpoint_config = {
-            key: value
-            for key, value in checkpoint_config_from_store.items()
-            if key in checkpoint_config_from_call_args
-        }
-        checkpoint_config.update(checkpoint_config_from_call_args)
-        if not self.ge_cloud_mode:
-            checkpoint_config = filter_properties_dict(
-                properties=checkpoint_config, clean_falsy=True
-            )
-
-        checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
-
-        return checkpoint.run(**checkpoint_run_arguments)
 
     def test_yaml_config(
         self,

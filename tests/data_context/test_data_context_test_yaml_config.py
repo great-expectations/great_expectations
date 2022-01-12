@@ -216,7 +216,7 @@ def test_checkpoint_store_with_filesystem_store_backend(
             "class_name": "TupleFilesystemStoreBackend",
             "base_directory": f"{tmp_dir}/checkpoints",
             "suppress_store_backend_id": True,
-            "filepath_template": "{0}.yml",
+            "filepath_suffix": ".yml",
         },
         "overwrite_existing": False,
         "runtime_environment": {
@@ -708,7 +708,9 @@ introspection:
         datasource_name="my_datasource",
         data_connector_name="whole_table_with_limits",
         data_asset_name="test_df",
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
     )
     my_evr = my_validator.expect_table_columns_to_match_set(column_set=[])
     print(my_evr)
@@ -846,6 +848,9 @@ data_connectors:
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
 
+    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+    assert mock_emit.call_count == 2
+
     df_data = my_batch.data.dataframe
     assert df_data.shape == (10, 10)
     df_data["date"] = df_data.apply(
@@ -868,12 +873,17 @@ data_connectors:
             data_asset_name="DOES_NOT_EXIST",
         )
 
+    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+    assert mock_emit.call_count == 3
+
     my_validator = context.get_validator(
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
         data_asset_name="D",
         data_connector_query={"batch_filter_parameters": {"number": "3"}},
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
         batch_spec_passthrough={
             "sampling_method": "_sample_using_hash",
             "sampling_kwargs": {
@@ -883,6 +893,10 @@ data_connectors:
             },
         },
     )
+
+    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+    assert mock_emit.call_count == 4
+
     my_evr = my_validator.expect_column_values_to_be_between(
         column="d", min_value=1, max_value=31
     )
@@ -893,7 +907,8 @@ data_connectors:
     # assert my_evr.success
 
     # No other usage stats calls detected
-    assert mock_emit.call_count == 1
+    # assert mock_emit.call_count == 1
+    assert mock_emit.call_count == 4
 
 
 @mock.patch(
@@ -1043,6 +1058,9 @@ data_connectors:
     )
     assert my_batch.batch_definition["data_asset_name"] == "A"
 
+    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+    assert mock_emit.call_count == 2
+
     my_batch.head()
 
     df_data = my_batch.data.dataframe
@@ -1067,6 +1085,9 @@ data_connectors:
             data_asset_name="DOES_NOT_EXIST",
         )
 
+    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+    assert mock_emit.call_count == 3
+
     my_validator = context.get_validator(
         datasource_name="my_directory_datasource",
         data_connector_name="my_filesystem_data_connector",
@@ -1087,11 +1108,14 @@ data_connectors:
     )
     assert my_evr.success
 
+    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+    assert mock_emit.call_count == 4
+
     # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
     # assert my_evr.success
 
     # No other usage stats calls detected
-    assert mock_emit.call_count == 1
+    assert mock_emit.call_count == 4
 
 
 @mock.patch(

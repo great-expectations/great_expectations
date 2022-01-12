@@ -7,7 +7,7 @@ we introduced `project check-config` to sanity check your config files. From you
 project directory, run:
 
 ```bash
-great_expectations --v3-api project check-config
+great_expectations project check-config
 ```
 
 This can be used at any time and will grow more robust and helpful as our

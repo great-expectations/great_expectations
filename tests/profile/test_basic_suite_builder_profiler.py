@@ -134,6 +134,7 @@ def test__create_expectations_for_numeric_column(
     if test_backend in [
         "PandasDataset",
         "SparkDFDataset",
+        "sqlite",
         "postgresql",
         "mysql",
         "mssql",
@@ -162,6 +163,7 @@ def test__create_expectations_for_numeric_column(
             "expect_column_max_to_be_between",
             "expect_column_mean_to_be_between",
             "expect_column_median_to_be_between",
+            "expect_column_quantile_values_to_be_between",
             "expect_column_values_to_not_be_null",
         }
 
@@ -543,8 +545,9 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
 )
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_have_included_or_excluded_columns_on_pandas(
-    pandas_dataset,
+    pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(pandas_dataset)
     assert isinstance(observed_suite, ExpectationSuite)
 
@@ -747,6 +750,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
                 "expectation_type": "expect_column_quantile_values_to_be_between",
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -760,8 +764,9 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
 )
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(
-    pandas_dataset,
+    pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset, profiler_configuration={"included_columns": ["naturals"]}
     )
@@ -850,6 +855,7 @@ def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(
                 "expectation_type": "expect_column_quantile_values_to_be_between",
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -863,8 +869,9 @@ def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(
 )
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
-    pandas_dataset,
+    pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -917,6 +924,7 @@ def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
                 "expectation_type": "expect_column_values_to_not_be_null",
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -930,8 +938,9 @@ def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
 )
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
-    pandas_dataset,
+    pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -964,6 +973,7 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
                 "expectation_type": "expect_column_values_to_not_be_null",
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -978,9 +988,9 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("included_columns", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_falsey_on_pandas(
-    included_columns,
-    pandas_dataset,
+    included_columns, pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1003,6 +1013,7 @@ def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_false
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -1014,9 +1025,9 @@ def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_false
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("included_expectations", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations_are_falsey_on_pandas(
-    included_expectations,
-    pandas_dataset,
+    included_expectations, pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1026,9 +1037,7 @@ def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations
     assert isinstance(observed_suite, ExpectationSuite)
 
     expected = ExpectationSuite(
-        "default",
-        data_asset_type="Dataset",
-        expectations=[],
+        "default", data_asset_type="Dataset", expectations=[], data_context=context
     )
 
     # remove metadata to simplify assertions
@@ -1043,9 +1052,9 @@ def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("excluded_expectations", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectations_are_falsey_on_pandas(
-    excluded_expectations,
-    pandas_dataset,
+    excluded_expectations, pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1253,6 +1262,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
                 "meta": {"BasicSuiteBuilderProfiler": {"confidence": "very low"}},
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions
@@ -1267,9 +1277,9 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
 @pytest.mark.skipif(os.getenv("PANDAS") == "0.22.0", reason="0.22.0 pandas")
 @pytest.mark.parametrize("excluded_columns", FALSEY_VALUES)
 def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_falsey_on_pandas(
-    excluded_columns,
-    pandas_dataset,
+    excluded_columns, pandas_dataset, empty_data_context
 ):
+    context: "DataContext" = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1307,6 +1317,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_fals
                 "kwargs": {"column": "nulls", "mostly": 0.471},
             },
         ],
+        data_context=context,
     )
 
     # remove metadata to simplify assertions

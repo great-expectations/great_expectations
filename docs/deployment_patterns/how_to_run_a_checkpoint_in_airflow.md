@@ -30,19 +30,19 @@ You can use a simple `BashOperator` in Airflow to trigger the checkpoint run. Th
 ```python
 validation_task = BashOperator(
     task_id='validation_task',
-    bash_command='great_expectations --v3-api checkpoint run my_checkpoint',
+    bash_command='great_expectations checkpoint run my_checkpoint',
     dag=dag
 )
 ```
 
 ### Option 2: Running the `checkpoint script` output with a PythonOperator
 
-Another option is to use the output of the `great_expectations --v3-api checkpoint script` command and paste it into a method that is called from a PythonOperator in the DAG. This gives you more fine-grained control over how to respond to Validation Results:
+Another option is to use the output of the `great_expectations checkpoint script` command and paste it into a method that is called from a PythonOperator in the DAG. This gives you more fine-grained control over how to respond to Validation Results:
 
-1. Run `great_expectations --v3-api checkpoint script`
+1. Run `great_expectations checkpoint script`
 
     ```bash
-    great_expectations --v3-api checkpoint script my_checkpoint
+    great_expectations checkpoint script my_checkpoint
 
     ...
 

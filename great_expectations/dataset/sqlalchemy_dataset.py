@@ -1,10 +1,11 @@
 import inspect
+import itertools
 import logging
 import traceback
 import warnings
 from datetime import datetime
 from functools import wraps
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -935,6 +936,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 quantiles=quantiles,
                 allow_relative_error=allow_relative_error,
             )
+        elif self.sql_engine_dialect.name.lower() == "sqlite":
+            return self._get_column_quantiles_sqlite(
+                column=column,
+                quantiles=quantiles,
+            )
         else:
             return convert_to_json_serializable(
                 self._get_column_quantiles_generic_sqlalchemy(
@@ -1047,6 +1053,59 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         try:
             quantiles_results: Row = self.engine.execute(quantiles_query).fetchone()
             return list(quantiles_results)
+        except ProgrammingError as pe:
+            self._treat_quantiles_exception(pe)
+
+    def _get_column_quantiles_sqlite(
+        self,
+        column,
+        quantiles: Iterable,
+    ) -> list:
+        """
+        The present implementation is somewhat inefficient, because it requires as many calls to "self.engine.execute()"
+        as the number of partitions in the "quantiles" parameter (albeit, typically, only a few).  However, this is the
+        only mechanism available for SQLite at the present time (11/17/2021), because the analytical processing is not a
+        very strongly represented capability of the SQLite database management system.
+        """
+        table_row_count_query: Select = sa.select([sa.func.count()]).select_from(
+            self._table
+        )
+        table_row_count_result: Optional[Row] = None
+        try:
+            table_row_count_result = self.engine.execute(
+                table_row_count_query
+            ).fetchone()
+        except ProgrammingError as pe:
+            self._treat_quantiles_exception(pe)
+
+        table_row_count: int
+        if table_row_count_result is not None:
+            table_row_count = list(table_row_count_result)[0]
+        else:
+            table_row_count = 0
+
+        offsets: List[int] = [quantile * table_row_count - 1 for quantile in quantiles]
+        quantile_queries: List[Select] = [
+            sa.select([sa.column(column)])
+            .order_by(sa.column(column).asc())
+            .offset(offset)
+            .limit(1)
+            .select_from(self._table)
+            for offset in offsets
+        ]
+
+        quantile_result: Row
+        quantile_query: Select
+        try:
+            quantiles_results: List[Row] = [
+                self.engine.execute(quantile_query).fetchone()
+                for quantile_query in quantile_queries
+            ]
+            return list(
+                itertools.chain.from_iterable(
+                    [list(quantile_result) for quantile_result in quantiles_results]
+                )
+            )
         except ProgrammingError as pe:
             self._treat_quantiles_exception(pe)
 
@@ -1546,9 +1605,9 @@ WHERE
         )
 
         if ignore_row_if == "all_values_are_missing":
-            query = query.where(sa.and_(*(col != None for col in columns)))
+            query = query.where(~sa.and_(*(col == None for col in columns)))
         elif ignore_row_if == "any_value_is_missing":
-            query = query.where(sa.or_(*(col != None for col in columns)))
+            query = query.where(sa.and_(*(col != None for col in columns)))
         elif ignore_row_if == "never":
             pass
         else:
@@ -2089,6 +2148,23 @@ WHERE
         except (AttributeError, TypeError):
             pass
 
+        try:
+            # Athena
+            if isinstance(
+                self.sql_engine_dialect, pyathena.sqlalchemy_athena.AthenaDialect
+            ):
+                if positive:
+                    return sa.func.REGEXP_LIKE(sa.column(column), literal(regex))
+                else:
+                    return sa.not_(
+                        sa.func.REGEXP_LIKE(sa.column(column), literal(regex))
+                    )
+        except (
+            AttributeError,
+            TypeError,
+        ):  # TypeError can occur if the driver was not installed and so is None
+            pass
+
         return None
 
     @MetaSqlAlchemyDataset.column_map_expectation
@@ -2244,6 +2320,14 @@ WHERE
         try:
             if isinstance(
                 self.sql_engine_dialect, teradatasqlalchemy.dialect.TeradataDialect
+            ):
+                dialect_supported = True
+        except (AttributeError, TypeError):
+            pass
+
+        try:
+            if isinstance(
+                self.sql_engine_dialect, pyathena.sqlalchemy_athena.AthenaDialect
             ):
                 dialect_supported = True
         except (AttributeError, TypeError):

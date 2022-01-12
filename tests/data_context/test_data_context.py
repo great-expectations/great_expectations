@@ -221,14 +221,7 @@ def test_compile_evaluation_parameter_dependencies(
         data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
         == {}
     )
-    expectation_suite = (
-        data_context_parameterized_expectation_suite.get_expectation_suite(
-            parameterized_expectation_suite_name
-        )
-    )
-    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies(
-        expectation_suite
-    )
+    data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
     assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
         "source_diabetes_data.default": [
             {
@@ -851,7 +844,11 @@ def test_data_context_updates_expectation_suite_names(
             "a_new_new_suite_name.json",
         ),
     ) as suite_file:
-        loaded_suite = expectationSuiteSchema.load(json.load(suite_file))
+        loaded_suite_dict: dict = expectationSuiteSchema.load(json.load(suite_file))
+        loaded_suite: ExpectationSuite = ExpectationSuite(
+            **loaded_suite_dict,
+            data_context=data_context_parameterized_expectation_suite,
+        )
         assert loaded_suite.expectation_suite_name == "a_new_new_suite_name"
 
     #   3. Using the new name but having the context draw that from the suite
@@ -1611,9 +1608,9 @@ def test_run_checkpoint_new_style(
 
 
 def test_get_validator_with_instantiated_expectation_suite(
-    empty_data_context, tmp_path_factory
+    empty_data_context_stats_enabled, tmp_path_factory
 ):
-    context = empty_data_context
+    context: DataContext = empty_data_context_stats_enabled
 
     base_directory = str(
         tmp_path_factory.mktemp(
@@ -1659,7 +1656,9 @@ data_connectors:
         batch_identifiers={
             "alphanumeric": "some_file",
         },
-        expectation_suite=ExpectationSuite("my_expectation_suite"),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
     )
     assert my_validator.expectation_suite_name == "my_expectation_suite"
 
@@ -1745,6 +1744,34 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
         expectation_suite_name=expectation_suite,
     )
     assert len(batch) == 3
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_add_expectation_to_expectation_suite(
+    mock_emit, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
+
+    expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite_name="my_new_expectation_suite"
+    )
+    expectation_suite.add_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "expectation_suite.add_expectation",
+                "event_payload": {},
+                "success": True,
+            }
+        )
+    ]
 
 
 @mock.patch(

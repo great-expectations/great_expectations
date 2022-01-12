@@ -37,6 +37,7 @@ def pytest_generate_tests(metafunc):
     parametrized_tests = []
     ids = []
     backends = build_test_backends_list_cfe(metafunc)
+    validator_with_data = None
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
@@ -53,7 +54,6 @@ def pytest_generate_tests(metafunc):
                         c, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True
-                        schemas = validator_with_data = None
                     else:
                         skip_expectation = False
                         if isinstance(d["data"], list):

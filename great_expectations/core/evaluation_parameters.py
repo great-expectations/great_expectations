@@ -5,6 +5,7 @@ import math
 import operator
 import traceback
 from collections import namedtuple
+from typing import Any, Dict, Optional, Tuple
 
 from pyparsing import (
     CaselessKeyword,
@@ -196,11 +197,11 @@ class EvaluationParameterParser:
 
 
 def build_evaluation_parameters(
-    expectation_args,
-    evaluation_parameters=None,
-    interactive_evaluation=True,
+    expectation_args: dict,
+    evaluation_parameters: Optional[dict] = None,
+    interactive_evaluation: bool = True,
     data_context=None,
-):
+) -> Tuple[dict, dict]:
     """Build a dictionary of parameters to evaluate, using the provided evaluation_parameters,
     AND mutate expectation_args by removing any parameter values passed in as temporary values during
     exploratory work.
@@ -218,11 +219,10 @@ def build_evaluation_parameters(
 
             # First, check to see whether an argument was supplied at runtime
             # If it was, use that one, but remove it from the stored config
-            if "$PARAMETER." + value["$PARAMETER"] in value:
-                evaluation_args[key] = evaluation_args[key][
-                    "$PARAMETER." + value["$PARAMETER"]
-                ]
-                del expectation_args[key]["$PARAMETER." + value["$PARAMETER"]]
+            param_key = f"$PARAMETER.{value['$PARAMETER']}"
+            if param_key in value:
+                evaluation_args[key] = evaluation_args[key][param_key]
+                del expectation_args[key][param_key]
 
             # If not, try to parse the evaluation parameter and substitute, which will raise
             # an exception if we do not have a value
@@ -305,8 +305,10 @@ def find_evaluation_parameter_dependencies(parameter_expression):
 
 
 def parse_evaluation_parameter(
-    parameter_expression, evaluation_parameters=None, data_context=None
-):
+    parameter_expression: str,
+    evaluation_parameters: Optional[Dict[str, Any]] = None,
+    data_context: Optional[Any] = None,  # Cannot type 'DataContext' due to import cycle
+) -> Any:
     """Use the provided evaluation_parameters dict to parse a given parameter expression.
 
     Args:
@@ -332,7 +334,13 @@ def parse_evaluation_parameter(
     except ParseException as err:
         L = ["Parse Failure", parameter_expression, (str(err), err.line, err.column)]
 
-    if len(L) == 1 and L[0] not in evaluation_parameters:
+    # Represents a valid parser result of a single function that has no arguments
+    if len(L) == 1 and isinstance(L[0], tuple) and L[0][2] is False:
+        # Necessary to catch `now()` (which only needs to be evaluated with `expr.exprStack`)
+        # NOTE: 20211122 - Chetan - Any future built-ins that are zero arity functions will match this behavior
+        pass
+
+    elif len(L) == 1 and L[0] not in evaluation_parameters:
         # In this special case there were no operations to find, so only one value, but we don't have something to
         # substitute for that value
         try:
@@ -392,7 +400,7 @@ def parse_evaluation_parameter(
     return result
 
 
-def _deduplicate_evaluation_parameter_dependencies(dependencies):
+def _deduplicate_evaluation_parameter_dependencies(dependencies: dict) -> dict:
     deduplicated = {}
     for suite_name, required_metrics in dependencies.items():
         deduplicated[suite_name] = []

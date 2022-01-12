@@ -5,11 +5,46 @@
 
 
 # An anonymized string *must* be an md5 hash, so must have exactly 32 characters
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    CLISuiteInteractiveFlagCombinations,
+)
+
 anonymized_string_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-string",
     "type": "string",
     "minLength": 32,
     "maxLength": 32,
+}
+
+anonymized_datasource_name_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-datasource-name",
+    "definitions": {"anonymized_string": anonymized_string_schema},
+    "anyOf": [
+        {
+            "type": "string",
+            "maxLength": 256,
+        },
+        {
+            "$ref": "#/definitions/anonymized_string",
+        },
+    ],
+}
+
+anonymized_run_time_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-run-time",
+    "definitions": {"anonymized_string": anonymized_string_schema},
+    "anyOf": [
+        {
+            "type": "string",
+            "format": "date-time",
+        },
+        {
+            "$ref": "#/definitions/anonymized_string",
+        },
+    ],
 }
 
 anonymized_class_info_schema = {
@@ -28,7 +63,7 @@ anonymized_class_info_schema = {
             # we don't want this to be true, but this is required to allow show_cta_footer
             # Note AJB-20201218 show_cta_footer was removed in v 0.9.9 via PR #1249
             "required": ["parent_class"],
-        }
+        },
     ],
 }
 
@@ -95,7 +130,7 @@ anonymized_store_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        }
+        },
     ],
 }
 
@@ -113,8 +148,17 @@ anonymized_action_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        }
+        },
     ],
+}
+
+anonymized_action_list_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-action-list",
+    "definitions": {"anonymized_action": anonymized_action_schema},
+    "type": "array",
+    "maxItems": 1000,
+    "items": {"$ref": "#/definitions/anonymized_action"},
 }
 
 anonymized_validation_operator_schema = {
@@ -122,7 +166,7 @@ anonymized_validation_operator_schema = {
     "title": "anonymized-validation-operator",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
-        "anonymized_action": anonymized_action_schema,
+        "anonymized_action_list": anonymized_action_list_schema,
     },
     "oneOf": [
         {
@@ -132,19 +176,18 @@ anonymized_validation_operator_schema = {
                 "parent_class": {"type": "string", "maxLength": 256},
                 "anonymized_class": {"$ref": "#/definitions/anonymized_string"},
                 "anonymized_action_list": {
-                    "type": "array",
-                    "maxItems": 1000,
-                    "items": {"$ref": "#/definitions/anonymized_action"},
+                    "$ref": "#/definitions/anonymized_action_list"
                 },
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        }
+        },
     ],
 }
 
 empty_payload_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "empty-payload",
     "type": "object",
     "properties": {},
     "additionalProperties": False,
@@ -173,13 +216,13 @@ anonymized_data_docs_site_schema = {
             },
             "additionalProperties": False,
             "required": ["parent_class", "anonymized_name"],
-        }
+        },
     ],
 }
 
 anonymized_expectation_suite_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "anonymized-expectation-suite-schema",
+    "title": "anonymized-expectation-suite",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "oneOf": [
         {
@@ -215,8 +258,9 @@ anonymized_expectation_suite_schema = {
     ],
 }
 
-init_payload_schema = {
+anonymized_init_payload_schema = {
     "$schema": "https://json-schema.org/schema#",
+    "title": "anonymized-init-payload",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_class_info": anonymized_class_info_schema,
@@ -225,6 +269,7 @@ init_payload_schema = {
         "anonymized_data_docs_site": anonymized_data_docs_site_schema,
         "anonymized_store": anonymized_store_schema,
         "anonymized_action": anonymized_action_schema,
+        "anonymized_action_list": anonymized_action_list_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
     },
     "type": "object",
@@ -270,10 +315,106 @@ init_payload_schema = {
     "additionalProperties": False,
 }
 
+anonymized_batch_request_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-batch-request",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+    },
+    "type": "object",
+    "properties": {
+        "anonymized_batch_request_required_top_level_properties": {
+            "type": "object",
+            "properties": {
+                "anonymized_datasource_name": {
+                    "$ref": "#/definitions/anonymized_datasource_name",
+                },
+                "anonymized_data_connector_name": {
+                    "$ref": "#/definitions/anonymized_string",
+                },
+                "anonymized_data_asset_name": {
+                    "$ref": "#/definitions/anonymized_string",
+                },
+            },
+            "required": [
+                "anonymized_datasource_name",
+                "anonymized_data_connector_name",
+                "anonymized_data_asset_name",
+            ],
+            "additionalProperties": False,
+        },
+        "batch_request_optional_top_level_keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+                "type": "string",
+                "enum": [
+                    "batch_identifiers",
+                    "batch_spec_passthrough",
+                    "data_connector_query",
+                    "runtime_parameters",
+                ],
+            },
+            "uniqueItems": True,
+        },
+        "data_connector_query_keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "items": {
+                "type": "string",
+                "enum": [
+                    "batch_filter_parameters",
+                    "custom_filter_function",
+                    "index",
+                    "limit",
+                ],
+            },
+            "uniqueItems": True,
+        },
+        "runtime_parameters_keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {
+                "type": "string",
+                "enum": [
+                    "batch_data",
+                    "query",
+                    "path",
+                ],
+            },
+        },
+        "batch_spec_passthrough_keys": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 6,
+            "items": {
+                "type": "string",
+                "enum": [
+                    "reader_method",
+                    "reader_options",
+                    "sampling_method",
+                    "sampling_kwargs",
+                    "splitter_method",
+                    "splitter_kwargs",
+                ],
+            },
+            "uniqueItems": True,
+        },
+    },
+    "additionalProperties": False,
+}
+
 anonymized_batch_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-batch",
-    "definitions": {"anonymized_string": anonymized_string_schema},
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+    },
     "oneOf": [
         {
             "type": "object",
@@ -287,7 +428,7 @@ anonymized_batch_schema = {
                     "$ref": "#/definitions/anonymized_string"
                 },
                 "anonymized_datasource_name": {
-                    "$ref": "#/definitions/anonymized_string"
+                    "$ref": "#/definitions/anonymized_datasource_name",
                 },
             },
             "additionalProperties": False,
@@ -296,12 +437,13 @@ anonymized_batch_schema = {
                 "anonymized_expectation_suite_name",
                 "anonymized_datasource_name",
             ],
-        }
+        },
     ],
 }
 
-run_validation_operator_payload_schema = {
+anonymized_run_validation_operator_payload_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-run-validation-operator-payload",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_batch": anonymized_batch_schema,
@@ -319,8 +461,37 @@ run_validation_operator_payload_schema = {
     "additionalProperties": False,
 }
 
-save_or_edit_expectation_suite_payload_schema = {
+anonymized_validation_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-validation",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
+        "anonymized_action_list": anonymized_action_list_schema,
+    },
+    "type": "object",
+    "properties": {
+        "anonymized_batch_request": {"$ref": "#/definitions/anonymized_batch_request"},
+        "anonymized_expectation_suite_name": {
+            "$ref": "#/definitions/anonymized_string"
+        },
+        "anonymized_action_list": {"$ref": "#/definitions/anonymized_action_list"},
+    },
+    "additionalProperties": False,
+}
+
+anonymized_validations_list_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-validations",
+    "definitions": {"anonymized_validation": anonymized_validation_schema},
+    "type": "array",
+    "maxItems": 1000,
+    "items": {"$ref": "#/definitions/anonymized_validation"},
+}
+
+anonymized_save_or_edit_expectation_suite_payload_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-save-or-edit-expectation-suite-payload",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
@@ -332,26 +503,68 @@ save_or_edit_expectation_suite_payload_schema = {
     "additionalProperties": False,
 }
 
-cli_suite_expectation_suite_payload_schema = {
+anonymized_cli_suite_expectation_suite_payload_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-cli-suite-expectation-suite-payload",
     "definitions": {"anonymized_string": anonymized_string_schema},
     "type": "object",
     "properties": {
-        "anonymized_expectation_suite_name": {
-            "$ref": "#/definitions/anonymized_string"
+        "interactive_flag": {
+            "type": ["boolean", "null"],
+        },
+        "interactive_attribution": {
+            "enum": [
+                element.value["interactive_attribution"]
+                for element in CLISuiteInteractiveFlagCombinations
+            ],
         },
         "api_version": {"type": "string", "maxLength": 256},
         "cancelled": {
             "type": ["boolean", "null"],
         },
     },
-    "required": ["anonymized_expectation_suite_name"],
-    "additionalProperties": False,
 }
 
-cli_payload_schema = {
+anonymized_cli_suite_new_expectation_suite_payload_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "cli-payload",
+    "title": "anonymized-cli-suite-new-expectation-suite-payload",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_cli_suite_expectation_suite_payload": anonymized_cli_suite_expectation_suite_payload_schema,
+    },
+    "items": {
+        "$ref": "#/definitions/anonymized_cli_suite_expectation_suite_payload",
+        "properties": {
+            "anonymized_expectation_suite_name": {
+                "$ref": "#/definitions/anonymized_string"
+            },
+        },
+        "additionalProperties": False,
+    },
+}
+
+anonymized_cli_suite_edit_expectation_suite_payload_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-cli-suite-edit-expectation-suite-payload",
+    "definitions": {
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_cli_suite_expectation_suite_payload": anonymized_cli_suite_expectation_suite_payload_schema,
+    },
+    "items": {
+        "$ref": "#/definitions/anonymized_cli_suite_expectation_suite_payload",
+        "properties": {
+            "anonymized_expectation_suite_name": {
+                "$ref": "#/definitions/anonymized_string"
+            },
+        },
+        "required": ["anonymized_expectation_suite_name"],
+        "additionalProperties": False,
+    },
+}
+
+anonymized_cli_payload_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-cli-payload",
     "type": "object",
     "properties": {
         "api_version": {
@@ -365,8 +578,9 @@ cli_payload_schema = {
     "additionalProperties": False,
 }
 
-cli_new_ds_choice_payload_schema = {
+anonymized_cli_new_ds_choice_payload_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-cli-new-ds-choice-payload",
     "type": "object",
     "properties": {
         "type": {"type": "string", "maxLength": 256},
@@ -378,8 +592,9 @@ cli_new_ds_choice_payload_schema = {
 }
 
 
-datasource_sqlalchemy_connect_payload = {
+anonymized_datasource_sqlalchemy_connect_payload_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-datasource-sqlalchemy-connect-payload",
     "type": "object",
     "properties": {
         "anonymized_name": {"type": "string", "maxLength": 256},
@@ -389,9 +604,9 @@ datasource_sqlalchemy_connect_payload = {
     "additionalProperties": False,
 }
 
-test_yaml_config_payload_schema = {
+anonymized_test_yaml_config_payload_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "test-yaml-config",
+    "title": "anonymized-test-yaml-config-payload",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
         "anonymized_class_info": anonymized_class_info_schema,
@@ -428,35 +643,153 @@ test_yaml_config_payload_schema = {
     "additionalProperties": False,
 }
 
-usage_statistics_record_schema = {
+anonymized_checkpoint_run_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-checkpoint-run-payload",
+    "definitions": {
+        "empty_payload": empty_payload_schema,
+        "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
+        "anonymized_run_time": anonymized_run_time_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
+        "anonymized_action": anonymized_action_schema,
+        "anonymized_action_list": anonymized_action_list_schema,
+        "anonymized_validation": anonymized_validation_schema,
+        "anonymized_validations": anonymized_validations_list_schema,
+    },
+    "oneOf": [
+        {
+            "type": "object",
+            "properties": {
+                "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+                "config_version": {"type": "number", "minimum": 1},
+                "anonymized_template_name": {"$ref": "#/definitions/anonymized_string"},
+                "anonymized_run_name_template": {
+                    "$ref": "#/definitions/anonymized_string"
+                },
+                "anonymized_expectation_suite_name": {
+                    "$ref": "#/definitions/anonymized_string"
+                },
+                "anonymized_batch_request": {
+                    "$ref": "#/definitions/anonymized_batch_request"
+                },
+                "anonymized_action_list": {
+                    "$ref": "#/definitions/anonymized_action_list"
+                },
+                "anonymized_validations": {
+                    "$ref": "#/definitions/anonymized_validations"
+                },
+                "anonymized_run_id": {"$ref": "#/definitions/anonymized_string"},
+                "anonymized_run_name": {"$ref": "#/definitions/anonymized_run_name"},
+                "anonymized_run_time": {"$ref": "#/definitions/anonymized_run_time"},
+                "anonymized_expectation_suite_ge_cloud_id": {
+                    "$ref": "#/definitions/anonymized_string"
+                },
+                "checkpoint_optional_top_level_keys": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "evaluation_parameters",
+                            "runtime_configuration",
+                            "profilers",
+                        ],
+                    },
+                    "uniqueItems": True,
+                },
+            },
+            "required": ["anonymized_name", "config_version"],
+            "additionalProperties": False,
+        },
+        {"$ref": "#/definitions/empty_payload"},
+    ],
+}
+
+anonymized_legacy_profiler_build_suite_payload_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-legacy-profiler-build-suite-payload",
+    "type": "object",
+    "properties": {
+        "profile_dataset_type": {"type": "string", "maxLength": 256},
+        "excluded_expectations_specified": {
+            "type": ["boolean"],
+        },
+        "ignored_columns_specified": {
+            "type": ["boolean"],
+        },
+        "not_null_only": {
+            "type": ["boolean"],
+        },
+        "primary_or_compound_key_specified": {
+            "type": ["boolean"],
+        },
+        "semantic_types_dict_specified": {
+            "type": ["boolean"],
+        },
+        "table_expectations_only": {
+            "type": ["boolean"],
+        },
+        "value_set_threshold_specified": {
+            "type": ["boolean"],
+        },
+        "api_version": {"type": "string", "maxLength": 256},
+    },
+    "required": [
+        "profile_dataset_type",
+        "excluded_expectations_specified",
+        "ignored_columns_specified",
+        "not_null_only",
+        "primary_or_compound_key_specified",
+        "semantic_types_dict_specified",
+        "table_expectations_only",
+        "value_set_threshold_specified",
+        "api_version",
+    ],
+    "additionalProperties": False,
+}
+
+anonymized_usage_statistics_record_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-usage-statistics-record",
     "definitions": {
         "anonymized_string": anonymized_string_schema,
+        "anonymized_datasource_name": anonymized_datasource_name_schema,
         "anonymized_datasource": anonymized_datasource_schema,
         "anonymized_store": anonymized_store_schema,
         "anonymized_class_info": anonymized_class_info_schema,
         "anonymized_validation_operator": anonymized_validation_operator_schema,
         "anonymized_action": anonymized_action_schema,
+        "anonymized_action_list": anonymized_action_list_schema,
         "empty_payload": empty_payload_schema,
-        "init_payload": init_payload_schema,
-        "run_validation_operator_payload": run_validation_operator_payload_schema,
+        "anonymized_init_payload": anonymized_init_payload_schema,
+        "anonymized_run_validation_operator_payload": anonymized_run_validation_operator_payload_schema,
         "anonymized_data_docs_site": anonymized_data_docs_site_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
         "anonymized_batch": anonymized_batch_schema,
         "anonymized_expectation_suite": anonymized_expectation_suite_schema,
-        "save_or_edit_expectation_suite_payload": save_or_edit_expectation_suite_payload_schema,
-        "cli_suite_expectation_suite_payload": cli_suite_expectation_suite_payload_schema,
-        "cli_payload": cli_payload_schema,
-        "cli_new_ds_choice_payload": cli_new_ds_choice_payload_schema,
-        "datasource_sqlalchemy_connect_payload": datasource_sqlalchemy_connect_payload,
-        "test_yaml_config_payload": test_yaml_config_payload_schema,
+        "anonymized_save_or_edit_expectation_suite_payload": anonymized_save_or_edit_expectation_suite_payload_schema,
+        "anonymized_cli_suite_expectation_suite_payload": anonymized_cli_suite_expectation_suite_payload_schema,
+        "anonymized_cli_suite_new_expectation_suite_payload": anonymized_cli_suite_new_expectation_suite_payload_schema,
+        "anonymized_cli_suite_edit_expectation_suite_payload": anonymized_cli_suite_edit_expectation_suite_payload_schema,
+        "anonymized_cli_payload": anonymized_cli_payload_schema,
+        "anonymized_cli_new_ds_choice_payload": anonymized_cli_new_ds_choice_payload_schema,
+        "anonymized_datasource_sqlalchemy_connect_payload": anonymized_datasource_sqlalchemy_connect_payload_schema,
+        "anonymized_test_yaml_config_payload": anonymized_test_yaml_config_payload_schema,
+        "anonymized_validation": anonymized_validation_schema,
+        "anonymized_validations": anonymized_validations_list_schema,
+        "anonymized_checkpoint_run": anonymized_checkpoint_run_schema,
+        "anonymized_legacy_profiler_build_suite_payload": anonymized_legacy_profiler_build_suite_payload_schema,
     },
     "type": "object",
     "properties": {
         "version": {"enum": ["1.0.0"]},
-        "event_time": {"type": "string", "format": "date-time"},
+        "ge_version": {"type": "string", "maxLength": 32},
         "data_context_id": {"type": "string", "format": "uuid"},
         "data_context_instance_id": {"type": "string", "format": "uuid"},
-        "ge_version": {"type": "string", "maxLength": 32},
+        "event_time": {"type": "string", "format": "date-time"},
+        "event_duration": {"type": "number"},
         "x-forwarded-for": {"type": "string"},
         "success": {"type": ["boolean", "null"]},
     },
@@ -465,7 +798,7 @@ usage_statistics_record_schema = {
             "type": "object",
             "properties": {
                 "event": {"enum": ["data_context.__init__"]},
-                "event_payload": {"$ref": "#/definitions/init_payload"},
+                "event_payload": {"$ref": "#/definitions/anonymized_init_payload"},
             },
         },
         {
@@ -473,7 +806,7 @@ usage_statistics_record_schema = {
             "properties": {
                 "event": {"enum": ["data_context.save_expectation_suite"]},
                 "event_payload": {
-                    "$ref": "#/definitions/save_or_edit_expectation_suite_payload"
+                    "$ref": "#/definitions/anonymized_save_or_edit_expectation_suite_payload"
                 },
             },
         },
@@ -482,8 +815,15 @@ usage_statistics_record_schema = {
             "properties": {
                 "event": {"enum": ["data_context.run_validation_operator"]},
                 "event_payload": {
-                    "$ref": "#/definitions/run_validation_operator_payload"
+                    "$ref": "#/definitions/anonymized_run_validation_operator_payload"
                 },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": ["data_context.get_batch_list"]},
+                "event_payload": {"$ref": "#/definitions/anonymized_batch_request"},
             },
         },
         {
@@ -497,7 +837,9 @@ usage_statistics_record_schema = {
             "type": "object",
             "properties": {
                 "event": {"enum": ["cli.new_ds_choice"]},
-                "event_payload": {"$ref": "#/definitions/cli_new_ds_choice_payload"},
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_cli_new_ds_choice_payload"
+                },
             },
         },
         {
@@ -512,7 +854,7 @@ usage_statistics_record_schema = {
             "properties": {
                 "event": {"enum": ["datasource.sqlalchemy.connect"]},
                 "event_payload": {
-                    "$ref": "#/definitions/datasource_sqlalchemy_connect_payload"
+                    "$ref": "#/definitions/anonymized_datasource_sqlalchemy_connect_payload"
                 },
             },
         },
@@ -523,6 +865,8 @@ usage_statistics_record_schema = {
                     "enum": [
                         "data_context.build_data_docs",
                         "data_context.open_data_docs",
+                        "data_context.run_checkpoint",
+                        "expectation_suite.add_expectation",
                     ],
                 },
                 "event_payload": {"$ref": "#/definitions/empty_payload"},
@@ -534,7 +878,24 @@ usage_statistics_record_schema = {
                 "event": {
                     "enum": ["data_context.test_yaml_config"],
                 },
-                "event_payload": {"$ref": "#/definitions/test_yaml_config_payload"},
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_test_yaml_config_payload"
+                },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": [
+                        "cli.suite.new",
+                        "cli.suite.new.begin",
+                        "cli.suite.new.end",
+                    ],
+                },
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_cli_suite_new_expectation_suite_payload"
+                },
             },
         },
         {
@@ -545,10 +906,30 @@ usage_statistics_record_schema = {
                         "cli.suite.edit",
                         "cli.suite.edit.begin",
                         "cli.suite.edit.end",
-                    ]
+                    ],
                 },
                 "event_payload": {
-                    "$ref": "#/definitions/cli_suite_expectation_suite_payload"
+                    "$ref": "#/definitions/anonymized_cli_suite_edit_expectation_suite_payload"
+                },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": ["checkpoint.run"],
+                },
+                "event_payload": {"$ref": "#/definitions/anonymized_checkpoint_run"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": ["legacy_profiler.build_suite"],
+                },
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_legacy_profiler_build_suite_payload"
                 },
             },
         },
@@ -607,15 +988,12 @@ usage_statistics_record_schema = {
                         "cli.suite.list",
                         "cli.suite.list.begin",
                         "cli.suite.list.end",
-                        "cli.suite.new",
-                        "cli.suite.new.begin",
-                        "cli.suite.new.end",
                         "cli.suite.scaffold",
                         "cli.validation_operator.list",
                         "cli.validation_operator.run",
                     ],
                 },
-                "event_payload": {"$ref": "#/definitions/cli_payload"},
+                "event_payload": {"$ref": "#/definitions/anonymized_cli_payload"},
             },
         },
     ],
@@ -635,4 +1013,4 @@ if __name__ == "__main__":
     import json
 
     with open("usage_statistics_record_schema.json", "w") as outfile:
-        json.dump(usage_statistics_record_schema, outfile, indent=2)
+        json.dump(anonymized_usage_statistics_record_schema, outfile, indent=2)

@@ -5,10 +5,10 @@ title: Create your first Expectations
 Expectations are the workhorse abstraction in Great Expectations. Each Expectation is a declarative, machine-verifiable assertion about the expected format, content, or behavior of your data. Great Expectations comes with dozens of built-in Expectations, and it’s possible to develop your own custom Expectations, too.
 
 ### Create an Expectation Suite using the CLI
-The CLI will help you create your first Expectation Suite. Suites are simply collections of Expectations. In order to create a new suite, we will use the built-in profiler to automatically create an Expectation Suite called `taxi.demo`. Type the following into your terminal:
+The CLI will help you create your first Expectation Suite. Suites are simply collections of Expectations. In order to create a new suite, we will use the built-in profiler to automatically create an Expectation Suite called `getting_started_expectation_suite_taxi.demo`. Type the following into your terminal:
 
 ```console
-great_expectations --v3-api suite new
+great_expectations suite new
 ```
 
 You will see the output below. Choose `3` to create the Expectation Suite Automatically, using a profiler, and `1` to profile the January taxi data in `yellow_tripdata_sample_2019-01.csv`.
@@ -20,32 +20,29 @@ Don’t execute the Jupyter Notebook cells just yet!
 :::
 
 ```console
-How would you like to create your Expectation Suite? 
-    1. Manually, without interacting with a sample batch of data (default) 
-    2. Interactively, with a sample batch of data 
-    3. Automatically, using a profiler 
-: 3 
- 
-A batch of data is required to edit the suite - let's help you to specify it. 
- 
- 
-Which data asset (accessible by data connector "default_inferred_data_connector_name")
-would you like to use? 
-    1. yellow_tripdata_sample_2019-01.csv 
-    2. yellow_tripdata_sample_2019-02.csv 
-: 1 
- 
-Name the new Expectation Suite [yellow_tripdata_sample_2019-01.csv.warning]: taxi.demo 
- 
-Great Expectations will create a notebook, containing code cells that select from
-available columns in your dataset and generate expectations about them to demonstrate
-some examples of assertions you can make about your data. 
- 
-When you run this notebook, Great Expectations will store these expectations in a new
-Expectation Suite "taxi.demo" here: 
- 
-  <path_to_project>/great_expectations/expectations/taxi/demo.json 
- 
+How would you like to create your Expectation Suite?
+    1. Manually, without interacting with a sample batch of data (default)
+    2. Interactively, with a sample batch of data
+    3. Automatically, using a profiler
+: 3
+
+A batch of data is required to edit the suite - let's help you to specify it.
+
+
+Which data asset (accessible by data connector "default_inferred_data_connector_name") would you like to use?
+    1. yellow_tripdata_sample_2019-01.csv
+    2. yellow_tripdata_sample_2019-02.csv
+: 1
+
+Name the new Expectation Suite [yellow_tripdata_sample_2019-01.csv.warning]: getting_started_expectation_suite_taxi.demo
+
+Great Expectations will create a notebook, containing code cells that select from available columns in your dataset and
+generate expectations about them to demonstrate some examples of assertions you can make about your data.
+
+When you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "getting_started_expectation_suite_taxi.demo" here:
+
+  <path_to_project>/great_expectations/expectations/getting_started_expectation_suite_taxi/demo.json
+
 Would you like to proceed? [Y/n]:  <press Enter>
 ```
 
@@ -66,12 +63,12 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 
 **Let’s take a look through the notebook and see what’s happening in each cell**:
 
-![edit](../../guides/images/suite_edit_notebook.png)
+![edit](../../images/suite_edit_notebook.png)
 
 1. The first cell does several things: It imports all the relevant libraries, loads a Data Context, and creates a `Validator`, which combines a Batch Request to define your batch of data, and an Expectation Suite.
 2. The second cell allows you to specify which columns you want to **ignore** when creating Expectations. Remember how we want to add some tests on the `passenger_count` column to ensure that its values range between 1 and 6? **Let’s comment just this one line to include it**:
 
-```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L55-L60
+```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L85-L89
 ```
 
 3. The next cell is where you configure a `UserConfigurableProfiler` and instantiate it, which will then profile the data and create the relevant Expectations to add to your `taxi.demo` suite.

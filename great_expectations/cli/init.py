@@ -19,6 +19,7 @@ from great_expectations.cli.cli_messages import (
     SECTION_SEPARATOR,
 )
 from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.exceptions import (
     DataContextError,
     DatasourceInitializationError,
@@ -101,8 +102,10 @@ def init(ctx, usage_stats):
             context = DataContext.create(
                 target_directory, usage_statistics_enabled=usage_stats
             )
-            toolkit.send_usage_message(
-                data_context=context, event="cli.init.create", success=True
+            send_usage_message(
+                data_context=context,
+                event="cli.init.create",
+                success=True,
             )
         except DataContextError as e:
             # TODO ensure this is covered by a test

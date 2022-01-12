@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 import sys
+from typing import Tuple
 
 import pytest
 
@@ -23,6 +24,14 @@ class BackendDependencies(enum.Enum):
 
 
 docs_test_matrix = [
+    {
+        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
@@ -334,26 +343,26 @@ docs_test_matrix = [
         "data_dir": "tests/test_sets/dataconnector_docs",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
     },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-    #     "extra_backend_dependencies": BackendDependencies.MYSQL,
-    # },
-    # {
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-    #     "extra_backend_dependencies": BackendDependencies.MYSQL,
-    # },
-    # {
-    #     "name": "rule_base_profiler_multi_batch_example",
-    #     "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
-    # },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.MYSQL,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.MYSQL,
+    },
+    {
+        "name": "rule_base_profiler_multi_batch_example",
+        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
+    },
     {
         "user_flow_script": "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
@@ -373,6 +382,34 @@ docs_test_matrix = [
         "user_flow_script": "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "extra_backend_dependencies": BackendDependencies.SPARK,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     },
 ]
 
@@ -402,6 +439,22 @@ integration_test_matrix = [
         "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
         "user_flow_script": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
+    },
+    {
+        "name": "pandas_execution_engine_with_gcp_installed",
+        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
+        "user_flow_script": "tests/integration/common_workflows/pandas_execution_engine_with_gcp_installed.py",
+        "other_files": (
+            (
+                "tests/integration/fixtures/cloud_provider_configs/gcp/my_example_creds.json",
+                ".gcs/my_example_creds.json",
+            ),
+        ),
+    },
+    {
+        "name": "pandas_execution_engine_with_gcp_installed",
+        "user_flow_script": "tests/integration/common_workflows/simple_build_data_docs.py",
     },
 ]
 
@@ -475,6 +528,23 @@ def _execute_integration_test(test_configuration, tmp_path):
                 source_data_dir,
                 test_data_dir,
             )
+
+        # Other files
+        # Other files to copy should be supplied as a tuple of tuples with source, dest pairs
+        # e.g. (("/source1/file1", "/dest1/file1"), ("/source2/file2", "/dest2/file2"))
+        other_files: Tuple[Tuple[str, str]] = test_configuration.get("other_files")
+        if other_files is not None:
+            if not isinstance(other_files, Tuple):
+                raise TypeError("other_files must be of type Tuple[Tuple[str, str]]")
+            if not all(isinstance(t, Tuple) for t in other_files):
+                raise TypeError("other_files must be of type Tuple[Tuple[str, str]]")
+
+            for file_paths in other_files:
+                source_file = os.path.join(base_dir, file_paths[0])
+                dest_file = os.path.join(tmp_path, file_paths[1])
+                dest_dir = os.path.dirname(dest_file)
+                os.makedirs(dest_dir)
+                shutil.copyfile(src=source_file, dst=dest_file)
 
         # UAT Script
         script_source = os.path.join(

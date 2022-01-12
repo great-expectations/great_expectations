@@ -11,6 +11,7 @@ from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.mark import Mark as mark
 from great_expectations.cli.v012.util import cli_message, cli_message_list
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidTopLevelConfigKeyError
@@ -96,7 +97,12 @@ def checkpoint_new(checkpoint, suite, directory, datasource):
     )
     datasource = toolkit.select_datasource(context, datasource_name=datasource)
     if datasource is None:
-        toolkit.send_usage_message(context, usage_event, success=False)
+        send_usage_message(
+            data_context=context,
+            event=usage_event,
+            api_version="v2",
+            success=False,
+        )
         sys.exit(1)
     _, _, _, batch_kwargs = toolkit.get_batch_kwargs(context, datasource.name)
 
@@ -115,9 +121,14 @@ def checkpoint_new(checkpoint, suite, directory, datasource):
 
     cli_message(
         f"""<green>A Checkpoint named `{checkpoint}` was added to your project!</green>
-  - To run this Checkpoint, run `great_expectations checkpoint run {checkpoint}`"""
+  - To run this Checkpoint, run `great_expectations --v2-api checkpoint run {checkpoint}`"""
     )
-    toolkit.send_usage_message(context, usage_event, success=True)
+    send_usage_message(
+        data_context=context,
+        event=usage_event,
+        api_version="v2",
+        success=True,
+    )
 
 
 def _verify_checkpoint_does_not_exist(
@@ -178,7 +189,12 @@ def checkpoint_list(directory):
             "No checkpoints found.\n"
             "  - Use the command `great_expectations checkpoint new` to create one."
         )
-        toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
+        send_usage_message(
+            data_context=context,
+            event="cli.checkpoint.list",
+            api_version="v2",
+            success=True,
+        )
         sys.exit(0)
 
     number_found = len(checkpoints)
@@ -186,7 +202,12 @@ def checkpoint_list(directory):
     message = f"Found {number_found} checkpoint{plural}."
     pretty_list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
     cli_message_list(pretty_list, list_intro_string=message)
-    toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
+    send_usage_message(
+        data_context=context,
+        event="cli.checkpoint.list",
+        api_version="v2",
+        success=True,
+    )
 
 
 @checkpoint.command(name="run")
@@ -220,12 +241,22 @@ def checkpoint_run(checkpoint, directory):
 
     if not results["success"]:
         cli_message("Validation failed!")
-        toolkit.send_usage_message(context, event=usage_event, success=True)
+        send_usage_message(
+            data_context=context,
+            event=usage_event,
+            api_version="v2",
+            success=True,
+        )
         print_validation_operator_results_details(results)
         sys.exit(1)
 
     cli_message("Validation succeeded!")
-    toolkit.send_usage_message(context, event=usage_event, success=True)
+    send_usage_message(
+        data_context=context,
+        event=usage_event,
+        api_version="v2",
+        success=True,
+    )
     print_validation_operator_results_details(results)
     sys.exit(0)
 
@@ -302,7 +333,12 @@ def checkpoint_script(checkpoint, directory):
   - The script is located in `great_expectations/uncommitted/run_{checkpoint}.py`
   - The script can be run with `python great_expectations/uncommitted/run_{checkpoint}.py`"""
     )
-    toolkit.send_usage_message(context, event=usage_event, success=True)
+    send_usage_message(
+        data_context=context,
+        event=usage_event,
+        api_version="v2",
+        success=True,
+    )
 
 
 def _load_script_template() -> str:
