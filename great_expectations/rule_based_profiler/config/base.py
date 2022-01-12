@@ -59,6 +59,7 @@ class DomainBuilderConfigSchema(Schema):
         for k, v in data.items():
             if v is None:
                 res.pop(k)
+                logger.info("Removed '%s' due to null value", k)
         return res
 
 
@@ -113,6 +114,7 @@ class ParameterBuilderConfigSchema(Schema):
         for k, v in data.items():
             if v is None:
                 res.pop(k)
+                logger.info("Removed '%s' due to null value", k)
         return res
 
 
@@ -174,6 +176,7 @@ class ExpectationConfigurationBuilderConfigSchema(Schema):
         for k, v in data.items():
             if v is None:
                 res.pop(k)
+                logger.info("Removed '%s' due to null value", k)
         return res
 
 
@@ -226,6 +229,7 @@ class RuleConfigSchema(Schema):
         for k, v in data.items():
             if v is None:
                 res.pop(k)
+                logger.info("Removed '%s' due to null value", k)
         return res
 
 
@@ -274,4 +278,5 @@ class RuleBasedProfilerConfigSchema(Schema):
         for k, v in data.items():
             if v is None:
                 res.pop(k)
+                logger.info("Removed '%s' due to null value", k)
         return res

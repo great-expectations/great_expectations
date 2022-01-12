@@ -70,7 +70,7 @@ def test_domain_builder_config_unsuccessfully_loads_with_missing_required_fields
     assert "'class_name': ['Missing data for required field.']" in str(e.value)
 
 
-def test_domain_builder_config_successfully_dumps_to_dictionary():
+def test_domain_builder_config_successfully_dumps_to_dictionary(caplog):
     schema = DomainBuilderConfigSchema()
     config = DomainBuilderConfig(
         class_name="DomainBuilder",
@@ -78,9 +78,12 @@ def test_domain_builder_config_successfully_dumps_to_dictionary():
         timestamp="2017-02-15|20:26:08.937881",
     )
 
-    data = schema.dump(config)
+    with caplog.at_level(logging.INFO):
+        data = schema.dump(config)
+
     assert isinstance(data, dict)
     assert all(getattr(config, k) == v for k, v in data.items())
+    assert "Removed 'module_name' due to null value" in caplog.messages
 
 
 def test_parameter_builder_config_successfully_loads_with_required_args():
@@ -142,7 +145,7 @@ def test_parameter_builder_config_unsuccessfully_loads_with_missing_required_fie
     )
 
 
-def test_parameter_builder_config_successfully_dumps_to_dictionary():
+def test_parameter_builder_config_successfully_dumps_to_dictionary(caplog):
     schema = ParameterBuilderConfigSchema()
     config = ParameterBuilderConfig(
         class_name="ParameterBuilder",
@@ -151,9 +154,12 @@ def test_parameter_builder_config_successfully_dumps_to_dictionary():
         timestamp="2017-02-15|20:26:08.937881",
     )
 
-    data = schema.dump(config)
+    with caplog.at_level(logging.INFO):
+        data = schema.dump(config)
+
     assert isinstance(data, dict)
     assert all(getattr(config, k) == v for k, v in data.items())
+    assert "Removed 'module_name' due to null value" in caplog.messages
 
 
 def test_expectation_configuration_builder_config_successfully_loads_with_required_args():
@@ -226,7 +232,9 @@ def test_expectation_configuration_builder_config_unsuccessfully_loads_with_miss
     )
 
 
-def test_expectation_configuration_builder_config_successfully_dumps_to_dictionary():
+def test_expectation_configuration_builder_config_successfully_dumps_to_dictionary(
+    caplog,
+):
     schema = ExpectationConfigurationBuilderConfigSchema()
     config = ExpectationConfigurationBuilderConfig(
         class_name="DomainBuilder",
@@ -234,9 +242,12 @@ def test_expectation_configuration_builder_config_successfully_dumps_to_dictiona
         timestamp="2017-02-15|20:26:08.937881",
     )
 
-    data = schema.dump(config)
+    with caplog.at_level(logging.INFO):
+        data = schema.dump(config)
+
     assert isinstance(data, dict)
     assert all(getattr(config, k) == v for k, v in data.items())
+    assert "Removed 'module_name' due to null value" in caplog.messages
 
 
 def test_rule_config_successfully_loads_with_required_args():
@@ -311,7 +322,7 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
     )
 
 
-def test_rule_config_successfully_dumps_to_dictionary():
+def test_rule_config_successfully_dumps_to_dictionary(caplog):
     schema = RuleConfigSchema()
     config = RuleConfig(
         name="rule_1",
@@ -330,7 +341,9 @@ def test_rule_config_successfully_dumps_to_dictionary():
         timestamp="2017-02-15|20:26:08.937881",
     )
 
-    data = schema.dump(config)
+    with caplog.at_level(logging.INFO):
+        data = schema.dump(config)
+
     assert isinstance(data, dict)
     assert isinstance(data["domain_builder"], dict)
     assert len(data["parameter_builders"]) == 1 and isinstance(
@@ -338,6 +351,10 @@ def test_rule_config_successfully_dumps_to_dictionary():
     )
     assert len(data["expectation_configuration_builders"]) == 1 and isinstance(
         data["expectation_configuration_builders"][0], dict
+    )
+    assert all(
+        f"Removed '{attr}' due to null value" in caplog.messages
+        for attr in ("module_name", "mostly", "batch_request")
     )
 
 
@@ -442,7 +459,7 @@ def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_f
     )
 
 
-def test_rule_based_profiler_config_successfully_dumps_to_dictionary():
+def test_rule_based_profiler_config_successfully_dumps_to_dictionary(caplog):
     schema = RuleBasedProfilerConfigSchema()
     config = RuleBasedProfilerConfig(
         name="my_RBP",
@@ -467,6 +484,14 @@ def test_rule_based_profiler_config_successfully_dumps_to_dictionary():
         timestamp="2017-02-15|20:26:08.937881",
     )
 
-    data = schema.dump(config)
+    with caplog.at_level(logging.INFO):
+        data = schema.dump(config)
+
     assert isinstance(data, dict)
     assert len(data["rules"]) == 1 and isinstance(data["rules"]["rule_1"], dict)
+
+    # As we invoke the serialization/deserialization methods of child objects, their logging messages are also emitted
+    assert all(
+        f"Removed '{attr}' due to null value" in caplog.messages
+        for attr in ("module_name", "mostly", "batch_request")
+    )
