@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from great_expectations.marshmallow__shade import INCLUDE, Schema, fields
+from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_load
 from great_expectations.types import DictDot
 
 
@@ -34,6 +34,10 @@ class DomainBuilderConfigSchema(Schema):
     class_name = fields.String(required=True)
     module_name = fields.String(required=False, allow_none=True)
     batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
+
+    @post_load
+    def make_config(self, data, **kwargs) -> DomainBuilderConfig:
+        return DomainBuilderConfig(**data)
 
 
 class ParameterBuilderConfig(DictDot):
@@ -69,6 +73,10 @@ class ParameterBuilderConfigSchema(Schema):
     module_name = fields.String(required=False, allow_none=True)
     parameter_name = fields.String(required=True)
     batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
+
+    @post_load
+    def make_config(self, data, **kwargs) -> ParameterBuilderConfig:
+        return ParameterBuilderConfig(**data)
 
 
 class ExpectationConfigurationBuilderConfig(DictDot):
@@ -108,6 +116,10 @@ class ExpectationConfigurationBuilderConfigSchema(Schema):
     mostly = fields.Float(required=False, allow_none=True)
     meta = fields.String(required=False, allow_none=True)
 
+    @post_load
+    def make_config(self, data, **kwargs) -> ExpectationConfigurationBuilderConfig:
+        return ExpectationConfigurationBuilderConfig(**data)
+
 
 class RuleConfig(DictDot):
     def __init__(
@@ -139,6 +151,10 @@ class RuleConfigSchema(Schema):
         ),
         required=True,
     )
+
+    @post_load
+    def make_config(self, data, **kwargs) -> RuleConfig:
+        return RuleConfig(**data)
 
 
 class RuleBasedProfilerConfig(DictDot):
@@ -173,5 +189,6 @@ class RuleBasedProfilerConfigSchema(Schema):
         required=True,
     )
 
-
-ruleBasedProfilerConfigSchema = RuleBasedProfilerConfigSchema()
+    @post_load
+    def make_config(self, data, **kwargs) -> RuleBasedProfilerConfig:
+        return RuleBasedProfilerConfig(**data)
