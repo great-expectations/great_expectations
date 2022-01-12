@@ -150,7 +150,7 @@ context.test_yaml_config(yaml.dump(datasource_config))
 
 ### 4. Save the Datasource configuration to your Data Context.
 
-What is the point of configuring a Datasource if you can't easily use it in the future?  It this point you will want to save your Datasource configuration to your Data Context.  This can be done easily by using the `add_datasource()` function, which is conveniently accessible from your Data Context.  
+What is the point of configuring a Datasource if you can't easily use it in the future?  At this point you will want to save your Datasource configuration to your Data Context.  This can be done easily by using the `add_datasource()` function, which is conveniently accessible from your Data Context.  
 
 <Tabs
   groupId="yaml-or-python"
