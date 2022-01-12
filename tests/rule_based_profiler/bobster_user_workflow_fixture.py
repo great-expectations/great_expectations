@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 # TODO: Move these fixtures to integration tests
@@ -7,8 +9,16 @@ from great_expectations.data_context.util import file_relative_path
 @pytest.fixture
 def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
     verbose_profiler_config_file_path: str = file_relative_path(
-        __file__, "bobster_user_workflow_verbose_profiler_config.yml"
+        __file__,
+        os.path.join(
+            "..",
+            "test_fixtures",
+            "rule_based_profiler",
+            "alpha",
+            "bobster_user_workflow_verbose_profiler_config.yml",
+        ),
     )
+
     verbose_profiler_config: str
     with open(verbose_profiler_config_file_path) as f:
         verbose_profiler_config = f.read()
