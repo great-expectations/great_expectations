@@ -1,11 +1,10 @@
-import copy
 from typing import Any, Dict, List, Optional
 
-from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_dump
-from great_expectations.types import SerializableDictDot
+from great_expectations.marshmallow__shade import INCLUDE, Schema, fields
+from great_expectations.types import DictDot
 
 
-class DomainBuilderConfig(SerializableDictDot):
+class DomainBuilderConfig(DictDot):
     def __init__(
         self,
         class_name: str,
@@ -37,7 +36,7 @@ class DomainBuilderConfigSchema(Schema):
     batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
 
 
-class ParameterBuilderConfig(SerializableDictDot):
+class ParameterBuilderConfig(DictDot):
     def __init__(
         self,
         parameter_name: str,
@@ -69,10 +68,10 @@ class ParameterBuilderConfigSchema(Schema):
     class_name = fields.String(required=True)
     module_name = fields.String(required=False, allow_none=True)
     parameter_name = fields.String(required=True)
-    ...
+    batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
 
 
-class ExpectationConfigurationBuilderConfig(SerializableDictDot):
+class ExpectationConfigurationBuilderConfig(DictDot):
     def __init__(
         self,
         expectation_type: str,
@@ -110,7 +109,7 @@ class ExpectationConfigurationBuilderConfigSchema(Schema):
     meta = fields.String(required=False, allow_none=True)
 
 
-class RuleConfig(SerializableDictDot):
+class RuleConfig(DictDot):
     def __init__(
         self,
         name: str,
@@ -142,7 +141,7 @@ class RuleConfigSchema(Schema):
     )
 
 
-class RuleBasedProfilerConfig(SerializableDictDot):
+class RuleBasedProfilerConfig(DictDot):
     def __init__(
         self,
         name: str,
@@ -173,14 +172,6 @@ class RuleBasedProfilerConfigSchema(Schema):
         values=fields.Nested(RuleConfigSchema, required=True),
         required=True,
     )
-
-    @post_dump
-    def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
-        res = copy.deepcopy(data)
-        for key in data:
-            if data[key] is None:
-                res.pop(key)
-        return res
 
 
 ruleBasedProfilerConfigSchema = RuleBasedProfilerConfigSchema()
