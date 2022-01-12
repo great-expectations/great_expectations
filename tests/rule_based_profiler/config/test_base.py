@@ -48,7 +48,7 @@ def test_domain_builder_config_successfully_loads_with_kwargs(caplog):
 
 
 def test_domain_builder_config_unsuccessfully_loads_with_missing_required_fields():
-    data = {"klass": "DomainBuilder"}
+    data = {}
     schema = DomainBuilderConfigSchema()
 
     with pytest.raises(ValidationError) as e:
@@ -95,7 +95,7 @@ def tests_parameter_builder_config_successfully_loads_with_kwargs(caplog):
 
 
 def test_parameter_builder_config_unsuccessfully_loads_with_missing_required_fields():
-    data = {"klass": "ParameterBuilder", "param": "my_param"}
+    data = {}
     schema = ParameterBuilderConfigSchema()
 
     with pytest.raises(ValidationError) as e:
@@ -150,7 +150,7 @@ def tests_expectation_configuration_builder_config_successfully_loads_with_kwarg
 
 
 def test_expectation_configuration_builder_config_unsuccessfully_loads_with_missing_required_fields():
-    data = {"klass": "ExpectationConfigurationBuilder"}
+    data = {}
     schema = ExpectationConfigurationBuilderConfigSchema()
 
     with pytest.raises(ValidationError) as e:
