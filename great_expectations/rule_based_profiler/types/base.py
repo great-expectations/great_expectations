@@ -1,14 +1,21 @@
+import copy
 from typing import Any, Dict, List, Optional
 
-from great_expectations.marshmallow__shade import INCLUDE, Schema, fields
+from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_dump
 from great_expectations.types import SerializableDictDot
 
 
-# TODO(cdkini): Add optional BatchRequest
 class DomainBuilderConfig(SerializableDictDot):
-    def __init__(self, class_name: str, module_name: Optional[str] = None, **kwargs):
+    def __init__(
+        self,
+        class_name: str,
+        module_name: Optional[str] = None,
+        batch_request: Optional[Dict[str, Any]] = None,
+        **kwargs,
+    ):
         self._class_name = class_name
         self._module_name = module_name
+        self.batch_request = batch_request
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -27,20 +34,22 @@ class DomainBuilderConfigSchema(Schema):
 
     class_name = fields.String(required=True)
     module_name = fields.String(required=False, allow_none=True)
+    batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
 
 
-# TODO(cdkini): Add optional BatchRequest
 class ParameterBuilderConfig(SerializableDictDot):
     def __init__(
         self,
         parameter_name: str,
         class_name: str,
         module_name: Optional[str] = None,
+        batch_request: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
         self.parameter_name = parameter_name
         self._class_name = class_name
         self._module_name = module_name
+        self.batch_request = batch_request
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -137,7 +146,7 @@ class RuleBasedProfilerConfig(SerializableDictDot):
     def __init__(
         self,
         name: str,
-        config_version: str,
+        config_version: float,
         rules: Dict[str, RuleConfig],
         variables: Optional[Dict[str, Any]] = None,
         **kwargs,
@@ -157,13 +166,21 @@ class RuleBasedProfilerConfigSchema(Schema):
         unknown = INCLUDE
 
     name = fields.String(required=True)
-    config_version = fields.Integer(required=True)
-    variables = fields.Dict(keys=fields.Str(), required=False, allow_none=True)
+    config_version = fields.Float(required=True)
+    variables = fields.Dict(keys=fields.String(), required=False, allow_none=True)
     rules = fields.Dict(
-        keys=fields.Str(),
+        keys=fields.String(),
         values=fields.Nested(RuleConfigSchema, required=True),
         required=True,
     )
+
+    @post_dump
+    def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
+        res = copy.deepcopy(data)
+        for key in data:
+            if data[key] is None:
+                res.pop(key)
+        return res
 
 
 ruleBasedProfilerConfigSchema = RuleBasedProfilerConfigSchema()
