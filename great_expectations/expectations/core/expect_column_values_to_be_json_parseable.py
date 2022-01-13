@@ -83,7 +83,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
         "requirements": [],
     }
 
-    map_metric = "column_values.json_parsable"
+    map_metric = "column_values.json_parseable"
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
