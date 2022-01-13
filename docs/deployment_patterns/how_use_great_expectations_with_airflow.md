@@ -1,5 +1,5 @@
 ---
-title: How to run a Checkpoint in Airflow
+title: How to Use Great Expectations with Airflow
 ---
 import Prerequisites from '../guides/connecting_to_your_data/components/prerequisites.jsx'
 
