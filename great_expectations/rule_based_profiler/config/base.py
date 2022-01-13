@@ -1,5 +1,5 @@
 import dataclasses
-from dataclasses import dataclass
+from dataclasses import InitVar, dataclass
 from typing import Any, Dict, List, Optional, Type
 
 from ruamel.yaml.comments import CommentedMap
@@ -177,17 +177,19 @@ class RuleConfigSchema(NotNullSchema):
     )
 
 
-@dataclass
+@dataclass(frozen=True)
 class RuleBasedProfilerConfig(BaseYamlConfig):
     name: str
     config_version: float
     rules: Dict[str, RuleConfig]
     variables: Optional[Dict[str, Any]] = None
-    commented_map: Optional[CommentedMap] = None
+    commented_map: InitVar[Optional[CommentedMap]] = None
 
-    def __post_init__(self):
+    def __post_init__(self, commented_map: Optional[CommentedMap]):
         # Required to fully set up the commented map and enable serialization
-        super().__init__(commented_map=self.commented_map)
+        if commented_map is None:
+            commented_map = CommentedMap()
+        object.__setattr__(self, "_commented_map", commented_map)
 
     @classmethod
     def get_config_class(cls) -> Type["RuleBasedProfilerConfig"]:
@@ -196,17 +198,6 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     @classmethod
     def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:
         return RuleBasedProfilerConfigSchema
-
-    # TODO(cdkini): Implement custom methods to ensure proper var substitution
-
-    # def dump(self, obj: Any, *, many: Optional[bool] = None) -> dict:
-    #     pass
-
-    # def __repr__(self):
-    #     pass
-
-    # def __deepcopy__(self):
-    #     pass
 
 
 class RuleBasedProfilerConfigSchema(NotNullSchema):
@@ -220,7 +211,7 @@ class RuleBasedProfilerConfigSchema(NotNullSchema):
         required=True,
         validate=lambda x: x == 1.0,
         error_messages={
-            "Invalid: config version is not supported; it must be 1.0 per the current version of Great Expectations"
+            "invalid": "config version is not supported; it must be 1.0 per the current version of Great Expectations"
         },
     )
     variables = fields.Dict(keys=fields.String(), required=False, allow_none=True)

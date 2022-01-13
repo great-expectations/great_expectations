@@ -2,7 +2,7 @@ import pytest
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.marshmallow__shade.exceptions import ValidationError
-from great_expectations.rule_based_profiler.config.base import (
+from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
     DomainBuilderConfigSchema,
     ExpectationConfigurationBuilderConfig,
@@ -24,7 +24,7 @@ def test_not_null_schema_raises_error_with_improperly_implemented_subclass():
     with pytest.raises(NotImplementedError) as e:
         MySchema().load({})
 
-    assert "must define its own custom __config__" in str(e.value)
+    assert "must define its own custom __config_class__" in str(e.value)
 
 
 def test_not_null_schema_removes_unknown_kwargs_when_loading():
