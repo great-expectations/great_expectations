@@ -187,7 +187,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
 
     def __post_init__(self):
         # Required to fully set up the commented map and enable serialization
-        super().__init__()
+        super().__init__(commented_map=self.commented_map)
 
     @classmethod
     def get_config_class(cls) -> Type["RuleBasedProfilerConfig"]:
@@ -205,7 +205,11 @@ class RuleBasedProfilerConfigSchema(NotNullSchema):
     __config__ = RuleBasedProfilerConfig
 
     name = fields.String(required=True)
-    config_version = fields.Float(required=True)
+    config_version = fields.Float(
+        required=True,
+        validate=lambda x: (0 < x < 100) or x is None,
+        error_messages={"invalid": "config version must " "be a number."},
+    )
     variables = fields.Dict(keys=fields.String(), required=False, allow_none=True)
     rules = fields.Dict(
         keys=fields.String(),
