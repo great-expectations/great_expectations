@@ -6,12 +6,11 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.execution_engine import (
     MetricPartialFunctionTypes,
 )
-from great_expectations.expectations.metrics.import_manager import F, Window
+from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.map_metric_provider import sa as sa
 from great_expectations.util import generate_temporary_table_name
 
 

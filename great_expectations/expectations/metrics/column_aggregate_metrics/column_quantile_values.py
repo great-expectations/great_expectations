@@ -21,9 +21,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
-    sa as sa,
-)
+from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 from great_expectations.validator.metric_configuration import MetricConfiguration
