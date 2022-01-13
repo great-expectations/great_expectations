@@ -11,9 +11,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.validator.validator import Validator
 
 
-class MetricParameterBuilder(ParameterBuilder):
+class MetricMultiBatchParameterBuilder(ParameterBuilder):
     """
-    A Single-Batch implementation for obtaining a resolved (evaluated) metric, using domain_kwargs, value_kwargs, and
+    A Single/Multi-Batch implementation for obtaining a resolved (evaluated) metric, using domain_kwargs, value_kwargs, and
     metric_name as arguments.
     """
 
