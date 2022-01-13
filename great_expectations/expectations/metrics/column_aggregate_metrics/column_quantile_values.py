@@ -10,13 +10,11 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.execution_engine import (
     ExecutionEngine,
     MetricDomainTypes,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (

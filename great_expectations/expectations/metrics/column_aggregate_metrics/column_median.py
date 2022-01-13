@@ -7,11 +7,9 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
@@ -34,7 +32,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
     def _sqlalchemy(
         cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
@@ -84,7 +82,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
     def _spark(
         cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
