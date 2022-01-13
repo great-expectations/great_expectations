@@ -20,7 +20,7 @@ The Batch Request (V3) API was introduced as part of the 0.13 major release of G
 
 ## Migrating to the Batch Request (V3) API
 
-As of version 0.14.0, the V3 API is the preferred method of interacting with GE. We highly recommend that you migrate to working with the V3 API as soon as possible.
+As of version 0.14.0, the V3 API is the preferred method of interacting with GE. We highly recommend that you migrate to working with the V3 API as soon as possible. Please make sure you're using the latest version of GE before beginning your migration!
 
 The migration involves two parts: first, using an automated CLI tool to upgrade the config file and Data Stores, and second, manually upgrading Datasources and Checkpoints. To begin the migration from the V2 to the V3 API, please do the following:
 
