@@ -197,6 +197,17 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:
         return RuleBasedProfilerConfigSchema
 
+    # TODO(cdkini): Implement custom methods to ensure proper var substitution
+
+    # def dump(self, obj: Any, *, many: Optional[bool] = None) -> dict:
+    #     pass
+
+    # def __repr__(self):
+    #     pass
+
+    # def __deepcopy__(self):
+    #     pass
+
 
 class RuleBasedProfilerConfigSchema(NotNullSchema):
     class Meta:
