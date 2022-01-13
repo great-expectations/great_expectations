@@ -207,8 +207,10 @@ class RuleBasedProfilerConfigSchema(NotNullSchema):
     name = fields.String(required=True)
     config_version = fields.Float(
         required=True,
-        validate=lambda x: (0 < x < 100) or x is None,
-        error_messages={"invalid": "config version must " "be a number."},
+        validate=lambda x: x == 1.0,
+        error_messages={
+            "Invalid: config version is not supported; it must be 1.0 per the current version of Great Expectations"
+        },
     )
     variables = fields.Dict(keys=fields.String(), required=False, allow_none=True)
     rules = fields.Dict(
