@@ -15,8 +15,8 @@ class NotNullSchema(Schema):
     """
     Extension of Marshmallow Schema to facilitate implicit removal of null values before serialization.
 
-    The __config__ attribute is utilized to point a Schema to a configuration. It is the responsibility
-    of the child class to define its own __config__ to ensure proper serialization/deserialization.
+    The __config_class__ attribute is utilized to point a Schema to a configuration. It is the responsibility
+    of the child class to define its own __config_class__ to ensure proper serialization/deserialization.
 
     Reference: https://marshmallow.readthedocs.io/en/stable/extending.html
 
@@ -38,16 +38,16 @@ class NotNullSchema(Schema):
             An instance of configuration class, which subclasses the DictDot serialization class
 
         Raises:
-            NotImplementedError: If the subclass inheriting NotNullSchema fails to define a __config__
+            NotImplementedError: If the subclass inheriting NotNullSchema fails to define a __config_class__
 
         """
-        if not hasattr(self, "__config__"):
+        if not hasattr(self, "__config_class__"):
             raise NotImplementedError(
-                "The subclass extending NotNullSchema must define its own custom __config__"
+                "The subclass extending NotNullSchema must define its own custom __config_class__"
             )
 
         # Removing **kwargs before creating config object
-        recognized_attrs = {f.name for f in dataclasses.fields(self.__config__)}
+        recognized_attrs = {f.name for f in dataclasses.fields(self.__config_class__)}
         cleaned_data = filter_properties_dict(
             properties=data,
             keep_fields=recognized_attrs,
@@ -55,7 +55,7 @@ class NotNullSchema(Schema):
             clean_falsy=False,
         )
 
-        return self.__config__(**cleaned_data)
+        return self.__config_class__(**cleaned_data)
 
     @post_dump
     def remove_nulls(self, data: dict, **kwargs) -> dict:
@@ -88,7 +88,7 @@ class DomainBuilderConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
 
-    __config__ = DomainBuilderConfig
+    __config_class__ = DomainBuilderConfig
 
     class_name = fields.String(required=True)
     module_name = fields.String(
@@ -111,7 +111,7 @@ class ParameterBuilderConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
 
-    __config__ = ParameterBuilderConfig
+    __config_class__ = ParameterBuilderConfig
 
     name = fields.String(required=True)
     class_name = fields.String(required=True)
@@ -136,7 +136,7 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
 
-    __config__ = ExpectationConfigurationBuilderConfig
+    __config_class__ = ExpectationConfigurationBuilderConfig
 
     class_name = fields.String(required=True)
     module_name = fields.String(
@@ -161,7 +161,7 @@ class RuleConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
 
-    __config__ = RuleConfig
+    __config_class__ = RuleConfig
 
     name = fields.String(required=True)
     domain_builder = fields.Nested(DomainBuilderConfigSchema, required=True)
@@ -213,7 +213,7 @@ class RuleBasedProfilerConfigSchema(NotNullSchema):
     class Meta:
         unknown = INCLUDE
 
-    __config__ = RuleBasedProfilerConfig
+    __config_class__ = RuleBasedProfilerConfig
 
     name = fields.String(required=True)
     config_version = fields.Float(
