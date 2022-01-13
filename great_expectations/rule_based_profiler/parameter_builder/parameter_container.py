@@ -1,6 +1,18 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Union
 
+from pyparsing import (
+    Literal,
+    ParseResults,
+    ParseException,
+    Suppress,
+    Word,
+    ZeroOrMore,
+    alphanums,
+    alphas,
+    nums,
+)
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.domain_builder import Domain
@@ -16,6 +28,19 @@ VARIABLES_KEY: str = f"$variables{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARA
 
 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: str = "value"
 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: str = "details"
+
+attribute_name = Word(alphas, alphanums + "_.") + ZeroOrMore(((Suppress(Literal('["')) + Word(alphas, alphanums + "_.") + Suppress(Literal('"]'))) ^ (Suppress(Literal("['")) + Word(alphas, alphanums + "_.") + Suppress(Literal("']")))) ^ (Suppress(Literal('[')) + Word(nums).setParseAction(lambda s, l, t: [int(t[0])]) + Suppress(Literal(']'))))
+
+
+class ParameterAttributeNameParserError(ge_exceptions.GreatExpectationsError):
+    pass
+
+
+def _parse_attribute_name(name: str) -> ParseResults:
+    try:
+        return attribute_name.parseString(name)
+    except ParseException:
+        raise ParameterAttributeNameParserError(f'Unable to parse Parameter Attribute Name: "{name}".')
 
 
 def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
@@ -277,6 +302,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
         if domain:
             # Supports the "$domain.domain_kwargs" style syntax.
             return domain[DOMAIN_KWARGS_PARAMETER_NAME]
+
         return None
 
     if fully_qualified_parameter_name.startswith(
@@ -286,19 +312,20 @@ def get_parameter_value_by_fully_qualified_parameter_name(
             # Supports the "$domain.domain_kwargs.column" style syntax.
             return domain[DOMAIN_KWARGS_PARAMETER_NAME].get(
                 fully_qualified_parameter_name[
-                    (len(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME) + 1) :
+                    (len(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME) + 1):
                 ]
             )
+
         return None
 
     parameter_container: ParameterContainer
 
     if fully_qualified_parameter_name.startswith(VARIABLES_KEY):
-        fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
         parameter_container = variables
     else:
-        fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
         parameter_container = parameters[domain.id]
+
+    fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
 
     fully_qualified_parameter_name_as_list: List[
         str
@@ -328,21 +355,37 @@ def _get_parameter_value_from_parameter_container(
         return None
 
     parameter_name_part: Optional[str] = None
+    attribute_value_reference: Optional[str] = None
     return_value: Optional[Union[Any, ParameterNode]] = parameter_node
     parent_parameter_node: Optional[ParameterNode] = None
     try:
         for parameter_name_part in fully_qualified_parameter_name_as_list:
-            parent_parameter_node = return_value
-            if parameter_name_part in return_value:
-                return_value = return_value[parameter_name_part]
+            parsed_attribute_name: ParseResults = _parse_attribute_name(name=parameter_name_part)
+            if len(parsed_attribute_name) < 1:
+                raise KeyError(
+                    f"""Unable to get value for parameter name "{fully_qualified_parameter_name}": Part \
+"{parameter_name_part}" in fully-qualified parameter name does not represent a valid expression.
+"""
+                )
 
+            parent_parameter_node = return_value
+
+            attribute_value_reference = parsed_attribute_name[0]
+            return_value = return_value[attribute_value_reference]
+
+            parsed_attribute_name = parsed_attribute_name[1:]
+
+            attribute_value_accessor: Union[str, int]
+            for attribute_value_accessor in parsed_attribute_name:
+                return_value = return_value[attribute_value_accessor]
     except KeyError:
         raise KeyError(
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" does not exist in fully-qualified parameter name.
 """
         )
-    if parameter_name_part not in parent_parameter_node:
+
+    if attribute_value_reference not in parent_parameter_node:
         raise KeyError(
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" of fully-qualified parameter name does not exist.

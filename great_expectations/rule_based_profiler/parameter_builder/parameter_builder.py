@@ -37,7 +37,7 @@ class ParameterBuilder(ABC):
         ```
         parameter_builders:
           - parameter_name: my_parameter
-            class_name: MetricParameterBuilder
+            class_name: MetricMultiBatchParameterBuilder
             metric_name: column.mean
         ```
     """

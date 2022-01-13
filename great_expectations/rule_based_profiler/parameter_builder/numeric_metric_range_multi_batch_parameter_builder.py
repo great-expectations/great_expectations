@@ -140,9 +140,11 @@ detected.
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
         """
-         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
+         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
+         details.
 
-         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
+         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
+         ptional details
 
          The algorithm operates according to the following steps:
          1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument). Note
