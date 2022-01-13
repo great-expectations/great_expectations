@@ -370,6 +370,28 @@ class Validator:
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
+    @staticmethod
+    def _get_default_domain_kwargs(metric_provider_cls, metric_configuration):
+        for key in metric_provider_cls.domain_keys:
+            if (
+                key not in metric_configuration.metric_domain_kwargs
+                and key in metric_provider_cls.default_kwarg_values
+            ):
+                metric_configuration.metric_domain_kwargs[
+                    key
+                ] = metric_provider_cls.default_kwarg_values[key]
+
+    @staticmethod
+    def _get_default_value_kwargs(metric_provider_cls, metric_configuration):
+        for key in metric_provider_cls.value_keys:
+            if (
+                key not in metric_configuration.metric_value_kwargs
+                and key in metric_provider_cls.default_kwarg_values
+            ):
+                metric_configuration.metric_value_kwargs[
+                    key
+                ] = metric_provider_cls.default_kwarg_values[key]
+
     def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
         """Return a dictionary with the requested metrics"""
         graph: ValidationGraph = ValidationGraph()
@@ -377,22 +399,15 @@ class Validator:
             provider_cls, _ = get_metric_provider(
                 metric_configuration.metric_name, self.execution_engine
             )
-            for key in provider_cls.domain_keys:
-                if (
-                    key not in metric_configuration.metric_domain_kwargs
-                    and key in provider_cls.default_kwarg_values
-                ):
-                    metric_configuration.metric_domain_kwargs[
-                        key
-                    ] = provider_cls.default_kwarg_values[key]
-            for key in provider_cls.value_keys:
-                if (
-                    key not in metric_configuration.metric_value_kwargs
-                    and key in provider_cls.default_kwarg_values
-                ):
-                    metric_configuration.metric_value_kwargs[
-                        key
-                    ] = provider_cls.default_kwarg_values[key]
+            self._get_default_domain_kwargs(
+                metric_provider_cls=provider_cls,
+                metric_configuration=metric_configuration,
+            )
+            self._get_default_value_kwargs(
+                metric_provider_cls=provider_cls,
+                metric_configuration=metric_configuration,
+            )
+
             self.build_metric_dependency_graph(
                 graph=graph,
                 execution_engine=self._execution_engine,
