@@ -95,7 +95,7 @@ data_context_config = DataContextConfig(
 )
 ```
 
-    The following example shows a Data Context configuration with an SQLAlchemy datasource and two GCS buckets for metadata stores, using some custom and some default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code. ``default_bucket_name``, ``default_project_name`` sets the default value for all stores that are not specified individually.
+    The following example shows a Data Context configuration with an SQLAlchemy datasource and two GCS buckets for metadata Stores, using some custom and some default prefixes. Note that you can still substitute environment variables as in the YAML based configuration to keep sensitive credentials out of your code. `default_bucket_name`, `default_project_name` sets the default value for all stores that are not specified individually.
 
     The resulting DataContextConfig from the following example creates an Expectations store and Data Docs using the ``my_default_bucket`` and ``my_default_project`` parameters since their bucket and project is not specified explicitly. The validations store is created using the explicitly specified ``my_validations_bucket`` and ``my_validations_project``. Further, the prefixes are set for the Expectations store and validations store, while Data Docs use the default ``data_docs`` prefix.
 
