@@ -99,4 +99,4 @@ Most teams will want to configure various Checkpoints and Validation Actions as 
 * [How to run a Checkpoint in Airflow](/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow)
 
 ## Not interested in managing your own configuration or infrastructure?
-Learn more about Great Expectations Cloud — our fully managed SaaS offering. Sign up for our weekly cloud workshop [here](https://greatexpectations.io/cloud). You’ll get to see our newest features and apply for our private Alpha program!
+Learn more about Great Expectations Cloud — our fully managed SaaS offering. Sign up for [our weekly cloud workshop](https://greatexpectations.io/cloud)! You’ll get to see our newest features and apply for our private Alpha program!
