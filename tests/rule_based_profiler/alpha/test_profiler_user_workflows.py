@@ -20,7 +20,6 @@ yaml = YAML()
 
 
 def test_alice_columnar_table_single_batch_batches_are_accessible(
-    monkeypatch,
     alice_columnar_table_single_batch_context,
     alice_columnar_table_single_batch,
 ):
