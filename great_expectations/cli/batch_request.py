@@ -79,7 +79,7 @@ def get_batch_request(
 
     if isinstance(datasource, Datasource):
         msg_prompt_enter_data_asset_name: str = f'\nWhich data asset (accessible by data connector "{data_connector_name}") would you like to use?\n'
-        data_asset_name = get_data_asset_name_from_data_connector(
+        data_asset_name = _get_data_asset_name_from_data_connector(
             datasource=datasource,
             data_connector_name=data_connector_name,
             msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
@@ -175,7 +175,7 @@ def select_data_connector_name(
     return data_connector_name
 
 
-def get_data_asset_name_from_data_connector(
+def _get_data_asset_name_from_data_connector(
     datasource: BaseDatasource,
     data_connector_name: str,
     msg_prompt_enter_data_asset_name: str,
@@ -212,11 +212,11 @@ def get_data_asset_name_from_data_connector(
         user_selected_option: Optional[str] = None
         while user_selected_option is None:
             user_selected_option = _get_user_response(prompt)
-            if user_selected_option == "l":
+            if user_selected_option.startswith("l"):
                 data_asset_name = _list_available_data_asset_names(
                     available_data_asset_names, msg_prompt_enter_data_asset_name
                 )
-            elif user_selected_option == "s":
+            elif user_selected_option.startswith("s"):
                 data_asset_name = _search_through_available_data_asset_names(
                     available_data_asset_names, msg_prompt_enter_data_asset_name
                 )
@@ -262,9 +262,9 @@ def _list_available_data_asset_names(
         user_response: str = _get_user_response(prompt)
 
         # Pagination options
-        if user_response == "n":
+        if user_response.startswith("n"):
             display_idx += 1
-        elif user_response == "p":
+        elif user_response.startswith("p"):
             display_idx -= 1
         # Selected asset
         elif user_response.isdigit():

@@ -1,6 +1,8 @@
 from unittest import mock
 
-from great_expectations.cli.batch_request import get_data_asset_name_from_data_connector
+from great_expectations.cli.batch_request import (
+    _get_data_asset_name_from_data_connector,
+)
 
 
 @mock.patch("great_expectations.cli.batch_request.BaseDatasource")
@@ -12,7 +14,7 @@ def test_get_data_asset_name_from_data_connector_default_path(
         "my_data_connector": ["a", "b", "c", "d", "e"]
     }
     mock_user_input.side_effect = ["4"]  # Immediately select my asset
-    data_asset_name = get_data_asset_name_from_data_connector(
+    data_asset_name = _get_data_asset_name_from_data_connector(
         mock_datasource, "my_data_connector", "my message prompt"
     )
     assert data_asset_name == "d"
@@ -32,7 +34,7 @@ def test_get_data_asset_name_from_data_connector_pagination(
         "n",  # Go to page 3 of my data asset listing
         "34",  # Select the 34th option in page 3
     ]
-    data_asset_name = get_data_asset_name_from_data_connector(
+    data_asset_name = _get_data_asset_name_from_data_connector(
         mock_datasource, "my_data_connector", "my message prompt"
     )
     assert data_asset_name == "my_file128"
@@ -55,7 +57,7 @@ def test_get_data_asset_name_from_data_connector_with_search(
         r"my_file\d{4}-\d{2}-\d{2}",  # Use regex to isolate one file with date format
         "1",  # Select the 1st and only option
     ]
-    data_asset_name = get_data_asset_name_from_data_connector(
+    data_asset_name = _get_data_asset_name_from_data_connector(
         mock_datasource, "my_data_connector", "my message prompt"
     )
     assert data_asset_name == target_file
