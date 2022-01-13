@@ -138,7 +138,7 @@ data_context_config = DataContextConfig(
 )
 ```
 
-    The following example sets overrides for many of the parameters available to you when creating a DataContextConfig and a Datasource.
+    The following example sets overrides for many of the parameters available to you when creating a `DataContextConfig` and a Datasource.
 
 ```python
 data_context_config = DataContextConfig(
