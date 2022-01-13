@@ -15,6 +15,9 @@ class NotNullSchema(Schema):
 
     The __config__ attribute is utilized to point a Schema to a configuration. It is the responsibility
     of the child class to define its own __config__ to ensure proper serialization/deserialization.
+
+    Reference: https://marshmallow.readthedocs.io/en/stable/extending.html
+
     """
 
     @post_load
@@ -31,6 +34,9 @@ class NotNullSchema(Schema):
 
         Returns:
             An instance of configuration class, which subclasses the DictDot serialization class
+
+        Raises:
+            NotImplementedError: If the subclass inheriting NotNullSchema fails to define a __config__
 
         """
         if not hasattr(self, "__config__"):
