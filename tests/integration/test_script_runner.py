@@ -164,6 +164,16 @@ local_tests = [
         "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
+    {
+        "user_flow_script": "tests/integration/docusaurus/miscellaneous/migration_guide_pandas_v3_api.py",
+        "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/",
+        "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/miscellaneous/migration_guide_pandas_v2_api.py",
+        "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/",
+        "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
+    },
 ]
 
 dockerized_db_tests = [
