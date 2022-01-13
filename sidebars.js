@@ -91,7 +91,7 @@ module.exports = {
               ]
             }
           ]
-        },
+        }
       ]
     },
     {
@@ -176,7 +176,8 @@ module.exports = {
                 // 'guides/connecting_to_your_data/advanced/how_to_create_a_lightweight_data_catalog_by_applying_a_descriptive_profiler_to_a_configured_datasource',
                 // 'guides/connecting_to_your_data/advanced/how_to_explore_changes_in_data_over_time_using_a_configured_datasource'
               ]
-            }
+            },
+            { type: 'doc', id: 'guides/connecting_to_your_data/index', label: 'Index' }
           ]
         }
       ]
@@ -252,7 +253,7 @@ module.exports = {
                 'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
                 'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
                 'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
-                'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
+                'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint'
               ]
             },
             {
