@@ -3345,4 +3345,11 @@ class MulticolumnMapMetricProvider(MapMetricProvider):
             metric_value_kwargs=None,
             metric_dependencies=None,
         )
+        dependencies["table.row_count"] = MetricConfiguration(
+            metric_name="table.row_count",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+
         return dependencies
