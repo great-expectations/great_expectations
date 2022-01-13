@@ -177,18 +177,17 @@ class RuleConfigSchema(NotNullSchema):
     )
 
 
-@dataclass(frozen=True)
+@dataclass
 class RuleBasedProfilerConfig(BaseYamlConfig):
     name: str
     config_version: float
     rules: Dict[str, RuleConfig]
     variables: Optional[Dict[str, Any]] = None
-    _commented_map: Optional[CommentedMap] = None
+    commented_map: Optional[CommentedMap] = None
 
     def __post_init__(self):
         # Required to enable the functionality of the parent class
-        if self._commented_map is None:
-            object.__setattr__(self, "_commented_map", CommentedMap())
+        super().__init__()
 
     @classmethod
     def get_config_class(cls):
