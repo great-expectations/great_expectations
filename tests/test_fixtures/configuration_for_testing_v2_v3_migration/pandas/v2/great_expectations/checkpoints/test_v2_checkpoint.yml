@@ -1,4 +1,4 @@
-# in the test_v3_checkpoint.yml file
+# in the test_v2_checkpoint.yml file
 name: test_v2_checkpoint
 config_version:
 module_name: great_expectations.checkpoint
@@ -6,7 +6,7 @@ class_name: LegacyCheckpoint
 validation_operator_name: action_list_operator
 batches:
   - batch_kwargs:
-      path: ../Titanic.csv
+      path: ../../data/Titanic.csv
       datasource: my_datasource
       data_asset_name: Titanic.csv
     expectation_suite_names:
