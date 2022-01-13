@@ -186,6 +186,7 @@ local_tests = [
         "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
         "extra_backend_dependencies": BackendDependencies.SPARK,
     },
+
 ]
 
 dockerized_db_tests = [
