@@ -24,6 +24,7 @@ from .expectations_store import ExpectationsStore  # isort:skip
 from .validations_store import ValidationsStore  # isort:skip
 from .query_store import SqlAlchemyQueryStore  # isort:skip
 from .html_site_store import HtmlSiteStore  # isort:skip
+from .profiler_store import ProfilerStore  # isort:skip
 
 
 for module_name, package_name in [
