@@ -3,8 +3,8 @@ from typing import Any, Dict, List, Optional, Union
 
 from pyparsing import (
     Literal,
-    ParseResults,
     ParseException,
+    ParseResults,
     Suppress,
     Word,
     ZeroOrMore,
@@ -29,7 +29,25 @@ VARIABLES_KEY: str = f"$variables{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARA
 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: str = "value"
 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: str = "details"
 
-attribute_name = Word(alphas, alphanums + "_.") + ZeroOrMore(((Suppress(Literal('["')) + Word(alphas, alphanums + "_.") + Suppress(Literal('"]'))) ^ (Suppress(Literal("['")) + Word(alphas, alphanums + "_.") + Suppress(Literal("']")))) ^ (Suppress(Literal('[')) + Word(nums).setParseAction(lambda s, l, t: [int(t[0])]) + Suppress(Literal(']'))))
+attribute_name = Word(alphas, alphanums + "_.") + ZeroOrMore(
+    (
+        (
+            Suppress(Literal('["'))
+            + Word(alphas, alphanums + "_.")
+            + Suppress(Literal('"]'))
+        )
+        ^ (
+            Suppress(Literal("['"))
+            + Word(alphas, alphanums + "_.")
+            + Suppress(Literal("']"))
+        )
+    )
+    ^ (
+        Suppress(Literal("["))
+        + Word(nums).setParseAction(lambda s, l, t: [int(t[0])])
+        + Suppress(Literal("]"))
+    )
+)
 
 
 class ParameterAttributeNameParserError(ge_exceptions.GreatExpectationsError):
@@ -40,7 +58,9 @@ def _parse_attribute_name(name: str) -> ParseResults:
     try:
         return attribute_name.parseString(name)
     except ParseException:
-        raise ParameterAttributeNameParserError(f'Unable to parse Parameter Attribute Name: "{name}".')
+        raise ParameterAttributeNameParserError(
+            f'Unable to parse Parameter Attribute Name: "{name}".'
+        )
 
 
 def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
@@ -312,7 +332,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
             # Supports the "$domain.domain_kwargs.column" style syntax.
             return domain[DOMAIN_KWARGS_PARAMETER_NAME].get(
                 fully_qualified_parameter_name[
-                    (len(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME) + 1):
+                    (len(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME) + 1) :
                 ]
             )
 
@@ -360,7 +380,9 @@ def _get_parameter_value_from_parameter_container(
     parent_parameter_node: Optional[ParameterNode] = None
     try:
         for parameter_name_part in fully_qualified_parameter_name_as_list:
-            parsed_attribute_name: ParseResults = _parse_attribute_name(name=parameter_name_part)
+            parsed_attribute_name: ParseResults = _parse_attribute_name(
+                name=parameter_name_part
+            )
             if len(parsed_attribute_name) < 1:
                 raise KeyError(
                     f"""Unable to get value for parameter name "{fully_qualified_parameter_name}": Part \

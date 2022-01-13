@@ -1,5 +1,5 @@
 from numbers import Number
-from typing import Any, Dict, Optional, Union, List
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 
@@ -67,11 +67,11 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
         """
-         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-         details.
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
+        details.
 
-         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
-         ptional details
+        :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
+        ptional details
         """
         validator: Validator = self.get_validator(
             domain=domain,
@@ -90,7 +90,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             )
 
         metric_computation_result: Dict[
-            str, Union[Union[Any, Number, np.ndarray, List[Union[Any, Number]]], Dict[str, Any]]
+            str,
+            Union[
+                Union[Any, Number, np.ndarray, List[Union[Any, Number]]], Dict[str, Any]
+            ],
         ] = self.get_metrics(
             batch_ids=batch_ids,
             validator=validator,
