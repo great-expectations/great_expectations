@@ -56,7 +56,7 @@ stages:
             name: CheckDocsDependenciesChanges
 
   - stage: custom_checks
-    dependsOn: [scope_check]
+    dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
@@ -67,7 +67,7 @@ stages:
         name: LinkChecker
 
   - stage: docusaurus_tests
-    dependsOn: [scope_check]
+    dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
