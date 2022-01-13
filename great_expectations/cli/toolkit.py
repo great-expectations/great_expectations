@@ -34,7 +34,7 @@ except ImportError:
 
 EXIT_UPGRADE_CONTINUATION_MESSAGE = (
     "\nOk, exiting now. To upgrade at a later time, use the following command: "
-    "<cyan>great_expectations --v3-api project upgrade</cyan>\n\nTo learn more about the upgrade "
+    "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade "
     "process, visit "
     "<cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
     "</cyan>.\n"
