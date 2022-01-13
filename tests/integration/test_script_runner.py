@@ -23,9 +23,9 @@ class BackendDependencies(enum.Enum):
     SNOWFLAKE = "SNOWFLAKE"
 
 
+# to be populated by the smaller lists below
 docs_test_matrix = []
 
-## LOCAL
 local_tests = [
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
@@ -160,9 +160,13 @@ local_tests = [
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
 ]
 
-local_tests_with_db = [
+dockerized_db_tests = [
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
@@ -176,20 +180,6 @@ local_tests_with_db = [
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py",
@@ -245,36 +235,32 @@ local_tests_with_db = [
     },
 ]
 
-### GCP
-gcp_tests = [
+# CLOUD
+
+cloud_snowflake_tests = [
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
+    },
+]
+
+cloud_gcp_tests = [
     {
         "user_flow_script": "tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
     {
-        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.BIGQUERY,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
-        "extra_backend_dependencies": BackendDependencies.BIGQUERY,
-    },
-    {
         "user_flow_script": "tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
     {
@@ -329,8 +315,29 @@ gcp_tests = [
     #     "user_flow_script": "tests/integration/common_workflows/simple_build_data_docs.py",
     # },
 ]
-## AZURE
-azure_tests = [
+
+cloud_bigquery_tests = [
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.BIGQUERY,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/integration/docusaurus/connecting_to_your_data/database/util.py",
+        "extra_backend_dependencies": BackendDependencies.BIGQUERY,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    },
+]
+
+cloud_azure_tests = [
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
@@ -366,9 +373,7 @@ azure_tests = [
     # },
 ]
 
-
-### AWS S3
-aws_s3_tests = [
+cloud_s3_tests = [
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
@@ -415,7 +420,7 @@ aws_s3_tests = [
     # },
 ]
 
-redshift_tests = [
+cloud_redshift_tests = [
     # TODO: <Alex>ALEX: Rename test modules to include "configured" and "inferred_and_runtime" suffixes in names.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
@@ -433,26 +438,15 @@ redshift_tests = [
     # },
 ]
 
-new_tests = [
-    {
-        "user_flow_script": "tests/integration/docusaurus/miscellaneous/v3/migration_guide_pandas.py",
-        "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations",
-        "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/miscellaneous/v2/migration_guide_pandas.py",
-        "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations",
-        "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
-    },
-]
-
-
-docs_test_matrix += new_tests
-# docs_test_matrix += local_tests_with_db
-# docs_test_matrix += gcp_tests
-# docs_test_matrix += azure_tests
-# docs_test_matrix += aws_s3_tests
-# docs_test_matrix += redshift_tests
+# populate docs_test_matrix with sub-lists
+docs_test_matrix += local_tests
+docs_test_matrix += dockerized_db_tests
+docs_test_matrix += cloud_snowflake_tests
+docs_test_matrix += cloud_gcp_tests
+docs_test_matrix += cloud_bigquery_tests
+docs_test_matrix += cloud_azure_tests
+docs_test_matrix += cloud_s3_tests
+docs_test_matrix += cloud_redshift_tests
 
 integration_test_matrix = [
     {
