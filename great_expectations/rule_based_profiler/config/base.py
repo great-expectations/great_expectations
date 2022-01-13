@@ -2,6 +2,8 @@ import dataclasses
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Type
 
+from ruamel.yaml.comments import CommentedMap
+
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_load
 from great_expectations.marshmallow__shade.decorators import post_dump
@@ -181,6 +183,20 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     config_version: float
     rules: Dict[str, RuleConfig]
     variables: Optional[Dict[str, Any]] = None
+    _commented_map: Optional[CommentedMap] = None
+
+    def __post_init__(self):
+        # Required to enable the functionality of the parent class
+        if self._commented_map is None:
+            object.__setattr__(self, "_commented_map", CommentedMap())
+
+    @classmethod
+    def get_config_class(cls):
+        return cls
+
+    @classmethod
+    def get_schema_class(cls):
+        return RuleBasedProfilerConfigSchema
 
 
 class RuleBasedProfilerConfigSchema(NotNullSchema):

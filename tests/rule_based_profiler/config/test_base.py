@@ -1,6 +1,5 @@
-import logging
-
 import pytest
+from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.marshmallow__shade.exceptions import ValidationError
 from great_expectations.rule_based_profiler.config.base import (
@@ -8,6 +7,7 @@ from great_expectations.rule_based_profiler.config.base import (
     DomainBuilderConfigSchema,
     ExpectationConfigurationBuilderConfig,
     ExpectationConfigurationBuilderConfigSchema,
+    NotNullSchema,
     ParameterBuilderConfig,
     ParameterBuilderConfigSchema,
     RuleBasedProfilerConfig,
@@ -15,6 +15,42 @@ from great_expectations.rule_based_profiler.config.base import (
     RuleConfig,
     RuleConfigSchema,
 )
+
+
+def test_not_null_schema_raises_error_with_improperly_implemented_subclass():
+    class MySchema(NotNullSchema):
+        pass
+
+    with pytest.raises(NotImplementedError) as e:
+        MySchema().load({})
+
+    assert "must define its own custom __config__" in str(e.value)
+
+
+def test_not_null_schema_removes_unknown_kwargs_when_loading():
+    data = {
+        "class_name": "DomainBuilder",
+        "a": "foo",
+        "b": "bar",
+        "c": "baz",
+    }
+    schema = DomainBuilderConfigSchema()
+    config = schema.load(data)
+    assert all(not hasattr(config, attr) for attr in ("a", "b", "c"))
+
+
+def test_not_null_schema_removes_null_values_when_dumping():
+    schema = DomainBuilderConfigSchema()
+    config = DomainBuilderConfig(
+        class_name="DomainBuilder",
+        module_name="great_expectations.rule_based_profiler.domain_builder",
+        batch_request=None,
+    )
+
+    data = schema.dump(config)
+    assert isinstance(data, dict)
+    assert "class_name" in data and "module_name" in data
+    assert "batch_request" not in data
 
 
 def test_domain_builder_config_successfully_loads_with_required_args():
@@ -25,14 +61,6 @@ def test_domain_builder_config_successfully_loads_with_required_args():
     config = schema.load(data)
     assert isinstance(config, DomainBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
-
-
-def test_domain_builder_config_successfully_loads_and_populates_missing_values():
-    data = {
-        "class_name": "DomainBuilder",
-    }
-    schema = DomainBuilderConfigSchema()
-    config = schema.load(data)
     assert config.module_name == "great_expectations.rule_based_profiler.domain_builder"
 
 
@@ -48,18 +76,6 @@ def test_domain_builder_config_successfully_loads_with_optional_args():
     assert all(getattr(config, k) == v for k, v in data.items())
 
 
-def test_domain_builder_config_successfully_loads_with_kwargs(caplog):
-    data = {"class_name": "DomainBuilder", "author": "Charles Dickens"}
-    schema = DomainBuilderConfigSchema()
-
-    with caplog.at_level(logging.INFO):
-        config = schema.load(data)
-
-    assert isinstance(config, DomainBuilderConfig)
-    assert all(getattr(config, k) == v for k, v in data.items())
-    assert len(caplog.messages) == 1  # author kwarg
-
-
 def test_domain_builder_config_unsuccessfully_loads_with_missing_required_fields():
     data = {}
     schema = DomainBuilderConfigSchema()
@@ -70,34 +86,12 @@ def test_domain_builder_config_unsuccessfully_loads_with_missing_required_fields
     assert "'class_name': ['Missing data for required field.']" in str(e.value)
 
 
-def test_domain_builder_config_successfully_dumps_to_dictionary(caplog):
-    schema = DomainBuilderConfigSchema()
-    config = DomainBuilderConfig(
-        class_name="DomainBuilder",
-        batch_request={"batch_request": {"datasource_name": "my_datasource"}},
-        timestamp="2017-02-15|20:26:08.937881",
-    )
-
-    with caplog.at_level(logging.INFO):
-        data = schema.dump(config)
-
-    assert isinstance(data, dict)
-    assert all(getattr(config, k) == v for k, v in data.items())
-    assert "Removed 'module_name' due to null value" in caplog.messages
-
-
 def test_parameter_builder_config_successfully_loads_with_required_args():
-    data = {"class_name": "ParameterBuilder", "parameter_name": "my_parameter_builder"}
+    data = {"class_name": "ParameterBuilder", "name": "my_parameter_builder"}
     schema = ParameterBuilderConfigSchema()
     config = schema.load(data)
     assert isinstance(config, ParameterBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
-
-
-def test_parameter_builder_config_successfully_loads_and_populates_missing_values():
-    data = {"class_name": "ParameterBuilder", "parameter_name": "my_parameter_builder"}
-    schema = ParameterBuilderConfigSchema()
-    config = schema.load(data)
     assert (
         config.module_name == "great_expectations.rule_based_profiler.parameter_builder"
     )
@@ -105,7 +99,7 @@ def test_parameter_builder_config_successfully_loads_and_populates_missing_value
 
 def test_parameter_builder_config_successfully_loads_with_optional_args():
     data = {
-        "parameter_name": "my_parameter_builder",
+        "name": "my_parameter_builder",
         "class_name": "ParameterBuilder",
         "module_name": "great_expectations.rule_based_profiler.parameter_builder",
         "batch_request": {"datasource_name": "my_datasource"},
@@ -114,22 +108,6 @@ def test_parameter_builder_config_successfully_loads_with_optional_args():
     config = schema.load(data)
     assert isinstance(config, ParameterBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
-
-
-def tests_parameter_builder_config_successfully_loads_with_kwargs(caplog):
-    data = {
-        "parameter_name": "my_parameter_builder",
-        "class_name": "ParameterBuilder",
-        "created_on": "2022-01-12",
-    }
-    schema = ParameterBuilderConfigSchema()
-
-    with caplog.at_level(logging.INFO):
-        config = schema.load(data)
-
-    assert isinstance(config, ParameterBuilderConfig)
-    assert all(getattr(config, k) == v for k, v in data.items())
-    assert len(caplog.messages) == 1  # created_on kwarg
 
 
 def test_parameter_builder_config_unsuccessfully_loads_with_missing_required_fields():
@@ -141,25 +119,8 @@ def test_parameter_builder_config_unsuccessfully_loads_with_missing_required_fie
 
     assert all(
         f"'{attr}': ['Missing data for required field.']" in str(e.value)
-        for attr in ("class_name", "parameter_name")
+        for attr in ("class_name", "name")
     )
-
-
-def test_parameter_builder_config_successfully_dumps_to_dictionary(caplog):
-    schema = ParameterBuilderConfigSchema()
-    config = ParameterBuilderConfig(
-        class_name="ParameterBuilder",
-        parameter_name="my parameter",
-        batch_request={"batch_request": {"datasource_name": "my_datasource"}},
-        timestamp="2017-02-15|20:26:08.937881",
-    )
-
-    with caplog.at_level(logging.INFO):
-        data = schema.dump(config)
-
-    assert isinstance(data, dict)
-    assert all(getattr(config, k) == v for k, v in data.items())
-    assert "Removed 'module_name' due to null value" in caplog.messages
 
 
 def test_expectation_configuration_builder_config_successfully_loads_with_required_args():
@@ -171,15 +132,6 @@ def test_expectation_configuration_builder_config_successfully_loads_with_requir
     config = schema.load(data)
     assert isinstance(config, ExpectationConfigurationBuilderConfig)
     assert all(getattr(config, k) == v for k, v in data.items())
-
-
-def test_expectation_configuration_builder_config_successfully_loads_and_populates_missing_values():
-    data = {
-        "class_name": "ExpectationConfigurationBuilder",
-        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-    }
-    schema = ExpectationConfigurationBuilderConfigSchema()
-    config = schema.load(data)
     assert (
         config.module_name
         == "great_expectations.rule_based_profiler.expectation_configuration_builder"
@@ -200,25 +152,6 @@ def test_expectation_configuration_builder_config_successfully_loads_with_option
     assert all(getattr(config, k) == v for k, v in data.items())
 
 
-def tests_expectation_configuration_builder_config_successfully_loads_with_kwargs(
-    caplog,
-):
-    data = {
-        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-        "class_name": "ExpectationConfigurationBuilder",
-        "created_on": "2022-01-12",
-        "author": "Charles Dickens",
-    }
-    schema = ExpectationConfigurationBuilderConfigSchema()
-
-    with caplog.at_level(logging.INFO):
-        config = schema.load(data)
-
-    assert isinstance(config, ExpectationConfigurationBuilderConfig)
-    assert all(getattr(config, k) == v for k, v in data.items())
-    assert len(caplog.messages) == 2  # created_on & author kwargs
-
-
 def test_expectation_configuration_builder_config_unsuccessfully_loads_with_missing_required_fields():
     data = {}
     schema = ExpectationConfigurationBuilderConfigSchema()
@@ -232,30 +165,12 @@ def test_expectation_configuration_builder_config_unsuccessfully_loads_with_miss
     )
 
 
-def test_expectation_configuration_builder_config_successfully_dumps_to_dictionary(
-    caplog,
-):
-    schema = ExpectationConfigurationBuilderConfigSchema()
-    config = ExpectationConfigurationBuilderConfig(
-        class_name="DomainBuilder",
-        expectation_type="expect_column_values_to_be_in_set",
-        timestamp="2017-02-15|20:26:08.937881",
-    )
-
-    with caplog.at_level(logging.INFO):
-        data = schema.dump(config)
-
-    assert isinstance(data, dict)
-    assert all(getattr(config, k) == v for k, v in data.items())
-    assert "Removed 'module_name' due to null value" in caplog.messages
-
-
 def test_rule_config_successfully_loads_with_required_args():
     data = {
         "name": "rule_1",
         "domain_builder": {"class_name": "DomainBuilder"},
         "parameter_builders": [
-            {"class_name": "ParameterBuilder", "parameter_name": "my_parameter"}
+            {"class_name": "ParameterBuilder", "name": "my_parameter"}
         ],
         "expectation_configuration_builders": [
             {
@@ -278,32 +193,6 @@ def test_rule_config_successfully_loads_with_required_args():
     )
 
 
-def test_rule_config_successfully_loads_with_kwargs(caplog):
-    data = {
-        "name": "rule_1",
-        "domain_builder": {"class_name": "DomainBuilder"},
-        "parameter_builders": [
-            {"class_name": "ParameterBuilder", "parameter_name": "my_parameter"}
-        ],
-        "expectation_configuration_builders": [
-            {
-                "class_name": "ExpectationConfigurationBuilder",
-                "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-            }
-        ],
-        "created_on": "2021-12-12",
-        "author": "Charles Dickens",
-    }
-    schema = RuleConfigSchema()
-
-    with caplog.at_level(logging.INFO):
-        config = schema.load(data)
-
-    assert isinstance(config, RuleConfig)
-    assert all(getattr(config, k) == data[k] for k in ("created_on", "author"))
-    assert len(caplog.messages) == 2  # created_on & author kwargs
-
-
 def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
     data = {}
     schema = RuleConfigSchema()
@@ -322,42 +211,6 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
     )
 
 
-def test_rule_config_successfully_dumps_to_dictionary(caplog):
-    schema = RuleConfigSchema()
-    config = RuleConfig(
-        name="rule_1",
-        domain_builder=DomainBuilderConfig(class_name="DomainBuilder"),
-        parameter_builders=[
-            ParameterBuilderConfig(
-                class_name="ParameterBuilder", parameter_name="my_parameter"
-            )
-        ],
-        expectation_configuration_builders=[
-            ExpectationConfigurationBuilderConfig(
-                class_name="ExpectationConfigurationBuilder",
-                expectation_type="expect_column_pair_values_A_to_be_greater_than_B",
-            )
-        ],
-        timestamp="2017-02-15|20:26:08.937881",
-    )
-
-    with caplog.at_level(logging.INFO):
-        data = schema.dump(config)
-
-    assert isinstance(data, dict)
-    assert isinstance(data["domain_builder"], dict)
-    assert len(data["parameter_builders"]) == 1 and isinstance(
-        data["parameter_builders"][0], dict
-    )
-    assert len(data["expectation_configuration_builders"]) == 1 and isinstance(
-        data["expectation_configuration_builders"][0], dict
-    )
-    assert all(
-        f"Removed '{attr}' due to null value" in caplog.messages
-        for attr in ("module_name", "mostly", "batch_request")
-    )
-
-
 def test_rule_based_profiler_config_successfully_loads_with_required_args():
     data = {
         "name": "my_RBP",
@@ -367,7 +220,7 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
                 "name": "rule_1",
                 "domain_builder": {"class_name": "DomainBuilder"},
                 "parameter_builders": [
-                    {"class_name": "ParameterBuilder", "parameter_name": "my_parameter"}
+                    {"class_name": "ParameterBuilder", "name": "my_parameter"}
                 ],
                 "expectation_configuration_builders": [
                     {
@@ -394,7 +247,7 @@ def test_rule_based_profiler_config_successfully_loads_with_optional_args():
                 "name": "rule_1",
                 "domain_builder": {"class_name": "DomainBuilder"},
                 "parameter_builders": [
-                    {"class_name": "ParameterBuilder", "parameter_name": "my_parameter"}
+                    {"class_name": "ParameterBuilder", "name": "my_parameter"}
                 ],
                 "expectation_configuration_builders": [
                     {
@@ -409,37 +262,6 @@ def test_rule_based_profiler_config_successfully_loads_with_optional_args():
     config = schema.load(data)
     assert isinstance(config, RuleBasedProfilerConfig)
     assert data["variables"] == config.variables
-
-
-def test_rule_based_profiler_config_successfully_loads_with_kwargs(caplog):
-    data = {
-        "name": "my_RBP",
-        "config_version": 1.0,
-        "rules": {
-            "rule_1": {
-                "name": "rule_1",
-                "domain_builder": {"class_name": "DomainBuilder"},
-                "parameter_builders": [
-                    {"class_name": "ParameterBuilder", "parameter_name": "my_parameter"}
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "ExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                    }
-                ],
-            },
-        },
-        "author": "Charles Dickens",
-    }
-    schema = RuleBasedProfilerConfigSchema()
-
-    with caplog.at_level(logging.INFO):
-        config = schema.load(data)
-
-    assert isinstance(config, RuleBasedProfilerConfig)
-    assert data["author"] == config.author
-    assert len(caplog.messages) == 1  # author kwarg
 
 
 def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_fields():
@@ -459,39 +281,27 @@ def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_f
     )
 
 
-def test_rule_based_profiler_config_successfully_dumps_to_dictionary(caplog):
-    schema = RuleBasedProfilerConfigSchema()
-    config = RuleBasedProfilerConfig(
-        name="my_RBP",
-        config_version=1.0,
-        rules={
-            "rule_1": RuleConfig(
-                name="rule_1",
-                domain_builder=DomainBuilderConfig(class_name="DomainBuilder"),
-                parameter_builders=[
-                    ParameterBuilderConfig(
-                        class_name="ParameterBuilder", parameter_name="my_parameter"
-                    )
+def test_rule_based_profiler_from_commented_map():
+    data = {
+        "name": "my_RBP",
+        "config_version": 1.0,
+        "variables": {"foo": "bar"},
+        "rules": {
+            "rule_1": {
+                "name": "rule_1",
+                "domain_builder": {"class_name": "DomainBuilder"},
+                "parameter_builders": [
+                    {"class_name": "ParameterBuilder", "name": "my_parameter"}
                 ],
-                expectation_configuration_builders=[
-                    ExpectationConfigurationBuilderConfig(
-                        class_name="ExpectationConfigurationBuilder",
-                        expectation_type="expect_column_pair_values_A_to_be_greater_than_B",
-                    )
+                "expectation_configuration_builders": [
+                    {
+                        "class_name": "ExpectationConfigurationBuilder",
+                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    }
                 ],
-            )
+            },
         },
-        timestamp="2017-02-15|20:26:08.937881",
-    )
-
-    with caplog.at_level(logging.INFO):
-        data = schema.dump(config)
-
-    assert isinstance(data, dict)
-    assert len(data["rules"]) == 1 and isinstance(data["rules"]["rule_1"], dict)
-
-    # As we invoke the serialization/deserialization methods of child objects, their logging messages are also emitted
-    assert all(
-        f"Removed '{attr}' due to null value" in caplog.messages
-        for attr in ("module_name", "mostly", "batch_request")
-    )
+    }
+    commented_map = CommentedMap(data)
+    config = RuleBasedProfilerConfig.from_commented_map(commented_map)
+    assert all(hasattr(config, k) for k in data)
