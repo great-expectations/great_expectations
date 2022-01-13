@@ -186,15 +186,15 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     commented_map: Optional[CommentedMap] = None
 
     def __post_init__(self):
-        # Required to enable the functionality of the parent class
+        # Required to fully set up the commented map and enable serialization
         super().__init__()
 
     @classmethod
-    def get_config_class(cls):
+    def get_config_class(cls) -> Type["RuleBasedProfilerConfig"]:
         return cls
 
     @classmethod
-    def get_schema_class(cls):
+    def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:
         return RuleBasedProfilerConfigSchema
 
 
