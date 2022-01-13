@@ -115,6 +115,8 @@ Recent extensions include:
 New deployment patterns include:
 * [How to Use Great Expectations with Google Cloud Platform and BigQuery](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery)
 * [How to Use Great Expectations in Databricks](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_databricks/)
+* [How to Use Great Expectations in Flyte](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_flyte)
+
 We're very excited to see what other plugins the data community comes up with!
 
 Quick start
