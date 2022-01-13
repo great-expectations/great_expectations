@@ -364,7 +364,6 @@ def test__check_example_cases__with_enough_test_cases_but_some_failing():
 
 
 def test__check_example_cases__with_enough_test_cases_and_no_failing():
-    print(expectation_test_data_case)
     assert ExpectationDiagnostics._check_example_cases(
         examples=[expectation_test_data_case],
         tests=[
