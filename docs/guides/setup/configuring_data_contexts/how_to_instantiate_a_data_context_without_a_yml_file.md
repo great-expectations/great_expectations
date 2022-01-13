@@ -227,7 +227,7 @@ data_context_config = DataContextConfig(
 ```
 
 
-2. **Pass this DataContextConfig as a project_config to BaseDataContext**
+### 2. Pass this DataContextConfig as a project_config to BaseDataContext
 
 ```python
 context = BaseDataContext(project_config=data_context_config)
