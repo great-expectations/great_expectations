@@ -184,11 +184,12 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'How to Guides',
+      label: 'Step 3: Create Expectations',
       items: [
+        { type: 'doc', id: 'guides/expectations/create_expectations_overview', label: 'Overview' },
         {
           type: 'category',
-          label: 'Creating and editing Expectations for your data',
+          label: 'How to guides',
           items: [
             {
               type: 'category',
@@ -232,9 +233,16 @@ module.exports = {
                 'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
                 'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
               ]
-            }
+            },
+            { type: 'doc', id: 'guides/expectations/index', label: 'Index' }
           ]
-        },
+        }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'How to Guides',
+      items: [
         {
           type: 'category',
           label: 'Validating your data',
