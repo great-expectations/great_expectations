@@ -882,6 +882,14 @@ class BaseDataContext:
             )
 
     @property
+    def profiler_store_name(self):
+        pass
+
+    @property
+    def profiler_store(self):
+        pass
+
+    @property
     def expectations_store_name(self):
         return self.project_config_with_variables_substituted.expectations_store_name
 
