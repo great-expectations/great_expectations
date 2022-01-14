@@ -113,15 +113,34 @@ class ParameterContainer(SerializableDictDot):
     "max_num_conversion_attempts" refers to the operations on date/time, while in the other -- it applies to characters.
 
     $variables.false_positive_threshold
-    $parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format
-    $parameter.date_strings.yyyy_mm_dd_date_format
-    $parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format
-    $parameter.date_strings.mm_yyyy_dd_date_format
+    $parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.value
+    $parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.details
+    $parameter.date_strings.yyyy_mm_dd_date_format.value
+    $parameter.date_strings.yyyy_mm_dd_date_format.details
+    $parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.value
+    $parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.details
+    $parameter.date_strings.mm_yyyy_dd_date_format.value
+    $parameter.date_strings.mm_yyyy_dd_date_format.details
     $parameter.date_strings.tolerances.max_abs_error_time_milliseconds
     $parameter.date_strings.tolerances.max_num_conversion_attempts
     $parameter.tolerances.mostly
     $parameter.tolerances.financial.usd
     $mean
+    $parameter.daily_taxi_fairs.mean_values.value[0]
+    $parameter.daily_taxi_fairs.mean_values.value[1]
+    $parameter.daily_taxi_fairs.mean_values.value[2]
+    $parameter.daily_taxi_fairs.mean_values.value[3]
+    $parameter.daily_taxi_fairs.mean_values.details
+    $parameter.weekly_taxi_fairs.mean_values.value["friday"]
+    $parameter.weekly_taxi_fairs.mean_values.value["saturday"]
+    $parameter.weekly_taxi_fairs.mean_values.value["sunday"]
+    $parameter.weekly_taxi_fairs.mean_values.value["monday"]
+    $parameter.weekly_taxi_fairs.mean_values.details
+    $parameter.hourly_taxi_fairs.mean_values.value[1]['friday']
+    $parameter.hourly_taxi_fairs.mean_values.value[18]['saturday']
+    $parameter.hourly_taxi_fairs.mean_values.value[20]['sunday']
+    $parameter.hourly_taxi_fairs.mean_values.value[21]['monday']
+    $parameter.hourly_taxi_fairs.mean_values.details
     $custom.lang.character_encodings
 
     The reason that ParameterContainer is needed is that each ParameterNode can point only to one tree structure,

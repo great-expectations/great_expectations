@@ -192,3 +192,231 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         )
         == 6.5e-1
     )
+
+    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value[0]",
+            domain=column_Date_domain,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
+        )
+        == 2.3
+    )
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "low",
+    }
+
+    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value[1]",
+            domain=column_Date_domain,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
+        )
+        == 9.8
+    )
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "low",
+    }
+
+    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value[2]",
+            domain=column_Date_domain,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
+        )
+        == 42.3
+    )
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "low",
+    }
+
+    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value[3]",
+            domain=column_Date_domain,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
+        )
+        == 8.1
+    )
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "low",
+    }
+
+    fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value["friday"]',
+            domain=column_Date_domain,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
+        )
+        == 78.78
+    )
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "medium",
+    }
+
+    fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value["saturday"]',
+            domain=column_Date_domain,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
+        )
+        == 91.39
+    )
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "medium",
+    }
+
+    fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value["sunday"]',
+            domain=column_Date_domain,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
+        )
+        == 71.43
+    )
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "medium",
+    }
+
+    fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value["monday"]',
+            domain=column_Date_domain,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
+        )
+        == 74.35
+    )
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "medium",
+    }
+
+    fully_qualified_parameter_name = "$parameter.monthly_taxi_fairs.mean_values"
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value[1]["friday"]',
+            domain=column_Date_domain,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
+        )
+        == 98.78
+    )
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "high",
+    }
+
+    fully_qualified_parameter_name = "$parameter.monthly_taxi_fairs.mean_values"
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value[18]["saturday"]',
+            domain=column_Date_domain,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
+        )
+        == 81.39
+    )
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "high",
+    }
+
+    fully_qualified_parameter_name = "$parameter.monthly_taxi_fairs.mean_values"
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value[20]["sunday"]',
+            domain=column_Date_domain,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
+        )
+        == 72.43
+    )
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "high",
+    }
+
+    fully_qualified_parameter_name = "$parameter.monthly_taxi_fairs.mean_values"
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value[21]["monday"]',
+            domain=column_Date_domain,
+            variables=rule_with_variables_with_parameters.variables,
+            parameters=rule_with_variables_with_parameters.parameters,
+        )
+        == 94.35
+    )
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "high",
+    }
