@@ -305,15 +305,21 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
     elif domain_name == "date":
         domain = column_Date_domain
     else:
-        raise ValueError(f'Supported "domain_name" parameter values are "age" and "date".')
+        raise ValueError(
+            f'Supported "domain_name" parameter values are "age" and "date".'
+        )
 
     if value_accessor is None:
         value_accessor = ""
 
     if use_value_suffix:
-        fully_qualified_parameter_name_for_value = f"{fully_qualified_parameter_name}.value{value_accessor}"
+        fully_qualified_parameter_name_for_value = (
+            f"{fully_qualified_parameter_name}.value{value_accessor}"
+        )
     else:
-        fully_qualified_parameter_name_for_value = f"{fully_qualified_parameter_name}{value_accessor}"
+        fully_qualified_parameter_name_for_value = (
+            f"{fully_qualified_parameter_name}{value_accessor}"
+        )
 
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
@@ -326,11 +332,16 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
     )
 
     if test_details:
-        fully_qualified_parameter_name_for_details = f"{fully_qualified_parameter_name}.details"
+        fully_qualified_parameter_name_for_details = (
+            f"{fully_qualified_parameter_name}.details"
+        )
 
-        assert get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_details,
-            domain=domain,
-            variables=rule_with_variables_with_parameters.variables,
-            parameters=rule_with_variables_with_parameters.parameters,
-        ) == details
+        assert (
+            get_parameter_value_by_fully_qualified_parameter_name(
+                fully_qualified_parameter_name=fully_qualified_parameter_name_for_details,
+                domain=domain,
+                variables=rule_with_variables_with_parameters.variables,
+                parameters=rule_with_variables_with_parameters.parameters,
+            )
+            == details
+        )
