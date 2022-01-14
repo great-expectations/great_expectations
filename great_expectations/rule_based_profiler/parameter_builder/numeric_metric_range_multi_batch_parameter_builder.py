@@ -11,6 +11,11 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterContainer,
     build_parameter_container,
 )
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    MetricComputationDetails,
+    MetricComputationResult,
+    MetricComputationValues,
+)
 from great_expectations.rule_based_profiler.util import (
     NP_EPSILON,
     compute_bootstrap_quantiles,
@@ -182,9 +187,7 @@ detected.
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        metric_computation_result: Dict[
-            str, Union[Union[np.ndarray, List[Union[Any, Number]]], Dict[str, Any]]
-        ] = self.get_metrics(
+        metric_computation_result: MetricComputationResult = self.get_metrics(
             batch_ids=batch_ids,
             validator=validator,
             metric_name=self._metric_name,
@@ -196,10 +199,8 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        metric_values: Union[
-            np.ndarray, List[Union[Any, Number]]
-        ] = metric_computation_result["metric_values"]
-        details: Dict[str, Any] = metric_computation_result["details"]
+        metric_values: MetricComputationValues = metric_computation_result.metric_values
+        details: MetricComputationDetails = metric_computation_result.details
 
         # Obtain sampling_method directive from rule state (i.e., variables and parameters); from instance variable otherwise.
         sampling_method: str = get_parameter_value_and_validate_return_type(

@@ -1,7 +1,4 @@
-from numbers import Number
 from typing import Any, Dict, List, Optional, Union
-
-import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
@@ -10,6 +7,11 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     ParameterContainer,
     build_parameter_container,
+)
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    MetricComputationDetails,
+    MetricComputationResult,
+    MetricComputationValues,
 )
 from great_expectations.validator.validator import Validator
 
@@ -89,12 +91,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        metric_computation_result: Dict[
-            str,
-            Union[
-                Union[Any, Number, np.ndarray, List[Union[Any, Number]]], Dict[str, Any]
-            ],
-        ] = self.get_metrics(
+        metric_computation_result: MetricComputationResult = self.get_metrics(
             batch_ids=batch_ids,
             validator=validator,
             metric_name=self._metric_name,
@@ -106,10 +103,8 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: Union[
-            np.ndarray, List[Union[Any, Number]]
-        ] = metric_computation_result["metric_values"]
-        details: Dict[str, Any] = metric_computation_result["details"]
+        metric_values: MetricComputationValues = metric_computation_result.metric_values
+        details: MetricComputationDetails = metric_computation_result.details
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.parameter_name}": {
