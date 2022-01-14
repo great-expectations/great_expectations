@@ -1,7 +1,7 @@
 ---
-title: "Create Expectations"
+title: "Create Expectations: Index"
 ---
-# [![Create Expectations Icon](../../images/universal_map/Flask-active.png)](./create_expectations_overview.md) Index: Create Expectations
+# [![Create Expectations Icon](../../images/universal_map/Flask-active.png)](./create_expectations_overview.md) Create Expectations: Index
 
 ## Core skills
 - [How to create and edit Expectations based on domain knowledge, without inspecting data directly](../../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md)

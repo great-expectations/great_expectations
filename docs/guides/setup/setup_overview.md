@@ -1,7 +1,7 @@
 ---
 title: "Setup: Overview"
 ---
-# [![Setup Icon](../../images/universal_map/Gear-active.png)](setup_overview.md) Setup: Overview 
+# [![Setup Icon](../../images/universal_map/Gear-active.png)](./setup_overview.md) Setup: Overview 
 
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 
