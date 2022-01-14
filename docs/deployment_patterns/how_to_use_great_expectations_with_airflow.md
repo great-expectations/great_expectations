@@ -16,7 +16,7 @@ This guide will help you run a Great Expectations checkpoint in Apache Airflow, 
 
 Airflow is a data orchestration tool for creating and maintaining data pipelines through DAGs (directed acyclic graphs) written in Python. DAGs complete work through operators, which are templates that each encapsulate a specific type of work. This document explains how to use the `GreatExpectationsOperator` to perform data quality work in an Airflow DAG.
 
-> *This guide focuses on using Great Expectations with Airflow in a self-hosted environment. See here for the guide on using Great Expectations with Airflow from within Astronomer.*
+> *This guide focuses on using Great Expectations with Airflow in a self-hosted environment. See [here](https://www.astronomer.io/guides/airflow-great-expectations) for the guide on using Great Expectations with Airflow from within Astronomer.*
 
 Before you start writing your DAG, make sure you have a Data Context and Checkpoint configured.
 
