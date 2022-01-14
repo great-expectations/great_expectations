@@ -1184,6 +1184,7 @@ class DataContextConfigSchema(Schema):
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()
     checkpoint_store_name = fields.Str(required=False, allow_none=True)
+    profiler_store_name = fields.Str(required=False, allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
     validation_operators = fields.Dict(
         keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
@@ -1334,6 +1335,10 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         f"{CHECKPOINTS_BASE_DIRECTORY}/"
     )
+    # Rule Based Profiler
+    DEFAULT_PROFILER_STORE_NAME = "profiler_store"
+    PROFILERS_BASE_DIRECTORY = "profilers"
+    DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{PROFILERS_BASE_DIRECTORY}/"
     DEFAULT_DATA_DOCS_SITE_NAME = "local_site"
     DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
     PLUGINS_BASE_DIRECTORY = "plugins"
@@ -1377,6 +1382,14 @@ class DataContextConfigDefaults(enum.Enum):
         },
         DEFAULT_CHECKPOINT_STORE_NAME: {
             "class_name": "CheckpointStore",
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "suppress_store_backend_id": True,
+                "base_directory": DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+            },
+        },
+        DEFAULT_PROFILER_STORE_NAME: {
+            "class_name": "RuleBasedProfiler",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
                 "suppress_store_backend_id": True,
