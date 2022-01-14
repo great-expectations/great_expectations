@@ -112,7 +112,7 @@ The `<additional_keys_based_on_source_data_system>` will be things like `batch_i
 
 ### 3. Test your configuration
 
-Because the configurations for Datasources can vary depending on the underlying data system they are connecting to, Great Expectations provides a convenience function that will help you determine if there are errors in your configuration.  This function is `test_yaml_config()`.  Using `test_yamal_config` in a Jupyter Notebook is our recommended method for testing Datasource configuration.  Of course, you can always edit and test YAML configs manually, and instantiate Datasources through code.  When executed, `test_yamal_config()` will instantiate the component and run through a self check procedure to verify the component works as expected.
+Because the configurations for Datasources can vary depending on the underlying data system they are connecting to, Great Expectations provides a convenience function that will help you determine if there are errors in your configuration.  This function is `test_yaml_config()`.  Using `test_yaml_config` in a Jupyter Notebook is our recommended method for testing Datasource configuration.  Of course, you can always edit and test YAML configs manually, and instantiate Datasources through code.  When executed, `test_yaml_config()` will instantiate the component and run through a self check procedure to verify the component works as expected.
 
 In the case of a Datasource, this means:
 - confirming that the connection works.
