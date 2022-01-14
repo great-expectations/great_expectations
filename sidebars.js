@@ -91,7 +91,64 @@ module.exports = {
               ]
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Step 3: Create Expectations',
+      items: [
+        { type: 'doc', id: 'guides/expectations/create_expectations_overview', label: 'Overview' },
+        {
+          type: 'category',
+          label: 'How to guides',
+          items: [
+            {
+              type: 'category',
+              label: 'Core skills',
+              items: [
+                'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
+                'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
+                'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
+                'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Configuring Profilers',
+              items: []
+            },
+            {
+              type: 'category',
+              label: 'Creating Custom Expectations',
+              items: [
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
+                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Contributing',
+              items: [
+                'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Advanced',
+              items: [
+                'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
+                'guides/expectations/advanced/how_to_create_renderers_for_custom_expectations',
+                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
+                'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
+                'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
+                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
+              ]
+            },
+            { type: 'doc', id: 'guides/expectations/index', label: 'Index' }
+          ]
+        }
       ]
     },
     {
@@ -256,55 +313,6 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Creating and editing Expectations for your data',
-          items: [
-            {
-              type: 'category',
-              label: 'Core skills',
-              items: [
-                'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
-                'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
-                'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
-                'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Configuring Profilers',
-              items: []
-            },
-            {
-              type: 'category',
-              label: 'Creating Custom Expectations',
-              items: [
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
-                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Contributing',
-              items: [
-                'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Advanced',
-              items: [
-                'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
-                'guides/expectations/advanced/how_to_create_renderers_for_custom_expectations',
-                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
-                'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
-                'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-                'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
-              ]
-            }
-          ]
-        },
-        {
-          type: 'category',
           label: 'Validating your data',
           items: [
             {
@@ -321,7 +329,7 @@ module.exports = {
                 'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
                 'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
                 'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
-                'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
+                'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint'
               ]
             },
             {
