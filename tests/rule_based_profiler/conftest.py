@@ -1524,21 +1524,21 @@ def multi_part_name_parameter_container():
     $parameter.date_strings.tolerances.max_num_conversion_attempts
     $parameter.tolerances.mostly
     $mean
-    $parameter.daily_taxi_fairs.mean_values.value[0]
-    $parameter.daily_taxi_fairs.mean_values.value[1]
-    $parameter.daily_taxi_fairs.mean_values.value[2]
-    $parameter.daily_taxi_fairs.mean_values.value[3]
-    $parameter.daily_taxi_fairs.mean_values.details
-    $parameter.weekly_taxi_fairs.mean_values.value["friday"]
-    $parameter.weekly_taxi_fairs.mean_values.value["saturday"]
-    $parameter.weekly_taxi_fairs.mean_values.value["sunday"]
-    $parameter.weekly_taxi_fairs.mean_values.value["monday"]
-    $parameter.weekly_taxi_fairs.mean_values.details
-    $parameter.monthly_taxi_fairs.mean_values.value[1]['friday']
-    $parameter.monthly_taxi_fairs.mean_values.value[18]['saturday']
-    $parameter.monthly_taxi_fairs.mean_values.value[20]['sunday']
-    $parameter.monthly_taxi_fairs.mean_values.value[21]['monday']
+    $parameter.monthly_taxi_fairs.mean_values.value[0]
+    $parameter.monthly_taxi_fairs.mean_values.value[1]
+    $parameter.monthly_taxi_fairs.mean_values.value[2]
+    $parameter.monthly_taxi_fairs.mean_values.value[3]
     $parameter.monthly_taxi_fairs.mean_values.details
+    $parameter.daily_taxi_fairs.mean_values.value["friday"]
+    $parameter.daily_taxi_fairs.mean_values.value["saturday"]
+    $parameter.daily_taxi_fairs.mean_values.value["sunday"]
+    $parameter.daily_taxi_fairs.mean_values.value["monday"]
+    $parameter.daily_taxi_fairs.mean_values.details
+    $parameter.weekly_taxi_fairs.mean_values.value[1]['friday']
+    $parameter.weekly_taxi_fairs.mean_values.value[18]['saturday']
+    $parameter.weekly_taxi_fairs.mean_values.value[20]['sunday']
+    $parameter.weekly_taxi_fairs.mean_values.value[21]['monday']
+    $parameter.weekly_taxi_fairs.mean_values.details
     """
     root_mean_node: ParameterNode = ParameterNode(
         {
@@ -1607,7 +1607,7 @@ def multi_part_name_parameter_container():
             "tolerances": date_strings_tolerances_parameter_node,
         }
     )
-    daily_taxi_fairs_parameter_node: ParameterNode = ParameterNode(
+    monthly_taxi_fairs_parameter_node: ParameterNode = ParameterNode(
         {
             "mean_values": ParameterNode(
                 {
@@ -1653,7 +1653,7 @@ def multi_part_name_parameter_container():
             ),
         }
     )
-    weekly_taxi_fairs_parameter_node: ParameterNode = ParameterNode(
+    daily_taxi_fairs_parameter_node: ParameterNode = ParameterNode(
         {
             "mean_values": ParameterNode(
                 {
@@ -1675,7 +1675,7 @@ def multi_part_name_parameter_container():
             ),
         }
     )
-    monthly_taxi_fairs_parameter_node: ParameterNode = ParameterNode(
+    weekly_taxi_fairs_parameter_node: ParameterNode = ParameterNode(
         {
             "mean_values": ParameterNode(
                 {
@@ -1973,9 +1973,9 @@ def multi_part_name_parameter_container():
         {
             "date_strings": date_strings_parameter_node,
             "tolerances": tolerances_parameter_node,
+            "monthly_taxi_fairs": monthly_taxi_fairs_parameter_node,
             "daily_taxi_fairs": daily_taxi_fairs_parameter_node,
             "weekly_taxi_fairs": weekly_taxi_fairs_parameter_node,
-            "monthly_taxi_fairs": monthly_taxi_fairs_parameter_node,
         }
     )
     root_parameter_node: ParameterNode = ParameterNode(
@@ -2015,7 +2015,7 @@ def parameters_with_different_depth_level_values():
         "$parameter.tolerances.mostly": 9.1e-1,
         "$parameter.tolerances.financial.usd": 1.0,
         "$mean": 6.5e-1,
-        "$parameter.daily_taxi_fairs.mean_values.value": [
+        "$parameter.monthly_taxi_fairs.mean_values.value": [
             2.3,
             9.8,
             42.3,
@@ -2048,10 +2048,10 @@ def parameters_with_different_depth_level_values():
             78.78,
             12.99,
         ],
-        "$parameter.daily_taxi_fairs.mean_values.details": {
+        "$parameter.monthly_taxi_fairs.mean_values.details": {
             "confidence": "low",
         },
-        "$parameter.weekly_taxi_fairs.mean_values.value": {
+        "$parameter.daily_taxi_fairs.mean_values.value": {
             "sunday": 71.43,
             "monday": 74.35,
             "tuesday": 42.3,
@@ -2060,10 +2060,10 @@ def parameters_with_different_depth_level_values():
             "friday": 78.78,
             "saturday": 91.39,
         },
-        "$parameter.weekly_taxi_fairs.mean_values.details": {
+        "$parameter.daily_taxi_fairs.mean_values.details": {
             "confidence": "medium",
         },
-        "$parameter.monthly_taxi_fairs.mean_values.value": [
+        "$parameter.weekly_taxi_fairs.mean_values.value": [
             {
                 "sunday": 71.43,
                 "monday": 74.35,
@@ -2344,7 +2344,7 @@ def parameters_with_different_depth_level_values():
                 "saturday": 78.39,
             },
         ],
-        "$parameter.monthly_taxi_fairs.mean_values.details": {
+        "$parameter.weekly_taxi_fairs.mean_values.details": {
             "confidence": "high",
         },
     }

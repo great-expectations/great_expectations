@@ -193,7 +193,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         == 6.5e-1
     )
 
-    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
+    fully_qualified_parameter_name = "$parameter.monthly_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value[0]",
@@ -212,7 +212,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         "confidence": "low",
     }
 
-    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
+    fully_qualified_parameter_name = "$parameter.monthly_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value[1]",
@@ -231,7 +231,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         "confidence": "low",
     }
 
-    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
+    fully_qualified_parameter_name = "$parameter.monthly_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value[2]",
@@ -250,7 +250,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         "confidence": "low",
     }
 
-    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
+    fully_qualified_parameter_name = "$parameter.monthly_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value[3]",
@@ -269,7 +269,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         "confidence": "low",
     }
 
-    fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
+    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value["friday"]',
@@ -288,7 +288,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         "confidence": "medium",
     }
 
-    fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
+    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value["saturday"]',
@@ -307,7 +307,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         "confidence": "medium",
     }
 
-    fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
+    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value["sunday"]',
@@ -326,7 +326,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         "confidence": "medium",
     }
 
-    fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
+    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value["monday"]',
@@ -345,7 +345,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         "confidence": "medium",
     }
 
-    fully_qualified_parameter_name = "$parameter.monthly_taxi_fairs.mean_values"
+    fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value[1]["friday"]',
@@ -364,7 +364,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         "confidence": "high",
     }
 
-    fully_qualified_parameter_name = "$parameter.monthly_taxi_fairs.mean_values"
+    fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value[18]["saturday"]',
@@ -383,7 +383,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         "confidence": "high",
     }
 
-    fully_qualified_parameter_name = "$parameter.monthly_taxi_fairs.mean_values"
+    fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value[20]["sunday"]',
@@ -402,7 +402,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         "confidence": "high",
     }
 
-    fully_qualified_parameter_name = "$parameter.monthly_taxi_fairs.mean_values"
+    fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=f'{fully_qualified_parameter_name}.value[21]["monday"]',

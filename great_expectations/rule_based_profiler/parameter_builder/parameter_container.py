@@ -126,21 +126,21 @@ class ParameterContainer(SerializableDictDot):
     $parameter.tolerances.mostly
     $parameter.tolerances.financial.usd
     $mean
-    $parameter.daily_taxi_fairs.mean_values.value[0]
-    $parameter.daily_taxi_fairs.mean_values.value[1]
-    $parameter.daily_taxi_fairs.mean_values.value[2]
-    $parameter.daily_taxi_fairs.mean_values.value[3]
+    $parameter.monthly_taxi_fairs.mean_values.value[0]
+    $parameter.monthly_taxi_fairs.mean_values.value[1]
+    $parameter.monthly_taxi_fairs.mean_values.value[2]
+    $parameter.monthly_taxi_fairs.mean_values.value[3]
+    $parameter.monthly_taxi_fairs.mean_values.details
+    $parameter.daily_taxi_fairs.mean_values.value["friday"]
+    $parameter.daily_taxi_fairs.mean_values.value["saturday"]
+    $parameter.daily_taxi_fairs.mean_values.value["sunday"]
+    $parameter.daily_taxi_fairs.mean_values.value["monday"]
     $parameter.daily_taxi_fairs.mean_values.details
-    $parameter.weekly_taxi_fairs.mean_values.value["friday"]
-    $parameter.weekly_taxi_fairs.mean_values.value["saturday"]
-    $parameter.weekly_taxi_fairs.mean_values.value["sunday"]
-    $parameter.weekly_taxi_fairs.mean_values.value["monday"]
+    $parameter.weekly_taxi_fairs.mean_values.value[1]['friday']
+    $parameter.weekly_taxi_fairs.mean_values.value[18]['saturday']
+    $parameter.weekly_taxi_fairs.mean_values.value[20]['sunday']
+    $parameter.weekly_taxi_fairs.mean_values.value[21]['monday']
     $parameter.weekly_taxi_fairs.mean_values.details
-    $parameter.hourly_taxi_fairs.mean_values.value[1]['friday']
-    $parameter.hourly_taxi_fairs.mean_values.value[18]['saturday']
-    $parameter.hourly_taxi_fairs.mean_values.value[20]['sunday']
-    $parameter.hourly_taxi_fairs.mean_values.value[21]['monday']
-    $parameter.hourly_taxi_fairs.mean_values.details
     $custom.lang.character_encodings
 
     The reason that ParameterContainer is needed is that each ParameterNode can point only to one tree structure,
