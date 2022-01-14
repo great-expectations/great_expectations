@@ -20,7 +20,7 @@ The Batch Request (V3) API was introduced as part of the 0.13 major release of G
 
 ## Migrating to the Batch Request (V3) API
 
-As of version 0.14.0, the V3 API is the preferred method of interacting with GE. We highly recommend that you migrate to working with the V3 API as soon as possible.
+As of version 0.14.0, the V3 API is the preferred method of interacting with GE. We highly recommend that you migrate to working with the V3 API as soon as possible. Please make sure you're using the latest version of GE before beginning your migration!
 
 The migration involves two parts: first, using an automated CLI tool to upgrade the config file and Data Stores, and second, manually upgrading Datasources and Checkpoints. To begin the migration from the V2 to the V3 API, please do the following:
 
@@ -173,11 +173,11 @@ One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSql
 :::
 
 #### V2-Style Datasource
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v2/great_expectations/great_expectations.yml#L16-L26
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/great_expectations.yml#L16-L26
 ```
 
 #### V3-Style Datasource
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v3/great_expectations/great_expectations.yml#L16-L31
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/great_expectations.yml#L16-L31
 ```
 
 
@@ -217,12 +217,12 @@ The example V3-style Checkpoint contains:
 
 #### V2-Style Checkpoint
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L13
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L13
 ```
 
 The Validation Operator named `action_list_operator` would be part of the `great_expectations.yml` file.
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v2/great_expectations/great_expectations.yml#L56-L68
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/great_expectations.yml#L56-L68
 ```
 
 #### V3-Style Checkpoint
@@ -235,7 +235,7 @@ For additional examples on how to configure V3-style checkpoints, including how 
 - [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
 
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
 ```
 
 If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations checkpoint list`.
