@@ -141,6 +141,7 @@ def get_parameter_value_and_validate_return_type(
     """
     if isinstance(parameter_reference, dict):
         parameter_reference = dict(copy.deepcopy(parameter_reference))
+
     parameter_reference = get_parameter_value(
         domain=domain,
         parameter_reference=parameter_reference,
@@ -154,6 +155,7 @@ def get_parameter_value_and_validate_return_type(
 (value of type "{str(type(parameter_reference))}" was encountered).
 """
             )
+
     return parameter_reference
 
 
@@ -191,6 +193,7 @@ def get_parameter_value(
                     variables=variables,
                     parameters=parameters,
                 )
+
     return parameter_reference
 
 
