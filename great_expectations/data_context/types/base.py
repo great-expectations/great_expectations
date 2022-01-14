@@ -58,7 +58,7 @@ def object_to_yaml_str(obj):
 class BaseYamlConfig(SerializableDictDot):
     _config_schema_class = None
 
-    def __init__(self, commented_map: CommentedMap = None):
+    def __init__(self, commented_map: Optional[CommentedMap] = None):
         if commented_map is None:
             commented_map = CommentedMap()
         self._commented_map = commented_map
