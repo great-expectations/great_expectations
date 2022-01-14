@@ -98,7 +98,7 @@ module.exports = {
       type: 'category',
       label: 'Step 2: Connect To Data',
       items: [
-        { type: 'doc', id: 'guides/connecting_to_your_data/overview', label: 'Overview' },
+        { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_overview', label: 'Overview' },
         {
           type: 'category',
           label: 'How to guides',

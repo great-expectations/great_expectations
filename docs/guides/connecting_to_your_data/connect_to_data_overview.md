@@ -1,7 +1,7 @@
 ---
 title: "Connect to data: Overview"
 ---
-# [![Connect to data icon](../../images/universal_map/Outlet-active.png)](overview.md) Connect to data: Overview 
+# [![Connect to data icon](../../images/universal_map/Outlet-active.png)](./connect_to_data_overview.md) Connect to data: Overview 
 
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import Tabs from '@theme/Tabs';
@@ -29,7 +29,7 @@ The majority of the work involved in connecting to data is a simple matter of co
 
 <!-- The following subsections should be repeated as necessary.  They should give a high level map of the things that need to be done or optionally can be done in this process, preferably in the order that they should be addressed (assuming there is one). If the process crosses multiple steps of the Universal Map, use the <SetupHeader> <ConnectHeader> <CreateHeader> and <ValidateHeader> tags to indicate which Universal Map step the subsections fall under. -->
 
-### 1. Boilerplate
+### 1. Prepare scaffolding
 
 If you use the Great Expectations CLI, you can run this command to automatically generate a pre-configured Jupyter Notebook:
 

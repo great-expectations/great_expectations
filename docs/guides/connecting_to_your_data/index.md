@@ -1,6 +1,7 @@
 ---
 title: "Connect to Data"
 ---
+# [![Connect to Data Icon](../../images/universal_map/Outlet-active.png)](../connecting_to_your_data/connect_to_data_overview.md) Index: Connect to Data
 
 ## Core skills
 - [How to choose which DataConnector to use](../../guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.md)
