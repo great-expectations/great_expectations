@@ -80,7 +80,7 @@ print(validator.head())
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_mysql_datasource"]
 assert (
-    "taxi_data"
+    "test_ci.taxi_data"
     in context.get_available_data_asset_names()["my_mysql_datasource"][
         "default_inferred_data_connector_name"
     ]
