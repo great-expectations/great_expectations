@@ -61,9 +61,8 @@ def test_parse_row_condition_string_pandas_engine():
 @pytest.mark.rendered_output
 def test_all_expectations_using_test_definitions():
     test_files = glob.glob("tests/test_definitions/*/expect*.json")
+    assert len(test_files) > 0, "Did not identify any test files"
 
-    all_true = True
-    failure_count, total_count = 0, 0
     types = []
 
     # Loop over all test_files, datasets, and tests:
