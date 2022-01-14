@@ -119,7 +119,7 @@ In the case of a Datasource, this means:
 - gathering a list of available DataAssets (e.g. tables in SQL; files or folders in a filesystem)
 - verifying that it can successfully fetch at least one Batch from the source.
 
-If something about your configuration wasn't set up correctly, `test_yamal_config()` will raise an error.  Whenever possible, `test_yamal_config()` provides helpful warnings and error messages.  It can't solve every problem, but it can solve many.
+If something about your configuration wasn't set up correctly, `test_yaml_config()` will raise an error.  Whenever possible, `test_yaml_config()` provides helpful warnings and error messages.  It can't solve every problem, but it can solve many.
 
 You can call `test_yaml_config()` from your Data Context, like so:
 
