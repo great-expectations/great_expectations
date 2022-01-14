@@ -48,7 +48,7 @@ batch_request = RuntimeBatchRequest(
     datasource_name="my_mysql_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
-    runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
+    runtime_parameters={"query": "SELECT * from test_ci.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 context.create_expectation_suite(
