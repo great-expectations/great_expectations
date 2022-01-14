@@ -55,6 +55,16 @@ class ParameterAttributeNameParserError(ge_exceptions.GreatExpectationsError):
 
 
 def _parse_attribute_name(name: str) -> ParseResults:
+    """
+    Using the grammer defined by "attribute_name", provides the parsing of collection (list, dictionary) access syntax:
+    List: variable[index: int]
+    Dictionary: variable[key: str]
+    Nested List/Dictionary: variable[index_0: int][key_0: str][index_1: int][key_1: str][key_2: str][index_2: int]...
+
+    Applicability: To be used as part of configuration (e.g., YAML-based files or text strings).
+    Extendability: Readily extensible to include "slice" and other standard accessors (as long as no dynamic elements).
+    """
+
     try:
         return attribute_name.parseString(name)
     except ParseException:
