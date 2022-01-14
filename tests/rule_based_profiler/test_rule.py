@@ -345,6 +345,30 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         "confidence": "medium",
     }
 
+    fully_qualified_parameter_name = "$parameter.daily_taxi_fairs.mean_values"
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.value",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "sunday": 71.43,
+        "monday": 74.35,
+        "tuesday": 42.3,
+        "wednesday": 42.3,
+        "thursday": 82.2,
+        "friday": 78.78,
+        "saturday": 91.39,
+    }
+    assert get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=f"{fully_qualified_parameter_name}.details",
+        domain=column_Date_domain,
+        variables=rule_with_variables_with_parameters.variables,
+        parameters=rule_with_variables_with_parameters.parameters,
+    ) == {
+        "confidence": "medium",
+    }
+
     fully_qualified_parameter_name = "$parameter.weekly_taxi_fairs.mean_values"
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
