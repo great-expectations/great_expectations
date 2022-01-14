@@ -221,7 +221,7 @@ One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSql
 </Tabs>
 
 
-Migrating Datasource configurations that contain connections to the cloud or databases involve additional complexities like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](/docs/guides/connecting_to_your_data/index) for examples on V3-style Datasource configurations that will suit your needs.
+Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](/docs/guides/connecting_to_your_data/index) for examples on V3-style Datasource configurations that will suit your needs.
 
 ### Manually Migrate V2 Checkpoints to V3 Checkpoints
 
@@ -279,7 +279,7 @@ The Validation Operator named `action_list_operator` would be part of the `great
 
 #### V3-Style Checkpoint
 
-Here is the equivalent configuration in V3-style. Notice that the Validation Operators have been migrated into the `action_list` field in the Checkpoint configuration. In addition, you will also need to remove the Validation Operations from `great_expectations.yml` as a manual step.  Also, notice the `batch_request` that refers to the data asset rather than `batch_kwargs`.  In our example, there are also some additional parameters like `ge_cloud_id` and `expectation_suite_ge_cloud_id` that are added automatically and do not need to be modified as part of the migration.
+Here is the equivalent configuration in V3-style. Notice that the Validation Operators have been migrated into the `action_list` field in the Checkpoint configuration. In addition, you will also need to remove the Validation Operations from `great_expectations.yml` as a manual step.  Also, notice the `batch_request` that refers to the data asset rather than `batch_kwargs`.
 
 For additional examples on how to configure V3-style checkpoints, including how to use `test_yaml_config` to build advanced configurations, please refer to our documentation here:
 
@@ -378,7 +378,6 @@ If everything is successful, then you should see output similar to below.:
 
 ```bash
 Using v3 (Batch Request) API
-Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
 Calculating Metrics: 100%|█████████████████████████████████████████████████████████████████████████████| 4/4 [00:00<00:00,  6.67it/s]
 Validation succeeded!
 
