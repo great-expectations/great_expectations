@@ -339,12 +339,12 @@ The example V3-style Checkpoint contains:
 
 #### V2-Style Checkpoint
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L13
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L15
 ```
 
 The Validation Operator named `action_list_operator` would be part of the `great_expectations.yml` file.
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/great_expectations.yml#L56-L68
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/great_expectations.yml#L57-L69
 ```
 
 #### V3-Style Checkpoint
@@ -378,7 +378,8 @@ If everything is successful, then you should see output similar to below.:
 
 ```bash
 Using v3 (Batch Request) API
-Calculating Metrics: 100%|████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00<00:00, 604.83it/s]
+Using Spark's default log4j profile: org/apache/spark/log4j-defaults.properties
+Calculating Metrics: 100%|█████████████████████████████████████████████████████████████████████████████| 4/4 [00:00<00:00,  6.67it/s]
 Validation succeeded!
 
 Suite Name                                   Status     Expectations met
