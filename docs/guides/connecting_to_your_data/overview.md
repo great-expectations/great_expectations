@@ -121,7 +121,7 @@ In the case of a Datasource, this means:
 
 If something about your configuration wasn't set up correctly, `test_yamal_config()` will raise an error.  Whenever possible, `test_yamal_config()` provides helpful warnings and error messages.  It can't solve every problem, but it can solve many.
 
-You can call `test_yamal_config()` from your Data Context, like so:
+You can call `test_yaml_config()` from your Data Context, like so:
 
 <Tabs
   groupId="yaml-or-python"
