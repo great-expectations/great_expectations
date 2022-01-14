@@ -24,6 +24,7 @@ from great_expectations.util import is_numeric
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
+# TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
 MetricComputationValues = Union[
     Union[Any, Number, np.ndarray, List[Union[Any, Number]]]
 ]
