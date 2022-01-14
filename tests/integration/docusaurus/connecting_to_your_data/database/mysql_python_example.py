@@ -66,7 +66,7 @@ assert isinstance(validator, ge.validator.validator.Validator)
 batch_request = BatchRequest(
     datasource_name="my_mysql_datasource",
     data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
+    data_asset_name="test_ci.taxi_data",  # this is the name of the table you want to retrieve
 )
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
