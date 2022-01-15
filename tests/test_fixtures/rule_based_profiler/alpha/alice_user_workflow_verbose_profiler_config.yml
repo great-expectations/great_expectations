@@ -20,7 +20,7 @@ rules:
         - user_id
     parameter_builders:
       - parameter_name: my_min_user_id
-        class_name: MetricParameterBuilder
+        class_name: MetricMultiBatchParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
         batch_request: $variables.alice_single_batch_data_batch_request
         metric_name: column.min
@@ -34,7 +34,7 @@ rules:
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        min_value: $parameter.my_min_user_id.value
+        min_value: $parameter.my_min_user_id.value[0]
         max_value: $variables.max_user_id
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_values_to_not_be_null
@@ -53,13 +53,13 @@ rules:
     parameter_builders:
       # unused parameter my_max_ts
       - parameter_name: my_max_ts
-        class_name: MetricParameterBuilder
+        class_name: MetricMultiBatchParameterBuilder
         batch_request: $variables.alice_single_batch_data_batch_request
         module_name: great_expectations.rule_based_profiler.parameter_builder
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
       - parameter_name: my_max_event_ts
-        class_name: MetricParameterBuilder
+        class_name: MetricMultiBatchParameterBuilder
         batch_request: $variables.alice_single_batch_data_batch_request
         module_name: great_expectations.rule_based_profiler.parameter_builder
         metric_name: column.max
@@ -68,7 +68,7 @@ rules:
           column: event_ts
       # unused parameter my_min_ts
       - parameter_name: my_min_ts
-        class_name: MetricParameterBuilder
+        class_name: MetricMultiBatchParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
         batch_request: $variables.alice_single_batch_data_batch_request
         metric_name: column.min
@@ -105,7 +105,7 @@ rules:
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $variables.min_timestamp
-        max_value: $parameter.my_max_event_ts.value
+        max_value: $parameter.my_max_event_ts.value[0]
         meta:
           notes:
             format: markdown
