@@ -1,5 +1,4 @@
 import warnings
-from typing import Optional
 
 from dateutil.parser import parse
 

@@ -20,7 +20,7 @@ The Batch Request (V3) API was introduced as part of the 0.13 major release of G
 
 ## Migrating to the Batch Request (V3) API
 
-As of version 0.14.0, the V3 API is the preferred method of interacting with GE. We highly recommend that you migrate to working with the V3 API as soon as possible.
+As of version 0.14.0, the V3 API is the preferred method of interacting with GE. We highly recommend that you migrate to working with the V3 API as soon as possible. Please make sure you're using the latest version of GE before beginning your migration!
 
 The migration involves two parts: first, using an automated CLI tool to upgrade the config file and Data Stores, and second, manually upgrading Datasources and Checkpoints. To begin the migration from the V2 to the V3 API, please do the following:
 
@@ -154,7 +154,17 @@ Now you are ready to manually migrate Datasources and Checkpoints to be compatib
 
 ### Manually migrate Datasources from V2 to V3
 
-The first manual step needed is to convert the V2-style Datasource to a V3-style one.
+The first manual step needed is to convert the V2-style Datasource to a V3-style one. The following documentation 
+contains examples for data read-in using `pandas` and `spark`. 
+
+<Tabs
+  groupId="configurations-pandas-spark-postgres"
+  defaultValue='pandas'
+  values={[
+  {label: 'Pandas', value:'pandas'},
+  {label: 'Spark', value:'spark'},
+  ]}>
+<TabItem value="pandas">
 
 The V2-style Datasource has:
   - Data-type specific Datasource, like the `PandasDatasource` in our example below.
@@ -173,15 +183,45 @@ One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSql
 :::
 
 #### V2-Style Datasource
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v2/great_expectations/great_expectations.yml#L16-L26
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/great_expectations.yml#L16-L26
 ```
 
 #### V3-Style Datasource
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v3/great_expectations/great_expectations.yml#L16-L31
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/great_expectations.yml#L16-L31
+```
+</TabItem>
+<TabItem value="spark">
+
+
+The V2-style Datasource has:
+  - Data-type specific Datasource, like the `SparkDFDatasource` in our example below.
+  - Data-type specific Datasets, like the `SparkDFDataset` in our example below.
+  - batch_kwargs_generators like the `SubdirReaderBatchKwargsGenerator` in our example below.
+
+The V3-style Datasource has:
+  - Datasource that is agnostic to datatype.
+  - Datatype-specific ExecutionEngine, like the `SparkDFExecutionEngine` in our example below.
+  - Data-specific DataConnectors, like the `InferredAssetFilesystemDataConnector` in our example below.
+
+:::note Note on Datasource in V3
+
+One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSqlalchemyDatasource, which combines functionality of the Datasource and ExecutionEngine to enable [database introspection and partitioning](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql). More examples on using the SimpleSqlalchemyDatasource can be found [here](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
+
+:::
+
+#### V2-Style Datasource
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/great_expectations.yml#L16-L26
 ```
 
+#### V3-Style Datasource
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/great_expectations.yml#L16-L34
+```
 
-Migrating Datasource configurations that contain connections to the cloud or databases involve additional complexities like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](/docs/guides/connecting_to_your_data/index) for examples on V3-style Datasource configurations that will suit your needs.
+</TabItem>
+</Tabs>
+
+
+Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](/docs/guides/connecting_to_your_data/index) for examples on V3-style Datasource configurations that will suit your needs.
 
 ### Manually Migrate V2 Checkpoints to V3 Checkpoints
 
@@ -196,6 +236,18 @@ In Great Expectations version 0.13.7, we introduced an improved Checkpoints feat
 This means that, although Validation Operators were run directly from the DataContext in V2, they are now run by Checkpoints in V3 as part of `action_list` items. This change offers a convenient abstraction for running Validations and ensures that all actions associated with running validations are included in one place, rather than split up between the `great_expectations.yml` file and Checkpoint configuration.
 
 The example below demonstrates how a V2 to V3 migration can be performed for an existing V2  Checkpoint.
+
+
+<Tabs
+  groupId="configurations-pandas-spark-postgres"
+  defaultValue='pandas'
+  values={[
+  {label: 'Pandas', value:'pandas'},
+  {label: 'Spark', value:'spark'},
+  ]}>
+
+
+<TabItem value="pandas">
 
 The example V2-style Checkpoint contains:
   - A `LegacyCheckpoint`, with no `config_version` (versions were introduced as part of V3-style Checkpoints).
@@ -217,17 +269,17 @@ The example V3-style Checkpoint contains:
 
 #### V2-Style Checkpoint
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L13
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L13
 ```
 
 The Validation Operator named `action_list_operator` would be part of the `great_expectations.yml` file.
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v2/great_expectations/great_expectations.yml#L56-L68
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/great_expectations.yml#L56-L68
 ```
 
 #### V3-Style Checkpoint
 
-Here is the equivalent configuration in V3-style. Notice that the Validation Operators have been migrated into the `action_list` field in the Checkpoint configuration. In addition, you will also need to remove the Validation Operations from `great_expectations.yml` as a manual step.  Also, notice the `batch_request` that refers to the data asset rather than `batch_kwargs`.  In our example, there are also some additional parameters like `ge_cloud_id` and `expectation_suite_ge_cloud_id` that are added automatically and do not need to be modified as part of the migration.
+Here is the equivalent configuration in V3-style. Notice that the Validation Operators have been migrated into the `action_list` field in the Checkpoint configuration. In addition, you will also need to remove the Validation Operations from `great_expectations.yml` as a manual step.  Also, notice the `batch_request` that refers to the data asset rather than `batch_kwargs`.
 
 For additional examples on how to configure V3-style checkpoints, including how to use `test_yaml_config` to build advanced configurations, please refer to our documentation here:
 
@@ -235,7 +287,7 @@ For additional examples on how to configure V3-style checkpoints, including how 
 - [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
 
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
 ```
 
 If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations checkpoint list`.
@@ -262,6 +314,79 @@ Validation succeeded!
 Suite Name                                   Status     Expectations met
 - Titanic.profiled                           ✔ Passed   2 of 2 (100.0 %)
 ```
+
+</TabItem>
+<TabItem value="spark">
+
+
+The example V2-style Checkpoint contains:
+  - A `LegacyCheckpoint`, with no `config_version` (versions were introduced as part of V3-style Checkpoints).
+  - A `validation_operator_name` that contains a reference to Validation Operators that are configured in the `great_expectations.yml` file, like `action_list_operator` in our example below.
+  - Reference to `batch_kwargs`, like in our example below.
+
+The example V3-style Checkpoint contains:
+  - A `Checkpoint` class with `config_version` populated (`1.0` in our example below).
+  - A list of `validations`, which contain [BatchRequests](/docs/reference/datasources#batches) that will be used to run the Checkpoint.
+  - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were known as Validation Operators in V2-style Checkpoints.
+
+:::note Migrating ExpectationSuites
+  
+  `ExpectationSuites` that were created in the V2-API will work in the V3-API **without** needing to be modified. However, `ExpectationSuites` also contain `metadata` describing the `batch` that was used to create the original `ExpectationSuite` object (under the `citations` field). For a suite that was created in V2, this metadata will contain `batch_kwargs`, and V3 suites will contain a `batch_request`. 
+  
+  If you choose to do so, the `citation` metadata can be migrated using the same pattern for migrating `batch_kwargs` to `batch_request` described below. 
+
+:::
+
+#### V2-Style Checkpoint
+
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L15
+```
+
+The Validation Operator named `action_list_operator` would be part of the `great_expectations.yml` file.
+
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/great_expectations.yml#L57-L69
+```
+
+#### V3-Style Checkpoint
+
+Here is the equivalent configuration in V3-style. Notice that the Validation Operators have been migrated into the `action_list` field in the Checkpoint configuration. In addition, you will also need to remove the Validation Operations from `great_expectations.yml` as a manual step.  Also, notice the `batch_request` that refers to the data asset rather than `batch_kwargs`.  In our example, there are also some additional parameters like `ge_cloud_id` and `expectation_suite_ge_cloud_id` that are added automatically and do not need to be modified as part of the migration.
+
+For additional examples on how to configure V3-style checkpoints, including how to use `test_yaml_config` to build advanced configurations, please refer to our documentation here:
+
+- [How to add validations data or suites to a Checkpoint](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint)
+- [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
+
+
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
+```
+
+If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations checkpoint list`.
+
+```bash
+Using v3 (Batch Request) API
+Found 1 Checkpoint.
+ - test_v3_checkpoint
+ ```
+
+Finally, you can check if your migration has worked by running your new V3-style Checkpoint.
+
+```bash
+great_expectations checkpoint run test_v3_checkpoint
+```
+
+If everything is successful, then you should see output similar to below.:
+
+```bash
+Using v3 (Batch Request) API
+Calculating Metrics: 100%|█████████████████████████████████████████████████████████████████████████████| 4/4 [00:00<00:00,  6.67it/s]
+Validation succeeded!
+
+Suite Name                                   Status     Expectations met
+- Titanic.profiled                           ✔ Passed   2 of 2 (100.0 %)
+```
+
+</TabItem>
+</Tabs>
 
 Congratulations! You have successfully migrated your configuration of Great Expectations to be compatible with the V3-API.
 
