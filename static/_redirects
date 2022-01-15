@@ -188,3 +188,4 @@
 /docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_secrets_store https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
 /docs/guides/connecting_to_your_data/advanced/database_credentials https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials
 
+/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_airflow

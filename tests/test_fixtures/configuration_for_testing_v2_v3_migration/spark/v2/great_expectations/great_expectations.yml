@@ -15,15 +15,16 @@ config_version: 2.0
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
 datasources:
   my_datasource:
-    class_name: PandasDatasource
+    class_name: SparkDFDatasource
     module_name: great_expectations.datasource
     data_asset_type:
       module_name: great_expectations.dataset
-      class_name: PandasDataset
+      class_name: SparkDFDataset
     batch_kwargs_generators:
       subdir_reader:
         class_name: SubdirReaderBatchKwargsGenerator
-        base_directory: ../../
+        base_directory: ../../../
+
 
 # This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
