@@ -10,7 +10,7 @@ CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 from util import load_data_into_database
 
 load_data_into_database(
-    table_name="taxi_data",
+    table_name="titanic",
     csv_path="./data/Titanic.csv",
     connection_string=CONNECTION_STRING,
 )
