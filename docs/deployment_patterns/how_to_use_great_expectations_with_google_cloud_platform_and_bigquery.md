@@ -34,10 +34,10 @@ The following diagram shows the recommended components for a Great Expectations 
 
 Relevant documentation for the components can also be found here:
 
-- [How to configure an Expectation store to use GCS](https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs)
-- [How to configure a Validation Result store in GCS](https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs)
-- [How to host and share Data Docs on GCS](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs)
-- Optionally, you can also use a [Secret Manager for GCP Credentials](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
+- [How to configure an Expectation store to use GCS](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs)
+- [How to configure a Validation Result store in GCS](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs)
+- [How to host and share Data Docs on GCS](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs)
+- Optionally, you can also use a [Secret Manager for GCP Credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
 
 :::note Note on V3 Expectations for BigQuery
 
@@ -64,7 +64,7 @@ pip install great-expectations --upgrade
 
 The following sections describe how you can take a basic local configuration of Great Expectations and connect it to Metadata stores on GCP.
 
-The full configuration used in this guide can be found in the [`great-expectations` repository](https://github.com/great-expectations/great_expectations/tests/integration/fixtures/gcp_deployment/) and is also linked at the bottom of this document.
+The full configuration used in this guide can be found in the [`great-expectations` repository](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/fixtures/gcp_deployment/) and is also linked at the bottom of this document.
 
 :::note Note on Trailing Slashes in Metadata Store prefixes
 
@@ -150,7 +150,7 @@ Save the configuration into your DataContext by using the `add_datasource()` fun
 ```
 
 For more details on how to configure the Datasource, and additional information on authentication, please refer to [How to connect to data on GCS using Pandas
-](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas)
+](/docs/guides/connecting_to_your_data/cloud/gcs/pandas)
 
 </TabItem>
 <TabItem value="bigquery">
@@ -175,7 +175,7 @@ Save the configuration into your DataContext by using the `add_datasource()` fun
 ```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L230
 ```
 
-For more details on how to configure the BigQuery Datasource, please refer to [How to connect to a BigQuery database](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery)
+For more details on how to configure the BigQuery Datasource, please refer to [How to connect to a BigQuery database](/docs/guides/connecting_to_your_data/database/bigquery)
 
 </TabItem>
 </Tabs>
@@ -191,7 +191,7 @@ For more details on how to configure the BigQuery Datasource, please refer to [H
   ]}>
 <TabItem value="gcs">
 
-For our example, we will be creating an ExpectationSuite with [instant feedback from a sample Batch of data](https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data), which we will describe in our `BatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly) or using the [User Configurable Profiler](https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`. 
+For our example, we will be creating an ExpectationSuite with [instant feedback from a sample Batch of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data), which we will describe in our `BatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](/docs/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly) or using the [User Configurable Profiler](/docs/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`. 
 
 First, load a batch of data by specifying a `data_asset_name` in a `BatchRequest`.
 
@@ -213,12 +213,12 @@ Lastly, save the ExpectationSuite, which now contains our two Expectations.
 ```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py#L273
 ```
 
-For more details on how to configure the RuntimeBatchRequest, as well as an example of how you can load data by specifying a GCS path to a single CSV, please refer to [How to connect to data on GCS using Pandas](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas)
+For more details on how to configure the RuntimeBatchRequest, as well as an example of how you can load data by specifying a GCS path to a single CSV, please refer to [How to connect to data on GCS using Pandas](/docs/guides/connecting_to_your_data/cloud/gcs/pandas)
 
 </TabItem>
 <TabItem value="bigquery">
 
-For our example, we will be creating our ExpectationSuite with [instant feedback from a sample Batch of data](https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data), which we will describe in our `RuntimeBatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly) or using the [User Configurable Profiler](https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`. 
+For our example, we will be creating our ExpectationSuite with [instant feedback from a sample Batch of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data), which we will describe in our `RuntimeBatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](/docs/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly) or using the [User Configurable Profiler](/docs/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`. 
 
 First, load a batch of data by specifying an SQL query in a `RuntimeBatchRequest` (`SELECT * from demo.taxi_data LIMIT 10` is an example query for our test data and can be replaced with any query you would like).
 
@@ -240,14 +240,14 @@ Lastly, save the ExpectationSuite, which now contains our two Expectations.
 ```python file=../../tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py#L258
 ```
 
-For more details on how to configure the BatchRequest, as well as an example of how you can load data by specifying a table name, please refer to [How to connect to a BigQuery database](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery)
+For more details on how to configure the BatchRequest, as well as an example of how you can load data by specifying a table name, please refer to [How to connect to a BigQuery database](/docs/guides/connecting_to_your_data/database/bigquery)
 
 </TabItem>
 </Tabs>
 
 ### 5. Build and Run a Checkpoint 
 
-For our example, we will create a basic Checkpoint configuration using the `SimpleCheckpoint` class. For [additional examples](https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint), information on [how to add validations, data, or suites to existing checkpoints](https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint), and [more complex configurations](https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config) please refer to the documentation under `How to Guides` -> `Validating your data` -> `Checkpoints`.
+For our example, we will create a basic Checkpoint configuration using the `SimpleCheckpoint` class. For [additional examples](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint), information on [how to add validations, data, or suites to existing checkpoints](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint), and [more complex configurations](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config) please refer to the documentation under `How to Guides` -> `Validating your data` -> `Checkpoints`.
 
 <Tabs
   groupId="connect-to-data-gcs-bigquery"
@@ -324,8 +324,8 @@ We will now take the local GE configuration from [Part 1](#part-1-local-configur
 
 There are a number of ways that Great Expectations can be run in Cloud Composer or Airflow.
 
-1. [Running a Checkpoint in Airflow using a `bash operator`](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow.html#option-1-running-a-checkpoint-with-a-bashoperator)
-2. [Running a Checkpoint in Airflow using a `python operator`](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow.html#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
+1. [Running a Checkpoint in Airflow using a `bash operator`](/docs/deployment_patterns/how_to_use_great_expectations_with_airflow#option-1-running-a-checkpoint-with-a-bashoperator)
+2. [Running a Checkpoint in Airflow using a `python operator`](/docs/deployment_patterns/how_to_use_great_expectations_with_airflow#option-2-running-the-checkpoint-script-output-with-a-pythonoperator)
 3. [Running a Checkpoint in Airflow using a `Airflow operator`](https://github.com/great-expectations/airflow-provider-great-expectations)
 
 For our example, we are going to use the `bash operator` to run the Checkpoint. This portion of the guide can also be found in the following [Walkthrough Video](https://drive.google.com/file/d/1YhEMqSRkp5JDIQA_7fleiKTTlEmYx2K8/view?usp=sharing).
@@ -388,7 +388,7 @@ Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, i
   ]}>
 <TabItem value="gcs">
 
-We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py).
+We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py).
 
 ```python file=../../tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py
 ```
@@ -409,7 +409,7 @@ For more details, please consult the [official documentation for Cloud Composer]
 </TabItem>
 <TabItem value="bigquery">
 
-We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py).
+We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py).
 
 ```python file=../../tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py
 ```
@@ -451,15 +451,15 @@ You've successfully migrated your Great Expectations configuration to Cloud Comp
 
 There are many ways to iterate and improve this initial version, including more sophisticated ways of triggering Checkpoints, building our DAGs and dividing our Data Assets into Batches using DataConnectors. For more information, please refer to the following documentation: 
 
-- [How to run a Checkpoint in Airflow using a `python operator`](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow.html#option-2-running-the-checkpoint-script-output-with-a-pythonoperator).
+- [How to run a Checkpoint in Airflow using a `python operator`](/docs/deployment_patterns/how_to_use_great_expectations_with_airflow#option-2-running-the-checkpoint-script-output-with-a-pythonoperator).
 - [How to run a Checkpoint in Airflow using a `Airflow operator`](https://github.com/great-expectations/airflow-provider-great-expectations)(recommended).
 - [How to trigger the DAG on a schedule](https://cloud.google.com/composer/docs/triggering-dags#schedule).
 - [How to trigger the DAG in response to events](http://airflow.apache.org/docs/apache-airflow/stable/concepts/sensors.html).
-- [How to configure a DataConnector to introspect and partition tables in SQL](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql/).
-- [How to configure a DataConnector to introspect and partition a file system or blob store](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store).
+- [How to configure a DataConnector to introspect and partition tables in SQL](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql/).
+- [How to configure a DataConnector to introspect and partition a file system or blob store](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store).
 
 Also, the following scripts and configurations can be found here:
  
-- Local GE configuration used in this guide can be found in the [`great-expectations` GIT repository](https://github.com/great-expectations/great_expectations/tests/integration/fixtures/gcp_deployment/).
-- [Script to test BigQuery configuration](https://github.com/great-expectations/great_expectations/tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py).
-- [Script to test GCS configuration](https://github.com/great-expectations/great_expectations/tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py).
+- Local GE configuration used in this guide can be found in the [`great-expectations` GIT repository](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/fixtures/gcp_deployment/).
+- [Script to test BigQuery configuration](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py).
+- [Script to test GCS configuration](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py).
