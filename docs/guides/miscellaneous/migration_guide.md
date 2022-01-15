@@ -155,7 +155,15 @@ Now you are ready to manually migrate Datasources and Checkpoints to be compatib
 ### Manually migrate Datasources from V2 to V3
 
 The first manual step needed is to convert the V2-style Datasource to a V3-style one. The following documentation 
-contains examples for data read-in using `pandas` and `spark`. 
+contains examples for data read-in using `pandas`, `spark`, and a database, using `postgresql` as an example. 
+
+:::tip
+
+The configurations for `pandas`, `spark` and `postgresql` shown in this guide are available as part of the `great-expectations` repository. 
+Please feel free to use the complete-and-working configurations found [here](https://github.com/great-expectations/great_expectations/tree/develop/tests/test_fixtures/configuration_for_testing_v2_v3_migration)
+to help with your migration. 
+
+:::
 
 <Tabs
   groupId="configurations-pandas-spark-postgres"
@@ -163,6 +171,7 @@ contains examples for data read-in using `pandas` and `spark`.
   values={[
   {label: 'Pandas', value:'pandas'},
   {label: 'Spark', value:'spark'},
+  {label: 'Database', value:'db'},
   ]}>
 <TabItem value="pandas">
 
@@ -218,6 +227,34 @@ One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSql
 ```
 
 </TabItem>
+
+<TabItem value="db">
+
+
+The V2-style Datasource has:
+  - Data-type specific Datasource, like the `SqlAlchemyDatasource` in our example below.
+  - Data-type specific Datasets, like the `SqlAlchemyDatasource` in our example below.
+
+The V3-style Datasource has:
+  - Datasource that is agnostic to datatype.
+  - Datatype-specific ExecutionEngine, like the `SqlAlchemyExecutionEngine` in our example below.
+  - Data-specific DataConnectors, like the `InferredAssetSqlDataConnector` in our example below.
+
+:::note Note on Datasource in V3
+
+One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSqlalchemyDatasource, which combines functionality of the Datasource and ExecutionEngine to enable [database introspection and partitioning](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql). More examples on using the SimpleSqlalchemyDatasource can be found [here](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
+
+:::
+
+#### V2-Style Datasource
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/great_expectations.yml#L16-L23
+```
+
+#### V3-Style Datasource
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/great_expectations.yml#L16-L32
+```
+
+</TabItem>
 </Tabs>
 
 
@@ -244,6 +281,7 @@ The example below demonstrates how a V2 to V3 migration can be performed for an 
   values={[
   {label: 'Pandas', value:'pandas'},
   {label: 'Spark', value:'spark'},
+  {label: 'Database', value:'db'},
   ]}>
 
 
@@ -385,6 +423,74 @@ Suite Name                                   Status     Expectations met
 - Titanic.profiled                           ✔ Passed   2 of 2 (100.0 %)
 ```
 
+</TabItem>
+<TabItem value="db">
+
+The example V2-style Checkpoint contains:
+  - A `LegacyCheckpoint`, with no `config_version` (versions were introduced as part of V3-style Checkpoints).
+  - A `validation_operator_name` that contains a reference to Validation Operators that are configured in the `great_expectations.yml` file, like `action_list_operator` in our example below.
+  - Reference to `batch_kwargs`, like in our example below.
+
+The example V3-style Checkpoint contains:
+  - A `Checkpoint` class with `config_version` populated (`1.0` in our example below).
+  - A list of `validations`, which contain [BatchRequests](/docs/reference/datasources#batches) that will be used to run the Checkpoint.
+  - A `action_list`, which contain a list of actions associated with the Validation Results (e.g., saving them for a later review, sending notifications in case of failures, etc.). These were known as Validation Operators in V2-style Checkpoints.
+
+:::note Migrating ExpectationSuites
+  
+  `ExpectationSuites` that were created in the V2-API will work in the V3-API **without** needing to be modified. However, `ExpectationSuites` also contain `metadata` describing the `batch` that was used to create the original `ExpectationSuite` object (under the `citations` field). For a suite that was created in V2, this metadata will contain `batch_kwargs`, and V3 suites will contain a `batch_request`. 
+  
+  If you choose to do so, the `citation` metadata can be migrated using the same pattern for migrating `batch_kwargs` to `batch_request` described below. 
+
+:::
+
+#### V2-Style Checkpoint
+
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L13
+```
+
+The Validation Operator named `action_list_operator` would be part of the `great_expectations.yml` file.
+
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/great_expectations.yml#L56-L66
+```
+
+#### V3-Style Checkpoint
+
+Here is the equivalent configuration in V3-style. Notice that the Validation Operators have been migrated into the `action_list` field in the Checkpoint configuration. In addition, you will also need to remove the Validation Operations from `great_expectations.yml` as a manual step.  Also, notice the `batch_request` that refers to the data asset rather than `batch_kwargs`.
+
+For additional examples on how to configure V3-style checkpoints, including how to use `test_yaml_config` to build advanced configurations, please refer to our documentation here:
+
+- [How to add validations data or suites to a Checkpoint](/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint)
+- [How to configure a new Checkpoint using test_yaml_config](/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config)
+
+
+```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L35
+```
+
+If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations checkpoint list`.
+
+```bash
+Using v3 (Batch Request) API
+Found 1 Checkpoint.
+ - test_v3_checkpoint
+ ```
+
+Finally, you can check if your migration has worked by running your new V3-style Checkpoint.
+
+```bash
+great_expectations checkpoint run test_v3_checkpoint
+```
+
+If everything is successful, then you should see output similar to below.:
+
+```bash
+Using v3 (Batch Request) API
+Calculating Metrics: 100%|████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00<00:00, 604.83it/s]
+Validation succeeded!
+
+Suite Name                                   Status     Expectations met
+- Titanic.profiled                           ✔ Passed   2 of 2 (100.0 %)
+```
 </TabItem>
 </Tabs>
 
