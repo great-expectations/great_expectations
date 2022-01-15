@@ -1,15 +1,10 @@
-# This pipeline is meant to run the GE test suite with an experimental test runner strategy.
-# The significant changes between this YAML and the primary azure-pipelines.yml file are:
-#  - Utilizes a custom script to filter the test files selected and passed on to pytest
-#  - Removes stages that aren't relevant to testing this strategy (i.e. usage stats)
-#  - Only tests Python 3.8 to improve performance
+# TODO(cdkini): Flesh out explanation.
 
 trigger:
   branches:
     include:
     - pre_pr-*
     - develop
-    - main
 
 resources:
   containers:
@@ -107,6 +102,19 @@ stages:
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
           matrix:
+            Python36-Pandas023:
+              python.version: '3.6'
+              numpy.version: '1.14.1'
+              pandas.version: '0.23.4'
+              scipy.version: '0.19.0'
+              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+            Python37-Pandas025:
+              python.version: '3.7'
+              numpy.version: '1.14.1'
+              pandas.version: '0.25.3'
+              # numpy 1.20 and pandas 0.25.3 do not coexist happily
+              scipy.version: '0.19.0'
+              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
             Python38-PandasLatest:
               python.version: '3.8'
               numpy.version: 'latest'
@@ -153,7 +161,7 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --tests tests --branch 'origin/develop' --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
@@ -181,8 +189,20 @@ stages:
 
         strategy:
           matrix:
+            Python36:
+              python.version: '3.6'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+            Python37:
+              python.version: '3.7'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
             Python38:
               python.version: '3.8'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+            Python39:
+              python.version: '3.9'
               pandas.version: 'latest'
               GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
 
@@ -222,7 +242,7 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --tests tests --branch 'origin/develop' --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
@@ -238,6 +258,38 @@ stages:
               codeCoverageTool: Cobertura
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+  - stage: usage_stats_integration
+    dependsOn: [scope_check, lint]
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: test_usage_stats_messages
+        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==20.2.4
+            displayName: 'Update pip'
+
+          - script: |
+              pip install --requirement requirements-dev-base.txt
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              # Specifically avoid using dgtest here because this section is quick to validate
+              pip install pytest pytest-azurepipelines
+              pytest --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+            displayName: 'pytest'
 
   - stage: db_integration
     pool:
@@ -291,7 +343,7 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --tests tests --branch 'origin/develop' --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
@@ -330,13 +382,13 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --tests tests --branch 'origin/develop' --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
 
   - stage: cli_integration
-    dependsOn: [scope_check, lint, required, db_integration]
+    dependsOn: [scope_check, lint, usage_stats_integration, required, db_integration]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -377,6 +429,104 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --tests tests --branch 'origin/develop' --filter 'tests/cli' --aws-integration -v
+              dgtest run great_expectations --filter 'tests/cli' --aws-integration -v
 
             displayName: 'pytest'
+
+  - stage: deploy_gallery
+    condition: and(succeeded(), or(eq(variables.isMain, true), eq(variables.isDevelop, true)))
+    pool:
+      vmImage: 'ubuntu-latest'
+    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
+
+    jobs:
+      - job: build_gallery
+        variables:
+          python.version: '3.7'
+          GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+          GE_pytest_opts: ''
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+            displayName: 'Update pip'
+
+          - script: |
+              sudo apt-get install -y pandoc
+              pip install pypandoc
+            displayName: 'Install pandoc'
+
+          - script: |
+              pip install $(GE_pytest_pip_opts)
+              pip install --requirement requirements.txt
+              pip install  .
+            displayName: 'Install dependencies'
+
+          - bash: python ./build_gallery.py
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Build Gallery'
+
+          - task: S3Upload@1
+            inputs:
+              regionName: 'us-east-2'
+              awsCredentials: 'aws-ci-great-expectations'
+              bucketName: 'superconductive-public'
+              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
+              globExpressions: '*.json'
+              targetFolder: 'static/gallery/'
+              filesAcl: 'public-read'
+
+          - bash: |
+              echo "About to trigger webhook: $GALLERY_BUILD_HOOK"
+              curl -X POST -d {} $GALLERY_BUILD_HOOK
+            displayName: 'Trigger gallery build'
+            env:
+              GALLERY_BUILD_HOOK: $(gallerywebhook)
+
+  - stage: deploy
+    condition: and(succeeded(), eq(variables.isMain, true))
+    pool:
+      vmImage: 'ubuntu-latest'
+    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
+
+    jobs:
+      - job: deploy
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+            displayName: 'Update pip'
+
+          - script: |
+              pip install twine
+              pip install wheel
+              echo "Creating tag: $(cat ./great_expectations/deployment_version)"
+              git config --global user.email "team@greatexpectations.io"
+              git config --global user.name "Great Expectations"
+              git tag --annotate $(cat ./great_expectations/deployment_version) -m "$(cat ./great_expectations/deployment_version)" || echo "tag exists, skipping"
+            displayName: 'Add new version tag'
+
+          # Build the python distribution from source
+          - script: |
+              python setup.py sdist
+              python setup.py bdist_wheel
+            displayName: 'Build distribution'
+
+          - task: TwineAuthenticate@1
+            inputs:
+              pythonUploadServiceConnection: pypi
+
+          # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
+          - script: |
+              python -m twine upload -r great-expectations --config-file $(PYPIRC_PATH) dist/*
+            displayName: 'Upload'

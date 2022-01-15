@@ -1,8 +1,9 @@
+# TODO(cdkini): Flesh out explanation.
+# TODO(cdkini): Add scheduled runs in YAML or here: https://dev.azure.com/great-expectations/great_expectations/_apps/hub/ms.vss-ciworkflow.build-ci-hub?_a=edit-build-definition&id=1&view=Tab_Triggers
+
 trigger:
   branches:
     include:
-    - pre_pr-*
-    - develop
     - main
 
 resources:
