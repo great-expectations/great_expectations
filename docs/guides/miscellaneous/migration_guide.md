@@ -173,7 +173,6 @@ to help with your migration.
   {label: 'Spark', value:'spark'},
   {label: 'Database', value:'db'},
   ]}>
-<TabItem value="pandas">
 
 The V2-style Datasource has:
   - Data-type specific Datasource, like the `PandasDatasource` in our example below.
@@ -256,7 +255,6 @@ One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSql
 
 </TabItem>
 </Tabs>
-
 
 Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](/docs/guides/connecting_to_your_data/index) for examples on V3-style Datasource configurations that will suit your needs.
 
@@ -492,6 +490,7 @@ Suite Name                                   Status     Expectations met
 - Titanic.profiled                           ✔ Passed   2 of 2 (100.0 %)
 ```
 </TabItem>
+
 </Tabs>
 
 Congratulations! You have successfully migrated your configuration of Great Expectations to be compatible with the V3-API.
