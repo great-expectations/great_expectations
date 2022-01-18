@@ -189,60 +189,70 @@ dockerized_db_tests = [
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.SQLALCHEMY,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mssql_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.MSSQL,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mssql_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.MSSQL,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.MYSQL,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.MYSQL,
     },
     {
@@ -269,12 +279,14 @@ cloud_snowflake_tests = [
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
+        "util_script": "tests/test_utils.py",
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
+        "util_script": "tests/test_utils.py",
     },
 ]
 
@@ -345,12 +357,14 @@ cloud_bigquery_tests = [
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.BIGQUERY,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.BIGQUERY,
     },
     {
@@ -449,12 +463,14 @@ cloud_redshift_tests = [
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    #     "util_script": "tests/test_utils.py",
     # },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    #     "util_script": "tests/test_utils.py",
     # },
 ]
 
@@ -604,6 +620,16 @@ def _execute_integration_test(test_configuration, tmp_path):
         )
         script_path = os.path.join(tmp_path, "test_script.py")
         shutil.copyfile(script_source, script_path)
+
+        # Util Script
+        if test_configuration.get("util_script") is not None:
+            script_source = os.path.join(
+                base_dir,
+                test_configuration.get("util_script"),
+            )
+            os.makedirs(os.path.join(tmp_path, "tests/"))
+            util_script_path = os.path.join(tmp_path, "tests/test_utils.py")
+            shutil.copyfile(script_source, util_script_path)
 
         # Check initial state
 
