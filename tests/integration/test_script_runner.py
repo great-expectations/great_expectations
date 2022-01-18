@@ -265,12 +265,14 @@ cloud_snowflake_tests = [
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
+        "util_script": "tests/test_utils.py",
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         "extra_backend_dependencies": BackendDependencies.SNOWFLAKE,
+        "util_script": "tests/test_utils.py",
     },
 ]
 
@@ -341,12 +343,14 @@ cloud_bigquery_tests = [
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.BIGQUERY,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.BIGQUERY,
     },
     {
@@ -445,24 +449,26 @@ cloud_redshift_tests = [
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    #     "util_script": "tests/test_utils.py",
     # },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    #     "util_script": "tests/test_utils.py",
     # },
 ]
 
 # populate docs_test_matrix with sub-lists
-# docs_test_matrix += local_tests
+docs_test_matrix += local_tests
 docs_test_matrix += dockerized_db_tests
-# docs_test_matrix += cloud_snowflake_tests
-# docs_test_matrix += cloud_gcp_tests
-# docs_test_matrix += cloud_bigquery_tests
-# docs_test_matrix += cloud_azure_tests
-# docs_test_matrix += cloud_s3_tests
-# docs_test_matrix += cloud_redshift_tests
+docs_test_matrix += cloud_snowflake_tests
+docs_test_matrix += cloud_gcp_tests
+docs_test_matrix += cloud_bigquery_tests
+docs_test_matrix += cloud_azure_tests
+docs_test_matrix += cloud_s3_tests
+docs_test_matrix += cloud_redshift_tests
 
 integration_test_matrix = [
     {
