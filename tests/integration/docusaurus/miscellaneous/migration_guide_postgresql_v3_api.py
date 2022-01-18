@@ -7,12 +7,13 @@ import great_expectations as ge
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 
 # This utility is not for general use. It is only to support testing.
-from util import load_data_into_database
+from tests.test_utils import load_data_into_test_database
 
-load_data_into_database(
+load_data_into_test_database(
     table_name="titanic",
     csv_path="./data/Titanic.csv",
     connection_string=CONNECTION_STRING,
+    load_full_dataset=True,
 )
 
 context = ge.get_context()
@@ -96,5 +97,4 @@ assert actual_checkpoint_yaml == yaml.safe_load(expected_checkpoint_yaml)
 
 # run checkpoint
 results = context.run_checkpoint(checkpoint_name="test_v3_checkpoint")
-
 assert results["success"] is True
