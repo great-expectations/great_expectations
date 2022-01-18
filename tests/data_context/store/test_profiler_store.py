@@ -6,15 +6,15 @@ import pytest
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
-from great_expectations.data_context.types.base import (
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+)
+from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
     ExpectationConfigurationBuilderConfig,
     ParameterBuilderConfig,
     RuleBasedProfilerConfig,
     RuleConfig,
-)
-from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import build_profiler_store_using_filesystem
@@ -98,31 +98,6 @@ def test_profiler_store_set_adds_valid_key(
     assert len(empty_profiler_store.list_keys()) == 1
 
 
-def test_profiler_store_remove_key_deletes_value(
-    populated_profiler_store: ProfilerStore, profiler_key: ConfigurationIdentifier
-):
-    assert len(populated_profiler_store.list_keys()) == 1
-    populated_profiler_store.remove_key(key=profiler_key)
-    assert len(populated_profiler_store.list_keys()) == 0
-
-
-def test_profiler_store_self_check_report(
-    populated_profiler_store: ProfilerStore, store_name: str, profiler_name: str
-):
-    data = populated_profiler_store.self_check()
-    self_check_report = convert_to_json_serializable(data=data)
-    assert self_check_report == {
-        "config": {
-            "class_name": "ProfilerStore",
-            "module_name": "great_expectations.data_context.store.profiler_store",
-            "overwrite_existing": False,
-            "store_name": store_name,
-        },
-        "keys": [profiler_name],
-        "len_keys": 1,
-    }
-
-
 def test_profiler_store_alters_filesystem(
     empty_data_context: DataContext,
     store_name: str,
@@ -158,7 +133,30 @@ def test_profiler_store_alters_filesystem(
     )
 
     assert len(profiler_store.list_keys()) == 1
-
     profiler_store.remove_key(key=key)
-
     assert len(profiler_store.list_keys()) == 0
+
+    data = profiler_store.self_check()
+    self_check_report = convert_to_json_serializable(data=data)
+
+    # Drop dynamic value to ensure appropriate assert
+    self_check_report["config"]["store_backend"].pop("base_directory")
+
+    assert self_check_report == {
+        "config": {
+            "class_name": "ProfilerStore",
+            "module_name": "great_expectations.data_context.store.profiler_store",
+            "overwrite_existing": True,
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "filepath_suffix": ".yml",
+                "fixed_length_key": False,
+                "module_name": "great_expectations.data_context.store.tuple_store_backend",
+                "platform_specific_separator": True,
+                "suppress_store_backend_id": False,
+            },
+            "store_name": "profiler_store",
+        },
+        "keys": [],
+        "len_keys": 0,
+    }
