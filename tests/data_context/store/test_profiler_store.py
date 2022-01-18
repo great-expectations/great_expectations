@@ -98,7 +98,7 @@ def test_profiler_store_set_adds_valid_key(
     assert len(empty_profiler_store.list_keys()) == 1
 
 
-def test_profiler_store_alters_filesystem(
+def test_profiler_store_integration(
     empty_data_context: DataContext,
     store_name: str,
     profiler_name: str,
