@@ -7,9 +7,14 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from great_expectations.data_context.store import CheckpointStore, StoreBackend
+from great_expectations.data_context.store import (
+    CheckpointStore,
+    ProfilerStore,
+    StoreBackend,
+)
 from great_expectations.data_context.store.util import (
     build_checkpoint_store_using_store_backend,
+    build_profiler_store_using_store_backend,
     delete_checkpoint_config_from_store_backend,
     delete_config_from_store_backend,
     load_checkpoint_config_from_store_backend,
@@ -270,17 +275,16 @@ def build_checkpoint_store_using_filesystem(
     )
 
 
-# TODO(cdkini): TBD
 def build_profiler_store_using_filesystem(
     store_name: str,
     base_directory: str,
     overwrite_existing: bool = False,
-) -> CheckpointStore:
+) -> ProfilerStore:
     store_config: dict = {"base_directory": base_directory}
     store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
         **store_config
     )
-    return build_checkpoint_store_using_store_backend(
+    return build_profiler_store_using_store_backend(
         store_name=store_name,
         store_backend=store_backend_obj,
         overwrite_existing=overwrite_existing,
