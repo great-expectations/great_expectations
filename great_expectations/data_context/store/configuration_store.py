@@ -95,9 +95,7 @@ class ConfigurationStore(Store):
             # GeCloudStoreBackend expects a json str
             config_schema = value.get_schema_class()()
             return config_schema.dump(value)
-
-        val = value.to_yaml_str()
-        return val
+        return value.to_yaml_str()
 
     def deserialize(self, key, value):
         config = value

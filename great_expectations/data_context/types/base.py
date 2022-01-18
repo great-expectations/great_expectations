@@ -30,6 +30,7 @@ from great_expectations.marshmallow__shade import (
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfigSchema
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
 
@@ -99,11 +100,6 @@ class BaseYamlConfig(SerializableDictDot):
             raise
 
     def _get_schema_validated_updated_commented_map(self) -> CommentedMap:
-        print("COMMENTED MAP", self._commented_map, "\n")
-        a = self._get_schema_instance()
-        print("SCHEMA INSTANCE", a, "\n")
-        b = a.dump(self)
-        print("DUMP", b, "\n")
         commented_map: CommentedMap = copy.deepcopy(self._commented_map)
         commented_map.update(self._get_schema_instance().dump(self))
         return commented_map
@@ -2561,175 +2557,4 @@ notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()
-
-
-class DomainBuilderConfig(DictDot):
-    def __init__(self, class_name, module_name=None, batch_request=None):
-        self.class_name = class_name
-        self.module_name = module_name
-        self.batch_request = batch_request
-
-
-class DomainBuilderConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
-    # __config_class__ = DomainBuilderConfig
-
-    class_name = fields.String(required=True)
-    module_name = fields.String(
-        required=False,
-        all_none=True,
-        missing="great_expectations.rule_based_profiler.domain_builder",
-    )
-    batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
-
-
-class ParameterBuilderConfig(DictDot):
-    def __init__(self, name, class_name, module_name=None, batch_request=None):
-        self.name = name
-        self.class_name = class_name
-        self.module_name = module_name
-        self.batch_request = batch_request
-
-
-class ParameterBuilderConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
-    # __config_class__ = ParameterBuilderConfig
-
-    name = fields.String(required=True)
-    class_name = fields.String(required=True)
-    module_name = fields.String(
-        required=False,
-        all_none=True,
-        missing="great_expectations.rule_based_profiler.parameter_builder",
-    )
-    batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
-
-
-class ExpectationConfigurationBuilderConfig(DictDot):
-    def __init__(
-        self, expectation_type, class_name, module_name=None, mostly=None, meta=None
-    ):
-        self.expectation_type = expectation_type
-        self.class_name = class_name
-        self.module_name = module_name
-        self.mostly = mostly
-        self.meta = meta
-
-
-class ExpectationConfigurationBuilderConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
-    # __config_class__ = ExpectationConfigurationBuilderConfig
-
-    class_name = fields.String(required=True)
-    module_name = fields.String(
-        required=False,
-        all_none=True,
-        missing="great_expectations.rule_based_profiler.expectation_configuration_builder",
-    )
-    expectation_type = fields.String(required=True)
-    mostly = fields.Float(required=False, allow_none=True)
-    meta = fields.Dict(required=False, allow_none=True)
-
-
-class RuleConfig(DictDot):
-    def __init__(
-        self,
-        name,
-        domain_builder,
-        parameter_builders,
-        expectation_configuration_builders,
-    ):
-        self.name = name
-        self.domain_builder = domain_builder
-        self.parameter_builders = parameter_builders
-        self.expectation_configuration_builders = expectation_configuration_builders
-
-
-class RuleConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
-    # __config_class__ = RuleConfig
-
-    name = fields.String(required=True)
-    domain_builder = fields.Nested(DomainBuilderConfigSchema, required=True)
-    parameter_builders = fields.List(
-        cls_or_instance=fields.Nested(ParameterBuilderConfigSchema, required=True),
-        required=True,
-    )
-    expectation_configuration_builders = fields.List(
-        cls_or_instance=fields.Nested(
-            ExpectationConfigurationBuilderConfigSchema, required=True
-        ),
-        required=True,
-    )
-
-
-# @dataclass(frozen=False)
-class RuleBasedProfilerConfig(BaseYamlConfig):
-    def __init__(
-        self,
-        name: str,
-        config_version: float,
-        variables: Optional[Dict[str, RuleConfig]] = None,
-        rules: Optional[Dict[str, Any]] = None,
-        commented_map: Optional[CommentedMap] = None,
-    ):
-        self.name = name
-        self.config_version = config_version
-        self.variables = variables
-        self.rules = rules
-
-        super().__init__(commented_map=commented_map)
-
-    # name: str
-    # config_version: float
-    # rules: Dict[str, RuleConfig]
-    # variables: Optional[Dict[str, Any]] = None
-    # commented_map: InitVar[Optional[CommentedMap]] = None
-
-    # def __post_init__(self, commented_map: Optional[CommentedMap]):
-    #     # Required to fully set up the commented map and enable serialization
-    #     super().__init__(commented_map=commented_map)
-    #     # if commented_map is None:
-    #     #     commented_map = CommentedMap()
-    #     # object.__setattr__(self, "_commented_map", commented_map)
-
-    @classmethod
-    def get_config_class(cls):
-        return cls
-
-    @classmethod
-    def get_schema_class(cls):
-        return RuleBasedProfilerConfigSchema
-
-
-class RuleBasedProfilerConfigSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
-    # __config_class__ = RuleBasedProfilerConfig
-
-    name = fields.String(required=True)
-    config_version = fields.Float(
-        required=True,
-        validate=lambda x: x == 1.0,
-        error_messages={
-            "invalid": "config version is not supported; it must be 1.0 per the current version of Great Expectations"
-        },
-    )
-    variables = fields.Dict(keys=fields.String(), required=False, allow_none=True)
-    rules = fields.Dict(
-        keys=fields.String(),
-        values=fields.Nested(RuleConfigSchema, required=True),
-        required=True,
-    )
-
-
 ruleBasedProfilerConfigSchema = RuleBasedProfilerConfigSchema()
