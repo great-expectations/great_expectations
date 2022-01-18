@@ -132,9 +132,10 @@ class Checkpoint:
         config: Optional[Union[CheckpointConfig, dict]] = None,
         runtime_kwargs: Optional[dict] = None,
     ) -> CheckpointConfig:
-        runtime_kwargs = runtime_kwargs or {}
         if config is None:
             config = self.config
+
+        runtime_kwargs = runtime_kwargs or {}
 
         if isinstance(config, dict):
             config = CheckpointConfig(**config)
