@@ -304,7 +304,6 @@ def build_profiler_store_using_filesystem(
         store_backend=store_backend_obj,
         overwrite_existing=overwrite_existing,
     )
-    print("BASE DIRECTORY", base_directory)
     return store
 
 
