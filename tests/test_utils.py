@@ -7,6 +7,21 @@ import numpy as np
 import pandas as pd
 import pytest
 
+logger = logging.getLogger(__name__)
+
+try:
+    import sqlalchemy as sa
+    from sqlalchemy.exc import SQLAlchemyError
+
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    sa = None
+    reflection = None
+    Table = None
+    Select = None
+
 from great_expectations.data_context.store import CheckpointStore, StoreBackend
 from great_expectations.data_context.store.util import (
     build_checkpoint_store_using_store_backend,
@@ -380,3 +395,39 @@ def delete_config_from_filesystem(
         store_backend=store_backend_obj,
         configuration_key=configuration_key,
     )
+
+
+def load_data_into_test_database(
+    table_name: str, csv_path: str, connection_string: str
+) -> None:
+    """
+    Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
+    This includes local Dockerized DBs like postgres, but also cloud-dbs like BigQuery and Redshift.
+    """
+    import pandas as pd
+
+    if sa:
+        engine = sa.create_engine(connection_string)
+    else:
+        logger.debug(
+            "Attempting to load data in to tests SqlAlchemy database, but unable to load SqlAlchemy context; "
+            "install optional sqlalchemy dependency for support."
+        )
+        return
+    try:
+        connection = engine.connect()
+        print(f"Dropping table {table_name}")
+        connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+        df = pd.read_csv(csv_path)
+        # Improving test performance by only loading the first 10 rows of our test data into the db
+        df = df.head(10)
+        print(f"Creating table {table_name} from {csv_path}")
+        df.to_sql(name=table_name, con=engine, index=False)
+    except SQLAlchemyError as e:
+        logger.error(
+            f"""Docs integration tests encountered an error while loading test-data into test-database."""
+        )
+        raise
+    finally:
+        connection.close()
+        engine.dispose()
