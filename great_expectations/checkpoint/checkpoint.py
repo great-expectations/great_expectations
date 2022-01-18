@@ -135,6 +135,7 @@ class Checkpoint:
         runtime_kwargs = runtime_kwargs or {}
         if config is None:
             config = self.config
+
         if isinstance(config, dict):
             config = CheckpointConfig(**config)
 
