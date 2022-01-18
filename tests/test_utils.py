@@ -398,7 +398,10 @@ def delete_config_from_filesystem(
 
 
 def load_data_into_test_database(
-    table_name: str, csv_path: str, connection_string: str
+    table_name: str,
+    csv_path: str,
+    connection_string: str,
+    load_full_dataset: bool = False,
 ) -> None:
     """
     Utility method that is used in loading test data into databases that can be accessed through SqlAlchemy.
@@ -419,8 +422,9 @@ def load_data_into_test_database(
         print(f"Dropping table {table_name}")
         connection.execute(f"DROP TABLE IF EXISTS {table_name}")
         df = pd.read_csv(csv_path)
-        # Improving test performance by only loading the first 10 rows of our test data into the db
-        df = df.head(10)
+        if not load_full_dataset:
+            # Improving test performance by only loading the first 10 rows of our test data into the db
+            df = df.head(10)
         print(f"Creating table {table_name} from {csv_path}")
         df.to_sql(name=table_name, con=engine, index=False)
     except SQLAlchemyError as e:
