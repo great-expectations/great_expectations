@@ -173,6 +173,7 @@ to help with your migration.
   {label: 'Spark', value:'spark'},
   {label: 'Database', value:'db'},
   ]}>
+<TabItem value="pandas">
 
 The V2-style Datasource has:
   - Data-type specific Datasource, like the `PandasDatasource` in our example below.
