@@ -45,6 +45,7 @@ def construct_data_context_config():
         validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
         evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
+        profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         plugins_directory: Optional[str] = None,
         stores: Optional[Dict] = None,
         validation_operators: Optional[Dict] = None,
@@ -64,6 +65,7 @@ def construct_data_context_config():
             "validations_store_name": validations_store_name,
             "evaluation_parameter_store_name": evaluation_parameter_store_name,
             "checkpoint_store_name": checkpoint_store_name,
+            "profiler_store_name": profiler_store_name,
             "plugins_directory": plugins_directory,
             "validation_operators": validation_operators,
             "stores": stores,
@@ -138,6 +140,7 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
         },
         store_backend_defaults=store_backend_defaults,
         checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
+        profiler_store_name=store_backend_defaults.profiler_store_name,
     )
 
     desired_config = construct_data_context_config(
@@ -210,6 +213,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
                 "prefix": "checkpoints",
             },
         },
+        "profiler_S3_store": {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "profilers",
+            },
+        },
     }
     desired_data_docs_sites_config = {
         "s3_site": {
@@ -233,6 +244,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
         validations_store_name="validations_S3_store",
         evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         checkpoint_store_name="checkpoint_S3_store",
+        profiler_store_name="profiler_S3_store",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -263,14 +275,17 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         validations_store_bucket_name="custom_validations_store_bucket_name",
         data_docs_bucket_name="custom_data_docs_store_bucket_name",
         checkpoint_store_bucket_name="custom_checkpoint_store_bucket_name",
+        profiler_store_bucket_name="custom_profiler_store_bucket_name",
         expectations_store_prefix="custom_expectations_store_prefix",
         validations_store_prefix="custom_validations_store_prefix",
         data_docs_prefix="custom_data_docs_prefix",
         checkpoint_store_prefix="custom_checkpoint_store_prefix",
+        profiler_store_prefix="custom_profiler_store_prefix",
         expectations_store_name="custom_expectations_S3_store_name",
         validations_store_name="custom_validations_S3_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_S3_store_name",
+        profiler_store_name="custom_profiler_S3_store_name",
     )
     data_context_config = DataContextConfig(
         datasources={
@@ -321,6 +336,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
                 "prefix": "custom_checkpoint_store_prefix",
             },
         },
+        "custom_profiler_S3_store_name": {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "bucket": "custom_profiler_store_bucket_name",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "custom_profiler_store_prefix",
+            },
+        },
     }
     desired_data_docs_sites_config = {
         "s3_site": {
@@ -344,6 +367,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         validations_store_name="custom_validations_S3_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_S3_store_name",
+        profiler_store_name="custom_profiler_S3_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -403,6 +427,9 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
     desired_config["stores"][desired_config["checkpoint_store_name"]]["store_backend"][
         "root_directory"
     ] = test_root_directory
+    desired_config["stores"][desired_config["profiler_store_name"]]["store_backend"][
+        "root_directory"
+    ] = test_root_directory
     desired_config["data_docs_sites"]["local_site"]["store_backend"][
         "root_directory"
     ] = test_root_directory
@@ -442,6 +469,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         },
         store_backend_defaults=store_backend_defaults,
         checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
+        profiler_store_name=store_backend_defaults.profiler_store_name,
     )
 
     # Create desired config
@@ -526,6 +554,15 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
                 "prefix": "checkpoints",
             },
         },
+        "profiler_GCS_store": {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "project": "my_default_project",
+                "class_name": "TupleGCSStoreBackend",
+                "prefix": "profilers",
+            },
+        },
     }
     desired_data_docs_sites_config = {
         "gcs_site": {
@@ -549,6 +586,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         expectations_store_name="expectations_GCS_store",
         validations_store_name="validations_GCS_store",
         checkpoint_store_name="checkpoint_GCS_store",
+        profiler_store_name="profiler_GCS_store",
         evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
@@ -581,18 +619,22 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         validations_store_bucket_name="custom_validations_store_bucket_name",
         data_docs_bucket_name="custom_data_docs_store_bucket_name",
         checkpoint_store_bucket_name="custom_checkpoint_store_bucket_name",
+        profiler_store_bucket_name="custom_profiler_store_bucket_name",
         expectations_store_project_name="custom_expectations_store_project_name",
         validations_store_project_name="custom_validations_store_project_name",
         data_docs_project_name="custom_data_docs_store_project_name",
         checkpoint_store_project_name="custom_checkpoint_store_project_name",
+        profiler_store_project_name="custom_profiler_store_project_name",
         expectations_store_prefix="custom_expectations_store_prefix",
         validations_store_prefix="custom_validations_store_prefix",
         data_docs_prefix="custom_data_docs_prefix",
         checkpoint_store_prefix="custom_checkpoint_store_prefix",
+        profiler_store_prefix="custom_profiler_store_prefix",
         expectations_store_name="custom_expectations_GCS_store_name",
         validations_store_name="custom_validations_GCS_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_GCS_store_name",
+        profiler_store_name="custom_profiler_GCS_store_name",
     )
     data_context_config = DataContextConfig(
         datasources={
@@ -646,6 +688,15 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
                 "prefix": "custom_checkpoint_store_prefix",
             },
         },
+        "custom_profiler_GCS_store_name": {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "bucket": "custom_profiler_store_bucket_name",
+                "project": "custom_profiler_store_project_name",
+                "class_name": "TupleGCSStoreBackend",
+                "prefix": "custom_profiler_store_prefix",
+            },
+        },
     }
     desired_data_docs_sites_config = {
         "gcs_site": {
@@ -669,6 +720,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         validations_store_name="custom_validations_GCS_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_GCS_store_name",
+        profiler_store_name="custom_profiler_GCS_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -768,6 +820,20 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
                 },
             },
         },
+        "profiler_database_store": {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "class_name": "DatabaseStoreBackend",
+                "credentials": {
+                    "drivername": "postgresql",
+                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
+                    "port": "65432",
+                    "username": "ge_tutorials",
+                    "password": "ge_tutorials",
+                    "database": "ge_tutorials",
+                },
+            },
+        },
     }
     desired_data_docs_sites_config = {
         "local_site": {
@@ -789,6 +855,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
         expectations_store_name="expectations_database_store",
         validations_store_name="validations_database_store",
         checkpoint_store_name="checkpoint_database_store",
+        profiler_store_name="profiler_database_store",
         evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
@@ -847,10 +914,19 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
             "password": "custom_checkpoint_store_password",
             "database": "custom_checkpoint_store_database",
         },
+        profiler_store_credentials={
+            "drivername": "custom_profiler_store_drivername",
+            "host": "custom_profiler_store_host",
+            "port": "custom_profiler_store_port",
+            "username": "custom_profiler_store_username",
+            "password": "custom_profiler_store_password",
+            "database": "custom_profiler_store_database",
+        },
         expectations_store_name="custom_expectations_database_store_name",
         validations_store_name="custom_validations_database_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_database_store_name",
+        profiler_store_name="custom_profiler_database_store_name",
     )
     data_context_config = DataContextConfig(
         datasources={
@@ -919,6 +995,20 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
                 },
             },
         },
+        "custom_profiler_database_store_name": {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "class_name": "DatabaseStoreBackend",
+                "credentials": {
+                    "database": "custom_profiler_store_database",
+                    "drivername": "custom_profiler_store_drivername",
+                    "host": "custom_profiler_store_host",
+                    "password": "custom_profiler_store_password",
+                    "port": "custom_profiler_store_port",
+                    "username": "custom_profiler_store_username",
+                },
+            },
+        },
     }
     desired_data_docs_sites_config = {
         "local_site": {
@@ -941,6 +1031,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         validations_store_name="custom_validations_database_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
         checkpoint_store_name="custom_checkpoint_database_store_name",
+        profiler_store_name="custom_profiler_database_store_name",
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
     )
@@ -1035,11 +1126,20 @@ def test_override_general_defaults(
                     "prefix": "REPLACE_ME",
                 },
             },
+            "profiler_S3_store": {
+                "class_name": "ProfilerStore",
+                "store_backend": {
+                    "class_name": "TupleS3StoreBackend",
+                    "bucket": "REPLACE_ME",
+                    "prefix": "REPLACE_ME",
+                },
+            },
         },
         expectations_store_name="custom_expectations_store_name",
         validations_store_name="custom_validations_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
         checkpoint_store_name="checkpoint_S3_store",
+        profiler_store_name="profiler_S3_store",
         data_docs_sites={
             "s3_site": {
                 "class_name": "SiteBuilder",
@@ -1127,6 +1227,14 @@ def test_override_general_defaults(
                 "prefix": "REPLACE_ME",
             },
         },
+        "profiler_S3_store": {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "bucket": "REPLACE_ME",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "REPLACE_ME",
+            },
+        },
     }
 
     desired_data_docs_sites_config = {
@@ -1183,6 +1291,7 @@ def test_override_general_defaults(
         validations_store_name="custom_validations_store_name",
         evaluation_parameter_store_name="custom_evaluation_parameter_store_name",
         checkpoint_store_name="checkpoint_S3_store",
+        profiler_store_name="profiler_S3_store",
         stores=desired_stores,
         validation_operators=desired_validation_operators,
         data_docs_sites=desired_data_docs_sites_config,
@@ -1257,6 +1366,14 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
                 "prefix": "checkpoints",
             },
         },
+        "profiler_S3_store": {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "bucket": "my_default_bucket",
+                "class_name": "TupleS3StoreBackend",
+                "prefix": "profilers",
+            },
+        },
     }
     desired_data_docs_sites_config = {
         "s3_site": {
@@ -1279,6 +1396,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         expectations_store_name="expectations_S3_store",
         validations_store_name="validations_S3_store",
         checkpoint_store_name="checkpoint_S3_store",
+        profiler_store_name="profiler_S3_store",
         evaluation_parameter_store_name=DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         stores=desired_stores_config,
         data_docs_sites=desired_data_docs_sites_config,
@@ -1321,12 +1439,17 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
             "enabled": True,
         },
         "checkpoint_store_name": "checkpoint_store",
+        "profiler_store_name": "profiler_store",
         "config_version": 3.0,
         "evaluation_parameter_store_name": "evaluation_parameter_store",
         "expectations_store_name": "expectations_store",
         "stores": {
             "checkpoint_store": {
                 "class_name": "CheckpointStore",
+                "store_backend": {"class_name": "InMemoryStoreBackend"},
+            },
+            "profiler_store": {
+                "class_name": "ProfilerStore",
                 "store_backend": {"class_name": "InMemoryStoreBackend"},
             },
             "evaluation_parameter_store": {"class_name": "EvaluationParameterStore"},

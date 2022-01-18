@@ -1738,7 +1738,7 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
-        self.profiler_store_name = checkpoint_store_name
+        self.profiler_store_name = profiler_store_name
         self.stores = {
             expectations_store_name: {
                 "class_name": "ExpectationsStore",
