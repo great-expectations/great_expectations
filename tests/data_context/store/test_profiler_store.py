@@ -4,6 +4,7 @@ from typing import Dict
 import pytest
 
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -15,6 +16,7 @@ from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     RuleConfig,
 )
+from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import build_profiler_store_using_filesystem
 
 
@@ -119,11 +121,53 @@ def test_profiler_store_self_check_report(
     }
 
 
-def test_profiler_store_alters_filesystem(empty_data_context, store_name):
+"""
+great_expectations/data_context/store/configuration_store.py:147: in self_check
+    self.serialization_self_check(pretty_print=pretty_print)
+great_expectations/data_context/store/profiler_store.py:50: in serialization_self_check
+    test_value = self.get(key=test_key)
+great_expectations/data_context/store/store.py:153: in get
+    return self.deserialize(key, value)
+great_expectations/data_context/store/configuration_store.py:105: in deserialize
+    return self._configuration_class.from_commented_map(commented_map=config)
+great_expectations/data_context/types/base.py:91: in from_commented_map
+    config = cls._get_schema_instance().load(commented_map)
+great_expectations/marshmallow__shade/schema.py:735: in load
+    return self._do_load(
+
+"""
+
+
+def test_profiler_store_alters_filesystem(
+    empty_data_context: DataContext,
+    store_name: str,
+    profiler_name: str,
+    profiler_config: RuleBasedProfilerConfig,
+):
     base_directory: str = str(Path(empty_data_context.root_directory) / "profilers")
 
     profiler_store = build_profiler_store_using_filesystem(
         store_name=store_name,
         base_directory=base_directory,
         overwrite_existing=True,
+    )
+
+    dir_tree = gen_directory_tree_str(startpath=base_directory)
+    assert (
+        dir_tree
+        == """profilers/
+    .ge_store_backend_id
+"""
+    )
+
+    key = ConfigurationIdentifier(configuration_key=profiler_name)
+    profiler_store.set(key=key, value=profiler_config)
+
+    dir_tree = gen_directory_tree_str(startpath=base_directory)
+    assert (
+        dir_tree
+        == """profilers/
+    .ge_store_backend_id
+    my_first_profiler.yml
+"""
     )
