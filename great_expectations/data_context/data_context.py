@@ -61,6 +61,7 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
+from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
@@ -882,15 +883,15 @@ class BaseDataContext:
             )
 
     @property
-    def profiler_store_name(self):
-        pass
+    def profiler_store_name(self) -> str:
+        return self.project_config_with_variables_substituted.profiler_store_name
 
     @property
-    def profiler_store(self):
-        pass
+    def profiler_store(self) -> ProfilerStore:
+        return self.stores[self.profiler_store_name]
 
     @property
-    def expectations_store_name(self):
+    def expectations_store_name(self) -> Optional[str]:
         return self.project_config_with_variables_substituted.expectations_store_name
 
     @property
