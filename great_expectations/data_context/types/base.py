@@ -30,7 +30,6 @@ from great_expectations.marshmallow__shade import (
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfigSchema
 from great_expectations.types import DictDot, SerializableDictDot
 from great_expectations.types.configurations import ClassConfigSchema
 
@@ -2557,4 +2556,3 @@ notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
 progressBarsConfigSchema = ProgressBarsConfigSchema()
-ruleBasedProfilerConfigSchema = RuleBasedProfilerConfigSchema()

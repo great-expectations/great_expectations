@@ -3,11 +3,11 @@ import uuid
 from typing import Union
 
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
-from great_expectations.data_context.types.base import RuleBasedProfilerConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
 )
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 
 class ProfilerStore(ConfigurationStore):

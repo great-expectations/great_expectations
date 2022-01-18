@@ -1,5 +1,7 @@
 from typing import Any, Dict, List, Optional, Type
 
+from ruamel.yaml.comments import CommentedMap
+
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.marshmallow__shade import (
     INCLUDE,
@@ -236,3 +238,6 @@ class RuleBasedProfilerConfigSchema(NotNullSchema):
         values=fields.Nested(RuleConfigSchema, required=True),
         required=True,
     )
+
+
+ruleBasedProfilerConfigSchema = RuleBasedProfilerConfigSchema()
