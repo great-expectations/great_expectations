@@ -6,9 +6,9 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 
 # This utility is not for general use. It is only to support testing.
-from util import load_data_into_database
+from tests.test_utils import load_data_into_test_database
 
-load_data_into_database(
+load_data_into_test_database(
     table_name="taxi_data",
     csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=CONNECTION_STRING,
