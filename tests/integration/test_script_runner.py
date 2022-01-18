@@ -445,14 +445,14 @@ cloud_redshift_tests = [
 ]
 
 # populate docs_test_matrix with sub-lists
-docs_test_matrix += local_tests
+# docs_test_matrix += local_tests
 docs_test_matrix += dockerized_db_tests
-docs_test_matrix += cloud_snowflake_tests
-docs_test_matrix += cloud_gcp_tests
-docs_test_matrix += cloud_bigquery_tests
-docs_test_matrix += cloud_azure_tests
-docs_test_matrix += cloud_s3_tests
-docs_test_matrix += cloud_redshift_tests
+# docs_test_matrix += cloud_snowflake_tests
+# docs_test_matrix += cloud_gcp_tests
+# docs_test_matrix += cloud_bigquery_tests
+# docs_test_matrix += cloud_azure_tests
+# docs_test_matrix += cloud_s3_tests
+# docs_test_matrix += cloud_redshift_tests
 
 integration_test_matrix = [
     {
