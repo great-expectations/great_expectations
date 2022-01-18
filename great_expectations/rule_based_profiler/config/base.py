@@ -240,4 +240,10 @@ class RuleBasedProfilerConfigSchema(NotNullSchema):
     )
 
 
+domainBuilderConfigSchema = DomainBuilderConfigSchema()
+parameterBuilderConfigSchema = ParameterBuilderConfigSchema()
+expectationConfigurationBuilderConfigSchema = (
+    ExpectationConfigurationBuilderConfigSchema()
+)
+ruleConfigSchema = RuleConfigSchema()
 ruleBasedProfilerConfigSchema = RuleBasedProfilerConfigSchema()
