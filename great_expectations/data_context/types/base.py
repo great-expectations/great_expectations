@@ -1338,7 +1338,7 @@ class DataContextConfigDefaults(enum.Enum):
         f"{CHECKPOINTS_BASE_DIRECTORY}/"
     )
 
-    # Profilres
+    # Profilers
     DEFAULT_PROFILER_STORE_NAME = "profiler_store"
     PROFILERS_BASE_DIRECTORY = "profilers"
     DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{PROFILERS_BASE_DIRECTORY}/"
