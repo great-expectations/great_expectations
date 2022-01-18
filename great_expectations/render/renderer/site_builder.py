@@ -673,8 +673,7 @@ class DefaultSiteIndexBuilder:
         """
         create_expectations = CallToActionButton(
             "How to Create Expectations",
-            # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations.html",
+            "https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_create_expectations",
         )
         see_glossary = CallToActionButton(
             "See More Kinds of Expectations",
@@ -682,16 +681,15 @@ class DefaultSiteIndexBuilder:
         )
         validation_playground = CallToActionButton(
             "How to Validate Data",
-            # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation.html",
+            "https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_validate_data",
         )
         customize_data_docs = CallToActionButton(
             "How to Customize Data Docs",
-            "https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#data-docs",
+            "https://docs.greatexpectations.io/docs/reference/data_docs#customizing-html-documentation",
         )
         team_site = CallToActionButton(
             "How to Set Up a Team Site",
-            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs.html",
+            "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem"
         )
         # TODO gallery does not yet exist
         # gallery = CallToActionButton(
