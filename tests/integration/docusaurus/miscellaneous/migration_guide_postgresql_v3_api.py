@@ -96,6 +96,5 @@ assert actual_checkpoint_yaml == yaml.safe_load(expected_checkpoint_yaml)
 
 # run checkpoint
 results = context.run_checkpoint(checkpoint_name="test_v3_checkpoint")
-print(results)
-print("this is v2 api")
+
 assert results["success"] is True

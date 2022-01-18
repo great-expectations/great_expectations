@@ -17,8 +17,6 @@ def load_data_into_database(
         print(f"Dropping table {table_name}")
         connection.execute(f"DROP TABLE IF EXISTS {table_name}")
         df = pd.read_csv(csv_path)
-        # Improving test performance by only loading the first 10 rows of our test data into the db
-        df = df.head(10)
         print(f"Creating table {table_name} from {csv_path}")
         df.to_sql(name=table_name, con=engine, index=False)
     except SQLAlchemyError as e:
