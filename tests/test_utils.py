@@ -284,11 +284,13 @@ def build_profiler_store_using_filesystem(
     store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
         **store_config
     )
-    return build_profiler_store_using_store_backend(
+    store = build_profiler_store_using_store_backend(
         store_name=store_name,
         store_backend=store_backend_obj,
         overwrite_existing=overwrite_existing,
     )
+    print("BASE DIRECTORY", base_directory)
+    return store
 
 
 def save_checkpoint_config_to_filesystem(

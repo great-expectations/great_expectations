@@ -6,15 +6,15 @@ import pytest
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
-from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-)
-from great_expectations.rule_based_profiler.config.base import (
+from great_expectations.data_context.types.base import (
     DomainBuilderConfig,
     ExpectationConfigurationBuilderConfig,
     ParameterBuilderConfig,
     RuleBasedProfilerConfig,
     RuleConfig,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
 )
 from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import build_profiler_store_using_filesystem
@@ -64,14 +64,18 @@ def empty_profiler_store(store_name: str) -> ProfilerStore:
 
 
 @pytest.fixture(scope="function")
+def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
+    return ConfigurationIdentifier(configuration_key=profiler_name)
+
+
+@pytest.fixture(scope="function")
 def populated_profiler_store(
     empty_profiler_store: ProfilerStore,
     profiler_config: RuleBasedProfilerConfig,
-    profiler_name: str,
+    profiler_key: ConfigurationIdentifier,
 ) -> ProfilerStore:
     profiler_store = empty_profiler_store
-    key = ConfigurationIdentifier(configuration_key=profiler_name)
-    profiler_store.set(key=key, value=profiler_config)
+    profiler_store.set(key=profiler_key, value=profiler_config)
     return profiler_store
 
 
@@ -87,20 +91,18 @@ def test_profiler_store_raises_error_with_invalid_value(
 def test_profiler_store_set_adds_valid_key(
     empty_profiler_store: ProfilerStore,
     profiler_config: RuleBasedProfilerConfig,
-    profiler_name: str,
+    profiler_key: ConfigurationIdentifier,
 ):
-    key = ConfigurationIdentifier(configuration_key=profiler_name)
     assert len(empty_profiler_store.list_keys()) == 0
-    empty_profiler_store.set(key=key, value=profiler_config)
+    empty_profiler_store.set(key=profiler_key, value=profiler_config)
     assert len(empty_profiler_store.list_keys()) == 1
 
 
 def test_profiler_store_remove_key_deletes_value(
-    populated_profiler_store: ProfilerStore, profiler_name: str
+    populated_profiler_store: ProfilerStore, profiler_key: ConfigurationIdentifier
 ):
     assert len(populated_profiler_store.list_keys()) == 1
-    key = (profiler_name,)
-    populated_profiler_store.remove_key(key=key)
+    populated_profiler_store.remove_key(key=profiler_key)
     assert len(populated_profiler_store.list_keys()) == 0
 
 
@@ -119,23 +121,6 @@ def test_profiler_store_self_check_report(
         "keys": [profiler_name],
         "len_keys": 1,
     }
-
-
-"""
-great_expectations/data_context/store/configuration_store.py:147: in self_check
-    self.serialization_self_check(pretty_print=pretty_print)
-great_expectations/data_context/store/profiler_store.py:50: in serialization_self_check
-    test_value = self.get(key=test_key)
-great_expectations/data_context/store/store.py:153: in get
-    return self.deserialize(key, value)
-great_expectations/data_context/store/configuration_store.py:105: in deserialize
-    return self._configuration_class.from_commented_map(commented_map=config)
-great_expectations/data_context/types/base.py:91: in from_commented_map
-    config = cls._get_schema_instance().load(commented_map)
-great_expectations/marshmallow__shade/schema.py:735: in load
-    return self._do_load(
-
-"""
 
 
 def test_profiler_store_alters_filesystem(
@@ -171,3 +156,9 @@ def test_profiler_store_alters_filesystem(
     my_first_profiler.yml
 """
     )
+
+    assert len(profiler_store.list_keys()) == 1
+
+    profiler_store.remove_key(key=key)
+
+    assert len(profiler_store.list_keys()) == 0
