@@ -1335,7 +1335,6 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         f"{CHECKPOINTS_BASE_DIRECTORY}/"
     )
-    # Rule Based Profiler
     DEFAULT_PROFILER_STORE_NAME = "profiler_store"
     PROFILERS_BASE_DIRECTORY = "profilers"
     DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{PROFILERS_BASE_DIRECTORY}/"
@@ -1393,7 +1392,7 @@ class DataContextConfigDefaults(enum.Enum):
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
                 "suppress_store_backend_id": True,
-                "base_directory": DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+                "base_directory": DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME,
             },
         },
     }
