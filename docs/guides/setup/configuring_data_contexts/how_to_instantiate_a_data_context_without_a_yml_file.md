@@ -23,7 +23,7 @@ Steps
 
     Here we will show a few examples of common configurations, using the ``store_backend_defaults`` parameter. Note that you can use the existing API without defaults by omitting that parameter, and you can override all of the parameters as shown in the last example. A parameter set in ``DataContextConfig`` will override a parameter set in ``store_backend_defaults`` if both are used.
 
-    The following ``store_backend_defaults`` are currently available: 
+    The following ``store_backend_defaults`` are currently available:
         - :py:class:`~great_expectations.data_context.types.base.S3StoreBackendDefaults`
         - :py:class:`~great_expectations.data_context.types.base.GCSStoreBackendDefaults`
         - :py:class:`~great_expectations.data_context.types.base.DatabaseStoreBackendDefaults`
@@ -230,6 +230,7 @@ data_context_config = DataContextConfig(
 ### 2. Pass this DataContextConfig as a project_config to BaseDataContext
 
 ```python
+from great_expectations.data_context.types.base import BaseDataContext
 context = BaseDataContext(project_config=data_context_config)
 ```
 
