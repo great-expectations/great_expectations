@@ -186,11 +186,6 @@ The V3-style Datasource has:
   - Datatype-specific ExecutionEngine, like the `PandasExecutionEngine` in our example below.
   - Data-specific DataConnectors, like the `InferredAssetFilesystemDataConnector` in our example below.
 
-:::note Note on Datasource in V3
-
-One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSqlalchemyDatasource, which combines functionality of the Datasource and ExecutionEngine to enable [database introspection and partitioning](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql). More examples on using the SimpleSqlalchemyDatasource can be found [here](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
-
-:::
 
 #### V2-Style Datasource
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/great_expectations.yml#L16-L26
@@ -199,6 +194,15 @@ One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSql
 #### V3-Style Datasource
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/great_expectations.yml#L16-L31
 ```
+ 
+<details>
+  <summary> More details on <code>base_directory</code></summary>
+    The <code>base_directory</code> is set to <code>../../../data/</code> according to the example Pandas configuration which can be found <a href="https://github.com/great-expectations/great_expectations/tree/develop/tests/test_fixtures/configuration_for_testing_v2_v3_migration"> in the great_expectations repository</a>.
+
+</details>
+
+Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](/docs/guides/connecting_to_your_data/index) for examples on V3-style Datasource configurations that will suit your needs.
+
 </TabItem>
 <TabItem value="spark">
 
@@ -213,11 +217,6 @@ The V3-style Datasource has:
   - Datatype-specific ExecutionEngine, like the `SparkDFExecutionEngine` in our example below.
   - Data-specific DataConnectors, like the `InferredAssetFilesystemDataConnector` in our example below.
 
-:::note Note on Datasource in V3
-
-One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSqlalchemyDatasource, which combines functionality of the Datasource and ExecutionEngine to enable [database introspection and partitioning](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql). More examples on using the SimpleSqlalchemyDatasource can be found [here](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
-
-:::
 
 #### V2-Style Datasource
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/great_expectations.yml#L16-L26
@@ -227,6 +226,14 @@ One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSql
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/great_expectations.yml#L16-L34
 ```
 
+<details>
+  <summary> More details on <code>base_directory</code></summary>
+    The <code>base_directory</code> is set to <code>../../../data/</code> according to the example Spark configuration which can be found <a href="https://github.com/great-expectations/great_expectations/tree/develop/tests/test_fixtures/configuration_for_testing_v2_v3_migration"> in the great_expectations repository</a>.
+
+</details>
+
+Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](/docs/guides/connecting_to_your_data/index) for examples on V3-style Datasource configurations that will suit your needs.
+
 </TabItem>
 
 <TabItem value="db">
@@ -234,7 +241,7 @@ One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSql
 
 The V2-style Datasource has:
   - Data-type specific Datasource, like the `SqlAlchemyDatasource` in our example below.
-  - Data-type specific Datasets, like the `SqlAlchemyDatasource` in our example below.
+  - Data-type specific Datasets, like the `SqlAlchemyDataset` in our example below.
 
 The V3-style Datasource has:
   - Datasource that is agnostic to datatype.
@@ -243,7 +250,7 @@ The V3-style Datasource has:
 
 :::note Note on Datasource in V3
 
-One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSqlalchemyDatasource, which combines functionality of the Datasource and ExecutionEngine to enable [database introspection and partitioning](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql). More examples on using the SimpleSqlalchemyDatasource can be found [here](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
+One exception to the datatype-agnostic Datasource in the V3 API is the <code>SimpleSqlalchemyDatasource</code>, which combines functionality of the <code>Datasource</code> and <code>ExecutionEngine</code> to enable [database introspection and partitioning](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql). More examples on using the <code>SimpleSqlalchemyDatasource</code> can be found [here](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql).
 
 :::
 
@@ -255,10 +262,26 @@ One exception to the datatype-agnostic Datasource in the V3 API is the SimpleSql
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/great_expectations.yml#L16-L32
 ```
 
+<details>
+  <summary> More details on <code>connection_string</code></summary>
+    The <code>connection_string</code> is set according to <code>postgresql+psycopg2://postgres:@localhost/test_ci</code> according to the example Postgres configuration which can be found <a href="https://github.com/great-expectations/great_expectations/tree/develop/tests/test_fixtures/configuration_for_testing_v2_v3_migration"> in the great_expectations repository</a>,
+    which loads an example dataset (<code>Titanic.csv</code>) into a local postgres database (<code>test_ci</code>).
+
+</details>
+
+Migrating Datasource configurations that contain connections to databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. 
+
+Please check out the following docs for examples of V3-style Datasource configurations that will suit your needs: 
+
+- [How to connect to a Athena database](/docs/guides/connecting_to_your_data/database/athena)
+- [How to connect to a BigQuery database](/docs/guides/connecting_to_your_data/database/bigquery)
+- [How to connect to a MySQL database](/docs/guides/connecting_to_your_data/database/mysql)
+- [How to connect to a Redshift database](/docs/guides/connecting_to_your_data/database/redshift)
+- [How to connect to a Snowflake database](/docs/guides/connecting_to_your_data/database/snowflake)
+- [How to connect to a SQLite database](/docs/guides/connecting_to_your_data/database/sqlite)
+
 </TabItem>
 </Tabs>
-
-Migrating Datasource configurations that contain connections to the cloud or databases involve additional parameters like credentials that are specific to each configuration. The how-to-guides for Great Expectations contain numerous examples of V3 configurations that can be used for these various situations. Please check out our documentation on [Connecting to your Data](/docs/guides/connecting_to_your_data/index) for examples on V3-style Datasource configurations that will suit your needs.
 
 ### Manually Migrate V2 Checkpoints to V3 Checkpoints
 
@@ -310,6 +333,11 @@ The example V3-style Checkpoint contains:
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L13
 ```
 
+<details>
+  <summary> More details on <code>path</code></summary>
+    The <code>path</code> for <code>batch_kwargs</code> is set to <code>../../data/Titanic.csv</code> according to the example Pandas configuration which can be found <a href="https://github.com/great-expectations/great_expectations/tree/develop/tests/test_fixtures/configuration_for_testing_v2_v3_migration"> in the great_expectations repository</a>.
+</details>
+
 The Validation Operator named `action_list_operator` would be part of the `great_expectations.yml` file.
 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/great_expectations.yml#L56-L68
@@ -327,6 +355,11 @@ For additional examples on how to configure V3-style checkpoints, including how 
 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
 ```
+
+<details>
+  <summary> More details on <code>data_asset_name</code></summary>
+    The <code>data_asset_name</code> for <code>batch_request</code> is set to <code>Titanic.csv</code> according to the example Pandas configuration which can be found <a href="https://github.com/great-expectations/great_expectations/tree/develop/tests/test_fixtures/configuration_for_testing_v2_v3_migration"> in the great_expectations repository</a>.
+</details>
 
 If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations checkpoint list`.
 
@@ -380,6 +413,11 @@ The example V3-style Checkpoint contains:
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L15
 ```
 
+<details>
+  <summary> More details on <code>path</code></summary>
+    The <code>path</code> for <code>batch_kwargs</code> is set to <code>../../data/Titanic.csv</code> according to the example Spark configuration which can be found <a href="https://github.com/great-expectations/great_expectations/tree/develop/tests/test_fixtures/configuration_for_testing_v2_v3_migration"> in the great_expectations repository</a>.
+</details>
+
 The Validation Operator named `action_list_operator` would be part of the `great_expectations.yml` file.
 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/great_expectations.yml#L57-L69
@@ -397,6 +435,11 @@ For additional examples on how to configure V3-style checkpoints, including how 
 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
 ```
+
+<details>
+  <summary> More details on <code>data_asset_name</code></summary>
+    The <code>data_asset_name</code> for <code>batch_request</code> is set to <code>Titanic.csv</code> according to the example Spark configuration which can be found <a href="https://github.com/great-expectations/great_expectations/tree/develop/tests/test_fixtures/configuration_for_testing_v2_v3_migration"> in the great_expectations repository</a>.
+</details>
 
 If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations checkpoint list`.
 
@@ -449,6 +492,11 @@ The example V3-style Checkpoint contains:
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L13
 ```
 
+<details>
+  <summary> More details on <code>query</code></summary>
+    In the example above, a <code>query</code> is passed in as part of <code>batch_kwargs</code>. In our example we are selecting all rows from <code>public.titanic</code> according to the example Postgres configuration which can be found <a href="https://github.com/great-expectations/great_expectations/tree/develop/tests/test_fixtures/configuration_for_testing_v2_v3_migration"> in the great_expectations repository</a>.
+</details>
+
 The Validation Operator named `action_list_operator` would be part of the `great_expectations.yml` file.
 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/great_expectations.yml#L56-L66
@@ -466,6 +514,11 @@ For additional examples on how to configure V3-style checkpoints, including how 
 
 ```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L35
 ```
+
+<details>
+  <summary> More details on <code>query</code></summary>
+    The <code>query</code> for <code>batch_request</code> is passed in as <code>runtime_parameters</code>. In our example we are selecting all rows from <code>public.titanic</code> according to the example Postgres configuration which can be found <a href="https://github.com/great-expectations/great_expectations/tree/develop/tests/test_fixtures/configuration_for_testing_v2_v3_migration"> in the great_expectations repository</a>.
+</details>
 
 If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations checkpoint list`.
 
