@@ -9,6 +9,11 @@
     "definition": "Provided to a Datasource in order to create a Batch.",
     "url": "terms/batch_request"
   },
+  "catalog_asset": {
+    "term": "Catalog Asset",
+    "definition": "A collection of records within a Datasource which is usually named based on the underlying data system and sliced in different ways to correspond to multiple desired specifications.",
+    "url": "terms/catalog_asset"
+  },
   "checkpoint": {
     "term": "Checkpoint",
     "definition": "The primary means for validating data in a production deployment of Great Expectations.",
