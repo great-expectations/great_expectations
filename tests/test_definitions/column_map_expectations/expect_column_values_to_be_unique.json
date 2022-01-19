@@ -9,7 +9,9 @@
       "n" : [null, null, 2, null],
       "unique" : [1, 2, 3, null],
       "null": [null, null, null, null],
-      "mult_dup": ["1", "1", "2", "2"]
+      "mult_dup": ["1", "1", "2", "2"],
+      "0": [1, 2, 3, 4],
+      "_c0": [1, 2, 3, 4]
     },
     "schemas": {
       "spark": {
@@ -20,7 +22,9 @@
         "n": "IntegerType",
         "unique": "IntegerType",
         "null": "NullType",
-        "mult_dup": "StringType"
+        "mult_dup": "StringType",
+        "0": "IntegerType",
+        "_c0": "IntegerType"
       },
       "mssql": {
         "a": "VARCHAR",
@@ -30,7 +34,9 @@
         "n": "INTEGER",
         "unique": "INTEGER",
         "null": "NVARCHAR",
-        "mult_dup": "VARCHAR"
+        "mult_dup": "VARCHAR",
+        "0": "INTEGER",
+        "_c0": "INTEGER"
       },
       "mysql": {
         "a": "CHAR",
@@ -40,7 +46,9 @@
         "n": "INTEGER",
         "unique": "INTEGER",
         "null": "CHAR",
-        "mult_dup": "CHAR"
+        "mult_dup": "CHAR",
+        "0": "INTEGER",
+        "_c0": "INTEGER"
       }
     },
     "tests" : [
@@ -146,6 +154,26 @@
           "success": false,
           "unexpected_list": ["1", "1", "2", "2"],
           "unexpected_index_list": [0, 1, 2, 3]
+        }
+      },
+      {
+        "title": "positive_integer_column_name",
+        "exact_match_out": false,
+        "in": {
+          "column": "0"
+        },
+        "out": {
+          "success": true
+        }
+      },
+      {
+        "title": "positive_spark_headerless_column_name",
+        "exact_match_out": false,
+        "in": {
+          "column": "_c0"
+      },
+        "out": {
+          "success": true
         }
       }
     ]
