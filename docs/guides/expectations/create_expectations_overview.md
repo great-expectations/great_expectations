@@ -39,7 +39,7 @@ As with creating Expectations interactively, you will start with your Data Conte
 
 The Profiler we recommend using for this workflow is the `UserConfigurableProfiler`.  We provide an in depth guide to this in our documentation on [how to create and edit expectations with a profiler](./how_to_create_and_edit_expectations_with_a_profiler.md).
 
-We also provide an in depth guides on [how to create a new Expectation Suite using rule based Profilers](./advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md) and [how to create a new Expectation Suite by profiling from a json schema file](./advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file.md) in our advanced how to guides for Expectations.
+We also provide in depth guides on [how to create a new Expectation Suite using rule based Profilers](./advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md) and [how to create a new Expectation Suite by profiling from a json schema file](./advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file.md) in our advanced how to guides for Expectations.
 
 ### Testing your Expectation Suite
 
