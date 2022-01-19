@@ -53,7 +53,7 @@ It may be that you have saved an Expectation Suite that you wish to go back to a
 great_expectations suite edit NAME_OF_YOUR_SUITE_HERE
 ```
 
-This will open a Jupyter Notebook that contiains the configurations for each of that Expectation Suite's Expectations in their own cells.  You can edit these cells and then run them to generate Expectations in a new Expectation Suite.  Once your edited version of the Expectations have been created in their own Expectation Suite, you can save that Expectation Suite over the pre-existing one, or save it as a new suite altogether.
+This will open a Jupyter Notebook that contains the configurations for each of that Expectation Suite's Expectations in their own cells.  You can edit these cells and then run them to generate Expectations in a new Expectation Suite.  Once your edited version of the Expectations have been created in their own Expectation Suite, you can save that Expectation Suite over the pre-existing one, or save it as a new suite altogether.
 
 ## Wrapping up
 
