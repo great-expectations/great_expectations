@@ -255,6 +255,20 @@ dockerized_db_tests = [
         "util_script": "tests/test_utils.py",
         "extra_backend_dependencies": BackendDependencies.MYSQL,
     },
+    {
+        "user_flow_script": "tests/integration/docusaurus/miscellaneous/migration_guide_postgresql_v3_api.py",
+        "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/",
+        "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
+        "util_script": "tests/test_utils.py",
+        "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/miscellaneous/migration_guide_postgresql_v2_api.py",
+        "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/",
+        "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
+        "util_script": "tests/test_utils.py",
+        "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
+    },
 ]
 
 # CLOUD
