@@ -102,3 +102,6 @@ If you have bugfix or feature request, please [upvote an existing issue](https:/
 
 #### Contribute code or documentation
 We welcome contributions to Great Expectations. Please start with our [Contributing guide](/docs/contributing/contributing) and don’t be shy with questions!
+
+#### Not interested in managing your own configuration or infrastructure? 
+Learn more about Great Expectations Cloud — our fully managed SaaS offering. Sign up for [our weekly cloud workshop](https://greatexpectations.io/cloud)! You’ll get to see our newest features and apply for our private Alpha program!

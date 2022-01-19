@@ -8,14 +8,39 @@ Changelog
 develop
 -----------------
 
+0.14.1
+-----------------
+* [FEATURE] Add pagination/search to CLI batch request listing (#3854)
+* [BUGFIX] Safeguard against using V2 API with V3 Configuration (#3954)
+* [BUGFIX] Bugfix and refactor for `cloud-db-integration` pipeline (#3977)
+* [BUGFIX] Fixes breaking typo in expect_column_values_to_be_json_parseable (#3983)
+* [BUGFIX] Fixes issue where nested columns could not be addressed properly in spark (#3986)
+* [DOCS] How to connect to your data in `mssql` (#3950)
+* [DOCS] MigrationGuide - Adding note on Migrating Expectation Suites (#3959)
+* [DOCS] Incremental Update: The Universal Map's Getting Started Tutorial (#3881)
+* [DOCS] Note about creating backup of Checkpoints (#3968)
+* [DOCS] Connecting to BigQuery Doc line references fix (#3974)
+* [DOCS] Remove RTD snippet about comments/suggestions from Docusaurus docs (#3980)
+* [DOCS] Add howto for the OpenLineage validation operator (#3688) (thanks @rossturk)
+* [DOCS] Updates to README.md (#3964)
+* [DOCS] Update migration guide (#3967)
+* [MAINTENANCE] Refactor docs dependency script (#3952)
+* [MAINTENANCE] Use Effective SQLAlchemy for Reflection Fallback Logic and SQL Metrics (#3958)
+* [MAINTENANCE] Remove outdated scripts (#3953)
+* [MAINTENANCE] Add pytest opt to improve collection time (#3976)
+* [MAINTENANCE] Refactor `render` method in PageRenderer (#3962)
+* [MAINTENANCE] Standardize rule based profiler testing directories organization (#3984)
+* [MAINTENANCE] Metrics Cleanup (#3989)
+* [MAINTENANCE] Refactor `render` method of Content Block Renderer (#3960)
+
 0.14.0
 -----------------
+* [BREAKING] Change Default CLI Flag To V3 (#3943)
 * [FEATURE] Cloud-399/Cloud-519: Add Cloud Notification Action (#3891)
 * [FEATURE] `great_expectations_contrib` CLI tool (#3909)
 * [FEATURE] Update `dependency_graph` pipeline to use `dgtest` CLI (#3912)
 * [FEATURE] Incorporate updated dgtest CLI tool in experimental pipeline (#3927)
 * [FEATURE] Add YAML config option to disable progress bars (#3794)
-* [FEATURE] Change Default CLI Flag To V3 (#3943)
 * [BUGFIX] Fix internal links to docs that may be rendered incorrectly (#3915)
 * [BUGFIX] Update SlackNotificationAction to send slack_token and slack_channel to send_slack_notification function (#3873) (thanks @Calvo94)
 * [BUGFIX] `CheckDocsDependenciesChanges` to only handle `.py` files (#3936)

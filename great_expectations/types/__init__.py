@@ -65,7 +65,7 @@ class DictDot:
     def __len__(self):
         return len(self.__dict__)
 
-    def keys(self) -> set:
+    def keys(self):
         return self.to_dict().keys()
 
     def items(self):
