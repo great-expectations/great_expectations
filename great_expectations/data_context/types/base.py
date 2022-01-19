@@ -178,7 +178,7 @@ class AssetConfig(DictDot):
         if glob_directive is not None:
             self.glob_directive = glob_directive
         for k, v in kwargs.items():
-            logger.warn("Skipping unknown key-value pair: (%s, %s)", k, v)
+            logger.warn("Skipping unknown kwarg: (%s, %s)", k, v)
 
     @property
     def class_name(self):
@@ -243,7 +243,7 @@ class SorterConfig(DictDot):
         self._module_name = module_name
         self._orderby = orderby
         for k, v in kwargs.items():
-            logger.warn("Skipping unknown key-value pair: (%s, %s)", k, v)
+            logger.warn("Skipping unknown kwarg: (%s, %s)", k, v)
 
         if reference_list is not None:
             self._reference_list = reference_list
@@ -383,7 +383,7 @@ class DataConnectorConfig(DictDot):
             self.delimiter = delimiter
 
         for k, v in kwargs.items():
-            logger.warn("Skipping unknown key-value pair: (%s, %s)", k, v)
+            logger.warn("Skipping unknown kwarg: (%s, %s)", k, v)
 
     @property
     def class_name(self):
@@ -666,7 +666,7 @@ class ExecutionEngineConfig(DictDot):
         if gcs_options is not None:
             self.gcs_options = gcs_options
         for k, v in kwargs.items():
-            logger.warn("Skipping unknown key-value pair: (%s, %s)", k, v)
+            logger.warn("Skipping unknown kwarg: (%s, %s)", k, v)
 
     @property
     def module_name(self):
@@ -805,7 +805,7 @@ class DatasourceConfig(DictDot):
         if limit is not None:
             self.limit = limit
         for k, v in kwargs.items():
-            logger.warn("Skipping unknown key-value pair: (%s, %s)", k, v)
+            logger.warn("Skipping unknown kwarg: (%s, %s)", k, v)
 
     @property
     def class_name(self):
