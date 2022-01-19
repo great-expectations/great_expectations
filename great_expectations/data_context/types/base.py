@@ -178,7 +178,7 @@ class AssetConfig(DictDot):
         if glob_directive is not None:
             self.glob_directive = glob_directive
         for k, v in kwargs.items():
-            logger.warn("Skipping unknown kwarg: (%s, %s)", k, v)
+            logger.warning("Skipping unknown kwarg: (%s, %s)", k, v)
 
     @property
     def class_name(self):
@@ -243,7 +243,7 @@ class SorterConfig(DictDot):
         self._module_name = module_name
         self._orderby = orderby
         for k, v in kwargs.items():
-            logger.warn("Skipping unknown kwarg: (%s, %s)", k, v)
+            logger.warning("Skipping unknown kwarg: (%s, %s)", k, v)
 
         if reference_list is not None:
             self._reference_list = reference_list
@@ -316,6 +316,8 @@ class DataConnectorConfig(DictDot):
         batch_identifiers=None,
         sorters=None,
         batch_spec_passthrough=None,
+        include_schema_name=None,
+        table_name=None,
         # S3
         boto3_options=None,
         bucket=None,
@@ -351,6 +353,10 @@ class DataConnectorConfig(DictDot):
             self.sorters = sorters
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
+        if include_schema_name is not None:
+            self.include_schema_name = include_schema_name
+        if table_name is not None:
+            self.table_name = table_name
 
         # S3
         if boto3_options is not None:
@@ -383,7 +389,7 @@ class DataConnectorConfig(DictDot):
             self.delimiter = delimiter
 
         for k, v in kwargs.items():
-            logger.warn("Skipping unknown kwarg: (%s, %s)", k, v)
+            logger.warning("Skipping unknown kwarg: (%s, %s)", k, v)
 
     @property
     def class_name(self):
@@ -451,6 +457,7 @@ class DataConnectorConfigSchema(Schema):
     data_asset_name_prefix = fields.String(required=False, allow_none=True)
     data_asset_name_suffix = fields.String(required=False, allow_none=True)
     include_schema_name = fields.Boolean(required=False, allow_none=True)
+    table_name = fields.String(required=False, allow_none=True)
     splitter_method = fields.String(required=False, allow_none=True)
     splitter_kwargs = fields.Dict(required=False, allow_none=True)
     sampling_method = fields.String(required=False, allow_none=True)
@@ -666,7 +673,7 @@ class ExecutionEngineConfig(DictDot):
         if gcs_options is not None:
             self.gcs_options = gcs_options
         for k, v in kwargs.items():
-            logger.warn("Skipping unknown kwarg: (%s, %s)", k, v)
+            logger.warning("Skipping unknown kwarg: (%s, %s)", k, v)
 
     @property
     def module_name(self):
@@ -805,7 +812,7 @@ class DatasourceConfig(DictDot):
         if limit is not None:
             self.limit = limit
         for k, v in kwargs.items():
-            logger.warn("Skipping unknown kwarg: (%s, %s)", k, v)
+            logger.warning("Skipping unknown kwarg: (%s, %s)", k, v)
 
     @property
     def class_name(self):
