@@ -165,8 +165,6 @@ class AssetConfig(DictDot):
             self.schema_name = schema_name
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
-        for k, v in kwargs.items():
-            setattr(self, k, v)
 
     @property
     def class_name(self):
@@ -230,8 +228,6 @@ class SorterConfig(DictDot):
         self._class_name = class_name
         self._module_name = module_name
         self._orderby = orderby
-        for k, v in kwargs.items():
-            setattr(self, k, v)
 
         if reference_list is not None:
             self._reference_list = reference_list
@@ -369,9 +365,6 @@ class DataConnectorConfig(DictDot):
         # Both S3/Azure
         if delimiter is not None:
             self.delimiter = delimiter
-
-        for k, v in kwargs.items():
-            setattr(self, k, v)
 
     @property
     def class_name(self):
@@ -653,8 +646,6 @@ class ExecutionEngineConfig(DictDot):
             self.azure_options = azure_options
         if gcs_options is not None:
             self.gcs_options = gcs_options
-        for k, v in kwargs.items():
-            setattr(self, k, v)
 
     @property
     def module_name(self):
@@ -792,8 +783,6 @@ class DatasourceConfig(DictDot):
             self.reader_options = reader_options
         if limit is not None:
             self.limit = limit
-        for k, v in kwargs.items():
-            setattr(self, k, v)
 
     @property
     def class_name(self):
