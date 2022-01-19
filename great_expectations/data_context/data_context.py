@@ -22,6 +22,7 @@ from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 import great_expectations.exceptions as ge_exceptions
+import great_expectations.rule_based_profiler.toolkit as profiler_toolkit
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.batch import (
@@ -884,43 +885,36 @@ class BaseDataContext:
             )
 
     @property
-    def profiler_store_name(self) -> str:
+    def profiler_store_name(self):
         try:
             return self.project_config_with_variables_substituted.profiler_store_name
         except AttributeError:
+            if profiler_toolkit.default_profilers_exist(
+                directory_path=self.root_directory
+            ):
+                return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
             if self.root_directory:
-                profilers_path = os.path.join(
-                    self.root_directory,
-                    DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
-                )
-                if os.path.isdir(profilers_path):
-                    return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
-                error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create the following directory: {profilers_path}\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
+                error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
             else:
                 error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create a `profilers` directory in your Great Expectations project " f"directory.\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
             raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
 
     @property
-    def profiler_store(self) -> ProfilerStore:
+    def profiler_store(self):
         profiler_store_name: str = self.profiler_store_name
         try:
             return self.stores[profiler_store_name]
         except KeyError:
-            if self.root_directory:
-                profilers_path = os.path.join(
-                    self.root_directory,
-                    DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
+            if profiler_toolkit.default_profilers_exist(
+                directory_path=self.root_directory
+            ):
+                logger.warning(
+                    f'Profiler store named "{profiler_store_name}" is not a configured store, so will try to use default Profiler store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Profiler Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
                 )
-                if os.path.isdir(profilers_path):
-                    logger.warning(
-                        f'Profiler store named "{profiler_store_name}" is not a configured store, so will try to use default Profiler store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Profiler Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
-                    )
-                    return self._build_store_from_config(
-                        profiler_store_name,
-                        DataContextConfigDefaults.DEFAULT_STORES.value[
-                            profiler_store_name
-                        ],
-                    )
+                return self._build_store_from_config(
+                    profiler_store_name,
+                    DataContextConfigDefaults.DEFAULT_STORES.value[profiler_store_name],
+                )
             raise ge_exceptions.StoreConfigurationError(
                 f'Attempted to access the Profiler store named "{profiler_store_name}", which is not a configured store.'
             )
