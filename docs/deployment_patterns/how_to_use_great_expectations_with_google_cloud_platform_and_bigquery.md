@@ -456,7 +456,7 @@ There are many ways to iterate and improve this initial version, which used a `b
 - [How to trigger the DAG on a schedule](https://cloud.google.com/composer/docs/triggering-dags#schedule).
 - [How to trigger the DAG on a schedule](https://cloud.google.com/composer/docs/triggering-dags#schedule).
 - [How to trigger the DAG in response to events](http://airflow.apache.org/docs/apache-airflow/stable/concepts/sensors.html).
-- [How to use the Google Kubernetes Engine (GKE) to deploy, manage and scale your application](https://airflow.apache.org/docs/apache-airflow-providers-google/stable/operators/cloud/kubernetes_engine.html#howto-operator-gkestartpodoperator).
+- [How to use the Google Kubernetes Engine (GKE) to deploy, manage and scale your application](https://airflow.apache.org/docs/apache-airflow-providers-google/stable/operators/cloud/kubernetes_engine.html).
 - [How to configure a DataConnector to introspect and partition tables in SQL](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql/).
 - [How to configure a DataConnector to introspect and partition a file system or blob store](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store).
 
