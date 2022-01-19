@@ -5,7 +5,6 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store import (
     CheckpointStore,
     ConfigurationStore,
-    ProfilerStore,
     StoreBackend,
 )
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
@@ -63,23 +62,6 @@ def build_checkpoint_store_using_store_backend(
         CheckpointStore,
         build_configuration_store(
             class_name="CheckpointStore",
-            module_name="great_expectations.data_context.store",
-            store_name=store_name,
-            store_backend=store_backend,
-            overwrite_existing=overwrite_existing,
-        ),
-    )
-
-
-def build_profiler_store_using_store_backend(
-    store_name: str,
-    store_backend: Union[StoreBackend, dict],
-    overwrite_existing: bool = False,
-) -> ProfilerStore:
-    return cast(
-        ProfilerStore,
-        build_configuration_store(
-            class_name="ProfilerStore",
             module_name="great_expectations.data_context.store",
             store_name=store_name,
             store_backend=store_backend,
