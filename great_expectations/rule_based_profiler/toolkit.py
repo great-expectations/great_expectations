@@ -1,7 +1,6 @@
 import os
 from typing import List, Optional
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 
