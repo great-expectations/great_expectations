@@ -4,7 +4,7 @@ import itertools
 import json
 import logging
 import uuid
-from typing import Any, Dict, List, MutableMapping, Optional, Tuple, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Union
 from uuid import UUID
 
 from ruamel.yaml import YAML
@@ -12,14 +12,12 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchRequest,
-    delete_runtime_parameters_batch_data_references_from_config,
-    get_batch_request_dict,
-    get_runtime_parameters_batch_data_references_from_config,
-    restore_runtime_parameters_batch_data_references_into_config,
+from great_expectations.core.batch import BatchRequest, get_batch_request_dict
+from great_expectations.core.util import (
+    convert_to_json_serializable,
+    nested_update,
+    safe_deep_copy,
 )
-from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -27,6 +25,7 @@ from great_expectations.marshmallow__shade import (
     fields,
     post_dump,
     post_load,
+    pre_dump,
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
@@ -2003,18 +2002,13 @@ class CheckpointConfigSchema(Schema):
                 data.pop(key)
         return data
 
-    def dump(self, obj: Any, *, many: Optional[bool] = None) -> dict:
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=obj)
-        delete_runtime_parameters_batch_data_references_from_config(config=obj)
-        data: dict = super().dump(obj=obj, many=many)
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=obj, batch_data_references=batch_data_references
-        )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=data, batch_data_references=batch_data_references
-        )
+    # noinspection PyUnusedLocal
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        data = copy.deepcopy(data)
+        for key, value in data.items():
+            data[key] = convert_to_json_serializable(value)
+
         return data
 
 
@@ -2165,16 +2159,10 @@ class CheckpointConfig(BaseYamlConfig):
                 batch_request = self.batch_request or {}
                 runtime_batch_request = runtime_kwargs.get("batch_request")
                 if runtime_batch_request is not None:
-                    runtime_batch_request = self._safe_copy_batch_request(
-                        batch_request=runtime_batch_request
-                    )
+                    runtime_batch_request = copy.deepcopy(runtime_batch_request)
                     if not isinstance(runtime_batch_request, dict):
                         # noinspection PyUnresolvedReferences
                         runtime_batch_request = runtime_batch_request.to_dict()
-
-                    delete_runtime_parameters_batch_data_references_from_config(
-                        config=batch_request
-                    )
 
                     batch_request = nested_update(batch_request, runtime_batch_request)
 
@@ -2385,69 +2373,19 @@ class CheckpointConfig(BaseYamlConfig):
         self._runtime_configuration = value
 
     def __deepcopy__(self, memo):
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
-        delete_runtime_parameters_batch_data_references_from_config(config=self)
-
         cls = self.__class__
         result = cls.__new__(cls)
-        result._commented_map = CommentedMap()
 
         memo[id(self)] = result
-        for key, value in self.to_json_dict().items():
-            # noinspection PyArgumentList
-            value_copy = copy.deepcopy(value, memo)
+        for key, value in self.to_dict().items():
+            value_copy = safe_deep_copy(data=value, memo=memo)
             setattr(result, key, value_copy)
-
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=self, batch_data_references=batch_data_references
-        )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=result, batch_data_references=batch_data_references
-        )
 
         return result
 
     def __repr__(self) -> str:
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
-        delete_runtime_parameters_batch_data_references_from_config(config=self)
-        config: dict = self.to_json_dict()
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=self, batch_data_references=batch_data_references
-        )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=config,
-            batch_data_references=batch_data_references,
-            replace_value_with_type_string=True,
-        )
-        return json.dumps(config, indent=2)
-
-    @staticmethod
-    def _safe_copy_batch_request(
-        batch_request: Optional[Union[DictDot, dict]]
-    ) -> Optional[Union[DictDot, dict]]:
-        if batch_request is None:
-            return None
-
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(
-            config=batch_request
-        )
-        delete_runtime_parameters_batch_data_references_from_config(
-            config=batch_request
-        )
-        result = copy.deepcopy(batch_request)
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=batch_request, batch_data_references=batch_data_references
-        )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=result, batch_data_references=batch_data_references
-        )
-        return result
+        serializeable_dict: dict = self.to_json_dict()
+        return json.dumps(serializeable_dict, indent=2)
 
 
 class CheckpointValidationConfig(DictDot):
