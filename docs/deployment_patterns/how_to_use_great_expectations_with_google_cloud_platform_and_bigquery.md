@@ -449,7 +449,7 @@ If the DAG run was successful, we should see the `Success` status appear on the 
 
 You've successfully migrated your Great Expectations configuration to Cloud Composer! 
 
-There are many ways to iterate and improve this initial version, which used a `bash operator` for simplicity. For information on more sophisticated ways of triggering Checkpoints, building our DAGs and dividing our Data Assets into Batches using DataConnectors, please refer to the following documentation: 
+There are many ways to iterate and improve this initial version, which used a `bash operator` for simplicity. For information on more sophisticated ways of triggering Checkpoints, building our DAGs, and dividing our Data Assets into Batches using DataConnectors, please refer to the following documentation: 
 
 - [How to run a Checkpoint in Airflow using a `python operator`](/docs/deployment_patterns/how_to_use_great_expectations_with_airflow#option-2-running-the-checkpoint-script-output-with-a-pythonoperator).
 - [How to run a Checkpoint in Airflow using a `Great Expectations Airflow operator`](https://github.com/great-expectations/airflow-provider-great-expectations)(recommended).
