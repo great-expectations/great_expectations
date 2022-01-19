@@ -10,9 +10,9 @@ date: 20211022
 
 ## So what's in the folder?
 
-- `/data` : This folder contains a test file, `Titanic.csv` that is used by the configurations in this directory.  
+- `data/`: This folder contains a test file, `Titanic.csv` that is used by the configurations in this directory.  
 
-- The other folders `/pandas`, `/spark`, `/postgresql` each contain the following:
+- The other folders `pandas/`, `spark/`, `postgresql/` each contain the following:
   - **V2 configuration in `v2/great_expectations/` folder**
     - Checkpoint named `test_v2_checkpoint`
     - uses LegacyCheckpoint class
@@ -35,4 +35,4 @@ date: 20211022
       - uses v3-datasource
       - uses `CheckpointStore`
 
-- In the `/postgresql` folder, there is an additional Jupyter Notebook that can be used to load the `Titanic.csv` into a `postgresql` database running in a local Docker container. In developing these example configurations, we used the `docker-compose.yml` file that is in the [`great_expectations` repository](https://github.com/great-expectations/great_expectations/tree/develop/assets/docker/postgresql)
+- In the `postgresql/` folder, there is an additional Jupyter Notebook that can be used to load the `Titanic.csv` into a `postgresql` database running in a local Docker container. In developing these example configurations, we used the `docker-compose.yml` file that is in the [`great_expectations` repository](https://github.com/great-expectations/great_expectations/tree/develop/assets/docker/postgresql)
