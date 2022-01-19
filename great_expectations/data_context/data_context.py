@@ -2106,12 +2106,16 @@ class BaseDataContext:
         try:
             active_store_names.append(self.checkpoint_store_name)
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
-            pass
+            logger.info(
+                f"Checkpoint store is not configured; omitting it from active stores"
+            )
 
         try:
             active_store_names.append(self.profiler_store_name)
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
-            pass
+            logger.info(
+                f"Profiler store is not configured; omitting it from active stores"
+            )
 
         return [
             store for store in self.list_stores() if store["name"] in active_store_names

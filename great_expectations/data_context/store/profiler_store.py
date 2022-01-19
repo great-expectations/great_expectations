@@ -41,8 +41,6 @@ class ProfilerStore(ConfigurationStore):
         self.set(key=test_key, value=test_profiler_configuration)
         if pretty_print:
             print(f"\tTest key {test_key} successfully added to Profiler store.\n")
-
-        if pretty_print:
             print(
                 f"Attempting to retrieve the test value associated with key {test_key} from Profiler store..."
             )
@@ -52,8 +50,6 @@ class ProfilerStore(ConfigurationStore):
             print(
                 f"\tTest value successfully retrieved from Profiler store: {test_value}\n"
             )
-
-        if pretty_print:
             print(f"Cleaning up test key {test_key} and value from Profiler store...")
 
         test_value = self.remove_key(key=test_key)
