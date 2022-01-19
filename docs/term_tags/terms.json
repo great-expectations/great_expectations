@@ -91,12 +91,12 @@
   },
   "profiler": {
     "term": "Profiler",
-    "definition": "Generates candidate Expectations (and sometimes other artifacts) from data.",
+    "definition": "Generates Metrics and candidate Expectations from data.",
     "url": "terms/profiler"
   },
   "renderer": {
     "term": "Renderer",
-    "definition": "A class for converting Expectations, Validation Results, etc. into Data Docs or other output such as email notifications or slack messages.",
+    "definition": "A method for converting Expectations, Validation Results, etc. into Data Docs or other output such as email notifications or slack messages.",
     "url": "terms/renderer"
   },
   "store": {
