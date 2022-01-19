@@ -1,24 +1,18 @@
 ---
 id: glossary
-title: Glossary
+title: Glossary of Terms
 ---
-
-import Datasource from './term_tags/_tag.mdx';
 import Data from './term_tags/terms.json'
 
-But can I insert a tag in the middle of a paragraph? test test test <Datasource tag="datasource" text="Datasource." /> Well, let's see.
-
-
-
-## **Batch:** 
+**Batch:** 
 A selection of records from a Data Asset.
 
 
-## **Batch Request:** 
+**Batch Request:** 
 Provided to a Datasource in order to create a Batch.
 
 
-## **Checkpoint:** 
+**Checkpoint:** 
 The primary means for validating data in a production deployment of Great Expectations.
 
 

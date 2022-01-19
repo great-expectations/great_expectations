@@ -305,7 +305,15 @@ module.exports = {
       type: 'category',
       label: 'Reference',
       items: [
-        'glossary'
+        'glossary',
+        { type: 'category',
+          label: 'Technical Terms',
+          items: [
+            'terms/datasource',
+            'terms/data_context',
+            'terms/data_asset'
+          ]
+        }
       ]
     },
     {

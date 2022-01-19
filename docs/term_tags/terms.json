@@ -69,6 +69,11 @@
     "definition": "A verifiable assertion about data.",
     "url": "terms/expectation"
   },
+  "expectation_suite": {
+    "term": "Expectation Suite",
+    "definition": "A collection of verifiable assertions about data.",
+    "url": "terms/expectation_suite"
+  },
   "expectation_store": {
     "term": "Expectation Store",
     "definition": "A connector to store and retrieve information about collections of verifiable assertions about data.",
