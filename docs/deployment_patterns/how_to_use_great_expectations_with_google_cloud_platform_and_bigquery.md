@@ -117,7 +117,7 @@ If successful, the `gcloud` CLI will provide the URL to your app and launch it i
 
 ### 3. Connect to your Data
 
-The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery) and eventually build a [Checkpoint](../reference/checkpoints_and_actions.md) that will be migrated to Cloud Composer. The following code can be run either in an interacrtive Python session or Jupyter Notebook that is in your `great_expectations/` folder.
+The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery) and eventually build a [Checkpoint](../reference/checkpoints_and_actions.md) that will be migrated to Cloud Composer. The following code can be run either in an interactive Python session or Jupyter Notebook that is in your `great_expectations/` folder.
 More details can be found in the corresponding How to Guides, which have been linked.
 
 <Tabs
@@ -449,12 +449,14 @@ If the DAG run was successful, we should see the `Success` status appear on the 
 
 You've successfully migrated your Great Expectations configuration to Cloud Composer! 
 
-There are many ways to iterate and improve this initial version, including more sophisticated ways of triggering Checkpoints, building our DAGs and dividing our Data Assets into Batches using DataConnectors. For more information, please refer to the following documentation: 
+There are many ways to iterate and improve this initial version, which used a `bash operator` for simplicity. For information on more sophisticated ways of triggering Checkpoints, building our DAGs, and dividing our Data Assets into Batches using DataConnectors, please refer to the following documentation: 
 
 - [How to run a Checkpoint in Airflow using a `python operator`](/docs/deployment_patterns/how_to_use_great_expectations_with_airflow#option-2-running-the-checkpoint-script-output-with-a-pythonoperator).
-- [How to run a Checkpoint in Airflow using a `Airflow operator`](https://github.com/great-expectations/airflow-provider-great-expectations)(recommended).
+- [How to run a Checkpoint in Airflow using a `Great Expectations Airflow operator`](https://github.com/great-expectations/airflow-provider-great-expectations)(recommended).
+- [How to trigger the DAG on a schedule](https://cloud.google.com/composer/docs/triggering-dags#schedule).
 - [How to trigger the DAG on a schedule](https://cloud.google.com/composer/docs/triggering-dags#schedule).
 - [How to trigger the DAG in response to events](http://airflow.apache.org/docs/apache-airflow/stable/concepts/sensors.html).
+- [How to use the Google Kubernetes Engine (GKE) to deploy, manage and scale your application](https://airflow.apache.org/docs/apache-airflow-providers-google/stable/operators/cloud/kubernetes_engine.html).
 - [How to configure a DataConnector to introspect and partition tables in SQL](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql/).
 - [How to configure a DataConnector to introspect and partition a file system or blob store](/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store).
 
