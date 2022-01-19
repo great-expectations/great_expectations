@@ -147,6 +147,10 @@ class AssetConfig(DictDot):
         max_keys=None,
         schema_name=None,
         batch_spec_passthrough=None,
+        group_names: Optional[List[str]] = None,
+        pattern: Optional[str] = None,
+        base_directory: Optional[List[str]] = None,
+        glob_directive: Optional[str] = None,
         **kwargs,
     ):
         if name is not None:
@@ -165,8 +169,15 @@ class AssetConfig(DictDot):
             self.schema_name = schema_name
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
+        if group_names is not None:
+            self.group_names = group_names
+        if pattern is not None:
+            self.pattern = pattern
+        if base_directory is not None:
+            self.base_directory = base_directory
+        if glob_directive is not None:
+            self.glob_directive = glob_directive
         for k, v in kwargs.items():
-            setattr(self, k, v)
             logger.warn("Skipping unknown key-value pair: (%s, %s)", k, v)
 
     @property
