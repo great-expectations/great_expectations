@@ -27,17 +27,20 @@ from .html_site_store import HtmlSiteStore  # isort:skip
 from .profiler_store import ProfilerStore  # isort:skip
 
 
-for module_name, package_name in [
-    (".store", "great_expectations.data_context.store"),
-    (".validations_store", "great_expectations.data_context.store"),
-    (".configuration_store", "great_expectations.data_context.store"),
-    (".expectations_store", "great_expectations.data_context.store"),
-    (".html_site_store", "great_expectations.data_context.store"),
-    (".metric_store", "great_expectations.data_context.store"),
-    (".checkpoint_store", "great_expectations.data_context.store"),
-    (".store_backend", "great_expectations.data_context.store"),
-    (".tuple_store_backend", "great_expectations.data_context.store"),
-    (".database_store_backend", "great_expectations.data_context.store"),
-    (".ge_cloud_store_backend", "great_expectations.data_context.store"),
-]:
-    verify_dynamic_loading_support(module_name=module_name, package_name=package_name)
+for module_name in (
+    ".store",
+    ".validations_store",
+    ".configuration_store",
+    ".expectations_store",
+    ".html_site_store",
+    ".profiler_store",
+    ".metric_store",
+    ".checkpoint_store",
+    ".store_backend",
+    ".tuple_store_backend",
+    ".database_store_backend",
+    ".ge_cloud_store_backend",
+):
+    verify_dynamic_loading_support(
+        module_name=module_name, package_name="great_expectations.data_context.store"
+    )

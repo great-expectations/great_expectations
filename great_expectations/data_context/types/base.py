@@ -1393,7 +1393,7 @@ class DataContextConfigDefaults(enum.Enum):
             },
         },
         DEFAULT_PROFILER_STORE_NAME: {
-            "class_name": "RuleBasedProfiler",
+            "class_name": "ProfilerStore",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
                 "suppress_store_backend_id": True,
