@@ -12,9 +12,17 @@ import TechnicalTag from '../term_tags/_tag.mdx';
 
 <UniversalMap setup='inactive' connect='active' create='active' validate='active'/>
 
+#### Definition
+
 A Datasource provides a standard API for accessing and interacting with data from a wide variety of source systems.
 
-Datasources provide a unified API across multiple backends: the Datasource API remains the same for PostgreSQL, MongoDB, CSV Filesystems, and all other supported data backends.  Datasources also permit CRUD (Create/Read/Update/Delete) operations on your data.
+#### Core Promises
+
+Datasources provide a unified API across multiple backends: the Datasource API remains the same for PostgreSQL, MongoDB, CSV Filesystems, and all other supported data backends.  
+
+Datasources do not modify your data.
+
+#### Related Concepts
 
 Datasources function by bringing together a way of interacting with Data (an <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" />) with a way of accessing that data (a <TechnicalTag relative="../" tag="data_connector" text="Data Connector." />).
 
@@ -38,7 +46,9 @@ Datasources are also used to obtain Batches for <TechnicalTag relative="../" tag
 
 Datasources support connecting to a variety of different data backends.  No matter which source data system you employ, the Datasource's API will remain the same.
 
-### CRUD Operations
+### No Unexpected Modifications
+
+Datasources do not modify your data during profiling or validation, but they may create temporary artifacts to optimize computing Metrics and Validation
 
 
 ## Creating a Datasource
