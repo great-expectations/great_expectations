@@ -65,5 +65,5 @@ great_expectations suite list
 
 This command will list all the saved Expectation Suites in your Data Context.
 
-As long as you have a saved Expectation Suite to work with you'll be all set to move on to [Step 4: Validate Data.](../validation/validate_data_overview.md)
+As long as you have a saved Expectation Suite with which to work, you'll be all set to move on to [Step 4: Validate Data.](../validation/validate_data_overview.md)
 
