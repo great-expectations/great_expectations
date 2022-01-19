@@ -1145,7 +1145,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=True, filter_nan=False
     )
-    assert new_domain_kwargs["row_condition"] == 'col("foo").notnull()'
+    assert new_domain_kwargs["row_condition"] == "foo IS NOT NULL"
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (2,), (3,), (4,), (5,), (6,)]
@@ -1183,7 +1183,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=True, filter_nan=False
     )
-    assert new_domain_kwargs["row_condition"] == 'col("foo").notnull()'
+    assert new_domain_kwargs["row_condition"] == "foo IS NOT NULL"
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     expected = [(1,), (2,), (3,), (3,), (np.nan,), (2,), (3,), (4,), (5,), (6,)]
