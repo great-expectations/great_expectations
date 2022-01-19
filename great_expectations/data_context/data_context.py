@@ -3249,6 +3249,16 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs,
         )
 
+    def list_profilers(self) -> List[str]:
+        if self.profiler_store is None:
+            raise ge_exceptions.StoreConfigurationError(
+                f"Attempted to list profilers from a Profiler Store, which is not a configured store."
+            )
+        return profiler_toolkit.list_profilers(
+            profiler_store=self.profiler_store,
+            ge_cloud_mode=self.ge_cloud_mode,
+        )
+
     def test_yaml_config(
         self,
         yaml_config: str,
