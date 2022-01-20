@@ -25,9 +25,9 @@ There are three very important things you can do when configuring your Checkpoin
 
 #### Checkpoints, Batch Requests, and Expectation Suites
 
-Batch Requests are used to specify the data that a Checkpoint will Validate.  You can add additional validation data by assigning it Batch Requests, or set up the Checkpoint so that it requires a Batch Request to be specified at run time.
+Batch Requests are used to specify the data that a Checkpoint will Validate.  You can add additional validation data to your Checkpoint by assigning it Batch Requests, or set up the Checkpoint so that it requires a Batch Request to be specified at run time.
 
-Expectation Suites contain the Expectations that the Checkpoint will run against the validation data specified in its Batch Requests.  A Checkpoint must have at least one Expectation Suite, but you can add additional Expectation Suites as well and all of them will be used.
+Expectation Suites contain the Expectations that the Checkpoint will run against the validation data specified in its Batch Requests.  As with Batch Requests, you can configure a Checkpoint to run multiple Expectation Suites.
 
 For more detailed instructions on how to add Batch Requests or Expectation Suites to a Checkpoint, please see our guide on [how to add validations data or suites to a Checkpoint](./checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md).
 
