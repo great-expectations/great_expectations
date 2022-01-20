@@ -108,6 +108,7 @@ def test_cli_init_on_new_project(
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -636,6 +637,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
