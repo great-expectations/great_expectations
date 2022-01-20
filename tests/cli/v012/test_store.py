@@ -73,7 +73,7 @@ def test_store_list_with_four_stores(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     runner = CliRunner(mix_stderr=False)
 
-    # Profilers are v14+ specific
+    # Profilers are v014+ specific
     os.rmdir(os.path.join(project_dir, "profilers"))
 
     expected_result = """\

@@ -114,7 +114,7 @@ def test_cli_init_on_new_project(
     ]
     assert data_source_class == "SqlAlchemyDataset"
 
-    # Profilers are v14+ specific
+    # Profilers are v014+ specific
     os.rmdir(os.path.join(ge_dir, "profilers"))
 
     obs_tree = gen_directory_tree_str(ge_dir)
