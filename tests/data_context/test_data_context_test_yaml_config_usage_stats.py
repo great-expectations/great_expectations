@@ -4,6 +4,10 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
+from tests.core.usage_statistics.util import (
+    usage_stats_exceptions_exist,
+    usage_stats_invalid_messages_exist,
+)
 
 """This module is for tests related to ensuring that test_yaml_config() emits the correct usage stats messages. Many of the tests for usage stats messages are implemented in other tests, noted below in the checklist"""
 
@@ -34,7 +38,7 @@ from great_expectations import DataContext
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_test_yaml_config_usage_stats_substitution_error(
-    mock_emit, empty_data_context_stats_enabled
+    mock_emit, caplog, empty_data_context_stats_enabled
 ):
     with pytest.raises(ge_exceptions.MissingConfigVariableError):
         _ = empty_data_context_stats_enabled.test_yaml_config(
@@ -58,12 +62,16 @@ store_backend:
         ),
     ]
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_test_yaml_config_usage_stats_custom_type(
-    mock_emit, empty_data_context_stats_enabled
+    mock_emit, caplog, empty_data_context_stats_enabled
 ):
     """
     What does this test and why?
@@ -105,12 +113,16 @@ store_backend:
         ),
     ]
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_test_yaml_config_usage_stats_class_name_not_provided(
-    mock_emit, empty_data_context_stats_enabled
+    mock_emit, caplog, empty_data_context_stats_enabled
 ):
     """
     What does this test and why?
@@ -135,12 +147,16 @@ module_name: great_expectations.data_context.store.expectations_store
         ),
     ]
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_test_yaml_config_usage_stats_custom_config_class_name_not_provided(
-    mock_emit, empty_data_context_stats_enabled
+    mock_emit, caplog, empty_data_context_stats_enabled
 ):
     """
     What does this test and why?
@@ -170,12 +186,16 @@ store_backend:
         ),
     ]
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_test_yaml_config_usage_stats_custom_type_not_ge_subclass(
-    mock_emit, empty_data_context_stats_enabled
+    mock_emit, caplog, empty_data_context_stats_enabled
 ):
     """
     What does this test and why?
@@ -202,12 +222,16 @@ class_name: MyCustomNonCoreGeClass
         ),
     ]
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_test_yaml_config_usage_stats_simple_sqlalchemy_datasource_subclass(
-    mock_emit, sa, test_backends, empty_data_context_stats_enabled
+    mock_emit, caplog, sa, test_backends, empty_data_context_stats_enabled
 ):
     """
     What does this test and why?
@@ -271,3 +295,7 @@ credentials:
             }
         ),
     ]
+
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
