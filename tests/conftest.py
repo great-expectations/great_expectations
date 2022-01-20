@@ -54,7 +54,7 @@ from great_expectations.self_check.util import (
     get_sqlite_connection_url,
 )
 from great_expectations.util import is_library_loadable
-from tests.test_utils import create_files_in_directory
+from tests.test_utils import create_files_in_directory, load_data_into_test_database
 
 yaml = YAML()
 ###
