@@ -3309,7 +3309,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 (
                     instantiated_class,
                     usage_stats_event_payload,
-                ) = self._test_yaml_config_other(name, config, runtime_environment)
+                ) = self._test_yaml_config_other(
+                    name, config, runtime_environment, usage_stats_event_payload
+                )
 
             send_usage_message(
                 data_context=self,
@@ -3524,6 +3526,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         name: Optional[str],
         config: CommentedMap,
         runtime_environment: dict,
+        usage_stats_event_payload: dict,
     ) -> Tuple[Any, dict]:
         print(
             "\tNo matching class found. Attempting to instantiate class from the raw config..."
