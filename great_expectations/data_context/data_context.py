@@ -101,6 +101,7 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
+from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
@@ -3339,31 +3340,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 ) = self._test_yaml_config_checkpoint(name, class_name, config)
 
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
-                print(
-                    f"\tInstantiating as a DataConnector, since class_name is {class_name}"
-                )
-                data_connector_name: str = (
-                    name or config.get("name") or "my_temp_data_connector"
-                )
-                instantiated_class = instantiate_class_from_config(
-                    config=config,
-                    runtime_environment={
-                        **runtime_environment,
-                        **{
-                            "root_directory": self.root_directory,
-                        },
-                    },
-                    config_defaults={},
-                )
-
-                data_connector_anonymizer = DataConnectorAnonymizer(
-                    self.data_context_id
-                )
-
-                usage_stats_event_payload = (
-                    data_connector_anonymizer.anonymize_data_connector_info(
-                        name=data_connector_name, config=config
-                    )
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._test_yaml_config_data_connector(
+                    name, class_name, config, runtime_environment
                 )
 
             else:
@@ -3606,6 +3587,37 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
             name=checkpoint_name, config=checkpoint_config
+        )
+        return instantiated_class, usage_stats_event_payload
+
+    def _test_yaml_config_data_connector(
+        self,
+        name: Optional[str],
+        class_name: str,
+        config: CommentedMap,
+        runtime_environment: Optional[dict],
+    ) -> Tuple[DataConnector, dict]:
+        print(f"\tInstantiating as a DataConnector, since class_name is {class_name}")
+        data_connector_name: str = (
+            name or config.get("name") or "my_temp_data_connector"
+        )
+        instantiated_class = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                **runtime_environment,
+                **{
+                    "root_directory": self.root_directory,
+                },
+            },
+            config_defaults={},
+        )
+
+        data_connector_anonymizer = DataConnectorAnonymizer(self.data_context_id)
+
+        usage_stats_event_payload = (
+            data_connector_anonymizer.anonymize_data_connector_info(
+                name=data_connector_name, config=config
+            )
         )
         return instantiated_class, usage_stats_event_payload
 
