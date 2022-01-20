@@ -114,6 +114,9 @@ def test_cli_init_on_new_project(
     ]
     assert data_source_class == "SqlAlchemyDataset"
 
+    # Profilers are v14+ specific
+    os.rmdir(os.path.join(ge_dir, "profilers"))
+
     obs_tree = gen_directory_tree_str(ge_dir)
 
     # Instead of monkey patching guids, just regex out the guids
@@ -137,7 +140,6 @@ great_expectations/
             styles/
                 data_docs_custom_styles.css
             views/
-    profilers/
     uncommitted/
         config_variables.yml
         data_docs/

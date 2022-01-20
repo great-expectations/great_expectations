@@ -216,6 +216,9 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
         "url": "sqlite:////subfolder_thats_not_real/not_a_real.db"
     }
 
+    # Profilers are v14+ specific
+    os.rmdir(os.path.join(root_dir, "great_expectations", "profilers"))
+
     obs_tree = gen_directory_tree_str(os.path.join(root_dir, "great_expectations"))
     assert (
         obs_tree
@@ -232,7 +235,6 @@ great_expectations/
             styles/
                 data_docs_custom_styles.css
             views/
-    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
