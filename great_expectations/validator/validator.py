@@ -150,7 +150,6 @@ class Validator:
         self._data_context = data_context
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
-        self._validator_config = {}
 
         if batches is None:
             batches = []
@@ -173,7 +172,6 @@ class Validator:
         self._default_expectation_args = copy.deepcopy(
             Validator.DEFAULT_RUNTIME_CONFIGURATION
         )
-        self._validator_config = {}
 
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
@@ -861,14 +859,6 @@ aborting graph resolution.
             remove_multiple_matches=remove_multiple_matches,
             ge_cloud_id=ge_cloud_id,
         )
-
-    def set_config_value(self, key, value) -> None:
-        """Setter for config value"""
-        self._validator_config[key] = value
-
-    def get_config_value(self, key):
-        """Getter for config value"""
-        return self._validator_config.get(key)
 
     def load_batch_list(self, batch_list: List[Batch]) -> List[Batch]:
         for batch in batch_list:
