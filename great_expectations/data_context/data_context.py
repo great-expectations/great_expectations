@@ -3348,120 +3348,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
 
             else:
-                print(
-                    "\tNo matching class found. Attempting to instantiate class from the raw config..."
-                )
-                instantiated_class = instantiate_class_from_config(
-                    config=config,
-                    runtime_environment={
-                        **runtime_environment,
-                        **{
-                            "root_directory": self.root_directory,
-                        },
-                    },
-                    config_defaults={},
-                )
-
-                # If a subclass of a supported type, find the parent class and anonymize
-                store_anonymizer: StoreAnonymizer = StoreAnonymizer(
-                    self.data_context_id
-                )
-                datasource_anonymizer: DatasourceAnonymizer = DatasourceAnonymizer(
-                    self.data_context_id
-                )
-                checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
-                    self.data_context_id
-                )
-                data_connector_anonymizer: DataConnectorAnonymizer = (
-                    DataConnectorAnonymizer(self.data_context_id)
-                )
-                if (
-                    store_anonymizer.is_parent_class_recognized(
-                        store_obj=instantiated_class
-                    )
-                    is not None
-                ):
-                    store_name: str = name or config.get("name") or "my_temp_store"
-                    store_name = instantiated_class.store_name or store_name
-                    usage_stats_event_payload = store_anonymizer.anonymize_store_info(
-                        store_name=store_name, store_obj=instantiated_class
-                    )
-                elif (
-                    datasource_anonymizer.is_parent_class_recognized(config=config)
-                    is not None
-                ):
-                    datasource_name: str = (
-                        name or config.get("name") or "my_temp_datasource"
-                    )
-                    if datasource_anonymizer.is_parent_class_recognized_v3_api(
-                        config=config
-                    ):
-                        # Roundtrip through schema validator to add missing fields
-                        datasource_config = datasourceConfigSchema.load(
-                            instantiated_class.config
-                        )
-                        full_datasource_config = datasourceConfigSchema.dump(
-                            datasource_config
-                        )
-                    else:
-                        # for v2 api
-                        full_datasource_config = config
-                    parent_class_name = (
-                        datasource_anonymizer.is_parent_class_recognized(config=config)
-                    )
-                    if parent_class_name == "SimpleSqlalchemyDatasource":
-                        # Use the raw config here, defaults will be added in the anonymizer
-                        usage_stats_event_payload = datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
-                            name=datasource_name, config=config
-                        )
-                    else:
-                        usage_stats_event_payload = (
-                            datasource_anonymizer.anonymize_datasource_info(
-                                name=datasource_name, config=full_datasource_config
-                            )
-                        )
-
-                elif (
-                    checkpoint_anonymizer.is_parent_class_recognized(config=config)
-                    is not None
-                ):
-                    checkpoint_name: str = (
-                        name or config.get("name") or "my_temp_checkpoint"
-                    )
-                    # Roundtrip through schema validator to add missing fields
-                    checkpoint_config: Union[CheckpointConfig, dict]
-                    checkpoint_config = CheckpointConfig.from_commented_map(
-                        commented_map=config
-                    )
-                    checkpoint_config = checkpoint_config.to_json_dict()
-                    checkpoint_config.update({"name": checkpoint_name})
-                    usage_stats_event_payload = (
-                        checkpoint_anonymizer.anonymize_checkpoint_info(
-                            name=checkpoint_name, config=checkpoint_config
-                        )
-                    )
-
-                elif (
-                    data_connector_anonymizer.is_parent_class_recognized(config=config)
-                    is not None
-                ):
-                    data_connector_name: str = (
-                        name or config.get("name") or "my_temp_data_connector"
-                    )
-                    usage_stats_event_payload = (
-                        data_connector_anonymizer.anonymize_data_connector_info(
-                            name=data_connector_name, config=config
-                        )
-                    )
-
-                else:
-                    # If class_name is not a supported type or subclass of a supported type,
-                    # mark it as custom with no additional information since we can't anonymize
-                    usage_stats_event_payload[
-                        "diagnostic_info"
-                    ] = usage_stats_event_payload.get("diagnostic_info", []) + [
-                        "__custom_subclass_not_core_ge__"
-                    ]
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._test_yaml_config_other(name, config, runtime_environment)
 
             send_usage_message(
                 data_context=self,
@@ -3471,9 +3361,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             if pretty_print:
                 print(
-                    f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}"
+                    f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}\n"
                 )
-                print()
 
             report_object: dict = instantiated_class.self_check(
                 pretty_print=pretty_print
@@ -3595,7 +3484,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         name: Optional[str],
         class_name: str,
         config: CommentedMap,
-        runtime_environment: Optional[dict],
+        runtime_environment: dict,
     ) -> Tuple[DataConnector, dict]:
         print(f"\tInstantiating as a DataConnector, since class_name is {class_name}")
         data_connector_name: str = (
@@ -3619,6 +3508,115 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 name=data_connector_name, config=config
             )
         )
+        return instantiated_class, usage_stats_event_payload
+
+    def _test_yaml_config_other(
+        self,
+        name: Optional[str],
+        config: CommentedMap,
+        runtime_environment: dict,
+    ) -> Tuple[Any, dict]:
+        print(
+            "\tNo matching class found. Attempting to instantiate class from the raw config..."
+        )
+        instantiated_class = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                **runtime_environment,
+                **{
+                    "root_directory": self.root_directory,
+                },
+            },
+            config_defaults={},
+        )
+
+        # If a subclass of a supported type, find the parent class and anonymize
+        store_anonymizer: StoreAnonymizer = StoreAnonymizer(self.data_context_id)
+        datasource_anonymizer: DatasourceAnonymizer = DatasourceAnonymizer(
+            self.data_context_id
+        )
+        checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
+            self.data_context_id
+        )
+        data_connector_anonymizer: DataConnectorAnonymizer = DataConnectorAnonymizer(
+            self.data_context_id
+        )
+        if (
+            store_anonymizer.is_parent_class_recognized(store_obj=instantiated_class)
+            is not None
+        ):
+            store_name: str = name or config.get("name") or "my_temp_store"
+            store_name = instantiated_class.store_name or store_name
+            usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+                store_name=store_name, store_obj=instantiated_class
+            )
+        elif (
+            datasource_anonymizer.is_parent_class_recognized(config=config) is not None
+        ):
+            datasource_name: str = name or config.get("name") or "my_temp_datasource"
+            if datasource_anonymizer.is_parent_class_recognized_v3_api(config=config):
+                # Roundtrip through schema validator to add missing fields
+                datasource_config = datasourceConfigSchema.load(
+                    instantiated_class.config
+                )
+                full_datasource_config = datasourceConfigSchema.dump(datasource_config)
+            else:
+                # for v2 api
+                full_datasource_config = config
+            parent_class_name = datasource_anonymizer.is_parent_class_recognized(
+                config=config
+            )
+            if parent_class_name == "SimpleSqlalchemyDatasource":
+                # Use the raw config here, defaults will be added in the anonymizer
+                usage_stats_event_payload = (
+                    datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+                        name=datasource_name, config=config
+                    )
+                )
+            else:
+                usage_stats_event_payload = (
+                    datasource_anonymizer.anonymize_datasource_info(
+                        name=datasource_name, config=full_datasource_config
+                    )
+                )
+
+        elif (
+            checkpoint_anonymizer.is_parent_class_recognized(config=config) is not None
+        ):
+            checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
+            # Roundtrip through schema validator to add missing fields
+            checkpoint_config: Union[CheckpointConfig, dict]
+            checkpoint_config = CheckpointConfig.from_commented_map(
+                commented_map=config
+            )
+            checkpoint_config = checkpoint_config.to_json_dict()
+            checkpoint_config.update({"name": checkpoint_name})
+            usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
+                name=checkpoint_name, config=checkpoint_config
+            )
+
+        elif (
+            data_connector_anonymizer.is_parent_class_recognized(config=config)
+            is not None
+        ):
+            data_connector_name: str = (
+                name or config.get("name") or "my_temp_data_connector"
+            )
+            usage_stats_event_payload = (
+                data_connector_anonymizer.anonymize_data_connector_info(
+                    name=data_connector_name, config=config
+                )
+            )
+
+        else:
+            # If class_name is not a supported type or subclass of a supported type,
+            # mark it as custom with no additional information since we can't anonymize
+            usage_stats_event_payload[
+                "diagnostic_info"
+            ] = usage_stats_event_payload.get("diagnostic_info", []) + [
+                "__custom_subclass_not_core_ge__"
+            ]
+
         return instantiated_class, usage_stats_event_payload
 
 
