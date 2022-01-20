@@ -108,6 +108,7 @@ from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.rule_based_profiler.profiler import Profiler
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
@@ -3247,6 +3248,18 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id=ge_cloud_id,
             expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
             **kwargs,
+        )
+
+    def get_profiler(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> Profiler:
+        return profiler_toolkit.get_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
         )
 
     def list_profilers(self) -> List[str]:
