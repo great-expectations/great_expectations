@@ -362,9 +362,9 @@ def run_validation_operator_usage_statistics(
         payload["anonymized_operator_name"] = anonymizer.anonymize(
             validation_operator_name
         )
-    except TypeError:
+    except TypeError as e:
         logger.debug(
-            "run_validation_operator_usage_statistics: Unable to create validation_operator_name hash"
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, run_validation_operator_usage_statistics: Unable to create validation_operator_name hash"
         )
     if data_context._usage_statistics_handler:
         # noinspection PyBroadException
@@ -374,9 +374,9 @@ def run_validation_operator_usage_statistics(
                 batch_anonymizer.anonymize_batch_info(batch)
                 for batch in assets_to_validate
             ]
-        except Exception:
+        except Exception as e:
             logger.debug(
-                "run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
             )
 
     return payload
@@ -411,9 +411,9 @@ def save_expectation_suite_usage_statistics(
         payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
             expectation_suite_name
         )
-    except Exception:
+    except Exception as e:
         logger.debug(
-            "save_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, save_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
         )
 
     return payload
@@ -443,9 +443,9 @@ def edit_expectation_suite_usage_statistics(
         payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
             expectation_suite_name
         )
-    except Exception:
+    except Exception as e:
         logger.debug(
-            "edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
         )
 
     return payload
@@ -498,9 +498,9 @@ def get_batch_list_usage_statistics(data_context, *args, **kwargs):
                 data_context._usage_statistics_handler._batch_request_anonymizer
             )
             payload = batch_request_anonymizer.anonymize_batch_request(*args, **kwargs)
-        except Exception:
+        except Exception as e:
             logger.debug(
-                "get_batch_list_usage_statistics: Unable to create anonymized_batch_request payload field"
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_batch_request payload field"
             )
 
     return payload
@@ -539,9 +539,9 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
             )
 
             checkpoint._config = checkpoint_config
-        except Exception:
+        except Exception as e:
             logger.debug(
-                "get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
             )
 
     return payload
