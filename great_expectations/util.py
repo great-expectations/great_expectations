@@ -771,6 +771,7 @@ def read_pickle(
             profiler=profiler,
         )
 
+
 def read_sas(
     filename,
     class_name="PandasDataset",
@@ -813,6 +814,7 @@ def read_sas(
             expectation_suite=expectation_suite,
             profiler=profiler,
         )
+
 
 def validate(
     data_asset,

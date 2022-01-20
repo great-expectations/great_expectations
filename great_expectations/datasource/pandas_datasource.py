@@ -285,9 +285,10 @@ class PandasDatasource(LegacyDatasource):
         elif path.endswith(".sas7bdat") or path.endswith(".xpt"):
             return {"reader_method": "read_sas"}
 
-        else: raise BatchKwargsError(
-            "Unable to determine reader method from path: %s" % path, {"path": path}
-        )
+        else:
+            raise BatchKwargsError(
+                "Unable to determine reader method from path: %s" % path, {"path": path}
+            )
 
     def _infer_default_options(self, reader_fn: Callable, reader_options: dict) -> dict:
         """

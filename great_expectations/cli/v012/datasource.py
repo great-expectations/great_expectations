@@ -1110,7 +1110,7 @@ We could not determine the format of the file. What is it?
         "2": "parquet",
         "3": "xlsx",
         "4": "json",
-        "5": "sas"
+        "5": "sas",
     }
 
     data_asset_name = None
