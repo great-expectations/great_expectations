@@ -3270,47 +3270,49 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         config = self._test_yaml_config_prepare_config(
             yaml_config, runtime_environment, usage_stats_event_name
         )
+
         if "class_name" in config:
             class_name = config["class_name"]
 
         instantiated_class: Any = None
         usage_stats_event_payload: Dict[str, Union[str, List[str]]] = {}
 
+        if pretty_print:
+            print("Attempting to instantiate class from config...")
         try:
-            if pretty_print:
-                print("Attempting to instantiate class from config...")
-
             if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
-                ) = self._test_yaml_config_store(name, class_name, config)
-
+                ) = self._test_instantiation_of_store_from_yaml_config(
+                    name, class_name, config
+                )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
-                ) = self._test_yaml_config_datasource(name, class_name, config)
-
+                ) = self._test_instantiation_of_datasource_from_yaml_config(
+                    name, class_name, config
+                )
             elif class_name in ["Checkpoint", "SimpleCheckpoint"]:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
-                ) = self._test_yaml_config_checkpoint(name, class_name, config)
-
+                ) = self._test_instantiation_of_checkpoint_from_yaml_config(
+                    name, class_name, config
+                )
             elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
-                ) = self._test_yaml_config_data_connector(
+                ) = self._test_instantiation_of_data_connector_from_yaml_config(
                     name, class_name, config, runtime_environment
                 )
-
             else:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
-                ) = self._test_yaml_config_other(
+                ) = self._test_instantiation_of_misc_class_from_yaml_config(
                     name, config, runtime_environment, usage_stats_event_payload
                 )
 
@@ -3361,6 +3363,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def _test_yaml_config_prepare_config(
         self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
     ) -> CommentedMap:
+        """
+        Performs variable substitution and conversion from YAML to CommentedMap.
+        See `test_yaml_config` for more details.
+        """
         try:
             substituted_config_variables: Union[
                 DataContextConfig, dict
@@ -3409,9 +3415,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             raise e
 
-    def _test_yaml_config_store(
+    def _test_instantiation_of_store_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
     ) -> Tuple[Store, dict]:
+        """
+        Helper to create store instance and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
         print(f"\tInstantiating as a Store, since class_name is {class_name}")
         store_name: str = name or config.get("name") or "my_temp_store"
         instantiated_class = cast(
@@ -3430,9 +3440,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
         return instantiated_class, usage_stats_event_payload
 
-    def _test_yaml_config_datasource(
+    def _test_instantiation_of_datasource_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
     ) -> Tuple[Datasource, dict]:
+        """
+        Helper to create datasource instance and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
         print(f"\tInstantiating as a Datasource, since class_name is {class_name}")
         datasource_name: str = name or config.get("name") or "my_temp_datasource"
         instantiated_class = cast(
@@ -3462,9 +3476,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
         return instantiated_class, usage_stats_event_payload
 
-    def _test_yaml_config_checkpoint(
+    def _test_instantiation_of_checkpoint_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
     ) -> Tuple[Checkpoint, dict]:
+        """
+        Helper to create checkpoint instance and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
         print(f"\tInstantiating as a {class_name}, since class_name is {class_name}")
 
         checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
@@ -3491,13 +3509,17 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
         return instantiated_class, usage_stats_event_payload
 
-    def _test_yaml_config_data_connector(
+    def _test_instantiation_of_data_connector_from_yaml_config(
         self,
         name: Optional[str],
         class_name: str,
         config: CommentedMap,
         runtime_environment: dict,
     ) -> Tuple[DataConnector, dict]:
+        """
+        Helper to create data connector instance and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
         print(f"\tInstantiating as a DataConnector, since class_name is {class_name}")
         data_connector_name: str = (
             name or config.get("name") or "my_temp_data_connector"
@@ -3522,13 +3544,18 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
         return instantiated_class, usage_stats_event_payload
 
-    def _test_yaml_config_other(
+    def _test_instantiation_of_misc_class_from_yaml_config(
         self,
         name: Optional[str],
         config: CommentedMap,
         runtime_environment: dict,
         usage_stats_event_payload: dict,
     ) -> Tuple[Any, dict]:
+        """
+        Catch-all to cover all classes not covered in other `_test_instantiation` methods.
+        Attempts to match config to the relevant class/parent and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
         print(
             "\tNo matching class found. Attempting to instantiate class from the raw config..."
         )
