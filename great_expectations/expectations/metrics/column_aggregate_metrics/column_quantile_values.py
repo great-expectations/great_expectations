@@ -2,7 +2,7 @@ import itertools
 import logging
 import traceback
 from collections.abc import Iterable
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
@@ -10,22 +10,18 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.execution_engine import (
     ExecutionEngine,
     MetricDomainTypes,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
-    sa as sa,
-)
+from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -88,7 +84,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         (
@@ -167,7 +163,7 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         (
@@ -205,16 +201,6 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
-        )
-
-        table_domain_kwargs: dict = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
-        dependencies["table.row_count"] = MetricConfiguration(
-            metric_name="table.row_count",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs=None,
-            metric_dependencies=None,
         )
 
         return dependencies

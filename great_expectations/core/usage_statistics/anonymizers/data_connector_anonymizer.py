@@ -1,6 +1,10 @@
 # isort:skip_file
 
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.data_context.types.base import (
+    DataConnectorConfig,
+    dataConnectorConfigSchema,
+)
 
 from great_expectations.datasource.data_connector import (
     DataConnector,
@@ -54,10 +58,18 @@ class DataConnectorAnonymizer(Anonymizer):
             "anonymized_name": self.anonymize(name),
         }
 
+        # Roundtrip through schema validation to add any missing fields
+        data_connector_config: DataConnectorConfig = dataConnectorConfigSchema.load(
+            config
+        )
+        data_connector_config_dict: dict = dataConnectorConfigSchema.dump(
+            data_connector_config
+        )
+
         self.anonymize_object_info(
             anonymized_info_dict=anonymized_info_dict,
             ge_classes=self._ge_classes,
-            object_config=config,
+            object_config=data_connector_config_dict,
         )
 
         return anonymized_info_dict

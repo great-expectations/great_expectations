@@ -73,12 +73,10 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     }
 
     metric_dependencies = ("table.row_count",)
-
     success_keys = (
         "min_value",
         "max_value",
     )
-
     default_kwarg_values = {
         "min_value": None,
         "max_value": None,
@@ -87,6 +85,10 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
+    args_keys = (
+        "min_value",
+        "max_value",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

@@ -80,7 +80,6 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
         "min_value",
         "max_value",
     )
-
     default_kwarg_values = {
         "min_value": None,
         "max_value": None,
@@ -89,6 +88,10 @@ class ExpectTableColumnCountToBeBetween(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
+    args_keys = (
+        "min_value",
+        "max_value",
+    )
 
     """ A Metric Decorator for the Column Count"""
 
