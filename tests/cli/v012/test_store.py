@@ -1,9 +1,9 @@
-import pytest
+import os
+
 from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
-from great_expectations.exceptions import InvalidConfigurationYamlError
 from tests.cli.v012.utils import assert_no_logging_messages_or_tracebacks
 
 
@@ -33,8 +33,10 @@ def test_store_list_with_two_stores(caplog, empty_data_context):
     context = DataContext(project_dir)
     del context._project_config.stores["validations_store"]
     del context._project_config.stores["evaluation_parameter_store"]
+    del context._project_config.stores["profiler_store"]
     context._project_config.validations_store_name = "expectations_store"
     context._project_config.evaluation_parameter_store_name = "expectations_store"
+    context._project_config.profiler_store_name = "profiler_store"
     context._save_project_config()
 
     runner = CliRunner(mix_stderr=False)
@@ -71,6 +73,9 @@ def test_store_list_with_four_stores(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     runner = CliRunner(mix_stderr=False)
 
+    # Profilers are v014+ specific
+    os.rmdir(os.path.join(project_dir, "profilers"))
+
     expected_result = """\
 4 Stores found:[0m
 [0m
@@ -95,7 +100,6 @@ def test_store_list_with_four_stores(caplog, empty_data_context):
      [36mclass_name:[0m TupleFilesystemStoreBackend[0m
      [36mbase_directory:[0m checkpoints/[0m
      [36msuppress_store_backend_id:[0m True[0m"""
-
     result = runner.invoke(
         cli,
         f"store list -d {project_dir}",
