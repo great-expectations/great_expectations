@@ -12,13 +12,14 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import requests
 from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
+from typing_extensions import Literal
 
 import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 import great_expectations.exceptions as ge_exceptions
@@ -3265,10 +3266,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         }
 
         usage_stats_event_name: str = "data_context.test_yaml_config"
-        usage_stats_event_payload: Dict[str, Union[str, List[str]]] = {}
-
-        if pretty_print:
-            print("Attempting to instantiate class from config...")
 
         config = self._test_yaml_config_prepare_config(
             yaml_config, runtime_environment, usage_stats_event_name
@@ -3277,8 +3274,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             class_name = config["class_name"]
 
         instantiated_class: Any = None
+        usage_stats_event_payload: Dict[str, Union[str, List[str]]] = {}
 
         try:
+            if pretty_print:
+                print("Attempting to instantiate class from config...")
+
             if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
                 (
                     instantiated_class,
