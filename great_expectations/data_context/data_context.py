@@ -12,7 +12,7 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union, cast
 
 import requests
 from dateutil.parser import parse
@@ -3207,7 +3207,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         class_name: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
-        return_mode: str = "instantiated_class",
+        return_mode: Union[
+            Literal["instantiated_class"], Literal["report_object"]
+        ] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):
         """Convenience method for testing yaml configs
@@ -3251,6 +3253,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         The returned object is determined by return_mode.
         """
+        if return_mode not in ["instantiated_class", "report_object"]:
+            raise ValueError(f"Unknown return_mode: {return_mode}.")
+
         if runtime_environment is None:
             runtime_environment = {}
 
@@ -3265,58 +3270,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if pretty_print:
             print("Attempting to instantiate class from config...")
 
-        if return_mode not in ["instantiated_class", "report_object"]:
-            raise ValueError(f"Unknown return_mode: {return_mode}.")
-
-        try:
-            substituted_config_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                self.config_variables,
-                dict(os.environ),
-            )
-
-            substitutions: dict = {
-                **substituted_config_variables,
-                **dict(os.environ),
-                **runtime_environment,
-            }
-
-            config_str_with_substituted_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                yaml_config,
-                substitutions,
-            )
-        except Exception as e:
-            usage_stats_event_payload: dict = {
-                "diagnostic_info": ["__substitution_error__"],
-            }
-            send_usage_message(
-                data_context=self,
-                event=usage_stats_event_name,
-                event_payload=usage_stats_event_payload,
-                success=False,
-            )
-            raise e
-
-        try:
-            config: CommentedMap = yaml.load(config_str_with_substituted_variables)
-
-            if "class_name" in config:
-                class_name = config["class_name"]
-
-        except Exception as e:
-            usage_stats_event_payload: dict = {
-                "diagnostic_info": ["__yaml_parse_error__"],
-            }
-            send_usage_message(
-                data_context=self,
-                event=usage_stats_event_name,
-                event_payload=usage_stats_event_payload,
-                success=False,
-            )
-            raise e
+        config = self._test_yaml_config_prepare_config(
+            yaml_config, runtime_environment, usage_stats_event_name
+        )
+        if "class_name" in config:
+            class_name = config["class_name"]
 
         instantiated_class: Any = None
 
@@ -3396,6 +3354,57 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 traceback.print_exc(limit=1)
             else:
                 raise e
+
+    def _test_yaml_config_prepare_config(
+        self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
+    ) -> CommentedMap:
+        try:
+            substituted_config_variables: Union[
+                DataContextConfig, dict
+            ] = substitute_all_config_variables(
+                self.config_variables,
+                dict(os.environ),
+            )
+
+            substitutions: dict = {
+                **substituted_config_variables,
+                **dict(os.environ),
+                **runtime_environment,
+            }
+
+            config_str_with_substituted_variables: Union[
+                DataContextConfig, dict
+            ] = substitute_all_config_variables(
+                yaml_config,
+                substitutions,
+            )
+        except Exception as e:
+            usage_stats_event_payload: dict = {
+                "diagnostic_info": ["__substitution_error__"],
+            }
+            send_usage_message(
+                data_context=self,
+                event=usage_stats_event_name,
+                event_payload=usage_stats_event_payload,
+                success=False,
+            )
+            raise e
+
+        try:
+            config: CommentedMap = yaml.load(config_str_with_substituted_variables)
+            return config
+
+        except Exception as e:
+            usage_stats_event_payload: dict = {
+                "diagnostic_info": ["__yaml_parse_error__"],
+            }
+            send_usage_message(
+                data_context=self,
+                event=usage_stats_event_name,
+                event_payload=usage_stats_event_payload,
+                success=False,
+            )
+            raise e
 
     def _test_yaml_config_store(
         self, name: Optional[str], class_name: str, config: CommentedMap
