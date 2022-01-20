@@ -3294,7 +3294,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 ) = self._test_instantiation_of_datasource_from_yaml_config(
                     name, class_name, config
                 )
-            elif class_name in ["Checkpoint", "SimpleCheckpoint"]:
+            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
