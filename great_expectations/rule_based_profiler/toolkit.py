@@ -9,7 +9,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.profiler import Profiler
 from great_expectations.util import filter_properties_dict
@@ -35,10 +34,6 @@ def get_profiler(
         id_ = key.configuration_key if isinstance(key, ConfigurationIdentifier) else key
         raise ge_exceptions.ProfilerNotFoundError(
             message=f'Non-existent Profiler configuration named "{id_}".\n\nDetails: {exc_ik}'
-        )
-    except ValidationError as exc_ve:
-        raise ge_exceptions.ProfilerConfigurationError(
-            message=f"Invalid Checkpoint configuration: {exc_ve}"
         )
 
     config = profiler_config.to_json_dict()
@@ -72,8 +67,8 @@ def default_profilers_exist(directory_path: Optional[str]) -> bool:
     if not directory_path:
         return False
 
-    checkpoints_directory_path: str = os.path.join(
+    profiler_directory_path: str = os.path.join(
         directory_path,
         DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
     )
-    return os.path.isdir(checkpoints_directory_path)
+    return os.path.isdir(profiler_directory_path)
