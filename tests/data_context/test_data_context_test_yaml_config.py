@@ -1343,3 +1343,12 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_rule_based_profiler(
+    mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
+):
+    pass
