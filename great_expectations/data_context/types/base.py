@@ -633,6 +633,7 @@ class ExecutionEngineConfig(DictDot):
         boto3_options=None,
         azure_options=None,
         gcs_options=None,
+        credentials_info=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -653,6 +654,8 @@ class ExecutionEngineConfig(DictDot):
             self.azure_options = azure_options
         if gcs_options is not None:
             self.gcs_options = gcs_options
+        if credentials_info is not None:
+            self.credentials_info = credentials_info
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -690,7 +693,9 @@ class ExecutionEngineConfigSchema(Schema):
     caching = fields.Boolean(required=False, allow_none=True)
     batch_spec_defaults = fields.Dict(required=False, allow_none=True)
     force_reuse_spark_context = fields.Boolean(required=False, allow_none=True)
-    connection_info = fields.Dict(required=False, allow_none=True)
+    # BigQuery Service Account Credentials
+    # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
+    credentials_info = fields.Dict(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @validates_schema
@@ -739,6 +744,7 @@ class DatasourceConfig(DictDot):
         boto3_options=None,
         azure_options=None,
         gcs_options=None,
+        credentials_info=None,
         reader_method=None,
         reader_options=None,
         limit=None,
@@ -787,6 +793,8 @@ class DatasourceConfig(DictDot):
             self.azure_options = azure_options
         if gcs_options is not None:
             self.gcs_options = gcs_options
+        if credentials_info is not None:
+            self.credentials_info = credentials_info
         if reader_method is not None:
             self.reader_method = reader_method
         if reader_options is not None:
