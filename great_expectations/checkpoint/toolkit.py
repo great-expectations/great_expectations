@@ -19,7 +19,6 @@ from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.util import filter_properties_dict
 
 
@@ -166,10 +165,6 @@ def get_checkpoint(
     except ge_exceptions.InvalidKeyError as exc_ik:
         raise ge_exceptions.CheckpointNotFoundError(
             message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
-        )
-    except ValidationError as exc_ve:
-        raise ge_exceptions.InvalidCheckpointConfigError(
-            message="Invalid Checkpoint configuration", validation_error=exc_ve
         )
 
     if checkpoint_config.config_version is None:
