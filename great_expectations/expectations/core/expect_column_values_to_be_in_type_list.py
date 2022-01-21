@@ -347,7 +347,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         if isinstance(pd_type, type):
                             comp_types.append(pd_type)
                             try:
-                                if isinstance(pd_type(), pd.core.dtypes.base.ExtensionDtype):
+                                if isinstance(
+                                    pd_type(), pd.core.dtypes.base.ExtensionDtype
+                                ):
                                     comp_types.append(pd_type())
                             except TypeError:
                                 pass
