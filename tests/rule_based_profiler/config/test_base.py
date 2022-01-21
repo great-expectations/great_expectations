@@ -1,6 +1,9 @@
+from unittest import mock
+
 import pytest
 from ruamel.yaml.comments import CommentedMap
 
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.marshmallow__shade.exceptions import ValidationError
 from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
@@ -15,6 +18,7 @@ from great_expectations.rule_based_profiler.config import (
     RuleConfig,
     RuleConfigSchema,
 )
+from great_expectations.rule_based_profiler.profiler import Profiler
 
 
 def test_not_null_schema_raises_error_with_improperly_implemented_subclass():
@@ -293,3 +297,39 @@ def test_rule_based_profiler_from_commented_map():
     commented_map = CommentedMap(data)
     config = RuleBasedProfilerConfig.from_commented_map(commented_map)
     assert all(hasattr(config, k) for k in data)
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_rule_based_profiler_instantiate_class_from_config(mock_data_context):
+    config = {
+        "name": "my_RBP",
+        "config_version": 1.0,
+        "variables": {"foo": "bar"},
+        "rules": {
+            "rule_1": {
+                "name": "rule_1",
+                "domain_builder": {"class_name": "DomainBuilder"},
+                "parameter_builders": [
+                    {"class_name": "ParameterBuilder", "name": "my_parameter"}
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "class_name": "ExpectationConfigurationBuilder",
+                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    }
+                ],
+            },
+        },
+    }
+    # profiler = Profiler(**config)
+    profiler = instantiate_class_from_config(
+        config=config,
+        runtime_environment={"data_context": mock_data_context},
+        config_defaults={
+            "class_name": "Profiler",
+            "module_name": "great_expectations.rule_based_profiler.profiler",
+        },
+    )
+    assert isinstance(profiler, Profiler)
+    print(profiler.__dict__)
+    assert False
