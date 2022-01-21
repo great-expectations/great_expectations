@@ -63,7 +63,6 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
-from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
@@ -110,6 +109,8 @@ from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.profiler import Profiler
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
@@ -3358,6 +3359,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 ) = self._test_instantiation_of_data_connector_from_yaml_config(
                     name, class_name, config, runtime_environment
                 )
+            elif class_name in ["Profiler"]:
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._test_instantiation_of_profiler_from_yaml_config(
+                    name, class_name, config, runtime_environment
+                )
             else:
                 (
                     instantiated_class,
@@ -3593,6 +3601,35 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
         )
         return instantiated_class, usage_stats_event_payload
+
+    def _test_instantiation_of_profiler_from_yaml_config(
+        self, name: Optional[str], class_name: str, config: CommentedMap
+    ) -> Tuple[Checkpoint, dict]:
+        """
+        Helper to create profiler instance and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
+        print(f"\tInstantiating as a {class_name}, since class_name is {class_name}")
+
+        profiler_name = name or config.get("name") or "my_temp_profiler"
+
+        profiler_config = RuleBasedProfilerConfig.from_commented_map(
+            commented_map=config
+        )
+        profiler_config = profiler_config.to_json_dict()
+        profiler_config.update({"name": profiler_name})
+
+        instantiated_class = Profiler(data_context=self, **profiler_config)
+
+        # TODO(cdkini): Open to implement with appropriate anonymizer!
+        # checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
+        #     self.data_context_id
+        # )
+
+        # usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
+        #     name=checkpoint_name, config=checkpoint_config
+        # )
+        # return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_misc_class_from_yaml_config(
         self,
