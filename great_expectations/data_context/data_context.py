@@ -3622,11 +3622,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiler_config = profiler_config.to_json_dict()
         profiler_config.update({"name": profiler_name})
 
-        instantiated_class = Profiler(data_context=self, **profiler_config)
+        instantiated_class = Profiler(
+            profiler_config=profiler_config, data_context=self
+        )
 
         profiler_anonymizer = ProfilerAnonymizer(self.data_context_id)
 
-        usage_stats_event_payload = profiler_anonymizer.anonymize_checkpoint_info(
+        usage_stats_event_payload = profiler_anonymizer.anonymize_profiler_info(
             name=profiler_name, config=profiler_config
         )
         return instantiated_class, usage_stats_event_payload

@@ -1351,4 +1351,13 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
 def test_rule_based_profiler(
     mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
 ):
-    pass
+    context = empty_data_context_stats_enabled
+    yaml_config = """
+    name: my_profiler
+    config_version: 1.0
+    variables:
+    rules: {}
+    """
+    context.test_yaml_config(
+        yaml_config=yaml_config, name="my_profiler", class_name="Profiler"
+    )

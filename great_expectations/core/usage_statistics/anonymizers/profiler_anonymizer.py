@@ -11,7 +11,7 @@ class ProfilerAnonymizer(Anonymizer):
         # ordered bottom up in terms of inheritance order
         self._ge_classes = [Profiler]
 
-    def anonymize_checkpoint_info(self, name: str, config: dict) -> dict:
+    def anonymize_profiler_info(self, name: str, config: dict) -> dict:
         anonymized_info_dict: dict = {
             "anonymized_name": self.anonymize(name),
         }
