@@ -27,18 +27,6 @@ def test_not_null_schema_raises_error_with_improperly_implemented_subclass():
     assert "must define its own custom __config_class__" in str(e.value)
 
 
-def test_not_null_schema_removes_unknown_kwargs_when_loading():
-    data = {
-        "class_name": "DomainBuilder",
-        "a": "foo",
-        "b": "bar",
-        "c": "baz",
-    }
-    schema = DomainBuilderConfigSchema()
-    config = schema.load(data)
-    assert all(not hasattr(config, attr) for attr in ("a", "b", "c"))
-
-
 def test_not_null_schema_removes_null_values_when_dumping():
     schema = DomainBuilderConfigSchema()
     config = DomainBuilderConfig(
