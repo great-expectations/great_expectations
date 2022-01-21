@@ -1,8 +1,6 @@
 import os
-from typing import List, Optional, Union
+from typing import List, Optional
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.types.resource_identifiers import (
@@ -66,6 +64,15 @@ def list_profilers(
     if ge_cloud_mode:
         return profiler_store.list_keys()
 
+    return [x.configuration_key for x in profiler_store.list_keys()]
+
+
+def list_profilers(
+    profiler_store: ProfilerStore,
+    ge_cloud_mode: bool,
+) -> List[str]:
+    if ge_cloud_mode:
+        return profiler_store.list_keys()
     return [x.configuration_key for x in profiler_store.list_keys()]
 
 

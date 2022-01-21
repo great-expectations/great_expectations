@@ -3252,18 +3252,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs,
         )
 
-    def get_profiler(
-        self,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> Profiler:
-        return profiler_toolkit.get_profiler(
-            data_context=self,
-            profiler_store=self.profiler_store,
-            name=name,
-            ge_cloud_id=ge_cloud_id,
-        )
-
     def list_profilers(self) -> List[str]:
         if self.profiler_store is None:
             raise ge_exceptions.StoreConfigurationError(
