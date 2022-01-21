@@ -95,6 +95,12 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
 
     @staticmethod
     def sanitize_prefix(text: str) -> str:
+        """
+        Takes in a given user-prefix and cleans it to work with file-system traversal methods
+        (i.e. add '/' to the end of a string meant to represent a directory)
+
+        Customized for S3 paths, ignoring the path separator used by the host OS
+        """
         path_parts = text.split("/")
         if not path_parts:  # Empty prefix
             return text
