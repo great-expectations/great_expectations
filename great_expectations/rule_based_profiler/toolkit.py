@@ -11,7 +11,6 @@ def list_profilers(
 ) -> List[str]:
     if ge_cloud_mode:
         return profiler_store.list_keys()
-
     return [x.configuration_key for x in profiler_store.list_keys()]
 
 
