@@ -13,6 +13,9 @@ from great_expectations.marshmallow__shade import (
 from great_expectations.types import DictDot
 from great_expectations.util import filter_properties_dict
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 
 class NotNullSchema(Schema):
     """
@@ -75,6 +78,11 @@ class DomainBuilderConfig(DictDot):
         self.class_name = class_name
         self.module_name = module_name
         self.batch_request = batch_request
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+            logger.warning(
+                "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
+            )
 
 
 class DomainBuilderConfigSchema(NotNullSchema):
@@ -105,6 +113,11 @@ class ParameterBuilderConfig(DictDot):
         self.class_name = class_name
         self.module_name = module_name
         self.batch_request = batch_request
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+            logger.warning(
+                "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
+            )
 
 
 class ParameterBuilderConfigSchema(NotNullSchema):
@@ -138,6 +151,11 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         self.module_name = module_name
         self.mostly = mostly
         self.meta = meta
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+            logger.warning(
+                "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
+            )
 
 
 class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
@@ -170,6 +188,11 @@ class RuleConfig(DictDot):
         self.domain_builder = domain_builder
         self.parameter_builders = parameter_builders
         self.expectation_configuration_builders = expectation_configuration_builders
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+            logger.warning(
+                "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
+            )
 
 
 class RuleConfigSchema(NotNullSchema):
@@ -206,6 +229,11 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         self.config_version = config_version
         self.rules = rules
         self.variables = variables
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+            logger.warning(
+                "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
+            )
 
         super().__init__(commented_map=commented_map)
 

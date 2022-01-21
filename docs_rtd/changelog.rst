@@ -8,6 +8,25 @@ Changelog
 develop
 -----------------
 
+0.14.2
+-----------------
+* [FEATURE] Marshmallow schema for Rule Based Profiler (#3982)
+* [FEATURE] Enable Rule-Based Profile Parameter Access To Collection Typed Values (#3998)
+* [BUGFIX] Docs integration pipeline bugfix  (#3997)
+* [BUGFIX] Enables spark-native null filtering (#4004)
+* [DOCS] Gtm/cta in docs (#3993)
+* [DOCS] Fix incorrect variable name in how_to_configure_an_expectation_store_in_amazon_s3.md (#3971) (thanks @moritzkoerber)
+* [DOCS] update custom docs css to add a subtle border around tabbed content (#4001)
+* [DOCS] Migration Guide now includes example for Spark data (#3996)
+* [DOCS] Revamp Airflow Deployment Pattern (#3963) (thanks @denimalpaca)
+* [DOCS] updating redirects to reflect a moved file (#4007)
+* [DOCS] typo in gcp + bigquery tutorial (#4018)
+* [DOCS] Additional description of Kubernetes Operators in GCP Deployment Guide (#4019)
+* [DOCS] Migration Guide now includes example for Databases (#4005)
+* [DOCS] Update how to instantiate without a yml file (#3995)
+* [MAINTENANCE] Refactor of `test_script_runner.py` to break-up test list (#3987)
+* [MAINTENANCE] Small refactor for tests that allows DB setup to be done from all tests (#4012)
+
 0.14.1
 -----------------
 * [FEATURE] Add pagination/search to CLI batch request listing (#3854)
