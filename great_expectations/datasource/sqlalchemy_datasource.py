@@ -312,15 +312,8 @@ class SqlAlchemyDatasource(LegacyDatasource):
         create_engine_kwargs = {}
 
         connect_args = credentials.pop("connect_args", None)
-
         if connect_args:
             create_engine_kwargs["connect_args"] = connect_args
-
-        # 'credentials_info' is a kwarg used by BigQuery dialect to pass in dict creds, instead of filepath
-        # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
-        credentials_info = credentials.pop("credentials_info", None)
-        if credentials_info:
-            create_engine_kwargs["credentials_info"] = credentials_info
 
         # if a connection string or url was provided in the profile, use that
         if "connection_string" in credentials:
