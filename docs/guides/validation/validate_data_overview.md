@@ -9,7 +9,7 @@ import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 
 <UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/>
 
-When you have completed this step for the first time, you will have created and run a Checkpoint.  This Checkpoint can then be reused to Validate data in the future, and you can also create and configure additional Checkpoints to cover different use cases, should you have them.
+When you complete this step for the first time, you will have created and run a Checkpoint.  This Checkpoint can then be reused to Validate data in the future, and you can also create and configure additional Checkpoints to cover different use cases, should you have them.
 
 ## The Validate Data process
 
