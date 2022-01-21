@@ -25,7 +25,7 @@ class DomainBuilder(ABC):
     ):
         """
         Args:
-            data_context: "DataContext"
+            data_context: DataContext
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
         """
 

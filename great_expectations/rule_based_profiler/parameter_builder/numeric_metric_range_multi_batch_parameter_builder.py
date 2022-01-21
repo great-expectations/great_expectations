@@ -93,7 +93,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             output.  If omitted, then no rounding is performed, unless the computed value is already an integer.
             truncate_values: user-configured directive for whether or not to allow the computed parameter values
             (i.e., lower_bound, upper_bound) to take on values outside the specified bounds when packaged on output.
-            data_context: "DataContext"
+            data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         super().__init__(

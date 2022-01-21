@@ -43,7 +43,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
             replace_nan_with_zero: if False (default), then if the computed metric gives NaN, then exception is raised;
             otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
-            data_context: "DataContext"
+            data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         super().__init__(
