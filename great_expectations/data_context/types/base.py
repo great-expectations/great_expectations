@@ -853,6 +853,9 @@ class DatasourceConfigSchema(Schema):
     gcs_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
+    # BigQuery Service Account Credentials
+    # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
+    credentials_info = fields.Dict(required=False, allow_none=True)
     reader_method = fields.String(required=False, allow_none=True)
     reader_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
