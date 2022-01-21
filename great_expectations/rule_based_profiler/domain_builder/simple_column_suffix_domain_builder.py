@@ -1,6 +1,5 @@
 from typing import Iterable, List, Optional, Union
 
-from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import Domain, DomainBuilder
@@ -15,13 +14,13 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: "DataContext",
         batch_request: Optional[Union[BatchRequest, dict]] = None,
         column_name_suffixes: Optional[List[str]] = None,
     ):
         """
         Args:
-            data_context: DataContext
+            data_context: "DataContext"
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
         """
 

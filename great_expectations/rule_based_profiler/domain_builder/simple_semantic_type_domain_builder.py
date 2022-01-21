@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.profile.base import ProfilerTypeMapping
@@ -22,7 +21,7 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: "DataContext",
         batch_request: Optional[Union[BatchRequest, dict]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
@@ -30,7 +29,7 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
     ):
         """
         Args:
-            data_context: DataContext
+            data_context: "DataContext"
             batch_request: specified in DomainBuilder configuration to get Batch objects for domain computation.
         """
 

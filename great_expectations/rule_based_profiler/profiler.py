@@ -2,7 +2,6 @@ import uuid
 from typing import Any, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
@@ -99,7 +98,7 @@ class Profiler:
         self,
         *,
         profiler_config: Optional[Dict[str, Dict[str, Dict[str, Any]]]] = None,
-        data_context: Optional[DataContext] = None,
+        data_context: Optional["DataContext"] = None,
     ):
         """
         Create a new Profiler using configured rules.
