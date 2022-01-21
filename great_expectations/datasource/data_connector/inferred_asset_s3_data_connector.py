@@ -95,13 +95,13 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
 
     @staticmethod
     def sanitize_prefix(text: str) -> str:
-        path_parts = text.split('/')
+        path_parts = text.split("/")
         if not path_parts:  # Empty prefix
             return text
-        elif '.' in path_parts[-1]:  # File, not folder
+        elif "." in path_parts[-1]:  # File, not folder
             return text
         else:  # Folder, should have trailing /
-            return text.rstrip('/') + '/'
+            return text.rstrip("/") + "/"
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
         """
