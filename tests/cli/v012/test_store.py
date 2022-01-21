@@ -73,11 +73,8 @@ def test_store_list_with_four_stores(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     runner = CliRunner(mix_stderr=False)
 
-    # Profilers are v014+ specific
-    os.rmdir(os.path.join(project_dir, "profilers"))
-
     expected_result = """\
-4 Stores found:[0m
+5 Stores found:[0m
 [0m
  - [36mname:[0m expectations_store[0m
    [36mclass_name:[0m ExpectationsStore[0m
@@ -99,6 +96,13 @@ def test_store_list_with_four_stores(caplog, empty_data_context):
    [36mstore_backend:[0m[0m
      [36mclass_name:[0m TupleFilesystemStoreBackend[0m
      [36mbase_directory:[0m checkpoints/[0m
+     [36msuppress_store_backend_id:[0m True[0m
+[0m
+ - [36mname:[0m profiler_store[0m
+   [36mclass_name:[0m ProfilerStore[0m
+   [36mstore_backend:[0m[0m
+     [36mclass_name:[0m TupleFilesystemStoreBackend[0m
+     [36mbase_directory:[0m profilers/[0m
      [36msuppress_store_backend_id:[0m True[0m"""
     result = runner.invoke(
         cli,

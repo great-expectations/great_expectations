@@ -11,49 +11,17 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
+from tests.core.usage_statistics.util import (
+    usage_stats_exceptions_exist,
+    usage_stats_invalid_messages_exist,
+)
 from tests.test_utils import create_files_in_directory
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_empty_store(mock_emit, empty_data_context_stats_enabled):
-    # noinspection PyUnusedLocal
-    my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
-        yaml_config="""
-module_name: great_expectations.data_context.store.expectations_store
-class_name: ExpectationsStore
-store_backend:
-    module_name: great_expectations.data_context.store.store_backend
-    class_name: InMemoryStoreBackend
-"""
-    )
-    assert mock_emit.call_count == 1
-    # Substitute current anonymized name since it changes for each run
-    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_name,
-                    "parent_class": "ExpectationsStore",
-                    "anonymized_store_backend": {
-                        "parent_class": "InMemoryStoreBackend"
-                    },
-                },
-                "success": True,
-            }
-        ),
-    ]
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_config_with_yaml_error(mock_emit, empty_data_context_stats_enabled):
+def test_config_with_yaml_error(mock_emit, caplog, empty_data_context_stats_enabled):
     with pytest.raises(Exception):
         # noinspection PyUnusedLocal
         my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
@@ -77,12 +45,16 @@ EGREGIOUS FORMATTING ERROR
         ),
     ]
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_expectations_store_with_filesystem_store_backend(
-    mock_emit, empty_data_context_stats_enabled
+    mock_emit, caplog, empty_data_context_stats_enabled
 ):
     tmp_dir = str(tempfile.mkdtemp())
     with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:
@@ -122,12 +94,16 @@ store_backend:
         )
     ]
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_checkpoint_store_with_filesystem_store_backend(
-    mock_emit, empty_data_context_stats_enabled, tmp_path_factory
+    mock_emit, caplog, empty_data_context_stats_enabled, tmp_path_factory
 ):
     tmp_dir: str = str(
         tmp_path_factory.mktemp("test_checkpoint_store_with_filesystem_store_backend")
@@ -257,11 +233,15 @@ def test_checkpoint_store_with_filesystem_store_backend(
     # No other usage stats calls
     assert mock_emit.call_count == 2
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_empty_store2(mock_emit, empty_data_context_stats_enabled):
+def test_empty_store2(mock_emit, caplog, empty_data_context_stats_enabled):
     empty_data_context_stats_enabled.test_yaml_config(
         yaml_config="""
 class_name: ValidationsStore
@@ -292,11 +272,15 @@ store_backend:
         ),
     ]
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_datasource_config(mock_emit, empty_data_context_stats_enabled):
+def test_datasource_config(mock_emit, caplog, empty_data_context_stats_enabled):
     temp_dir = str(tempfile.mkdtemp())
     create_files_in_directory(
         directory=temp_dir,
@@ -398,11 +382,15 @@ data_connectors:
     # No other usage stats calls
     assert mock_emit.call_count == 1
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
-def test_error_states(mock_emit, empty_data_context_stats_enabled):
+def test_error_states(mock_emit, caplog, empty_data_context_stats_enabled):
     first_config: str = """
 class_name: Datasource
 
@@ -511,12 +499,16 @@ data_connectors:
     )
     assert mock_emit.call_args_list == expected_call_args_list
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_config_variables_in_test_yaml_config(
-    mock_emit, empty_data_context_stats_enabled, sa
+    mock_emit, caplog, empty_data_context_stats_enabled, sa
 ):
     context: DataContext = empty_data_context_stats_enabled
 
@@ -613,12 +605,20 @@ introspection:
     )
     assert mock_emit.call_args_list == expected_call_args_list
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_golden_path_sql_datasource_configuration(
-    mock_emit, empty_data_context_stats_enabled, sa, test_connectable_postgresql_db
+    mock_emit,
+    caplog,
+    empty_data_context_stats_enabled,
+    sa,
+    test_connectable_postgresql_db,
 ):
     """Tests the golden path for setting up a StreamlinedSQLDatasource using test_yaml_config"""
     context: DataContext = empty_data_context_stats_enabled
@@ -726,12 +726,16 @@ introspection:
     # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["a", "b", "c"])
     # assert my_evr.success
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_golden_path_inferred_asset_pandas_datasource_configuration(
-    mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
+    mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -910,12 +914,16 @@ data_connectors:
     # assert mock_emit.call_count == 1
     assert mock_emit.call_count == 4
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_golden_path_configured_asset_pandas_datasource_configuration(
-    mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
+    mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
 ):
     """
     Tests the golden path for InferredAssetFilesystemDataConnector with PandasExecutionEngine using test_yaml_config
@@ -1117,12 +1125,16 @@ data_connectors:
     # No other usage stats calls detected
     assert mock_emit.call_count == 4
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
-    mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
+    mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
 ):
     """
     Tests output of test_yaml_config() for a Datacontext configured with a Datasource with
@@ -1201,12 +1213,16 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
         == "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
     )
 
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_datasource_configuration(
-    mock_emit, empty_data_context_stats_enabled, test_df, tmp_path_factory
+    mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
 ):
     """
     Tests output of test_yaml_config() for a Datacontext configured with a Datasource with InferredAssetDataConnector
@@ -1323,3 +1339,7 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
     }
+
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
