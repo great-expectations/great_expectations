@@ -6,7 +6,6 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
 from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -21,7 +20,7 @@ NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 def get_validator(
     purpose: str,
     *,
-    data_context: Optional[DataContext] = None,
+    data_context: Optional["DataContext"] = None,
     batch_request: Optional[Union[BatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
@@ -54,7 +53,7 @@ def get_validator(
 
 
 def get_batch_ids(
-    data_context: Optional[DataContext] = None,
+    data_context: Optional["DataContext"] = None,
     batch_request: Optional[Union[BatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,

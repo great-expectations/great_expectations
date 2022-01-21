@@ -1,6 +1,7 @@
 import os
-from typing import List, Optional
+from typing import List, Optional, Union
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.types.resource_identifiers import (
@@ -15,7 +16,7 @@ from great_expectations.util import filter_properties_dict
 
 
 def get_profiler(
-    data_context: DataContext,
+    data_context: "DataContext",
     profiler_store: ProfilerStore,
     name: Optional[str] = None,
     ge_cloud_id: Optional[str] = None,
@@ -40,10 +41,11 @@ def get_profiler(
             message=f"Invalid Checkpoint configuration: {exc_ve}"
         )
 
-    config: dict = profiler_config.to_json_dict()
+    config = profiler_config.to_json_dict()
     if name:
         config.update({"name": name})
     config = filter_properties_dict(properties=config, clean_falsy=True)
+
     profiler = instantiate_class_from_config(
         config=config,
         runtime_environment={
@@ -55,16 +57,6 @@ def get_profiler(
     )
 
     return profiler
-
-
-def list_profilers(
-    profiler_store: ProfilerStore,
-    ge_cloud_mode: bool,
-) -> List[str]:
-    if ge_cloud_mode:
-        return profiler_store.list_keys()
-
-    return [x.configuration_key for x in profiler_store.list_keys()]
 
 
 def list_profilers(
