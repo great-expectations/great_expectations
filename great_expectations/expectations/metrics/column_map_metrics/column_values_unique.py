@@ -1,27 +1,17 @@
-from typing import Any, Dict, Optional, Tuple
-
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
-    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.execution_engine import (
     MetricPartialFunctionTypes,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.metrics.import_manager import F, Window
+from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
-    column_function_partial,
 )
-from great_expectations.expectations.metrics.map_metric_provider import sa as sa
-from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.util import generate_temporary_table_name
-from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class ColumnValuesUnique(ColumnMapMetricProvider):
