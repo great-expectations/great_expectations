@@ -341,11 +341,16 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 except TypeError:
                     try:
                         pd_type = getattr(pd, type_)
-                        if isinstance(pd_type, type):
-                            comp_types.append(pd_type)
                     except AttributeError:
                         pass
-
+                    else:
+                        if isinstance(pd_type, type):
+                            comp_types.append(pd_type)
+                            try:
+                                if isinstance(pd_type(), pd.core.dtypes.base.ExtensionDtype):
+                                    comp_types.append(pd_type())
+                            except TypeError:
+                                pass
                     try:
                         pd_type = getattr(pd.core.dtypes.dtypes, type_)
                         if isinstance(pd_type, type):
