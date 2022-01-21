@@ -60,6 +60,14 @@
         "ts": "DATETIME",
         "alpha": "VARCHAR",
         "numeric": "INTEGER"
+      },
+      "bigquery": {
+        "x": "NUMERIC",
+        "y": "STRING",
+        "z": "NUMERIC",
+        "ts": "DATETIME",
+        "alpha": "STRING",
+        "numeric": "NUMERIC"
       }
     },
     "tests": [
