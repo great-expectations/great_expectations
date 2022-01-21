@@ -79,7 +79,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         )
 
         self._bucket = bucket
-        self._prefix = FilePathDataConnector.sanitize_prefix(prefix)
+        self._prefix = self.sanitize_prefix(prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 
@@ -92,6 +92,11 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             raise ImportError(
                 "Unable to load boto3 (it is required for InferredAssetS3DataConnector)."
             )
+
+    @staticmethod
+    def sanitize_prefix(text: str) -> str:
+        text = text.rstrip('/') + '/'
+        return text
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
         """
