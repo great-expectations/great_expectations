@@ -11,11 +11,23 @@ from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.store.profiler_store import ProfilerStore
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler.config import (
+    DomainBuilderConfig,
+    ExpectationConfigurationBuilderConfig,
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+    RuleConfig,
+)
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterContainer,
@@ -2398,3 +2410,65 @@ def rule_with_variables_with_parameters(
         column_Date_domain.id: multi_part_name_parameter_container,
     }
     return rule
+
+
+# Fixtures from
+
+
+@pytest.fixture(scope="function")
+def profiler_name() -> str:
+    return "my_first_profiler"
+
+
+@pytest.fixture(scope="function")
+def store_name() -> str:
+    return "profiler_store"
+
+
+@pytest.fixture(scope="function")
+def rules() -> Dict[str, RuleConfig]:
+    return {
+        "rule_1": RuleConfig(
+            name="rule_1",
+            domain_builder=DomainBuilderConfig(class_name="DomainBuilder"),
+            parameter_builders=[
+                ParameterBuilderConfig(
+                    class_name="ParameterBuilder", name="my_parameter"
+                )
+            ],
+            expectation_configuration_builders=[
+                ExpectationConfigurationBuilderConfig(
+                    class_name="ExpectationConfigurationBuilder",
+                    expectation_type="expect_column_pair_values_A_to_be_greater_than_B",
+                )
+            ],
+        )
+    }
+
+
+@pytest.fixture(scope="function")
+def profiler_config(
+    profiler_name: str, rules: Dict[str, RuleConfig]
+) -> RuleBasedProfilerConfig:
+    return RuleBasedProfilerConfig(name=profiler_name, config_version=1.0, rules=rules)
+
+
+@pytest.fixture(scope="function")
+def empty_profiler_store(store_name: str) -> ProfilerStore:
+    return ProfilerStore(store_name)
+
+
+@pytest.fixture(scope="function")
+def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
+    return ConfigurationIdentifier(configuration_key=profiler_name)
+
+
+@pytest.fixture(scope="function")
+def populated_profiler_store(
+    empty_profiler_store: ProfilerStore,
+    profiler_config: RuleBasedProfilerConfig,
+    profiler_key: ConfigurationIdentifier,
+) -> ProfilerStore:
+    profiler_store = empty_profiler_store
+    profiler_store.set(key=profiler_key, value=profiler_config)
+    return profiler_store

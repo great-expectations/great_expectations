@@ -7,23 +7,31 @@ from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
+from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.toolkit import get_profiler, list_profilers
 
 
-@pytest.fixture(scope="function")
-def profiler_store():
-    return ProfilerStore("profiler_store")
-
-
 @mock.patch("great_expectations.data_context.data_context.DataContext")
-def test_get_profiler(mock_data_context: mock.MagicMock):
-    pass
-    # res = get_profiler(
-    #     data_context=empty_data_context,
-    #     profiler_store=store,
-    #     name="my_profiler",
-    #     ge_cloud_id=None,
-    # )
+def test_get_profiler(
+    mock_data_context: mock.MagicMock,
+    populated_profiler_store: ProfilerStore,
+    profiler_name: str,
+    profiler_config: RuleBasedProfilerConfig,
+):
+
+    with mock.patch(
+        "great_expectations.data_context.store.profiler_store.ProfilerStore.get",
+        return_value=profiler_config,
+    ):
+        breakpoint()
+        profiler = get_profiler(
+            data_context=mock_data_context,
+            profiler_store=populated_profiler_store,
+            name=profiler_name,
+            ge_cloud_id=None,
+        )
+
+    assert profiler == 1
 
 
 def test_get_profiler_in_cloud_mode():
@@ -32,12 +40,12 @@ def test_get_profiler_in_cloud_mode():
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_get_profiler_non_existent_profiler_raises_error(
-    mock_data_context: mock.MagicMock, profiler_store: ProfilerStore
+    mock_data_context: mock.MagicMock, empty_profiler_store: ProfilerStore
 ):
     with pytest.raises(ge_exceptions.ProfilerNotFoundError) as e:
         get_profiler(
             data_context=mock_data_context,
-            profiler_store=profiler_store,
+            profiler_store=empty_profiler_store,
             name="my_profiler",
             ge_cloud_id=None,
         )

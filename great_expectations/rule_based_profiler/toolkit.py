@@ -47,6 +47,7 @@ def get_profiler(
             "data_context": data_context,
         },
         config_defaults={
+            "class_name": "Profiler",
             "module_name": "great_expectations.rule_based_profiler.profiler",
         },
     )
