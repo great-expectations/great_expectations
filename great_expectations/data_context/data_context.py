@@ -47,6 +47,9 @@ from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymi
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
 )
+from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
+    ProfilerAnonymizer,
+)
 from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
     StoreAnonymizer,
 )
@@ -3364,7 +3367,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                     instantiated_class,
                     usage_stats_event_payload,
                 ) = self._test_instantiation_of_profiler_from_yaml_config(
-                    name, class_name, config, runtime_environment
+                    name, class_name, config
                 )
             else:
                 (
@@ -3604,7 +3607,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
     def _test_instantiation_of_profiler_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
-    ) -> Tuple[Checkpoint, dict]:
+    ) -> Tuple[Profiler, dict]:
         """
         Helper to create profiler instance and update usage stats payload.
         See `test_yaml_config` for more details.
@@ -3621,15 +3624,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         instantiated_class = Profiler(data_context=self, **profiler_config)
 
-        # TODO(cdkini): Open to implement with appropriate anonymizer!
-        # checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
-        #     self.data_context_id
-        # )
+        profiler_anonymizer = ProfilerAnonymizer(self.data_context_id)
 
-        # usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
-        #     name=checkpoint_name, config=checkpoint_config
-        # )
-        # return instantiated_class, usage_stats_event_payload
+        usage_stats_event_payload = profiler_anonymizer.anonymize_checkpoint_info(
+            name=profiler_name, config=profiler_config
+        )
+        return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_misc_class_from_yaml_config(
         self,
