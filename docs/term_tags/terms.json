@@ -9,6 +9,11 @@
     "definition": "Provided to a Datasource in order to create a Batch.",
     "url": "terms/batch_request"
   },
+  "catalog_asset": {
+    "term": "Catalog Asset",
+    "definition": "A collection of records within a Datasource which is usually named based on the underlying data system and sliced in different ways to correspond to multiple desired specifications.",
+    "url": "terms/catalog_asset"
+  },
   "checkpoint": {
     "term": "Checkpoint",
     "definition": "The primary means for validating data in a production deployment of Great Expectations.",
@@ -91,12 +96,12 @@
   },
   "profiler": {
     "term": "Profiler",
-    "definition": "Generates candidate Expectations (and sometimes other artifacts) from data.",
+    "definition": "Generates Metrics and candidate Expectations from data.",
     "url": "terms/profiler"
   },
   "renderer": {
     "term": "Renderer",
-    "definition": "A class for converting Expectations, Validation Results, etc. into Data Docs or other output such as email notifications or slack messages.",
+    "definition": "A method for converting Expectations, Validation Results, etc. into Data Docs or other output such as email notifications or slack messages.",
     "url": "terms/renderer"
   },
   "store": {
