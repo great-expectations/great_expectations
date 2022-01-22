@@ -566,6 +566,7 @@ project_path/
                 styles/
                     data_docs_custom_styles.css
                 views/
+        profilers/
         uncommitted/
             config_variables.yml
             data_docs/
@@ -1071,6 +1072,7 @@ great_expectations/
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -1096,6 +1098,7 @@ great_expectations/
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -1154,6 +1157,7 @@ def test_data_context_create_builds_base_directories(tmp_path_factory):
     for directory in [
         "expectations",
         "plugins",
+        "profilers",
         "checkpoints",
         "uncommitted",
     ]:
@@ -1190,6 +1194,7 @@ def test_scaffold_directories(tmp_path_factory):
     assert set(os.listdir(empty_directory)) == {
         "plugins",
         "checkpoints",
+        "profilers",
         "expectations",
         ".gitignore",
         "uncommitted",
