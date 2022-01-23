@@ -143,7 +143,7 @@ def build_gallery(
             )
             try:
                 diagnostics = impl().run_diagnostics()
-                gallery_info[expectation] = diagnostics
+                gallery_info[expectation] = diagnostics.to_json_dict()
                 built_expectations.add(expectation)
             except Exception:
                 logger.error(f"Failed to run diagnostics for: {expectation}")
@@ -206,7 +206,7 @@ def build_gallery(
                 )
                 try:
                     diagnostics = impl().run_diagnostics()
-                    gallery_info[expectation] = diagnostics
+                    gallery_info[expectation] = diagnostics.to_json_dict()
                     built_expectations.add(expectation)
                 except Exception:
                     logger.error(f"Failed to run diagnostics for: {expectation}")

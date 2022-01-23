@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import List, Tuple
 
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -15,6 +15,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
 )
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
 
 # from pydantic.dataclasses import dataclass
@@ -51,6 +52,9 @@ class ExpectationDiagnostics(SerializableDictDot):
     metrics: List[ExpectationMetricDiagnostics]
     tests: List[ExpectationTestDiagnostics]
     errors: List[ExpectationErrorDiagnostics]
+
+    def to_json_dict(self) -> dict:
+        return convert_to_json_serializable(data=asdict(self))
 
     @property
     def checklist(self) -> ExpectationDiagnosticMaturityMessages:
