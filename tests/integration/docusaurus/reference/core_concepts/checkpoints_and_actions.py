@@ -162,13 +162,13 @@ validations:
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
-    evaluation_parameters:
-      GT_PARAM: 1000
-      LT_PARAM: 50000
-    runtime_configuration:
-      result_format:
-        result_format: BASIC
-        partial_unexpected_count: 20
+evaluation_parameters:
+  GT_PARAM: 1000
+  LT_PARAM: 50000
+runtime_configuration:
+  result_format:
+    result_format: BASIC
+    partial_unexpected_count: 20
 """
 context.add_checkpoint(**yaml.load(no_nesting))
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
@@ -443,10 +443,3 @@ expectation_suite = validation_result["meta"]["expectation_suite_name"]
 data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
 assert expectation_suite == "my_expectation_suite"
 assert data_asset == "yellow_tripdata_sample_2019-01"
-documentation_results = """
-print(expectation_suite)
-my_expectation_suite
-
-print(data_asset)
-yellow_tripdata_sample_2019-01
-"""
