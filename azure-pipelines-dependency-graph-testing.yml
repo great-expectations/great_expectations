@@ -160,7 +160,7 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --tests tests --branch 'origin/develop' --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
@@ -241,7 +241,7 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --tests tests --branch 'origin/develop' --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
@@ -341,7 +341,7 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --tests tests --branch 'origin/develop' --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
@@ -380,7 +380,7 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --tests tests --branch 'origin/develop' --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'pytest'
@@ -427,6 +427,6 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --tests tests --branch 'origin/develop' --filter 'tests/cli' --aws-integration -v
+              dgtest run great_expectations --filter 'tests/cli' --aws-integration -v
 
             displayName: 'pytest'
