@@ -78,7 +78,11 @@ def test_resolve_config_using_acceptable_arguments(checkpoint):
     }
 
     # Matching how this is called in usage_statistics.py (parameter style)
-    resolved_runtime_kwargs: dict = checkpoint_run_anonymizer.resolve_config_using_acceptable_arguments(*(checkpoint,), **kwargs)
+    resolved_runtime_kwargs: dict = (
+        checkpoint_run_anonymizer.resolve_config_using_acceptable_arguments(
+            *(checkpoint,), **kwargs
+        )
+    )
 
     # Assertions about important bits of the substituted_runtime_config
 
@@ -86,8 +90,12 @@ def test_resolve_config_using_acceptable_arguments(checkpoint):
         "runtime_parameters": {"batch_data": df},
         "batch_identifiers": {"default_identifier_name": "my_simple_df"},
     }
-    expected_top_level_batch_request = convert_to_json_serializable(data=expected_top_level_batch_request)
-    actual_top_level_batch_request = convert_to_json_serializable(data=resolved_runtime_kwargs["batch_request"])
+    expected_top_level_batch_request = convert_to_json_serializable(
+        data=expected_top_level_batch_request
+    )
+    actual_top_level_batch_request = convert_to_json_serializable(
+        data=resolved_runtime_kwargs["batch_request"]
+    )
     assert actual_top_level_batch_request == expected_top_level_batch_request
 
     validation_level_batch_request = resolved_runtime_kwargs["validations"][0][

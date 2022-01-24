@@ -4,7 +4,7 @@ import smtplib
 import ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Optional, Union, List
+from typing import List, Optional, Union
 
 import requests
 
@@ -239,7 +239,9 @@ def get_substituted_validation_dict(
 # TODO: <Alex>A common utility function should be factored out from DataContext.get_batch_list() for any purpose.</Alex>
 def get_substituted_batch_request(
     substituted_runtime_config: dict,
-    validation_batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+    validation_batch_request: Optional[
+        Union[BatchRequest, RuntimeBatchRequest, dict]
+    ] = None,
 ) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     substituted_runtime_batch_request = substituted_runtime_config.get("batch_request")
 
@@ -252,8 +254,12 @@ def get_substituted_batch_request(
     if validation_batch_request is None:
         validation_batch_request = {}
 
-    validation_batch_request = get_batch_request_as_dict(batch_request=validation_batch_request)
-    substituted_runtime_batch_request = get_batch_request_as_dict(batch_request=substituted_runtime_batch_request)
+    validation_batch_request = get_batch_request_as_dict(
+        batch_request=validation_batch_request
+    )
+    substituted_runtime_batch_request = get_batch_request_as_dict(
+        batch_request=substituted_runtime_batch_request
+    )
 
     effective_batch_request: dict = dict(
         **substituted_runtime_batch_request, **validation_batch_request
@@ -268,10 +274,7 @@ def get_substituted_batch_request(
 
     for key, value in validation_batch_request.items():
         substituted_value = substituted_runtime_batch_request.get(key)
-        if (
-            value is not None
-            and substituted_value is not None
-        ):
+        if value is not None and substituted_value is not None:
             raise ge_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )
@@ -305,9 +308,9 @@ def substitute_template_config(source_config: dict, template_config: dict) -> di
     if source_config.get("expectation_suite_name") is not None:
         dest_config["expectation_suite_name"] = source_config["expectation_suite_name"]
     if source_config.get("expectation_suite_ge_cloud_id") is not None:
-        dest_config["expectation_suite_ge_cloud_id"] = (
-            source_config["expectation_suite_ge_cloud_id"]
-        )
+        dest_config["expectation_suite_ge_cloud_id"] = source_config[
+            "expectation_suite_ge_cloud_id"
+        ]
 
     # update
     if source_config.get("batch_request") is not None:
@@ -350,9 +353,7 @@ def substitute_template_config(source_config: dict, template_config: dict) -> di
         profilers = dest_config.get("profilers") or []
         existing_profilers = template_config.get("profilers") or []
         profilers.extend(
-            filter(
-                lambda v: v not in existing_profilers, source_config["profilers"]
-            )
+            filter(lambda v: v not in existing_profilers, source_config["profilers"])
         )
         dest_config["profilers"] = profilers
 
@@ -373,16 +374,26 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
     if runtime_kwargs.get("expectation_suite_name") is not None:
         dest_config["expectation_suite_name"] = runtime_kwargs["expectation_suite_name"]
     if runtime_kwargs.get("expectation_suite_ge_cloud_id") is not None:
-        dest_config["expectation_suite_ge_cloud_id"] = runtime_kwargs["expectation_suite_ge_cloud_id"]
+        dest_config["expectation_suite_ge_cloud_id"] = runtime_kwargs[
+            "expectation_suite_ge_cloud_id"
+        ]
     # update
     if runtime_kwargs.get("batch_request") is not None:
         batch_request = dest_config.get("batch_request") or {}
         batch_request_from_runtime_kwargs = runtime_kwargs["batch_request"]
-        batch_request_from_runtime_kwargs = safe_deep_copy(data=batch_request_from_runtime_kwargs)
-        if isinstance(batch_request_from_runtime_kwargs, (BatchRequest, RuntimeBatchRequest)):
+        batch_request_from_runtime_kwargs = safe_deep_copy(
+            data=batch_request_from_runtime_kwargs
+        )
+        if isinstance(
+            batch_request_from_runtime_kwargs, (BatchRequest, RuntimeBatchRequest)
+        ):
             # noinspection PyUnresolvedReferences
-            batch_request_from_runtime_kwargs = batch_request_from_runtime_kwargs.to_dict()
-        updated_batch_request = nested_update(batch_request, batch_request_from_runtime_kwargs)
+            batch_request_from_runtime_kwargs = (
+                batch_request_from_runtime_kwargs.to_dict()
+            )
+        updated_batch_request = nested_update(
+            batch_request, batch_request_from_runtime_kwargs
+        )
         dest_config["batch_request"] = updated_batch_request
     if runtime_kwargs.get("action_list") is not None:
         action_list = dest_config.get("action_list") or []
@@ -418,16 +429,16 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
         profilers = dest_config.get("profilers") or []
         existing_profilers = source_config.get("profilers") or []
         profilers.extend(
-            filter(
-                lambda v: v not in existing_profilers, runtime_kwargs["profilers"]
-            )
+            filter(lambda v: v not in existing_profilers, runtime_kwargs["profilers"])
         )
         dest_config["profilers"] = profilers
 
     return dest_config
 
 
-def get_updated_action_list(base_action_list: list, other_action_list: list) -> List[dict]:
+def get_updated_action_list(
+    base_action_list: list, other_action_list: list
+) -> List[dict]:
     if base_action_list is None:
         base_action_list = []
 
@@ -456,11 +467,19 @@ def get_updated_action_list(base_action_list: list, other_action_list: list) -> 
     return list(base_action_list_dict.values())
 
 
-def batch_request_contains_batch_data(batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None) -> bool:
-    return batch_request is not None and batch_request.get("runtime_parameters") is not None and batch_request["runtime_parameters"].get("batch_data") is not None
+def batch_request_contains_batch_data(
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+) -> bool:
+    return (
+        batch_request is not None
+        and batch_request.get("runtime_parameters") is not None
+        and batch_request["runtime_parameters"].get("batch_data") is not None
+    )
 
 
-def batch_request_in_validations_contains_batch_data(validations: Optional[List[dict]] = None) -> bool:
+def batch_request_in_validations_contains_batch_data(
+    validations: Optional[List[dict]] = None,
+) -> bool:
     if validations is not None:
         for idx, val in enumerate(validations):
             if (
@@ -474,7 +493,9 @@ def batch_request_in_validations_contains_batch_data(validations: Optional[List[
     return False
 
 
-def get_batch_request_as_dict(batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None) -> Optional[dict]:
+def get_batch_request_as_dict(
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+) -> Optional[dict]:
     if isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
         batch_request = batch_request.to_dict()
 
@@ -482,12 +503,14 @@ def get_batch_request_as_dict(batch_request: Optional[Union[BatchRequest, Runtim
 
 
 def get_validations_with_batch_request_as_dict(
-    validations: Optional[list] = None
+    validations: Optional[list] = None,
 ) -> Optional[list]:
     if validations:
         for value in validations:
             if "batch_request" in value:
-                value["batch_request"] = get_batch_request_as_dict(batch_request=value["batch_request"])
+                value["batch_request"] = get_batch_request_as_dict(
+                    batch_request=value["batch_request"]
+                )
 
     return validations
 

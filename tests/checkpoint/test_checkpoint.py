@@ -20,7 +20,10 @@ from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
-from great_expectations.util import filter_properties_dict, deep_filter_properties_iterable
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    filter_properties_dict,
+)
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
@@ -36,7 +39,9 @@ def test_checkpoint_raises_typeerror_on_incorrect_data_context():
 
 
 def test_checkpoint_with_no_config_version_has_no_action_list(empty_data_context):
-    checkpoint = Checkpoint(name="foo", data_context=empty_data_context, config_version=None)
+    checkpoint = Checkpoint(
+        name="foo", data_context=empty_data_context, config_version=None
+    )
     assert checkpoint.action_list is None
 
 
@@ -284,7 +289,12 @@ def test_basic_checkpoint_config_validation(
     config: CommentedMap = yaml.load(yaml_config)
     checkpoint_config = CheckpointConfig(**config)
     checkpoint = Checkpoint(
-        data_context=context, **{key: value for key, value in checkpoint_config.to_json_dict().items() if key not in ["module_name", "class_name"]}
+        data_context=context,
+        **{
+            key: value
+            for key, value in checkpoint_config.to_json_dict().items()
+            if key not in ["module_name", "class_name"]
+        },
     )
     assert (
         filter_properties_dict(
@@ -2435,85 +2445,104 @@ def test_newstyle_checkpoint_config_substitution_simple(
         ],
     )
     simplified_checkpoint: Checkpoint = Checkpoint(
-        data_context=context, **{key: value for key, value in simplified_checkpoint_config.to_json_dict().items() if key not in ["module_name", "class_name"]}
+        data_context=context,
+        **{
+            key: value
+            for key, value in simplified_checkpoint_config.to_json_dict().items()
+            if key not in ["module_name", "class_name"]
+        },
     )
 
     # template only
-    expected_substituted_checkpoint_config_template_only: CheckpointConfig = CheckpointConfig(
-        name="my_simplified_checkpoint",
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template-test",
-        expectation_suite_name="users.delivery",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
+    expected_substituted_checkpoint_config_template_only: CheckpointConfig = (
+        CheckpointConfig(
+            name="my_simplified_checkpoint",
+            config_version=1,
+            run_name_template="%Y-%M-foo-bar-template-test",
+            expectation_suite_name="users.delivery",
+            action_list=[
+                {
+                    "name": "store_validation_result",
+                    "action": {
+                        "class_name": "StoreValidationResultAction",
+                    },
                 },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
+                {
+                    "name": "store_evaluation_params",
+                    "action": {
+                        "class_name": "StoreEvaluationParametersAction",
+                    },
                 },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
+                {
+                    "name": "update_data_docs",
+                    "action": {
+                        "class_name": "UpdateDataDocsAction",
+                    },
                 },
+            ],
+            evaluation_parameters={
+                "environment": "my_ge_environment",
+                "tolerance": 1.0e-2,
+                "aux_param_0": "1",
+                "aux_param_1": "1 + 1",
             },
-        ],
-        evaluation_parameters={
-            "environment": "my_ge_environment",
-            "tolerance": 1.0e-2,
-            "aux_param_0": "1",
-            "aux_param_1": "1 + 1",
-        },
-        runtime_configuration={
-            "result_format": {
-                "result_format": "BASIC",
-                "partial_unexpected_count": 20,
-            }
-        },
-        validations=[
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_special_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -1},
+            runtime_configuration={
+                "result_format": {
+                    "result_format": "BASIC",
+                    "partial_unexpected_count": 20,
                 }
             },
-            {
-                "batch_request": {
-                    "datasource_name": "my_datasource",
-                    "data_connector_name": "my_other_data_connector",
-                    "data_asset_name": "users",
-                    "data_connector_query": {"partition_index": -2},
-                }
-            },
-        ],
+            validations=[
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_special_data_connector",
+                        "data_asset_name": "users",
+                        "data_connector_query": {"partition_index": -1},
+                    }
+                },
+                {
+                    "batch_request": {
+                        "datasource_name": "my_datasource",
+                        "data_connector_name": "my_other_data_connector",
+                        "data_asset_name": "users",
+                        "data_connector_query": {"partition_index": -2},
+                    }
+                },
+            ],
+        )
     )
 
-    substituted_config_template_only: dict = simplified_checkpoint.get_substituted_config()
-    assert (
-        deep_filter_properties_iterable(
-            properties=substituted_config_template_only,
-            clean_falsy=True,
-            keep_falsy_numerics=True,
-        )
-        == deep_filter_properties_iterable(properties={key: value for key, value in expected_substituted_checkpoint_config_template_only.to_json_dict().items() if key not in ["module_name", "class_name"]}, clean_falsy=True, keep_falsy_numerics=True,)
+    substituted_config_template_only: dict = (
+        simplified_checkpoint.get_substituted_config()
+    )
+    assert deep_filter_properties_iterable(
+        properties=substituted_config_template_only,
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+    ) == deep_filter_properties_iterable(
+        properties={
+            key: value
+            for key, value in expected_substituted_checkpoint_config_template_only.to_json_dict().items()
+            if key not in ["module_name", "class_name"]
+        },
+        clean_falsy=True,
+        keep_falsy_numerics=True,
     )
     # make sure operation is idempotent
     simplified_checkpoint.get_substituted_config()
-    assert (
-        deep_filter_properties_iterable(
-            properties=substituted_config_template_only,
-            clean_falsy=True,
-            keep_falsy_numerics=True,
-        )
-        == deep_filter_properties_iterable(properties={key: value for key, value in expected_substituted_checkpoint_config_template_only.to_json_dict().items() if key not in ["module_name", "class_name"]}, clean_falsy=True, keep_falsy_numerics=True,)
+    assert deep_filter_properties_iterable(
+        properties=substituted_config_template_only,
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+    ) == deep_filter_properties_iterable(
+        properties={
+            key: value
+            for key, value in expected_substituted_checkpoint_config_template_only.to_json_dict().items()
+            if key not in ["module_name", "class_name"]
+        },
+        clean_falsy=True,
+        keep_falsy_numerics=True,
     )
 
     # template and runtime kwargs
@@ -2658,13 +2687,18 @@ def test_newstyle_checkpoint_config_substitution_simple(
             }
         )
     )
-    assert (
-        deep_filter_properties_iterable(
-            properties=substituted_config_template_and_runtime_kwargs,
-            clean_falsy=True,
-            keep_falsy_numerics=True,
-        )
-        == deep_filter_properties_iterable(properties={key: value for key, value in expected_substituted_checkpoint_config_template_and_runtime_kwargs.to_json_dict().items() if key not in ["module_name", "class_name"]}, clean_falsy=True, keep_falsy_numerics=True,)
+    assert deep_filter_properties_iterable(
+        properties=substituted_config_template_and_runtime_kwargs,
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+    ) == deep_filter_properties_iterable(
+        properties={
+            key: value
+            for key, value in expected_substituted_checkpoint_config_template_and_runtime_kwargs.to_json_dict().items()
+            if key not in ["module_name", "class_name"]
+        },
+        clean_falsy=True,
+        keep_falsy_numerics=True,
     )
 
 
@@ -2704,7 +2738,12 @@ def test_newstyle_checkpoint_config_substitution_nested(
         ],
     )
     nested_checkpoint: Checkpoint = Checkpoint(
-        data_context=context, **{key: value for key, value in nested_checkpoint_config.to_json_dict().items() if key not in ["module_name", "class_name"]}
+        data_context=context,
+        **{
+            key: value
+            for key, value in nested_checkpoint_config.to_json_dict().items()
+            if key not in ["module_name", "class_name"]
+        },
     )
 
     # template only
@@ -2778,23 +2817,33 @@ def test_newstyle_checkpoint_config_substitution_nested(
     )
 
     substituted_config_template_only = nested_checkpoint.get_substituted_config()
-    assert (
-        deep_filter_properties_iterable(
-            properties=substituted_config_template_only,
-            clean_falsy=True,
-            keep_falsy_numerics=True,
-        )
-        == deep_filter_properties_iterable(properties={key: value for key, value in expected_nested_checkpoint_config_template_only.to_json_dict().items() if key not in ["module_name", "class_name"]}, clean_falsy=True, keep_falsy_numerics=True,)
+    assert deep_filter_properties_iterable(
+        properties=substituted_config_template_only,
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+    ) == deep_filter_properties_iterable(
+        properties={
+            key: value
+            for key, value in expected_nested_checkpoint_config_template_only.to_json_dict().items()
+            if key not in ["module_name", "class_name"]
+        },
+        clean_falsy=True,
+        keep_falsy_numerics=True,
     )
     # make sure operation is idempotent
     nested_checkpoint.get_substituted_config()
-    assert (
-        deep_filter_properties_iterable(
-            properties=substituted_config_template_only,
-            clean_falsy=True,
-            keep_falsy_numerics=True,
-        )
-        == deep_filter_properties_iterable(properties={key: value for key, value in expected_nested_checkpoint_config_template_only.to_json_dict().items() if key not in ["module_name", "class_name"]}, clean_falsy=True, keep_falsy_numerics=True,)
+    assert deep_filter_properties_iterable(
+        properties=substituted_config_template_only,
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+    ) == deep_filter_properties_iterable(
+        properties={
+            key: value
+            for key, value in expected_nested_checkpoint_config_template_only.to_json_dict().items()
+            if key not in ["module_name", "class_name"]
+        },
+        clean_falsy=True,
+        keep_falsy_numerics=True,
     )
 
     # runtime kwargs with new checkpoint template name passed at runtime
@@ -2955,13 +3004,18 @@ def test_newstyle_checkpoint_config_substitution_nested(
             },
         }
     )
-    assert (
-        deep_filter_properties_iterable(
-            properties=substituted_config_template_and_runtime_kwargs,
-            clean_falsy=True,
-            keep_falsy_numerics=True,
-        )
-        == deep_filter_properties_iterable(properties={key: value for key, value in expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict().items() if key not in ["module_name", "class_name"]}, clean_falsy=True, keep_falsy_numerics=True,)
+    assert deep_filter_properties_iterable(
+        properties=substituted_config_template_and_runtime_kwargs,
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+    ) == deep_filter_properties_iterable(
+        properties={
+            key: value
+            for key, value in expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict().items()
+            if key not in ["module_name", "class_name"]
+        },
+        clean_falsy=True,
+        keep_falsy_numerics=True,
     )
 
 

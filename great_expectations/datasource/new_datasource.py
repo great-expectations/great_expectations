@@ -97,7 +97,9 @@ class BaseDatasource:
         )
         return new_batch
 
-    def get_single_batch_from_batch_request(self, batch_request: Union[BatchRequest, RuntimeBatchRequest]) -> Batch:
+    def get_single_batch_from_batch_request(
+        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
+    ) -> Batch:
         batch_list: List[Batch] = self.get_batch_list_from_batch_request(batch_request)
         if len(batch_list) != 1:
             raise ValueError(
@@ -348,7 +350,9 @@ class BaseDatasource:
 
         return report_object
 
-    def _validate_batch_request(self, batch_request: Union[BatchRequest, RuntimeBatchRequest]):
+    def _validate_batch_request(
+        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
+    ):
         if not (
             batch_request.datasource_name is None
             or batch_request.datasource_name == self.name

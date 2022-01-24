@@ -4,9 +4,15 @@ from typing import Dict, List, Optional, Union
 
 from ruamel.yaml.comments import CommentedMap
 
-from great_expectations.checkpoint.util import batch_request_contains_batch_data, batch_request_in_validations_contains_batch_data
+from great_expectations.checkpoint.util import (
+    batch_request_contains_batch_data,
+    batch_request_in_validations_contains_batch_data,
+)
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.data_context.types.base import CheckpointConfig, checkpointConfigSchema
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    checkpointConfigSchema,
+)
 from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
 
 logger = logging.getLogger(__name__)
@@ -140,7 +146,9 @@ class SimpleCheckpointConfigurator:
         else:
             if validations is not None:
                 for idx, val in enumerate(validations):
-                    if isinstance(val["batch_request"], (BatchRequest, RuntimeBatchRequest)):
+                    if isinstance(
+                        val["batch_request"], (BatchRequest, RuntimeBatchRequest)
+                    ):
                         val["batch_request"] = val["batch_request"].to_json_dict()
 
         specific_config_kwargs_overrides: dict = {

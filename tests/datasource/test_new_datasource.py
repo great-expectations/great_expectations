@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 import pandas as pd
 import pytest

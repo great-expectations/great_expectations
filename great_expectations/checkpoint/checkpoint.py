@@ -12,11 +12,11 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
-    get_substituted_validation_dict,
-    substitute_template_config,
-    substitute_runtime_config,
     get_batch_request_as_dict,
+    get_substituted_validation_dict,
     get_validations_with_batch_request_as_dict,
+    substitute_runtime_config,
+    substitute_template_config,
 )
 from great_expectations.core import RunIdentifier
 from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
@@ -26,8 +26,8 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.core.util import (
-    get_datetime_string_from_strftime_format,
     convert_to_json_serializable,
+    get_datetime_string_from_strftime_format,
 )
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import (
@@ -37,8 +37,8 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
 from great_expectations.util import (
-    filter_properties_dict,
     deep_filter_properties_iterable,
+    filter_properties_dict,
 )
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -153,7 +153,7 @@ class Checkpoint:
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> CheckpointResult:
         assert not (run_id and run_name) and not (
-                run_id and run_time
+            run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
 
         run_time = run_time or datetime.datetime.now()
@@ -161,7 +161,9 @@ class Checkpoint:
         result_format = result_format or runtime_configuration.get("result_format")
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
-        validations = get_validations_with_batch_request_as_dict(validations=validations)
+        validations = get_validations_with_batch_request_as_dict(
+            validations=validations
+        )
 
         runtime_kwargs: dict = {
             "template_name": template_name,
@@ -175,7 +177,9 @@ class Checkpoint:
             "profilers": profilers or [],
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
-        substituted_runtime_config: dict = self.get_substituted_config(runtime_kwargs=runtime_kwargs)
+        substituted_runtime_config: dict = self.get_substituted_config(
+            runtime_kwargs=runtime_kwargs
+        )
         run_name_template = substituted_runtime_config.get("run_name_template")
 
         batch_request = substituted_runtime_config.get("batch_request")
@@ -198,7 +202,7 @@ class Checkpoint:
         # AsyncExecutor and the corresponding AsyncExecutor docstring for more details on when multiple threads are
         # used.
         with AsyncExecutor(
-                self.data_context.concurrency, max_workers=len(validations)
+            self.data_context.concurrency, max_workers=len(validations)
         ) as async_executor:
             # noinspection PyUnresolvedReferences
             async_validation_operator_results: List[
@@ -234,7 +238,10 @@ class Checkpoint:
             run_id=run_id, run_results=run_results, checkpoint_config=self.config_kwargs
         )
 
-    def get_substituted_config(self, runtime_kwargs: Optional[dict] = None,) -> dict:
+    def get_substituted_config(
+        self,
+        runtime_kwargs: Optional[dict] = None,
+    ) -> dict:
         if runtime_kwargs is None:
             runtime_kwargs = {}
 
@@ -244,8 +251,12 @@ class Checkpoint:
         if template_name:
             config_kwargs["template_name"] = template_name
 
-        substituted_runtime_config: dict = self.get_substituted_template(source_config=config_kwargs)
-        substituted_runtime_config = self.get_substituted_runtime_kwargs(source_config=substituted_runtime_config, runtime_kwargs=runtime_kwargs)
+        substituted_runtime_config: dict = self.get_substituted_template(
+            source_config=config_kwargs
+        )
+        substituted_runtime_config = self.get_substituted_runtime_kwargs(
+            source_config=substituted_runtime_config, runtime_kwargs=runtime_kwargs
+        )
 
         return substituted_runtime_config
 
@@ -257,7 +268,9 @@ class Checkpoint:
 
         template_name = source_config.get("template_name")
         if template_name:
-            checkpoint: Checkpoint = self.data_context.get_checkpoint(name=template_name)
+            checkpoint: Checkpoint = self.data_context.get_checkpoint(
+                name=template_name
+            )
             template_config: dict = checkpoint.config_kwargs
 
             if template_config["config_version"] != source_config["config_version"]:
@@ -266,8 +279,12 @@ class Checkpoint:
                     f"'{source_config}' (ver. {source_config['config_version']}. Checkpoints can only use templates with the same config_version."
                 )
 
-            substituted_template_config: dict = self.get_substituted_template(source_config=template_config)
-            substituted_config = substitute_template_config(source_config=source_config, template_config=substituted_template_config)
+            substituted_template_config: dict = self.get_substituted_template(
+                source_config=template_config
+            )
+            substituted_config = substitute_template_config(
+                source_config=source_config, template_config=substituted_template_config
+            )
         else:
             substituted_config = copy.deepcopy(source_config)
 
@@ -284,16 +301,16 @@ class Checkpoint:
         if runtime_kwargs is None:
             runtime_kwargs = {}
 
-        substituted_config: dict = substitute_runtime_config(source_config=source_config, runtime_kwargs=runtime_kwargs)
+        substituted_config: dict = substitute_runtime_config(
+            source_config=source_config, runtime_kwargs=runtime_kwargs
+        )
 
         if self.data_context.ge_cloud_mode:
             return substituted_config
 
         return self._substitute_config_variables(config=substituted_config)
 
-    def _substitute_config_variables(
-        self, config: dict
-    ) -> dict:
+    def _substitute_config_variables(self, config: dict) -> dict:
         substituted_config_variables = substitute_all_config_variables(
             self.data_context.config_variables,
             dict(os.environ),
@@ -306,7 +323,11 @@ class Checkpoint:
             **self.data_context.runtime_environment,
         }
 
-        return substitute_all_config_variables(data=config, replace_variables_dict=substitutions, dollar_sign_escape_string=self.data_context.DOLLAR_SIGN_ESCAPE_STRING)
+        return substitute_all_config_variables(
+            data=config,
+            replace_variables_dict=substitutions,
+            dollar_sign_escape_string=self.data_context.DOLLAR_SIGN_ESCAPE_STRING,
+        )
 
     def _run_validation(
         self,
@@ -326,9 +347,9 @@ class Checkpoint:
                 substituted_runtime_config=substituted_runtime_config,
                 validation_dict=validation_dict,
             )
-            batch_request: Union[BatchRequest, RuntimeBatchRequest] = substituted_validation_dict.get(
-                "batch_request"
-            )
+            batch_request: Union[
+                BatchRequest, RuntimeBatchRequest
+            ] = substituted_validation_dict.get("batch_request")
             expectation_suite_name: str = substituted_validation_dict.get(
                 "expectation_suite_name"
             )
@@ -398,9 +419,9 @@ class Checkpoint:
                 )
             )
         except (
-                ge_exceptions.CheckpointError,
-                ge_exceptions.ExecutionEngineError,
-                ge_exceptions.MetricError,
+            ge_exceptions.CheckpointError,
+            ge_exceptions.ExecutionEngineError,
+            ge_exceptions.MetricError,
         ) as e:
             raise ge_exceptions.CheckpointError(
                 f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
@@ -455,7 +476,9 @@ is run), with each validation having its own defined "action_list" attribute.
         return report_object
 
     # noinspection PyShadowingBuiltins
-    def get_config(self, format: str = "dict", clean_falsy: bool = False) -> Union[dict, str]:
+    def get_config(
+        self, format: str = "dict", clean_falsy: bool = False
+    ) -> Union[dict, str]:
         config_kwargs: dict
         if clean_falsy:
             config_kwargs = filter_properties_dict(
@@ -646,7 +669,7 @@ class LegacyCheckpoint(Checkpoint):
         return self._validation_operator_name
 
     @property
-    def batches(self) -> Optional[List[dict]] :
+    def batches(self) -> Optional[List[dict]]:
         return self._batches
 
     def _run_default_validation_operator(

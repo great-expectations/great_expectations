@@ -7,9 +7,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
-from great_expectations.data_context.types.base import (
-    CheckpointConfigSchema,
-)
+from great_expectations.data_context.types.base import CheckpointConfigSchema
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )

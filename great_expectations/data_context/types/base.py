@@ -4,18 +4,15 @@ import itertools
 import json
 import logging
 import uuid
-from uuid import UUID
 from typing import Any, Dict, List, MutableMapping, Optional, Union
+from uuid import UUID
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.util import (
-    convert_to_json_serializable,
-    safe_deep_copy,
-)
+from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -1947,7 +1944,9 @@ class CheckpointConfigSchema(Schema):
         allow_none=True,
     )
     template_name = fields.String(required=False, allow_none=True)
-    module_name = fields.String(required=False, allow_none=True, missing="great_expectations.checkpoint")
+    module_name = fields.String(
+        required=False, allow_none=True, missing="great_expectations.checkpoint"
+    )
     class_name = fields.Str(required=False, allow_none=True)
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)

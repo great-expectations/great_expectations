@@ -27,8 +27,8 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
-    RuntimeBatchRequest,
     IDDict,
+    RuntimeBatchRequest,
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite

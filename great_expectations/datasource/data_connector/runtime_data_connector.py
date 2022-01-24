@@ -2,10 +2,7 @@ import logging
 from typing import Any, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchDefinition,
-    RuntimeBatchRequest,
-)
+from great_expectations.core.batch import BatchDefinition, RuntimeBatchRequest
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchMarkers,

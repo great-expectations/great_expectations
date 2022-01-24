@@ -38,8 +38,8 @@ from great_expectations.datasource import (
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
 from great_expectations.util import (
-    gen_directory_tree_str,
     deep_filter_properties_iterable,
+    gen_directory_tree_str,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
 
@@ -1895,23 +1895,33 @@ expectation_suite_ge_cloud_id:
         checkpoint_from_disk = cf.read()
 
     assert checkpoint_from_disk == expected_checkpoint_yaml
-    assert (
-        deep_filter_properties_iterable(
-            properties=checkpoint_from_yaml.get_config(),
-            clean_falsy=True,
-            keep_falsy_numerics=True,
-        )
-        == deep_filter_properties_iterable(properties={key: value for key, value in dict(yaml.load(expected_checkpoint_yaml)).items() if key not in ["module_name", "class_name"]}, clean_falsy=True, keep_falsy_numerics=True,)
+    assert deep_filter_properties_iterable(
+        properties=checkpoint_from_yaml.get_config(),
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+    ) == deep_filter_properties_iterable(
+        properties={
+            key: value
+            for key, value in dict(yaml.load(expected_checkpoint_yaml)).items()
+            if key not in ["module_name", "class_name"]
+        },
+        clean_falsy=True,
+        keep_falsy_numerics=True,
     )
 
     checkpoint_from_store = context.get_checkpoint(name=checkpoint_name)
-    assert (
-        deep_filter_properties_iterable(
-            properties=checkpoint_from_store.get_config(),
-            clean_falsy=True,
-            keep_falsy_numerics=True,
-        )
-        == deep_filter_properties_iterable(properties={key: value for key, value in dict(yaml.load(expected_checkpoint_yaml)).items() if key not in ["module_name", "class_name"]}, clean_falsy=True, keep_falsy_numerics=True,)
+    assert deep_filter_properties_iterable(
+        properties=checkpoint_from_store.get_config(),
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+    ) == deep_filter_properties_iterable(
+        properties={
+            key: value
+            for key, value in dict(yaml.load(expected_checkpoint_yaml)).items()
+            if key not in ["module_name", "class_name"]
+        },
+        clean_falsy=True,
+        keep_falsy_numerics=True,
     )
 
     expected_action_list = [

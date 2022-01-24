@@ -936,7 +936,12 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     assert len(context.list_expectation_suites()) == 2
 
     # persist to store
-    checkpoint_class_args: dict = dict(**{"class_name": "SimpleCheckpoint",}, **simple_checkpoint_defaults.get_config())
+    checkpoint_class_args: dict = dict(
+        **{
+            "class_name": "SimpleCheckpoint",
+        },
+        **simple_checkpoint_defaults.get_config()
+    )
     context.add_checkpoint(**checkpoint_class_args)
     checkpoint_name = simple_checkpoint_defaults.name
     assert context.list_checkpoints() == [checkpoint_name]

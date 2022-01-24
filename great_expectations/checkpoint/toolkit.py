@@ -26,7 +26,10 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.marshmallow__shade import ValidationError
-from great_expectations.util import filter_properties_dict, deep_filter_properties_iterable
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    filter_properties_dict,
+)
 
 
 def list_checkpoints(
