@@ -466,9 +466,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
 
         upgrade_overview = f"""\
 <cyan>\
-++====================================++
-|| UpgradeHelperV11: Upgrade Overview ||
-++====================================++\
+++=====================================================++
+|| UpgradeHelperV11: Upgrade Overview (V2-API Version) ||
+++=====================================================++\
 </cyan>
 
 **WARNING**
