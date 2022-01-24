@@ -85,7 +85,7 @@ stages:
 
     jobs:
       - job: lint
-        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -108,7 +108,7 @@ stages:
 
     jobs:
       - job: compatibility_matrix
-        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
         variables:
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
@@ -183,7 +183,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: comprehensive
-        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
 
         services:
           postgres: postgres
@@ -263,7 +263,7 @@ stages:
 
     jobs:
       - job: test_usage_stats_messages
-        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
         variables:
           python.version: '3.8'
 
@@ -295,7 +295,7 @@ stages:
 
     jobs:
       - job: mysql
-        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
 
         services:
           mysql: mysql
@@ -338,7 +338,7 @@ stages:
             displayName: 'pytest'
 
       - job: mssql
-        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
 
         services:
           mssql: mssql
@@ -376,7 +376,7 @@ stages:
 
     jobs:
       - job: test_cli
-        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
 
         services:
           postgres: postgres
