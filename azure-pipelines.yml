@@ -1,9 +1,21 @@
+# TODO(cdkini): Add blurb about what this is and how it differs from the other pipeline
+
+schedules:
+- cron: 0 */4 * * *
+  displayName: Scheduled Runs
+  branches:
+    include:
+    - develop
+    exclude:
+    - main
+  always: true
+
 trigger:
   branches:
     include:
-    - pre_pr-*
-    - develop
     - main
+    exclude:
+    - develop
 
 resources:
   containers:
@@ -33,7 +45,7 @@ resources:
 
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
-  isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
+  isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule')]
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 stages:
@@ -73,7 +85,7 @@ stages:
 
     jobs:
       - job: lint
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -96,7 +108,7 @@ stages:
 
     jobs:
       - job: compatibility_matrix
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
         variables:
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
@@ -171,7 +183,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: comprehensive
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
 
         services:
           postgres: postgres
@@ -251,7 +263,7 @@ stages:
 
     jobs:
       - job: test_usage_stats_messages
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
         variables:
           python.version: '3.8'
 
@@ -283,7 +295,7 @@ stages:
 
     jobs:
       - job: mysql
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
 
         services:
           mysql: mysql
@@ -326,7 +338,7 @@ stages:
             displayName: 'pytest'
 
       - job: mssql
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
 
         services:
           mssql: mssql
@@ -364,7 +376,7 @@ stages:
 
     jobs:
       - job: test_cli
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true)))
 
         services:
           postgres: postgres
@@ -398,7 +410,7 @@ stages:
             displayName: 'pytest'
 
   - stage: deploy_gallery
-    condition: and(succeeded(), or(eq(variables.isMain, true), eq(variables.isDevelop, true)))
+    condition: succeeded()
     pool:
       vmImage: 'ubuntu-latest'
     dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]

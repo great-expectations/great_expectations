@@ -1,4 +1,3 @@
-# Hey there!
 import copy
 from typing import Dict, List, Optional
 
