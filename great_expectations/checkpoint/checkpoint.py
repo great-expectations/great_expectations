@@ -478,11 +478,17 @@ is run), with each validation having its own defined "action_list" attribute.
     # noinspection PyShadowingBuiltins
     def get_config(
         self,
+        reconcile: bool = False,
         runtime_kwargs: Optional[dict] = None,
         format: str = "dict",
         clean_falsy: bool = False,
     ) -> Union[dict, str]:
-        config_kwargs: dict = self.get_substituted_config(runtime_kwargs=runtime_kwargs)
+        if reconcile or runtime_kwargs:
+            config_kwargs: dict = self.get_substituted_config(
+                runtime_kwargs=runtime_kwargs
+            )
+        else:
+            config_kwargs = copy.deepcopy(self.config_kwargs)
 
         if clean_falsy:
             filter_properties_dict(
