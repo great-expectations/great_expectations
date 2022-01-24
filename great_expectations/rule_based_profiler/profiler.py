@@ -120,40 +120,33 @@ class Profiler:
         self._name = name
         self._config_version = config_version
         self._data_context = data_context
-        self._rules = self._init_rules(rules, variables, data_context)
+        self._rules = []
+
+        if variables is None:
+            variables = {}
         self._variables = variables
 
-    def _init_rules(
-        self,
-        rule_configs: Dict[str, RuleConfig],
-        variables: Optional[Dict[str, Any]],
-        data_context: Optional[DataContext],
-    ) -> List[Rule]:
-        rules = []
-
-        for rule_name, rule_config in rule_configs.items():
-            domain_builder_config: Optional[DomainBuilderConfig] = rule_config.get(
-                "domain_builder"
-            )
-            parameter_builder_configs: Optional[
-                List[ParameterBuilderConfig]
-            ] = rule_config.get("parameter_builders")
-            expectation_configuration_builder_configs: Optional[
-                List[ExpectationConfigurationBuilderConfig]
-            ] = rule_config.get("expectation_configuration_builders")
-
+        for rule_name, rule_config in rules.items():
             # Config is validated through schema but do a sanity check
-            if any(
-                config is None
-                for config in (
-                    domain_builder_config,
-                    parameter_builder_configs,
-                    expectation_configuration_builder_configs,
+            if not all(
+                attr in rule_config
+                for attr in (
+                    "domain_builder",
+                    "parameter_builders",
+                    "expectation_configuration_builders",
                 )
             ):
                 raise ge_exceptions.ProfilerConfigurationError(
                     message=f'Invalid rule "{rule_name}": missing mandatory config value(s).'
                 )
+
+            domain_builder_config: DomainBuilderConfig = rule_config["domain_builder"]
+            parameter_builder_configs: List[ParameterBuilderConfig] = rule_config[
+                "parameter_builders"
+            ]
+            expectation_configuration_builder_configs: List[
+                ExpectationConfigurationBuilderConfig
+            ] = rule_config["expectation_configuration_builders"]
 
             # Instantiate DomainBuilder
             domain_builder: DomainBuilder = instantiate_class_from_config(
@@ -198,24 +191,20 @@ class Profiler:
                     )
 
             # Convert variables to ParameterContainer
-            if variables is None:
-                variables = {}
-            variables = build_parameter_container_for_variables(
+            _variables = build_parameter_container_for_variables(
                 variables_configs=variables
             )
 
             # Take previous steps and package into a Rule object
-            rules.append(
+            self._rules.append(
                 Rule(
                     name=rule_name,
                     domain_builder=domain_builder,
                     parameter_builders=parameter_builders,
                     expectation_configuration_builders=expectation_configuration_builders,
-                    variables=variables,
+                    variables=_variables,
                 )
             )
-
-        return rules
 
     def profile(
         self,
