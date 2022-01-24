@@ -98,10 +98,8 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Check whether the Expectation has a library_metadata object"""
 
         return ExpectationDiagnosticCheckMessage(
-            **{
-                "message": "library_metadata object exists",
-                "passed": library_metadata.library_metadata_passed_checks,
-            }
+            message="library_metadata object exists",
+            passed=library_metadata.library_metadata_passed_checks,
         )
 
     @staticmethod
@@ -117,24 +115,20 @@ class ExpectationDiagnostics(SerializableDictDot):
             short_description = None
         if short_description not in {"", "\n", "TODO: Add a docstring here", None}:
             return ExpectationDiagnosticCheckMessage(
-                **{
-                    "message": message,
-                    "sub_messages": [
-                        {
-                            "message": '"' + short_description + '"',
-                            "passed": True,
-                        }
-                    ],
-                    "passed": True,
-                }
+                message=message,
+                sub_messages=[
+                    {
+                        "message": '"' + short_description + '"',
+                        "passed": True,
+                    }
+                ],
+                passed=True,
             )
 
         else:
             return ExpectationDiagnosticCheckMessage(
-                **{
-                    "message": message,
-                    "passed": False,
-                }
+                message=message,
+                passed=False,
             )
 
     @classmethod
@@ -158,10 +152,8 @@ class ExpectationDiagnostics(SerializableDictDot):
         )
         print(positive_case_count, negative_case_count, unexpected_case_count, passed)
         return ExpectationDiagnosticCheckMessage(
-            **{
-                "message": message,
-                "passed": passed,
-            }
+            message=message,
+            passed=passed,
         )
 
     @staticmethod
@@ -178,17 +170,13 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         if successful_execution_engines > 0:
             return ExpectationDiagnosticCheckMessage(
-                **{
-                    "message": message,
-                    "passed": True,
-                }
+                message=message,
+                passed=True,
             )
         else:
             return ExpectationDiagnosticCheckMessage(
-                **{
-                    "message": message,
-                    "passed": False,
-                }
+                message=message,
+                passed=False,
             )
 
     @staticmethod
