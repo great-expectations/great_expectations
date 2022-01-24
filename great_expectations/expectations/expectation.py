@@ -1291,11 +1291,12 @@ class Expectation(metaclass=MetaExpectation):
                 for executed_test_case in executed_test_cases:
                     test_title = executed_test_case["test_case"]["title"]
 
+
                     try:
                         rendered_result = renderer(
                             configuration=executed_test_case[
                                 "expectation_configuration"
-                            ].to_dict(),
+                            ],
                             result=executed_test_case["validation_result"],
                         )
                         rendered_result_str = self._get_rendered_result_as_string(
