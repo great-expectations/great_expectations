@@ -100,6 +100,9 @@ CHECKPOINT_STORE_STRING = yaml.dump(
         ]
     }
 ).replace("\n", "\n  ")[:-2]
+PROFILER_STORE_STRING = yaml.dump(
+    {"profiler_store": DataContextConfigDefaults.DEFAULT_STORES.value["profiler_store"]}
+).replace("\n", "\n  ")[:-2]
 
 PROJECT_OPTIONAL_CONFIG_COMMENT = (
     CONFIG_VARIABLES_INTRO
@@ -125,6 +128,7 @@ stores:
     # https://docs.greatexpectations.io/en/latest/reference/core_concepts/evaluation_parameters.html
     {EVALUATION_PARAMETER_STORE_STRING}
   {CHECKPOINT_STORE_STRING}
+  {PROFILER_STORE_STRING}
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 evaluation_parameter_store_name: evaluation_parameter_store
