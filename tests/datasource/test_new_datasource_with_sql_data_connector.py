@@ -501,6 +501,65 @@ tables:
 
     # Here we should test getting another batch
 
+    datasource_with_whitelisted_kwarg = context.test_yaml_config(
+        f"""
+class_name: SimpleSqlalchemyDatasource
+connection_string: sqlite:///{db_file}
+credentials_info: {
+    "type": "service_account",
+    "project_id": "<PROJECT_ID",
+    "private_key_id": "<PRIVATE_KEY_ID>",
+    "private_key": "-----BEGIN PRIVATE KEY-----\n<PKEY>\n-----END PRIVATE KEY-----\n",
+    "client_email": "<EMAIL>",
+    "client_id": "<CLIENT_ID",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/testme%40<PROJECT>.iam.gserviceaccount.com"
+}
+"""
+        + """
+tables:
+    table_partitioned_by_date_column__A:
+        partitioners:
+            whole_table: {}
+            daily:
+                splitter_method: _split_on_converted_datetime
+                splitter_kwargs:
+                    column_name: date
+                    date_format_string: "%Y-%m-%d"
+            weekly:
+                splitter_method: _split_on_converted_datetime
+                splitter_kwargs:
+                    column_name: date
+                    date_format_string: "%Y-%W"
+            by_id_dozens:
+                splitter_method: _split_on_divided_integer
+                splitter_kwargs:
+                    column_name: id
+                    divisor: 12
+"""
+    )
+    print(
+        json.dumps(
+            datasource_with_whitelisted_kwarg.get_available_data_asset_names(), indent=4
+        )
+    )
+    assert datasource_with_whitelisted_kwarg.get_available_data_asset_names() == {
+        "whole_table": [
+            "table_partitioned_by_date_column__A",
+        ],
+        "daily": [
+            "table_partitioned_by_date_column__A",
+        ],
+        "weekly": [
+            "table_partitioned_by_date_column__A",
+        ],
+        "by_id_dozens": [
+            "table_partitioned_by_date_column__A",
+        ],
+    }
+
 
 # Note: Abe 2020111: this test belongs with the data_connector tests, not here.
 def test_introspect_db(test_cases_for_sql_data_connector_sqlite_execution_engine):
