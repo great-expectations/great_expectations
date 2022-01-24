@@ -39,12 +39,12 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
-
-    Keyword Args:
         min_value (int or None): \
             The minimum value for a column entry length.
         max_value (int or None): \
             The maximum value for a column entry length.
+
+    Keyword Args:
         mostly (None or a float between 0 and 1): \
             Return `"success": True` if at least mostly fraction of values match the expectation. \
             For more detail, see :ref:`mostly`.
@@ -99,7 +99,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "strict_max",
         "mostly",
     )
-
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
@@ -112,6 +111,11 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "min_value",
+        "max_value",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)

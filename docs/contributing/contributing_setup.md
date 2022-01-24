@@ -75,7 +75,7 @@ This is not required, but highly recommended.
 
 * ` pip install -e .`
 
-	*`-e` will install Great Expectations in “editable” mode. This is not required, but is often very convenient as a developer.
+	* `-e` will install Great Expectations in “editable” mode. This is not required, but is often very convenient as a developer.
 
 ### (Optional) Configure resources for testing and documentation
 Depending on which features of Great Expectations you want to work on, you may want to configure different backends for local testing, such as PostgreSQL and Spark. Also, there are a couple of extra steps if you want to build documentation locally.

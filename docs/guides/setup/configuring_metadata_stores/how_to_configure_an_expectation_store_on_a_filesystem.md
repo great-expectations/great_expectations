@@ -59,12 +59,12 @@ Steps
     ```
 
 
-4. **Confirm that the location has been updated by running** ``great_expectations --v3-api store list``.
+4. **Confirm that the location has been updated by running** ``great_expectations store list``.
 
     Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``shared_expectations_filesystem_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in the ``shared_expectations/`` folder as long as we set the ``expectations_store_name`` variable to ``shared_expectations_filesystem_store``.  The config for ``expectations_store`` can be removed if you would like.
 
     ```bash
-    great_expectations --v3-api store list
+    great_expectations store list
 
     2 Stores found:
 
@@ -82,10 +82,10 @@ Steps
     ```
 
 
-5. **Confirm that Expectations can be read from the new storage location by running** ``great_expectations --v3-api suite list``.
+5. **Confirm that Expectations can be read from the new storage location by running** ``great_expectations suite list``.
 
     ```bash
-    great_expectations --v3-api suite list
+    great_expectations suite list
 
     1 Expectation Suite found:
         - npi_expectations
@@ -126,6 +126,3 @@ Additional Notes
     +        "value": 333
            }
     ```
-
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.

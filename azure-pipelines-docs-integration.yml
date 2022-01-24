@@ -55,7 +55,19 @@ stages:
           - bash: ./scripts/check_for_docs_deps_changes
             name: CheckDocsDependenciesChanges
 
+  - stage: custom_checks
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+    - job: link_checker
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      steps:
+      - bash: python scripts/docs_link_checker.py -p docs -r docs -s docs --skip-external
+        name: LinkChecker
+
   - stage: docusaurus_tests
+    dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-latest'
     jobs:

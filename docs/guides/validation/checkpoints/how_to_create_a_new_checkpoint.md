@@ -21,7 +21,7 @@ This how-to guide assumes you have already:
 ##### 1. First, run the CLI command below.
 
 ````console
-great_expectations --v3-api checkpoint new my_checkpoint
+great_expectations checkpoint new my_checkpoint
 ````
 
 ##### 2.  Next, you will be presented with a Jupyter Notebook which will guide you through the steps of creating a checkpoint.
