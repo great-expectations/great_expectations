@@ -27,8 +27,8 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.batch import (
     Batch,
     BatchRequest,
-    IDDict,
     RuntimeBatchRequest,
+    IDDict,
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -1837,7 +1837,7 @@ class BaseDataContext:
         )
 
     def _instantiate_datasource_from_config_and_update_project_config(
-        self, name: str, config: Union[CommentedMap, dict], initialize: bool = True
+        self, name: str, config: dict, initialize: bool = True
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
@@ -1846,7 +1846,7 @@ class BaseDataContext:
         datasource_config = self.project_config_with_variables_substituted.datasources[
             name
         ]
-        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        config = dict(datasourceConfigSchema.dump(datasource_config))
         datasource: Optional[Union[LegacyDatasource, BaseDatasource]]
         if initialize:
             try:
@@ -3059,7 +3059,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_request: Optional[dict] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -3138,7 +3138,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -3179,7 +3179,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return checkpoint_toolkit.run_checkpoint(
             data_context=self,
             checkpoint_store=self.checkpoint_store,
-            ge_cloud_mode=self.ge_cloud_mode,
             checkpoint_name=checkpoint_name,
             template_name=template_name,
             run_name_template=run_name_template,
@@ -3394,9 +3393,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 checkpoint_config = checkpoint_config.to_json_dict()
                 checkpoint_config.update({"name": checkpoint_name})
 
+                checkpoint_class_args: dict = copy.deepcopy(checkpoint_config)
+                checkpoint_class_args.pop("module_name")
+                checkpoint_class_args.pop("class_name")
+
                 if class_name == "Checkpoint":
                     instantiated_class = Checkpoint(
-                        data_context=self, **checkpoint_config
+                        data_context=self, **checkpoint_class_args
                     )
                 elif class_name == "SimpleCheckpoint":
                     instantiated_class = SimpleCheckpoint(

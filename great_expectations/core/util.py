@@ -364,7 +364,7 @@ def ensure_json_serializable(data):
         )
 
 
-def safe_deep_copy(data, memo):
+def safe_deep_copy(data, memo=None):
     """
     This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
     """

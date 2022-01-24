@@ -8,7 +8,6 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
 from great_expectations.data_context.types.base import (
-    CheckpointConfig,
     CheckpointConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -56,7 +55,7 @@ class CheckpointResult(DictDot):
             ValidationResultIdentifier,
             Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
         ],
-        checkpoint_config: CheckpointConfig,
+        checkpoint_config: dict,
         success: Optional[bool] = None,
     ) -> None:
         self._run_id = run_id
@@ -90,7 +89,7 @@ class CheckpointResult(DictDot):
         return self.checkpoint_config.name
 
     @property
-    def checkpoint_config(self) -> CheckpointConfig:
+    def checkpoint_config(self) -> dict:
         return self._checkpoint_config
 
     @property
