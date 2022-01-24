@@ -10,9 +10,14 @@ Would you like to run the Upgrade Helper to bring your project up-to-date? [Y/n]
 
 ================================================================================
 [0m
-++====================================++
-|| UpgradeHelperV11: Upgrade Overview ||
-++====================================++
+++=====================================================++
+|| UpgradeHelperV11: Upgrade Overview (V2-API Version) ||
+++=====================================================++
+
+**WARNING**
+You have run the 'great_expectations project upgrade' command using the --v2-api flag, which is not able to perform the full upgrade to the configuration (3.0) that is fully compatible with the V3-API
+
+Please re-run the 'great_expectations project upgrade' command without the --v2-api flag.
 
 UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x.
 
@@ -55,9 +60,14 @@ The config_version of your great_expectations.yml has been automatically increme
 A log detailing the upgrade can be found here:
 
     - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json[0m[0m
-++====================================++
-|| UpgradeHelperV13: Upgrade Overview ||
-++====================================++
+++=====================================================++
+|| UpgradeHelperV13: Upgrade Overview (V2-API Version) ||
+++=====================================================++
+
+**WARNING**
+You have run the 'great_expectations project upgrade' command using the --v2-api flag, which is not able to perform the full upgrade to the configuration (3.0) that is fully compatible with the V3-API
+
+Please re-run the 'great_expectations project upgrade' command without the --v2-api flag.
 
 UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations V3 API.
 
