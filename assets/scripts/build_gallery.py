@@ -243,6 +243,5 @@ if __name__ == "__main__":
     tracebacks = expectation_tracebacks.getvalue()
     if tracebacks != "":
         print(tracebacks)
-        sys.exit(1)
     with open("./expectation_library.json", "w") as outfile:
         json.dump(gallery_info, outfile)
