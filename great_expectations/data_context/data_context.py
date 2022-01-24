@@ -3558,7 +3558,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         if class_name == "Checkpoint":
             instantiated_class = Checkpoint(data_context=self, **checkpoint_class_args)
         elif class_name == "SimpleCheckpoint":
-            instantiated_class = SimpleCheckpoint(data_context=self, **checkpoint_class_args)
+            instantiated_class = SimpleCheckpoint(
+                data_context=self, **checkpoint_class_args
+            )
         else:
             raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
 
