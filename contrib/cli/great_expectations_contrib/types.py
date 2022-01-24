@@ -17,20 +17,20 @@ logger.setLevel(logging.INFO)
 Diagnostics = Dict[str, Any]
 
 
-@dataclass
+@dataclass(frozen=True)
 class ExpectationCompletenessCheck:
     message: str
     passed: bool
 
 
-@dataclass
+@dataclass(frozen=True)
 class ExpectationCompletenessChecklist:
     experimental: List[ExpectationCompletenessCheck]
     beta: List[ExpectationCompletenessCheck]
     production: List[ExpectationCompletenessCheck]
 
 
-@dataclass
+@dataclass(frozen=True)
 class PackageCompletenessStatus:
     concept_only: int
     experimental: int
@@ -39,7 +39,7 @@ class PackageCompletenessStatus:
     total: int
 
 
-@dataclass
+@dataclass(frozen=True)
 class RenderedExpectationDetail:
     name: str
     tags: List[str]
@@ -47,14 +47,14 @@ class RenderedExpectationDetail:
     status: ExpectationCompletenessChecklist
 
 
-@dataclass
+@dataclass(frozen=True)
 class Dependency:
     text: str
     link: str
     version: Optional[str]
 
 
-@dataclass
+@dataclass(frozen=True)
 class GitHubUser:
     username: str
     full_name: Optional[str]
@@ -67,13 +67,13 @@ class SocialLinkType(Enum):
     MEDIUM = "MEDIUM"
 
 
-@dataclass
+@dataclass(frozen=True)
 class SocialLink:
     account_type: SocialLinkType
     identifier: str
 
 
-@dataclass
+@dataclass(frozen=True)
 class DomainExpert:
     full_name: str
     social_links: List[SocialLink]
@@ -87,7 +87,7 @@ class Maturity(Enum):
     PRODUCTION = "PRODUCTION"
 
 
-@dataclass
+@dataclass(frozen=True)
 class GreatExpectationsContribPackage:
     # Core
     package_name: Optional[str] = None
