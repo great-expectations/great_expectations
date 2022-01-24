@@ -1021,6 +1021,7 @@ class Expectation(metaclass=MetaExpectation):
             if len(included_test_cases) > 0:
                 copied_example = deepcopy(example)
                 copied_example["tests"] = included_test_cases
+                copied_example.pop("test_backends", None)
                 included_examples.append(ExpectationTestDataCases(**copied_example))
 
         return included_examples
