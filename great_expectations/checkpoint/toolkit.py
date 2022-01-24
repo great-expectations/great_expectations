@@ -261,7 +261,6 @@ def run_checkpoint(
     Args:
         data_context: DataContext for Checkpoint class instantiation purposes
         checkpoint_store: CheckpointStore for managing Checkpoint configurations
-        ge_cloud_mode: Whether or not Great Expectations is operating in the cloud mode
         checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
         template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
         run_name_template: The template to use for run_name
@@ -331,6 +330,12 @@ def run_checkpoint(
     checkpoint_config.update(checkpoint_config_from_call_args)
 
     checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
+    filter_properties_dict(
+        properties=checkpoint_run_arguments,
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+        inplace=True,
+    )
 
     return checkpoint.run(**checkpoint_run_arguments)
 
