@@ -1,21 +1,13 @@
+import copy
 import json
-from copy import deepcopy
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
-from great_expectations.core.batch import (
-    delete_runtime_parameters_batch_data_references_from_config,
-    get_runtime_parameters_batch_data_references_from_config,
-    restore_runtime_parameters_batch_data_references_into_config,
-)
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
-from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    CheckpointConfigSchema,
-)
+from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
+from great_expectations.data_context.types.base import Attributes
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -61,7 +53,7 @@ class CheckpointResult(DictDot):
             ValidationResultIdentifier,
             Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
         ],
-        checkpoint_config: CheckpointConfig,
+        checkpoint_config: Attributes,
         success: Optional[bool] = None,
     ) -> None:
         self._run_id = run_id
@@ -95,7 +87,7 @@ class CheckpointResult(DictDot):
         return self.checkpoint_config.name
 
     @property
-    def checkpoint_config(self) -> CheckpointConfig:
+    def checkpoint_config(self) -> Attributes:
         return self._checkpoint_config
 
     @property
@@ -289,27 +281,24 @@ class CheckpointResult(DictDot):
         return self._validation_statistics
 
     def to_json_dict(self) -> dict:
-        return checkpointResultSchema.dump(self)
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+
+        memo[id(self)] = result
+        for key, value in self.to_dict().items():
+            if value is not None:
+                value_copy = safe_deep_copy(data=value, memo=memo)
+                setattr(result, key, value_copy)
+
+        return result
 
     def __repr__(self):
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(
-            config=self["checkpoint_config"]
-        )
-        delete_runtime_parameters_batch_data_references_from_config(
-            config=self["checkpoint_config"]
-        )
         serializeable_dict: dict = self.to_json_dict()
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=self["checkpoint_config"],
-            batch_data_references=batch_data_references,
-        )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=serializeable_dict["checkpoint_config"],
-            batch_data_references=batch_data_references,
-            replace_value_with_type_string=True,
-        )
         return json.dumps(serializeable_dict, indent=2)
 
 
@@ -317,14 +306,14 @@ class CheckpointResultSchema(Schema):
     # JC: I think this needs to be changed to be an instance of a new type called CheckpointResult,
     # which would include the top-level keys run_id, config, name, and a list of results.
     run_id = fields.Nested(RunIdentifierSchema)
-    run_results = fields.Dict()
-    checkpoint_config = fields.Nested(CheckpointConfigSchema)
-    success = fields.Bool()
+    run_results = fields.Dict(required=False, allow_none=True)
+    checkpoint_config = fields.Dict(required=False, allow_none=True)
+    success = fields.Boolean(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @pre_dump
     def prepare_dump(self, data, **kwargs):
-        data = deepcopy(data)
+        data = copy.deepcopy(data)
         data._run_results = convert_to_json_serializable(data.run_results)
         return data
 

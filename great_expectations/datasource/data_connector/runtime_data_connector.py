@@ -2,12 +2,7 @@ import logging
 from typing import Any, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchRequest,
-    BatchRequestBase,
-    RuntimeBatchRequest,
-)
+from great_expectations.core.batch import BatchDefinition, RuntimeBatchRequest
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchMarkers,
@@ -35,8 +30,7 @@ class RuntimeDataConnector(DataConnector):
         name (str): The name of this DataConnector
         datasource_name (str): The name of the Datasource that contains it
         execution_engine (ExecutionEngine): An ExecutionEngine
-        batch_identifiers (list): a list of keys that must be defined in the batch_identifiers dict of
-        RuntimeBatchRequest
+        batch_identifiers (list): a list of keys that must be defined in the batch_identifiers dict of RuntimeBatchRequest
         batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
@@ -144,7 +138,7 @@ class RuntimeDataConnector(DataConnector):
 
     def _get_batch_definition_list_from_batch_request(
         self,
-        batch_request: BatchRequest,
+        batch_request: RuntimeBatchRequest,
     ) -> List[BatchDefinition]:
         """
         <Will> 202103. The following behavior of the _data_references_cache follows a pattern that we are using for
@@ -271,7 +265,7 @@ class RuntimeDataConnector(DataConnector):
                 "'query', 'path'."
             )
 
-    def _validate_batch_request(self, batch_request: BatchRequestBase):
+    def _validate_batch_request(self, batch_request: RuntimeBatchRequest):
         super()._validate_batch_request(batch_request=batch_request)
 
         runtime_parameters = batch_request.runtime_parameters

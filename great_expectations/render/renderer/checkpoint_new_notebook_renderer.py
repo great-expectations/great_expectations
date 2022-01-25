@@ -152,9 +152,7 @@ If you instead wish to use python instead of yaml to configure your Checkpoint, 
 
 You can run the following cell to print out the full yaml configuration. For example, if you used **SimpleCheckpoint**  this will show you the default action list."""
         )
-        self.add_code_cell(
-            "print(my_checkpoint.get_substituted_config().to_yaml_str())", lint=True
-        )
+        self.add_code_cell('print(my_checkpoint.get_config(format="yaml"))', lint=True)
 
     def _add_add_checkpoint(self):
         self.add_markdown_cell(
