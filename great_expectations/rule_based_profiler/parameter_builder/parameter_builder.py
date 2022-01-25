@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context import DataContext
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
 from great_expectations.rule_based_profiler.util import build_metric_domain_kwargs
@@ -46,7 +46,7 @@ class ParameterBuilder(ABC):
 
         ```
         parameter_builders:
-          - parameter_name: my_parameter
+          - name: my_parameter
             class_name: MetricMultiBatchParameterBuilder
             metric_name: column.mean
         ```
@@ -54,9 +54,9 @@ class ParameterBuilder(ABC):
 
     def __init__(
         self,
-        parameter_name: str,
-        data_context: Optional[DataContext] = None,
-        batch_request: Optional[Union[dict, str]] = None,
+        name: str,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
         """
         The ParameterBuilder will build parameters for the active domain from the rule.
@@ -69,7 +69,7 @@ class ParameterBuilder(ABC):
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
 
-        self._parameter_name = parameter_name
+        self._parameter_name = name
         self._data_context = data_context
         self._batch_request = batch_request
 
@@ -249,7 +249,7 @@ class ParameterBuilder(ABC):
         return self._parameter_name
 
     @property
-    def data_context(self) -> DataContext:
+    def data_context(self) -> "DataContext":  # noqa: F821
         return self._data_context
 
     @property

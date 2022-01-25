@@ -55,7 +55,12 @@ def rules() -> Dict[str, RuleConfig]:
 def profiler_config(
     profiler_name: str, rules: Dict[str, RuleConfig]
 ) -> RuleBasedProfilerConfig:
-    return RuleBasedProfilerConfig(name=profiler_name, config_version=1.0, rules=rules)
+    return RuleBasedProfilerConfig(
+        name=profiler_name,
+        class_name="RuleBasedProfiler",
+        config_version=1.0,
+        rules=rules,
+    )
 
 
 @pytest.fixture(scope="function")

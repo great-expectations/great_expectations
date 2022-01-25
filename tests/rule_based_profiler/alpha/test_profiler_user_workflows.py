@@ -12,7 +12,7 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
-from great_expectations.rule_based_profiler.profiler import Profiler
+from great_expectations.rule_based_profiler.profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -82,9 +82,12 @@ def test_alice_profiler_user_workflow_single_batch(
 
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    profiler_config.pop("class_name")
 
-    profiler: Profiler = Profiler(
-        profiler_config=profiler_config,
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        **profiler_config,
         data_context=data_context,
     )
 
@@ -188,9 +191,12 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
 
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    profiler_config.pop("class_name")
 
-    profiler: Profiler = Profiler(
-        profiler_config=profiler_config,
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        **profiler_config,
         data_context=data_context,
     )
 
@@ -229,9 +235,12 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
 
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    profiler_config.pop("class_name")
 
-    profiler: Profiler = Profiler(
-        profiler_config=profiler_config,
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        **profiler_config,
         data_context=data_context,
     )
 

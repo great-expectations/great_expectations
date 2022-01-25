@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
@@ -57,7 +57,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 
     def __init__(
         self,
-        parameter_name: str,
+        name: str,
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
@@ -70,8 +70,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
-        data_context: Optional[DataContext] = None,
-        batch_request: Optional[Union[str, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
         """
         Args:
@@ -98,7 +98,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         super().__init__(
-            parameter_name=parameter_name,
+            name=name,
             data_context=data_context,
             batch_request=batch_request,
         )
