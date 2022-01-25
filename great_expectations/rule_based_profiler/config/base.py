@@ -220,19 +220,19 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     def __init__(
         self,
         name: str,
-        class_name: str,
         config_version: float,
         rules: Dict[str, RuleConfig],
+        class_name: str,
         module_name: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
         **kwargs
     ):
         self.name = name
-        self.class_name = class_name
         self.config_version = config_version
-        self.module_name = module_name
         self.rules = rules
+        self.class_name = class_name
+        self.module_name = module_name
         self.variables = variables
         for k, v in kwargs.items():
             setattr(self, k, v)

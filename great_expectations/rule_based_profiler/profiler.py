@@ -107,7 +107,7 @@ class RuleBasedProfiler:
         config_version: float,
         rules: Dict[str, RuleConfig],
         variables: Optional[Dict[str, Any]] = None,
-        data_context: Optional["DataContext"] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         Create a new Profiler using configured rules.

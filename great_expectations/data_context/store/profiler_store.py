@@ -26,6 +26,7 @@ class ProfilerStore(ConfigurationStore):
         test_profiler_configuration = RuleBasedProfilerConfig(
             name=test_profiler_name,
             class_name="RuleBasedProfiler",
+            module_name="great_expectations.rule_based_profiler",
             config_version=1.0,
             rules={},
         )
