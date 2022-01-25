@@ -190,13 +190,8 @@ class RuleBasedProfiler:
         data_context: Optional["DataContext"],  # noqa: F821
     ) -> DomainBuilder:
         domain_builder_config: CommentedMap = rule_config["domain_builder"]
-
-        # Validate config object before instantiation
-        domain_builder_config = domainBuilderConfigSchema.load(domain_builder_config)
-        config_dict: dict = domainBuilderConfigSchema.dump(domain_builder_config)
-
         domain_builder: DomainBuilder = instantiate_class_from_config(
-            config=config_dict,
+            config=domain_builder_config,
             runtime_environment={"data_context": data_context},
             config_defaults={
                 "module_name": "great_expectations.rule_based_profiler.domain_builder"
@@ -216,14 +211,8 @@ class RuleBasedProfiler:
         )
 
         for parameter_builder_config in parameter_builder_configs:
-            # Validate config object before instantiation
-            parameter_builder_config = parameterBuilderConfigSchema.load(
-                parameter_builder_config
-            )
-            config_dict = parameterBuilderConfigSchema.dump(parameter_builder_config)
-
             parameter_builder = instantiate_class_from_config(
-                config=config_dict,
+                config=parameter_builder_config,
                 runtime_environment={"data_context": data_context},
                 config_defaults={
                     "module_name": "great_expectations.rule_based_profiler.parameter_builder"
@@ -246,18 +235,8 @@ class RuleBasedProfiler:
         for (
             expectation_configuration_builder_config
         ) in expectation_configuration_builder_configs:
-            # Validate config object before instantiation
-            expectation_configuration_builder_config = (
-                expectationConfigurationBuilderConfigSchema.load(
-                    expectation_configuration_builder_config
-                )
-            )
-            config_dict: dict = expectationConfigurationBuilderConfigSchema.dump(
-                expectation_configuration_builder_config
-            )
-
             expectation_configuration_builder = instantiate_class_from_config(
-                config=config_dict,
+                config=expectation_configuration_builder_config,
                 runtime_environment={},
                 config_defaults={
                     "class_name": "DefaultExpectationConfigurationBuilder",
