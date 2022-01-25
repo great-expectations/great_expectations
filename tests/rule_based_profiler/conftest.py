@@ -352,7 +352,6 @@ def alice_columnar_table_single_batch(empty_data_context):
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
     # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
     profiler_config.pop("class_name")
-
     expected_expectation_suite.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
         profiler_config=profiler_config,
