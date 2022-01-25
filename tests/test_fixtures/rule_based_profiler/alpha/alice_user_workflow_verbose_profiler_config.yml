@@ -1,3 +1,5 @@
+name: alice user workflow
+config_version: 1.0
 variables:
   # BatchRequest yielding exactly one batch
   alice_single_batch_data_batch_request:

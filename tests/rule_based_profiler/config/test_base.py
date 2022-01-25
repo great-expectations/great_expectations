@@ -206,6 +206,8 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
 def test_rule_based_profiler_config_successfully_loads_with_required_args():
     data = {
         "name": "my_RBP",
+        "class_name": "RuleBasedProfiler",
+        "module_name": "great_expectations.rule_based_profiler.rule_based_profiler",
         "config_version": 1.0,
         "rules": {
             "rule_1": {
@@ -232,6 +234,8 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
 def test_rule_based_profiler_config_successfully_loads_with_optional_args():
     data = {
         "name": "my_RBP",
+        "class_name": "RuleBasedProfiler",
+        "module_name": "great_expectations.rule_based_profiler.rule_based_profiler",
         "config_version": 1.0,
         "variables": {"foo": "bar"},
         "rules": {
@@ -276,6 +280,8 @@ def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_f
 def test_rule_based_profiler_from_commented_map():
     data = {
         "name": "my_RBP",
+        "class_name": "RuleBasedProfiler",
+        "module_name": "great_expectations.rule_based_profiler.rule_based_profiler",
         "config_version": 1.0,
         "variables": {"foo": "bar"},
         "rules": {
@@ -297,39 +303,3 @@ def test_rule_based_profiler_from_commented_map():
     commented_map = CommentedMap(data)
     config = RuleBasedProfilerConfig.from_commented_map(commented_map)
     assert all(hasattr(config, k) for k in data)
-
-
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-def test_rule_based_profiler_instantiate_class_from_config(mock_data_context):
-    config = {
-        "name": "my_RBP",
-        "config_version": 1.0,
-        "variables": {"foo": "bar"},
-        "rules": {
-            "rule_1": {
-                "name": "rule_1",
-                "domain_builder": {"class_name": "DomainBuilder"},
-                "parameter_builders": [
-                    {"class_name": "ParameterBuilder", "name": "my_parameter"}
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "ExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                    }
-                ],
-            },
-        },
-    }
-    # profiler = Profiler(**config)
-    profiler = instantiate_class_from_config(
-        config=config,
-        runtime_environment={"data_context": mock_data_context},
-        config_defaults={
-            "class_name": "Profiler",
-            "module_name": "great_expectations.rule_based_profiler.profiler",
-        },
-    )
-    assert isinstance(profiler, RuleBasedProfiler)
-    print(profiler.__dict__)
-    assert False

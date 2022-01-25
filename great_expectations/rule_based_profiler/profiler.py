@@ -11,6 +11,7 @@ from great_expectations.rule_based_profiler.config.base import (
     ExpectationConfigurationBuilderConfig,
     ParameterBuilderConfig,
     RuleConfig,
+    ruleConfigSchema,
 )
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
@@ -125,6 +126,14 @@ class RuleBasedProfiler:
         self._data_context = data_context
         self._variables = variables or {}
         self._rules = []
+
+        # Necessary for citation
+        self._profiler_config = {
+            "name": name,
+            "config_version": config_version,
+            "rules": rules,
+            "variables": variables,
+        }
 
         for rule_name, rule_config in rules.items():
             # Config is validated through schema but do a sanity check

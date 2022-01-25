@@ -135,7 +135,7 @@ def test_profile_includes_citations(
     profiler_config: dict = yaml.load(yaml_config)
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        profiler_config=profiler_config,
+        **profiler_config,
         data_context=data_context,
     )
 
@@ -162,7 +162,7 @@ def test_profile_excludes_citations(
     profiler_config: dict = yaml.load(yaml_config)
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        profiler_config=profiler_config,
+        **profiler_config,
         data_context=data_context,
     )
 
