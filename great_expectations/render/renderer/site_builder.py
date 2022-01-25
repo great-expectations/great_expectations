@@ -681,7 +681,7 @@ class DefaultSiteIndexBuilder:
         )
         validation_playground = CallToActionButton(
             "How to Validate Data",
-            "https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_validate_data",
+            "https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint",
         )
         customize_data_docs = CallToActionButton(
             "How to Customize Data Docs",
