@@ -261,7 +261,7 @@ class RuleBasedProfilerConfigSchema(NotNullSchema):
     module_name = fields.String(
         required=False,
         all_none=True,
-        missing="great_expectations.rule_based_profiler.rule_based_profiler",
+        missing="great_expectations.rule_based_profiler",
     )
     name = fields.String(required=True)
     config_version = fields.Float(

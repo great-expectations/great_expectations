@@ -203,7 +203,7 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
     data = {
         "name": "my_RBP",
         "class_name": "RuleBasedProfiler",
-        "module_name": "great_expectations.rule_based_profiler.rule_based_profiler",
+        "module_name": "great_expectations.rule_based_profiler",
         "config_version": 1.0,
         "rules": {
             "rule_1": {
@@ -231,7 +231,7 @@ def test_rule_based_profiler_config_successfully_loads_with_optional_args():
     data = {
         "name": "my_RBP",
         "class_name": "RuleBasedProfiler",
-        "module_name": "great_expectations.rule_based_profiler.rule_based_profiler",
+        "module_name": "great_expectations.rule_based_profiler",
         "config_version": 1.0,
         "variables": {"foo": "bar"},
         "rules": {
@@ -277,7 +277,7 @@ def test_rule_based_profiler_from_commented_map():
     data = {
         "name": "my_RBP",
         "class_name": "RuleBasedProfiler",
-        "module_name": "great_expectations.rule_based_profiler.rule_based_profiler",
+        "module_name": "great_expectations.rule_based_profiler",
         "config_version": 1.0,
         "variables": {"foo": "bar"},
         "rules": {

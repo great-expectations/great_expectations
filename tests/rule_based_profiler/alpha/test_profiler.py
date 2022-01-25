@@ -134,6 +134,8 @@ def test_profile_includes_citations(
 
     # Instantiate Profiler
     profiler_config = yaml.load(yaml_config)
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
     profiler_config.pop("class_name")
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
@@ -162,6 +164,8 @@ def test_profile_excludes_citations(
 
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
     profiler_config.pop("class_name")
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
