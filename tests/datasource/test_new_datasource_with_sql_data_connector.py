@@ -505,19 +505,20 @@ tables:
 def test_basic_instantiation_with_bigquery_creds(sa, empty_data_context):
     context = empty_data_context
     my_data_source = instantiate_class_from_config(
+        # private key is valid but useless
         config={
             "connection_string": "bigquery://project/dataset",
             "credentials_info": {
                 "type": "service_account",
-                "project_id": "<PROJECT_ID",
-                "private_key_id": "<PRIVATE_KEY_ID>",
-                "private_key": "-----BEGIN PRIVATE KEY-----\n<PKEY>\n-----END PRIVATE KEY-----\n",
-                "client_email": "<EMAIL>",
-                "client_id": "<CLIENT_ID",
+                "project_id": "ge_project_id",
+                "private_key_id": "id1",
+                "private_key": "-----BEGIN OPENSSH PRIVATE KEY-----\n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\n-----END OPENSSH PRIVATE KEY-----",
+                "client_email": "email@googl.com",
+                "client_id": "1234567890abcdef",
                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                 "token_uri": "https://oauth2.googleapis.com/token",
                 "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/testme%40<PROJECT>.iam.gserviceaccount.com",
+                "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/testme%40proyecto.iam.gserviceaccount.com",
             },
         },
         config_defaults={
@@ -527,17 +528,18 @@ def test_basic_instantiation_with_bigquery_creds(sa, empty_data_context):
         runtime_environment={"name": "my_sql_datasource"},
     )
     print(my_data_source)
+    # private key is valid but useless
     assert my_data_source.credentials_info == {
         "type": "service_account",
-        "project_id": "<PROJECT_ID",
-        "private_key_id": "<PRIVATE_KEY_ID>",
-        "private_key": "-----BEGIN PRIVATE KEY-----\n<PKEY>\n-----END PRIVATE KEY-----\n",
-        "client_email": "<EMAIL>",
-        "client_id": "<CLIENT_ID",
+        "project_id": "ge_project_id",
+        "private_key_id": "id1",
+        "private_key": "-----BEGIN OPENSSH PRIVATE KEY-----\n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\n-----END OPENSSH PRIVATE KEY-----",
+        "client_email": "email@googl.com",
+        "client_id": "1234567890abcdef",
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
         "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/testme%40<PROJECT>.iam.gserviceaccount.com",
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/testme%40proyecto.iam.gserviceaccount.com",
     }
 
 
