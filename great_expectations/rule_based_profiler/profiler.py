@@ -126,16 +126,23 @@ class RuleBasedProfiler:
         self._config_version = config_version
         self._data_context = data_context
         self._variables = variables or {}
-        self._rules = []
+        self._rules = self._init_rules(rules, variables, data_context)
 
-        # Necessary for citation
-        self._profiler_config = {
+        # Necessary to annotate ExpectationSuite during `profile()`
+        self._citation = {
             "name": name,
             "config_version": config_version,
             "rules": rules,
             "variables": variables,
         }
 
+    def _init_rules(
+        self,
+        rules: Dict[str, RuleConfig],
+        variables: Dict[str, Any],
+        data_context: Optional["DataContext"],
+    ) -> List[Rule]:
+        resulting_rules = []
         for rule_name, rule_config in rules.items():
             # Config is validated through schema but do a sanity check
             for attr in (
@@ -204,7 +211,7 @@ class RuleBasedProfiler:
             )
 
             # Compile previous steps and package into a Rule object
-            self._rules.append(
+            resulting_rules.append(
                 Rule(
                     name=rule_name,
                     domain_builder=domain_builder,
@@ -213,6 +220,8 @@ class RuleBasedProfiler:
                     variables=_variables,
                 )
             )
+
+        return resulting_rules
 
     def profile(
         self,
@@ -239,7 +248,7 @@ class RuleBasedProfiler:
         if include_citation:
             expectation_suite.add_citation(
                 comment="Suite created by Rule-Based Profiler with the configuration included.",
-                profiler_config=self._profiler_config,
+                profiler_config=self._citation,
             )
 
         rule: Rule
