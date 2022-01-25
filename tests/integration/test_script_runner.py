@@ -370,6 +370,7 @@ cloud_bigquery_tests = [
     {
         "user_flow_script": "tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "extra_backend_dependencies": BackendDependencies.BIGQUERY,
     },
 ]
 
@@ -475,14 +476,14 @@ cloud_redshift_tests = [
 ]
 
 # populate docs_test_matrix with sub-lists
-docs_test_matrix += local_tests
-docs_test_matrix += dockerized_db_tests
-docs_test_matrix += cloud_snowflake_tests
-docs_test_matrix += cloud_gcp_tests
+# docs_test_matrix += local_tests
+# docs_test_matrix += dockerized_db_tests
+# docs_test_matrix += cloud_snowflake_tests
+# docs_test_matrix += cloud_gcp_tests
 docs_test_matrix += cloud_bigquery_tests
-docs_test_matrix += cloud_azure_tests
-docs_test_matrix += cloud_s3_tests
-docs_test_matrix += cloud_redshift_tests
+# docs_test_matrix += cloud_azure_tests
+# docs_test_matrix += cloud_s3_tests
+# docs_test_matrix += cloud_redshift_tests
 
 integration_test_matrix = [
     {

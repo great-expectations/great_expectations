@@ -143,6 +143,7 @@ stages:
             # AWS credentials
             AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
             # GCP credentials
+            # <TODO> THIS NEEDS TO BE RECONCILED INTO SAME PROJECT
             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
             GCP_PROJECT: $(GCP_PROJECT)
             GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)

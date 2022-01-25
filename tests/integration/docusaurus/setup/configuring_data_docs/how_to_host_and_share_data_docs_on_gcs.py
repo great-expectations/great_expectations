@@ -28,10 +28,10 @@ create_data_docs_directory = """
 gsutil mb -p <YOUR GCP PROJECT NAME> -l US-EAST1 -b on gs://<YOUR GCS BUCKET NAME>/
 """
 create_data_docs_directory = create_data_docs_directory.replace(
-    "<YOUR GCP PROJECT NAME>", "superconductive-internal"
+    "<YOUR GCP PROJECT NAME>", "ge-oss-ci-cd"
 )
 create_data_docs_directory = create_data_docs_directory.replace(
-    "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs"
+    "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs" 
 )
 
 result = subprocess.run(
@@ -145,7 +145,7 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 """
 data_docs_site_yaml = data_docs_site_yaml.replace(
-    "<YOUR GCP PROJECT NAME>", "superconductive-internal"
+    "<YOUR GCP PROJECT NAME>", "ge-oss-ci-cd"
 )
 data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs"

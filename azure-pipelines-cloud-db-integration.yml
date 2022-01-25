@@ -50,6 +50,7 @@ stages:
                 --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
             env:
+              # <TODO> This needs to be reconciled into same project
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
               GE_TEST_BIGQUERY_PROJECT: $(GE_TEST_BIGQUERY_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
