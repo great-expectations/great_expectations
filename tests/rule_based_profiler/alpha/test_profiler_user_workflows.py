@@ -82,6 +82,7 @@ def test_alice_profiler_user_workflow_single_batch(
 
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
+    profiler_config.pop("class_name")
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
         **profiler_config,
@@ -188,6 +189,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
 
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
+    profiler_config.pop("class_name")
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
         **profiler_config,
@@ -229,6 +231,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
 
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
+    profiler_config.pop("class_name")
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
         **profiler_config,

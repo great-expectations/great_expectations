@@ -349,6 +349,8 @@ def alice_columnar_table_single_batch(empty_data_context):
     sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
 
     profiler_config: dict = yaml.load(verbose_profiler_config)
+    profiler_config.pop("class_name")
+
     expected_expectation_suite.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
         profiler_config=profiler_config,
@@ -1146,6 +1148,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         )
 
     profiler_config: dict = yaml.load(verbose_profiler_config)
+    profiler_config.pop("class_name")
     expected_expectation_suite_oneshot_sampling_method.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
         profiler_config=profiler_config,
