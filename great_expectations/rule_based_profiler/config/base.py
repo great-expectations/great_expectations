@@ -220,14 +220,18 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     def __init__(
         self,
         name: str,
+        class_name: str,
         config_version: float,
         rules: Dict[str, RuleConfig],
+        module_name: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
         **kwargs
     ):
         self.name = name
+        self.class_name = class_name
         self.config_version = config_version
+        self.module_name = module_name
         self.rules = rules
         self.variables = variables
         for k, v in kwargs.items():
@@ -253,6 +257,12 @@ class RuleBasedProfilerConfigSchema(NotNullSchema):
 
     __config_class__ = RuleBasedProfilerConfig
 
+    class_name = fields.String(required=True)
+    module_name = fields.String(
+        required=False,
+        all_none=True,
+        missing="great_expectations.rule_based_profiler.rule_based_profiler",
+    )
     name = fields.String(required=True)
     config_version = fields.Float(
         required=True,

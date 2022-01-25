@@ -5,7 +5,7 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
-from great_expectations.rule_based_profiler.profiler import Profiler
+from great_expectations.rule_based_profiler.profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 yaml = YAML()
@@ -134,7 +134,7 @@ def test_profile_includes_citations(
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
 
-    profiler: Profiler = Profiler(
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
         profiler_config=profiler_config,
         data_context=data_context,
     )
@@ -161,7 +161,7 @@ def test_profile_excludes_citations(
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
 
-    profiler: Profiler = Profiler(
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
         profiler_config=profiler_config,
         data_context=data_context,
     )

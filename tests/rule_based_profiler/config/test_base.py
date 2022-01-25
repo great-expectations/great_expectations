@@ -18,7 +18,7 @@ from great_expectations.rule_based_profiler.config import (
     RuleConfig,
     RuleConfigSchema,
 )
-from great_expectations.rule_based_profiler.profiler import Profiler
+from great_expectations.rule_based_profiler.profiler import RuleBasedProfiler
 
 
 def test_not_null_schema_raises_error_with_improperly_implemented_subclass():
@@ -330,6 +330,6 @@ def test_rule_based_profiler_instantiate_class_from_config(mock_data_context):
             "module_name": "great_expectations.rule_based_profiler.profiler",
         },
     )
-    assert isinstance(profiler, Profiler)
+    assert isinstance(profiler, RuleBasedProfiler)
     print(profiler.__dict__)
     assert False
