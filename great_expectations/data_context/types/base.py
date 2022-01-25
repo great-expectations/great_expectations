@@ -25,8 +25,12 @@ from great_expectations.marshmallow__shade import (
 )
 from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.types.base import SerializableDotDict
 from great_expectations.types.configurations import ClassConfigSchema
-from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    filter_properties_dict,
+)
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -2105,6 +2109,11 @@ class CheckpointConfigSchema(Schema):
             if key in data and data[key] is None:
                 data.pop(key)
         return data
+
+
+class Attributes(SerializableDotDict):
+    def to_json_dict(self) -> dict:
+        return convert_to_json_serializable(data=dict(self))
 
 
 class CheckpointConfig(BaseYamlConfig):

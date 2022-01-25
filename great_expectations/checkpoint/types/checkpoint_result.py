@@ -7,7 +7,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
-from great_expectations.data_context.types.base import CheckpointConfigSchema
+from great_expectations.data_context.types.base import Attributes
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -53,7 +53,7 @@ class CheckpointResult(DictDot):
             ValidationResultIdentifier,
             Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
         ],
-        checkpoint_config: dict,
+        checkpoint_config: Attributes,
         success: Optional[bool] = None,
     ) -> None:
         self._run_id = run_id
@@ -87,7 +87,7 @@ class CheckpointResult(DictDot):
         return self.checkpoint_config.name
 
     @property
-    def checkpoint_config(self) -> dict:
+    def checkpoint_config(self) -> Attributes:
         return self._checkpoint_config
 
     @property
@@ -281,7 +281,9 @@ class CheckpointResult(DictDot):
         return self._validation_statistics
 
     def to_json_dict(self) -> dict:
-        return checkpointResultSchema.dump(self)
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
     def __deepcopy__(self, memo):
         cls = self.__class__
@@ -304,9 +306,9 @@ class CheckpointResultSchema(Schema):
     # JC: I think this needs to be changed to be an instance of a new type called CheckpointResult,
     # which would include the top-level keys run_id, config, name, and a list of results.
     run_id = fields.Nested(RunIdentifierSchema)
-    run_results = fields.Dict()
-    checkpoint_config = fields.Nested(CheckpointConfigSchema)
-    success = fields.Bool()
+    run_results = fields.Dict(required=False, allow_none=True)
+    checkpoint_config = fields.Dict(required=False, allow_none=True)
+    success = fields.Boolean(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @pre_dump

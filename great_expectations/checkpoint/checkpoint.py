@@ -31,6 +31,7 @@ from great_expectations.core.util import (
 )
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import (
+    Attributes,
     CheckpointConfig,
     object_to_yaml_str,
 )
@@ -89,10 +90,6 @@ class Checkpoint:
         ge_cloud_id: Optional[UUID] = None,
         expectation_suite_ge_cloud_id: Optional[UUID] = None,
     ):
-        self._name = name
-
-        self._config_version = config_version
-
         # Note the gross typechecking to avoid a circular import
         if "DataContext" not in str(type(data_context)):
             raise TypeError("A Checkpoint requires a valid DataContext")
@@ -100,12 +97,6 @@ class Checkpoint:
         self._usage_statistics_handler = data_context._usage_statistics_handler
 
         self._data_context = data_context
-
-        self._action_list = action_list
-
-        self._validations = validations
-
-        self._ge_cloud_id = ge_cloud_id
 
         config_kwargs: dict = {
             "name": name,
@@ -124,8 +115,9 @@ class Checkpoint:
             # Next two fields are for LegacyCheckpoint configuration
             "validation_operator_name": validation_operator_name,
             "batches": batches,
-        }
-        self._config_kwargs = config_kwargs
+        } or {}
+
+        self._config_kwargs = Attributes(config_kwargs)
 
     # TODO: Add eval param processing using new TBD parser syntax and updated EvaluationParameterParser and
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
@@ -177,9 +169,11 @@ class Checkpoint:
             "profilers": profilers or [],
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
         }
+
         substituted_runtime_config: dict = self.get_substituted_config(
             runtime_kwargs=runtime_kwargs
         )
+
         run_name_template = substituted_runtime_config.get("run_name_template")
 
         batch_request = substituted_runtime_config.get("batch_request")
@@ -251,16 +245,16 @@ class Checkpoint:
         if template_name:
             config_kwargs["template_name"] = template_name
 
-        substituted_runtime_config: dict = self.get_substituted_template(
+        substituted_runtime_config: dict = self._get_substituted_template(
             source_config=config_kwargs
         )
-        substituted_runtime_config = self.get_substituted_runtime_kwargs(
+        substituted_runtime_config = self._get_substituted_runtime_kwargs(
             source_config=substituted_runtime_config, runtime_kwargs=runtime_kwargs
         )
 
         return substituted_runtime_config
 
-    def get_substituted_template(
+    def _get_substituted_template(
         self,
         source_config: dict,
     ) -> dict:
@@ -279,7 +273,7 @@ class Checkpoint:
                     f"'{source_config}' (ver. {source_config['config_version']}. Checkpoints can only use templates with the same config_version."
                 )
 
-            substituted_template_config: dict = self.get_substituted_template(
+            substituted_template_config: dict = self._get_substituted_template(
                 source_config=template_config
             )
             substituted_config = substitute_template_config(
@@ -293,7 +287,7 @@ class Checkpoint:
 
         return self._substitute_config_variables(config=substituted_config)
 
-    def get_substituted_runtime_kwargs(
+    def _get_substituted_runtime_kwargs(
         self,
         source_config: dict,
         runtime_kwargs: Optional[dict] = None,
@@ -516,28 +510,28 @@ is run), with each validation having its own defined "action_list" attribute.
         raise ValueError(f"Unknown format {format} in LegacyCheckpoint.get_config.")
 
     @property
-    def config_kwargs(self) -> dict:
+    def config_kwargs(self) -> Attributes:
         return self._config_kwargs
 
     @property
     def name(self) -> str:
-        return self._name
+        return self.config_kwargs.name
 
     @property
     def config_version(self) -> float:
-        return self._config_version
+        return self.config_kwargs.config_version
 
     @property
     def action_list(self) -> List[Dict]:
-        return self._action_list
+        return self.config_kwargs.action_list
 
     @property
     def validations(self) -> List[Dict]:
-        return self._validations
+        return self.config_kwargs.validations
 
     @property
     def ge_cloud_id(self) -> UUID:
-        return self._ge_cloud_id
+        return self.config_kwargs.ge_cloud_id
 
     @property
     def data_context(self) -> "DataContext":  # noqa: F821

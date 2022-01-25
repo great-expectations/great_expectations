@@ -7,8 +7,9 @@ from ruamel.yaml.comments import CommentedMap
 from great_expectations.checkpoint.util import (
     batch_request_contains_batch_data,
     batch_request_in_validations_contains_batch_data,
+    get_batch_request_as_dict,
+    get_validations_with_batch_request_as_dict,
 )
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     checkpointConfigSchema,
@@ -136,20 +137,18 @@ class SimpleCheckpointConfigurator:
         if batch_request_contains_batch_data(batch_request=batch_request):
             config_kwargs.pop("batch_request", None)
         else:
-            if isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
-                config_kwargs["batch_request"] = batch_request.to_json_dict()
+            config_kwargs["batch_request"] = get_batch_request_as_dict(
+                batch_request=batch_request
+            )
 
         # DataFrames shouldn't be saved to CheckpointStore
         validations = config_kwargs.get("validations")
         if batch_request_in_validations_contains_batch_data(validations=validations):
             config_kwargs.pop("validations", [])
         else:
-            if validations is not None:
-                for idx, val in enumerate(validations):
-                    if isinstance(
-                        val["batch_request"], (BatchRequest, RuntimeBatchRequest)
-                    ):
-                        val["batch_request"] = val["batch_request"].to_json_dict()
+            config_kwargs["validations"] = get_validations_with_batch_request_as_dict(
+                validations=validations
+            )
 
         specific_config_kwargs_overrides: dict = {
             "config_version": 1.0,

@@ -42,7 +42,7 @@ def test_checkpoint_with_no_config_version_has_no_action_list(empty_data_context
     checkpoint = Checkpoint(
         name="foo", data_context=empty_data_context, config_version=None
     )
-    assert checkpoint.action_list is None
+    assert checkpoint.action_list == []
 
 
 def test_checkpoint_with_config_version_has_action_list(empty_data_context):

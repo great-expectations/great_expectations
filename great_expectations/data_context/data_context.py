@@ -3551,9 +3551,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         checkpoint_config = checkpoint_config.to_json_dict()
         checkpoint_config.update({"name": checkpoint_name})
 
-        checkpoint_class_args: dict = copy.deepcopy(checkpoint_config)
-        checkpoint_class_args.pop("module_name")
-        checkpoint_class_args.pop("class_name")
+        checkpoint_class_args: dict = {
+            key: value
+            for key, value in checkpoint_config.items()
+            if key not in ["module_name", "class_name"]
+        }
 
         if class_name == "Checkpoint":
             instantiated_class = Checkpoint(data_context=self, **checkpoint_class_args)
