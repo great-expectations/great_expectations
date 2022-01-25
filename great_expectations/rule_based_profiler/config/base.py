@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -73,7 +73,7 @@ class DomainBuilderConfig(DictDot):
         self,
         class_name: str,
         module_name: Optional[str] = None,
-        batch_request: Optional[Dict[str, Any]] = None,
+        batch_request: Optional[Union[dict, str]] = None,
         **kwargs
     ):
         self.class_name = class_name
@@ -98,7 +98,7 @@ class DomainBuilderConfigSchema(NotNullSchema):
         all_none=True,
         missing="great_expectations.rule_based_profiler.domain_builder",
     )
-    batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
+    batch_request = fields.Raw(required=False, allow_none=True)
 
 
 class ParameterBuilderConfig(DictDot):
@@ -107,7 +107,7 @@ class ParameterBuilderConfig(DictDot):
         name: str,
         class_name: str,
         module_name: Optional[str] = None,
-        batch_request: Optional[Dict[str, Any]] = None,
+        batch_request: Optional[Union[dict, str]] = None,
         **kwargs
     ):
         self.name = name
@@ -134,7 +134,7 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         all_none=True,
         missing="great_expectations.rule_based_profiler.parameter_builder",
     )
-    batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
+    batch_request = fields.Raw(required=False, allow_none=True)
 
 
 class ExpectationConfigurationBuilderConfig(DictDot):

@@ -24,7 +24,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
 
     def __init__(
         self,
-        parameter_name: str,
+        name: str,
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
@@ -48,7 +48,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         super().__init__(
-            parameter_name=parameter_name,
+            name=name,
             data_context=data_context,
             batch_request=batch_request,
         )

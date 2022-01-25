@@ -19,7 +19,7 @@ rules:
     domain_builder:
       class_name: TableDomainBuilder
     parameter_builders:
-      - parameter_name: row_count_range
+      - name: row_count_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_2018_thru_nov_2020_monthly_tripdata_batch_request
         metric_name: table.row_count

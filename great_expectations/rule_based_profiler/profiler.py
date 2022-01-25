@@ -192,12 +192,11 @@ class RuleBasedProfiler:
         domain_builder_config: CommentedMap = rule_config["domain_builder"]
 
         # Validate config object before instantiation
-        domainBuilderConfigSchema.validate_schema(domain_builder_config)
-        # domain_builder_config = domainBuilderConfigSchema.load(domain_builder_config)
-        # config_dict: dict = domainBuilderConfigSchema.dump(domain_builder_config)
+        domain_builder_config = domainBuilderConfigSchema.load(domain_builder_config)
+        config_dict: dict = domainBuilderConfigSchema.dump(domain_builder_config)
 
         domain_builder: DomainBuilder = instantiate_class_from_config(
-            config=domain_builder_config,
+            config=config_dict,
             runtime_environment={"data_context": data_context},
             config_defaults={
                 "module_name": "great_expectations.rule_based_profiler.domain_builder"

@@ -21,7 +21,7 @@ rules:
     domain_builder:
       class_name: TableDomainBuilder
     parameter_builders:
-      - parameter_name: row_count_range
+      - name: row_count_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         metric_name: table.row_count
@@ -51,7 +51,7 @@ rules:
       semantic_types:
         - numeric
     parameter_builders:
-      - parameter_name: min_range
+      - name: min_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         metric_name: column.min
@@ -59,7 +59,7 @@ rules:
         sampling_method: $variables.sampling_method
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
-      - parameter_name: max_range
+      - name: max_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         metric_name: column.max

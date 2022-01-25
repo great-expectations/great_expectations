@@ -46,7 +46,7 @@ class ParameterBuilder(ABC):
 
         ```
         parameter_builders:
-          - parameter_name: my_parameter
+          - name: my_parameter
             class_name: MetricMultiBatchParameterBuilder
             metric_name: column.mean
         ```
@@ -54,7 +54,7 @@ class ParameterBuilder(ABC):
 
     def __init__(
         self,
-        parameter_name: str,
+        name: str,
         data_context: Optional["DataContext"] = None,  # noqa: F821
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
@@ -69,7 +69,7 @@ class ParameterBuilder(ABC):
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
 
-        self._parameter_name = parameter_name
+        self._parameter_name = name
         self._data_context = data_context
         self._batch_request = batch_request
 
