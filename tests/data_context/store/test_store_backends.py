@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-import uuid
 from collections import OrderedDict
 from unittest.mock import patch
 
@@ -11,7 +10,6 @@ import pytest
 from moto import mock_s3
 
 import tests.test_utils as test_utils
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import DataContext
@@ -1353,7 +1351,7 @@ def test_GeCloudStoreBackend():
                                 ("class_name", "SimpleCheckpoint"),
                                 ("run_name_template", None),
                                 ("expectation_suite_name", None),
-                                ("batch_request", None),
+                                ("batch_request", {}),
                                 ("action_list", []),
                                 ("evaluation_parameters", {}),
                                 ("runtime_configuration", {}),
