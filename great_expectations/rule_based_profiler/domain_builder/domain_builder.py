@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
 from great_expectations.rule_based_profiler.util import (
@@ -21,7 +20,7 @@ class DomainBuilder(ABC):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: "DataContext",
         batch_request: Optional[Union[dict, str]] = None,
     ):
         """
@@ -102,5 +101,5 @@ class DomainBuilder(ABC):
         return batch_ids[0]
 
     @property
-    def data_context(self) -> DataContext:
+    def data_context(self) -> "DataContext":
         return self._data_context

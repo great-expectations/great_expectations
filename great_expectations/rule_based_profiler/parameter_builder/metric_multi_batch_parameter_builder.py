@@ -1,7 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
@@ -30,7 +29,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
-        data_context: Optional[DataContext] = None,
+        data_context: Optional["DataContext"] = None,
         batch_request: Optional[Union[dict, str]] = None,
     ):
         """
