@@ -206,7 +206,8 @@ class RuleConfigSchema(NotNullSchema):
     domain_builder = fields.Nested(DomainBuilderConfigSchema, required=True)
     parameter_builders = fields.List(
         cls_or_instance=fields.Nested(ParameterBuilderConfigSchema, required=True),
-        required=True,
+        required=False,
+        allow_none=True,
     )
     expectation_configuration_builders = fields.List(
         cls_or_instance=fields.Nested(

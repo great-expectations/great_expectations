@@ -193,7 +193,6 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
         for attr in (
             "name",
             "domain_builder",
-            "parameter_builders",
             "expectation_configuration_builders",
         )
     )
