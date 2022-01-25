@@ -116,7 +116,10 @@ class RuleBasedProfiler:
         These will be used to define profiler computation patterns.
 
         Args:
-            profiler_config: Variables and Rules configuration as a dictionary
+            name: The name of the RBP instance
+            config_version: The version of the RBP (currently only 1.0 is supported)
+            rules: A set of RuleConfigs, each of which contains its own DomainBuilder, ParameterBuilders, and ExpectationConfigurationBuilders
+            variables: Any variables to be substituted within the rules
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         self._name = name

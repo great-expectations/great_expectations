@@ -69,7 +69,9 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
-        data_context: Optional["DataContext"] = None,
+        data_context: Optional[
+            "DataContext"
+        ] = None,  # something Alex said (apply everywhere)
         batch_request: Optional[Union[str, dict]] = None,
     ):
         """
