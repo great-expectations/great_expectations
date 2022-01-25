@@ -7,6 +7,8 @@ profiler_config = """
 # This profiler is meant to be used on the NYC taxi data (yellow_tripdata_sample_<YEAR>-<MONTH>.csv)
 # located in tests/test_sets/taxi_yellow_tripdata_samples/
 
+name: my profiler
+
 variables:
   false_positive_rate: 0.01
   mostly: 1.0
@@ -102,7 +104,7 @@ data_context = DataContext()
 # Instantiate Profiler
 full_profiler_config_dict: dict = yaml.load(profiler_config)
 profiler: RuleBasedProfiler = RuleBasedProfiler(
-    profiler_config=full_profiler_config_dict,
+    **full_profiler_config_dict,
     data_context=data_context,
 )
 
