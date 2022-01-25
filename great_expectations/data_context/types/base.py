@@ -4,7 +4,7 @@ import itertools
 import json
 import logging
 import uuid
-from typing import Any, Dict, List, MutableMapping, Optional, Tuple, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Union
 from uuid import UUID
 
 from ruamel.yaml import YAML
@@ -12,14 +12,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchRequest,
-    delete_runtime_parameters_batch_data_references_from_config,
-    get_batch_request_dict,
-    get_runtime_parameters_batch_data_references_from_config,
-    restore_runtime_parameters_batch_data_references_into_config,
-)
-from great_expectations.core.util import convert_to_json_serializable, nested_update
+from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -27,11 +20,17 @@ from great_expectations.marshmallow__shade import (
     fields,
     post_dump,
     post_load,
+    pre_dump,
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.types.base import SerializableDotDict
 from great_expectations.types.configurations import ClassConfigSchema
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    filter_properties_dict,
+)
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -113,7 +112,16 @@ class BaseYamlConfig(SerializableDictDot):
         """
         :returns a YAML string containing the project configuration
         """
-        return object_to_yaml_str(self.commented_map)
+        return object_to_yaml_str(obj=self.commented_map)
+
+    def to_raw_dict(self) -> dict:
+        """
+        :returns a raw dict containing the project configuration
+        """
+        key: str
+        commented_map: CommentedMap = self.commented_map
+        # return {key: commented_map[key] for key in commented_map}
+        return {key: self[key] for key in commented_map}
 
     def to_json_dict(self) -> dict:
         """
@@ -2013,6 +2021,8 @@ class CheckpointConfigSchema(Schema):
         "slack_webhook",
         "notify_on",
         "notify_with",
+        "validation_operator_name",
+        "batches",
     ]
 
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
@@ -2024,7 +2034,9 @@ class CheckpointConfigSchema(Schema):
         allow_none=True,
     )
     template_name = fields.String(required=False, allow_none=True)
-    module_name = fields.String(required=False, missing="great_expectations.checkpoint")
+    module_name = fields.String(
+        required=False, allow_none=True, missing="great_expectations.checkpoint"
+    )
     class_name = fields.Str(required=False, allow_none=True)
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
@@ -2081,6 +2093,15 @@ class CheckpointConfigSchema(Schema):
                 )
 
     # noinspection PyUnusedLocal
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        data = copy.deepcopy(data)
+        for key, value in data.items():
+            data[key] = convert_to_json_serializable(data=value)
+
+        return data
+
+    # noinspection PyUnusedLocal
     @post_dump
     def remove_keys_if_none(self, data, **kwargs):
         data = copy.deepcopy(data)
@@ -2089,19 +2110,10 @@ class CheckpointConfigSchema(Schema):
                 data.pop(key)
         return data
 
-    def dump(self, obj: Any, *, many: Optional[bool] = None) -> dict:
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=obj)
-        delete_runtime_parameters_batch_data_references_from_config(config=obj)
-        data: dict = super().dump(obj=obj, many=many)
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=obj, batch_data_references=batch_data_references
-        )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=data, batch_data_references=batch_data_references
-        )
-        return data
+
+class Attributes(SerializableDotDict):
+    def to_json_dict(self) -> dict:
+        return convert_to_json_serializable(data=dict(self))
 
 
 class CheckpointConfig(BaseYamlConfig):
@@ -2117,7 +2129,7 @@ class CheckpointConfig(BaseYamlConfig):
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[dict, BatchRequest]] = None,
+        batch_request: Optional[dict] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -2142,16 +2154,12 @@ class CheckpointConfig(BaseYamlConfig):
             if batches is not None and isinstance(batches, list):
                 self.batches = batches
         else:
-            batch_request, validations = get_batch_request_dict(
-                batch_request, validations
-            )
-
             class_name = class_name or "Checkpoint"
             self._template_name = template_name
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
             self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
-            self._batch_request = batch_request
+            self._batch_request = batch_request or {}
             self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
@@ -2168,132 +2176,6 @@ class CheckpointConfig(BaseYamlConfig):
         self._class_name = class_name
 
         super().__init__(commented_map=commented_map)
-
-    def update(
-        self,
-        other_config: Optional["CheckpointConfig"] = None,
-        runtime_kwargs: Optional[dict] = None,
-    ):
-        assert other_config is not None or runtime_kwargs is not None, (
-            "other_config and runtime_kwargs cannot both " "be None"
-        )
-
-        if other_config is not None:
-            # replace
-            if other_config.name is not None:
-                self.name = other_config.name
-            if other_config.module_name is not None:
-                self.module_name = other_config.module_name
-            if other_config.class_name is not None:
-                self.class_name = other_config.class_name
-            if other_config.run_name_template is not None:
-                self.run_name_template = other_config.run_name_template
-            if other_config.expectation_suite_name is not None:
-                self.expectation_suite_name = other_config.expectation_suite_name
-            if other_config.expectation_suite_ge_cloud_id is not None:
-                self.expectation_suite_ge_cloud_id = (
-                    other_config.expectation_suite_ge_cloud_id
-                )
-            # update
-            if other_config.batch_request is not None:
-                if getattr(self, "batch_request", None) is None:
-                    batch_request = {}
-                else:
-                    batch_request = self.batch_request
-
-                other_batch_request = other_config.batch_request
-
-                updated_batch_request = nested_update(
-                    batch_request,
-                    other_batch_request,
-                )
-                self._batch_request = updated_batch_request
-            if other_config.action_list is not None:
-                self.action_list = self.get_updated_action_list(
-                    base_action_list=self.action_list,
-                    other_action_list=other_config.action_list,
-                )
-            if other_config.evaluation_parameters is not None:
-                nested_update(
-                    self.evaluation_parameters,
-                    other_config.evaluation_parameters,
-                )
-            if other_config.runtime_configuration is not None:
-                nested_update(
-                    self.runtime_configuration,
-                    other_config.runtime_configuration,
-                )
-            if other_config.validations is not None:
-                self.validations.extend(
-                    filter(
-                        lambda v: v not in self.validations, other_config.validations
-                    )
-                )
-            if other_config.profilers is not None:
-                self.profilers.extend(other_config.profilers)
-
-        if runtime_kwargs is not None and any(runtime_kwargs.values()):
-            # replace
-            if runtime_kwargs.get("template_name") is not None:
-                self.template_name = runtime_kwargs.get("template_name")
-            if runtime_kwargs.get("run_name_template") is not None:
-                self.run_name_template = runtime_kwargs.get("run_name_template")
-            if runtime_kwargs.get("expectation_suite_name") is not None:
-                self.expectation_suite_name = runtime_kwargs.get(
-                    "expectation_suite_name"
-                )
-            if runtime_kwargs.get("expectation_suite_ge_cloud_id") is not None:
-                self.expectation_suite_ge_cloud_id = runtime_kwargs.get(
-                    "expectation_suite_ge_cloud_id"
-                )
-            # update
-            if runtime_kwargs.get("batch_request") is not None:
-                batch_request = self.batch_request or {}
-                runtime_batch_request = runtime_kwargs.get("batch_request")
-                if runtime_batch_request is not None:
-                    runtime_batch_request = self._safe_copy_batch_request(
-                        batch_request=runtime_batch_request
-                    )
-                    if not isinstance(runtime_batch_request, dict):
-                        # noinspection PyUnresolvedReferences
-                        runtime_batch_request = runtime_batch_request.to_dict()
-
-                    delete_runtime_parameters_batch_data_references_from_config(
-                        config=batch_request
-                    )
-
-                    batch_request = nested_update(batch_request, runtime_batch_request)
-
-                self._batch_request = batch_request
-
-            if runtime_kwargs.get("action_list") is not None:
-                self.action_list = self.get_updated_action_list(
-                    base_action_list=self.action_list,
-                    other_action_list=runtime_kwargs.get("action_list"),
-                )
-
-            if runtime_kwargs.get("evaluation_parameters") is not None:
-                nested_update(
-                    self.evaluation_parameters,
-                    runtime_kwargs.get("evaluation_parameters"),
-                )
-
-            if runtime_kwargs.get("runtime_configuration") is not None:
-                nested_update(
-                    self.runtime_configuration,
-                    runtime_kwargs.get("runtime_configuration"),
-                )
-
-            if runtime_kwargs.get("validations") is not None:
-                self.validations.extend(
-                    filter(
-                        lambda v: v not in self.validations,
-                        runtime_kwargs.get("validations"),
-                    )
-                )
-
-            if runtime_kwargs.get("profilers") is not None:
-                self.profilers.extend(runtime_kwargs.get("profilers"))
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
@@ -2424,36 +2306,6 @@ class CheckpointConfig(BaseYamlConfig):
     def notify_with(self) -> str:
         return self._notify_with
 
-    @classmethod
-    def get_updated_action_list(
-        cls,
-        base_action_list: list,
-        other_action_list: list,
-    ) -> List[dict]:
-        base_action_list_dict = {action["name"]: action for action in base_action_list}
-
-        for other_action in other_action_list:
-            other_action_name = other_action["name"]
-            if other_action_name in base_action_list_dict:
-                if other_action["action"]:
-                    nested_update(
-                        base_action_list_dict[other_action_name],
-                        other_action,
-                        dedup=True,
-                    )
-                else:
-                    base_action_list_dict.pop(other_action_name)
-            else:
-                base_action_list_dict[other_action_name] = other_action
-
-        for other_action in other_action_list:
-            other_action_name = other_action["name"]
-            if other_action_name in base_action_list_dict:
-                if not other_action["action"]:
-                    base_action_list_dict.pop(other_action_name)
-
-        return list(base_action_list_dict.values())
-
     @property
     def evaluation_parameters(self) -> dict:
         return self._evaluation_parameters
@@ -2471,69 +2323,24 @@ class CheckpointConfig(BaseYamlConfig):
         self._runtime_configuration = value
 
     def __deepcopy__(self, memo):
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
-        delete_runtime_parameters_batch_data_references_from_config(config=self)
-
         cls = self.__class__
         result = cls.__new__(cls)
-        result._commented_map = CommentedMap()
 
         memo[id(self)] = result
-        for key, value in self.to_json_dict().items():
-            # noinspection PyArgumentList
-            value_copy = copy.deepcopy(value, memo)
+        for key, value in self.to_dict().items():
+            value_copy = safe_deep_copy(data=value, memo=memo)
             setattr(result, key, value_copy)
-
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=self, batch_data_references=batch_data_references
-        )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=result, batch_data_references=batch_data_references
-        )
 
         return result
 
     def __repr__(self) -> str:
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
-        delete_runtime_parameters_batch_data_references_from_config(config=self)
-        config: dict = self.to_json_dict()
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=self, batch_data_references=batch_data_references
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            keep_falsy_numerics=True,
+            inplace=True,
         )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=config,
-            batch_data_references=batch_data_references,
-            replace_value_with_type_string=True,
-        )
-        return json.dumps(config, indent=2)
-
-    @staticmethod
-    def _safe_copy_batch_request(
-        batch_request: Optional[Union[DictDot, dict]]
-    ) -> Optional[Union[DictDot, dict]]:
-        if batch_request is None:
-            return None
-
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(
-            config=batch_request
-        )
-        delete_runtime_parameters_batch_data_references_from_config(
-            config=batch_request
-        )
-        result = copy.deepcopy(batch_request)
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=batch_request, batch_data_references=batch_data_references
-        )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=result, batch_data_references=batch_data_references
-        )
-        return result
+        return json.dumps(json_dict, indent=2)
 
 
 class CheckpointValidationConfig(DictDot):
