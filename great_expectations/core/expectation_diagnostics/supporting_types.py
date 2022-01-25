@@ -179,6 +179,7 @@ class ExpectationDiagnosticCheckMessage(SerializableDictDot):
 class ExpectationDiagnosticMaturityMessages(SerializableDictDot):
     """A holder for ExpectationDiagnosticCheckMessages, grouping them by maturity level. Used within the ExpectationDiagnostic object."""
 
+    concept_only: List[ExpectationDiagnosticCheckMessage]
     experimental: List[ExpectationDiagnosticCheckMessage]
     beta: List[ExpectationDiagnosticCheckMessage]
     production: List[ExpectationDiagnosticCheckMessage]

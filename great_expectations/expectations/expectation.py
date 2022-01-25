@@ -33,6 +33,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
     ExecutedExpectationTestCase,
     ExpectationDescriptionDiagnostics,
+    ExpectationDiagnosticMaturityMessages,
     ExpectationErrorDiagnostics,
     ExpectationExecutionEngineDiagnostics,
     ExpectationMetricDiagnostics,
@@ -963,6 +964,16 @@ class Expectation(metaclass=MetaExpectation):
             execution_engine_diagnostics=introspected_execution_engines,
         )
 
+        maturity_checklist: ExpectationDiagnosticMaturityMessages = (
+            self._get_maturity_checklist(
+                library_metadata=library_metadata,
+                description=description_diagnostics,
+                examples=examples,
+                tests=test_results,
+                execution_engines=introspected_execution_engines,
+            )
+        )
+
         return ExpectationDiagnostics(
             library_metadata=library_metadata,
             examples=examples,
@@ -972,6 +983,7 @@ class Expectation(metaclass=MetaExpectation):
             metrics=metric_diagnostics_list,
             execution_engines=introspected_execution_engines,
             tests=test_results,
+            maturity_checklist=maturity_checklist,
             errors=[],  #!!!FIXME!!!
         )
 
@@ -1416,6 +1428,45 @@ class Expectation(metaclass=MetaExpectation):
                 augmented_library_metadata["library_metadata_passed_checks"] = True
 
         return AugmentedLibraryMetadata.from_legacy_dict(augmented_library_metadata)
+
+    def _get_maturity_checklist(
+        self,
+        library_metadata: AugmentedLibraryMetadata,
+        description: ExpectationDescriptionDiagnostics,
+        examples: List[ExpectationTestDataCases],
+        tests: List[ExpectationTestDiagnostics],
+        execution_engines: ExpectationExecutionEngineDiagnostics,
+    ) -> ExpectationDiagnosticMaturityMessages:
+        """Generate maturity checklist messages"""
+        concept_only_checks = []
+        experimental_checks = []
+        beta_checks = []
+        production_checks = []
+        checks = []
+
+        checks.append(ExpectationDiagnostics._check_library_metadata(library_metadata))
+        checks.append(ExpectationDiagnostics._check_docstring(description))
+        checks.append(ExpectationDiagnostics._check_example_cases(examples, tests))
+        checks.append(
+            ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
+                execution_engines
+            )
+        )
+        if library_metadata["maturity"] == "CONCEPT_ONLY":
+            concept_only_checks = checks
+        elif library_metadata["maturity"] == "EXPERIMENTAL":
+            experimental_checks = checks
+        elif library_metadata["maturity"] == "BETA":
+            beta_checks = checks
+        elif library_metadata["maturity"] == "PRODUCTION":
+            production_checks = checks
+
+        return ExpectationDiagnosticMaturityMessages(
+            concept_only=concept_only_checks,
+            experimental=experimental_checks,
+            beta=beta_checks,
+            production=production_checks,
+        )
 
 
 class TableExpectation(Expectation, ABC):

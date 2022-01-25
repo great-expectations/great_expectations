@@ -113,6 +113,37 @@ def test_expectation_self_check():
         "metrics": [],
         "tests": [],
         "errors": [],
+        "maturity_checklist": {
+            "beta": [],
+            "concept_only": [
+                {
+                    "doc_url": None,
+                    "message": "library_metadata object exists",
+                    "passed": False,
+                    "sub_messages": []
+                },
+                {
+                    "doc_url": None,
+                    "message": "Has a docstring, including a one-line short description",
+                    "passed": False,
+                    "sub_messages": []
+                },
+                {
+                    "doc_url": None,
+                    "message": "Has at least one positive and negative example case, and all test cases pass",
+                    "passed": False,
+                    "sub_messages": []
+                },
+                {
+                    "doc_url": None,
+                    "message": "Core logic exists and passes tests on at least one Execution Engine",
+                    "passed": True,
+                    "sub_messages": []
+                }
+            ],
+            "experimental": [],
+            "production": []
+        },
     }
 
 

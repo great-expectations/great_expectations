@@ -104,16 +104,7 @@ edr = ExpectationDiagnostics(
     },
     tests=[],
     errors=[],
-)
-
-
-def test_ExpectationDiagnosticReport():
-
-    print(edr)
-
-
-def test__convert_checks_into_output_message():
-    checks = ExpectationDiagnosticMaturityMessages(
+    maturity_checklist=ExpectationDiagnosticMaturityMessages(
         experimental=[
             ExpectationDiagnosticCheckMessage(
                 message="AAA",
@@ -125,6 +116,7 @@ def test__convert_checks_into_output_message():
             ),
         ],
         beta=[],
+        concept_only=[],
         production=[
             ExpectationDiagnosticCheckMessage(
                 message="CCC",
@@ -142,11 +134,19 @@ def test__convert_checks_into_output_message():
             ),
         ],
     )
+)
 
+
+def test_ExpectationDiagnosticReport():
+
+    print(edr)
+
+
+def test__convert_checks_into_output_message():
     assert (
         edr._convert_checks_into_output_message(
             class_name="ExpectColumnValuesToEqualThree",
-            maturity_messages=checks,
+            maturity_messages=edr.maturity_checklist,
         )
         == """\
 Completeness checklist for ExpectColumnValuesToEqualThree:
