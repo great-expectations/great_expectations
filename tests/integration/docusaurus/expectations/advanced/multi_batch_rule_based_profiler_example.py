@@ -1,14 +1,11 @@
 from ruamel import yaml
 
 from great_expectations import DataContext
-from great_expectations.rule_based_profiler.profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.profiler import Profiler
 
 profiler_config = """
 # This profiler is meant to be used on the NYC taxi data (yellow_tripdata_sample_<YEAR>-<MONTH>.csv)
 # located in tests/test_sets/taxi_yellow_tripdata_samples/
-
-name: my profiler
-config_version: 1.0
 
 variables:
   false_positive_rate: 0.01
@@ -104,8 +101,8 @@ data_context = DataContext()
 
 # Instantiate Profiler
 full_profiler_config_dict: dict = yaml.load(profiler_config)
-profiler: RuleBasedProfiler = RuleBasedProfiler(
-    **full_profiler_config_dict,
+profiler: Profiler = Profiler(
+    profiler_config=full_profiler_config_dict,
     data_context=data_context,
 )
 
