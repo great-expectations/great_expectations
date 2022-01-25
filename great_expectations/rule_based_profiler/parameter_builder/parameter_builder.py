@@ -54,7 +54,7 @@ class ParameterBuilder(ABC):
     def __init__(
         self,
         parameter_name: str,
-        data_context: Optional["DataContext"] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
         batch_request: Optional[Union[dict, str]] = None,
     ):
         """
@@ -248,7 +248,7 @@ class ParameterBuilder(ABC):
         return self._parameter_name
 
     @property
-    def data_context(self) -> "DataContext":
+    def data_context(self) -> "DataContext":  # noqa: F821
         return self._data_context
 
     @property

@@ -14,7 +14,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
 
     def __init__(
         self,
-        data_context: "DataContext",
+        data_context: "DataContext",  # noqa: F821
         batch_request: Optional[Union[BatchRequest, dict]] = None,
         column_name_suffixes: Optional[List[str]] = None,
     ):

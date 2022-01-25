@@ -29,7 +29,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
-        data_context: Optional["DataContext"] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
         batch_request: Optional[Union[dict, str]] = None,
     ):
         """

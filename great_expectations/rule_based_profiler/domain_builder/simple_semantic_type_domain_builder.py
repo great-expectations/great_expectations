@@ -21,7 +21,7 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
 
     def __init__(
         self,
-        data_context: "DataContext",
+        data_context: "DataContext",  # noqa: F821
         batch_request: Optional[Union[BatchRequest, dict]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]

@@ -20,7 +20,7 @@ class DomainBuilder(ABC):
 
     def __init__(
         self,
-        data_context: "DataContext",
+        data_context: "DataContext",  # noqa: F821
         batch_request: Optional[Union[dict, str]] = None,
     ):
         """
@@ -101,5 +101,5 @@ class DomainBuilder(ABC):
         return batch_ids[0]
 
     @property
-    def data_context(self) -> "DataContext":
+    def data_context(self) -> "DataContext":  # noqa: F821
         return self._data_context

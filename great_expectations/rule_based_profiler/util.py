@@ -20,7 +20,7 @@ NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 def get_validator(
     purpose: str,
     *,
-    data_context: Optional["DataContext"] = None,
+    data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_request: Optional[Union[BatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
@@ -53,7 +53,7 @@ def get_validator(
 
 
 def get_batch_ids(
-    data_context: Optional["DataContext"] = None,
+    data_context: Optional["DataContext"] = None,  # noqa: F821
     batch_request: Optional[Union[BatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,

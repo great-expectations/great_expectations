@@ -1,9 +1,6 @@
-from unittest import mock
-
 import pytest
 from ruamel.yaml.comments import CommentedMap
 
-from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.marshmallow__shade.exceptions import ValidationError
 from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
@@ -18,7 +15,6 @@ from great_expectations.rule_based_profiler.config import (
     RuleConfig,
     RuleConfigSchema,
 )
-from great_expectations.rule_based_profiler.profiler import RuleBasedProfiler
 
 
 def test_not_null_schema_raises_error_with_improperly_implemented_subclass():
