@@ -8,6 +8,7 @@ profiler_config = """
 # located in tests/test_sets/taxi_yellow_tripdata_samples/
 
 name: my profiler
+config_version: 1.0
 
 variables:
   false_positive_rate: 0.01
