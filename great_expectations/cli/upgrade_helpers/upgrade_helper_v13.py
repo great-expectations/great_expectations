@@ -105,11 +105,11 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         try:
             for checkpoint_name in sorted(self.data_context.list_checkpoints()):
                 checkpoint = self.data_context.get_checkpoint(name=checkpoint_name)
-                if checkpoint.config.config_version is None:
+                if checkpoint.config_version is None:
                     legacy_checkpoints.append(checkpoint)
 
             self.upgrade_checklist["manual"]["checkpoints"] = {
-                checkpoint.name: checkpoint.config.to_json_dict()
+                checkpoint.name: checkpoint.get_config()
                 for checkpoint in legacy_checkpoints
             }
 
