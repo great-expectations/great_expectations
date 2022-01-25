@@ -23,7 +23,13 @@ Connecting to your data in Great Expectations is designed to be a painless proce
 
 <!-- Brief outline of what the process entails.  -->
 
-Connecting to your data is built around the Datasource object.  A Datasource provides a standard API for accessing and interacting with data from a wide variety of source systems.  It does this by providing an interface for a Data Connector and an Execution Engine to work together.
+Connecting to your data is built around the Datasource object.  A Datasource provides a standard API for accessing and interacting with data from a wide variety of source systems. This makes working with Datasources very convenient!
+
+![How you work with a Datasource](../../images/universal_map/overviews/you_work_with_datasource.png)
+  
+Behind the scenes, however, the Datasource is doing a lot of work for you.  The Datasource provides an interface for a Data Connector and an Execution Engine to work together, and handles all the heavy lifting involved in communication between Great Expectations and your source data systems.
+
+![How a Datasource works for you](../../images/universal_map/overviews/datasource_works_for_you.png)
 
 The majority of the work involved in connecting to data is a simple matter of configuring a new Datasource according to the requirements of your underlying data system.  Once your Datasource is configured and saved to your Data Context you will only need to use the Datasource API to access and interact with your data, regardless of the original source system (or systems) that your data is stored in.
 
