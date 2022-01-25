@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
 from great_expectations.rule_based_profiler.util import build_metric_domain_kwargs
@@ -55,7 +56,7 @@ class ParameterBuilder(ABC):
         self,
         parameter_name: str,
         data_context: Optional["DataContext"] = None,  # noqa: F821
-        batch_request: Optional[Union[dict, str]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
         """
         The ParameterBuilder will build parameters for the active domain from the rule.
