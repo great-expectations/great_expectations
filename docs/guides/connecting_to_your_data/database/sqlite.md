@@ -40,7 +40,7 @@ For this guide we will use a `connection_string` that looks like this:
 
 ```
 sqlite:///<PATH_TO_DB_FILE>
-```
+```   
 
 For more details on different ways to specify database files and information on how to connect to an in-memory SQLite database, please refer to the documentation on [SQLAlchemy](https://docs.sqlalchemy.org/en/14/core/engines.html#sqlite).
 
@@ -156,8 +156,6 @@ To view the full scripts used in this page, see them on GitHub:
 
 - [sqlite_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py)
 - [sqlite_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py)
-
-If your usecase requires passing custom `sqlalchemy.create_engine` paramaters; you can take advantage of that by passing them in your `connection_string`, the connection string will be processed as `sqlalchemy.create_engine(url, kwargs)`.
 
 ## Next Steps
 
