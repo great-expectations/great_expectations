@@ -673,7 +673,7 @@ class DefaultSiteIndexBuilder:
         """
         create_expectations = CallToActionButton(
             "How to Create Expectations",
-            "https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_create_expectations",
+            "https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data",
         )
         see_glossary = CallToActionButton(
             "See More Kinds of Expectations",
