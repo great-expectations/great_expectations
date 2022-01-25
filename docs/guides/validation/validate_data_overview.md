@@ -13,7 +13,11 @@ When you complete this step for the first time, you will have created and run a 
 
 ## The Validate Data process
 
-The recommended workflow for validating data is through **the use of Checkpoints.**  Checkpoints handle the rest of the validation process for you: They will validate data, save Validation Results, run any Actions you have specified, and finally create Data Docs with their results.  Once you have created your Checkpoint, configured it to your specifications, and specified any Actions you want it to take all you will need to do is tell the Checkpoint to run.
+The recommended workflow for validating data is through **the use of Checkpoints.**  Checkpoints handle the rest of the validation process for you: They will validate data, save Validation Results, run any Actions you have specified, and finally create Data Docs with their results.  
+
+![How a Checkpoint works](../../images/universal_map/overviews/how_a_checkpoint_works.png)
+
+As you can imagine, Checkpoints will make validating data a very simple process, especially since they are reusable.  Once you have created your Checkpoint, configured it to your specifications, and specified any Actions you want it to take based on the Validation Results, all you will need to do in the future is tell the Checkpoint to run.
 
 ### Creating a Checkpoint
 
