@@ -139,7 +139,7 @@ class RuleBasedProfiler:
     def _init_rules(
         rules: Dict[str, CommentedMap],
         variables: Dict[str, Any],
-        data_context: Optional["DataContext"],  # noqa: F821
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ) -> List[Rule]:
         resulting_rules = []
         for rule_name, rule_config in rules.items():
@@ -159,7 +159,7 @@ class RuleBasedProfiler:
                 data_context=data_context,
             )
             parameter_builders = RuleBasedProfiler._init_parameter_builders(
-                parameter_builder_configs=rule_config["parameter_builders"],
+                parameter_builder_configs=rule_config.get("parameter_builders"),
                 data_context=data_context,
             )
             expectation_configuration_builders = (
@@ -191,7 +191,7 @@ class RuleBasedProfiler:
     @staticmethod
     def _init_domain_builder(
         domain_builder_config: CommentedMap,
-        data_context: Optional["DataContext"],  # noqa: F821
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ) -> DomainBuilder:
         domain_builder: DomainBuilder = instantiate_class_from_config(
             config=domain_builder_config,
@@ -205,8 +205,8 @@ class RuleBasedProfiler:
 
     @staticmethod
     def _init_parameter_builders(
-        parameter_builder_configs: List[CommentedMap],
-        data_context: Optional["DataContext"],  # noqa: F821
+        parameter_builder_configs: Optional[List[CommentedMap]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ) -> List[ParameterBuilder]:
         parameter_builders: List[ParameterBuilder] = []
         for parameter_builder_config in parameter_builder_configs:
