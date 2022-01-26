@@ -99,7 +99,7 @@ stages:
           name: gcp_authkey
           displayName: 'Download GCS Credentials'
           inputs:
-              secureFile: 'superconductive-service-acct.json'
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
         - task: DownloadSecureFile@1
           name: aws_authkey
