@@ -9,12 +9,10 @@ except ImportError:
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
+from great_expectations.datasource.data_connector import InferredAssetS3DataConnector
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
-)
-from great_expectations.datasource.data_connector.file_path_data_connector import (
-    FilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import list_s3_keys
 from great_expectations.execution_engine import ExecutionEngine
@@ -82,7 +80,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._bucket = bucket
-        self._prefix = FilePathDataConnector.sanitize_prefix(prefix)
+        self._prefix = InferredAssetS3DataConnector.sanitize_prefix_for_s3(prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 

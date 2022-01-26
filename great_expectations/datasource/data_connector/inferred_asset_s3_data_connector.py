@@ -79,7 +79,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         )
 
         self._bucket = bucket
-        self._prefix = self.sanitize_prefix(prefix)
+        self._prefix = self.sanitize_prefix_for_s3(prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 
@@ -94,7 +94,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
             )
 
     @staticmethod
-    def sanitize_prefix(text: str) -> str:
+    def sanitize_prefix_for_s3(text: str) -> str:
         """
         Takes in a given user-prefix and cleans it to work with file-system traversal methods
         (i.e. add '/' to the end of a string meant to represent a directory)
