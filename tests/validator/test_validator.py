@@ -151,7 +151,7 @@ def test_populate_dependencies():
                 metric_configuration=metric_configuration,
                 configuration=configuration,
             )
-    assert len(graph.edges) == 19
+    assert len(graph.edges) == 33
 
 
 def test_populate_dependencies_with_incorrect_metric_name():
