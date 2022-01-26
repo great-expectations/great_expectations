@@ -166,6 +166,10 @@ def get_checkpoint(
         raise ge_exceptions.CheckpointNotFoundError(
             message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'
         )
+    except ValidationError as exc_ve:
+        raise ge_exceptions.InvalidCheckpointConfigError(
+            message="Invalid Checkpoint configuration", validation_error=exc_ve
+        )
 
     if checkpoint_config.config_version is None:
         if not (
