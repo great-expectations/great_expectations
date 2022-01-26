@@ -120,10 +120,12 @@ class RuleBasedProfiler:
         """
         self._name = name
         self._config_version = config_version
+        if variables is None:
+            variables = {}
+        self._variables = variables
         self._rules = self._init_rules(
             rules=rules, variables=variables, data_context=data_context
         )
-        self._variables = variables or {}
         self._data_context = data_context
 
         # Necessary to annotate ExpectationSuite during `run()`

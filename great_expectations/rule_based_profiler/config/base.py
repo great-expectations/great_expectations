@@ -51,21 +51,35 @@ class NotNullSchema(Schema):
 
         return self.__config_class__(**data)
 
-    @post_dump
-    def remove_nulls(self, data: dict, **kwargs) -> dict:
-        """Hook to clear the config object of any null values before being written as a dictionary.
-        Args:
-            data: The dictionary representation of the configuration object
-            kwargs: Marshmallow-specific kwargs required to maintain hook signature (unused herein)
-        Returns:
-            A cleaned dictionary that has no null values
-        """
-        cleaned_data = filter_properties_dict(
-            properties=data,
+    # @post_dump
+    # def remove_nulls(self, data: dict, **kwargs) -> dict:
+    #     """Hook to clear the config object of any null values before being written as a dictionary.
+    #     Args:
+    #         data: The dictionary representation of the configuration object
+    #         kwargs: Marshmallow-specific kwargs required to maintain hook signature (unused herein)
+    #     Returns:
+    #         A cleaned dictionary that has no null values
+    #     """
+    #     cleaned_data = filter_properties_dict(
+    #         properties=data,
+    #         clean_nulls=True,
+    #         clean_falsy=False,
+    #     )
+    #     return cleaned_data
+
+    @post_dump(pass_original=True)
+    def remove_nulls_and_keep_unknowns(
+        self, output: dict, original: Type[DictDot], **kwargs
+    ) -> dict:
+        for key in original:
+            if key not in output and not key.startswith("_"):
+                output[key] = original[key]
+        cleaned_output = filter_properties_dict(
+            properties=output,
             clean_nulls=True,
             clean_falsy=False,
         )
-        return cleaned_data
+        return cleaned_output
 
 
 class DomainBuilderConfig(DictDot):
