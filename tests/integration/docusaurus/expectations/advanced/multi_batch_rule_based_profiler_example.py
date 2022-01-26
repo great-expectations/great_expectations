@@ -106,7 +106,7 @@ profiler: Profiler = Profiler(
     data_context=data_context,
 )
 
-suite = profiler.profile(expectation_suite_name="test_suite_name")
+suite = profiler.run_profiler(expectation_suite_name="test_suite_name")
 print(suite)
 
 # Please note that this docstring is here to demonstrate output for docs. It is not needed for normal use.
