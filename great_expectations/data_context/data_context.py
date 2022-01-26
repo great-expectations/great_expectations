@@ -3644,11 +3644,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiler_config = profiler_config.to_json_dict()
         profiler_config.update({"name": profiler_name})
 
-        instantiated_class = instantiate_class_from_config(
-            config=profiler_config,
-            runtime_environment={"data_context": self},
-            config_defaults={"module_name": "great_expectations.rule_based_profiler"},
-        )
+        profiler_class_args: dict = {
+            key: value
+            for key, value in profiler_config.items()
+            if key not in ["module_name", "class_name"]
+        }
+
+        instantiated_class = RuleBasedProfiler(**profiler_class_args, data_context=self)
 
         profiler_anonymizer = ProfilerAnonymizer(self.data_context_id)
 
