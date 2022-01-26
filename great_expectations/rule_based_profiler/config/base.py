@@ -51,21 +51,36 @@ class NotNullSchema(Schema):
 
         return self.__config_class__(**data)
 
-    @post_dump
-    def remove_nulls(self, data: dict, **kwargs) -> dict:
+    @post_dump(pass_original=True)
+    def remove_nulls_and_keep_unknowns(
+        self, output: dict, original: Type[DictDot], **kwargs
+    ) -> dict:
         """Hook to clear the config object of any null values before being written as a dictionary.
+
+        Additionally, it bypasses strict schema validation before writing to dict to ensure that dynamic
+        attributes set through `setattr` are captured in the resulting object.
+
+        It is important to note that only public attributes are captured through this process.
+
+        Chetan - 20220126 - Note that if we tighten up the schema (remove the dynamic `setattr` behavior),
+        the functionality to keep unknowns should also be removed.
+
         Args:
             data: The dictionary representation of the configuration object
             kwargs: Marshmallow-specific kwargs required to maintain hook signature (unused herein)
+
         Returns:
             A cleaned dictionary that has no null values
         """
-        cleaned_data = filter_properties_dict(
-            properties=data,
+        for key in original:
+            if key not in output and not key.startswith("_"):
+                output[key] = original[key]
+        cleaned_output = filter_properties_dict(
+            properties=output,
             clean_nulls=True,
             clean_falsy=False,
         )
-        return cleaned_data
+        return cleaned_output
 
 
 class DomainBuilderConfig(DictDot):
