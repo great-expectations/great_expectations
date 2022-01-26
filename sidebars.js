@@ -3,38 +3,47 @@ module.exports = {
     'intro',
     {
       type: 'category',
-      label: 'Getting Started',
+      label: 'Getting Started (A Tutorial)',
       items: [
-        'tutorials/getting_started/intro',
-        'tutorials/getting_started/initialize_a_data_context',
-        'tutorials/getting_started/connect_to_data',
-        'tutorials/getting_started/create_your_first_expectations',
-        'tutorials/getting_started/check_out_data_docs',
-        'tutorials/getting_started/validate_your_data',
-        'tutorials/getting_started/customize_your_deployment'
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_overview', label: 'Overview' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_setup', label: '1. Setup' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_connect_to_data', label: '2. Connect to Data' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_create_expectations', label: '3. Create Expectations' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_validate_data', label: '4. Validate Data' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_review', label: 'Review and next steps' }
+        // { type: 'doc', id: 'tutorials/getting_started/check_out_data_docs', label: 'Viewing your Results' },
+        // { type: 'doc', id: 'tutorials/getting_started/customize_your_deployment', label: 'Next Steps: Customizing for your Deployment' }
       ]
     },
+    // {
+    //   type: 'category',
+    //   label: 'Getting Started',
+    //   items: [
+    //     'tutorials/getting_started/intro',
+    //     'tutorials/getting_started/initialize_a_data_context',
+    //     'tutorials/getting_started/connect_to_data',
+    //     'tutorials/getting_started/create_your_first_expectations',
+    //     'tutorials/getting_started/check_out_data_docs',
+    //     'tutorials/getting_started/validate_your_data',
+    //     'tutorials/getting_started/customize_your_deployment'
+    //   ]
+    // },
     {
       type: 'category',
-      label: 'How to Guides',
+      label: 'Step 1: Setup',
       items: [
+        { type: 'doc', id: 'guides/setup/setup_overview', label: 'Overview' },
         {
           type: 'category',
-          label: 'Setting up Great Expectations',
+          label: 'How to guides',
           items: [
-            {
-              type: 'category',
-              label: 'Core skills',
-              items: [
-                // 'guides/setup/how_to_instantiate_a_data_context',
-              ]
-            },
             {
               type: 'category',
               label: 'Installation',
               items: [
                 'guides/setup/installation/local',
-                'guides/setup/installation/hosted_environment'
+                'guides/setup/installation/hosted_environment',
+                'guides/setup/installation/index'
               ]
             },
             {
@@ -44,12 +53,13 @@ module.exports = {
                 'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
                 'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
                 'guides/setup/configuring_data_contexts/how_to_configure_credentials',
-                'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file'
+                'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file',
+                'guides/setup/configuring_data_contexts/index'
               ]
             },
             {
               type: 'category',
-              label: 'Metadata Stores',
+              label: 'Stores',
               items: [
                 {
                   type: 'category',
@@ -79,7 +89,8 @@ module.exports = {
                   items: [
                     'guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore'
                   ]
-                }
+                },
+                'guides/setup/configuring_metadata_stores/index'
               ]
             },
             {
@@ -89,14 +100,23 @@ module.exports = {
                 'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem',
                 'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage',
                 'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs',
-                'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3'
+                'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3',
+                'guides/setup/configuring_data_docs/index'
               ]
-            }
+            },
+            { type: 'doc', id: 'guides/setup/index', label: 'Index' }
           ]
-        },
+        }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Step 2: Connect To Data',
+      items: [
+        { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_overview', label: 'Overview' },
         {
           type: 'category',
-          label: 'Connecting to your data',
+          label: 'How to guides',
           items: [
             {
               type: 'category',
@@ -126,7 +146,7 @@ module.exports = {
               items: [
                 'guides/connecting_to_your_data/database/athena',
                 'guides/connecting_to_your_data/database/bigquery',
-                // 'guides/connecting_to_your_data/database/mssql',
+                'guides/connecting_to_your_data/database/mssql',
                 'guides/connecting_to_your_data/database/mysql',
                 'guides/connecting_to_your_data/database/postgres',
                 'guides/connecting_to_your_data/database/redshift',
@@ -171,12 +191,20 @@ module.exports = {
                 // 'guides/connecting_to_your_data/advanced/how_to_create_a_lightweight_data_catalog_by_applying_a_descriptive_profiler_to_a_configured_datasource',
                 // 'guides/connecting_to_your_data/advanced/how_to_explore_changes_in_data_over_time_using_a_configured_datasource'
               ]
-            }
+            },
+            { type: 'doc', id: 'guides/connecting_to_your_data/index', label: 'Index' }
           ]
-        },
+        }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Step 3: Create Expectations',
+      items: [
+        { type: 'doc', id: 'guides/expectations/create_expectations_overview', label: 'Overview' },
         {
           type: 'category',
-          label: 'Creating and editing Expectations for your data',
+          label: 'How to guides',
           items: [
             {
               type: 'category',
@@ -220,12 +248,20 @@ module.exports = {
                 'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
                 'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
               ]
-            }
+            },
+            { type: 'doc', id: 'guides/expectations/index', label: 'Index' }
           ]
-        },
+        }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Step 4: Validate Data',
+      items: [
+        { type: 'doc', id: 'guides/validation/validate_data_overview', label: 'Overview' },
         {
           type: 'category',
-          label: 'Validating your data',
+          label: 'How to guides',
           items: [
             {
               type: 'category',
@@ -241,7 +277,7 @@ module.exports = {
                 'guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint',
                 'guides/validation/checkpoints/how_to_create_a_new_checkpoint',
                 'guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config',
-                'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint',
+                'guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint'
               ]
             },
             {
@@ -250,6 +286,7 @@ module.exports = {
               items: [
                 // 'guides/validation/validation_actions/how_to_store_validation_results_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action',
+                'guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action'
@@ -263,9 +300,16 @@ module.exports = {
                 'guides/validation/advanced/how_to_implement_custom_notifications',
                 'guides/validation/advanced/how_to_validate_data_without_a_checkpoint'
               ]
-            }
+            },
+            { type: 'doc', id: 'guides/validation/index', label: 'Index' }
           ]
-        },
+        }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'How to Guides',
+      items: [
         {
           type: 'category',
           label: 'Miscellaneous',
@@ -288,8 +332,9 @@ module.exports = {
       items: [
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_use_great_expectations_in_databricks',
+        'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
-        'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
+        'deployment_patterns/how_to_use_great_expectations_with_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_flyte'
         // {
         // type: 'category',

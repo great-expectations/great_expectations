@@ -12,7 +12,7 @@ This is useful if you want to aggregate individual validations (across suites or
 
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md).
-- Configured a [Checkpoint](./how_to_create_a_new_checkpoint)
+- Configured a [Checkpoint](./how_to_create_a_new_checkpoint.md)
 
 </Prerequisites>
 
@@ -178,7 +178,5 @@ Additional notes
 :::tip
 This is a good way to aggregate validations in a complex pipeline. You could use this feature to **validate multiple source files before and after their ingestion into your data lake**.
 :::
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
 
 If you want to be a real hero, we'd welcome a pull request. Please see our [Contributing guide](../../../contributing/contributing.md) and [How to write a how-to-guide](../../miscellaneous/how_to_write_a_how_to_guide.md) to get started.

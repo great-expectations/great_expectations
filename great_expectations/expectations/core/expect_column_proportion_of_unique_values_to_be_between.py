@@ -103,6 +103,13 @@ class ExpectColumnProportionOfUniqueValuesToBeBetween(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "min_value",
+        "max_value",
+        "strict_min",
+        "strict_max",
+    )
 
     """ A Column Aggregate MetricProvider Decorator for the Unique Proportion"""
 

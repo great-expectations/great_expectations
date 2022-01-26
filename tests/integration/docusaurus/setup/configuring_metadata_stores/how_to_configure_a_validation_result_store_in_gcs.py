@@ -196,7 +196,7 @@ Operation completed over 2 objects
 
 # list validation stores
 list_validation_stores_command = """
-great_expectations --v3-api store list
+great_expectations store list
 """
 
 result = subprocess.run(

@@ -58,7 +58,7 @@ def object_to_yaml_str(obj):
 class BaseYamlConfig(SerializableDictDot):
     _config_schema_class = None
 
-    def __init__(self, commented_map: CommentedMap = None):
+    def __init__(self, commented_map: Optional[CommentedMap] = None):
         if commented_map is None:
             commented_map = CommentedMap()
         self._commented_map = commented_map
@@ -145,6 +145,7 @@ class AssetConfig(DictDot):
         prefix=None,
         delimiter=None,
         max_keys=None,
+        schema_name=None,
         batch_spec_passthrough=None,
         **kwargs,
     ):
@@ -160,6 +161,8 @@ class AssetConfig(DictDot):
             self.delimiter = delimiter
         if max_keys is not None:
             self.max_keys = max_keys
+        if schema_name is not None:
+            self.schema_name = schema_name
         if batch_spec_passthrough is not None:
             self.batch_spec_passthrough = batch_spec_passthrough
         for k, v in kwargs.items():
@@ -195,6 +198,7 @@ class AssetConfigSchema(Schema):
     prefix = fields.String(required=False, allow_none=True)
     delimiter = fields.String(required=False, allow_none=True)
     max_keys = fields.Integer(required=False, allow_none=True)
+    schema_name = fields.String(required=False, allow_none=True)
     batch_spec_passthrough = fields.Dict(required=False, allow_none=True)
 
     # Necessary addition for Cloud assets
@@ -1082,6 +1086,24 @@ class NotebooksConfigSchema(Schema):
         return NotebooksConfig(**data)
 
 
+class ProgressBarsConfig(DictDot):
+    def __init__(
+        self,
+        globally: bool = True,
+        profilers: bool = True,
+        metric_calculations: bool = True,
+    ):
+        self.globally = globally
+        self.profilers = profilers
+        self.metric_calculations = metric_calculations
+
+
+class ProgressBarsConfigSchema(Schema):
+    globally = fields.Boolean(default=True)
+    profilers = fields.Boolean(default=True)
+    metric_calculations = fields.Boolean(default=True)
+
+
 class ConcurrencyConfig(DictDot):
     """WARNING: This class is experimental."""
 
@@ -1162,6 +1184,7 @@ class DataContextConfigSchema(Schema):
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()
     checkpoint_store_name = fields.Str(required=False, allow_none=True)
+    profiler_store_name = fields.Str(required=False, allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
     validation_operators = fields.Dict(
         keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
@@ -1173,10 +1196,28 @@ class DataContextConfigSchema(Schema):
     )
     config_variables_file_path = fields.Str(allow_none=True)
     anonymous_usage_statistics = fields.Nested(AnonymizedUsageStatisticsConfigSchema)
-    concurrency = fields.Nested(ConcurrencyConfigSchema)
+    progress_bars = fields.Nested(
+        ProgressBarsConfigSchema, required=False, allow_none=True
+    )
+    concurrency = fields.Nested(
+        ConcurrencyConfigSchema, required=False, allow_none=True
+    )
 
-    # noinspection PyMethodMayBeStatic
-    # noinspection PyUnusedLocal
+    # To ensure backwards compatability, we need to ensure that new options are "opt-in"
+    # If a user has not explicitly configured the value, it will be None and will be wiped by the post_dump hook
+    REMOVE_KEYS_IF_NONE = [
+        "concurrency",  # 0.13.33
+        "progress_bars",  # 0.13.49
+    ]
+
+    @post_dump
+    def remove_keys_if_none(self, data: dict, **kwargs) -> dict:
+        data = copy.deepcopy(data)
+        for key in self.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
+
     def handle_error(self, exc, data, **kwargs):
         """Log and raise our custom exception when (de)serialization fails."""
         if (
@@ -1289,11 +1330,19 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         "evaluation_parameters/"
     )
+
+    # Checkpoints
     DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"
     CHECKPOINTS_BASE_DIRECTORY = "checkpoints"
     DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         f"{CHECKPOINTS_BASE_DIRECTORY}/"
     )
+
+    # Profilers
+    DEFAULT_PROFILER_STORE_NAME = "profiler_store"
+    PROFILERS_BASE_DIRECTORY = "profilers"
+    DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{PROFILERS_BASE_DIRECTORY}/"
+
     DEFAULT_DATA_DOCS_SITE_NAME = "local_site"
     DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
     PLUGINS_BASE_DIRECTORY = "plugins"
@@ -1343,6 +1392,14 @@ class DataContextConfigDefaults(enum.Enum):
                 "base_directory": DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME,
             },
         },
+        DEFAULT_PROFILER_STORE_NAME: {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "suppress_store_backend_id": True,
+                "base_directory": DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+            },
+        },
     }
     DEFAULT_DATA_DOCS_SITES = {
         DEFAULT_DATA_DOCS_SITE_NAME: {
@@ -1376,6 +1433,7 @@ class BaseStoreBackendDefaults(DictDot):
         validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
         evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
+        profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
         validation_operators: dict = None,
         stores: dict = None,
@@ -1385,6 +1443,7 @@ class BaseStoreBackendDefaults(DictDot):
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
+        self.profiler_store_name = profiler_store_name
         self.validation_operators = validation_operators
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
@@ -1406,14 +1465,17 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         validations_store_bucket_name: Overrides default_bucket_name if supplied
         data_docs_bucket_name: Overrides default_bucket_name if supplied
         checkpoint_store_bucket_name: Overrides default_bucket_name if supplied
+        profiler_store_bucket_name: Overrides default_bucket_name if supplied
         expectations_store_prefix: Overrides default if supplied
         validations_store_prefix: Overrides default if supplied
         data_docs_prefix: Overrides default if supplied
         checkpoint_store_prefix: Overrides default if supplied
+        profiler_store_prefix: Overrides default if supplied
         expectations_store_name: Overrides default if supplied
         validations_store_name: Overrides default if supplied
         evaluation_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
+        profiler_store_name: Overrides default if supplied
     """
 
     def __init__(
@@ -1423,14 +1485,17 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         validations_store_bucket_name: Optional[str] = None,
         data_docs_bucket_name: Optional[str] = None,
         checkpoint_store_bucket_name: Optional[str] = None,
+        profiler_store_bucket_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
         validations_store_prefix: str = "validations",
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
+        profiler_store_prefix: str = "profilers",
         expectations_store_name: str = "expectations_S3_store",
         validations_store_name: str = "validations_S3_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
         checkpoint_store_name: str = "checkpoint_S3_store",
+        profiler_store_name: str = "profiler_S3_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1444,12 +1509,15 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
             data_docs_bucket_name = default_bucket_name
         if checkpoint_store_bucket_name is None:
             checkpoint_store_bucket_name = default_bucket_name
+        if profiler_store_bucket_name is None:
+            profiler_store_bucket_name = default_bucket_name
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
+        self.profiler_store_name = profiler_store_name
         self.stores = {
             expectations_store_name: {
                 "class_name": "ExpectationsStore",
@@ -1474,6 +1542,14 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "class_name": "TupleS3StoreBackend",
                     "bucket": checkpoint_store_bucket_name,
                     "prefix": checkpoint_store_prefix,
+                },
+            },
+            profiler_store_name: {
+                "class_name": "ProfilerStore",
+                "store_backend": {
+                    "class_name": "TupleS3StoreBackend",
+                    "bucket": profiler_store_bucket_name,
+                    "prefix": profiler_store_prefix,
                 },
             },
         }
@@ -1524,6 +1600,9 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             self.stores[self.checkpoint_store_name]["store_backend"][
                 "root_directory"
             ] = root_directory
+            self.stores[self.profiler_store_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
             self.data_docs_sites[self.data_docs_site_name]["store_backend"][
                 "root_directory"
             ] = root_directory
@@ -1564,6 +1643,12 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
                     "class_name": "InMemoryStoreBackend",
                 },
             },
+            self.profiler_store_name: {
+                "class_name": "ProfilerStore",
+                "store_backend": {
+                    "class_name": "InMemoryStoreBackend",
+                },
+            },
         }
         self.data_docs_sites = {}
 
@@ -1578,18 +1663,22 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         validations_store_bucket_name: Overrides default_bucket_name if supplied
         data_docs_bucket_name: Overrides default_bucket_name if supplied
         checkpoint_store_bucket_name: Overrides default_bucket_name if supplied
+        profiler_store_bucket_name: Overrides default_bucket_name if supplied
         expectations_store_project_name: Overrides default_project_name if supplied
         validations_store_project_name: Overrides default_project_name if supplied
         data_docs_project_name: Overrides default_project_name if supplied
         checkpoint_store_project_name: Overrides default_project_name if supplied
+        profiler_store_project_name: Overrides default_project_name if supplied
         expectations_store_prefix: Overrides default if supplied
         validations_store_prefix: Overrides default if supplied
         data_docs_prefix: Overrides default if supplied
         checkpoint_store_prefix: Overrides default if supplied
+        profiler_store_prefix: Overrides default if supplied
         expectations_store_name: Overrides default if supplied
         validations_store_name: Overrides default if supplied
         evaluation_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
+        profiler_store_name: Overrides default if supplied
     """
 
     def __init__(
@@ -1600,18 +1689,22 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         validations_store_bucket_name: Optional[str] = None,
         data_docs_bucket_name: Optional[str] = None,
         checkpoint_store_bucket_name: Optional[str] = None,
+        profiler_store_bucket_name: Optional[str] = None,
         expectations_store_project_name: Optional[str] = None,
         validations_store_project_name: Optional[str] = None,
         data_docs_project_name: Optional[str] = None,
         checkpoint_store_project_name: Optional[str] = None,
+        profiler_store_project_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
         validations_store_prefix: str = "validations",
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
+        profiler_store_prefix: str = "profilers",
         expectations_store_name: str = "expectations_GCS_store",
         validations_store_name: str = "validations_GCS_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
         checkpoint_store_name: str = "checkpoint_GCS_store",
+        profiler_store_name: str = "profiler_GCS_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1625,6 +1718,8 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
             data_docs_bucket_name = default_bucket_name
         if checkpoint_store_bucket_name is None:
             checkpoint_store_bucket_name = default_bucket_name
+        if profiler_store_bucket_name is None:
+            profiler_store_bucket_name = default_bucket_name
 
         # Use default_project_name if separate store projects are not provided
         if expectations_store_project_name is None:
@@ -1635,12 +1730,15 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
             data_docs_project_name = default_project_name
         if checkpoint_store_project_name is None:
             checkpoint_store_project_name = default_project_name
+        if profiler_store_project_name is None:
+            profiler_store_project_name = default_project_name
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
+        self.profiler_store_name = profiler_store_name
         self.stores = {
             expectations_store_name: {
                 "class_name": "ExpectationsStore",
@@ -1670,6 +1768,15 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": checkpoint_store_prefix,
                 },
             },
+            profiler_store_name: {
+                "class_name": "ProfilerStore",
+                "store_backend": {
+                    "class_name": "TupleGCSStoreBackend",
+                    "project": profiler_store_project_name,
+                    "bucket": profiler_store_bucket_name,
+                    "prefix": profiler_store_prefix,
+                },
+            },
         }
         self.data_docs_sites = {
             "gcs_site": {
@@ -1696,10 +1803,12 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         expectations_store_credentials: Overrides default_credentials if supplied
         validations_store_credentials: Overrides default_credentials if supplied
         checkpoint_store_credentials: Overrides default_credentials if supplied
+        profiler_store_credentials: Overrides default_credentials if supplied
         expectations_store_name: Overrides default if supplied
         validations_store_name: Overrides default if supplied
         evaluation_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
+        profiler_store_name: Overrides default if supplied
     """
 
     def __init__(
@@ -1708,10 +1817,12 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         expectations_store_credentials: Optional[Dict] = None,
         validations_store_credentials: Optional[Dict] = None,
         checkpoint_store_credentials: Optional[Dict] = None,
+        profiler_store_credentials: Optional[Dict] = None,
         expectations_store_name: str = "expectations_database_store",
         validations_store_name: str = "validations_database_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
         checkpoint_store_name: str = "checkpoint_database_store",
+        profiler_store_name: str = "profiler_database_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1723,12 +1834,15 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
             validations_store_credentials = default_credentials
         if checkpoint_store_credentials is None:
             checkpoint_store_credentials = default_credentials
+        if profiler_store_credentials is None:
+            profiler_store_credentials = default_credentials
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
+        self.profiler_store_name = profiler_store_name
 
         self.stores = {
             expectations_store_name: {
@@ -1753,6 +1867,13 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                     "credentials": checkpoint_store_credentials,
                 },
             },
+            profiler_store_name: {
+                "class_name": "ProfilerStore",
+                "store_backend": {
+                    "class_name": "DatabaseStoreBackend",
+                    "credentials": profiler_store_credentials,
+                },
+            },
         }
 
 
@@ -1773,6 +1894,7 @@ class DataContextConfig(BaseYamlConfig):
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
         checkpoint_store_name: Optional[str] = None,
+        profiler_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
         validation_operators=None,
         stores: Optional[Dict] = None,
@@ -1783,6 +1905,7 @@ class DataContextConfig(BaseYamlConfig):
         store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
         commented_map: Optional[CommentedMap] = None,
         concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
+        progress_bars: Optional[ProgressBarsConfig] = None,
     ):
         # Set defaults
         if config_version is None:
@@ -1805,6 +1928,8 @@ class DataContextConfig(BaseYamlConfig):
                 data_docs_sites = store_backend_defaults.data_docs_sites
             if checkpoint_store_name is None:
                 checkpoint_store_name = store_backend_defaults.checkpoint_store_name
+            if profiler_store_name is None:
+                profiler_store_name = store_backend_defaults.profiler_store_name
 
         self._config_version = config_version
         if datasources is None:
@@ -1815,6 +1940,8 @@ class DataContextConfig(BaseYamlConfig):
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         if checkpoint_store_name is not None:
             self.checkpoint_store_name = checkpoint_store_name
+        if profiler_store_name is not None:
+            self.profiler_store_name = profiler_store_name
         self.plugins_directory = plugins_directory
         if validation_operators is not None:
             self.validation_operators = validation_operators
@@ -1829,11 +1956,10 @@ class DataContextConfig(BaseYamlConfig):
                 **anonymous_usage_statistics
             )
         self.anonymous_usage_statistics = anonymous_usage_statistics
-        if concurrency is None:
-            concurrency = ConcurrencyConfig()
-        elif isinstance(concurrency, dict):
+        if isinstance(concurrency, dict):
             concurrency = ConcurrencyConfig(**concurrency)
-        self.concurrency: ConcurrencyConfig = concurrency
+        self.concurrency = concurrency
+        self.progress_bars = progress_bars
 
         super().__init__(commented_map=commented_map)
 
@@ -2429,3 +2555,4 @@ anonymizedUsageStatisticsSchema = AnonymizedUsageStatisticsConfigSchema()
 notebookConfigSchema = NotebookConfigSchema()
 checkpointConfigSchema = CheckpointConfigSchema()
 concurrencyConfigSchema = ConcurrencyConfigSchema()
+progressBarsConfigSchema = ProgressBarsConfigSchema()

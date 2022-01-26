@@ -145,7 +145,10 @@ table.borderless tr:nth-child(2n) {
     margin-left: auto;
     margin-right: auto;
     width: 75%;
+}
 
+.tabs-container .margin-vert--md{
+    margin-top: 0 !important;
 }
 
 
@@ -170,4 +173,12 @@ table.borderless tr:nth-child(2n) {
 
 .tooltip:hover .tooltiptext {
   visibility: visible;
+
+  
+div[role="tabpanel"]{
+   --ifm-code-background: var(--ifm-alert-background-color-highlight);
+    border-radius: var(--ifm-alert-border-radius);
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 1px 2px 0px;
+    border-top: 0;
+    padding: var(--ifm-alert-padding-vertical) var(--ifm-alert-padding-horizontal);
 }
