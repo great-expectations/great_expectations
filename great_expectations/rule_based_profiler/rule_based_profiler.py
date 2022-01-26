@@ -209,6 +209,9 @@ class RuleBasedProfiler:
         parameter_builder_configs: Optional[List[CommentedMap]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ) -> List[ParameterBuilder]:
+        if parameter_builder_configs is None:
+            parameter_builder_configs = []
+
         parameter_builders: List[ParameterBuilder] = []
         for parameter_builder_config in parameter_builder_configs:
             parameter_builder = instantiate_class_from_config(
