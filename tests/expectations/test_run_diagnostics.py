@@ -115,7 +115,7 @@ def test_expectation_self_check():
         "errors": [],
         "maturity_checklist": {
             "beta": [],
-            "concept_only": [
+            "experimental": [
                 {
                     "doc_url": None,
                     "message": "library_metadata object exists",
@@ -141,7 +141,6 @@ def test_expectation_self_check():
                     "sub_messages": []
                 }
             ],
-            "experimental": [],
             "production": []
         },
     }

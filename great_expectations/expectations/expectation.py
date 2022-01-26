@@ -1438,31 +1438,20 @@ class Expectation(metaclass=MetaExpectation):
         execution_engines: ExpectationExecutionEngineDiagnostics,
     ) -> ExpectationDiagnosticMaturityMessages:
         """Generate maturity checklist messages"""
-        concept_only_checks = []
         experimental_checks = []
         beta_checks = []
         production_checks = []
-        checks = []
 
-        checks.append(ExpectationDiagnostics._check_library_metadata(library_metadata))
-        checks.append(ExpectationDiagnostics._check_docstring(description))
-        checks.append(ExpectationDiagnostics._check_example_cases(examples, tests))
-        checks.append(
+        experimental_checks.append(ExpectationDiagnostics._check_library_metadata(library_metadata))
+        experimental_checks.append(ExpectationDiagnostics._check_docstring(description))
+        experimental_checks.append(ExpectationDiagnostics._check_example_cases(examples, tests))
+        experimental_checks.append(
             ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
                 execution_engines
             )
         )
-        if library_metadata["maturity"] == "CONCEPT_ONLY":
-            concept_only_checks = checks
-        elif library_metadata["maturity"] == "EXPERIMENTAL":
-            experimental_checks = checks
-        elif library_metadata["maturity"] == "BETA":
-            beta_checks = checks
-        elif library_metadata["maturity"] == "PRODUCTION":
-            production_checks = checks
 
         return ExpectationDiagnosticMaturityMessages(
-            concept_only=concept_only_checks,
             experimental=experimental_checks,
             beta=beta_checks,
             production=production_checks,

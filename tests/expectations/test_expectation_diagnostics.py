@@ -116,7 +116,6 @@ edr = ExpectationDiagnostics(
             ),
         ],
         beta=[],
-        concept_only=[],
         production=[
             ExpectationDiagnosticCheckMessage(
                 message="CCC",
