@@ -9,7 +9,7 @@ context = ge.get_context()
 
 # set GCP project
 result = subprocess.run(
-    "gcloud config set project superconductive-internal".split(),
+    "gcloud config set project ge-oss-ci-cd".split(),
     check=True,
     stderr=subprocess.PIPE,
 )
