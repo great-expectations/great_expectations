@@ -314,7 +314,20 @@ def test_rule_based_profiler_emits_valid_usage_stats(
     module_name: great_expectations.rule_based_profiler
     config_version: 1.0
     variables:
-    rules: {}
+      integer_type: INTEGER
+      timestamp_type: TIMESTAMP
+      max_user_id: 999999999999
+      min_timestamp: 2004-10-19 10:23:54
+    rules:
+      my_rule_for_user_ids:
+        name: my_rule_for_user_ids
+        class_name: Rule
+        module_name: great_expectations.rule_based_profiler.rule
+        domain_builder:
+          class_name: TableDomainBuilder
+        expectation_configuration_builders:
+          - expectation_type: expect_column_values_to_be_of_type
+            class_name: DefaultExpectationConfigurationBuilder
     """
     context.test_yaml_config(
         yaml_config=yaml_config, name="my_profiler", class_name="Profiler"
@@ -337,3 +350,7 @@ def test_rule_based_profiler_emits_valid_usage_stats(
             }
         )
     ]
+
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
