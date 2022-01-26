@@ -7,12 +7,6 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.rule_based_profiler.config.base import (
-    RuleConfig,
-    domainBuilderConfigSchema,
-    expectationConfigurationBuilderConfigSchema,
-    parameterBuilderConfigSchema,
-)
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
@@ -44,7 +38,7 @@ class RuleBasedProfiler:
         how_to_guide_url:
         maturity: Experimental
         maturity_details:
-            api_stability: Low (instantiation of Profiler and the signature of the profile() method will change)
+            api_stability: Low (instantiation of Profiler and the signature of the run() method will change)
             implementation_completeness: Moderate (some augmentation and/or growth in capabilities is to be expected)
             unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
             integration_infrastructure_test_coverage: N/A -> TBD
@@ -108,8 +102,8 @@ class RuleBasedProfiler:
         *,
         name: str,
         config_version: float,
-        rules: Dict[str, RuleConfig],
         variables: Optional[Dict[str, Any]] = None,
+        rules: Dict[str, CommentedMap],
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -127,11 +121,14 @@ class RuleBasedProfiler:
         """
         self._name = name
         self._config_version = config_version
-        self._data_context = data_context
         self._variables = variables or {}
-        self._rules = self._init_rules(rules, variables, data_context)
+        self._rules = self._init_rules(
+            rules=rules, variables=variables, data_context=data_context
+        )
 
-        # Necessary to annotate ExpectationSuite during `profile()`
+        self._data_context = data_context
+
+        # Necessary to annotate ExpectationSuite during `run()`
         self._citation = {
             "name": name,
             "config_version": config_version,
@@ -139,11 +136,11 @@ class RuleBasedProfiler:
             "variables": variables,
         }
 
+    @staticmethod
     def _init_rules(
-        self,
-        rules: Dict[str, RuleConfig],
+        rules: Dict[str, CommentedMap],
         variables: Dict[str, Any],
-        data_context: Optional["DataContext"],
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ) -> List[Rule]:
         resulting_rules = []
         for rule_name, rule_config in rules.items():
@@ -158,12 +155,20 @@ class RuleBasedProfiler:
                     )
 
             # Instantiate builder attributes
-            domain_builder = self._init_domain_builder(rule_config, data_context)
-            parameter_builders = self._init_parameter_builders(
-                rule_config, data_context
+            domain_builder = RuleBasedProfiler._init_domain_builder(
+                domain_builder_config=rule_config["domain_builder"],
+                data_context=data_context,
+            )
+            parameter_builders = RuleBasedProfiler._init_parameter_builders(
+                parameter_builder_configs=rule_config.get("parameter_builders"),
+                data_context=data_context,
             )
             expectation_configuration_builders = (
-                self._init_expectation_configuration_builders(rule_config, data_context)
+                RuleBasedProfiler._init_expectation_configuration_builders(
+                    expectation_configuration_builder_configs=rule_config[
+                        "expectation_configuration_builders"
+                    ]
+                )
             )
 
             # Convert variables to ParameterContainer
@@ -184,12 +189,11 @@ class RuleBasedProfiler:
 
         return resulting_rules
 
+    @staticmethod
     def _init_domain_builder(
-        self,
-        rule_config: CommentedMap,
-        data_context: Optional["DataContext"],  # noqa: F821
+        domain_builder_config: CommentedMap,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ) -> DomainBuilder:
-        domain_builder_config: CommentedMap = rule_config["domain_builder"]
         domain_builder: DomainBuilder = instantiate_class_from_config(
             config=domain_builder_config,
             runtime_environment={"data_context": data_context},
@@ -200,16 +204,15 @@ class RuleBasedProfiler:
 
         return domain_builder
 
+    @staticmethod
     def _init_parameter_builders(
-        self,
-        rule_config: CommentedMap,
-        data_context: Optional["DataContext"],  # noqa: F821
+        parameter_builder_configs: Optional[List[CommentedMap]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ) -> List[ParameterBuilder]:
-        parameter_builders: List[ParameterBuilder] = []
-        parameter_builder_configs: List[CommentedMap] = rule_config.get(
-            "parameter_builders", []
-        )
+        if parameter_builder_configs is None:
+            parameter_builder_configs = []
 
+        parameter_builders: List[ParameterBuilder] = []
         for parameter_builder_config in parameter_builder_configs:
             parameter_builder = instantiate_class_from_config(
                 config=parameter_builder_config,
@@ -222,16 +225,11 @@ class RuleBasedProfiler:
 
         return parameter_builders
 
+    @staticmethod
     def _init_expectation_configuration_builders(
-        self,
-        rule_config: CommentedMap,
-        data_context: Optional["DataContext"],  # noqa: F821
+        expectation_configuration_builder_configs: List[CommentedMap],
     ) -> List[ExpectationConfigurationBuilder]:
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = []
-        expectation_configuration_builder_configs: List[CommentedMap] = rule_config[
-            "expectation_configuration_builders"
-        ]
-
         for (
             expectation_configuration_builder_config
         ) in expectation_configuration_builder_configs:
@@ -247,7 +245,7 @@ class RuleBasedProfiler:
 
         return expectation_configuration_builders
 
-    def profile(
+    def run(
         self,
         *,
         expectation_suite_name: Optional[str] = None,
