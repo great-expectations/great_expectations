@@ -1,7 +1,7 @@
 ---
 title: "Connect to Data: Index"
 ---
-# [![Connect to Data Icon](../../images/universal_map/Outlet-active.png)](../connecting_to_your_data/connect_to_data_overview.md) Connect to Data: Index
+# [![Connect to Data Icon](../../images/universal_map/Outlet-active.png)](./connect_to_data_overview.md) Connect to Data: Index
 
 ## Core skills
 - [How to choose which DataConnector to use](../../guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.md)
@@ -20,6 +20,7 @@ title: "Connect to Data: Index"
 ## Database
 - [How to connect to a Athena database](../../guides/connecting_to_your_data/database/athena.md)
 - [How to connect to a BigQuery database](../../guides/connecting_to_your_data/database/bigquery.md)
+- [How to connect to an MSSQL database](../../guides/connecting_to_your_data/database/mssql.md)
 - [How to connect to a MySQL database](../../guides/connecting_to_your_data/database/mysql.md)
 - [How to connect to a PostgreSQL database](../../guides/connecting_to_your_data/database/postgres.md)
 - [How to connect to a Redshift database](../../guides/connecting_to_your_data/database/redshift.md)
@@ -41,4 +42,3 @@ title: "Connect to Data: Index"
 ## Advanced
 - [How to configure a DataConnector for splitting and sampling a file system or blob store](../../guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store.md)
 - [How to configure a DataConnector for splitting and sampling tables in SQL](../../guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql.md)
-
