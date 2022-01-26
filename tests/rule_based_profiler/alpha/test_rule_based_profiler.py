@@ -5,8 +5,7 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
-from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 yaml = YAML()
@@ -143,7 +142,7 @@ def test_profile_includes_citations(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.profile(
+    expectation_suite: ExpectationSuite = profiler.run(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
@@ -173,7 +172,7 @@ def test_profile_excludes_citations(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.profile(
+    expectation_suite: ExpectationSuite = profiler.run(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
