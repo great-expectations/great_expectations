@@ -161,30 +161,3 @@ future release.  Please update code accordingly.  Moreover, in "{cls.__name__}._
                 compute_domain_kwargs,
                 accessor_domain_kwargs,
             )
-
-    @classmethod
-    def _get_evaluation_dependencies(
-        cls,
-        metric: MetricConfiguration,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None,
-    ):
-        dependencies: dict = super()._get_evaluation_dependencies(
-            metric=metric,
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
-        )
-        table_domain_kwargs: dict = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
-        dependencies["table.column_types"] = MetricConfiguration(
-            metric_name="table.column_types",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs={
-                "include_nested": True,
-            },
-            metric_dependencies=None,
-        )
-        return dependencies

@@ -188,23 +188,6 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
             )
         return df.approxQuantile(column, list(quantiles), allow_relative_error)
 
-    @classmethod
-    def _get_evaluation_dependencies(
-        cls,
-        metric: MetricConfiguration,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None,
-    ):
-        dependencies: dict = super()._get_evaluation_dependencies(
-            metric=metric,
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
-        )
-
-        return dependencies
-
 
 def _get_column_quantiles_mssql(
     column, quantiles: Iterable, selectable, sqlalchemy_engine
