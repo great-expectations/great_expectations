@@ -689,7 +689,7 @@ class DefaultSiteIndexBuilder:
         )
         team_site = CallToActionButton(
             "How to Set Up a Team Site",
-            "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem"
+            "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem",
         )
         # TODO gallery does not yet exist
         # gallery = CallToActionButton(
