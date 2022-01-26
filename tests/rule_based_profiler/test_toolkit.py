@@ -7,8 +7,8 @@ from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
+from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.toolkit import get_profiler, list_profilers
 
 
@@ -32,10 +32,6 @@ def test_get_profiler(
         )
 
     assert isinstance(profiler, RuleBasedProfiler)
-
-
-def test_get_profiler_in_cloud_mode():
-    pass
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
