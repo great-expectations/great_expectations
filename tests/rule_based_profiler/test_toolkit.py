@@ -16,10 +16,8 @@ from great_expectations.rule_based_profiler.toolkit import get_profiler, list_pr
 def test_get_profiler(
     mock_data_context: mock.MagicMock,
     populated_profiler_store: ProfilerStore,
-    profiler_name: str,
     profiler_config: RuleBasedProfilerConfig,
 ):
-
     with mock.patch(
         "great_expectations.data_context.store.profiler_store.ProfilerStore.get",
         return_value=profiler_config,
@@ -27,7 +25,7 @@ def test_get_profiler(
         profiler = get_profiler(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,
-            name=profiler_name,
+            name="my_profiler",
             ge_cloud_id=None,
         )
 

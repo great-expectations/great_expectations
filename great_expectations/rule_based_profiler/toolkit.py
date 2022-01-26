@@ -20,7 +20,6 @@ def get_profiler(
     name: Optional[str] = None,
     ge_cloud_id: Optional[str] = None,
 ) -> RuleBasedProfiler:
-
     key: Union[GeCloudIdentifier, ConfigurationIdentifier]
     if ge_cloud_id:
         key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)

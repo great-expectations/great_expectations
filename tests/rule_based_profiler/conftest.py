@@ -2462,6 +2462,7 @@ def profiler_config(
     return RuleBasedProfilerConfig(
         name=profiler_name,
         class_name="RuleBasedProfiler",
+        module_name="great_expectations.rule_based_profiler",
         config_version=1.0,
         rules=rules,
     )
