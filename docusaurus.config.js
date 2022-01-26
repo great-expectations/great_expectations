@@ -14,7 +14,8 @@ module.exports = {
   projectName: 'great_expectations',
   plugins: [
     // ["plugin-image-zoom"],
-    require.resolve('@cmfcmf/docusaurus-search-local')
+    require.resolve('@cmfcmf/docusaurus-search-local'),
+    '@docusaurus-terminology/parser'
   ],
 
   themeConfig: {
