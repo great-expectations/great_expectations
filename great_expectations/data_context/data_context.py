@@ -3251,6 +3251,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs,
         )
 
+    def add_profiler(self):
+        return profiler_toolkit.add_profiler
+
     def get_profiler(
         self,
         name: Optional[str] = None,

@@ -12,6 +12,26 @@ from great_expectations.rule_based_profiler.config.base import RuleBasedProfiler
 from great_expectations.rule_based_profiler.toolkit import get_profiler, list_profilers
 
 
+def test_add_profiler():
+    pass
+
+
+def test_add_profiler_with_batch_request_containing_batch_data_raises_error():
+    pass
+
+
+def test_add_profiler_alice_integration():
+    pass
+
+
+def test_add_profiler_bobby_integration():
+    pass
+
+
+def test_add_profiler_bobster_integration():
+    pass
+
+
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_get_profiler(
     mock_data_context: mock.MagicMock,

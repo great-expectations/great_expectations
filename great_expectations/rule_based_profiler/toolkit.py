@@ -14,6 +14,10 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 from great_expectations.util import filter_properties_dict
 
 
+def add_profiler():
+    pass
+
+
 def get_profiler(
     data_context: "DataContext",
     profiler_store: ProfilerStore,
