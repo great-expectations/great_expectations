@@ -10,7 +10,7 @@ This guide will walk you through the process of creating your own custom ColumnE
 
 <Prerequisites>
 
-- Read the [overview for creating Custom Expectations](overview.md).
+- Read the [overview for creating Custom Expectations](./overview.md).
 
 </Prerequisites>
 
