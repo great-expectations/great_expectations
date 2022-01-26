@@ -216,11 +216,13 @@ class RuleBasedProfiler:
     def _init_parameter_builders(
         parameter_builder_configs: Optional[List[CommentedMap]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
-    ) -> List[ParameterBuilder]:
+    ) -> Optional[List[ParameterBuilder]]:
         if parameter_builder_configs is None:
-            parameter_builder_configs = []
+            return None
 
         parameter_builders: List[ParameterBuilder] = []
+
+        parameter_builder_config: CommentedMap
         for parameter_builder_config in parameter_builder_configs:
             parameter_builder = instantiate_class_from_config(
                 config=parameter_builder_config,
