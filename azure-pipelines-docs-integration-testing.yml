@@ -116,6 +116,9 @@ stages:
             ./google-cloud-sdk/bin/gcloud config set pass_credentials_to_gsutil True
             ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$(gcp_authkey.secureFilePath)
           displayName: 'Install Google Cloud SDK'
+        - script: |
+            gsutil mb -p ge-oss-ci-cd -l US-EAST1 -b on gs://superconductive-integration-tests-data-docs
+          displayName: 'Debugging gsutil'
 
         - script: |
             sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
