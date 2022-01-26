@@ -1,4 +1,5 @@
 import datetime
+import itertools
 import json
 import os
 import tempfile
@@ -9,9 +10,11 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
+from great_expectations.data_context.data_context import BaseDataContext
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.util import load_class
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
@@ -1372,3 +1375,43 @@ def test_rule_based_profiler_integration(
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
+
+def test_test_yaml_config_supported_types_have_self_check():
+    # Each major category of test_yaml_config supported types has its own origin module_name
+    supported_types = [
+        (
+            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES,
+            "great_expectations.data_context.store",
+        ),
+        (
+            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES,
+            "great_expectations.datasource",
+        ),
+        (
+            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES,
+            "great_expectations.datasource.data_connector",
+        ),
+        (
+            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES,
+            "great_expectations.checkpoint",
+        ),
+        (
+            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES,
+            "great_expectations.rule_based_profiler",
+        ),
+    ]
+
+    # Quick sanity check to ensure that we are testing ALL supported types herein
+    all_types = list(itertools.chain.from_iterable(t[0] for t in supported_types))
+    assert sorted(all_types) == sorted(
+        BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+    )
+
+    # Use class_name and module_name to get the class type and introspect to confirm adherence to self_check requirement
+    for category, module_name in supported_types:
+        for class_name in category:
+            class_ = load_class(class_name=class_name, module_name=module_name)
+            assert hasattr(class_, "self_check") and callable(
+                class_.self_check
+            ), f"Class '{class_}' is missing the required `self_check()` method"
