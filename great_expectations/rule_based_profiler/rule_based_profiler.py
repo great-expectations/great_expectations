@@ -99,11 +99,10 @@ class RuleBasedProfiler:
 
     def __init__(
         self,
-        *,
         name: str,
         config_version: float,
-        variables: Optional[Dict[str, Any]] = None,
         rules: Dict[str, CommentedMap],
+        variables: Optional[Dict[str, Any]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -121,11 +120,12 @@ class RuleBasedProfiler:
         """
         self._name = name
         self._config_version = config_version
-        self._variables = variables or {}
+        if variables is None:
+            variables = {}
+        self._variables = variables
         self._rules = self._init_rules(
             rules=rules, variables=variables, data_context=data_context
         )
-
         self._data_context = data_context
 
         # Necessary to annotate ExpectationSuite during `run()`

@@ -23,6 +23,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfig,
@@ -44,6 +45,13 @@ from great_expectations.datasource import (
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.rule_based_profiler.config import (
+    DomainBuilderConfig,
+    ExpectationConfigurationBuilderConfig,
+    ParameterBuilderConfig,
+    RuleBasedProfilerConfig,
+    RuleConfig,
+)
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -54,7 +62,7 @@ from great_expectations.self_check.util import (
     get_sqlite_connection_url,
 )
 from great_expectations.util import is_library_loadable
-from tests.test_utils import create_files_in_directory, load_data_into_test_database
+from tests.test_utils import create_files_in_directory
 
 yaml = YAML()
 ###
@@ -4992,3 +5000,70 @@ def cloud_data_context_with_datasource_sqlalchemy_engine(
         **config,
     )
     return context
+
+
+@pytest.fixture(scope="function")
+def profiler_name() -> str:
+    return "my_first_profiler"
+
+
+@pytest.fixture(scope="function")
+def store_name() -> str:
+    return "profiler_store"
+
+
+@pytest.fixture(scope="function")
+def rules() -> Dict[str, RuleConfig]:
+    return {
+        "rule_1": RuleConfig(
+            name="rule_1",
+            domain_builder=DomainBuilderConfig(class_name="TableDomainBuilder"),
+            parameter_builders=[
+                ParameterBuilderConfig(
+                    class_name="MetricMultiBatchParameterBuilder",
+                    metric_name="my_metric",
+                    name="my_parameter",
+                )
+            ],
+            expectation_configuration_builders=[
+                ExpectationConfigurationBuilderConfig(
+                    class_name="DefaultExpectationConfigurationBuilder",
+                    expectation_type="expect_column_pair_values_A_to_be_greater_than_B",
+                )
+            ],
+        )
+    }
+
+
+@pytest.fixture(scope="function")
+def profiler_config(
+    profiler_name: str, rules: Dict[str, RuleConfig]
+) -> RuleBasedProfilerConfig:
+    return RuleBasedProfilerConfig(
+        name=profiler_name,
+        class_name="RuleBasedProfiler",
+        module_name="great_expectations.rule_based_profiler",
+        config_version=1.0,
+        rules=rules,
+    )
+
+
+@pytest.fixture(scope="function")
+def empty_profiler_store(store_name: str) -> ProfilerStore:
+    return ProfilerStore(store_name)
+
+
+@pytest.fixture(scope="function")
+def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
+    return ConfigurationIdentifier(configuration_key=profiler_name)
+
+
+@pytest.fixture(scope="function")
+def populated_profiler_store(
+    empty_profiler_store: ProfilerStore,
+    profiler_config: RuleBasedProfilerConfig,
+    profiler_key: ConfigurationIdentifier,
+) -> ProfilerStore:
+    profiler_store = empty_profiler_store
+    profiler_store.set(key=profiler_key, value=profiler_config)
+    return profiler_store
