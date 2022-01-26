@@ -258,6 +258,14 @@ class ColumnAggregateMetricProvider(TableMetricProvider):
         table_domain_kwargs: dict = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
+        dependencies["table.column_types"] = MetricConfiguration(
+            metric_name="table.column_types",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs={
+                "include_nested": True,
+            },
+            metric_dependencies=None,
+        )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
             metric_domain_kwargs=table_domain_kwargs,
@@ -270,7 +278,6 @@ class ColumnAggregateMetricProvider(TableMetricProvider):
             metric_value_kwargs=None,
             metric_dependencies=None,
         )
-
         return dependencies
 
 

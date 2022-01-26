@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -73,7 +73,7 @@ class DomainBuilderConfig(DictDot):
         self,
         class_name: str,
         module_name: Optional[str] = None,
-        batch_request: Optional[Dict[str, Any]] = None,
+        batch_request: Optional[Union[dict, str]] = None,
         **kwargs
     ):
         self.class_name = class_name
@@ -98,7 +98,7 @@ class DomainBuilderConfigSchema(NotNullSchema):
         all_none=True,
         missing="great_expectations.rule_based_profiler.domain_builder",
     )
-    batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
+    batch_request = fields.Raw(required=False, allow_none=True)
 
 
 class ParameterBuilderConfig(DictDot):
@@ -107,7 +107,7 @@ class ParameterBuilderConfig(DictDot):
         name: str,
         class_name: str,
         module_name: Optional[str] = None,
-        batch_request: Optional[Dict[str, Any]] = None,
+        batch_request: Optional[Union[dict, str]] = None,
         **kwargs
     ):
         self.name = name
@@ -134,7 +134,7 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         all_none=True,
         missing="great_expectations.rule_based_profiler.parameter_builder",
     )
-    batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
+    batch_request = fields.Raw(required=False, allow_none=True)
 
 
 class ExpectationConfigurationBuilderConfig(DictDot):
@@ -206,7 +206,8 @@ class RuleConfigSchema(NotNullSchema):
     domain_builder = fields.Nested(DomainBuilderConfigSchema, required=True)
     parameter_builders = fields.List(
         cls_or_instance=fields.Nested(ParameterBuilderConfigSchema, required=True),
-        required=True,
+        required=False,
+        allow_none=True,
     )
     expectation_configuration_builders = fields.List(
         cls_or_instance=fields.Nested(
@@ -222,6 +223,8 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         name: str,
         config_version: float,
         rules: Dict[str, RuleConfig],
+        class_name: str,
+        module_name: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
         **kwargs
@@ -229,6 +232,8 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         self.name = name
         self.config_version = config_version
         self.rules = rules
+        self.class_name = class_name
+        self.module_name = module_name
         self.variables = variables
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -253,6 +258,12 @@ class RuleBasedProfilerConfigSchema(NotNullSchema):
 
     __config_class__ = RuleBasedProfilerConfig
 
+    class_name = fields.String(required=True)
+    module_name = fields.String(
+        required=False,
+        all_none=True,
+        missing="great_expectations.rule_based_profiler",
+    )
     name = fields.String(required=True)
     config_version = fields.Float(
         required=True,
