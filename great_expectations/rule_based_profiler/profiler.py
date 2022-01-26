@@ -100,7 +100,7 @@ class RuleBasedProfiler:
 
     def __init__(
         self,
-        *,
+        # *,
         name: str,
         config_version: float,
         rules: Dict[str, RuleConfig],

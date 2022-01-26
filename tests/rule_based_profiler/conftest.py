@@ -37,6 +37,7 @@ from great_expectations.rule_based_profiler.rule import Rule
 
 yaml = YAML()
 
+# Fixtures from alpha ==================================================================================================
 
 # TODO: AJB 20210525 This fixture is not yet used but may be helpful to generate batches for unit tests of multibatch
 #  workflows.  It should probably be extended to add different column types / data.
@@ -2418,7 +2419,7 @@ def rule_with_variables_with_parameters(
     return rule
 
 
-# Fixtures from
+# Fixtures from config_version 1.0 ============================================================================
 
 
 @pytest.fixture(scope="function")
@@ -2436,15 +2437,17 @@ def rules() -> Dict[str, RuleConfig]:
     return {
         "rule_1": RuleConfig(
             name="rule_1",
-            domain_builder=DomainBuilderConfig(class_name="DomainBuilder"),
+            domain_builder=DomainBuilderConfig(class_name="TableDomainBuilder"),
             parameter_builders=[
                 ParameterBuilderConfig(
-                    class_name="ParameterBuilder", name="my_parameter"
+                    class_name="MetricMultiBatchParameterBuilder",
+                    metric_name="my_metric",
+                    name="my_parameter",
                 )
             ],
             expectation_configuration_builders=[
                 ExpectationConfigurationBuilderConfig(
-                    class_name="ExpectationConfigurationBuilder",
+                    class_name="DefaultExpectationConfigurationBuilder",
                     expectation_type="expect_column_pair_values_A_to_be_greater_than_B",
                 )
             ],
