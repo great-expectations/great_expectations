@@ -2,6 +2,7 @@
 id: glossary
 title: "Glossary of Terms"
 ---
+
 **Batch:** A selection of records from a Data Asset.
 
 **Batch Request:** Provided to a Datasource in order to create a Batch.
@@ -54,11 +55,11 @@ title: "Glossary of Terms"
 
 **Validation Action:** A Python class with a run method that takes the result of validating a Batch against an Expectation Suite and does something with it
 
-**Validation Operator:** Triggers Validation Actions after Validation completes.
+**Validation Operator:** An internal object that can trigger Validation Actions after Validation completes.
 
-**Validation Result:** Generated when data is Validated against an Expectation Suite.
+**Validation Result:** An object generated when data is Validated against an Expectation Suite.
 
 **Validation Result Store:** A connector to store and retrieve information about objects generated when data is Validated against an Expectation Suite.
 
-**Validator:** Used to run an Expectation Suite against data.
+**Validator:** The object responsible for running an Expectation Suite against data.
 
