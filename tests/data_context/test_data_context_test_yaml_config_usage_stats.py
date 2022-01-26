@@ -299,3 +299,41 @@ credentials:
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_rule_based_profiler_emits_valid_usage_stats(
+    mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
+):
+    context = empty_data_context_stats_enabled
+    yaml_config = """
+    name: my_profiler
+    class_name: RuleBasedProfiler
+    module_name: great_expectations.rule_based_profiler
+    config_version: 1.0
+    variables:
+    rules: {}
+    """
+    context.test_yaml_config(
+        yaml_config=yaml_config, name="my_profiler", class_name="Profiler"
+    )
+
+    # Substitute anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "RuleBasedProfiler",
+                },
+                "success": True,
+            }
+        )
+    ]

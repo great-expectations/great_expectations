@@ -136,6 +136,10 @@ class RuleBasedProfiler:
             "variables": variables,
         }
 
+    @property
+    def name(self) -> str:
+        return self._name
+
     @staticmethod
     def _init_rules(
         rules: Dict[str, CommentedMap],
@@ -284,3 +288,8 @@ class RuleBasedProfiler:
                 )
 
         return expectation_suite
+
+    def self_check(self, pretty_print=True) -> dict:
+        # Provide visibility into parameters that Checkpoint was instantiated with.
+        report_object: dict = {"config": self._citation}
+        return report_object
