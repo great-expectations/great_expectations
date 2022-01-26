@@ -2,6 +2,7 @@
 id: glossary
 title: "Glossary of Terms"
 ---
+
 **Batch:** A selection of records from a Data Asset.
 
 **Batch Request:** Provided to a Datasource in order to create a Batch.
