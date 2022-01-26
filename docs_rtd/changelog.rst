@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [FEATURE] Support service account credentials dictionary for BigQuery connections (#4039)
 
 0.14.2
 -----------------

@@ -1882,7 +1882,7 @@ class BaseDataContext:
         )
 
     def _instantiate_datasource_from_config_and_update_project_config(
-        self, name: str, config: Union[CommentedMap, dict], initialize: bool = True
+        self, name: str, config: dict, initialize: bool = True
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
@@ -1891,7 +1891,7 @@ class BaseDataContext:
         datasource_config = self.project_config_with_variables_substituted.datasources[
             name
         ]
-        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        config = dict(datasourceConfigSchema.dump(datasource_config))
         datasource: Optional[Union[LegacyDatasource, BaseDatasource]]
         if initialize:
             try:
@@ -3115,7 +3115,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_request: Optional[dict] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -3194,7 +3194,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -3235,7 +3235,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return checkpoint_toolkit.run_checkpoint(
             data_context=self,
             checkpoint_store=self.checkpoint_store,
-            ge_cloud_mode=self.ge_cloud_mode,
             checkpoint_name=checkpoint_name,
             template_name=template_name,
             run_name_template=run_name_template,
@@ -3564,12 +3563,20 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         checkpoint_config = checkpoint_config.to_json_dict()
         checkpoint_config.update({"name": checkpoint_name})
 
+        checkpoint_class_args: dict = {
+            key: value
+            for key, value in checkpoint_config.items()
+            if key not in ["module_name", "class_name"]
+        }
+
         if class_name == "Checkpoint":
-            instantiated_class = Checkpoint(data_context=self, **checkpoint_config)
+            instantiated_class = Checkpoint(data_context=self, **checkpoint_class_args)
         elif class_name == "SimpleCheckpoint":
             instantiated_class = SimpleCheckpoint(
-                data_context=self, **checkpoint_config
+                data_context=self, **checkpoint_class_args
             )
+        else:
+            raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
 
         checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
             self.data_context_id
@@ -3578,6 +3585,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
             name=checkpoint_name, config=checkpoint_config
         )
+
         return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_data_connector_from_yaml_config(
