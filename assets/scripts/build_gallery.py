@@ -218,7 +218,9 @@ def build_gallery(
                 except Exception:
                     logger.error(f"Failed to run diagnostics for: {expectation}")
                     print(traceback.format_exc())
-                    expectation_tracebacks.write(f"\n\n----------------\n{expectation}\n")
+                    expectation_tracebacks.write(
+                        f"\n\n----------------\n{expectation}\n"
+                    )
                     expectation_tracebacks.write(traceback.format_exc())
 
             logger.info(f"Unloading just-installed for module {expectation_module}")
