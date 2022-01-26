@@ -165,7 +165,7 @@ class SimpleCheckpointConfigurator:
 
         logger.debug(
             f"SimpleCheckpointConfigurator built this CheckpointConfig:"
-            f" {print(checkpoint_config)}"
+            f"{checkpoint_config}"
         )
         return CheckpointConfig(**config_kwargs)
 
