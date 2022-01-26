@@ -7,12 +7,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.rule_based_profiler.config.base import (
-    RuleConfig,
-    domainBuilderConfigSchema,
-    expectationConfigurationBuilderConfigSchema,
-    parameterBuilderConfigSchema,
-)
+from great_expectations.rule_based_profiler.config.base import RuleConfig
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )

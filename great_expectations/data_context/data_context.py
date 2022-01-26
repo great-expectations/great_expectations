@@ -63,6 +63,7 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
+from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
@@ -109,7 +110,7 @@ from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
-from great_expectations.rule_based_profiler.profiler import Profiler
+from great_expectations.rule_based_profiler.profiler import RuleBasedProfiler
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
@@ -3254,7 +3255,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         self,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-    ) -> Profiler:
+    ) -> RuleBasedProfiler:
         return profiler_toolkit.get_profiler(
             data_context=self,
             profiler_store=self.profiler_store,

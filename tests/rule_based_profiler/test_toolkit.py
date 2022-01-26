@@ -8,6 +8,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.toolkit import get_profiler, list_profilers
 
 
@@ -23,7 +24,6 @@ def test_get_profiler(
         "great_expectations.data_context.store.profiler_store.ProfilerStore.get",
         return_value=profiler_config,
     ):
-        breakpoint()
         profiler = get_profiler(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,
@@ -31,7 +31,7 @@ def test_get_profiler(
             ge_cloud_id=None,
         )
 
-    assert profiler == 1
+    assert isinstance(profiler, RuleBasedProfiler)
 
 
 def test_get_profiler_in_cloud_mode():

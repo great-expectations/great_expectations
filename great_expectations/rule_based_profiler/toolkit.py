@@ -10,7 +10,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.profiler import Profiler
+from great_expectations.rule_based_profiler.profiler import RuleBasedProfiler
 from great_expectations.util import filter_properties_dict
 
 
@@ -19,7 +19,7 @@ def get_profiler(
     profiler_store: ProfilerStore,
     name: Optional[str] = None,
     ge_cloud_id: Optional[str] = None,
-) -> Profiler:
+) -> RuleBasedProfiler:
 
     key: Union[GeCloudIdentifier, ConfigurationIdentifier]
     if ge_cloud_id:
@@ -47,8 +47,8 @@ def get_profiler(
             "data_context": data_context,
         },
         config_defaults={
-            "class_name": "Profiler",
-            "module_name": "great_expectations.rule_based_profiler.profiler",
+            "class_name": "RuleBasedProfiler",
+            "module_name": "great_expectations.rule_based_profiler",
         },
     )
 
