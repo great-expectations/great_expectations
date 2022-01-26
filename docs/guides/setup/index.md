@@ -6,12 +6,14 @@ title: "Setup: Index"
 ## Installation
 - [How to install Great Expectations locally](../../guides/setup/installation/local.md)
 - [How to install Great Expectations in a hosted environment](../../guides/setup/installation/hosted_environment.md)
+- ["Index"](../../guides/setup/installation/index.md)
 
 ## Data Contexts
 - [How to configure a new Data Context with the CLI](../../guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md)
 - [How to configure DataContext components using test_yaml_config](../../guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 - [How to configure credentials](../../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
 - [How to instantiate a Data Context without a yml file](../../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
+- ["Index"](../../guides/setup/configuring_data_contexts/index.md)
 
 ## Stores
 
