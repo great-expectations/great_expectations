@@ -14,15 +14,15 @@ result = subprocess.run(
     stderr=subprocess.PIPE,
 )
 
-# try:
-#     # remove this bucket if there was a failure in the script last time
-#     result = subprocess.run(
-#         "gsutil rm -r gs://superconductive-integration-tests-data-docs".split(),
-#         check=True,
-#         stderr=subprocess.PIPE,
-#     )
-# except Exception as e:
-#     pass
+try:
+    # remove this bucket if there was a failure in the script last time
+    result = subprocess.run(
+        "gsutil rm -r gs://superconductive-integration-tests-data-docs".split(),
+        check=True,
+        stderr=subprocess.PIPE,
+    )
+except Exception as e:
+    pass
 
 create_data_docs_directory = """
 gsutil mb -p <YOUR GCP PROJECT NAME> -l US-EAST1 -b on gs://<YOUR GCS BUCKET NAME>/
