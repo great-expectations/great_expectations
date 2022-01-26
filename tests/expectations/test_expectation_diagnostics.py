@@ -136,11 +136,6 @@ edr = ExpectationDiagnostics(
 )
 
 
-def test_ExpectationDiagnosticReport():
-
-    print(edr)
-
-
 def test__convert_checks_into_output_message():
     assert (
         edr._convert_checks_into_output_message(
