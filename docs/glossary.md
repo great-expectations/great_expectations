@@ -54,7 +54,7 @@ title: "Glossary of Terms"
 
 **Validation Operator:** Triggers Validation Actions after Validation completes.
 
-**Validation Result:** An object generated when data is Validated against an Expectation Suite.
+**Validation Result:** Generated when data is Validated against an Expectation Suite.
 
 **Validation Result Store:** A connector to store and retrieve information about objects generated when data is Validated against an Expectation Suite.
 
