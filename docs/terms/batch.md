@@ -30,9 +30,9 @@ Metrics are always associated with a Batch of data. The identifier for the Batch
 
 <CreateHeader/>
 
-When creating Expectations interactively, a Validator needs access to a specific Batch of data against which to check Expectations. The [how to guide on interactively creating expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md.md) covers using a Batch in this use case.
+When creating Expectations interactively, a Validator needs access to a specific Batch of data against which to check Expectations. The [how to guide on interactively creating expectations](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) covers using a Batch in this use case.
 
-Our in depth guide on [how to create and edit expectations with a profiler](./how_to_create_and_edit_expectations_with_a_profiler.md) covers how to specify which Batches of data should be used when using Great Expectations to generate statistics and candidate Expectations for your data.
+Our in depth guide on [how to create and edit expectations with a profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md) covers how to specify which Batches of data should be used when using Great Expectations to generate statistics and candidate Expectations for your data.
 
 <ValidateHeader/>
 
