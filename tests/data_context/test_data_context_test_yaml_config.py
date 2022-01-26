@@ -1354,6 +1354,8 @@ def test_rule_based_profiler(
     context = empty_data_context_stats_enabled
     yaml_config = """
     name: my_profiler
+    class_name: RuleBasedProfiler
+    module_name: great_expectations.rule_based_profiler
     config_version: 1.0
     variables:
     rules: {}

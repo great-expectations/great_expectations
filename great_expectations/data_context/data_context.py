@@ -112,8 +112,8 @@ from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.profiler import Profiler
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
@@ -287,6 +287,9 @@ class BaseDataContext:
         "Checkpoint",
         "SimpleCheckpoint",
     ]
+    TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
+        "RuleBasedProfiler",
+    ]
     ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
         "__substitution_error__",
         "__yaml_parse_error__",
@@ -298,6 +301,7 @@ class BaseDataContext:
         + TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES
         + TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES
         + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
+        + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
     )
 
     _data_context = None
@@ -3371,7 +3375,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 ) = self._test_instantiation_of_data_connector_from_yaml_config(
                     name, class_name, config, runtime_environment
                 )
-            elif class_name in ["Profiler"]:
+            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES:
                 (
                     instantiated_class,
                     usage_stats_event_payload,
@@ -3625,7 +3629,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
     def _test_instantiation_of_profiler_from_yaml_config(
         self, name: Optional[str], class_name: str, config: CommentedMap
-    ) -> Tuple[Profiler, dict]:
+    ) -> Tuple[RuleBasedProfiler, dict]:
         """
         Helper to create profiler instance and update usage stats payload.
         See `test_yaml_config` for more details.
@@ -3640,9 +3644,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         profiler_config = profiler_config.to_json_dict()
         profiler_config.update({"name": profiler_name})
 
-        instantiated_class = Profiler(
-            profiler_config=profiler_config, data_context=self
-        )
+        instantiated_class = RuleBasedProfiler(**profiler_config, data_context=self)
 
         profiler_anonymizer = ProfilerAnonymizer(self.data_context_id)
 

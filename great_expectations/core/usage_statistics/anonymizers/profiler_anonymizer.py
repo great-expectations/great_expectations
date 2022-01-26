@@ -1,7 +1,7 @@
 from typing import Optional
 
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.rule_based_profiler.profiler import Profiler
+from great_expectations.rule_based_profiler import RuleBasedProfiler
 
 
 class ProfilerAnonymizer(Anonymizer):
@@ -9,7 +9,7 @@ class ProfilerAnonymizer(Anonymizer):
         super().__init__(salt=salt)
 
         # ordered bottom up in terms of inheritance order
-        self._ge_classes = [Profiler]
+        self._ge_classes = [RuleBasedProfiler]
 
     def anonymize_profiler_info(self, name: str, config: dict) -> dict:
         anonymized_info_dict: dict = {
