@@ -58,5 +58,5 @@ title: "Glossary of Terms"
 
 **Validation Result Store:** A connector to store and retrieve information about objects generated when data is Validated against an Expectation Suite.
 
-**Validator:** The object responsible for running an Expectation Suite against data.
+**Validator:** Used to run an Expectation Suite against data.
 
