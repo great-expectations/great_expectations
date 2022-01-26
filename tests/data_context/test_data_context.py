@@ -37,7 +37,10 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.util import gen_directory_tree_str
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    gen_directory_tree_str,
+)
 from tests.test_utils import create_files_in_directory, safe_remove
 
 try:
@@ -702,12 +705,14 @@ def test_add_store(empty_data_context):
     assert isinstance(new_store, ExpectationsStore)
 
 
+# noinspection PyPep8Naming
 def test_ExplorerDataContext(titanic_data_context):
     context_root_directory = titanic_data_context.root_directory
     explorer_data_context = ExplorerDataContext(context_root_directory)
     assert explorer_data_context._expectation_explorer_manager
 
 
+# noinspection PyPep8Naming
 def test_ConfigOnlyDataContext__initialization(
     tmp_path_factory, basic_data_context_config
 ):
@@ -1424,13 +1429,17 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     context = empty_context_with_checkpoint
     obs = context.get_checkpoint("my_checkpoint")
     assert isinstance(obs, Checkpoint)
-    config = obs.config
-    assert isinstance(config.to_json_dict(), dict)
-    assert config.to_json_dict() == {
-        "module_name": "great_expectations.checkpoint",
-        "class_name": "LegacyCheckpoint",
-        "config_version": None,
+    config = obs.get_config()
+    assert isinstance(config, dict)
+    assert config == {
         "name": "my_checkpoint",
+        "template_name": None,
+        "config_version": None,
+        "run_name_template": None,
+        "batch_request": {},
+        "expectation_suite_name": None,
+        "validations": [],
+        "action_list": [],
         "batches": [
             {
                 "batch_kwargs": {
@@ -1449,11 +1458,16 @@ def test_get_checkpoint(empty_context_with_checkpoint):
             },
         ],
         "validation_operator_name": "action_list_operator",
+        "evaluation_parameters": {},
+        "profilers": [],
+        "runtime_configuration": {},
+        "ge_cloud_id": None,
+        "expectation_suite_ge_cloud_id": None,
     }
 
 
 def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
-    yaml = YAML(typ="safe")
+    yaml_obj = YAML(typ="safe")
     context = empty_data_context
 
     checkpoint = {
@@ -1465,7 +1479,7 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
         "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
+        yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
     with pytest.raises(ge_exceptions.CheckpointError) as e:
@@ -1473,7 +1487,7 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
 
 
 def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
-    yaml = YAML(typ="safe")
+    yaml_obj = YAML(typ="safe")
     context = empty_data_context
 
     checkpoint = {
@@ -1486,7 +1500,7 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
         "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
+        yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
     with pytest.raises(ge_exceptions.InvalidCheckpointConfigError) as e:
@@ -1496,7 +1510,7 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
 def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
     empty_data_context,
 ):
-    yaml = YAML(typ="safe")
+    yaml_obj = YAML(typ="safe")
     context = empty_data_context
 
     checkpoint = {
@@ -1513,7 +1527,7 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
         "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
+        yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
     with pytest.raises(ge_exceptions.CheckpointError) as e:
@@ -1521,7 +1535,7 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
 
 
 def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context):
-    yaml = YAML(typ="safe")
+    yaml_obj = YAML(typ="safe")
     context = empty_data_context
 
     checkpoint = {
@@ -1534,7 +1548,7 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
         "foo.yml",
     )
     with open(checkpoint_file_path, "w") as f:
-        yaml.dump(checkpoint, f)
+        yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
     with pytest.raises(ge_exceptions.CheckpointError) as e:
@@ -1849,7 +1863,7 @@ module_name: great_expectations.checkpoint
 class_name: Checkpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
 expectation_suite_name:
-batch_request:
+batch_request: {}
 action_list:
   - name: store_validation_result
     action:
@@ -1886,10 +1900,34 @@ expectation_suite_ge_cloud_id:
         checkpoint_from_disk = cf.read()
 
     assert checkpoint_from_disk == expected_checkpoint_yaml
-    assert checkpoint_from_yaml.config.to_yaml_str() == expected_checkpoint_yaml
+    assert deep_filter_properties_iterable(
+        properties=checkpoint_from_yaml.get_config(),
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+    ) == deep_filter_properties_iterable(
+        properties={
+            key: value
+            for key, value in dict(yaml.load(expected_checkpoint_yaml)).items()
+            if key not in ["module_name", "class_name"]
+        },
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+    )
 
-    checkpoint_from_store = context.get_checkpoint(checkpoint_name)
-    assert checkpoint_from_store.config.to_yaml_str() == expected_checkpoint_yaml
+    checkpoint_from_store = context.get_checkpoint(name=checkpoint_name)
+    assert deep_filter_properties_iterable(
+        properties=checkpoint_from_store.get_config(),
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+    ) == deep_filter_properties_iterable(
+        properties={
+            key: value
+            for key, value in dict(yaml.load(expected_checkpoint_yaml)).items()
+            if key not in ["module_name", "class_name"]
+        },
+        clean_falsy=True,
+        keep_falsy_numerics=True,
+    )
 
     expected_action_list = [
         {
@@ -1917,15 +1955,10 @@ expectation_suite_ge_cloud_id:
     )
 
     assert checkpoint_from_yaml.name == checkpoint_name
-    assert checkpoint_from_yaml.config.to_json_dict() == {
+    assert checkpoint_from_yaml.get_config(clean_falsy=True) == {
         "name": "my_new_checkpoint",
         "config_version": 1.0,
-        "template_name": None,
-        "module_name": "great_expectations.checkpoint",
-        "class_name": "Checkpoint",
         "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
-        "expectation_suite_name": None,
-        "batch_request": None,
         "action_list": [
             {
                 "name": "store_validation_result",
@@ -1940,9 +1973,6 @@ expectation_suite_ge_cloud_id:
                 "action": {"class_name": "UpdateDataDocsAction", "site_names": []},
             },
         ],
-        "evaluation_parameters": {},
-        "expectation_suite_ge_cloud_id": None,
-        "runtime_configuration": {},
         "validations": [
             {
                 "batch_request": {
@@ -1954,8 +1984,6 @@ expectation_suite_ge_cloud_id:
                 "expectation_suite_name": "newsuite",
             }
         ],
-        "profilers": [],
-        "ge_cloud_id": None,
     }
 
     assert isinstance(checkpoint_from_yaml, Checkpoint)
