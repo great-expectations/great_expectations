@@ -52,7 +52,7 @@ title: "Glossary of Terms"
 
 **Validation Action:** A Python class with a run method that takes the result of validating a Batch against an Expectation Suite and does something with it
 
-**Validation Operator:** An internal object that can trigger Validation Actions after Validation completes.
+**Validation Operator:** Triggers Validation Actions after Validation completes.
 
 **Validation Result:** An object generated when data is Validated against an Expectation Suite.
 
