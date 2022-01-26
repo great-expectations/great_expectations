@@ -18,7 +18,7 @@ def build_glossary_page(orderd_list_of_terms_tuples, glossary_file_path):
     # Open the glossary page for editing
     with open(glossary_file_path, "w") as glossary_file:
         # Write the glossary page header
-        glossary_file.write("---\nid: glossary\ntitle: \"Glossary of Terms\"\n---\n")
+        glossary_file.write("---\nid: glossary\ntitle: \"Glossary of Terms\"\n---\n\n")
         # iterate the glossary list of tuples and write glossary entries.
         for term, definition in orderd_list_of_terms_tuples:
             glossary_file.write(f"**{term}:** {definition}\n\n")
