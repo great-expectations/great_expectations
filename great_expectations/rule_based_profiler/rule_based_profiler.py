@@ -140,6 +140,10 @@ class RuleBasedProfiler:
     def name(self) -> str:
         return self._name
 
+    @property
+    def variables(self) -> dict:
+        return self._variables
+
     @staticmethod
     def _init_rules(
         rules: Dict[str, CommentedMap],
@@ -290,6 +294,26 @@ class RuleBasedProfiler:
         return expectation_suite
 
     def self_check(self, pretty_print=True) -> dict:
-        # Provide visibility into parameters that Checkpoint was instantiated with.
+        """
+        Necessary to enable integration with `DataContext.test_yaml_config`
+
+        Args:
+            pretty_print: flag to turn on verbose output
+
+        Returns:
+            Dictionary that contains RuleBasedProfiler state
+
+        """
+        # Provide visibility into parameters that RuleBasedProfiler was instantiated with.
         report_object: dict = {"config": self._citation}
+
+        if pretty_print:
+            print(f"\nRuleBasedProfiler class name: {self.name}")
+
+            if not self._variables:
+                print(
+                    'Your current RuleBasedProfiler configuration has an empty "variables" attribute. \
+                    Please ensure you populate it if you\'d like to reference values in your "rules" attribute.'
+                )
+
         return report_object
