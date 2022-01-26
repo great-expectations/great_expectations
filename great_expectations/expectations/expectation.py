@@ -1303,7 +1303,6 @@ class Expectation(metaclass=MetaExpectation):
                 for executed_test_case in executed_test_cases:
                     test_title = executed_test_case["test_case"]["title"]
 
-
                     try:
                         rendered_result = renderer(
                             configuration=executed_test_case[
@@ -1442,9 +1441,13 @@ class Expectation(metaclass=MetaExpectation):
         beta_checks = []
         production_checks = []
 
-        experimental_checks.append(ExpectationDiagnostics._check_library_metadata(library_metadata))
+        experimental_checks.append(
+            ExpectationDiagnostics._check_library_metadata(library_metadata)
+        )
         experimental_checks.append(ExpectationDiagnostics._check_docstring(description))
-        experimental_checks.append(ExpectationDiagnostics._check_example_cases(examples, tests))
+        experimental_checks.append(
+            ExpectationDiagnostics._check_example_cases(examples, tests)
+        )
         experimental_checks.append(
             ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
                 execution_engines

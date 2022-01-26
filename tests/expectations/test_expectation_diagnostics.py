@@ -132,7 +132,7 @@ edr = ExpectationDiagnostics(
                 ],
             ),
         ],
-    )
+    ),
 )
 
 
