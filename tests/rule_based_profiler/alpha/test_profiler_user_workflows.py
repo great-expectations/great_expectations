@@ -91,7 +91,7 @@ def test_alice_profiler_user_workflow_single_batch(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run_profiler(
+    expectation_suite: ExpectationSuite = profiler.run(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
@@ -201,7 +201,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run_profiler(
+    expectation_suite: ExpectationSuite = profiler.run(
         expectation_suite_name=bobby_columnar_table_multi_batch[
             "test_configuration_oneshot_sampling_method"
         ]["expectation_suite_name"],
@@ -245,7 +245,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run_profiler(
+    expectation_suite: ExpectationSuite = profiler.run(
         expectation_suite_name=bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000[
             "test_configuration_bootstrap_sampling_method"
         ][

@@ -109,7 +109,7 @@ rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
     data_context=data_context,
 )
 
-suite = rule_based_profiler.run_profiler(expectation_suite_name="test_suite_name")
+suite = rule_based_profiler.run(expectation_suite_name="test_suite_name")
 print(suite)
 
 # Please note that this docstring is here to demonstrate output for docs. It is not needed for normal use.

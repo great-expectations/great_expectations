@@ -38,7 +38,7 @@ class RuleBasedProfiler:
         how_to_guide_url:
         maturity: Experimental
         maturity_details:
-            api_stability: Low (instantiation of Profiler and the signature of the run_profiler() method will change)
+            api_stability: Low (instantiation of Profiler and the signature of the run() method will change)
             implementation_completeness: Moderate (some augmentation and/or growth in capabilities is to be expected)
             unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
             integration_infrastructure_test_coverage: N/A -> TBD
@@ -127,7 +127,7 @@ class RuleBasedProfiler:
             rules=rules, variables=variables, data_context=data_context
         )
 
-        # Necessary to annotate ExpectationSuite during `run_profiler()`
+        # Necessary to annotate ExpectationSuite during `run()`
         self._citation = {
             "name": name,
             "config_version": config_version,
@@ -241,7 +241,7 @@ class RuleBasedProfiler:
 
         return expectation_configuration_builders
 
-    def run_profiler(
+    def run(
         self,
         *,
         expectation_suite_name: Optional[str] = None,

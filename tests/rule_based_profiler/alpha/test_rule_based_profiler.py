@@ -142,7 +142,7 @@ def test_profile_includes_citations(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run_profiler(
+    expectation_suite: ExpectationSuite = profiler.run(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
@@ -172,7 +172,7 @@ def test_profile_excludes_citations(
         data_context=data_context,
     )
 
-    expectation_suite: ExpectationSuite = profiler.run_profiler(
+    expectation_suite: ExpectationSuite = profiler.run(
         expectation_suite_name=alice_columnar_table_single_batch[
             "expected_expectation_suite_name"
         ],
