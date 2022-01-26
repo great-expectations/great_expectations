@@ -126,12 +126,12 @@
   },
   "validation_operator": {
     "term": "Validation Operator",
-    "definition": "An internal object that can trigger Validation Actions after Validation completes.",
+    "definition": "Triggers Validation Actions after Validation completes.",
     "url": "terms/validation_operator"
   },
   "validation_result": {
     "term": "Validation Result",
-    "definition": "An object generated when data is Validated against an Expectation Suite.",
+    "definition": "Generated when data is Validated against an Expectation Suite.",
     "url": "terms/validation_result"
   },
   "validation_result_store": {
@@ -141,7 +141,7 @@
   },
   "validator": {
     "term": "Validator",
-    "definition": "The object responsible for running an Expectation Suite against data.",
+    "definition": "Used to run an Expectation Suite against data.",
     "url": "terms/validator"
   }
 }

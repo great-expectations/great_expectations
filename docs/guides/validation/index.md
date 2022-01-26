@@ -1,7 +1,7 @@
 ---
 title: "Validate Data: Index"
 ---
-# [![Create Expectations Icon](../../images/universal_map/Checkmark-active.png)](./validate_data_overview.md) Validate Data: Index
+# [![Validate Data Icon](../../images/universal_map/Checkmark-active.png)](./validate_data_overview.md) Validate Data: Index
 
 ## Core skills
 - [How to validate data by running a Checkpoint](../../guides/validation/how_to_validate_data_by_running_a_checkpoint.md)
@@ -14,6 +14,7 @@ title: "Validate Data: Index"
 
 ## Validation Actions
 - [How to trigger Email as a Validation Action](../../guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action.md)
+- [How to collect OpenLineage metadata using a Validation Action](../../guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action.md)
 - [How to trigger Opsgenie notifications as a Validation Action](../../guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action.md)
 - [How to trigger Slack notifications as a Validation Action](../../guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action.md)
 - [How to update Data Docs as a Validation Action](../../guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action.md)

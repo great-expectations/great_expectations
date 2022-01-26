@@ -17,6 +17,10 @@ import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 	
 Getting started with Great Expectations is quick and easy.  Once you have completed setup for your production deployment, you will have access to all of the features of Great Expectations from a single entry point: Your Data Context.  You will also have your Stores and Data Docs configured in the manner most suitable for your project's purposes.
 
+### The alternative to manual Setup
+
+If you're not interested in managing your own configuration or infrastructure then Great Expectations Cloud may be of interest to you. You can learn more about Great Expectations Cloud — our fully managed SaaS offering — by signing up for [our weekly cloud workshop!](https://greatexpectations.io/cloud) You’ll get to see our newest features and apply for our private Alpha program!
+
 ## The Setup process
 
 <!-- Brief outline of what the process entails.  -->

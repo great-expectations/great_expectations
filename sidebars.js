@@ -104,6 +104,14 @@ module.exports = {
                 'guides/setup/configuring_data_docs/index'
               ]
             },
+            {
+              type: 'category',
+              label: 'Advanced',
+              items: [
+                { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
+                { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' }
+              ]
+            },
             { type: 'doc', id: 'guides/setup/index', label: 'Index' }
           ]
         }
@@ -213,7 +221,9 @@ module.exports = {
                 'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
                 'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
                 'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
-                'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data'
+                'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
+                { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
+                { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' }
               ]
             },
             {
@@ -228,13 +238,6 @@ module.exports = {
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Contributing',
-              items: [
-                'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
               ]
             },
             {
@@ -308,26 +311,6 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'How to Guides',
-      items: [
-        {
-          type: 'category',
-          label: 'Miscellaneous',
-          items: [
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' },
-            { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
-          ]
-        }
-      ]
-    },
-    {
-      type: 'category',
       label: 'Deployment Patterns',
       items: [
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
@@ -335,7 +318,8 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
-        'deployment_patterns/how_to_use_great_expectations_in_flyte'
+        'deployment_patterns/how_to_use_great_expectations_in_flyte',
+        { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
         // {
         // type: 'category',
         // label: 'Contributing',
@@ -345,61 +329,6 @@ module.exports = {
         // ]
         // }
       ]
-    },
-    {
-      type: 'category',
-      label: 'Reference',
-      items: [
-        'glossary',
-        { type: 'category',
-          label: 'Technical Terms',
-          items: [
-            'terms/datasource',
-            'terms/data_context',
-            'terms/data_asset'
-          ]
-        }
-      ]
-    },
-    {
-      type: 'category',
-      label: 'Core Concepts',
-      items: [
-        { type: 'doc', id: 'reference/core_concepts', label: 'Introduction' },
-        { type: 'doc', id: 'reference/checkpoints_and_actions' },
-        { type: 'doc', id: 'reference/data_context' },
-        { type: 'doc', id: 'reference/data_discovery' },
-        { type: 'doc', id: 'reference/data_docs' },
-        { type: 'doc', id: 'reference/datasources' },
-        { type: 'doc', id: 'reference/evaluation_parameters' },
-        { type: 'doc', id: 'reference/execution_engine' },
-        {
-          type: 'category',
-          label: 'Expectations',
-          collapsed: true,
-          items: [
-            { type: 'doc', id: 'reference/expectations/expectations' },
-            { type: 'doc', id: 'reference/expectations/conditional_expectations' },
-            { type: 'doc', id: 'reference/expectations/distributional_expectations' },
-            { type: 'doc', id: 'reference/expectations/implemented_expectations' },
-            { type: 'doc', id: 'reference/expectation_suite_operations' }
-          ]
-        },
-        { type: 'doc', id: 'reference/metrics' },
-        { type: 'doc', id: 'reference/profilers' },
-        { type: 'doc', id: 'reference/expectations/result_format' },
-        { type: 'doc', id: 'reference/expectations/standard_arguments' },
-        // { type: 'doc', id: 'reference/stores' },
-        { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
-        { type: 'doc', id: 'reference/validation' },
-        { type: 'doc', id: 'reference/anonymous_usage_statistics' },
-        { type: 'doc', id: 'reference/supporting_resources' }
-      ]
-    },
-    {
-      type: 'doc',
-      label: 'API Reference',
-      id: 'reference/api_reference'
     },
     {
       type: 'category',
@@ -413,20 +342,84 @@ module.exports = {
         { type: 'doc', id: 'contributing/contributing_test' },
         { type: 'doc', id: 'contributing/contributing_maturity' },
         { type: 'doc', id: 'contributing/contributing_misc' },
+        'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations',
         {
           type: 'category',
           label: 'Style guides',
           items: [
             { type: 'doc', id: 'contributing/style_guides/docs_style' },
             { type: 'doc', id: 'contributing/style_guides/code_style' },
-            { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' }
+            { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
+            { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
           ]
         }
       ]
     },
     {
-      type: 'doc',
-      id: 'changelog'
+      type: 'category',
+      label: 'Reference',
+      items: [
+        { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
+        {
+          type: 'doc',
+          label: 'API Reference',
+          id: 'reference/api_reference'
+        },
+        'glossary',
+        {
+          type: 'category',
+          label: 'Technical Terms',
+          items: [
+            'terms/datasource',
+            'terms/data_context',
+            'terms/data_asset'
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Core Concepts',
+          items: [
+            { type: 'doc', id: 'reference/core_concepts', label: 'Introduction' },
+            { type: 'doc', id: 'reference/checkpoints_and_actions' },
+            { type: 'doc', id: 'reference/data_context' },
+            { type: 'doc', id: 'reference/data_discovery' },
+            { type: 'doc', id: 'reference/data_docs' },
+            { type: 'doc', id: 'reference/datasources' },
+            { type: 'doc', id: 'reference/evaluation_parameters' },
+            { type: 'doc', id: 'reference/execution_engine' },
+            {
+              type: 'category',
+              label: 'Expectations',
+              collapsed: true,
+              items: [
+                { type: 'doc', id: 'reference/expectations/expectations' },
+                { type: 'doc', id: 'reference/expectations/conditional_expectations' },
+                { type: 'doc', id: 'reference/expectations/distributional_expectations' },
+                { type: 'doc', id: 'reference/expectations/implemented_expectations' },
+                { type: 'doc', id: 'reference/expectation_suite_operations' }
+              ]
+            },
+            { type: 'doc', id: 'reference/metrics' },
+            { type: 'doc', id: 'reference/profilers' },
+            { type: 'doc', id: 'reference/expectations/result_format' },
+            { type: 'doc', id: 'reference/expectations/standard_arguments' },
+            // { type: 'doc', id: 'reference/stores' },
+            { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
+            { type: 'doc', id: 'reference/validation' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' },
+            { type: 'doc', id: 'reference/supporting_resources' }
+          ]
+        }
+      ]
+    },
+    {
+      type: 'category',
+      label: 'Updates and Migration',
+      items: [
+        { type: 'doc', id: 'changelog' },
+        { type: 'doc', id: 'guides/miscellaneous/migration_guide' }
+      ]
     }
   ]
 }
