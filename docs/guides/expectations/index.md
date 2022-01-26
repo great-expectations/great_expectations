@@ -15,9 +15,6 @@ title: "Create Expectations: Index"
 - [How to create custom Expectations](../../guides/expectations/creating_custom_expectations/how_to_create_custom_expectations.md)
 - [How to create custom parameterized Expectations](../../guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations.md)
 
-## Contributing
-- [How to contribute a new Expectation to Great Expectations](../../guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations.md)
-
 ## Advanced
 - [How to add comments to Expectations and display them in Data Docs](../../guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs.md)
 - [How to Create Renderers for Custom Expectations](../../guides/expectations/advanced/how_to_create_renderers_for_custom_expectations.md)

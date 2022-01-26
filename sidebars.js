@@ -232,13 +232,6 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'Contributing',
-              items: [
-                'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
-              ]
-            },
-            {
-              type: 'category',
               label: 'Advanced',
               items: [
                 'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
@@ -413,6 +406,7 @@ module.exports = {
         { type: 'doc', id: 'contributing/contributing_test' },
         { type: 'doc', id: 'contributing/contributing_maturity' },
         { type: 'doc', id: 'contributing/contributing_misc' },
+        'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations',
         {
           type: 'category',
           label: 'Style guides',
