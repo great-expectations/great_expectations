@@ -135,8 +135,8 @@ class RuleBasedProfiler:
             "variables": variables,
         }
 
+    @staticmethod
     def _init_rules(
-        self,
         rules: Dict[str, CommentedMap],
         variables: Dict[str, Any],
         data_context: Optional["DataContext"],  # noqa: F821
@@ -154,16 +154,16 @@ class RuleBasedProfiler:
                     )
 
             # Instantiate builder attributes
-            domain_builder = self._init_domain_builder(
+            domain_builder = RuleBasedProfiler._init_domain_builder(
                 domain_builder_config=rule_config["domain_builder"],
                 data_context=data_context,
             )
-            parameter_builders = self._init_parameter_builders(
+            parameter_builders = RuleBasedProfiler._init_parameter_builders(
                 parameter_builder_configs=rule_config["parameter_builders"],
                 data_context=data_context,
             )
             expectation_configuration_builders = (
-                self._init_expectation_configuration_builders(
+                RuleBasedProfiler._init_expectation_configuration_builders(
                     expectation_configuration_builder_configs=rule_config[
                         "expectation_configuration_builders"
                     ]
