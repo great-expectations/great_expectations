@@ -115,6 +115,7 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config.base import RuleConfig
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
@@ -3259,8 +3260,26 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs,
         )
 
-    def add_profiler(self):
-        return profiler_toolkit.add_profiler
+    def add_profiler(
+        self,
+        name: str,
+        config_version: float,
+        rules: Dict[str, RuleConfig],
+        class_name: str,
+        module_name: Optional[str] = None,
+        variables: Optional[dict] = None,
+        commented_map: Optional[CommentedMap] = None,
+    ):
+        config = RuleBasedProfilerConfig(
+            name=name,
+            config_version=config_version,
+            rules=rules,
+            class_name=class_name,
+            module_name=module_name,
+            variables=variables,
+            commented_map=commented_map,
+        )
+        return profiler_toolkit.add_profiler(config)
 
     def get_profiler(
         self,
