@@ -49,6 +49,18 @@
         "mult_dup": "CHAR",
         "0": "INTEGER",
         "_c0": "INTEGER"
+      },
+      "bigquery": {
+        "a": "STRING",
+        "b": "STRING",
+        "c": "NUMERIC",
+        "d": "STRING",
+        "n": "INTEGER",
+        "unique": "NUMERIC",
+        "null": "STRING",
+        "mult_dup": "STRING",
+        "0": "NUMERIC",
+        "_c0": "NUMERIC"
       }
     },
     "tests" : [
