@@ -25,17 +25,17 @@ Due to their nature as extensions of Great Expectations, it can be generally sai
 
 <UniversalMap setup='active' connect='active' create='active' validate='active'/>
 
-Plugins can be relevant to any point in the process of working with Great Expectations, depending on what any given Plugin is meant to do or extend.  Developing a Plugin is a process that exists outside of the standard four step workflow for using Great Expectations.  However, you can generally expect to actually *use* a Plugin in the same step as whatever object it is extending would be used, and to configure a Plugin in the same step as you would configure whatever object is extended by the Plugin.
+Plugins can be relevant to any point in the process of working with Great Expectations, depending on what any given Plugin is meant to do or extend.  Developing a Plugin is a process that exists outside the standard four-step workflow for using Great Expectations.  However, you can generally expect to actually *use* a Plugin in the same step as whatever object it is extending would be used, and to configure a Plugin in the same step as you would configure whatever object is extended by the Plugin.
 
 ## Features
 
 ### Versatility and customization
 
-Plugins can be anything from entirely custom code to subclasses inheriting from existing Great Expectations classes.  This versatility allows you to extend and tailor Great Expectations to your specific needs.  The use of Plugins can also allow you to implement features that have been submitted to Great Expectations but not yet integrated into the code base.  For instance, if you contributed code for a new featue to Great Expectations, you could implement it in your production environment as a plugin even if it had not yet been merged into the official Great Expectations code base and released as a new version.
+Plugins can be anything from entirely custom code to subclasses inheriting from existing Great Expectations classes.  This versatility allows you to extend and tailor Great Expectations to your specific needs.  The use of Plugins can also allow you to implement features that have been submitted to Great Expectations but not yet integrated into the code base.  For instance, if you contributed code for a new feature to Great Expectations, you could implement it in your production environment as a plugin even if it had not yet been merged into the official Great Expectations code base and released as a new version.
 
 ### Component specific functionality
 
-Because Plugins often extend the functionality of existing Greate Expectations components, it is impossible to classify all of their potential features in a few generic statements.  In general, best practices are to include thorough documentation if your are developing or contributing code for use as a Plugin.  If you are using code that was created by someone else, you will have to reference their documentation (and possibly their code itself) in order to determine the features of that specific Plugin.
+Because Plugins often extend the functionality of existing Greate Expectations components, it is impossible to classify all of their potential features in a few generic statements.  In general, best practices are to include thorough documentation if you are developing or contributing code for use as a Plugin.  If you are using code that was created by someone else, you will have to reference their documentation (and possibly their code itself) in order to determine the features of that specific Plugin.
 
 ## API basics
 
