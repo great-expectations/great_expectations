@@ -131,6 +131,10 @@ class ProfilerExecutionError(ProfilerError):
     pass
 
 
+class ProfilerNotFoundError(ProfilerError):
+    pass
+
+
 class InvalidConfigError(DataContextError):
     def __init__(self, message):
         self.message = message

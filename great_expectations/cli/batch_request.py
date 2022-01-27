@@ -368,7 +368,7 @@ Would you like to continue?"""
                 msg_prompt_warning, type=click.Choice(["y", "n"]), show_choices=True
             )
             if confirmation == "y":
-                data_asset_name = get_data_asset_name_from_data_connector(
+                data_asset_name = _get_data_asset_name_from_data_connector(
                     datasource=datasource,
                     data_connector_name=data_connector_name,
                     msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
