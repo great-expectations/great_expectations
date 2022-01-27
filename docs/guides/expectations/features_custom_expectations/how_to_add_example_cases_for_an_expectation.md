@@ -66,7 +66,7 @@ To begin with, let's implement those two basic tests: one positive example case,
 
 #### 2. Defining our data
 
-Search for `examples = []` in the template file you are modifying for your new custom Expectation. 
+Search for `examples = []` in the template file you are modifying for your new Custom Expectation. 
 We're going to populate `examples` with a list of example cases.
 
 <details>
