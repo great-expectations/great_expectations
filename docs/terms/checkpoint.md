@@ -76,7 +76,7 @@ For an in-depth guide on Checkpoint creation, see our [guide on how to create a 
 ### Checkpoint configuration
 
 A Checkpoint uses its configuration to determine what data to validate against which Expectation Suite(s), and what
-actions to perform on the Validation Results - these validations and actions are executed by calling a
+actions to perform on the Validation Results - these validations and Actions are executed by calling a
 Checkpoint's `run` method (analogous to calling `validate` with a single Batch). Checkpoint configurations are very
 flexible. At one end of the spectrum, you can specify a complete configuration in a Checkpoint's YAML file, and simply
 call `my_checkpoint.run()`. At the other end, you can specify a minimal configuration in the YAML file and provide
