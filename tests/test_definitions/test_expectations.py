@@ -53,11 +53,29 @@ def pytest_generate_tests(metafunc):
 
                 for d in test_configuration["datasets"]:
                     datasets = []
+                    # optional only_for and suppress_test flag at the datasets-level that can prevent data being
+                    # added to incompatible backends. Currently only used by expect_column_values_to_be_unique
+                    only_for = d.get("only_for", None)
+                    if only_for and not isinstance(only_for, list):
+                        raise ValueError(
+                            "Invalid test specification. 'only_for' should be passed in as a list"
+                        )
+                    suppress_test_for = d.get("suppress_test_for", None)
+                    if suppress_test_for and not isinstance(suppress_test_for, list):
+                        raise ValueError(
+                            "Invalid test specification. 'suppress_test_for' should be passed in as a list"
+                        )
                     if candidate_test_is_on_temporary_notimplemented_list(
                         c, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True
                         schemas = data_asset = None
+                    elif suppress_test_for and (
+                        c is suppress_test_for or c in suppress_test_for
+                    ):
+                        continue
+                    elif only_for and (c is only_for or c in only_for):
+                        continue
                     else:
                         skip_expectation = False
                         if isinstance(d["data"], list):
@@ -98,7 +116,9 @@ def pytest_generate_tests(metafunc):
                             # if we're not on the "only_for" list, then never even generate the test
                             generate_test = False
                             if not isinstance(test["only_for"], list):
-                                raise ValueError("Invalid test specification.")
+                                raise ValueError(
+                                    "Invalid test specification. 'only_for' should be passed in as a list"
+                                )
 
                             if isinstance(data_asset, SqlAlchemyDataset):
                                 # Call out supported dialects
@@ -164,54 +184,65 @@ def pytest_generate_tests(metafunc):
                         if not generate_test:
                             continue
 
-                        if "suppress_test_for" in test and (
-                            (
+                        if "suppress_test_for" in test:
+                            if not isinstance(test["suppress_test_for"], list):
+                                raise ValueError(
+                                    "Invalid test specification. 'suppress_test_for' should be passed in as a list"
+                                )
+
+                            if (
                                 "sqlalchemy" in test["suppress_test_for"]
                                 and isinstance(data_asset, SqlAlchemyDataset)
-                            )
-                            or (
-                                "sqlite" in test["suppress_test_for"]
-                                and sqliteDialect is not None
-                                and isinstance(data_asset, SqlAlchemyDataset)
-                                and isinstance(data_asset.engine.dialect, sqliteDialect)
-                            )
-                            or (
-                                "postgresql" in test["suppress_test_for"]
-                                and postgresqlDialect is not None
-                                and isinstance(data_asset, SqlAlchemyDataset)
-                                and isinstance(
-                                    data_asset.engine.dialect, postgresqlDialect
+                                or (
+                                    "sqlite" in test["suppress_test_for"]
+                                    and sqliteDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and isinstance(
+                                        data_asset.engine.dialect, sqliteDialect
+                                    )
                                 )
-                            )
-                            or (
-                                "mysql" in test["suppress_test_for"]
-                                and mysqlDialect is not None
-                                and isinstance(data_asset, SqlAlchemyDataset)
-                                and isinstance(data_asset.engine.dialect, mysqlDialect)
-                            )
-                            or (
-                                "mssql" in test["suppress_test_for"]
-                                and mssqlDialect is not None
-                                and isinstance(data_asset, SqlAlchemyDataset)
-                                and isinstance(data_asset.engine.dialect, mssqlDialect)
-                            )
-                            or (
-                                "bigquery" in test["suppress_test_for"]
-                                and BigQueryDialect is not None
-                                and isinstance(data_asset, SqlAlchemyDataset)
-                                and hasattr(data_asset.engine.dialect, "name")
-                                and data_asset.engine.dialect.name.lower() == "bigquery"
-                            )
-                            or (
-                                "pandas" in test["suppress_test_for"]
-                                and isinstance(data_asset, PandasDataset)
-                            )
-                            or (
-                                "spark" in test["suppress_test_for"]
-                                and isinstance(data_asset, SparkDFDataset)
-                            )
-                        ):
-                            skip_test = True
+                                or (
+                                    "postgresql" in test["suppress_test_for"]
+                                    and postgresqlDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and isinstance(
+                                        data_asset.engine.dialect, postgresqlDialect
+                                    )
+                                )
+                                or (
+                                    "mysql" in test["suppress_test_for"]
+                                    and mysqlDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and isinstance(
+                                        data_asset.engine.dialect, mysqlDialect
+                                    )
+                                )
+                                or (
+                                    "mssql" in test["suppress_test_for"]
+                                    and mssqlDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and isinstance(
+                                        data_asset.engine.dialect, mssqlDialect
+                                    )
+                                )
+                                or (
+                                    "bigquery" in test["suppress_test_for"]
+                                    and BigQueryDialect is not None
+                                    and isinstance(data_asset, SqlAlchemyDataset)
+                                    and hasattr(data_asset.engine.dialect, "name")
+                                    and data_asset.engine.dialect.name.lower()
+                                    == "bigquery"
+                                )
+                                or (
+                                    "pandas" in test["suppress_test_for"]
+                                    and isinstance(data_asset, PandasDataset)
+                                )
+                                or (
+                                    "spark" in test["suppress_test_for"]
+                                    and isinstance(data_asset, SparkDFDataset)
+                                )
+                            ):
+                                skip_test = True
                         # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
                         if "allow_cross_type_comparisons" in test["in"] and isinstance(
                             data_asset, SqlAlchemyDataset

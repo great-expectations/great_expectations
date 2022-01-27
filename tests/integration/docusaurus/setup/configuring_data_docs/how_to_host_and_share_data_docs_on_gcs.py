@@ -31,7 +31,7 @@ create_data_docs_directory = create_data_docs_directory.replace(
     "<YOUR GCP PROJECT NAME>", "ge-oss-ci-cd"
 )
 create_data_docs_directory = create_data_docs_directory.replace(
-    "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs" 
+    "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs"
 )
 
 result = subprocess.run(
