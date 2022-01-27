@@ -198,8 +198,8 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # GCP project and BigQuery dataset information and not for general use. It is only to support testing.
-gcp_project = os.environ.get("GCP_PROJECT", "ge-oss-ci-cd")
-bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET", "demo")
+gcp_project = os.environ.get("GE_TEST_BIGQUERY_PROJECT", "ge-oss-ci-cd")
+bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET", "demo")
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
