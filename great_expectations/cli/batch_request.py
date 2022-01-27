@@ -4,6 +4,9 @@ import re
 import uuid
 from typing import Any, Dict, List, Optional, Union, cast
 
+from great_expectations.datasource.data_connector.runtime_data_connector import (
+    RuntimeDataConnector,
+)
 from great_expectations.util import get_sqlalchemy_inspector
 
 try:
@@ -66,17 +69,18 @@ def get_batch_request(
     available_data_asset_names_by_data_connector_dict: Dict[
         str, List[str]
     ] = datasource.get_available_data_asset_names()
-    data_connector_name: Optional[str] = select_data_connector_name(
+    data_connector_name: str = select_data_connector_name(
         available_data_asset_names_by_data_connector_dict=available_data_asset_names_by_data_connector_dict,
     )
+
+    data_connector = datasource.data_connectors[data_connector_name]
 
     batch_request: Dict[str, Union[str, int, Dict[str, Any]]] = {
         "datasource_name": datasource.name,
         "data_connector_name": data_connector_name,
     }
 
-    data_asset_name: str
-
+    data_asset_name: Optional[str]
     if isinstance(datasource, Datasource):
         msg_prompt_enter_data_asset_name: str = f'\nWhich data asset (accessible by data connector "{data_connector_name}") would you like to use?\n'
         data_asset_name = _get_data_asset_name_from_data_connector(
@@ -95,10 +99,14 @@ def get_batch_request(
         )
     else:
         raise ge_exceptions.DataContextError(
-            "Datasource {:s} of unsupported type {:s} was encountered.".format(
-                datasource.name, str(type(datasource))
-            )
+            f"Datasource '{datasource.name}' of unsupported type {type(datasource)} was encountered."
         )
+
+    if data_asset_name is None:
+        if isinstance(data_connector, RuntimeDataConnector):
+            pass
+        else:
+            raise ge_exceptions.InvalidConfigError("message")
 
     batch_request.update(
         {
@@ -129,17 +137,18 @@ def select_data_connector_name(
     available_data_asset_names_by_data_connector_dict: Optional[
         Dict[str, List[str]]
     ] = None,
-) -> Optional[str]:
+) -> str:
+    breakpoint()
     msg_prompt_select_data_connector_name = "Select data_connector"
+
+    if not available_data_asset_names_by_data_connector_dict:
+        available_data_asset_names_by_data_connector_dict = {}
 
     num_available_data_asset_names_by_data_connector = len(
         available_data_asset_names_by_data_connector_dict
     )
 
-    if (
-        available_data_asset_names_by_data_connector_dict is None
-        or num_available_data_asset_names_by_data_connector == 0
-    ):
+    if num_available_data_asset_names_by_data_connector == 0:
         return None
 
     if num_available_data_asset_names_by_data_connector == 1:
@@ -206,8 +215,11 @@ def _get_data_asset_name_from_data_connector(
     data_asset_name: Optional[str] = None
     num_data_assets = len(available_data_asset_names)
 
+    # No available data assets to paginate or search through so we exit early
+    if num_data_assets == 0:
+        return None
     # If we have a large number of assets, give the user the ability to paginate or search
-    if num_data_assets > 100:
+    elif num_data_assets > 100:
         prompt = f"You have a list of {num_data_assets:,} data assets. Would you like to list them [l] or search [s]?\n"
         user_selected_option: Optional[str] = None
         while user_selected_option is None:
@@ -245,10 +257,6 @@ def _list_available_data_asset_names(
         available_data_asset_names_str[i : i + PAGE_SIZE]
         for i in range(0, len(available_data_asset_names_str), PAGE_SIZE)
     ]
-
-    # No available data assets to paginate or search through so we exit early
-    if len(data_asset_pages) == 0:
-        return None
 
     display_idx = 0  # Used to traverse between pages
     data_asset_name: Optional[str] = None
