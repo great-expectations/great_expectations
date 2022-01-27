@@ -9,7 +9,9 @@
       "n" : [null, null, 2, null],
       "unique" : [1, 2, 3, null],
       "null": [null, null, null, null],
-      "mult_dup": ["1", "1", "2", "2"]
+      "mult_dup": ["1", "1", "2", "2"],
+      "0": [1, 2, 3, 4],
+      "_c0": [1, 2, 3, 4]
     },
     "schemas": {
       "spark": {
@@ -20,7 +22,9 @@
         "n": "IntegerType",
         "unique": "IntegerType",
         "null": "NullType",
-        "mult_dup": "StringType"
+        "mult_dup": "StringType",
+        "0": "IntegerType",
+        "_c0": "IntegerType"
       },
       "mssql": {
         "a": "VARCHAR",
@@ -30,7 +34,9 @@
         "n": "INTEGER",
         "unique": "INTEGER",
         "null": "NVARCHAR",
-        "mult_dup": "VARCHAR"
+        "mult_dup": "VARCHAR",
+        "0": "INTEGER",
+        "_c0": "INTEGER"
       },
       "mysql": {
         "a": "CHAR",
@@ -40,17 +46,9 @@
         "n": "INTEGER",
         "unique": "INTEGER",
         "null": "CHAR",
-        "mult_dup": "CHAR"
-      },
-      "bigquery": {
-        "a": "STRING",
-        "b": "STRING",
-        "c": "NUMERIC",
-        "d": "STRING",
-        "n": "NUMERIC",
-        "unique": "NUMERIC",
-        "null": "STRING",
-        "mult_dup": "STRING"
+        "mult_dup": "CHAR",
+        "0": "INTEGER",
+        "_c0": "INTEGER"
       }
     },
     "tests" : [
@@ -157,25 +155,9 @@
           "unexpected_list": ["1", "1", "2", "2"],
           "unexpected_index_list": [0, 1, 2, 3]
         }
-      }
-    ]
-  },
-   {
-    "data" : {
-      "0": [1, 2, 3, 4],
-      "_c0": [1, 2, 3, 4]
-    },
-    "schemas": {
-      "spark": {
-        "0": "IntegerType",
-        "_c0": "IntegerType"
-      }
-    },
-    "only_for": "spark",
-    "tests" : [
+      },
       {
         "title": "positive_integer_column_name",
-        "only_for": "spark",
         "exact_match_out": false,
         "in": {
           "column": "0"
@@ -186,7 +168,6 @@
       },
       {
         "title": "positive_spark_headerless_column_name",
-        "only_for": "spark",
         "exact_match_out": false,
         "in": {
           "column": "_c0"
