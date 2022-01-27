@@ -55,7 +55,7 @@
         "b": "STRING",
         "c": "NUMERIC",
         "d": "STRING",
-        "n": "INTEGER",
+        "n": "NUMERIC",
         "unique": "NUMERIC",
         "null": "STRING",
         "mult_dup": "STRING",
