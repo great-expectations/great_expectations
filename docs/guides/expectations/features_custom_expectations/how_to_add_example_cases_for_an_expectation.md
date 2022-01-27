@@ -62,7 +62,7 @@ These tests can include examples intended to pass, fail, or error out, and expec
 
 At a minimum, we want to create tests that show what our Custom Expectation will and will *not* do. 
 These basic positive and negative example cases are the minimum amount of test coverage required for a Custom Expectation to be accepted into the Great Expectations codebase at an [Experimental level](../../../contributing/contributing_maturity.md#contributing-expectations).
-To begin with, let's implement those two basic tests; one positive example case, and one negative example case. 
+To begin with, let's implement those two basic tests: one positive example case, and one negative example case. 
 
 #### 2. Defining our data
 
