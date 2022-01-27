@@ -372,6 +372,7 @@ cloud_bigquery_tests = [
     {
         "user_flow_script": "tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "extra_backend_dependencies": BackendDependencies.BIGQUERY,
     },
 ]
 

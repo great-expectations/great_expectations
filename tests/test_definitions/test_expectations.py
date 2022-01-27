@@ -36,7 +36,7 @@ def pytest_generate_tests(metafunc):
         for dir_ in os.listdir(dir_path)
         if os.path.isdir(os.path.join(dir_path, dir_))
     ]
-
+    # expectation_dirs = ["test"]
     parametrized_tests = []
     ids = []
     for expectation_category in expectation_dirs:

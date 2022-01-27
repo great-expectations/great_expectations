@@ -250,7 +250,7 @@ def _create_context(
         if html_dir
         else None
     )
-    bigquery_project = os.environ["GE_TEST_BIGQUERY_PROJECT"]
+    bigquery_project = os.environ.get("GE_TEST_BIGQUERY_PROJECT", "ge-oss-ci-cd")
     bigquery_dataset = os.environ.get(
         "GE_TEST_BIGQUERY_PERFORMANCE_DATASET", "performance_ci"
     )

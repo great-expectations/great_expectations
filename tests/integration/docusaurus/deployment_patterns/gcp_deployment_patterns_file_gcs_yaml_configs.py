@@ -58,10 +58,10 @@ expectations_store_name: expectations_GCS_store
 configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "project"
-] = "superconductive-internal"
+] = "ge-oss-ci-cd"
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "bucket"
-] = "superconductive-integration-tests"
+] = "test_metadata_store"
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "prefix"
 ] = "metadata/expectations"
@@ -138,10 +138,10 @@ validations_store_name: validations_GCS_store
 configured_validations_store = yaml.safe_load(configured_validations_store_yaml)
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "project"
-] = "superconductive-internal"
+] = "ge-oss-ci-cd"
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "bucket"
-] = "superconductive-integration-tests"
+] = "test_metadata_store"
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "prefix"
 ] = "metadata/validations"
@@ -181,10 +181,10 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 """
 data_docs_site_yaml = data_docs_site_yaml.replace(
-    "<YOUR GCP PROJECT NAME>", "superconductive-internal"
+    "<YOUR GCP PROJECT NAME>", "ge-oss-ci-cd"
 )
 data_docs_site_yaml = data_docs_site_yaml.replace(
-    "<YOUR GCS BUCKET NAME>", "superconductive-integration-datadocs-tests"
+    "<YOUR GCS BUCKET NAME>", "test_datadocs_store"
 )
 great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
@@ -220,11 +220,9 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
+datasource_yaml = datasource_yaml.replace("<YOUR_GCS_BUCKET_HERE>", "test_docs_data")
 datasource_yaml = datasource_yaml.replace(
-    "<YOUR_GCS_BUCKET_HERE>", "superconductive-integration-tests"
-)
-datasource_yaml = datasource_yaml.replace(
-    "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
+    "<BUCKET_PATH_TO_DATA>", "taxi_yellow_tripdata_samples/"
 )
 
 context.test_yaml_config(datasource_yaml)
@@ -240,7 +238,7 @@ batch_request = BatchRequest(
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = (
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
+    "taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
 context.create_expectation_suite(
@@ -259,9 +257,9 @@ assert set(
         "default_inferred_data_connector_name"
     ]
 ) == {
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02",
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03",
+    "taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
+    "taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02",
+    "taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03",
 }
 
 validator.expect_column_values_to_not_be_null(column="passenger_count")
@@ -287,7 +285,7 @@ validations:
 """
 checkpoint_config = checkpoint_config.replace(
     "<YOUR_DATA_ASSET_NAME>",
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
+    "taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
 )
 context.add_checkpoint(**yaml.safe_load(checkpoint_config))
 checkpoint_result = context.run_checkpoint(

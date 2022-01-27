@@ -11,7 +11,7 @@ context = ge.get_context()
 great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
-with open(great_expectations_yaml_file_path, "r") as f:
+with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.safe_load(f)
 
 stores = great_expectations_yaml["stores"]
@@ -57,10 +57,10 @@ expectations_store_name: expectations_GCS_store
 configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "project"
-] = "superconductive-internal"
+] = "ge-oss-ci-cd"
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "bucket"
-] = "superconductive-integration-tests"
+] = "test_metadata_store"
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "prefix"
 ] = "how_to_configure_an_expectation_store_in_gcs/expectations"
@@ -68,7 +68,7 @@ configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend
 try:
     # remove this bucket if there was a failure in the script last time
     result = subprocess.run(
-        "gsutil rm -r gs://superconductive-integration-tests/how_to_configure_an_expectation_store_in_gcs/expectations".split(),
+        "gsutil rm -r gs://test_metadata_store/how_to_configure_an_expectation_store_in_gcs/expectations".split(),
         check=True,
         stderr=subprocess.PIPE,
     )
@@ -80,7 +80,7 @@ context.add_store(
     store_name=configured_expectations_store["expectations_store_name"],
     store_config=configured_expectations_store["stores"]["expectations_GCS_store"],
 )
-with open(great_expectations_yaml_file_path, "r") as f:
+with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.safe_load(f)
 great_expectations_yaml["expectations_store_name"] = "expectations_GCS_store"
 great_expectations_yaml["stores"]["expectations_GCS_store"]["store_backend"].pop(
@@ -181,7 +181,7 @@ assert "my_expectation_suite" in stdout
 
 # clean up this bucket for next time
 result = subprocess.run(
-    "gsutil rm -r gs://superconductive-integration-tests/how_to_configure_an_expectation_store_in_gcs/expectations".split(),
+    "gsutil rm -r gs://test_metadata_store/how_to_configure_an_expectation_store_in_gcs/expectations".split(),
     check=True,
     stderr=subprocess.PIPE,
 )
