@@ -35,7 +35,7 @@ stages:
             name: gcp_authkey
             displayName: 'Download Google Service Account'
             inputs:
-              secureFile: 'superconductive-service-acct.json'
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
 
           - script: |
