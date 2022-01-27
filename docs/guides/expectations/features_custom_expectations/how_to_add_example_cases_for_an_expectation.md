@@ -13,8 +13,8 @@ This guide will help you add example cases to document and test the behavior of 
 
 
 Example cases in Great Expectations serve a dual purpose:
-* They help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate;
-* And provide test cases that the Great Expectations testing framework can execute automatically.
+* First, they help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate.
+* Second, they provide test cases that the Great Expectations testing framework can execute automatically.
 
 If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will render these examples.
 
