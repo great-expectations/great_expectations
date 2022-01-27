@@ -9,7 +9,7 @@
       "n" : [null, null, 2, null],
       "unique" : [1, 2, 3, null],
       "null": [null, null, null, null],
-      "mult_dup": ["1", "1", "2", "2"],
+      "mult_dup": ["1", "1", "2", "2"]
     },
     "schemas": {
       "spark": {
