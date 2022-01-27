@@ -3,9 +3,14 @@ Checking project...[0m
 
 ================================================================================
 [0m
-++====================================++
-|| UpgradeHelperV13: Upgrade Overview ||
-++====================================++
+++=====================================================++
+|| UpgradeHelperV13: Upgrade Overview (V2-API Version) ||
+++=====================================================++
+
+**WARNING**
+You have run the 'great_expectations project upgrade' command using the --v2-api flag, which is not able to perform the full upgrade to the configuration (3.0) that is fully compatible with the V3-API
+
+Please re-run the 'great_expectations project upgrade' command without the --v2-api flag.
 
 UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations V3 API.
 

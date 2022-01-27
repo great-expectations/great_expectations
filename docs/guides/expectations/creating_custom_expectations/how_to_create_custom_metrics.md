@@ -156,7 +156,7 @@ Define success_keys of your Expectation
 success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 ````
 
-Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Expectations and Metrics](docs/reference/metrics).
+Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Expectations and Metrics](/docs/reference/metrics).
 
 * `ExpectColumnCustomMedianToBeBetween` class that the template implements declares the list of Metrics it needs computes for producing its result:
 

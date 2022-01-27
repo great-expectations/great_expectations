@@ -45,14 +45,14 @@ Grouped together, they constitute a Definition of Done for Expectations at each 
 
 ## How these docs are organized
 
-The docs in `Creating Custom Expectations` focus on completing the four steps for Experimental Expectations. Completing them will get to the point where your Expectation can be executed against one backend, with a couple tests to verify correctness, and a basic docstring and metadata to support diagonstics. Optionally, you can also publish experimental Expectations to the [Great Expectations open source gallery](https://greatexpectations.io/expectations) by following the steps [here](overview.md#publishing-your-expectation-as-an-open-source-contribution).
+The docs in `Creating Custom Expectations` focus on completing the four steps for Experimental Expectations. Completing them will get to the point where your Expectation can be executed against one backend, with a couple tests to verify correctness, and a basic docstring and metadata to support diagonstics. Optionally, you can also publish experimental Expectations to the [Great Expectations open source gallery](https://greatexpectations.io/expectations) by following the steps [here](./overview.md#publishing-your-expectation-as-an-open-source-contribution).
 
 The code to achieve the first four steps looks somewhat different depending on the class of Expectation you're developing. Accordingly, there are separate how-to guides and templates for each class of Expectation.
 
 | Guide: "How to create a custom..." |  Template |
 |-----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Column Map Expectation](how_to_create_custom_column_map_expectations.md)             | [column_map_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py)       |
-| [Column Aggregate Expectation](how_to_create_custom_column_aggregate_expectations.md) | [column_aggregate_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py) |
+| [Column Map Expectation](./how_to_create_custom_column_map_expectations.md)             | [column_map_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py)       |
+| [Column Aggregate Expectation](./how_to_create_custom_column_aggregate_expectations.md) | [column_aggregate_expectation_template](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py) |
 
 :::note 
 Not all classes of Expectation currently have guides and templates. <br></br>
