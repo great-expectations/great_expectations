@@ -34,7 +34,7 @@ class ColumnCustomMax(ColumnMetricProvider):
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, _table, _column_name, **kwargs):
         """Spark Max Implementation"""
-        return F.maxcolumn()
+        return F.max(column)
 
 
 class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
@@ -46,7 +46,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
             "data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
             "tests": [
                 {
-                    "title": "positive_test",
+                    "title": "baisc_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
@@ -59,7 +59,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
                     "out": {"success": True},
                 },
                 {
-                    "title": "negative_test",
+                    "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
@@ -136,4 +136,4 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    print(ExpectColumnMaxToBeBetweenCustom().generate_diagnostic_checklist())
+    print(ExpectColumnMaxToBeBetweenCustom().print_diagnostic_checklist())
