@@ -1,20 +1,19 @@
 ---
 title: Contributing a Package
 ---
-import Prerequisites from '../guides/connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from './components/prerequisites.jsx'
 
 This guide demonstrates how to bundle your own custom Expectations, Metrics, and Profilers into an official Great Expectations contributor package.
 
 <Prerequisites>
 
-* Clone the official `great_expectations` repo on your local machine.
-* Create an account on [PyPi](https://pypi.org/account/register/)
+* Created an account on [PyPi](https://pypi.org/account/register/)
 
 </Prerequisites>
 
-## Steps
+### Steps
 
-### 1. Install the `great_expectations_contrib` CLI Tool
+#### 1. Install the `great_expectations_contrib` CLI Tool
 
 To streamline the process of contributing a package to Great Expectations, we've developed a CLI tool to
 abstract away some of the complexity and help you adhere to our codebases' best practices. Please 
@@ -39,7 +38,7 @@ great_expectations_contrib
 
 ---
 
-### 2. Initialize a project
+#### 2. Initialize a project
 
 Once the CLI tool is enabled, we need to intialize an empty package.
 
@@ -52,7 +51,7 @@ This will prompt you to answer a number of questions, such as:
 * What your package is about
 * Your GitHub and PyPi usernames
 
-Please answer these questions to the best of your ability as they will be leveraged when
+The answers to these questions will be leveraged when
 publishing your package. Upon completing the required prompts, you'll receive a confirmation
 message and be able to view your package in its initial state.
 
@@ -92,20 +91,16 @@ please maintain this general structure during your development.
 
 ---
 
-### 3. Contribute to your package
+#### 3. Contribute to your package
 
 Now that your package has been initialized, it's time to get coding!
-
-Here's some general guidance to aid your development:
-* Expectations - LINK TO COME
-* Metrics - LINK TO COME
-* Profilers - LINK TO COME
 
 You'll want to capture any dependencies in your `requirements.txt`, validate your code
 in `tests`, detail your package's capabilities in `README.md`, and update any relevant 
 publishing details in `setup.py`. 
 
 As you iterate on your work, you can check your progress using:
+
 ```
 great_expectations_contrib check
 ```
@@ -120,7 +115,7 @@ Using `great_expectations_contrib` as part of your development loop will help yo
 keep on track and provide you with a checklist of necessary items to get your package
 across the finish line!
 
-### 4. Publish your package
+#### 4. Publish your package
 
 Once you've written your package, tested its behavior, and documented its capabilities,
 the final step is to get your work published.
@@ -131,4 +126,14 @@ great_expectations_contrib publish
 ```
 
 As long as you've passed the necessary checks, you'll be prompted to provide your
-PyPi username and password.
+PyPi username and password, and your package will be published!
+
+<div style={{"text-align":"center"}}>
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
+Congratulations!<br/>&#127881; You've just published your first Great Expectations contributor package! &#127881;
+</b></p>
+</div>
+
+#### 5. Contribution (Optional)
+
+Your package can also be submitted as a contribution to the Great Expectations codebase, under the same [Maturity Level](./contributing_maturity.md#contributing-expectations) requirements as [Custom Expectations](../guides/expectations/creating_custom_expectations/overview.md).
