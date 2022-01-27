@@ -47,6 +47,9 @@ from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymi
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
 )
+from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
+    ProfilerAnonymizer,
+)
 from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
     StoreAnonymizer,
 )
@@ -111,6 +114,7 @@ from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
@@ -284,6 +288,9 @@ class BaseDataContext:
         "Checkpoint",
         "SimpleCheckpoint",
     ]
+    TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
+        "RuleBasedProfiler",
+    ]
     ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
         "__substitution_error__",
         "__yaml_parse_error__",
@@ -295,6 +302,7 @@ class BaseDataContext:
         + TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES
         + TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES
         + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
+        + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
     )
 
     _data_context = None
@@ -3380,6 +3388,13 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 ) = self._test_instantiation_of_data_connector_from_yaml_config(
                     name, class_name, config, runtime_environment
                 )
+            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES:
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._test_instantiation_of_profiler_from_yaml_config(
+                    name, class_name, config
+                )
             else:
                 (
                     instantiated_class,
@@ -3622,6 +3637,36 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             data_connector_anonymizer.anonymize_data_connector_info(
                 name=data_connector_name, config=config
             )
+        )
+        return instantiated_class, usage_stats_event_payload
+
+    def _test_instantiation_of_profiler_from_yaml_config(
+        self, name: Optional[str], class_name: str, config: CommentedMap
+    ) -> Tuple[RuleBasedProfiler, dict]:
+        """
+        Helper to create profiler instance and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
+        print(f"\tInstantiating as a {class_name}, since class_name is {class_name}")
+
+        profiler_name = name or config.get("name") or "my_temp_profiler"
+
+        profiler_config = RuleBasedProfilerConfig.from_commented_map(
+            commented_map=config
+        )
+        profiler_config = profiler_config.to_json_dict()
+        profiler_config.update({"name": profiler_name})
+
+        instantiated_class = instantiate_class_from_config(
+            config=profiler_config,
+            runtime_environment={"data_context": self},
+            config_defaults={"module_name": "great_expectations.rule_based_profiler"},
+        )
+
+        profiler_anonymizer = ProfilerAnonymizer(self.data_context_id)
+
+        usage_stats_event_payload = profiler_anonymizer.anonymize_profiler_info(
+            name=profiler_name, config=profiler_config
         )
         return instantiated_class, usage_stats_event_payload
 
