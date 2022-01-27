@@ -1,4 +1,5 @@
 import datetime
+import itertools
 import json
 import os
 import tempfile
@@ -9,8 +10,11 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
+from great_expectations.data_context.data_context import BaseDataContext
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.util import load_class
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
@@ -1343,3 +1347,84 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
     assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_rule_based_profiler_integration(
+    mock_emit, caplog, empty_data_context_stats_enabled, test_df, tmp_path_factory
+):
+    context = empty_data_context_stats_enabled
+    yaml_config = """
+    name: my_profiler
+    class_name: RuleBasedProfiler
+    module_name: great_expectations.rule_based_profiler
+    config_version: 1.0
+    variables:
+      integer_type: INTEGER
+      timestamp_type: TIMESTAMP
+      max_user_id: 999999999999
+      min_timestamp: 2004-10-19 10:23:54
+    rules:
+      my_rule_for_user_ids:
+        name: my_rule_for_user_ids
+        class_name: Rule
+        module_name: great_expectations.rule_based_profiler.rule
+        domain_builder:
+          class_name: TableDomainBuilder
+        expectation_configuration_builders:
+          - expectation_type: expect_column_values_to_be_of_type
+            class_name: DefaultExpectationConfigurationBuilder
+    """
+    instantiated_class = context.test_yaml_config(
+        yaml_config=yaml_config, name="my_profiler", class_name="Profiler"
+    )
+
+    # Ensure valid return type and content
+    assert isinstance(instantiated_class, RuleBasedProfiler)
+    assert instantiated_class.name == "my_profiler"
+
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+
+
+def test_test_yaml_config_supported_types_have_self_check():
+    # Each major category of test_yaml_config supported types has its own origin module_name
+    supported_types = [
+        (
+            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES,
+            "great_expectations.data_context.store",
+        ),
+        (
+            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES,
+            "great_expectations.datasource",
+        ),
+        (
+            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES,
+            "great_expectations.datasource.data_connector",
+        ),
+        (
+            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES,
+            "great_expectations.checkpoint",
+        ),
+        (
+            BaseDataContext.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES,
+            "great_expectations.rule_based_profiler",
+        ),
+    ]
+
+    # Quick sanity check to ensure that we are testing ALL supported types herein
+    all_types = list(itertools.chain.from_iterable(t[0] for t in supported_types))
+    assert sorted(all_types) == sorted(
+        BaseDataContext.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+    )
+
+    # Use class_name and module_name to get the class type and introspect to confirm adherence to self_check requirement
+    for category, module_name in supported_types:
+        for class_name in category:
+            class_ = load_class(class_name=class_name, module_name=module_name)
+            assert hasattr(class_, "self_check") and callable(
+                class_.self_check
+            ), f"Class '{class_}' is missing the required `self_check()` method"

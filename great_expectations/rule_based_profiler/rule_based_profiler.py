@@ -136,6 +136,14 @@ class RuleBasedProfiler:
             "variables": variables,
         }
 
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def variables(self) -> dict:
+        return self._variables
+
     @staticmethod
     def _init_rules(
         rules: Dict[str, CommentedMap],
@@ -208,11 +216,13 @@ class RuleBasedProfiler:
     def _init_parameter_builders(
         parameter_builder_configs: Optional[List[CommentedMap]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
-    ) -> List[ParameterBuilder]:
+    ) -> Optional[List[ParameterBuilder]]:
         if parameter_builder_configs is None:
-            parameter_builder_configs = []
+            return None
 
         parameter_builders: List[ParameterBuilder] = []
+
+        parameter_builder_config: CommentedMap
         for parameter_builder_config in parameter_builder_configs:
             parameter_builder = instantiate_class_from_config(
                 config=parameter_builder_config,
@@ -284,3 +294,28 @@ class RuleBasedProfiler:
                 )
 
         return expectation_suite
+
+    def self_check(self, pretty_print=True) -> dict:
+        """
+        Necessary to enable integration with `DataContext.test_yaml_config`
+
+        Args:
+            pretty_print: flag to turn on verbose output
+
+        Returns:
+            Dictionary that contains RuleBasedProfiler state
+
+        """
+        # Provide visibility into parameters that RuleBasedProfiler was instantiated with.
+        report_object: dict = {"config": self._citation}
+
+        if pretty_print:
+            print(f"\nRuleBasedProfiler class name: {self.name}")
+
+            if not self._variables:
+                print(
+                    'Your current RuleBasedProfiler configuration has an empty "variables" attribute. \
+                    Please ensure you populate it if you\'d like to reference values in your "rules" attribute.'
+                )
+
+        return report_object
