@@ -83,8 +83,7 @@ def test_taxi_trips_benchmark(
         )
 
     # Do some basic sanity checks.
-    assert result
-    assert result.success
+    assert result.success, result
     assert len(result.run_results) == number_of_tables
     if write_data_docs:
         html_file_paths = list(Path(html_dir).glob("validations/**/*.html"))
