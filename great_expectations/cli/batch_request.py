@@ -246,6 +246,10 @@ def _list_available_data_asset_names(
         for i in range(0, len(available_data_asset_names_str), PAGE_SIZE)
     ]
 
+    # No available data assets to paginate or search through so we exit early
+    if len(data_asset_pages) == 0:
+        return None
+
     display_idx = 0  # Used to traverse between pages
     data_asset_name: Optional[str] = None
     while data_asset_name is None:
