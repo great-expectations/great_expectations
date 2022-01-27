@@ -50,10 +50,16 @@ def pytest_generate_tests(metafunc):
 
                 for d in test_configuration["datasets"]:
                     datasets = []
+                    # optional only_for flag that can prevent data being added to incompatible backends.
+                    # currently only used by expect_column_values_to_be_unique
+                    only_for = d.get("only_for", None)
                     if candidate_test_is_on_temporary_notimplemented_list_cfe(
                         c, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True
+                    elif only_for:
+                        if c is not only_for:
+                            continue
                     else:
                         skip_expectation = False
                         if isinstance(d["data"], list):
