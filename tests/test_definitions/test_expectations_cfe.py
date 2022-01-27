@@ -34,6 +34,7 @@ def pytest_generate_tests(metafunc):
         for dir_ in os.listdir(dir_path)
         if os.path.isdir(os.path.join(dir_path, dir_))
     ]
+    # expectation_dirs = ["test"]
     parametrized_tests = []
     ids = []
     backends = build_test_backends_list_cfe(metafunc)
@@ -50,10 +51,15 @@ def pytest_generate_tests(metafunc):
 
                 for d in test_configuration["datasets"]:
                     datasets = []
+                    # optional flags that can prevent data from being added to backend
+                    only_for = d.get("only_for", None)
                     if candidate_test_is_on_temporary_notimplemented_list_cfe(
                         c, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True
+                    elif only_for:
+                        if c is not only_for:
+                            continue
                     else:
                         skip_expectation = False
                         if isinstance(d["data"], list):

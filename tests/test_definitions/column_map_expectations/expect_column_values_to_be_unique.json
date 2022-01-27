@@ -40,7 +40,7 @@
         "n": "INTEGER",
         "unique": "INTEGER",
         "null": "CHAR",
-        "mult_dup": "CHAR",
+        "mult_dup": "CHAR"
       },
       "bigquery": {
         "a": "STRING",
@@ -169,11 +169,13 @@
       "spark": {
         "0": "IntegerType",
         "_c0": "IntegerType"
+      }
     },
+    "only_for": "spark",
     "tests" : [
       {
         "title": "positive_integer_column_name",
-        "only_for": ["spark"],
+        "only_for": "spark",
         "exact_match_out": false,
         "in": {
           "column": "0"
@@ -184,7 +186,7 @@
       },
       {
         "title": "positive_spark_headerless_column_name",
-        "only_for": ["spark"],
+        "only_for": "spark",
         "exact_match_out": false,
         "in": {
           "column": "_c0"
@@ -194,6 +196,5 @@
         }
       }
     ]
-  }
-  ]
+  }]
 }
