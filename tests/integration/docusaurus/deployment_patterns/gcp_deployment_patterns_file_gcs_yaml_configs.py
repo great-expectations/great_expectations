@@ -287,7 +287,7 @@ validations:
 """
 checkpoint_config = checkpoint_config.replace(
     "<YOUR_DATA_ASSET_NAME>",
-    "taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
 )
 context.add_checkpoint(**yaml.safe_load(checkpoint_config))
 checkpoint_result = context.run_checkpoint(

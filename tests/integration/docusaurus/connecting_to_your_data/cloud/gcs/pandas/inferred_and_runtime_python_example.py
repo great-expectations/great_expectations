@@ -83,7 +83,7 @@ batch_request = BatchRequest(
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = (
-    "taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
+    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
 context.create_expectation_suite(
