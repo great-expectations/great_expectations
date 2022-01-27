@@ -80,21 +80,21 @@ Because your Data Context contains the entirety of your Great Expectations proje
 
 As a Great Expectations user, once you have created a Data Context, you will almost always start future work either by using <TechnicalTag relative="../" tag="cli" text="CLI" /> commands from your Data Context's root folder, or by instantiating a `DataContext` in Python:
 
-```title = "Python code"
+```python title="Python code"
 import great_expectations as ge
 context = ge.get_context()
 ```
 
 Alternatively, you might call:
 
-```title = "Python code"
+```python title="Python code"
 import great_expectations as ge
 context = ge.get_context(filepath=”something”)
 ```
 
 If you’re using Great Expectations Cloud, you’d call:
 
-```title = "Python code"
+```python title="Python code"
 import great_expectations as ge
 context = ge.get_context(API_KEY=”something”)
 ```
@@ -113,7 +113,7 @@ Expectations) are the only ones you'll need.
 
 Here's a typical example:
 
-```python
+```python title="Python code"
 config = """
 class_name: Datasource
 execution_engine:
@@ -148,7 +148,7 @@ For more detailed guidance on using the `test_yaml_config()` method, please see 
 
 The code standards for Great Expectations strive for strongly typed inputs.  However, the Data Context's convenience functions are a noted exception to this standard.  For example, to get a Batch with typed input, you would call:
 
-```
+```python title="Python code"
 from great_expectations.core.batch import BatchRequest
 
 batch_request = BatchRequest(
@@ -164,7 +164,7 @@ context.get_batch(
 
 However, we can take some of the friction out of that process by allowing untyped inputs:
 
-```
+```python title="Python code"
 context.get_batch(
     datasource_name="my_azure_datasource",
     data_connector_name="default_inferred_data_connector_name",
