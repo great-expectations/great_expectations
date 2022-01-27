@@ -5,6 +5,7 @@ hoverText: The primary means for validating data in a production deployment of G
 ---
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
+import TechnicalTag from '../term_tags/_tag.mdx';
 import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
 <UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/>
@@ -17,17 +18,15 @@ A Checkpoint is the primary means for validating data in a production deployment
 
 ### Features and promises
 
-Checkpoints provide a convenient abstraction for bundling the validation of a Batch (or Batches) of data against an
-Expectation Suite (or several), as well as the actions that should be taken after the validation. Like Expectation
-Suites and Validation Results, Checkpoints are managed using a Data Context, and have their own Store which is used to
-persist their configurations to YAML files. These configurations can be committed to version control and shared with
-your team.
+Checkpoints provide a convenient abstraction for bundling the <TechnicalTag relative="../" tag="validation" text="Validation" /> of a <TechnicalTag relative="../" tag="batch" text="Batch (or Batches)" /> of data against an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> (or several), as well as the <TechnicalTag relative="../" tag="action" text="Actions" /> that should be taken after the validation. 
+
+Like Expectation Suites and <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, Checkpoints are managed using a <TechnicalTag relative="../" tag="data_context" text="Data Context" />, and have their own Store which is used to persist their configurations to YAML files. These configurations can be committed to version control and shared with your team.
 
 ### Relationships to other objects
 
 ![How a Checkpoint works](../images/universal_map/overviews/how_a_checkpoint_works.png)
 
-A Checkpoint uses a Validator to run one or more Expectation Suites against one or more Batches or Batch Requests. Running a Checkpoint produces Validation Results and will result in optional Actions being performed if they are configured to do so.
+A Checkpoint uses a <TechnicalTag relative="../" tag="validator" text="Validator" /> to run one or more Expectation Suites against one or more Batches provided by one or more <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" />. Running a Checkpoint produces Validation Results and will result in optional Actions being performed if they are configured to do so.
 
 ## Use cases
 
@@ -51,7 +50,7 @@ For an in-depth guide on this process, please see our guide on [how to validate 
 
 ### Reusable
 
-You do not need to re-create a Checkpoint every time you Validate data.  If you have created a Checkpoint that covers your data Validation needs, you can save and re-use it for your future Validation needs.  Since you can set Checkpoints up to receive some of their required information (like batch requests) at run time, it is easy to create Checkpoints that can be readily applied to multiple disparate sources of data.
+You do not need to re-create a Checkpoint every time you Validate data.  If you have created a Checkpoint that covers your data Validation needs, you can save and re-use it for your future Validation needs.  Since you can set Checkpoints up to receive some of their required information (like Batch Requests) at run time, it is easy to create Checkpoints that can be readily applied to multiple disparate sources of data.
 
 ### Actions
 
@@ -75,15 +74,9 @@ For an in-depth guide on Checkpoint creation, see our [guide on how to create a 
 
 ### Checkpoint configuration
 
-A Checkpoint uses its configuration to determine what data to validate against which Expectation Suite(s), and what
-actions to perform on the Validation Results - these validations and Actions are executed by calling a
-Checkpoint's `run` method (analogous to calling `validate` with a single Batch). Checkpoint configurations are very
-flexible. At one end of the spectrum, you can specify a complete configuration in a Checkpoint's YAML file, and simply
-call `my_checkpoint.run()`. At the other end, you can specify a minimal configuration in the YAML file and provide
-missing keys as kwargs when calling `run`.
+A Checkpoint uses its configuration to determine what data to Validate against which Expectation Suite(s), and what actions to perform on the Validation Results - these validations and Actions are executed by calling a Checkpoint's `run` method (analogous to calling `validate` with a single Batch). Checkpoint configurations are very flexible. At one end of the spectrum, you can specify a complete configuration in a Checkpoint's YAML file, and simply call `my_checkpoint.run()`. At the other end, you can specify a minimal configuration in the YAML file and provide missing keys as kwargs when calling `run`.
 
-At runtime, a Checkpoint configuration has three required and three optional keys, and is built using a combination of
-the YAML configuration and any kwargs passed in at runtime:
+At runtime, a Checkpoint configuration has three required and three optional keys, and is built using a combination of the YAML configuration and any kwargs passed in at runtime:
 
 #### Required keys
 
@@ -108,16 +101,11 @@ the YAML configuration and any kwargs passed in at runtime:
 
 1. `class_name`: the class of the Checkpoint to be instantiated, defaults to `Checkpoint`
 1. `template_name`: the name of another Checkpoint to use as a base template
-1. `run_name_template`: a template to create run names, using environment variables and datetime-template syntax (e.g. "
-   %Y-%M-staging-$MY_ENV_VAR")
+1. `run_name_template`: a template to create run names, using environment variables and datetime-template syntax (e.g. "%Y-%M-staging-$MY_ENV_VAR")
 
 #### Configuration defaults and parameter override behavior
 
-Checkpoint configurations follow a nested pattern, where more general keys provide defaults for more specific ones. For
-instance, any required validation dictionary keys (e.g. `expectation_suite_name`) can be specified at the top-level (
-i.e. at the same level as the validations list), serving as runtime defaults. Starting at the earliest reference
-template, if a configuration key is re-specified, its value can be appended, updated, replaced, or cause an error when
-redefined.
+Checkpoint configurations follow a nested pattern, where more general keys provide defaults for more specific ones. For instance, any required validation dictionary keys (e.g. `expectation_suite_name`) can be specified at the top-level (i.e. at the same level as the validations list), serving as runtime defaults. Starting at the earliest reference template, if a configuration key is re-specified, its value can be appended, updated, replaced, or cause an error when redefined.
 
 ##### Replaced
 
@@ -167,7 +155,7 @@ This configuration specifies full validation dictionaries - no nesting (defaults
 
 </TabItem>
 <TabItem value="tab1">
-This configuration specifies four top-level keys ("expectation_suite_name", "action_list", "evaluation_parameters", and "runtime_configuration") that can serve as defaults for each validation, allowing the keys to be omitted from the validation dictionaries. When run, this Checkpoint will perform two validations of two different batches of data, both against the same Expectation Suite ("my_expectation_suite"). Each validation will trigger the same set of actions and use the same evaluation parameters and runtime configuration.
+This configuration specifies four top-level keys ("expectation_suite_name", "action_list", "evaluation_parameters", and "runtime_configuration") that can serve as defaults for each validation, allowing the keys to be omitted from the validation dictionaries. When run, this Checkpoint will perform two Validations of two different Batches of data, both against the same Expectation Suite ("my_expectation_suite"). Each Validation will trigger the same set of Actions and use the same <TechnicalTag relative="../" tag="evaluation_parameter" text="Evaluation Parameters" /> and runtime configuration.
 
 **YAML**:
 
@@ -189,7 +177,7 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 
 </TabItem>
 <TabItem value="tab2">
-This configuration omits the "validations" key from the YAML, which means a "validations " list must be provided when the Checkpoint is run. Because "action_list", "evaluation_parameters", and "runtime_configuration" appear as top-level keys in the YAML configuration, these keys may be omitted from the validation dictionaries, unless a non-default value is desired. When run, this Checkpoint will perform two validations of two different batches of data, with each batch of data validated against a different Expectation Suite ("my_expectation_suite" and "my_other_expectation_suite", respectively). Each validation will trigger the same set of actions and use the same evaluation parameters and runtime configuration.
+This configuration omits the "validations" key from the YAML, which means a "validations " list must be provided when the Checkpoint is run. Because "action_list", "evaluation_parameters", and "runtime_configuration" appear as top-level keys in the YAML configuration, these keys may be omitted from the validation dictionaries, unless a non-default value is desired. When run, this Checkpoint will perform two validations of two different batches of data, with each batch of data validated against a different Expectation Suite ("my_expectation_suite" and "my_other_expectation_suite", respectively). Each Validation will trigger the same set of actions and use the same <TechnicalTag relative="../" tag="evaluation_parameter" text="Evaluation Parameters" /> and runtime configuration.
 
 **YAML**:
 
@@ -265,36 +253,22 @@ This configuration specifies the SimpleCheckpoint class under the "class_name" k
 
 ### SimpleCheckpoint class
 
-For many use cases, the SimpleCheckpoint class can be used to simplify the process of specifying a Checkpoint
-configuration. SimpleCheckpoint provides a basic set of actions - store Validation Result, store evaluation parameters,
-update Data Docs, and optionally, send a Slack notification - allowing you to omit an `action_list` from your
-configuration and at runtime.
+For many use cases, the SimpleCheckpoint class can be used to simplify the process of specifying a Checkpoint configuration. SimpleCheckpoint provides a basic set of actions - store Validation Result, store <TechnicalTag relative="../" tag="evaluation_parameter" text="Evaluation Parameters" />, update <TechnicalTag relative="../" tag="data_docs" text="Data Docs" />, and optionally, send a Slack notification - allowing you to omit an `action_list` from your configuration and at runtime.
 
-Configurations using the SimpleCheckpoint class can optionally specify four additional top-level keys that customize and
-extend the basic set of default actions:
+Configurations using the SimpleCheckpoint class can optionally specify four additional top-level keys that customize and extend the basic set of default actions:
 
 * `site_names`: a list of Data Docs site names to update as part of the update Data Docs action - defaults to "all"
 * `slack_webhook`: if provided, an action will be added that sends a Slack notification to the provided webhook
-* `notify_on`: used to define when a notification is fired, according to Validation Result outcome - `all`, `failure`,
-  or `success`. Defaults to `all`.
+* `notify_on`: used to define when a notification is fired, according to Validation Result outcome - `all`, `failure`, or `success`. Defaults to `all`.
 * `notify_with`: a list of Data Docs site names for which to include a URL in any notifications - defaults to `all`
 
 ### CheckpointResult
 
-The return object of a Checkpoint run is a CheckpointResult object. The `run_results` attribute forms the backbone of
-this type and defines the basic contract for what a Checkpoint's `run` method returns. It is a dictionary where the
-top-level keys are the ValidationResultIdentifiers of the Validation Results generated in the run. Each value is a
-dictionary having at minimum, a `validation_result` key containing an ExpectationSuiteValidationResult and
-an `actions_results` key containing a dictionary where the top-level keys are names of actions performed after that
-particular validation, with values containing any relevant outputs of that action (at minimum and in many cases, this
-would just be a dictionary with the action's `class_name`).
+The return object of a Checkpoint run is a CheckpointResult object. The `run_results` attribute forms the backbone of this type and defines the basic contract for what a Checkpoint's `run` method returns. It is a dictionary where the top-level keys are the ValidationResultIdentifiers of the Validation Results generated in the run. Each value is a dictionary having at minimum, a `validation_result` key containing an ExpectationSuiteValidationResult and an `actions_results` key containing a dictionary where the top-level keys are names of Actions performed after that particular Validation, with values containing any relevant outputs of that action (at minimum and in many cases, this would just be a dictionary with the Action's `class_name`).
 
-The `run_results` dictionary can contain other keys that are relevant for a specific Checkpoint implementation. For
-example, the `run_results` dictionary from a WarningAndFailureExpectationSuiteCheckpoint might have an extra key named "
-expectation_suite_severity_level" to indicate if the suite is at either a "warning" or "failure" level.
+The `run_results` dictionary can contain other keys that are relevant for a specific Checkpoint implementation. For example, the `run_results` dictionary from a WarningAndFailureExpectationSuiteCheckpoint might have an extra key named "expectation_suite_severity_level" to indicate if the suite is at either a "warning" or "failure" level.
 
-CheckpointResult objects include many convenience methods (e.g. `list_data_asset_names`) that make working with
-Checkpoint results easier. You can learn more about these methods in the documentation for class: `great_expectations.checkpoint.types.checkpoint_result.CheckpointResult`.
+CheckpointResult objects include many convenience methods (e.g. `list_data_asset_names`) that make working with Checkpoint results easier. You can learn more about these methods in the documentation for class: `great_expectations.checkpoint.types.checkpoint_result.CheckpointResult`.
 
 Below is an example of a `CheckpointResult` object which itself contains `ValidationResult`, `ExpectationSuiteValidationResult`, and `CheckpointConfig` objects.
 
