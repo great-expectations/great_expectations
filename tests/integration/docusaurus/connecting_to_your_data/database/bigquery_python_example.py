@@ -7,8 +7,8 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 # GCP project and BigQuery dataset information
 # Not for general use. It is only to support testing.
-gcp_project = os.environ.get("GE_TEST_BIGQUERY_PROJECT", "ge-oss-ci-cd")
-bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET", "demo")
+gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+bigquery_dataset = "demo"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 

@@ -97,7 +97,7 @@ validations_store_name: validations_GCS_store
 configured_validations_store = yaml.safe_load(configured_validations_store_yaml)
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "project"
-] = "ge-oss-ci-cd"
+] = gcp_project
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "bucket"
 ] = "test_metadata_store"

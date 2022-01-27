@@ -7,9 +7,12 @@ import great_expectations as ge
 
 context = ge.get_context()
 
+# the following sets the project for tests. You can replace with your GCP project.
+gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+
 # set GCP project
 result = subprocess.run(
-    "gcloud config set project ge-oss-ci-cd".split(),
+    f'gcloud config set project {gcp_project}'.split(),
     check=True,
     stderr=subprocess.PIPE,
 )
@@ -28,7 +31,7 @@ create_data_docs_directory = """
 gsutil mb -p <YOUR GCP PROJECT NAME> -l US-EAST1 -b on gs://<YOUR GCS BUCKET NAME>/
 """
 create_data_docs_directory = create_data_docs_directory.replace(
-    "<YOUR GCP PROJECT NAME>", "ge-oss-ci-cd"
+    "<YOUR GCP PROJECT NAME>", gcp_project
 )
 create_data_docs_directory = create_data_docs_directory.replace(
     "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs"
@@ -145,7 +148,7 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 """
 data_docs_site_yaml = data_docs_site_yaml.replace(
-    "<YOUR GCP PROJECT NAME>", "ge-oss-ci-cd"
+    "<YOUR GCP PROJECT NAME>", gcp_project
 )
 data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR GCS BUCKET NAME>", "superconductive-integration-tests-data-docs"

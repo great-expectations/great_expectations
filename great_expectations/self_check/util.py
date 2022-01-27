@@ -2041,16 +2041,16 @@ def generate_test_table_name(
 
 
 def _create_bigquery_engine() -> Engine:
-    gcp_project = os.getenv("GE_TEST_BIGQUERY_PROJECT", "ge-oss-ci-cd")
+    gcp_project = os.getenv("GE_TEST_GCP_PROJECT")
     if not gcp_project:
         raise ValueError(
-            "Environment Variable GE_TEST_BIGQUERY_PROJECT is required to run BigQuery expectation tests"
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery expectation tests"
         )
     return create_engine(f"bigquery://{gcp_project}/{_bigquery_dataset()}")
 
 
 def _bigquery_dataset() -> str:
-    dataset = os.getenv("GE_TEST_BIGQUERY_DATASET", "test_ci")
+    dataset = os.getenv("GE_TEST_BIGQUERY_DATASET")
     if not dataset:
         raise ValueError(
             "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"

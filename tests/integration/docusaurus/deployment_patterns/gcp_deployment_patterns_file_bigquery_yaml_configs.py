@@ -7,6 +7,8 @@ context = ge.get_context()
 
 import os
 
+gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
@@ -58,7 +60,7 @@ expectations_store_name: expectations_GCS_store
 configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "project"
-] = "ge-oss-ci-cd"
+] = gcp_project
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "bucket"
 ] = "test_metadata_store"
@@ -138,7 +140,7 @@ validations_store_name: validations_GCS_store
 configured_validations_store = yaml.safe_load(configured_validations_store_yaml)
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "project"
-] = "ge-oss-ci-cd"
+] = gcp_project
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "bucket"
 ] = "test_metadata_store"
@@ -181,7 +183,7 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 """
 data_docs_site_yaml = data_docs_site_yaml.replace(
-    "<YOUR GCP PROJECT NAME>", "ge-oss-ci-cd"
+    "<YOUR GCP PROJECT NAME>", gcp_project
 )
 data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR GCS BUCKET NAME>", "test_datadocs_store"
@@ -198,8 +200,8 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # GCP project and BigQuery dataset information and not for general use. It is only to support testing.
-gcp_project = os.environ.get("GE_TEST_BIGQUERY_PROJECT", "ge-oss-ci-cd")
-bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_DATASET", "demo")
+gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+bigquery_dataset = "demo"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 

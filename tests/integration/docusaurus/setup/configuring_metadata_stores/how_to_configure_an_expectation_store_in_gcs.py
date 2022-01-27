@@ -7,6 +7,7 @@ import great_expectations as ge
 
 context = ge.get_context()
 
+
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
@@ -57,7 +58,7 @@ expectations_store_name: expectations_GCS_store
 configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "project"
-] = "ge-oss-ci-cd"
+] = gcp_project
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "bucket"
 ] = "test_metadata_store"
