@@ -115,7 +115,10 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.config.base import RuleConfig
+from great_expectations.rule_based_profiler.config.base import (
+    RuleConfig,
+    ruleBasedProfilerConfigSchema,
+)
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
@@ -3264,22 +3267,27 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         self,
         name: str,
         config_version: float,
-        rules: Dict[str, RuleConfig],
+        rules: Dict[str, dict],
         class_name: str,
         module_name: Optional[str] = None,
         variables: Optional[dict] = None,
         commented_map: Optional[CommentedMap] = None,
+        ge_cloud_id: Optional[str] = None,
     ):
-        config = RuleBasedProfilerConfig(
-            name=name,
-            config_version=config_version,
-            rules=rules,
-            class_name=class_name,
-            module_name=module_name,
-            variables=variables,
-            commented_map=commented_map,
+        config: RuleBasedProfilerConfig = ruleBasedProfilerConfigSchema.load(
+            {
+                "name": name,
+                "config_version": config_version,
+                "rules": rules,
+                "class_name": class_name,
+                "module_name": module_name,
+                "variables": variables,
+                "commented_map": commented_map,
+            }
         )
-        return profiler_toolkit.add_profiler(config)
+        return profiler_toolkit.add_profiler(
+            config=config, data_context=self, ge_cloud_id=ge_cloud_id
+        )
 
     def get_profiler(
         self,

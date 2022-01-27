@@ -13,16 +13,13 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.config.base import (
-    RuleBasedProfilerConfig,
-    ruleBasedProfilerConfigSchema,
-)
+from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.util import filter_properties_dict
 
 
 def add_profiler(
-    data_context: "DataContext",  # noqa: F821
     config: RuleBasedProfilerConfig,
+    data_context: "DataContext",  # noqa: F821
     ge_cloud_id: Optional[str] = None,
 ) -> RuleBasedProfiler:
 
@@ -30,13 +27,8 @@ def add_profiler(
         config, data_context.profiler_store_name
     )
 
-    # TODO(cdkini): Figure out how exactly to do this check!
-    # Schema check of input config to ensure validity before class instantiation and store update
-    config_dict = config.to_raw_dict()
-    cleaned_config = ruleBasedProfilerConfigSchema.load(config_dict)
-
     new_profiler = instantiate_class_from_config(
-        config=cleaned_config,
+        config=config,
         runtime_environment={"data_context": data_context},
         config_defaults={"module_name": "great_expectations.rule_based_profiler"},
     )
@@ -49,7 +41,6 @@ def add_profiler(
             configuration_key=config.name,
         )
 
-    # TODO(cdkini): Figure out what `value=...` should be
     profiler_store = data_context.profiler_store
     profiler_ref = profiler_store.set(key=key, value=config)
     if isinstance(profiler_ref, GeCloudIdAwareRef):
