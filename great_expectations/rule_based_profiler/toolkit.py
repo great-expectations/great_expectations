@@ -1,22 +1,23 @@
 import os
-from typing import Any, List, Optional, Union
+import uuid
+from typing import List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.util import batch_request_contains_batch_data
-from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.base import DataContextConfigDefaults
+from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.util import (
-    deep_filter_properties_iterable,
-    filter_properties_dict,
+from great_expectations.rule_based_profiler.config.base import (
+    RuleBasedProfilerConfig,
+    ruleBasedProfilerConfigSchema,
 )
+from great_expectations.util import filter_properties_dict
 
 
 def add_profiler(
@@ -29,11 +30,10 @@ def add_profiler(
         config, data_context.profiler_store_name
     )
 
-    cleaned_config = deep_filter_properties_iterable(
-        properties=config.to_json_dict(),
-        clean_falsy=True,
-        keep_falsy_numerics=True,
-    )
+    # TODO(cdkini): Figure out how exactly to do this check!
+    # Schema check of input config to ensure validity before class instantiation and store update
+    config_dict = config.to_raw_dict()
+    cleaned_config = ruleBasedProfilerConfigSchema.load(config_dict)
 
     new_profiler = instantiate_class_from_config(
         config=cleaned_config,
@@ -49,30 +49,39 @@ def add_profiler(
             configuration_key=config.name,
         )
 
+    # TODO(cdkini): Figure out what `value=...` should be
+    profiler_store = data_context.profiler_store
+    profiler_ref = profiler_store.set(key=key, value=config)
+    if isinstance(profiler_ref, GeCloudIdAwareRef):
+        ge_cloud_id = profiler_ref.ge_cloud_id
+        new_profiler.ge_cloud_id = uuid.UUID(ge_cloud_id)
+
     return new_profiler
 
 
 def _check_validity_of_batch_requests_in_config(
     config: RuleBasedProfilerConfig, profiler_store_name: str
 ) -> None:
-    json_dict = config.to_raw_dict()
+    # Evaluate nested types in RuleConfig to parse out BatchRequests
+    batch_requests = []
+    for rule in config.rules.values():
 
-    # Recursive helper to walk nested config
-    def _traverse(node: Any) -> None:
-        if not isinstance(node, dict):
-            return
-        for k, v in node.items():
-            # DataFrames shouldn't be saved to ProfilerStore
-            if k == "batch_request" and batch_request_contains_batch_data(
-                batch_request=v
-            ):
-                raise ge_exceptions.InvalidConfigError(
-                    f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store_name}"'
-                )
-            _traverse(v)
+        domain_builder = rule.domain_builder
+        if domain_builder.batch_request:
+            batch_requests.append(domain_builder.batch_request)
 
-    # Trigger checks using top level config as root node
-    _traverse(json_dict)
+        parameter_builders = rule.parameter_builders
+        if parameter_builders:
+            for parameter_builder in parameter_builders:
+                if parameter_builder.batch_request:
+                    batch_requests.append(parameter_builder.batch_request)
+
+    # DataFrames shouldn't be saved to ProfilerStore
+    for batch_request in batch_requests:
+        if batch_request_contains_batch_data(batch_request=batch_request):
+            raise ge_exceptions.InvalidConfigError(
+                f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store_name}"'
+            )
 
 
 def get_profiler(
