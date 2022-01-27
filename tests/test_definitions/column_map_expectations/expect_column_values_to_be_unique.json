@@ -175,7 +175,6 @@
     "tests" : [
       {
         "title": "positive_integer_column_name",
-        "only_for": "spark",
         "exact_match_out": false,
         "in": {
           "column": "0"
@@ -186,7 +185,6 @@
       },
       {
         "title": "positive_spark_headerless_column_name",
-        "only_for": "spark",
         "exact_match_out": false,
         "in": {
           "column": "_c0"
