@@ -61,6 +61,9 @@ def pytest_generate_tests(metafunc):
                     ):
                         skip_expectation = True
                         schemas = data_asset = None
+                    elif only_for:
+                        if c is not only_for:
+                            continue
                     else:
                         skip_expectation = False
                         if isinstance(d["data"], list):
