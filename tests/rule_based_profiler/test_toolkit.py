@@ -79,7 +79,10 @@ def test_delete_profiler(
             ge_cloud_id=None,
         )
 
-        assert mock_remove_key.call_count == 1
+    assert mock_remove_key.call_count == 1
+    assert mock_remove_key.call_args == mock.call(
+        key=ConfigurationIdentifier("my_profiler")
+    )
 
 
 def test_delete_profiler_with_too_many_args_raises_error(
