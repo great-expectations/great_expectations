@@ -3274,6 +3274,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         commented_map: Optional[CommentedMap] = None,
         ge_cloud_id: Optional[str] = None,
     ):
+        # Package config and perform validation
         config: RuleBasedProfilerConfig = ruleBasedProfilerConfigSchema.load(
             {
                 "name": name,
@@ -3285,6 +3286,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 "commented_map": commented_map,
             }
         )
+
+        # Chetan - 20220127 - Open to refactor all Profiler CRUD from toolkit to class methods
         return profiler_toolkit.add_profiler(
             config=config, data_context=self, ge_cloud_id=ge_cloud_id
         )
