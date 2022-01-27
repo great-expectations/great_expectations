@@ -373,7 +373,8 @@ module.exports = {
           items: [
             'terms/datasource',
             'terms/data_context',
-            'terms/data_asset'
+            'terms/data_asset',
+            'terms/plugin'
           ]
         },
         {
