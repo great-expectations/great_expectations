@@ -20,9 +20,9 @@ If you decide to contribute your Expectation, its entry in the [Expectations Gal
 
 We will explain the structure of these tests using the Custom Expectation implemented in [How to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
 
-### Steps
+## Steps
 
-#### 1. Decide which tests you want to implement
+### 1. Decide which tests you want to implement
 
 Expectations can have a robust variety of possible applications. We want to create tests that demonstrate -- and verify -- the capabilities and limitations of our Custom Expectation.
 
@@ -64,7 +64,7 @@ At a minimum, we want to create tests that show what our Custom Expectation will
 These basic positive and negative example cases are the minimum amount of test coverage required for a Custom Expectation to be accepted into the Great Expectations codebase at an [Experimental level](../../../contributing/contributing_maturity.md#contributing-expectations).
 To begin with, let's implement those two basic tests: one positive example case, and one negative example case. 
 
-#### 2. Defining our data
+### 2. Defining our data
 
 Search for `examples = []` in the template file you are modifying for your new Custom Expectation. 
 We're going to populate `examples` with a list of example cases.
@@ -107,14 +107,14 @@ Sometimes you need to specify the precise type of the columns for each backend. 
 ```
 :::
 
-#### 3. Defining our tests
+### 3. Defining our tests
 
 In our example, `tests` will be a list containing dictionaries defining each test. 
 
 You will need to:
-1. Title your tests (`title`);
-2. Define the input for your tests (`in`);
-3. Decide how precisely you want to test the output of your tests (`exact_match_out`);
+1. Title your tests (`title`).
+2. Define the input for your tests (`in`).
+3. Decide how precisely you want to test the output of your tests (`exact_match_out`).
 4. Define the expected output for your tests (`out`).
 
 If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publically displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
@@ -122,7 +122,7 @@ If you are interested in contributing your Custom Expectation back to Great Expe
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L44-L76
 ```
 
-#### 4. Verifying our tests
+### 4. Verifying our tests
 
 If you now run your file, `print_diagnostic_checklist` will attempt to execute these example cases.
 
@@ -139,14 +139,18 @@ Congratulations!<br/>&#127881; You've successfully created example cases & tests
 </b></p>
 </div>
 
-#### 5. Contribution (Optional)
+### 5. Contribution (Optional)
 
-This guide will leave you with test coverage sufficient for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expecations at an Experimental level;
-if you're interested in having your contribution accepted at a Beta level, these tests will need to pass for all supported backends (Pandas, Spark, & SQLAlchemy).
+This guide will leave you with test coverage sufficient for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expecations at an Experimental level.  
+
+If you're interested in having your contribution accepted at a Beta level, these tests will need to pass for all supported backends (Pandas, Spark, & SQLAlchemy).
 
 For full acceptance into the Great Expectations codebase at a Production level, we require a more robust test suite. 
 If you believe your Custom Expectation is otherwise ready for contrbution at a Production level, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pull-requests), and we will work with you to ensure adequate testing.
 
 :::note
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
+
+To view the full script used in this page, see it on GitHub:
+- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
 :::
