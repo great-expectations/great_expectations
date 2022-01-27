@@ -11,9 +11,9 @@ This guide demonstrates how to bundle your own custom Expectations, Metrics, and
 
 </Prerequisites>
 
-### Steps
+## Steps
 
-#### 1. Install the `great_expectations_contrib` CLI Tool
+### 1. Install the `great_expectations_contrib` CLI Tool
 
 To streamline the process of contributing a package to Great Expectations, we've developed a CLI tool to
 abstract away some of the complexity and help you adhere to our codebases' best practices. Please 
@@ -36,9 +36,7 @@ great_expectations_contrib
 2. Perform a series of checks to determine the validity of your package
 3. Publish your package to PyPi for you and others to use
 
----
-
-#### 2. Initialize a project
+### 2. Initialize a project
 
 Once the CLI tool is enabled, we need to intialize an empty package.
 
@@ -89,9 +87,7 @@ Your file structure should look something like this:
 To ensure consistency with other packages and the rest of the Great Expectations ecosystem,
 please maintain this general structure during your development.
 
----
-
-#### 3. Contribute to your package
+### 3. Contribute to your package
 
 Now that your package has been initialized, it's time to get coding!
 
@@ -115,7 +111,7 @@ Using `great_expectations_contrib` as part of your development loop will help yo
 keep on track and provide you with a checklist of necessary items to get your package
 across the finish line!
 
-#### 4. Publish your package
+### 4. Publish your package
 
 Once you've written your package, tested its behavior, and documented its capabilities,
 the final step is to get your work published.
@@ -134,6 +130,6 @@ Congratulations!<br/>&#127881; You've just published your first Great Expectatio
 </b></p>
 </div>
 
-#### 5. Contribution (Optional)
+### 5. Contribution (Optional)
 
 Your package can also be submitted as a contribution to the Great Expectations codebase, under the same [Maturity Level](./contributing_maturity.md#contributing-expectations) requirements as [Custom Expectations](../guides/expectations/creating_custom_expectations/overview.md).
