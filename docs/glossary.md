@@ -41,7 +41,7 @@ title: "Glossary of Terms"
 
 **Metric Store:** A connector to store and retrieve information about computed attributes of data, such as the mean of a column.
 
-**Plugin:** Extends Great Expectations' components and/or functionality.
+**Plugin:** Extends Great Expectations' components and/or functionality at the project level.
 
 **Profiler:** Generates Metrics and candidate Expectations from data.
 
