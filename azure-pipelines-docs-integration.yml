@@ -123,7 +123,7 @@ stages:
 
         - script: |
             pip install pytest pytest-azurepipelines
-            pytest -v --docs-tests -m docs --mysql --mssql tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m docs --mysql --bigquery --mssql tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
@@ -144,6 +144,8 @@ stages:
             AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
             # GCP credentials
             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+            GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+            GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
             # Azure credentials
             AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
             AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)

@@ -53,6 +53,7 @@ stages:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
               GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+              GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
           - task: PublishTestResults@2
             inputs:
               searchFolder: junit
