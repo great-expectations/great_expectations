@@ -138,7 +138,6 @@ def select_data_connector_name(
         Dict[str, List[str]]
     ] = None,
 ) -> str:
-    breakpoint()
     msg_prompt_select_data_connector_name = "Select data_connector"
 
     if not available_data_asset_names_by_data_connector_dict:
