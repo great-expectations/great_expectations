@@ -74,7 +74,7 @@ If the exact deployment pattern you want to follow isn't documented in a Deploym
 Because your Data Context contains the entirety of your Great Expectations project, Great Expectations Cloud can reference it to permit seamless upgrading from open source Great Expectations to Great Expectations Cloud.
 
 
-## API Basics
+## API basics
 
 ### Instantiating a DataContext
 
@@ -140,11 +140,11 @@ from the "self check" of an artifact produced using that configuration.  You sho
 
 For more detailed guidance on using the `test_yaml_config()` method, please see our guide on [how to configure DataContext components using test_yaml_config](../guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md).
 
-## More Details
+## More details
 
-### Design Motivations
+### Design motivations
 
-#### Untyped Inputs
+#### Untyped inputs
 
 The code standards for Great Expectations strive for strongly typed inputs.  However, the Data Context's convenience functions are a noted exception to this standard.  For example, to get a Batch with typed input, you would call:
 
