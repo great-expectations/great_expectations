@@ -364,7 +364,7 @@ class RuleBasedProfiler:
         if rules is None:
             rules = {}
 
-        effective_rules: Dict[str, Rule] = self.rules
+        effective_rules: Dict[str, Rule] = self._get_rules_as_dict()
 
         rule_name: str
         rule_config: dict
@@ -570,6 +570,10 @@ class RuleBasedProfiler:
 
         return effective_expectation_configuration_builder_config
 
+    def _get_rules_as_dict(self) -> Dict[str, Rule]:
+        rule: Rule
+        return {rule.name: rule for rule in self._rules}
+
     @property
     def variables(self) -> Optional[ParameterContainer]:
         # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
@@ -580,9 +584,8 @@ class RuleBasedProfiler:
         self._variables = value
 
     @property
-    def rules(self) -> Dict[str, Rule]:
-        rule: Rule
-        return {rule.name: rule for rule in self._rules}
+    def rules(self) -> List[Rule]:
+        return list(self._get_rules_as_dict().values())
 
     @rules.setter
     def rules(self, value: List[Rule]):
