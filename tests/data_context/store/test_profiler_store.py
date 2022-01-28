@@ -10,13 +10,7 @@ from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
-from great_expectations.rule_based_profiler.config import (
-    DomainBuilderConfig,
-    ExpectationConfigurationBuilderConfig,
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-    RuleConfig,
-)
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import build_profiler_store_using_filesystem
 

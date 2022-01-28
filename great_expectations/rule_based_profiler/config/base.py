@@ -69,6 +69,7 @@ class NotNullSchema(Schema):
             output: Procecced dictionary representation of the configuration object (leaving original intact)
             original: The dictionary representation of the configuration object
             kwargs: Marshmallow-specific kwargs required to maintain hook signature (unused herein)
+
         Returns:
             A cleaned dictionary that has no null values
         """

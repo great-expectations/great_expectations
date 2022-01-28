@@ -294,7 +294,6 @@ class RuleBasedProfiler:
 
     def run(
         self,
-        *,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         expectation_suite_name: Optional[str] = None,
@@ -312,6 +311,7 @@ class RuleBasedProfiler:
             variables=variables
         )
 
+        # TODO: <Alex>ALEX -- Tests for Reconciliation are next immediate action items.</Alex>
         effective_rules: List[Rule] = self.reconcile_rules_for_profiler(rules=rules)
 
         if expectation_suite_name is None:
