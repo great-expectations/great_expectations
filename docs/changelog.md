@@ -4,6 +4,12 @@ title: Changelog
 
 ### Develop
 
+### 0.14.4
+* [BUGFIX] Fix typing_extensions requirement to allow for proper build (#4083) (thanks @votjakopal and @Godoy)
+* [DOCS] data docs action rewrite (#4087)
+* [DOCS] metric store how to rewrite (#4086)
+* [MAINTENANCE] Change `logger.warn` to `logger.warning` to remove deprecation warnings (#4085)
+
 ### 0.14.3
 * [FEATURE] Profiler Store (#3990)
 * [FEATURE] List profilers from DataContext (#4023)
