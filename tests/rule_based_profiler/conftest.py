@@ -16,6 +16,8 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.config.base import ruleBasedProfilerConfigSchema
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterContainer,
@@ -349,12 +351,18 @@ def alice_columnar_table_single_batch(empty_data_context):
     sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
 
     profiler_config: dict = yaml.load(verbose_profiler_config)
+
+    # Roundtrip through schema validation to add any missing fields
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
     # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
-    profiler_config.pop("class_name")
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
     expected_expectation_suite.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
-        profiler_config=profiler_config,
+        profiler_config=serialized_config,
     )
 
     return {
@@ -1149,12 +1157,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         )
 
     profiler_config: dict = yaml.load(verbose_profiler_config)
+
+    # Roundtrip through schema validation to add any missing fields
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
     # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
-    profiler_config.pop("class_name")
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
+
     expected_expectation_suite_oneshot_sampling_method.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
-        profiler_config=profiler_config,
+        profiler_config=serialized_config,
     )
 
     return {
@@ -2358,26 +2373,8 @@ def parameters_with_different_depth_level_values():
     return parameter_values
 
 
-@pytest.fixture
-def rule_without_variables_without_parameters():
-    rule: Rule = Rule(
-        name="rule_with_no_variables_no_parameters",
-        domain_builder=None,
-        parameter_builders=None,
-        expectation_configuration_builders=None,
-        variables=None,
-    )
-    return rule
-
-
-# noinspection PyPep8Naming
-@pytest.fixture
-def rule_with_variables_with_parameters(
-    column_Age_domain,
-    column_Date_domain,
-    single_part_name_parameter_container,
-    multi_part_name_parameter_container,
-):
+@pytest.fixture()
+def variables_multi_part_name_parameter_container():
     variables_multi_part_name_parameter_node: ParameterNode = ParameterNode(
         {
             "false_positive_threshold": 1.0e-2,
@@ -2388,16 +2385,49 @@ def rule_with_variables_with_parameters(
             "variables": variables_multi_part_name_parameter_node,  # $variables.false_positive_threshold
         }
     )
+    variables: ParameterContainer = ParameterContainer(
+        parameter_nodes={
+            "variables": root_variables_node,
+        }
+    )
+    return variables
+
+
+@pytest.fixture
+def rule_without_parameters():
     rule: Rule = Rule(
-        name="rule_with_variables_with_parameters",
+        name="rule_with_no_variables_no_parameters",
         domain_builder=None,
         parameter_builders=None,
         expectation_configuration_builders=None,
-        variables=ParameterContainer(
-            parameter_nodes={
-                "variables": root_variables_node,
-            }
-        ),
+    )
+    return rule
+
+
+# noinspection PyPep8Naming
+@pytest.fixture
+def rule_with_parameters(
+    empty_data_context,
+    column_Age_domain,
+    column_Date_domain,
+    variables_multi_part_name_parameter_container,
+    single_part_name_parameter_container,
+    multi_part_name_parameter_container,
+):
+    variables: dict = dict(variables_multi_part_name_parameter_container.parameter_nodes["variables"]["variables"])
+    rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_rule_based_profiler",
+        config_version=1.0,
+        variables=variables,
+        rules={},
+        data_context=empty_data_context,
+    )
+    rule: Rule = Rule(
+        rule_based_profiler=rule_based_profiler,
+        name="rule_with_parameters",
+        domain_builder=None,
+        parameter_builders=None,
+        expectation_configuration_builders=None,
     )
     rule._parameters = {
         column_Age_domain.id: single_part_name_parameter_container,

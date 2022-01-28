@@ -29,6 +29,7 @@ class NotNullSchema(Schema):
 
     """
 
+    # noinspection PyUnusedLocal
     @post_load
     def make_config(self, data: dict, **kwargs) -> Type[DictDot]:
         """Hook to convert the schema object into its respective config type.
@@ -49,23 +50,39 @@ class NotNullSchema(Schema):
                 "The subclass extending NotNullSchema must define its own custom __config_class__"
             )
 
+        # noinspection PyUnresolvedReferences
         return self.__config_class__(**data)
 
-    @post_dump
-    def remove_nulls(self, data: dict, **kwargs) -> dict:
+    # noinspection PyUnusedLocal
+    @post_dump(pass_original=True)
+    def remove_nulls_and_keep_unknowns(
+        self, output: dict, original: Type[DictDot], **kwargs
+    ) -> dict:
         """Hook to clear the config object of any null values before being written as a dictionary.
+        Additionally, it bypasses strict schema validation before writing to dict to ensure that dynamic
+        attributes set through `setattr` are captured in the resulting object.
+        It is important to note that only public attributes are captured through this process.
+        Chetan - 20220126 - Note that if we tighten up the schema (remove the dynamic `setattr` behavior),
+        the functionality to keep unknowns should also be removed.
+
         Args:
-            data: The dictionary representation of the configuration object
+            output: Procecced dictionary representation of the configuration object (leaving original intact)
+            original: The dictionary representation of the configuration object
             kwargs: Marshmallow-specific kwargs required to maintain hook signature (unused herein)
         Returns:
             A cleaned dictionary that has no null values
         """
-        cleaned_data = filter_properties_dict(
-            properties=data,
+        for key in original.keys():
+            if key not in output and not key.startswith("_"):
+                output[key] = original[key]
+
+        cleaned_output = filter_properties_dict(
+            properties=output,
             clean_nulls=True,
             clean_falsy=False,
         )
-        return cleaned_data
+
+        return cleaned_output
 
 
 class DomainBuilderConfig(DictDot):
@@ -74,7 +91,7 @@ class DomainBuilderConfig(DictDot):
         class_name: str,
         module_name: Optional[str] = None,
         batch_request: Optional[Union[dict, str]] = None,
-        **kwargs
+        **kwargs,
     ):
         self.class_name = class_name
         self.module_name = module_name
@@ -108,7 +125,7 @@ class ParameterBuilderConfig(DictDot):
         class_name: str,
         module_name: Optional[str] = None,
         batch_request: Optional[Union[dict, str]] = None,
-        **kwargs
+        **kwargs,
     ):
         self.name = name
         self.class_name = class_name
@@ -143,15 +160,11 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         expectation_type: str,
         class_name: str,
         module_name: Optional[str] = None,
-        mostly: Optional[float] = None,
-        meta: Optional[Dict] = None,
-        **kwargs
+        **kwargs,
     ):
         self.expectation_type = expectation_type
         self.class_name = class_name
         self.module_name = module_name
-        self.mostly = mostly
-        self.meta = meta
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.warning(
@@ -172,28 +185,18 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
         missing="great_expectations.rule_based_profiler.expectation_configuration_builder",
     )
     expectation_type = fields.String(required=True)
-    mostly = fields.Float(required=False, allow_none=True)
-    meta = fields.Dict(required=False, allow_none=True)
 
 
 class RuleConfig(DictDot):
     def __init__(
         self,
-        name: str,
-        domain_builder: DomainBuilderConfig,
-        parameter_builders: List[ParameterBuilderConfig],
-        expectation_configuration_builders: List[ExpectationConfigurationBuilderConfig],
-        **kwargs
+        expectation_configuration_builders: List[dict],  # see ExpectationConfigurationBuilderConfig
+        domain_builder: Optional[dict] = None,  # see DomainBuilderConfig
+        parameter_builders: Optional[List[dict]] = None,  # see ParameterBuilderConfig
     ):
-        self.name = name
         self.domain_builder = domain_builder
         self.parameter_builders = parameter_builders
         self.expectation_configuration_builders = expectation_configuration_builders
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-            logger.warning(
-                "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
-            )
 
 
 class RuleConfigSchema(NotNullSchema):
@@ -202,18 +205,16 @@ class RuleConfigSchema(NotNullSchema):
 
     __config_class__ = RuleConfig
 
-    name = fields.String(required=True)
-    domain_builder = fields.Nested(DomainBuilderConfigSchema, required=True)
+    domain_builder = fields.Nested(DomainBuilderConfigSchema, required=False, allow_none=True)
     parameter_builders = fields.List(
         cls_or_instance=fields.Nested(ParameterBuilderConfigSchema, required=True),
         required=False,
         allow_none=True,
     )
     expectation_configuration_builders = fields.List(
-        cls_or_instance=fields.Nested(
-            ExpectationConfigurationBuilderConfigSchema, required=True
-        ),
+        cls_or_instance=fields.Nested(ExpectationConfigurationBuilderConfigSchema, required=True),
         required=True,
+        allow_none=False,
     )
 
 
@@ -222,12 +223,11 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         self,
         name: str,
         config_version: float,
-        rules: Dict[str, RuleConfig],
+        rules: Dict[str, dict],  # see RuleConfig
         class_name: str,
         module_name: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
-        **kwargs
     ):
         self.name = name
         self.config_version = config_version
@@ -235,38 +235,35 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         self.class_name = class_name
         self.module_name = module_name
         self.variables = variables
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-            logger.warning(
-                "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
-            )
 
         super().__init__(commented_map=commented_map)
 
     @classmethod
-    def get_config_class(cls) -> Type["RuleBasedProfilerConfig"]:
+    def get_config_class(cls) -> Type["RuleBasedProfilerConfig"]:  # noqa: F821
         return cls
 
     @classmethod
-    def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:
+    def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:  # noqa: F821
         return RuleBasedProfilerConfigSchema
 
 
-class RuleBasedProfilerConfigSchema(NotNullSchema):
+class RuleBasedProfilerConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
     __config_class__ = RuleBasedProfilerConfig
 
-    class_name = fields.String(required=True)
+    name = fields.String(required=True, allow_none=False)
+    class_name = fields.String(required=True, allow_none=False)
     module_name = fields.String(
         required=False,
         all_none=True,
+        allow_none=True,
         missing="great_expectations.rule_based_profiler",
     )
-    name = fields.String(required=True)
     config_version = fields.Float(
         required=True,
+        allow_none=False,
         validate=lambda x: x == 1.0,
         error_messages={
             "invalid": "config version is not supported; it must be 1.0 per the current version of Great Expectations"
@@ -275,15 +272,13 @@ class RuleBasedProfilerConfigSchema(NotNullSchema):
     variables = fields.Dict(keys=fields.String(), required=False, allow_none=True)
     rules = fields.Dict(
         keys=fields.String(),
-        values=fields.Nested(RuleConfigSchema, required=True),
+        values=fields.Nested(RuleConfigSchema, required=True, allow_none=False),
         required=True,
     )
 
 
-domainBuilderConfigSchema = DomainBuilderConfigSchema()
+expectationConfigurationBuilderConfigSchema = ExpectationConfigurationBuilderConfigSchema()
 parameterBuilderConfigSchema = ParameterBuilderConfigSchema()
-expectationConfigurationBuilderConfigSchema = (
-    ExpectationConfigurationBuilderConfigSchema()
-)
+domainBuilderConfigSchema = DomainBuilderConfigSchema()
 ruleConfigSchema = RuleConfigSchema()
 ruleBasedProfilerConfigSchema = RuleBasedProfilerConfigSchema()
