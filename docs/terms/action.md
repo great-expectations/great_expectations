@@ -16,15 +16,15 @@ import ValidateHeader from '../images/universal_map/_um_validate_header.mdx';
 
 ### Definition
 
-An Action is a Python class with a `run()` method that takes the result of validating a Batch against an Expectation Suite and does something with it.
+An Action is a Python class with a `run()` method that takes the result of validating a <TechnicalTag relative="../" tag="batch" text="Batch" /> against an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> and does something with it.
 
 ### Features and promises
 
-Actions are highly customizable.  Great Expectations comes with common Actions for such things as sending email or Slack notifications, updating Data Docs, and storing Validation Results out of the box.  However, it is easy to create custom Actions by creating a subclass of Great Expectations' `ValidationAction` class and overwriting it's `_run()` method. This means that you can configure an Action to do literally anything you are capable of programming in Python in response to a Checkpoint Validation completing.
+Actions are highly customizable.  Great Expectations comes with common Actions for such things as sending email or Slack notifications, updating <TechnicalTag relative="../" tag="data_docs" text="Data Docs" />, and storing <TechnicalTag relative="../" tag="validation_results" text="Validation Results" /> out of the box.  However, it is easy to create custom Actions by creating a subclass of Great Expectations' `ValidationAction` class and overwriting it's `_run()` method. This means that you can configure an Action to do literally anything you are capable of programming in Python in response to a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> <TechnicalTag relative="../" tag="validation" text="Validation" /> completing.
 
 ### Relationship to other objects
 
-Actions are executed by Validation Operators, which are a component of Checkpoints.  In general, Validation Operators function behind the scenes, so it is enough to know that Actions are configured inside the `action_list` parameter of a Checkpoint's configuration, and execute every time the Checkpoint finishes running a Validation.
+Actions are executed by <TechnicalTag relative="../" tag="validation_operators" text="Validation Operators" />, which are a component of Checkpoints.  In general, Validation Operators function behind the scenes, so it is enough to know that Actions are configured inside the `action_list` parameter of a Checkpoint's configuration, and execute every time the Checkpoint finishes running a Validation.
 
 ## Use cases
 
