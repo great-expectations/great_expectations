@@ -1,5 +1,7 @@
 import glob
 import json
+import os
+from collections import defaultdict
 
 import pytest
 
@@ -60,21 +62,22 @@ def test_parse_row_condition_string_pandas_engine():
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
 def test_all_expectations_using_test_definitions():
-    test_files = glob.glob("tests/test_definitions/*/expect*.json")
-    assert len(test_files) > 0, "Did not identify any test files"
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    pattern = os.path.join(
+        dir_path, "..", "..", "tests/test_definitions/*/expect*.json"
+    )
+    test_files = glob.glob(pattern)
+    assert len(test_files) == 56
 
     types = []
 
     # Loop over all test_files, datasets, and tests:
-    test_results = {}
+    test_results = defaultdict(list)
     for filename in test_files:
         test_definitions = json.load(open(filename))
         types.append(test_definitions["expectation_type"])
 
-        test_results[test_definitions["expectation_type"]] = []
-
         for dataset in test_definitions["datasets"]:
-
             for test in dataset["tests"]:
                 # Construct an expectation from the test.
                 if type(test["in"]) == dict:
