@@ -106,7 +106,7 @@ def pytest_generate_tests(metafunc):
                     for test in d["tests"]:
                         generate_test = True
                         skip_test = False
-                        only_for = d.get("only_for")
+                        only_for = test.get("only_for")
                         if only_for:
                             # if we're not on the "only_for" list, then never even generate the test
                             generate_test = False
@@ -176,8 +176,7 @@ def pytest_generate_tests(metafunc):
                                 if "pandas" in only_for:
                                     generate_test = True
                                 if (
-                                    "pandas_022" in test["only_for"]
-                                    or "pandas_023" in test["only_for"]
+                                    "pandas_022" in only_for or "pandas_023" in only_for
                                 ) and int(pd.__version__.split(".")[1]) in [22, 23]:
                                     generate_test = True
                                 if ("pandas>=24" in only_for) and int(
@@ -194,7 +193,7 @@ def pytest_generate_tests(metafunc):
                         if not generate_test:
                             continue
 
-                        suppress_test_for = d.get("suppress_test_for")
+                        suppress_test_for = test.get("suppress_test_for")
                         if suppress_test_for:
                             if not isinstance(suppress_test_for, list):
                                 # coerce into list if passed in as string
