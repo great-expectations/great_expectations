@@ -8,6 +8,12 @@ import great_expectations as ge
 
 context = ge.get_context()
 
+# NOTE: The following code is only for testing and depends on an environment
+# variable to set the gcp_project. You can replace the value with your own
+# GCP project information
+gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+
+
 datasource_config = r"""
 name: my_datasource
 class_name: Datasource
