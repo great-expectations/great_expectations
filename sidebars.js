@@ -361,8 +361,26 @@ module.exports = {
       label: 'Reference',
       items: [
         {
+          type: 'doc',
+          label: 'API Reference',
+          id: 'reference/api_reference'
+        },
+        'glossary',
+        {
           type: 'category',
-          label: 'Additional Documentation',
+          label: 'Technical Terms',
+          items: [
+            'terms/datasource',
+            'terms/data_context',
+            'terms/data_asset',
+            'terms/execution_engine',
+            'terms/expectation',
+            'terms/plugin'
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Supplemental Documentation',
           items: [
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'reference/anonymous_usage_statistics' },
@@ -379,24 +397,6 @@ module.exports = {
                 { type: 'doc', id: 'reference/expectations/result_format' }
               ]
             }
-          ]
-        },
-        {
-          type: 'doc',
-          label: 'API Reference',
-          id: 'reference/api_reference'
-        },
-        'glossary',
-        {
-          type: 'category',
-          label: 'Technical Terms',
-          items: [
-            'terms/datasource',
-            'terms/data_context',
-            'terms/data_asset',
-            'terms/execution_engine',
-            'terms/expectation',
-            'terms/plugin'
           ]
         },
         {
