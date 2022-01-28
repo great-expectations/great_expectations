@@ -255,6 +255,11 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
 
 
 class RuleBasedProfilerConfigSchema(Schema):
+    """
+    Schema classes for configurations which extend from BaseYamlConfig must extend top-level Marshmallow Schema class.
+    Schema classes for their constituent configurations which extend DictDot leve must extend NotNullSchema class.
+    """
+
     class Meta:
         unknown = INCLUDE
 
