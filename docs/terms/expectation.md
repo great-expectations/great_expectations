@@ -21,42 +21,102 @@ An Expectation is a verifiable assertion about data.
 
 ### Features and promises
 
+Great Expectations is a framework for defining Expectations and running them against your data. Like assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, Great Expectations applies Expectations to data instead of code. For example, you could define an Expectation that a column contain no null values, and Great Expectations would run that Expectation against your data, and report if a null value was found.
+
+Expectations *enhance communication* about your data and *improve quality* for data applications. Using Expectations helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
+
 ### Relationship to other objects
+
+Expectations are grouped into Expectation Suites, which are in turn stored in an Expectation Store.  Profilers will analyze data in order to generate Expectations, and Checkpoints rely on Expectation Suites (and the Expectations contained therein) to Validate data.
 
 ## Use cases
 
-<SetupHeader/>
-
-
-
-<ConnectHeader/>
-
-
-
 <CreateHeader/>
 
+Expectations are obviously a fundamental component of the Create Expectations step in working with Great Expectations.  It is when you are creating Expectations that you will have the most direct interaction with them.  For further information on this process, please see our overview on the Create Expectations process, and our related how-to guides.
 
 
 <ValidateHeader/>
 
+When you create your Checkpoints, you will be able to configure them to use specific Expectation Suites.  Other than setting up this configuration (or arranging to pass Expectation Suites at runtime) you will not need to directly interact with the Expectations themselves.  Instead, when you run your Checkpoint it will handle using the Expectations in any of its Expectation Suites to validate the data indicated in its Batch Request/s.  This will be done under the hood, with the Validation Results that are generated being passed along to the Checkpoint's Actions for further (optional) processing.
 
 
 ## Features
+
+### Versatility out of the box
+
+Great Expectations' built-in library includes more than 50 common Expectations, such as:
+
+* `expect_column_values_to_not_be_null`
+* `expect_column_values_to_match_regex`
+* `expect_column_values_to_be_unique`
+* `expect_column_values_to_match_strftime_format`
+* `expect_table_row_count_to_be_between`
+* `expect_column_median_to_be_between`
+
+For a full list of available Expectations, please check out the [Expectation Gallery](https://greatexpectations.io/expectations).
+
+### Customization
+
+Expectations are especially useful when they capture critical aspects of data understanding that analysts and practitioners know based on its *semantic* meaning. It's common to want to extend Great Expectations with application or domain specific Expectations. For example:
+
+```bash
+expect_column_text_to_be_in_english
+expect_column_value_to_be_valid_icd_code
+```
+
+These Expectations aren't included in the default set, but could be very useful for specific applications.
+
+Fear not! Great Expectations is designed for customization and extensibility.
+
+Building custom Expectations is easy and allows your custom logic to become part of the validation, documentation, and even profiling workflows that make Great Expectations stand out. See the guide on [creating custom Expectations](/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations) for more information on building Expectations and updating Data Context configurations to automatically load batches of data with custom Data Assets.
+
+## Limitations
+
+Unfortunately, not all Expectations are implemented for all source data systems.  To see a list of what Expectations are implemented for a given backend, please reference our [guide to implemented Expectations](../reference/expectations/implemented_expectations.md).
 
 ## API basics
 
 ### How to access
 
+You may directly access Expectations as part of the interactive workflow for creating new Expectations.  For further details on this process, please see our guide on [how to create and edit Expectations with instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).  
+
 ### How to create
+
+Generating Expectations is one of the most important parts of using Great Expectations effectively, and there are a variety of methods for generating and encoding Expectations. When Expectations are encoded in the Great Expectations format, they become shareable and persistent sources of truth about how data was expected to behave-and how it actually
+did.
+
+There are several paths to generating Expectations:
+
+1. Automated inspection of datasets. Currently, the profiler mechanism in Great Expectations produces Expectation Suites that can be used for validation. In some cases, the goal is [profiling](../terms/profiler) your data, and in other cases automated inspection can produce Expectations that will be used in validating future batches of data.
+2. Expertise. Rich experience from subject matter experts, Analysts, and data owners is often a critical source of Expectations. Interviewing experts and encoding their tacit knowledge of common distributions, values, or failure conditions can be can excellent way to generate Expectations.
+3. Exploratory Analysis. Using Great Expectations in an exploratory analysis workflow (e.g. within Jupyter Notebooks)is an important way to develop experience with both raw and derived datasets and generate useful and testable Expectations about characteristics that may be important for the data's eventual purpose, whether reporting or feeding another downstream model or data system.
+
+For more information on these methods, please see our [overview guide for creating Expectations](../guides/expectations/create_expectations_overview.md#the-create-expectations-process).
 
 ### Configuration
 
+Most of the time you will not need to directly interact with an Expectation's configurations.  However, advanced users may have circumstances in which it is desireable to define Expectations based purely on domain knowledge, without comparing against underlying data.  To do this, you will need to directly write an Expectation's configuration.  For details on how to do this, please reference our guide on [how to create and edit Expectations based on domain knowledge, without inspecting data directly](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md).
+
+The other occasion when you may want to edit an Expectation's configuration is when you need to edit it's `result_format`.  The `result_format` parameter may be either a string or a dictionary which specifies the fields to return in `result`.  For further details, please see [our reference guide on the result_format parameter](../reference/expectations/result_format.md).
+
+### Results
+
+All Expectations return a JSON-serializable dictionary when evaluated, which consists of four standard (though optional, depending on the type of Expectation in question) arguments.  These are: `result_format`, `include_config`, `catch_exceptions`, and `meta`.  For detailed explainations as to what each of these arguments consists of and which Expectations use them, please see our guide on standard arguments.
+
 ## More details
 
-### Design motivation
+### Expectation Concepts: Domain and Success Keys
 
+A **domain** makes it possible to address a specific set of data, such as a *table*, *query result*, *column* in a table or dataframe, or even a Metric computed on a previous Batch of data.
 
+A domain is defined by a set of key-value pairs. The **domain keys** are the keys that uniquely define the domain for an Expectation. They vary depending on the Expectatation; for example, many Expectations apply to data in a single `column`, but others apply to data from multiple columns or to properties that do not apply to a column at all.
 
-NOTES: TEMPORARY
-----------------
-A verifiable assertion about data. Great Expectations is a framework for defining expectations and running them against your data. For example, you could define an expectation that a column contain no null values, and Great Expectations would run that expectation against your data, and report if a null value was found.
+An Expectation also defines **success keys** that determine the values of its metrics and when the Expectation will succeed.
+
+For example, the `expect_column_values_to_be_in_set` Expectation relies on the `batch_id`, `table`, `column`, and `row_condition` **domain keys** to determine what data are described by a particular configuration, and the `value_set` and `mostly` **success keys** to evaluate whether the Expectation is actually met for that data.
+
+**Note**: The *batch_id* and *table* domain keys are often omitted when running a validation, because the Expectation is being applied to a single batch and table. However, they must be provided in cases where they could be ambiguous.
+
+**Metrics** use a similar concept: they also use the same kind of **domain keys** as Expectations, but instead of success keys, we call the keys that determine a Metric's value its **value keys**.
+
