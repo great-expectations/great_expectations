@@ -1,5 +1,5 @@
 ---
-title: How to configure a MetricStore
+title: How to configure and use a MetricStore
 ---
 
 Saving metrics during Validation makes it easy to construct a new data series based on observed
@@ -7,7 +7,8 @@ dataset characteristics computed by Great Expectations. That data series can ser
 overall data quality metrics, for example.
 
 Storing metrics is still a **beta** feature of Great Expectations, and we expect configuration and
-capability to evolve rapidly.
+capability to evolve rapidly. 
+An improved implementation of this feature is underway, and will be available at some point in the future.
 
 ### Adding a MetricStore
 
@@ -17,21 +18,29 @@ of the validation and the Expectation Suite name in addition to the metric name 
 To define a MetricStore, add a metric store config to the "stores" section of your `great_expectations.yml`.
 This config requires two keys:
 - The `class_name` field determines which class will be instantiated to create this store, and must be `MetricStore`.
-- The `store_backend` field configures the particulars of how your metrics will be persisted. Any valid 
-
-When defining your MetricStore, In most cases, a MetricStore will be configured as a SQL database. To add a MetricStore to your DataContext, 
+- The `store_backend` field configures the particulars of how your metrics will be persisted. 
+  The `class_name` field determines which class will be instantiated to create this `StoreBackend`, and other fields are passed through to the StoreBackend class on instantiation.
+  In theory, any valid StoreBackend can be used, however at the time of writing, the only BackendStore under test for use with a MetricStore is the DatabaseStoreBackend with Postgres.
+  To use an SQL Database like Postgres, provide two fields: `class_name`, with the value of `DatabaseStoreBackend`, and `credentials`.
+  Credentials can point to credentials defined in your `config_variables.yml`, or alternatively can be defined inline.
 
 ```yaml
 stores:
     #  ...
-    metric_store:  # You can choose any name for your metric store
+    metric_store:  # You can choose any name as the key for your metric store
         class_name: MetricStore
         store_backend:
             class_name: DatabaseStoreBackend
-            # These credentials can be the same as those used in a Datasource configuration
             credentials: ${my_store_credentials}
+            # alternatively, define credentials inline:
+            # credentials:
+            #  username: my_username
+            #  password: my_password
+            #  port: 1234
+            #  host: xxxx
+            #  database: my_database
+            #  driver: postgresql
 ```
-
 
 The next time your DataContext is loaded, it will connect to the database and initialize a table to store metrics if
 one has not already been created. See the metrics_reference for more information on additional configuration
@@ -43,9 +52,22 @@ Once a MetricStore is available, a `StoreMetricsAction` Validation Action can be
 validation. This Validation Action has three required fields:
 - The `class_name` field determines which class will be instantiated to execute this action, and must be `StoreMetricsAction`.
 - The `target_store_name` field defines which Store backend to use when persisting the metrics. This should match the key of the MetricStore you added in your `great_expectations.yml`, which in our example above is `metrics_store`.
+- The `requested_metrics` field identifies which Expectation Suites and metrics to store. Please note that this API is likely to change in a future release.
+  Validation Result statistics are available using the following format:
+    ```yaml
+      expectation_suite_name:
+        statistics.<statistic name>
+   ```
+  Values from inside a particular Expectation's `result` field are available using the following format:
+   ```yaml
+      expectation_suite_name:
+        - column:
+          <column name>:
+            <expectation name>.result.<value name>
+   ```
+  In place of the Expectation Suite name, you may use `"*"` to denote that any expectation suite should match. 
 
-
-Add the following yaml block to your Checkpoint's ``action_list``:
+Here is an example yaml config for adding a StoreMetricsAction to the `taxi_data` dataset:
 
 ```yaml
 action_list:
@@ -53,26 +75,36 @@ action_list:
   - name: store_metrics
     action:
       class_name: StoreMetricsAction
-      target_store_name: metric_store  # Keep the space before this hash so it's not read as the name. This should match the name of the store configured above
-      # Note that the syntax for selecting requested metrics will change in a future release
+      target_store_name: metric_store  # This should match the name of the store configured above
       requested_metrics:
-        "*":  # The asterisk here matches *any* Expectation Suite name
-          # use the 'kwargs' key to request metrics that are defined by kwargs,
-          # for example because they are defined only for a particular column
-          # - column:
-          #     Age:
-          #       - expect_column_min_to_be_between.result.observed_value
+        public.taxi_data.warning:  # expectation suite name
           - statistics.evaluated_expectations
           - statistics.successful_expectations
+          - statistics.success_percent
+          - statistics.unsuccessful_expectations
+        "*":  # wildcard to match any expectation suite
+          - column:
+            passenger_count:
+              - expect_column_values_to_not_be_null.result.element_count
+              - expect_column_values_to_not_be_null.result.partial_unexpected_list
 ```
 
-The `StoreMetricsValidationAction` processes an `ExpectationValidationResult` and stores Metrics to a configured Store.
-Now, when your operator is executed, the requested metrics will be available in your database!
+### Test your MetricStore and StoreMetricsAction
 
-
+To test your `StoreMetricsAction`, run your checkpoint from your code or the CLI:
 ```python
-context.run_validation_operator('action_list_operator', (batch_kwargs, expectation_suite_name))
+import great_expectations as ge
+context = ge.get_context()
+checkpoint_name = "your checkpoint name here"
+context.run_checkpoint(checkpoint_name=checkpoint_name)
 ```
+```bash
+$ great_expectations checkpoint run <your checkpoint name>
+```
+
+### Summary
+The `StoreMetricsValidationAction` processes an `ExpectationValidationResult` and stores Metrics to a configured Store.
+Now, after your Checkpoint is run, the requested metrics will be available in your database!
 
 :::note
 To discuss with the Great Expectations community, please visit this topic in our community discussion forum: https://discuss.greatexpectations.io/t/ge-with-databricks-delta/82/3
