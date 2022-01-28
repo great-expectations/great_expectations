@@ -168,7 +168,7 @@ def _determine_batch_identifiers_using_named_groups(
         if key in group_names:
             batch_identifiers[key] = value
         else:
-            logger.warn(
+            logger.warning(
                 f"The named group '{key}' must explicitly be stated in group_names to be parsed"
             )
     return batch_identifiers
