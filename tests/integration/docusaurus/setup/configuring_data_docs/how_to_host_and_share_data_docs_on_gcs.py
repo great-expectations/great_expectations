@@ -7,7 +7,9 @@ import great_expectations as ge
 
 context = ge.get_context()
 
-# GCP project and BigQuery dataset information and not for general use. It is only to support testing.
+# NOTE: The following code is only for testing and depends on an environment
+# variable to set the gcp_project. You can replace the value with your own
+# GCP project information
 gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
 
 # set GCP project
