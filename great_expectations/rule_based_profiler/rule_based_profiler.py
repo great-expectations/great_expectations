@@ -455,7 +455,6 @@ class RuleBasedProfiler:
 
         effective_parameter_builder_config["batch_request"] = batch_request
 
-        # TODO: <Alex>ALEX CAN WE SIMPLIFY THE LOOP?</Alex>
         key: str
         value: Any
         current_value: Any
@@ -470,7 +469,6 @@ class RuleBasedProfiler:
 
     @staticmethod
     def _reconcile_expectation_configuration_builder_configs_for_rule(rule: Rule, rule_config: dict) -> List[dict]:
-        # TODO: <Alex>ALEX CAN WE SIMPLIFY THE LOOP?</Alex>
         effective_expectation_configuration_builder_configs: List[dict] = []
         expectation_configuration_builder_configs: Optional[List[dict]] = rule_config.get("expectation_configuration_builders", [])
 
@@ -479,8 +477,7 @@ class RuleBasedProfiler:
         for expectation_configuration_builder_config in expectation_configuration_builder_configs:
             expectation_configuration_builder_name: str = expectation_configuration_builder_config["expectation_type"]
             if expectation_configuration_builder_name in current_expectation_configuration_builders:
-                expectation_configuration_builder: ExpectationConfigurationBuilder = \
-                current_expectation_configuration_builders[expectation_configuration_builder_name]
+                expectation_configuration_builder: ExpectationConfigurationBuilder = current_expectation_configuration_builders[expectation_configuration_builder_name]
                 effective_expectation_configuration_builder_configs.append(
                     RuleBasedProfiler._reconcile_expectation_configuration_builder(
                         expectation_configuration_builder=expectation_configuration_builder,
@@ -497,7 +494,6 @@ class RuleBasedProfiler:
         expectation_configuration_builder: ExpectationConfigurationBuilder,
         expectation_configuration_builder_config: dict,
     ) -> dict:
-        # TODO: <Alex>ALEX CAN WE SIMPLIFY THE LOOP?</Alex>
         effective_expectation_configuration_builder_config: dict = {}
 
         key: str
