@@ -15,7 +15,6 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 class Rule:
     def __init__(
         self,
-        rule_based_profiler: "RuleBasedProfiler",  # noqa: F821
         name: str,
         domain_builder: Optional[DomainBuilder] = None,
         parameter_builders: Optional[List[ParameterBuilder]] = None,
@@ -26,14 +25,12 @@ class Rule:
         """
         Sets Profiler rule name, domain builders, parameters builders, configuration builders,
         and other necessary instance data (variables)
-        :param rule_based_profiler: RuleBaseProfiler (parent) object
         :param name: A string representing the name of the ProfilerRule
         :param domain_builder: A Domain Builder object used to build rule data domain
         :param parameter_builders: A Parameter Builder list used to configure necessary rule evaluation parameters for
         every configuration
         :param expectation_configuration_builders: A list of Expectation Configuration Builders
         """
-        self._rule_based_profiler = rule_based_profiler
         self._name = name
         self._domain_builder = domain_builder
         self._parameter_builders = parameter_builders
@@ -51,9 +48,6 @@ class Rule:
 
         :return: List of Corresponding Expectation Configurations representing every configured rule
         """
-        if variables is None:
-            variables = self.rule_based_profiler.variables
-
         expectation_configurations: List[ExpectationConfiguration] = []
 
         domains: List[Domain] = self._domain_builder.get_domains(variables=variables)
@@ -86,10 +80,6 @@ class Rule:
                 )
 
         return expectation_configurations
-
-    @property
-    def rule_based_profiler(self) -> "RuleBasedProfiler":  # noqa: F821
-        return self._rule_based_profiler
 
     @property
     def name(self) -> str:

@@ -2416,20 +2416,7 @@ def rule_with_parameters(
     single_part_name_parameter_container,
     multi_part_name_parameter_container,
 ):
-    variables: dict = dict(
-        variables_multi_part_name_parameter_container.parameter_nodes["variables"][
-            "variables"
-        ]
-    )
-    rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_rule_based_profiler",
-        config_version=1.0,
-        variables=variables,
-        rules={},
-        data_context=empty_data_context,
-    )
     rule: Rule = Rule(
-        rule_based_profiler=rule_based_profiler,
         name="rule_with_parameters",
         domain_builder=None,
         parameter_builders=None,
@@ -2440,3 +2427,19 @@ def rule_with_parameters(
         column_Date_domain.id: multi_part_name_parameter_container,
     }
     return rule
+
+
+@pytest.fixture
+def rule_based_profiler_with_variables_with_rules_with_parameters(
+    empty_data_context,
+    variables_multi_part_name_parameter_container,
+    rule_with_parameters,
+):
+    rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
+        name="my_rule_based_profiler",
+        config_version=1.0,
+        data_context=empty_data_context,
+    )
+    rule_based_profiler.variables = variables_multi_part_name_parameter_container
+    rule_based_profiler.rules = [rule_with_parameters]
+    return rule_based_profiler

@@ -294,6 +294,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
     column_Age_domain,
     column_Date_domain,
     rule_with_parameters,
+    rule_based_profiler_with_variables_with_rules_with_parameters,
     domain_name,
     fully_qualified_parameter_name,
     value,
@@ -327,7 +328,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
             domain=domain,
-            variables=rule_with_parameters.rule_based_profiler.variables,
+            variables=rule_based_profiler_with_variables_with_rules_with_parameters.variables,
             parameters=rule_with_parameters.parameters,
         )
         == value
@@ -342,7 +343,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
             get_parameter_value_by_fully_qualified_parameter_name(
                 fully_qualified_parameter_name=fully_qualified_parameter_name_for_details,
                 domain=domain,
-                variables=rule_with_parameters.rule_based_profiler.variables,
+                variables=rule_based_profiler_with_variables_with_rules_with_parameters.variables,
                 parameters=rule_with_parameters.parameters,
             )
             == details

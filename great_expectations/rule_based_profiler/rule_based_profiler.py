@@ -107,7 +107,7 @@ class RuleBasedProfiler:
         config_version: float,
         *,
         variables: Optional[Dict[str, Any]] = None,
-        rules: Dict[str, Dict[str, Any]],
+        rules: Optional[Dict[str, Dict[str, Any]]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
@@ -203,7 +203,6 @@ class RuleBasedProfiler:
 
         # Compile previous steps and package into a Rule object
         return Rule(
-            rule_based_profiler=self,
             name=rule_name,
             domain_builder=domain_builder,
             parameter_builders=parameter_builders,
@@ -572,11 +571,19 @@ class RuleBasedProfiler:
         return effective_expectation_configuration_builder_config
 
     @property
-    def variables(self) -> ParameterContainer:
+    def variables(self) -> Optional[ParameterContainer]:
         # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
         return copy.deepcopy(self._variables)
+
+    @variables.setter
+    def variables(self, value: Optional[ParameterContainer]):
+        self._variables = value
 
     @property
     def rules(self) -> Dict[str, Rule]:
         rule: Rule
         return {rule.name: rule for rule in self._rules}
+
+    @rules.setter
+    def rules(self, value: List[Rule]):
+        self._rules = value
