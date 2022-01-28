@@ -196,8 +196,8 @@ class RuleConfig(DictDot):
         self,
         name: str,
         domain_builder: DomainBuilderConfig,
-        parameter_builders: List[ParameterBuilderConfig],
         expectation_configuration_builders: List[ExpectationConfigurationBuilderConfig],
+        parameter_builders: Optional[List[ParameterBuilderConfig]] = None,
         **kwargs
     ):
         self.name = name
