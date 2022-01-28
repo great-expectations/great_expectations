@@ -7,6 +7,7 @@ from great_expectations.core.batch import BatchRequest
 
 context = ge.get_context()
 
+# GCP project and BigQuery dataset information and not for general use. It is only to support testing.
 gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
 
 # parse great_expectations.yml for comparison

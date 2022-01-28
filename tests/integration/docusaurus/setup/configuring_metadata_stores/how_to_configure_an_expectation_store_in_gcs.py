@@ -7,7 +7,6 @@ import great_expectations as ge
 
 context = ge.get_context()
 
-
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"

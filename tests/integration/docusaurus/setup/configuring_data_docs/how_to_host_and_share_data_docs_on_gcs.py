@@ -7,12 +7,12 @@ import great_expectations as ge
 
 context = ge.get_context()
 
-# the following sets the project for tests. You can replace with your GCP project.
+# GCP project and BigQuery dataset information and not for general use. It is only to support testing.
 gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
 
 # set GCP project
 result = subprocess.run(
-    f'gcloud config set project {gcp_project}'.split(),
+    f"gcloud config set project {gcp_project}".split(),
     check=True,
     stderr=subprocess.PIPE,
 )
