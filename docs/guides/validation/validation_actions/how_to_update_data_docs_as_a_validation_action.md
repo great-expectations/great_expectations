@@ -67,7 +67,16 @@ Steps
 
    Test that your new Validation Action is configured correctly:
 
-   1. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI using ``great_expectations checkpoint run <checkpoint name>``or using Python, as explained in [How to validate your data using a Checkpoint](../how_to_validate_data_by_running_a_checkpoint.md).
+   1. Run the Checkpoint from your code or the CLI and verify that no errors are thrown.
+   ```python
+   import great_expectations as ge
+   context = ge.get_context()
+   checkpoint_name = "your checkpoint name here"
+   context.run_checkpoint(checkpoint_name=checkpoint_name)
+   ```
+   ```bash
+   $ great_expectations checkpoint run <your checkpoint name>
+   ```
    2. Check your Data Docs sites to confirm that a new Validation Result has been added.
 
 Additional notes
