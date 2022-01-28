@@ -475,7 +475,7 @@ class BaseDataContext:
                     datasource_name=datasource_name
                 )
             except ge_exceptions.DatasourceInitializationError as e:
-                logger.warn(f"Cannot initialize datasource {datasource_name}: {e}")
+                logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
