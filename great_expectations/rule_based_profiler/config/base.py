@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -51,21 +51,36 @@ class NotNullSchema(Schema):
 
         return self.__config_class__(**data)
 
-    @post_dump
-    def remove_nulls(self, data: dict, **kwargs) -> dict:
+    @post_dump(pass_original=True)
+    def remove_nulls_and_keep_unknowns(
+        self, output: dict, original: Type[DictDot], **kwargs
+    ) -> dict:
         """Hook to clear the config object of any null values before being written as a dictionary.
+
+        Additionally, it bypasses strict schema validation before writing to dict to ensure that dynamic
+        attributes set through `setattr` are captured in the resulting object.
+
+        It is important to note that only public attributes are captured through this process.
+
+        Chetan - 20220126 - Note that if we tighten up the schema (remove the dynamic `setattr` behavior),
+        the functionality to keep unknowns should also be removed.
+
         Args:
             data: The dictionary representation of the configuration object
             kwargs: Marshmallow-specific kwargs required to maintain hook signature (unused herein)
+
         Returns:
             A cleaned dictionary that has no null values
         """
-        cleaned_data = filter_properties_dict(
-            properties=data,
+        for key in original:
+            if key not in output and not key.startswith("_"):
+                output[key] = original[key]
+        cleaned_output = filter_properties_dict(
+            properties=output,
             clean_nulls=True,
             clean_falsy=False,
         )
-        return cleaned_data
+        return cleaned_output
 
 
 class DomainBuilderConfig(DictDot):
@@ -73,7 +88,7 @@ class DomainBuilderConfig(DictDot):
         self,
         class_name: str,
         module_name: Optional[str] = None,
-        batch_request: Optional[Dict[str, Any]] = None,
+        batch_request: Optional[Union[dict, str]] = None,
         **kwargs
     ):
         self.class_name = class_name
@@ -98,7 +113,7 @@ class DomainBuilderConfigSchema(NotNullSchema):
         all_none=True,
         missing="great_expectations.rule_based_profiler.domain_builder",
     )
-    batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
+    batch_request = fields.Raw(required=False, allow_none=True)
 
 
 class ParameterBuilderConfig(DictDot):
@@ -107,7 +122,7 @@ class ParameterBuilderConfig(DictDot):
         name: str,
         class_name: str,
         module_name: Optional[str] = None,
-        batch_request: Optional[Dict[str, Any]] = None,
+        batch_request: Optional[Union[dict, str]] = None,
         **kwargs
     ):
         self.name = name
@@ -134,7 +149,7 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         all_none=True,
         missing="great_expectations.rule_based_profiler.parameter_builder",
     )
-    batch_request = fields.Dict(keys=fields.String(), required=False, allow_none=True)
+    batch_request = fields.Raw(required=False, allow_none=True)
 
 
 class ExpectationConfigurationBuilderConfig(DictDot):
@@ -181,8 +196,8 @@ class RuleConfig(DictDot):
         self,
         name: str,
         domain_builder: DomainBuilderConfig,
-        parameter_builders: List[ParameterBuilderConfig],
         expectation_configuration_builders: List[ExpectationConfigurationBuilderConfig],
+        parameter_builders: Optional[List[ParameterBuilderConfig]] = None,
         **kwargs
     ):
         self.name = name
@@ -206,7 +221,8 @@ class RuleConfigSchema(NotNullSchema):
     domain_builder = fields.Nested(DomainBuilderConfigSchema, required=True)
     parameter_builders = fields.List(
         cls_or_instance=fields.Nested(ParameterBuilderConfigSchema, required=True),
-        required=True,
+        required=False,
+        allow_none=True,
     )
     expectation_configuration_builders = fields.List(
         cls_or_instance=fields.Nested(
@@ -222,6 +238,8 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         name: str,
         config_version: float,
         rules: Dict[str, RuleConfig],
+        class_name: str,
+        module_name: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
         **kwargs
@@ -229,6 +247,8 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         self.name = name
         self.config_version = config_version
         self.rules = rules
+        self.class_name = class_name
+        self.module_name = module_name
         self.variables = variables
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -253,6 +273,12 @@ class RuleBasedProfilerConfigSchema(NotNullSchema):
 
     __config_class__ = RuleBasedProfilerConfig
 
+    class_name = fields.String(required=True)
+    module_name = fields.String(
+        required=False,
+        all_none=True,
+        missing="great_expectations.rule_based_profiler",
+    )
     name = fields.String(required=True)
     config_version = fields.Float(
         required=True,

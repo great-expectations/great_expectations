@@ -50,6 +50,11 @@ batch_request = RuntimeBatchRequest(
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from test_ci.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
+    batch_spec_passthrough={
+        "reader_options": {
+            "pool_size": 5
+        }  # NOTE: create_engine arguments may be passed here
+    },
 )
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
