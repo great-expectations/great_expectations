@@ -27,18 +27,18 @@ Expectations *enhance communication* about your data and *improve quality* for d
 
 ### Relationship to other objects
 
-Expectations are grouped into Expectation Suites, which are in turn stored in an Expectation Store.  Profilers will analyze data in order to generate Expectations, and Checkpoints rely on Expectation Suites (and the Expectations contained therein) to Validate data.
+Expectations are grouped into <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, which are in turn stored in an <TechnicalTag relative="../" tag="expectation_store" text="Expectation Store" />.  <TechnicalTag relative="../" tag="profiler" text="Profilers" /> will analyze data in order to generate Expectations, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> rely on Expectation Suites (and the Expectations contained therein) to <TechnicalTag relative="../" tag="validation" text="Validate" /> data.
 
 ## Use cases
 
 <CreateHeader/>
 
-Expectations are obviously a fundamental component of the Create Expectations step in working with Great Expectations.  It is when you are creating Expectations that you will have the most direct interaction with them.  For further information on this process, please see our overview on the Create Expectations process, and our related how-to guides.
+Expectations are obviously a fundamental component of the Create Expectations step in working with Great Expectations.  It is when you are creating Expectations that you will have the most direct interaction with them.  For further information on this process, please see [our overview on the Create Expectations process](../guides/expectations/create_expectations_overview.md), and [our related how-to guides](../guides/expectations/index.md).
 
 
 <ValidateHeader/>
 
-When you create your Checkpoints, you will be able to configure them to use specific Expectation Suites.  Other than setting up this configuration (or arranging to pass Expectation Suites at runtime) you will not need to directly interact with the Expectations themselves.  Instead, when you run your Checkpoint it will handle using the Expectations in any of its Expectation Suites to Validate the data indicated in its Batch Request/s.  This will be done under the hood, with the Validation Results that are generated being passed along to the Checkpoint's (optional) Actions for further processing.
+When you create your Checkpoints, you will be able to configure them to use specific Expectation Suites.  Other than setting up this configuration (or arranging to pass Expectation Suites at runtime) you will not need to directly interact with the Expectations themselves.  Instead, when you run your Checkpoint it will handle using the Expectations in any of its Expectation Suites to Validate the data indicated in its Batch Request/s.  This will be done under the hood, with the <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> that are generated being passed along to the Checkpoint's (optional) <TechnicalTag relative="../" tag="action" text="Actions" /> for further processing.
 
 
 ## Features
@@ -69,7 +69,7 @@ These Expectations aren't included in the default set, but could be very useful 
 
 Fear not! Great Expectations is designed for customization and extensibility.
 
-Building custom Expectations is easy and allows your custom logic to become part of the validation, documentation, and even profiling workflows that make Great Expectations stand out. See the guide on [creating custom Expectations](/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations) for more information on building Expectations and updating Data Context configurations to automatically load batches of data with custom Data Assets.
+Building custom Expectations is easy and allows your custom logic to become part of the validation, documentation, and even profiling workflows that make Great Expectations stand out. See the guide on [creating custom Expectations](/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations) for more information on building Expectations and updating <TechnicalTag relative="../" tag="data_context" text="Data Context" /> configurations to automatically load <TechnicalTag relative="../" tag="batch" text="Batches" /> of data with custom <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />Data Assets.
 
 ### Distributional Expectations
 
@@ -79,7 +79,7 @@ For more information, please see our [reference guide on Distributional Expectat
 
 ### Conditional Expectations
 
-Conditional Expectations are those that are intended to be applied not to an entire dataset, but to a particular subset of the data.  Alternatively, Conditional Expectations are those where what one expects of one variable depends on the value of another.  An example of this would be an Expectation that a column not have a null value only if another column's value falls into a specific subset.
+Conditional Expectations are those that are intended to be applied not to an entire dataset, but to a particular subset of the data.  Additionally, Conditional Expectations include those where what one expects of one variable depends on the value of another.  An example of this would be an Expectation that a column not have a null value only if another column's value falls into a specific subset.
 
 For more information on these Expectations, please see [our reference guide for Conditional Expectations](../reference/expectations/conditional_expectations.md).
 
@@ -110,9 +110,9 @@ For more information on these methods, please see our [overview guide for creati
 
 ### Configuration
 
-Most of the time you will not need to directly interact with an Expectation's configurations.  However, advanced users may have circumstances in which it is desireable to define Expectations based purely on domain knowledge, without comparing against underlying data.  To do this, you will need to directly write an Expectation's configuration.  For details on how to do this, please reference our guide on [how to create and edit Expectations based on domain knowledge, without inspecting data directly](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md).
+Most of the time you will not need to directly interact with an Expectation's configurations.  However, advanced users may have circumstances in which it is desirable to define Expectations based purely on domain knowledge, without comparing against underlying data.  To do this, you will need to directly write an Expectation's configuration.  For details on how to do this, please reference our guide on [how to create and edit Expectations based on domain knowledge, without inspecting data directly](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md).
 
-The other occasion when you may want to edit an Expectation's configuration is when you need to edit it's `result_format`.  The `result_format` parameter may be either a string or a dictionary which specifies the fields to return in `result`.  For further details, please see [our reference guide on the result_format parameter](../reference/expectations/result_format.md).
+The other occasion when you may want to edit an Expectation's configuration is when you need to edit the `result_format` of a <TechnicalTag relative="../" tag="custom_expectation" text="Custom Expectation" />  The `result_format` parameter may be either a string or a dictionary which specifies the fields to return in `result`.  For further details, please see [our reference guide on the result_format parameter](../reference/expectations/result_format.md).
 
 ### Results
 
