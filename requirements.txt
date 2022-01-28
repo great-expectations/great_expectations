@@ -21,4 +21,5 @@ ruamel.yaml>=0.16,<0.17.18  # package
 scipy>=0.19.0  # package
 termcolor>=1.1.0  # package
 tqdm>=4.59.0
+typing-extensions>=3.10.0.0 # Leverage type annotations from recent Python releases
 tzlocal>=1.2  # package

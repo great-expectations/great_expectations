@@ -34,5 +34,4 @@ pyupgrade==2.7.2  # lint
 requirements-parser>=0.2.0  # all_tests
 s3fs>=0.5.1 # all_tests
 snapshottest==0.6.0 # GE Cloud atomic renderer tests
-typing-extensions>=3.10.0.0 # typing. Added 202108 @Shinnnyshinshin and @cdkini
 xlrd>=1.1.0,<2.0.0  # all_tests
