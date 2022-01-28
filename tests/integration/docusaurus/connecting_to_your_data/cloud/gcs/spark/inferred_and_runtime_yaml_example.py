@@ -42,9 +42,7 @@ data_connectors:
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "<YOUR_GCS_BUCKET_HERE>", "superconductive-integration-tests"
-)
+datasource_yaml = datasource_yaml.replace("<YOUR_GCS_BUCKET_HERE>", "test_docs_data")
 datasource_yaml = datasource_yaml.replace(
     "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
 )
@@ -66,7 +64,7 @@ batch_request = RuntimeBatchRequest(
 # In normal usage you'd set your path directly in the BatchRequest above.
 batch_request.runtime_parameters[
     "path"
-] = "gs://superconductive-public/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
+] = "gs://test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
