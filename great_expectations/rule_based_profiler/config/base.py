@@ -190,7 +190,9 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
 class RuleConfig(DictDot):
     def __init__(
         self,
-        expectation_configuration_builders: List[dict],  # see ExpectationConfigurationBuilderConfig
+        expectation_configuration_builders: List[
+            dict
+        ],  # see ExpectationConfigurationBuilderConfig
         domain_builder: Optional[dict] = None,  # see DomainBuilderConfig
         parameter_builders: Optional[List[dict]] = None,  # see ParameterBuilderConfig
     ):
@@ -205,14 +207,18 @@ class RuleConfigSchema(NotNullSchema):
 
     __config_class__ = RuleConfig
 
-    domain_builder = fields.Nested(DomainBuilderConfigSchema, required=False, allow_none=True)
+    domain_builder = fields.Nested(
+        DomainBuilderConfigSchema, required=False, allow_none=True
+    )
     parameter_builders = fields.List(
         cls_or_instance=fields.Nested(ParameterBuilderConfigSchema, required=True),
         required=False,
         allow_none=True,
     )
     expectation_configuration_builders = fields.List(
-        cls_or_instance=fields.Nested(ExpectationConfigurationBuilderConfigSchema, required=True),
+        cls_or_instance=fields.Nested(
+            ExpectationConfigurationBuilderConfigSchema, required=True
+        ),
         required=True,
         allow_none=False,
     )
@@ -277,7 +283,9 @@ class RuleBasedProfilerConfigSchema(Schema):
     )
 
 
-expectationConfigurationBuilderConfigSchema = ExpectationConfigurationBuilderConfigSchema()
+expectationConfigurationBuilderConfigSchema = (
+    ExpectationConfigurationBuilderConfigSchema()
+)
 parameterBuilderConfigSchema = ParameterBuilderConfigSchema()
 domainBuilderConfigSchema = DomainBuilderConfigSchema()
 ruleConfigSchema = RuleConfigSchema()

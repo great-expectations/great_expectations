@@ -17,7 +17,9 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.config.base import ruleBasedProfilerConfigSchema
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterContainer,
@@ -2414,7 +2416,11 @@ def rule_with_parameters(
     single_part_name_parameter_container,
     multi_part_name_parameter_container,
 ):
-    variables: dict = dict(variables_multi_part_name_parameter_container.parameter_nodes["variables"]["variables"])
+    variables: dict = dict(
+        variables_multi_part_name_parameter_container.parameter_nodes["variables"][
+            "variables"
+        ]
+    )
     rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
         name="my_rule_based_profiler",
         config_version=1.0,

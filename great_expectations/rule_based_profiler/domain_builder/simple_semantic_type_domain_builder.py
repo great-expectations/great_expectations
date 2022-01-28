@@ -201,7 +201,11 @@ information.  Please ensure that the specified column name refers to exactly one
         return inferred_semantic_column_type
 
     @property
-    def semantic_types(self) -> Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]]:
+    def semantic_types(
+        self,
+    ) -> Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ]:
         return self._semantic_types
 
 

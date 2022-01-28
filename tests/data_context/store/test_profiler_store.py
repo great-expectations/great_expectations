@@ -1,6 +1,6 @@
 # TODO: <Alex>ALEX -- once all tests have been fixed, leave only the necessary imports.</Alex>
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 import pytest
 

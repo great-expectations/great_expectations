@@ -603,6 +603,7 @@ def get_batch_request_as_dict(
 
     return batch_request
 
+
 def get_batch_request_from_acceptable_arguments(
     datasource_name: Optional[str] = None,
     data_connector_name: Optional[str] = None,

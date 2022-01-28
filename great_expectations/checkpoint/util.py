@@ -401,7 +401,9 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
                 batch_request_from_runtime_kwargs.to_dict()
             )
         updated_batch_request = nested_update(
-            batch_request, batch_request_from_runtime_kwargs, dedup=True,
+            batch_request,
+            batch_request_from_runtime_kwargs,
+            dedup=True,
         )
         dest_config["batch_request"] = updated_batch_request
     if runtime_kwargs.get("action_list") is not None:

@@ -1,6 +1,6 @@
+import copy
 import uuid
 from typing import Any, Dict, List, Optional, Union
-import copy
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -187,13 +187,18 @@ class RuleBasedProfiler:
             domain_builder_config=rule_config["domain_builder"],
             data_context=self._data_context,
         )
-        parameter_builders: Optional[List[ParameterBuilder]] = RuleBasedProfiler._init_parameter_builders(
+        parameter_builders: Optional[
+            List[ParameterBuilder]
+        ] = RuleBasedProfiler._init_parameter_builders(
             parameter_builder_configs=rule_config.get("parameter_builders"),
             data_context=self._data_context,
         )
-        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = (
-            RuleBasedProfiler._init_expectation_configuration_builders(
-                expectation_configuration_builder_configs=rule_config["expectation_configuration_builders"])
+        expectation_configuration_builders: List[
+            ExpectationConfigurationBuilder
+        ] = RuleBasedProfiler._init_expectation_configuration_builders(
+            expectation_configuration_builder_configs=rule_config[
+                "expectation_configuration_builders"
+            ]
         )
 
         # Compile previous steps and package into a Rule object
@@ -232,9 +237,11 @@ class RuleBasedProfiler:
 
         parameter_builder_config: dict
         for parameter_builder_config in parameter_builder_configs:
-            parameter_builder: ParameterBuilder = RuleBasedProfiler._init_one_parameter_builder(
-                parameter_builder_config=parameter_builder_config,
-                data_context=data_context,
+            parameter_builder: ParameterBuilder = (
+                RuleBasedProfiler._init_one_parameter_builder(
+                    parameter_builder_config=parameter_builder_config,
+                    data_context=data_context,
+                )
             )
             parameter_builders.append(parameter_builder)
 
@@ -301,7 +308,9 @@ class RuleBasedProfiler:
             :param include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
         :return: Set of rule evaluation results in the form of an ExpectationSuite
         """
-        effective_variables: Optional[ParameterContainer] = self._reconcile_variables(variables=variables)
+        effective_variables: Optional[ParameterContainer] = self._reconcile_variables(
+            variables=variables
+        )
 
         effective_rules: List[Rule] = self.reconcile_rules_for_profiler(rules=rules)
 
@@ -335,18 +344,24 @@ class RuleBasedProfiler:
 
         return expectation_suite
 
-    def _reconcile_variables(self, variables: Optional[Dict[str, Any]] = None) -> Optional[ParameterContainer]:
+    def _reconcile_variables(
+        self, variables: Optional[Dict[str, Any]] = None
+    ) -> Optional[ParameterContainer]:
         effective_variables: Optional[ParameterContainer]
         if variables is not None and isinstance(variables, dict):
             variables_dict: dict = self.variables.to_dict()
             variables_dict.update(variables)
-            effective_variables = build_parameter_container_for_variables(variables_configs=variables)
+            effective_variables = build_parameter_container_for_variables(
+                variables_configs=variables
+            )
         else:
             effective_variables = self.variables
 
         return effective_variables
 
-    def reconcile_rules_for_profiler(self, rules: Optional[Dict[str, Dict[str, Any]]] = None) -> List[Rule]:
+    def reconcile_rules_for_profiler(
+        self, rules: Optional[Dict[str, Dict[str, Any]]] = None
+    ) -> List[Rule]:
         if rules is None:
             rules = {}
 
@@ -363,27 +378,38 @@ class RuleBasedProfiler:
             )
             for rule_name, rule_config in rules.items()
         }
-        override_rules: Dict[str, Rule] = {rule_name: self._init_one_rule(rule_name=rule_name, rule_config=rule_config) for rule_name, rule_config in override_rule_configs.items()}
+        override_rules: Dict[str, Rule] = {
+            rule_name: self._init_one_rule(rule_name=rule_name, rule_config=rule_config)
+            for rule_name, rule_config in override_rule_configs.items()
+        }
         effective_rules.update(override_rules)
 
         return list(effective_rules.values())
 
     @staticmethod
-    def _reconcile_rule(existing_rules: Dict[str, Rule], rule_name: str, rule_config: dict) -> Dict[str, Any]:
+    def _reconcile_rule(
+        existing_rules: Dict[str, Rule], rule_name: str, rule_config: dict
+    ) -> Dict[str, Any]:
         effective_rule_config: Dict[str, Any]
         if rule_name in existing_rules:
             rule: Rule = existing_rules[rule_name]
             domain_builder_config: dict = rule_config.get("domain_builder", {})
-            effective_domain_builder_config: dict = RuleBasedProfiler._reconcile_domain_builder_config(
-                rule=rule,
-                domain_builder_config=domain_builder_config,
+            effective_domain_builder_config: dict = (
+                RuleBasedProfiler._reconcile_domain_builder_config(
+                    rule=rule,
+                    domain_builder_config=domain_builder_config,
+                )
             )
-            effective_parameter_builder_configs: Optional[List[dict]] = RuleBasedProfiler._reconcile_parameter_builder_configs_for_rule(
+            effective_parameter_builder_configs: Optional[
+                List[dict]
+            ] = RuleBasedProfiler._reconcile_parameter_builder_configs_for_rule(
                 rule=rule,
                 rule_config=rule_config,
             )
 
-            effective_expectation_configuration_builder_configs: List[dict] = RuleBasedProfiler._reconcile_expectation_configuration_builder_configs_for_rule(
+            effective_expectation_configuration_builder_configs: List[
+                dict
+            ] = RuleBasedProfiler._reconcile_expectation_configuration_builder_configs_for_rule(
                 rule=rule,
                 rule_config=rule_config,
             )
@@ -403,9 +429,13 @@ class RuleBasedProfiler:
         domain_builder_config: dict,
     ) -> dict:
         effective_domain_builder_config: dict = {}
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = domain_builder_config.pop("batch_request", None)
+        batch_request: Optional[
+            Union[BatchRequest, RuntimeBatchRequest, dict]
+        ] = domain_builder_config.pop("batch_request", None)
         if batch_request is None:
-            batch_request = get_batch_request_as_dict(batch_request=rule.domain_builder.batch_request)
+            batch_request = get_batch_request_as_dict(
+                batch_request=rule.domain_builder.batch_request
+            )
 
         effective_domain_builder_config["batch_request"] = batch_request
 
@@ -422,16 +452,24 @@ class RuleBasedProfiler:
         return effective_domain_builder_config
 
     @staticmethod
-    def _reconcile_parameter_builder_configs_for_rule(rule: Rule, rule_config: dict) -> Optional[List[dict]]:
+    def _reconcile_parameter_builder_configs_for_rule(
+        rule: Rule, rule_config: dict
+    ) -> Optional[List[dict]]:
         effective_parameter_builder_configs: Optional[List[dict]] = []
-        parameter_builder_configs: Optional[List[dict]] = rule_config.get("parameter_builders", [])
+        parameter_builder_configs: Optional[List[dict]] = rule_config.get(
+            "parameter_builders", []
+        )
 
-        current_parameter_builders: Optional[Dict[str, ParameterBuilder]] = rule.parameter_builders
+        current_parameter_builders: Optional[
+            Dict[str, ParameterBuilder]
+        ] = rule.parameter_builders
         parameter_builder_config: dict
         for parameter_builder_config in parameter_builder_configs:
             parameter_builder_name: str = parameter_builder_config["name"]
             if parameter_builder_name in current_parameter_builders:
-                parameter_builder: ParameterBuilder = current_parameter_builders[parameter_builder_name]
+                parameter_builder: ParameterBuilder = current_parameter_builders[
+                    parameter_builder_name
+                ]
                 effective_parameter_builder_configs.append(
                     RuleBasedProfiler._reconcile_parameter_builder_config(
                         parameter_builder=parameter_builder,
@@ -449,9 +487,13 @@ class RuleBasedProfiler:
         parameter_builder_config: dict,
     ) -> dict:
         effective_parameter_builder_config: dict = {}
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = parameter_builder_config.pop("batch_request", None)
+        batch_request: Optional[
+            Union[BatchRequest, RuntimeBatchRequest, dict]
+        ] = parameter_builder_config.pop("batch_request", None)
         if batch_request is None:
-            batch_request = get_batch_request_as_dict(batch_request=parameter_builder.batch_request)
+            batch_request = get_batch_request_as_dict(
+                batch_request=parameter_builder.batch_request
+            )
 
         effective_parameter_builder_config["batch_request"] = batch_request
 
@@ -468,16 +510,33 @@ class RuleBasedProfiler:
         return effective_parameter_builder_config
 
     @staticmethod
-    def _reconcile_expectation_configuration_builder_configs_for_rule(rule: Rule, rule_config: dict) -> List[dict]:
+    def _reconcile_expectation_configuration_builder_configs_for_rule(
+        rule: Rule, rule_config: dict
+    ) -> List[dict]:
         effective_expectation_configuration_builder_configs: List[dict] = []
-        expectation_configuration_builder_configs: Optional[List[dict]] = rule_config.get("expectation_configuration_builders", [])
+        expectation_configuration_builder_configs: Optional[
+            List[dict]
+        ] = rule_config.get("expectation_configuration_builders", [])
 
-        current_expectation_configuration_builders: Dict[str, ExpectationConfigurationBuilder] = rule.expectation_configuration_builders
+        current_expectation_configuration_builders: Dict[
+            str, ExpectationConfigurationBuilder
+        ] = rule.expectation_configuration_builders
         expectation_configuration_builder_config: dict
-        for expectation_configuration_builder_config in expectation_configuration_builder_configs:
-            expectation_configuration_builder_name: str = expectation_configuration_builder_config["expectation_type"]
-            if expectation_configuration_builder_name in current_expectation_configuration_builders:
-                expectation_configuration_builder: ExpectationConfigurationBuilder = current_expectation_configuration_builders[expectation_configuration_builder_name]
+        for (
+            expectation_configuration_builder_config
+        ) in expectation_configuration_builder_configs:
+            expectation_configuration_builder_name: str = (
+                expectation_configuration_builder_config["expectation_type"]
+            )
+            if (
+                expectation_configuration_builder_name
+                in current_expectation_configuration_builders
+            ):
+                expectation_configuration_builder: ExpectationConfigurationBuilder = (
+                    current_expectation_configuration_builders[
+                        expectation_configuration_builder_name
+                    ]
+                )
                 effective_expectation_configuration_builder_configs.append(
                     RuleBasedProfiler._reconcile_expectation_configuration_builder(
                         expectation_configuration_builder=expectation_configuration_builder,
@@ -485,7 +544,9 @@ class RuleBasedProfiler:
                     )
                 )
             else:
-                effective_expectation_configuration_builder_configs.append(expectation_configuration_builder_config)
+                effective_expectation_configuration_builder_configs.append(
+                    expectation_configuration_builder_config
+                )
 
         return effective_expectation_configuration_builder_configs
 
@@ -502,7 +563,9 @@ class RuleBasedProfiler:
         for key, value in expectation_configuration_builder_config:
             if hasattr(expectation_configuration_builder, f"{key}"):
                 current_value = getattr(expectation_configuration_builder, key)
-                effective_expectation_configuration_builder_config[key] = value or current_value
+                effective_expectation_configuration_builder_config[key] = (
+                    value or current_value
+                )
             else:
                 effective_expectation_configuration_builder_config[key] = value
 

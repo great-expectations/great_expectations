@@ -189,9 +189,7 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
 
     assert all(
         f"'{attr}': ['Missing data for required field.']" in str(e.value)
-        for attr in (
-            "expectation_configuration_builders",
-        )
+        for attr in ("expectation_configuration_builders",)
     )
 
 
@@ -219,7 +217,9 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
     schema = RuleBasedProfilerConfigSchema()
     config = schema.load(data)
     assert isinstance(config, dict)
-    assert len(config["rules"]) == 1 and isinstance(config["rules"]["rule_1"], RuleConfig)
+    assert len(config["rules"]) == 1 and isinstance(
+        config["rules"]["rule_1"], RuleConfig
+    )
 
 
 def test_rule_based_profiler_config_successfully_loads_with_optional_args():

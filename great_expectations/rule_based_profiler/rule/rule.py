@@ -1,16 +1,15 @@
 import copy
 from typing import Dict, List, Optional
 
-from great_expectations.rule_based_profiler.domain_builder import (
-    Domain,
-    DomainBuilder,
+from great_expectations.core import ExpectationConfiguration
+from great_expectations.rule_based_profiler.domain_builder import Domain, DomainBuilder
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+    ExpectationConfigurationBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,
     ParameterContainer,
 )
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.rule_based_profiler.expectation_configuration_builder import ExpectationConfigurationBuilder
 
 
 class Rule:
@@ -20,7 +19,9 @@ class Rule:
         name: str,
         domain_builder: Optional[DomainBuilder] = None,
         parameter_builders: Optional[List[ParameterBuilder]] = None,
-        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = None,
+        expectation_configuration_builders: List[
+            ExpectationConfigurationBuilder
+        ] = None,
     ):
         """
         Sets Profiler rule name, domain builders, parameters builders, configuration builders,
@@ -104,12 +105,20 @@ class Rule:
             return None
 
         parameter_builder: ParameterBuilder
-        return {parameter_builder.name: parameter_builder for parameter_builder in self._parameter_builders}
+        return {
+            parameter_builder.name: parameter_builder
+            for parameter_builder in self._parameter_builders
+        }
 
     @property
-    def expectation_configuration_builders(self) -> Dict[str, ExpectationConfigurationBuilder]:
+    def expectation_configuration_builders(
+        self,
+    ) -> Dict[str, ExpectationConfigurationBuilder]:
         expectation_configuration_builder: ExpectationConfigurationBuilder
-        return {expectation_configuration_builder.expectation_type: expectation_configuration_builder for expectation_configuration_builder in self._expectation_configuration_builders}
+        return {
+            expectation_configuration_builder.expectation_type: expectation_configuration_builder
+            for expectation_configuration_builder in self._expectation_configuration_builders
+        }
 
     @property
     def parameters(self) -> Dict[str, ParameterContainer]:
