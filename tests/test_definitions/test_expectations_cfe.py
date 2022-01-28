@@ -68,7 +68,7 @@ def pytest_generate_tests(metafunc):
                         skip_expectation = True
                     elif suppress_test_for and c in suppress_test_for:
                         continue
-                    elif only_for and c in only_for:
+                    elif only_for and c not in only_for:
                         continue
                     else:
                         skip_expectation = False
