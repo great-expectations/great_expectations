@@ -71,16 +71,16 @@ Custom actions need to be created in Python code, and can be implemented as Plug
 **Required parameters:**
 - `validation_result_suite`: an instance of the `ExpectationSuiteValidationResult` class.
 - `validation_result_suite_identifier`: an instance of either the `ValidationResultIdentifier` class (for open source Great Expectations) or the `GeCloudIdentifier` (from Great Expectations Cloud).
-- `data_asset`
+- `data_asset`: an instance of the `Validator` class.
 
 **Optional parameters:**
-- expectation_suite_identifier
-- checkpoint_identifier
+- `expectation_suite_identifier`
+- `checkpoint_identifier`
 
 **Additional parameters:**
 - **kwargs: named parameters that are specific to a given Action, and need to be assigned a value in the Action's configuration in a Checkpoint's `action_list`.
 
-The required and optional parameters will be automatically passed to the Action from the Checkpoint that the Action is included with, after the Checkpoint completes Validation.  This means you can configure your custom Actions to behave conditionally based on the Validation Results your Checkpoint generates.  Additional `**kwargs` parameters can be included, but they cannot be passed automatically by the Checkpoint.  Therefore, you will have to specify the name and value for these parameters in the configuration for their Action, in the Checkpoint's `action_list`.
+The required and optional named parameters will be automatically passed to the Action from the Checkpoint that the Action is included with, after the Checkpoint completes Validation.  This means you can configure your custom Actions to behave conditionally based on the Validation Results your Checkpoint generates, or the values passed along with any of those named parameters.  Additional `**kwargs` parameters can be included, but they cannot be passed automatically by the Checkpoint.  Therefore, you will have to specify the name and value for these parameters in the configuration for their Action, in the Checkpoint's `action_list`.
 
 The best practice when creating a custom Action is actually to create a subclass of the `ValidationAction` class found in the `great_expectations.checkpoint.actions` module.  Leave the inherited `run()` method as its default, and overwrite the `_run()` method to contain your functionality.  There are numerous examples of this practice in the subclasses of `ValidationAction` located in the `great_expectations.checkpoint.actions` module, which you can view on GitHub:
 - [great_expectations.checkpoint.actions](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/checkpoint/actions.py)
