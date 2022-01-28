@@ -1081,5 +1081,9 @@ def test_validator_progress_bar_config_disabled(
 
 
 def test_validator_docstrings(multi_batch_taxi_validator):
-    expectation_impl = getattr(multi_batch_taxi_validator, "expect_column_values_to_be_in_set", None)
-    assert expectation_impl.__doc__.startswith("Expect each column value to be in a given set")
+    expectation_impl = getattr(
+        multi_batch_taxi_validator, "expect_column_values_to_be_in_set", None
+    )
+    assert expectation_impl.__doc__.startswith(
+        "Expect each column value to be in a given set"
+    )
