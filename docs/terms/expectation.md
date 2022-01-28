@@ -38,7 +38,7 @@ Expectations are obviously a fundamental component of the Create Expectations st
 
 <ValidateHeader/>
 
-When you create your Checkpoints, you will be able to configure them to use specific Expectation Suites.  Other than setting up this configuration (or arranging to pass Expectation Suites at runtime) you will not need to directly interact with the Expectations themselves.  Instead, when you run your Checkpoint it will handle using the Expectations in any of its Expectation Suites to validate the data indicated in its Batch Request/s.  This will be done under the hood, with the Validation Results that are generated being passed along to the Checkpoint's Actions for further (optional) processing.
+When you create your Checkpoints, you will be able to configure them to use specific Expectation Suites.  Other than setting up this configuration (or arranging to pass Expectation Suites at runtime) you will not need to directly interact with the Expectations themselves.  Instead, when you run your Checkpoint it will handle using the Expectations in any of its Expectation Suites to Validate the data indicated in its Batch Request/s.  This will be done under the hood, with the Validation Results that are generated being passed along to the Checkpoint's (optional) Actions for further processing.
 
 
 ## Features
@@ -71,9 +71,23 @@ Fear not! Great Expectations is designed for customization and extensibility.
 
 Building custom Expectations is easy and allows your custom logic to become part of the validation, documentation, and even profiling workflows that make Great Expectations stand out. See the guide on [creating custom Expectations](/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations) for more information on building Expectations and updating Data Context configurations to automatically load batches of data with custom Data Assets.
 
+### Distributional Expectations
+
+Distributional Expectations rely on expected distributions or "partition objects", which are built from intervals for continuous data or categorical classes and their associated weights, in order to help identify when new datasets or samples may be different than expected.  You should use Distributional Expectations in the same way as other Expectations: to help accelerate identification of risks and changes to a modeled system or disruptions to a complex upstream data feed.
+
+For more information, please see our [reference guide on Distributional Expectations](../reference/expectations/distributional_expectations.md).
+
+### Conditional Expectations
+
+Conditional Expectations are those that are intended to be applied not to an entire dataset, but to a particular subset of the data.  Alternatively, Conditional Expectations are those where what one expects of one variable depends on the value of another.  An example of this would be an Expectation that a column not have a null value only if another column's value falls into a specific subset.
+
+For more information on these Expectations, please see [our reference guide for Conditional Expectations](../reference/expectations/conditional_expectations.md).
+
 ## Limitations
 
 Unfortunately, not all Expectations are implemented for all source data systems.  To see a list of what Expectations are implemented for a given backend, please reference our [guide to implemented Expectations](../reference/expectations/implemented_expectations.md).
+
+Likewise, Conditional Expectations are considered **experimental** and are only available for the Pandas backend; not for the Spark and SQLAlchemy backends.  You can reference our [documentation on Conditional Expectations](../reference/expectations/conditional_expectations.md) for more information.
 
 ## API basics
 
@@ -102,7 +116,7 @@ The other occasion when you may want to edit an Expectation's configuration is w
 
 ### Results
 
-All Expectations return a JSON-serializable dictionary when evaluated, which consists of four standard (though optional, depending on the type of Expectation in question) arguments.  These are: `result_format`, `include_config`, `catch_exceptions`, and `meta`.  For detailed explainations as to what each of these arguments consists of and which Expectations use them, please see our guide on standard arguments.
+All Expectations return a JSON-serializable dictionary when evaluated, which consists of four standard (though optional, depending on the type of Expectation in question) arguments.  These are: `result_format`, `include_config`, `catch_exceptions`, and `meta`.  For a more detailed explanation as to what each of these arguments consists of and which Expectations use them, please see [our reference guide on standard arguments](../reference/expectations/standard_arguments.md).
 
 ## More details
 
