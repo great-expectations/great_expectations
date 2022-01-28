@@ -19,7 +19,12 @@ from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
-from typing_extensions import Literal
+
+try:
+    from typing import Literal
+except ImportError:
+    # Fallback for python < 3.8
+    from typing_extensions import Literal
 
 import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 import great_expectations.exceptions as ge_exceptions
@@ -470,7 +475,7 @@ class BaseDataContext:
                     datasource_name=datasource_name
                 )
             except ge_exceptions.DatasourceInitializationError as e:
-                logger.warn(f"Cannot initialize datasource {datasource_name}: {e}")
+                logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
