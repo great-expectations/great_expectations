@@ -48,6 +48,12 @@ When a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> Valida
 
 Execution engines handle the interactions with the source data system that their Datasource is configured for.  However, they also wrap data from those source data systems with metadata that allows Great Expectations to read it regardless of its native format. Additionally, Execution Engines translate of Expectations so that they can operate in a format appropriate to their associated source data system.  Because of this, the same Expectations can be used to validate data from different Datasources, even if those Datasources interact with source data systems so different in nature that they require different Execution Engines to access their data. 
 
+### Deferred Metrics
+
+SqlAlchemyExecutionEngine and SparkDFExecutionEngine provide an additional feature that allows deferred resolution of Metrics, making it possible to bundle the request for several metrics into a single trip to the backend. Additional Execution Engines may also support this feature in the future.
+
+The `resolve_metric_bundle()` method of these engines computes values of a bundle of Metrics; this function is used internally by `resolve_metrics()` on Execution Engines that support bundled metrics
+
 ## API basics
 
 ### How to access
@@ -58,6 +64,25 @@ You will not need to directly access an Execution Engine.  Instead, you will con
 
 You will not need to directly instantiate an Execution Engine.  Instead, they are automatically created as a component in a Datasource.
 
+### Execution Engine init arguments
+
+- `name`
+- `caching`
+- `batch_spec_defaults` (is this needed?)
+- `batch_data_dict`
+- `validator`
+
+### Execution Engine Properties
+
+- `loaded_batch_data` (all "loaded" batches)
+- `active_batch_data_id`
+
+### Execution Engine Methods
+
+- `load_batch_data(batrch_id, batch_data)`
+- `resolve_metrics`: computes metric values
+- `get_compute_domain`: gets the compute domain for a particular type of intermediate metric.
+
 ### Configuration
 
 Execution Engines and their configurations are specified in the configurations of Datasources.  In the configuration for your Datasource, you will have an `execution_engine` key.  This is a dictionary which will have at the least a `class_name` key that indicates the Execution Engine that will be associated with the Datasource.  If you are using a custom Execution Engine from a Plugin, you will also need to include a `module_name` key.  
@@ -65,3 +90,31 @@ Execution Engines and their configurations are specified in the configurations o
 If additional configuration is required by the Execution Engine, it will also be specified in the `execution_engine` configuration.  For example, the `SqlAlchemyExecutionEngine` will also expect the key `connection_string` as part of its configuration.
 
 For specifics on the required keys for a given Execution Engine, please see our [how-to guides for Connecting to Data](../guides/connecting_to_your_data/index.md).
+
+## More details
+
+### Design motivation: Validation flow
+
+1. Validator.graph_validate(expectation_suite)
+2. for each Expectation: get_validation_dependencies
+    ```python
+      {
+          "user_useful_name": MetricConfiguration,
+          ...
+      }
+   ```
+3. _populate_dependencies
+4. for each dependent metric: get_evaluation_dependencies
+    - a validation_graph object is ready. Nodes are MetricConfigurations, edges are dependencies.
+5. `_parse_validation_graph`
+6. for each set of ready_metrics: Execution Engine resolve_metrics
+7. for each metric: bundleable?
+  a. yes -> add to bundle
+  b. no -> `resolve_metric`
+    i. call metric_fn to get **value of metric**
+8. `resolve_metric_bundle`
+  a. for each metric in bundle:
+    i. call metric_fn to get: **tuple(engine_function, domain_kwargs)**
+    ii. add engine_function to resolve call for the domain
+  b. for each domain, dispatch call to engine, and add resulting metrics to metrics dictionary
+9. Expectation.validate(metrics) (now metrics are populated)
