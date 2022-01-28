@@ -336,30 +336,35 @@ cloud_gcp_tests = [
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "extra_backend_dependencies": BackendDependencies.GCS,
     },
+    {
+        "name": "pandas_execution_engine_with_gcp_installed",
+        "user_flow_script": "tests/integration/common_workflows/simple_build_data_docs.py",
+        "extra_backend_dependencies": BackendDependencies.GCS,
+    },
     # TODO: <Alex>ALEX -- Implement GCS Configured YAML Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and GCS Configured YAML Example is implemented.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/configured_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "extra_backend_dependencies": BackendDependencies.GCS,
     # },
     # TODO: <Alex>ALEX -- Implement GCS Configured Python Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and GCS Configured Python Example is implemented.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/configured_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "extra_backend_dependencies": BackendDependencies.GCS,
     # },
     # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "extra_backend_dependencies": BackendDependencies.GCS,
     # },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    # },
-    # {
-    #     "name": "pandas_execution_engine_with_gcp_installed",
-    #     "user_flow_script": "tests/integration/common_workflows/simple_build_data_docs.py",
+    #     "extra_backend_dependencies": BackendDependencies.GCS,
     # },
 ]
 
