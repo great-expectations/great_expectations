@@ -131,6 +131,7 @@ def test_profile_includes_citations(
 ):
     # Load data context
     data_context: DataContext = alice_columnar_table_single_batch_context
+
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -161,6 +162,7 @@ def test_profile_excludes_citations(
 ):
     # Load data context
     data_context: DataContext = alice_columnar_table_single_batch_context
+
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
 
