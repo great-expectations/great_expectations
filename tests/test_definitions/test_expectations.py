@@ -70,11 +70,9 @@ def pytest_generate_tests(metafunc):
                     ):
                         skip_expectation = True
                         schemas = data_asset = None
-                    elif suppress_test_for and (
-                        c is suppress_test_for or c in suppress_test_for
-                    ):
+                    elif suppress_test_for and c in suppress_test_for:
                         continue
-                    elif only_for and (c is only_for or c in only_for):
+                    elif only_for and c not in only_for:
                         continue
                     else:
                         skip_expectation = False
