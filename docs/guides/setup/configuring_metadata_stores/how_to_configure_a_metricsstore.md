@@ -7,8 +7,7 @@ dataset characteristics computed by Great Expectations. That data series can ser
 overall data quality metrics, for example.
 
 Storing metrics is still a **beta** feature of Great Expectations, and we expect configuration and
-capability to evolve rapidly. 
-An improved implementation of this feature is underway, and will be available at some point in the future.
+capability to evolve rapidly.
 
 ### Adding a MetricStore
 
@@ -66,6 +65,10 @@ validation. This Validation Action has three required fields:
             <expectation name>.result.<value name>
    ```
   In place of the Expectation Suite name, you may use `"*"` to denote that any expectation suite should match. 
+     :::note Note:
+  If an Expectation Suite name is used as a key, those metrics will only be added to the MetricStore when that Suite is run.
+  When the wildcard `"*"` is used, those metrics will be added to the MetricStore for each Suite which runs in the Checkpoint.
+  :::
 
 Here is an example yaml config for adding a StoreMetricsAction to the `taxi_data` dataset:
 
@@ -77,16 +80,16 @@ action_list:
       class_name: StoreMetricsAction
       target_store_name: metric_store  # This should match the name of the store configured above
       requested_metrics:
-        public.taxi_data.warning:  # expectation suite name
-          - statistics.evaluated_expectations
+        public.taxi_data.warning:  # match a particular expectation suite
+          - column:
+              passenger_count:
+                - expect_column_values_to_not_be_null.result.element_count
+                - expect_column_values_to_not_be_null.result.partial_unexpected_list
           - statistics.successful_expectations
+        "*":  # wildcard to match any expectation suite
+          - statistics.evaluated_expectations
           - statistics.success_percent
           - statistics.unsuccessful_expectations
-        "*":  # wildcard to match any expectation suite
-          - column:
-            passenger_count:
-              - expect_column_values_to_not_be_null.result.element_count
-              - expect_column_values_to_not_be_null.result.partial_unexpected_list
 ```
 
 ### Test your MetricStore and StoreMetricsAction
@@ -105,7 +108,3 @@ $ great_expectations checkpoint run <your checkpoint name>
 ### Summary
 The `StoreMetricsValidationAction` processes an `ExpectationValidationResult` and stores Metrics to a configured Store.
 Now, after your Checkpoint is run, the requested metrics will be available in your database!
-
-:::note
-To discuss with the Great Expectations community, please visit this topic in our community discussion forum: https://discuss.greatexpectations.io/t/ge-with-databricks-delta/82/3
-:::
