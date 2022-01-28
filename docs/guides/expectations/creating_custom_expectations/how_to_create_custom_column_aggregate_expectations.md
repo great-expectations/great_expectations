@@ -133,7 +133,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 1. They provide test fixtures that Great Expectations can execute automatically via pytest.
 2. They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery.
 
-your examples will look something like this:
+Your examples will look something like this:
 
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L44-L76
 ```
