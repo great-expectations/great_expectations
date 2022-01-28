@@ -7,7 +7,25 @@ Changelog
 
 develop
 -----------------
-* [FEATURE] Support service account credentials dictionary for BigQuery connections (#4039)
+
+0.14.3
+-----------------
+* [FEATURE] Profiler Store (#3990)
+* [FEATURE] List profilers from DataContext (#4023)
+* [FEATURE] add bigqquery json credentials kwargs for sqlalchemy connect (#4039)
+* [FEATURE] Get profilers from DataContext (#4033)
+* [FEATURE] Add RuleBasedProfiler to `test_yaml_config` utility (#4038)
+* [BUGFIX] Checkpoint Configurator fix to allow notebook logging suppression (#4057)
+* [DOCS] Created a page containing our glossary of terms and definitions. (#4056)
+* [DOCS] swap of old uri for new in data docs generated (#4013)
+* [MAINTENANCE] Refactor `test_yaml_config` (#4029)
+* [MAINTENANCE] Additional distinction made between V2 and V3 upgrade script (#4046)
+* [MAINTENANCE] Correcting Checkpoint Configuration and Execution Implementation (#4015)
+* [MAINTENANCE] Update minimum version for SQL Alchemy (#4055)
+* [MAINTENANCE] Refactor RBP constructor to work with **kwargs instantiation pattern through config objects (#4043)
+* [MAINTENANCE] Remove unnecessary metric dependency evaluations and add common table column types metric. (#4063)
+* [MAINTENANCE] Clean up new RBP types, method signatures, and method names for the long term. (#4064)
+* [MAINTENANCE] fixed broken function call in CLI (#4068)
 
 0.14.2
 -----------------
