@@ -74,7 +74,7 @@ Run this code to test your configuration.
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py#L21-L42
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py#L23-L42
 ```
 
 Run this code to test your configuration.

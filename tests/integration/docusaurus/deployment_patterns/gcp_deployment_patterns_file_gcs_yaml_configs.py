@@ -11,6 +11,10 @@ context = ge.get_context()
 # variable to set the gcp_project. You can replace the value with your own
 # GCP project information
 gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+if not gcp_project:
+    raise ValueError(
+        "Environment Variable GE_TEST_GCP_PROJECT is required to run GCS integration tests"
+    )
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
