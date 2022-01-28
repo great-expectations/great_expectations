@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -51,6 +52,17 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena(sa):
 
 
 def test_expect_column_values_to_be_in_type_list_nullable_int():
+    from packaging.version import parse
+
+    pandas_version = parse(pd.__version__)
+    if pandas_version < parse("0.24"):
+        # Prior to 0.24, Pandas did not have
+        pytest.skip("Prior to 0.24, Pandas did not have `Int32Dtype` or related.")
+    elif pandas_version >= parse("0.25") and pandas_version < parse("0.25.3"):
+        pytest.skip(
+            "A numpy<->Pandas compatibility bug made nullable integer types not work properly for pandas~=0.25"
+        )
+
     df = pd.DataFrame({"col": pd.Series([1, 2, None], dtype=pd.Int32Dtype())})
     validator = build_pandas_validator_with_data(df)
 
