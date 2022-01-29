@@ -146,10 +146,13 @@ try:
             "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
         )
         bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
+        BIGQUERY_TYPES = {}
+
 except (ImportError, AttributeError):
     bigquery_types_tuple = None
     BigQueryDialect = None
     pybigquery = None
+    BIGQUERY_TYPES = {}
 
 
 try:
