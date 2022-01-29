@@ -250,10 +250,16 @@ def _create_context(
         if html_dir
         else None
     )
-    bigquery_project = os.environ["GE_TEST_BIGQUERY_PROJECT"]
-    bigquery_dataset = os.environ.get(
-        "GE_TEST_BIGQUERY_PERFORMANCE_DATASET", "performance_ci"
-    )
+    bigquery_project = os.environ.get("GE_TEST_GCP_PROJECT")
+    if not bigquery_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery performance tests"
+        )
+    bigquery_dataset = os.environ.get("GE_TEST_BIGQUERY_PERFORMANCE_DATASET")
+    if not bigquery_dataset:
+        raise ValueError(
+            "Environment Variable GE_TEST_BIGQUERY_PERFORMANCE_DATASET is required to run BigQuery performance tests"
+        )
 
     data_context_config = DataContextConfig(
         store_backend_defaults=InMemoryStoreBackendDefaults(),

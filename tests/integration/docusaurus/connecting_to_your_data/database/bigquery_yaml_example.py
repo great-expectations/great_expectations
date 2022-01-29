@@ -5,10 +5,15 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
-# GCP project and BigQuery dataset information
-# Not for general use. It is only to support testing.
-gcp_project = os.environ.get("GCP_PROJECT")
-bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET")
+# NOTE: The following code is only for testing and depends on an environment
+# variable to set the gcp_project. You can replace the value with your own
+# GCP project information
+gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+if not gcp_project:
+    raise ValueError(
+        "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+    )
+bigquery_dataset = "demo"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
