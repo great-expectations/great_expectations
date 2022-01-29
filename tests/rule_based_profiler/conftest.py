@@ -16,7 +16,6 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
@@ -2427,19 +2426,3 @@ def rule_with_parameters(
         column_Date_domain.id: multi_part_name_parameter_container,
     }
     return rule
-
-
-@pytest.fixture
-def rule_based_profiler_with_variables_with_rules_with_parameters(
-    empty_data_context,
-    variables_multi_part_name_parameter_container,
-    rule_with_parameters,
-):
-    rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
-        name="my_rule_based_profiler",
-        config_version=1.0,
-        data_context=empty_data_context,
-    )
-    rule_based_profiler.variables = variables_multi_part_name_parameter_container
-    rule_based_profiler.rules = [rule_with_parameters]
-    return rule_based_profiler

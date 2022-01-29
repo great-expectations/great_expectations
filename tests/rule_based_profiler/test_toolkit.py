@@ -11,25 +11,25 @@ from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.toolkit import get_profiler, list_profilers
 
-# TODO: <Alex>ALEX -- this needs to be updated to reflect the correct configuration types.</Alex>
-# @mock.patch("great_expectations.data_context.data_context.DataContext")
-# def test_get_profiler(
-#     mock_data_context: mock.MagicMock,
-#     populated_profiler_store: ProfilerStore,
-#     profiler_config: RuleBasedProfilerConfig,
-# ):
-#     with mock.patch(
-#         "great_expectations.data_context.store.profiler_store.ProfilerStore.get",
-#         return_value=profiler_config,
-#     ):
-#         profiler = get_profiler(
-#             data_context=mock_data_context,
-#             profiler_store=populated_profiler_store,
-#             name="my_profiler",
-#             ge_cloud_id=None,
-#         )
-#
-#     assert isinstance(profiler, RuleBasedProfiler)
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_get_profiler(
+    mock_data_context: mock.MagicMock,
+    populated_profiler_store: ProfilerStore,
+    profiler_config: RuleBasedProfilerConfig,
+):
+    with mock.patch(
+        "great_expectations.data_context.store.profiler_store.ProfilerStore.get",
+        return_value=profiler_config,
+    ):
+        profiler = get_profiler(
+            data_context=mock_data_context,
+            profiler_store=populated_profiler_store,
+            name="my_profiler",
+            ge_cloud_id=None,
+        )
+
+    assert isinstance(profiler, RuleBasedProfiler)
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
