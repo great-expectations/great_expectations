@@ -1,4 +1,7 @@
 import importlib
+import pkgutil
+from types import ModuleType
+from typing import Dict
 
 import requirements as rp
 
@@ -52,6 +55,28 @@ def test_requirements_files():
 
 def test_all_imports_at_runtime():
     """Look for ImportErrors/ModuleNotFoundErrors when importing all GE modules"""
-    module = importlib.import_module("great_expectations")
-    names = [x for x in module.__dict__ if not x.startswith("_")]
-    globals().update({k: getattr(module, k) for k in names})
+
+    # These are scripts that are triggered if investigated by `importlib`.
+    # As we don't want to actually run the underlying code in our source files, let's only import files that define code.
+    IGNORE = {
+        "great_expectations.cli.checkpoint_script_template",
+        "great_expectations.cli.v012.checkpoint_script_template",
+    }
+
+    def import_submodules(package_name: str) -> Dict[str, ModuleType]:
+        """Import all submodules of a module, recursively, including subpackages"""
+
+        package = importlib.import_module(package_name)
+        results = {}
+        for _, name, is_pkg in pkgutil.walk_packages(package.__path__):
+            full_name = f"{package.__name__}.{name}"
+            if full_name in IGNORE:
+                return {}
+
+            results[full_name] = importlib.import_module(full_name)
+            if is_pkg:
+                results.update(import_submodules(full_name))
+
+        return results
+
+    import_dict = import_submodules("great_expectations")
