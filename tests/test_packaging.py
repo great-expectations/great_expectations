@@ -1,8 +1,9 @@
 import importlib
 import pkgutil
 from types import ModuleType
-from typing import Dict
+from typing import Callable, Dict
 
+import pytest
 import requirements as rp
 
 from great_expectations.data_context.util import file_relative_path
@@ -71,7 +72,7 @@ def test_all_imports_at_runtime():
         for _, name, is_pkg in pkgutil.walk_packages(package.__path__):
             full_name = f"{package.__name__}.{name}"
             if full_name in IGNORE:
-                return {}
+                continue
 
             results[full_name] = importlib.import_module(full_name)
             if is_pkg:
