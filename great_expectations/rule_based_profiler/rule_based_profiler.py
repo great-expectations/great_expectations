@@ -440,7 +440,7 @@ class RuleBasedProfiler:
         key: str
         value: Any
         current_value: Any
-        for key, value in domain_builder_config:
+        for key, value in domain_builder_config.items():
             if hasattr(rule, f"{key}"):
                 current_value = getattr(rule, key)
                 effective_domain_builder_config[key] = value or current_value
@@ -498,7 +498,7 @@ class RuleBasedProfiler:
         key: str
         value: Any
         current_value: Any
-        for key, value in parameter_builder_config:
+        for key, value in parameter_builder_config.items():
             if hasattr(parameter_builder, f"{key}"):
                 current_value = getattr(parameter_builder, key)
                 effective_parameter_builder_config[key] = value or current_value
@@ -558,7 +558,7 @@ class RuleBasedProfiler:
         key: str
         value: Any
         current_value: Any
-        for key, value in expectation_configuration_builder_config:
+        for key, value in expectation_configuration_builder_config.items():
             if hasattr(expectation_configuration_builder, f"{key}"):
                 current_value = getattr(expectation_configuration_builder, key)
                 effective_expectation_configuration_builder_config[key] = (
