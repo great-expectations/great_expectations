@@ -66,7 +66,7 @@ class NotNullSchema(Schema):
         the functionality to keep unknowns should also be removed.
 
         Args:
-            output: Procecced dictionary representation of the configuration object (leaving original intact)
+            output: Processed dictionary representation of the configuration object (leaving original intact)
             original: The dictionary representation of the configuration object
             kwargs: Marshmallow-specific kwargs required to maintain hook signature (unused herein)
 
