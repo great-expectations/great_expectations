@@ -339,10 +339,8 @@ class Validator:
                     exception_traceback = traceback.format_exc()
                     exception_message = f"{type(err).__name__}: {str(err)}"
                     exception_info = ExceptionInfo(
-                        **{
-                            "exception_traceback": exception_traceback,
-                            "exception_message": exception_message,
-                        }
+                        exception_traceback=exception_traceback,
+                        exception_message=exception_message,
                     )
                     validation_result = ExpectationValidationResult(
                         success=False,
@@ -405,7 +403,9 @@ class Validator:
         }
 
     @staticmethod
-    def _get_default_domain_kwargs(metric_provider_cls, metric_configuration):
+    def _get_default_domain_kwargs(
+        metric_provider_cls: "MetricProvider", metric_configuration: MetricConfiguration
+    ) -> None:
         for key in metric_provider_cls.domain_keys:
             if (
                 key not in metric_configuration.metric_domain_kwargs
@@ -416,7 +416,9 @@ class Validator:
                 ] = metric_provider_cls.default_kwarg_values[key]
 
     @staticmethod
-    def _get_default_value_kwargs(metric_provider_cls, metric_configuration):
+    def _get_default_value_kwargs(
+        metric_provider_cls: "MetricProvider", metric_configuration: MetricConfiguration
+    ) -> None:
         for key in metric_provider_cls.value_keys:
             if (
                 key not in metric_configuration.metric_value_kwargs
@@ -582,10 +584,8 @@ class Validator:
                     exception_traceback = traceback.format_exc()
                     exception_message = str(err)
                     exception_info = ExceptionInfo(
-                        **{
-                            "exception_traceback": exception_traceback,
-                            "exception_message": exception_message,
-                        }
+                        exception_traceback=exception_traceback,
+                        exception_message=exception_message,
                     )
                     result = ExpectationValidationResult(
                         success=False,
@@ -600,7 +600,7 @@ class Validator:
 
     @staticmethod
     def _generate_suite_level_graph_from_expectation_level_sub_graphs(
-        expectation_validation_graphs,
+        expectation_validation_graphs: List[ExpectationValidationGraph],
     ) -> ValidationGraph:
         # Collect edges from all expectation-level sub-graphs and incorporate them under common suite-level graph.
         expectation_validation_graph: ExpectationValidationGraph
@@ -620,9 +620,9 @@ class Validator:
         validation_graph: ValidationGraph,
         metrics: Dict[Tuple[str, str, str], Any],
         runtime_configuration: dict,
-        expectation_validation_graphs,
+        expectation_validation_graphs: List[ExpectationValidationGraph],
         evrs: List[ExpectationValidationResult],
-        processed_configurations,
+        processed_configurations: List[ExpectationConfiguration],
     ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
         # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
         aborted_metrics_info: Dict[
@@ -682,10 +682,8 @@ class Validator:
         """
         exception_message = str(exception)
         exception_info = ExceptionInfo(
-            **{
-                "exception_traceback": exception_traceback,
-                "exception_message": exception_message,
-            }
+            exception_traceback=exception_traceback,
+            exception_message=exception_message,
         )
 
         for configuration in failing_expectation_configurations:
@@ -838,10 +836,8 @@ class Validator:
                     exception_traceback = traceback.format_exc()
                     exception_message = str(err)
                     exception_info = ExceptionInfo(
-                        **{
-                            "exception_traceback": exception_traceback,
-                            "exception_message": exception_message,
-                        }
+                        exception_traceback=exception_traceback,
+                        exception_message=exception_message,
                     )
                     for failed_metric in err.failed_metrics:
                         if failed_metric.id in failed_metric_info:
