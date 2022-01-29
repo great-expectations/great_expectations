@@ -62,6 +62,15 @@ def test_parse_row_condition_string_pandas_engine():
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
 def test_all_expectations_using_test_definitions():
+    # Chetan - 20220129 - During v0.14.4, it was revealed that this test was broken.
+    # The `glob` statement did not pick up any relevant tests, resulting in `test_files` being empty.
+    # Without anything to iterate over, the test gave the impression of passing (when in actuality, it never tested anything).
+    #
+    # After some research, it seems as though this has been broken since the v0.13.0 release.
+    # As Datasets are a legacy feature, it is not worth the time investment to re-enable tests for all Expectations.
+    # The 5 Expectations noted below are implemented after v0.13.0 and are incompatible with this test fixture.
+    # As we have test coverage over these items in other parts of the test suite, we deem this exclusion acceptable and pass on further investigation.
+
     dir_path = os.path.dirname(os.path.abspath(__file__))
     pattern = os.path.join(
         dir_path, "..", "..", "tests/test_definitions/*/expect*.json"
