@@ -105,7 +105,6 @@ class RuleBasedProfiler:
         self,
         name: str,
         config_version: float,
-        *,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
