@@ -1,3 +1,5 @@
+import importlib
+
 import requirements as rp
 
 from great_expectations.data_context.util import file_relative_path
@@ -46,3 +48,10 @@ def test_requirements_files():
         | requirements_dev_sqlalchemy
         | requirements_dev_spark
     ) <= {"numpy>=1.21.0", "scipy>=1.7.0"}
+
+
+def test_all_imports_at_runtime():
+    """Look for ImportErrors/ModuleNotFoundErrors when importing all GE modules"""
+    module = importlib.import_module("great_expectations")
+    names = [x for x in module.__dict__ if not x.startswith("_")]
+    globals().update({k: getattr(module, k) for k in names})
