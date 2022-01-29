@@ -67,7 +67,7 @@ def test_all_expectations_using_test_definitions():
     #
     # After some research, it seems as though this has been broken since the v0.13.0 release.
     # As Datasets are a legacy feature, it is not worth the time investment to re-enable tests for all Expectations.
-    # The 5 Expectations noted below are implemented after v0.13.0 and are incompatible with this test fixture.
+    # The 5 Expectations noted below are implemented or updated after v0.13.0 and are incompatible with this test fixture.
     # As we have test coverage over these items in other parts of the test suite, we deem this exclusion acceptable and pass on further investigation.
 
     dir_path = os.path.dirname(os.path.abspath(__file__))
