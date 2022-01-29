@@ -14,7 +14,7 @@ rules:
        - user_id
     parameter_builders:
       - parameter_name: my_min_user_id # User defined
-        class_name: MetricParameterBuilder
+        class_name: MetricMultiBatchParameterBuilder
         metric_name: column.min
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_of_type
@@ -30,7 +30,7 @@ rules:
         - _ts
     parameter_builders:
       - parameter_name: my_max_event_ts
-        class_name: MetricParameterBuilder
+        class_name: MetricMultiBatchParameterBuilder
         metric_name: column.max
         metric_domain_kwargs:
           column: event_ts # This parameter is computed only on the event_ts column
