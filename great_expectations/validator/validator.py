@@ -368,28 +368,6 @@ class Validator:
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
-    @staticmethod
-    def _get_default_domain_kwargs(metric_provider_cls, metric_configuration):
-        for key in metric_provider_cls.domain_keys:
-            if (
-                key not in metric_configuration.metric_domain_kwargs
-                and key in metric_provider_cls.default_kwarg_values
-            ):
-                metric_configuration.metric_domain_kwargs[
-                    key
-                ] = metric_provider_cls.default_kwarg_values[key]
-
-    @staticmethod
-    def _get_default_value_kwargs(metric_provider_cls, metric_configuration):
-        for key in metric_provider_cls.value_keys:
-            if (
-                key not in metric_configuration.metric_value_kwargs
-                and key in metric_provider_cls.default_kwarg_values
-            ):
-                metric_configuration.metric_value_kwargs[
-                    key
-                ] = metric_provider_cls.default_kwarg_values[key]
-
     def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
         """Return a dictionary with the requested metrics"""
         graph: ValidationGraph = ValidationGraph()
@@ -425,6 +403,28 @@ class Validator:
             metric_name: resolved_metrics[metric_configuration.id]
             for (metric_name, metric_configuration) in metrics.items()
         }
+
+    @staticmethod
+    def _get_default_domain_kwargs(metric_provider_cls, metric_configuration):
+        for key in metric_provider_cls.domain_keys:
+            if (
+                key not in metric_configuration.metric_domain_kwargs
+                and key in metric_provider_cls.default_kwarg_values
+            ):
+                metric_configuration.metric_domain_kwargs[
+                    key
+                ] = metric_provider_cls.default_kwarg_values[key]
+
+    @staticmethod
+    def _get_default_value_kwargs(metric_provider_cls, metric_configuration):
+        for key in metric_provider_cls.value_keys:
+            if (
+                key not in metric_configuration.metric_value_kwargs
+                and key in metric_provider_cls.default_kwarg_values
+            ):
+                metric_configuration.metric_value_kwargs[
+                    key
+                ] = metric_provider_cls.default_kwarg_values[key]
 
     def get_metric(self, metric: MetricConfiguration) -> Any:
         """return the value of the requested metric."""
@@ -465,70 +465,19 @@ class Validator:
         exception_info: ExceptionInfo
         processed_configurations = []
         # noinspection SpellCheckingInspection
-        evrs = []
-        for configuration in configurations:
-            # Validating
-            try:
-                assert (
-                    configuration.expectation_type is not None
-                ), "Given configuration should include expectation type"
-            except AssertionError as e:
-                raise InvalidExpectationConfigurationError(str(e))
 
-            evaluated_config = copy.deepcopy(configuration)
-            evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
-
-            expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
-            validation_dependencies = expectation_impl().get_validation_dependencies(
-                evaluated_config, self._execution_engine, runtime_configuration
-            )["metrics"]
-
-            try:
-                expectation_validation_graph: ExpectationValidationGraph = (
-                    ExpectationValidationGraph(configuration=evaluated_config)
-                )
-                for metric_configuration in validation_dependencies.values():
-                    graph = ValidationGraph()
-                    self.build_metric_dependency_graph(
-                        graph=graph,
-                        execution_engine=self._execution_engine,
-                        metric_configuration=metric_configuration,
-                        configuration=evaluated_config,
-                        runtime_configuration=runtime_configuration,
-                    )
-                    expectation_validation_graph.update(graph=graph)
-                expectation_validation_graphs.append(expectation_validation_graph)
-                processed_configurations.append(evaluated_config)
-            except Exception as err:
-                if catch_exceptions:
-                    exception_traceback = traceback.format_exc()
-                    exception_message = str(err)
-                    exception_info = ExceptionInfo(
-                        **{
-                            "exception_traceback": exception_traceback,
-                            "exception_message": exception_message,
-                        }
-                    )
-                    result = ExpectationValidationResult(
-                        success=False,
-                        exception_info=exception_info,
-                        expectation_config=evaluated_config,
-                    )
-                    evrs.append(result)
-                else:
-                    raise err
+        evrs = self._generate_expectation_validation_result_from_expectation_configurations(
+            expectation_configurations=configurations,
+            expectation_validation_graphs=expectation_validation_graphs,
+            processed_configurations=processed_configurations,
+            catch_exceptions=catch_exceptions,
+            runtime_configuration=runtime_configuration,
+        )
 
         # Collect edges from all expectation-level sub-graphs and incorporate them under common suite-level graph.
-        expectation_validation_graph: ExpectationValidationGraph
-        edges: List[MetricEdge] = list(
-            itertools.chain.from_iterable(
-                [
-                    expectation_validation_graph.graph.edges
-                    for expectation_validation_graph in expectation_validation_graphs
-                ]
-            )
+        graph = self._generate_suite_level_graph_from_expectation_level_sub_graphs(
+            expectation_validation_graphs=expectation_validation_graphs
         )
-        graph = ValidationGraph(edges=edges)
 
         if metrics is None:
             metrics = {}
@@ -620,6 +569,89 @@ class Validator:
                     raise err
 
         return evrs
+
+    def _generate_expectation_validation_result_from_expectation_configurations(
+        self,
+        expectation_configurations: List[ExpectationConfiguration],
+        expectation_validation_graphs: List[ExpectationValidationGraph],
+        processed_configurations,
+        catch_exceptions: bool,
+        runtime_configuration: Optional[dict] = None,
+    ) -> List[ExpectationValidationResult]:
+        # While evaluating expectation configurations, create sub-graph for every metric dependency and incorporate
+        # these sub-graphs under corresponding expectation-level sub-graph (state of ExpectationValidationGraph object).
+
+        evrs: List[ExpectationValidationResult] = []
+        for configuration in expectation_configurations:
+            # Validating
+            try:
+                assert (
+                    configuration.expectation_type is not None
+                ), "Given configuration should include expectation type"
+            except AssertionError as e:
+                raise InvalidExpectationConfigurationError(str(e))
+
+            evaluated_config = copy.deepcopy(configuration)
+            evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
+
+            expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
+            validation_dependencies = expectation_impl().get_validation_dependencies(
+                evaluated_config, self._execution_engine, runtime_configuration
+            )["metrics"]
+
+            try:
+                expectation_validation_graph: ExpectationValidationGraph = (
+                    ExpectationValidationGraph(configuration=evaluated_config)
+                )
+                for metric_configuration in validation_dependencies.values():
+                    graph = ValidationGraph()
+                    self.build_metric_dependency_graph(
+                        graph=graph,
+                        execution_engine=self._execution_engine,
+                        metric_configuration=metric_configuration,
+                        configuration=evaluated_config,
+                        runtime_configuration=runtime_configuration,
+                    )
+                    expectation_validation_graph.update(graph=graph)
+                expectation_validation_graphs.append(expectation_validation_graph)
+                processed_configurations.append(evaluated_config)
+            except Exception as err:
+                if catch_exceptions:
+                    exception_traceback = traceback.format_exc()
+                    exception_message = str(err)
+                    exception_info = ExceptionInfo(
+                        **{
+                            "exception_traceback": exception_traceback,
+                            "exception_message": exception_message,
+                        }
+                    )
+                    result = ExpectationValidationResult(
+                        success=False,
+                        exception_info=exception_info,
+                        expectation_config=evaluated_config,
+                    )
+                    evrs.append(result)
+                else:
+                    raise err
+
+        return evrs
+
+    @staticmethod
+    def _generate_suite_level_graph_from_expectation_level_sub_graphs(
+        expectation_validation_graphs,
+    ) -> ValidationGraph:
+        # Collect edges from all expectation-level sub-graphs and incorporate them under common suite-level graph.
+        expectation_validation_graph: ExpectationValidationGraph
+        edges: List[MetricEdge] = list(
+            itertools.chain.from_iterable(
+                [
+                    expectation_validation_graph.graph.edges
+                    for expectation_validation_graph in expectation_validation_graphs
+                ]
+            )
+        )
+        validation_graph = ValidationGraph(edges=edges)
+        return validation_graph
 
     def build_metric_dependency_graph(
         self,
