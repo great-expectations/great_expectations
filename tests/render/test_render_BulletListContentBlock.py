@@ -67,15 +67,26 @@ def test_all_expectations_using_test_definitions():
         dir_path, "..", "..", "tests/test_definitions/*/expect*.json"
     )
     test_files = glob.glob(pattern)
-    assert len(test_files) == 56
+    assert (
+        len(test_files) == 56
+    ), "Something went wrong when collecting JSON Expectation test fixtures"
 
-    types = []
+    # The following do not work with this parameterized test
+    UNSUPPORTED_EXPECTATIONS = {
+        "expect_column_values_to_match_like_pattern",
+        "expect_column_values_to_match_like_pattern_list",
+        "expect_column_values_to_not_match_like_pattern",
+        "expect_column_values_to_not_match_like_pattern_list",
+        "expect_multicolumn_sum_to_equal",
+    }
 
     # Loop over all test_files, datasets, and tests:
     test_results = defaultdict(list)
     for filename in test_files:
         test_definitions = json.load(open(filename))
-        types.append(test_definitions["expectation_type"])
+
+        if test_definitions["expectation_type"] in UNSUPPORTED_EXPECTATIONS:
+            continue
 
         for dataset in test_definitions["datasets"]:
             for test in dataset["tests"]:
@@ -92,7 +103,9 @@ def test_all_expectations_using_test_definitions():
                 # Attempt to render it
                 render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
                     [fake_expectation]
-                ).to_json_dict()
+                )
+                assert render_result is not None
+                render_result = render_result.to_json_dict()
 
                 assert isinstance(render_result, dict)
                 assert "content_block_type" in render_result
