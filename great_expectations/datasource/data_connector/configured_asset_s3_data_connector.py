@@ -101,6 +101,10 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
 
         Customized for S3 paths, ignoring the path separator used by the host OS
         """
+        text = text.strip()
+        if not text:
+            return text
+
         path_parts = text.split("/")
         if not path_parts:  # Empty prefix
             return text
