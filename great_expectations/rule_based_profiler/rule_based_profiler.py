@@ -130,9 +130,9 @@ class RuleBasedProfiler:
             variables = {}
 
         # Convert variables argument to ParameterContainer
-        _variables: Optional[
-            ParameterContainer
-        ] = build_parameter_container_for_variables(variables_configs=variables)
+        _variables: ParameterContainer = build_parameter_container_for_variables(
+            variables_configs=variables
+        )
         self._variables = _variables
 
         self._data_context = data_context
@@ -345,7 +345,7 @@ class RuleBasedProfiler:
     def _reconcile_variables(
         self, variables: Optional[Dict[str, Any]] = None
     ) -> Optional[ParameterContainer]:
-        effective_variables: Optional[ParameterContainer]
+        effective_variables: ParameterContainer
         if variables is not None and isinstance(variables, dict):
             variables_dict: dict = self.variables.to_dict()
             variables_dict.update(variables)
