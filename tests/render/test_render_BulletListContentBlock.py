@@ -1,7 +1,6 @@
 import glob
 import json
 import os
-from collections import defaultdict
 
 import pytest
 
@@ -90,7 +89,7 @@ def test_all_expectations_using_test_definitions():
     }
 
     # Loop over all test_files, datasets, and tests:
-    test_results = defaultdict(list)
+    test_results = {}
     for filename in test_files:
         test_definitions = json.load(open(filename))
 
