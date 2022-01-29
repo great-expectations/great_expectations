@@ -598,6 +598,9 @@ class Batch(SerializableDictDot):
 def get_batch_request_as_dict(
     batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
 ) -> Optional[dict]:
+    if batch_request is None:
+        return None
+
     if isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
         batch_request = batch_request.to_dict()
 
