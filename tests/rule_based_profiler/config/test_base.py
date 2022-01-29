@@ -187,9 +187,9 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
     with pytest.raises(ValidationError) as e:
         schema.load(data)
 
-    assert all(
-        f"'{attr}': ['Missing data for required field.']" in str(e.value)
-        for attr in ("expectation_configuration_builders",)
+    assert (
+        "'expectation_configuration_builders': ['Missing data for required field.']"
+        in str(e.value)
     )
 
 
