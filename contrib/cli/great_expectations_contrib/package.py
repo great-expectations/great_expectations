@@ -165,16 +165,19 @@ class GreatExpectationsContribPackage:
             pass
 
     def _retrieve_package_expectations_diagnostics(self) -> List[Diagnostics]:
-        package = self._identify_user_package()
-        expectations_module = self._import_expectations_module(package)
-
-        # Could not import successfully so we exit early
-        if expectations_module is None:
+        try:
+            package = self._identify_user_package()
+            expectations_module = self._import_expectations_module(package)
+            expectations = self._retrieve_expectations_from_module(expectations_module)
+            diagnostics = self._gather_diagnostics(expectations)
+            return diagnostics
+        except Exception as e:
+            # Exceptions should not break the CLI - this behavior should be working in the background
+            # without the user being concerned about the underlying functionality
+            logger.warning(
+                f"Something went wrong when modifying the contributor package JSON object: {e}"
+            )
             return []
-
-        expectations = self._retrieve_expectations_from_module(expectations_module)
-        diagnostics = self._gather_diagnostics(expectations)
-        return diagnostics
 
     def _identify_user_package(self) -> str:
         # Guaranteed to have a dir named '<MY_PACKAGE>_expectations' through Cookiecutter validation
@@ -182,13 +185,10 @@ class GreatExpectationsContribPackage:
             d for d in os.listdir() if os.path.isdir(d) and d.endswith("_expectations")
         ]
 
-        # Sanity check to ensure we have one (and only one) package
         if len(packages) == 0:
-            logger.debug("Could not find a user-defined package")
-            return ""
+            raise FileNotFoundError("Could not find a user-defined package")
         elif len(packages) > 1:
-            logger.debug("Found multiple user-defined packages")
-            return ""
+            raise ValueError("Found more than one user-defined package")
 
         return packages[0]
 
@@ -199,9 +199,8 @@ class GreatExpectationsContribPackage:
         try:
             expectations_module = importlib.import_module(f"{package}.expectations")
             return expectations_module
-        except ModuleNotFoundError as e:
-            logger.debug(f"Could not import user expectations: {e}")
-            return None
+        except ModuleNotFoundError:
+            raise
 
     def _retrieve_expectations_from_module(
         self, expectations_module: Any
