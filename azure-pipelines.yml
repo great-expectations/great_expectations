@@ -127,7 +127,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - bash: pip install numpy
@@ -204,7 +204,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
@@ -261,7 +261,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
@@ -297,7 +297,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
@@ -340,7 +340,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
@@ -378,7 +378,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
@@ -416,7 +416,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
@@ -468,7 +468,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip  # pip==20.2.4
+          - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
