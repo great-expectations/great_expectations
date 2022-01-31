@@ -261,7 +261,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip==20.2.4
             displayName: 'Update pip'
 
           - script: |
