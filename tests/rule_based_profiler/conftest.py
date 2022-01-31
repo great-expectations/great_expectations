@@ -19,7 +19,13 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
-from great_expectations.rule_based_profiler.domain_builder import Domain
+from great_expectations.rule_based_profiler.domain_builder import (
+    ColumnDomainBuilder,
+    Domain,
+)
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+    DefaultExpectationConfigurationBuilder,
+)
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterContainer,
     ParameterNode,
@@ -2395,12 +2401,17 @@ def variables_multi_part_name_parameter_container():
 
 
 @pytest.fixture
-def rule_without_parameters():
+def rule_without_parameters(
+    empty_data_context,
+):
     rule: Rule = Rule(
         name="rule_with_no_variables_no_parameters",
-        domain_builder=None,
-        parameter_builders=None,
-        expectation_configuration_builders=None,
+        domain_builder=ColumnDomainBuilder(data_context=empty_data_context),
+        expectation_configuration_builders=[
+            DefaultExpectationConfigurationBuilder(
+                expectation_type="expect_my_validation"
+            )
+        ],
     )
     return rule
 
@@ -2417,9 +2428,12 @@ def rule_with_parameters(
 ):
     rule: Rule = Rule(
         name="rule_with_parameters",
-        domain_builder=None,
-        parameter_builders=None,
-        expectation_configuration_builders=None,
+        domain_builder=ColumnDomainBuilder(data_context=empty_data_context),
+        expectation_configuration_builders=[
+            DefaultExpectationConfigurationBuilder(
+                expectation_type="expect_my_validation"
+            )
+        ],
     )
     rule._parameters = {
         column_Age_domain.id: single_part_name_parameter_container,
