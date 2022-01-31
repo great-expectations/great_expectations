@@ -182,6 +182,7 @@ class GreatExpectationsContribPackage:
             d for d in os.listdir() if os.path.isdir(d) and d.endswith("_expectations")
         ]
 
+        # Sanity check to ensure we have one (and only one) package
         if len(packages) == 0:
             logger.debug("Could not find a user-defined package")
             return ""

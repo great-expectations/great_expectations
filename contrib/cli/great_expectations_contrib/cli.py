@@ -1,6 +1,6 @@
 import click
 from great_expectations_contrib.commands import check_cmd, init_cmd, publish_cmd
-from great_expectations_contrib.types import GreatExpectationsContribPackage
+from great_expectations_contrib.package import GreatExpectationsContribPackage
 
 # The following link points to the repo where the Cookiecutter template is hosted
 URL = "https://github.com/great-expectations/great-expectations-contrib-cookiecutter"
