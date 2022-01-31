@@ -453,7 +453,7 @@ class RuleBasedProfiler:
     def _reconcile_parameter_builder_configs_for_rule(
         rule: Rule, rule_config: dict
     ) -> Optional[List[dict]]:
-        effective_parameter_builder_configs: Optional[List[dict]] = []
+        effective_parameter_builder_configs: List[dict] = []
         parameter_builder_configs: Optional[List[dict]] = rule_config.get(
             "parameter_builders", []
         )
@@ -512,9 +512,9 @@ class RuleBasedProfiler:
         rule: Rule, rule_config: dict
     ) -> List[dict]:
         effective_expectation_configuration_builder_configs: List[dict] = []
-        expectation_configuration_builder_configs: Optional[
-            List[dict]
-        ] = rule_config.get("expectation_configuration_builders", [])
+        expectation_configuration_builder_configs: List[dict] = rule_config.get(
+            "expectation_configuration_builders", []
+        )
 
         current_expectation_configuration_builders: Dict[
             str, ExpectationConfigurationBuilder
