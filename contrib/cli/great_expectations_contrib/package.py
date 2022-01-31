@@ -159,10 +159,10 @@ class GreatExpectationsContribPackage:
         self._to_json_file()
 
     def _update_attrs_with_diagnostics(self, diagnostics: List[Diagnostics]) -> None:
-        # TODO: Write logic to assign values to attrs
-        # This is a black box for now (don't have the full context just yet)
         for diagnostic in diagnostics:
-            pass
+            # TODO: Write logic to assign values to attrs
+            # This is a black box for now
+            ...
 
     def _retrieve_package_expectations_diagnostics(self) -> List[Diagnostics]:
         try:
@@ -185,6 +185,7 @@ class GreatExpectationsContribPackage:
             d for d in os.listdir() if os.path.isdir(d) and d.endswith("_expectations")
         ]
 
+        # A sanity check in case the user modifies the Cookiecutter template in unexpected ways
         if len(packages) == 0:
             raise FileNotFoundError("Could not find a user-defined package")
         elif len(packages) > 1:
@@ -223,6 +224,6 @@ class GreatExpectationsContribPackage:
             instance = expectation()
             diagnostics = instance.run_diagnostics()
             diagnostics_list.append(diagnostics)
-            logger.info(f"Succesfully retrieved diagnostics from {expectation}")
+            logger.info(f"Successfully retrieved diagnostics from {expectation}")
 
         return diagnostics_list
