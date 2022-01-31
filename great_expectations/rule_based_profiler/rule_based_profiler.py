@@ -395,7 +395,7 @@ class RuleBasedProfiler:
             domain_builder_config: dict = rule_config.get("domain_builder", {})
             effective_domain_builder_config: dict = (
                 RuleBasedProfiler._reconcile_domain_builder_config(
-                    rule=rule,
+                    domain_builder=rule.domain_builder,
                     domain_builder_config=domain_builder_config,
                 )
             )
@@ -424,7 +424,7 @@ class RuleBasedProfiler:
 
     @staticmethod
     def _reconcile_domain_builder_config(
-        rule: Rule,
+        domain_builder: DomainBuilder,
         domain_builder_config: dict,
     ) -> dict:
         effective_domain_builder_config: dict = {}
@@ -433,7 +433,7 @@ class RuleBasedProfiler:
         ] = domain_builder_config.pop("batch_request", None)
         if batch_request is None:
             batch_request = get_batch_request_as_dict(
-                batch_request=rule.domain_builder.batch_request
+                batch_request=domain_builder.batch_request
             )
 
         effective_domain_builder_config["batch_request"] = batch_request
@@ -442,8 +442,8 @@ class RuleBasedProfiler:
         value: Any
         current_value: Any
         for key, value in domain_builder_config.items():
-            if hasattr(rule, f"{key}"):
-                current_value = getattr(rule, key)
+            if hasattr(domain_builder, f"{key}"):
+                current_value = getattr(domain_builder, key)
                 effective_domain_builder_config[key] = value or current_value
             else:
                 effective_domain_builder_config[key] = value
