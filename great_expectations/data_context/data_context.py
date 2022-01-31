@@ -3665,11 +3665,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         """
         print(f"\tInstantiating as a {class_name}, since class_name is {class_name}")
 
-        profiler_name = name or config.get("name") or "my_temp_profiler"
+        profiler_name: str = name or config.get("name") or "my_temp_profiler"
 
-        profiler_config = RuleBasedProfilerConfig.from_commented_map(
-            commented_map=config
-        )
+        profiler_config: Union[
+            RuleBasedProfilerConfig, dict
+        ] = RuleBasedProfilerConfig.from_commented_map(commented_map=config)
         profiler_config = profiler_config.to_json_dict()
         profiler_config.update({"name": profiler_name})
 
@@ -3679,11 +3679,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             config_defaults={"module_name": "great_expectations.rule_based_profiler"},
         )
 
-        profiler_anonymizer = ProfilerAnonymizer(self.data_context_id)
+        profiler_anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(
+            self.data_context_id
+        )
 
-        usage_stats_event_payload = profiler_anonymizer.anonymize_profiler_info(
+        usage_stats_event_payload: dict = profiler_anonymizer.anonymize_profiler_info(
             name=profiler_name, config=profiler_config
         )
+
         return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_misc_class_from_yaml_config(
