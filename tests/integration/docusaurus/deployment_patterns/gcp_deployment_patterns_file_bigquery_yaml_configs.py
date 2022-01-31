@@ -7,6 +7,15 @@ context = ge.get_context()
 
 import os
 
+# NOTE: The following code is only for testing and depends on an environment
+# variable to set the gcp_project. You can replace the value with your own
+# GCP project information
+gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+if not gcp_project:
+    raise ValueError(
+        "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+    )
+
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
@@ -58,10 +67,10 @@ expectations_store_name: expectations_GCS_store
 configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "project"
-] = "superconductive-internal"
+] = gcp_project
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "bucket"
-] = "superconductive-integration-tests"
+] = "test_metadata_store"
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "prefix"
 ] = "metadata/expectations"
@@ -138,10 +147,10 @@ validations_store_name: validations_GCS_store
 configured_validations_store = yaml.safe_load(configured_validations_store_yaml)
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "project"
-] = "superconductive-internal"
+] = gcp_project
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "bucket"
-] = "superconductive-integration-tests"
+] = "test_metadata_store"
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "prefix"
 ] = "metadata/validations"
@@ -181,10 +190,10 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 """
 data_docs_site_yaml = data_docs_site_yaml.replace(
-    "<YOUR GCP PROJECT NAME>", "superconductive-internal"
+    "<YOUR GCP PROJECT NAME>", gcp_project
 )
 data_docs_site_yaml = data_docs_site_yaml.replace(
-    "<YOUR GCS BUCKET NAME>", "superconductive-integration-datadocs-tests"
+    "<YOUR GCS BUCKET NAME>", "test_datadocs_store"
 )
 great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
@@ -197,9 +206,15 @@ great_expectations_yaml["data_docs_sites"] = yaml.safe_load(data_docs_site_yaml)
 with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
-# GCP project and BigQuery dataset information and not for general use. It is only to support testing.
-gcp_project = os.environ.get("GCP_PROJECT", "superconductive-internal")
-bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET", "demo")
+# NOTE: The following code is only for testing and depends on an environment
+# variable to set the gcp_project. You can replace the value with your own
+# GCP project information
+gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+if not gcp_project:
+    raise ValueError(
+        "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+    )
+bigquery_dataset = "demo"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
