@@ -191,3 +191,26 @@ def test_profile_excludes_citations(
     )
 
     assert expectation_suite.meta.get("citations") is None
+
+
+def test_reconcile_profiler_variables(
+    profiler_config_with_placeholder_args,
+):
+    pass
+    # effective_variables: Optional[
+    #     ParameterContainer
+    # ] = self.reconcile_profiler_variables(variables=variables)
+    #
+    # # TODO: <Alex>ALEX -- Tests for Reconciliation are next immediate action items.</Alex>
+    # # TODO: <Alex>ALEX -- Replace "getattr/setattr" with "__dict__" (in a "to_dict()" method on Rule and below).</Alex>
+    # effective_rules: List[Rule] = self.reconcile_profiler_rules(rules=rules)
+    #
+    # if expectation_suite_name is None:
+    #     expectation_suite_name = (
+    #         f"tmp.profiler_{self.__class__.__name__}_suite_{str(uuid.uuid4())[:8]}"
+    #     )
+    #
+    # expectation_suite: ExpectationSuite = ExpectationSuite(
+    #     expectation_suite_name=expectation_suite_name,
+    #     data_context=self._data_context,
+    # )
