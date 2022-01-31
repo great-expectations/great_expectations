@@ -200,8 +200,11 @@ class ParameterContainer(SerializableDictDot):
 
         return source
 
+    def to_dict(self) -> dict:
+        return asdict(self)
+
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=asdict(self))
+        return convert_to_json_serializable(data=self.to_dict())
 
 
 def build_parameter_container_for_variables(

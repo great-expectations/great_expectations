@@ -2121,8 +2121,11 @@ class CheckpointConfigSchema(Schema):
 
 
 class Attributes(SerializableDotDict):
+    def to_dict(self) -> dict:
+        return dict(self)
+
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=dict(self))
+        return convert_to_json_serializable(data=self.to_dict())
 
 
 class CheckpointConfig(BaseYamlConfig):

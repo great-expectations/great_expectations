@@ -155,7 +155,6 @@ def test_expectation_configuration_builder_config_unsuccessfully_loads_with_miss
 
 def test_rule_config_successfully_loads_with_required_args():
     data = {
-        "name": "rule_1",
         "domain_builder": {"class_name": "DomainBuilder"},
         "parameter_builders": [
             {"class_name": "ParameterBuilder", "name": "my_parameter"}
@@ -188,13 +187,9 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
     with pytest.raises(ValidationError) as e:
         schema.load(data)
 
-    assert all(
-        f"'{attr}': ['Missing data for required field.']" in str(e.value)
-        for attr in (
-            "name",
-            "domain_builder",
-            "expectation_configuration_builders",
-        )
+    assert (
+        "'expectation_configuration_builders': ['Missing data for required field.']"
+        in str(e.value)
     )
 
 
@@ -206,7 +201,6 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
         "config_version": 1.0,
         "rules": {
             "rule_1": {
-                "name": "rule_1",
                 "domain_builder": {"class_name": "DomainBuilder"},
                 "parameter_builders": [
                     {"class_name": "ParameterBuilder", "name": "my_parameter"}
@@ -222,8 +216,10 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
     }
     schema = RuleBasedProfilerConfigSchema()
     config = schema.load(data)
-    assert isinstance(config, RuleBasedProfilerConfig)
-    assert len(config.rules) == 1 and isinstance(config.rules["rule_1"], RuleConfig)
+    assert isinstance(config, dict)
+    assert len(config["rules"]) == 1 and isinstance(
+        config["rules"]["rule_1"], RuleConfig
+    )
 
 
 def test_rule_based_profiler_config_successfully_loads_with_optional_args():
@@ -235,7 +231,6 @@ def test_rule_based_profiler_config_successfully_loads_with_optional_args():
         "variables": {"foo": "bar"},
         "rules": {
             "rule_1": {
-                "name": "rule_1",
                 "domain_builder": {"class_name": "DomainBuilder"},
                 "parameter_builders": [
                     {"class_name": "ParameterBuilder", "name": "my_parameter"}
@@ -251,8 +246,8 @@ def test_rule_based_profiler_config_successfully_loads_with_optional_args():
     }
     schema = RuleBasedProfilerConfigSchema()
     config = schema.load(data)
-    assert isinstance(config, RuleBasedProfilerConfig)
-    assert data["variables"] == config.variables
+    assert isinstance(config, dict)
+    assert data["variables"] == config["variables"]
 
 
 def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_fields():
@@ -281,7 +276,6 @@ def test_rule_based_profiler_from_commented_map():
         "variables": {"foo": "bar"},
         "rules": {
             "rule_1": {
-                "name": "rule_1",
                 "domain_builder": {"class_name": "DomainBuilder"},
                 "parameter_builders": [
                     {"class_name": "ParameterBuilder", "name": "my_parameter"}

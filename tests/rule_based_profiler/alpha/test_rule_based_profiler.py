@@ -5,6 +5,9 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -128,6 +131,7 @@ def test_profile_includes_citations(
 ):
     # Load data context
     data_context: DataContext = alice_columnar_table_single_batch_context
+
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
 
@@ -158,17 +162,24 @@ def test_profile_excludes_citations(
 ):
     # Load data context
     data_context: DataContext = alice_columnar_table_single_batch_context
+
     # Load profiler configs & loop (run tests for each one)
     yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
 
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
+
+    # Roundtrip through schema validation to add any missing fields
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
     # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
-    profiler_config.pop("class_name")
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        **profiler_config,
+        **serialized_config,
         data_context=data_context,
     )
 

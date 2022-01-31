@@ -595,6 +595,18 @@ class Batch(SerializableDictDot):
         return self._data.execution_engine.resolve_metrics((metric,))[metric.id]
 
 
+def get_batch_request_as_dict(
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+) -> Optional[dict]:
+    if batch_request is None:
+        return None
+
+    if isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
+        batch_request = batch_request.to_dict()
+
+    return batch_request
+
+
 def get_batch_request_from_acceptable_arguments(
     datasource_name: Optional[str] = None,
     data_connector_name: Optional[str] = None,

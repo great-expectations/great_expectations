@@ -7,6 +7,12 @@ from great_expectations.rule_based_profiler.parameter_builder import ParameterCo
 
 
 class ExpectationConfigurationBuilder(ABC):
+    def __init__(
+        self,
+        expectation_type: str,
+    ):
+        self._expectation_type = expectation_type
+
     def build_expectation_configuration(
         self,
         domain: Domain,
@@ -25,3 +31,7 @@ class ExpectationConfigurationBuilder(ABC):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> ExpectationConfiguration:
         pass
+
+    @property
+    def expectation_type(self) -> str:
+        return self._expectation_type
