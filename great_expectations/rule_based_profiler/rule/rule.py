@@ -16,11 +16,9 @@ class Rule:
     def __init__(
         self,
         name: str,
-        domain_builder: Optional[DomainBuilder] = None,
+        domain_builder: DomainBuilder,
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder],
         parameter_builders: Optional[List[ParameterBuilder]] = None,
-        expectation_configuration_builders: List[
-            ExpectationConfigurationBuilder
-        ] = None,
     ):
         """
         Sets Profiler rule name, domain builders, parameters builders, configuration builders,
