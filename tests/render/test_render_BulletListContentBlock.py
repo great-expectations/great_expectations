@@ -67,20 +67,23 @@ def test_all_expectations_using_test_definitions():
     # Without anything to iterate over, the test gave the impression of passing (when in actuality, it never tested anything).
     #
     # After some research, it seems as though this has been broken since the v0.13.0 release.
-    # As Datasets are a legacy feature, it is not worth the time investment to re-enable tests for all Expectations.
-    # The 5 Expectations noted below are implemented or updated after v0.13.0 and are incompatible with this test fixture.
-    # As we have test coverage over these items in other parts of the test suite, we deem this exclusion acceptable and pass on further investigation.
+    # The 5 Expectations noted below are implemented or updated after v0.13.0 and are incompatible with this test fixture due to
+    # having incomplete render methods.
+    #
+    # As this behavior is implemented, the `UNSUPPORTED_EXPECTATIONS` list will be updated to reflect GE's current capabilities.
 
     dir_path = os.path.dirname(os.path.abspath(__file__))
     pattern = os.path.join(
         dir_path, "..", "..", "tests/test_definitions/*/expect*.json"
     )
     test_files = glob.glob(pattern)
+
+    # Historically, collecting all the JSON tests was an issue - this step ensures we actually have test data.
     assert (
         len(test_files) == 56
     ), "Something went wrong when collecting JSON Expectation test fixtures"
 
-    # The following do not work with this parameterized test
+    # The following do not work with this parameterized test due to incomplete render methods.
     UNSUPPORTED_EXPECTATIONS = {
         "expect_column_values_to_match_like_pattern",
         "expect_column_values_to_match_like_pattern_list",
@@ -94,6 +97,7 @@ def test_all_expectations_using_test_definitions():
     for filename in test_files:
         test_definitions = json.load(open(filename))
 
+        # Chetan -20220129 - To be removed once all expectations are supported
         if test_definitions["expectation_type"] in UNSUPPORTED_EXPECTATIONS:
             continue
 
