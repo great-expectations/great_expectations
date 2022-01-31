@@ -310,6 +310,7 @@ class RuleBasedProfiler:
         )
 
         # TODO: <Alex>ALEX -- Tests for Reconciliation are next immediate action items.</Alex>
+        # TODO: <Alex>ALEX -- Replace "getattr/setattr" with "__dict__" (in a "to_dict()" method on Rule and below).</Alex>
         effective_rules: List[Rule] = self.reconcile_rules_for_profiler(rules=rules)
 
         if expectation_suite_name is None:
