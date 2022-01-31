@@ -349,7 +349,8 @@ module.exports = {
         { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
         { type: 'doc', id: 'reference/validation' },
         { type: 'doc', id: 'reference/anonymous_usage_statistics' },
-        { type: 'doc', id: 'reference/supporting_resources' }
+        { type: 'doc', id: 'reference/supporting_resources' },
+        { type: 'doc', id: 'glossary' }
       ]
     },
     {

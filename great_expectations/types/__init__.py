@@ -68,10 +68,15 @@ class DictDot:
     def keys(self):
         return self.to_dict().keys()
 
+    def values(self):
+        return self.to_dict().values()
+
     def items(self):
         return self.to_dict().items()
 
     def get(self, key, default_value=None):
+        if self.__contains__(key=key):
+            return self.__getitem__(item=key)
         return self.__dict__.get(key, default_value)
 
     def to_dict(self):
