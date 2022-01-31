@@ -47,7 +47,7 @@ You can use either pip or Anaconda to install Great Expectations.
   ]}>
 <TabItem value="pip">
 
-Once you have confirmed that Python 3 is installed locally, you can create a virutal environment with venv.
+Once you have confirmed that Python 3 is installed locally, you can create a virtual environment with venv.
 
 <details>
 <summary>Python Virtual Environments</summary>
