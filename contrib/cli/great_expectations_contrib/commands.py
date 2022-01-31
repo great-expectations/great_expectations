@@ -5,7 +5,6 @@ from collections import namedtuple
 
 import click
 from cookiecutter.main import cookiecutter
-from great_expectations_contrib.types import GreatExpectationsContribPackage
 
 Command = namedtuple("Command", ["name", "full_command", "error_message"])
 
