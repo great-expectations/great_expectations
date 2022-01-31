@@ -365,30 +365,29 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 if native_type is not None:
                     comp_types.extend(native_type)
 
-            # TODO: Remove when Pandas >=0.26 is pinned as a dependency
+            # TODO: Remove when Numpy >=1.21 is pinned as a dependency
+            _pandas_supports_extension_dtypes = version.parse(
+                pd.__version__
+            ) >= version.parse("0.24")
+            _numpy_doesnt_support_extensions_properly = version.parse(
+                np.__version__
+            ) < version.parse("1.21")
             if (
-                version.parse("0.25")
-                <= version.parse(pd.__version__)
-                < version.parse("0.25.3")
+                _numpy_doesnt_support_extensions_properly
+                and _pandas_supports_extension_dtypes
             ):
                 # This works around a bug where Pandas nullable int types aren't compatible with Numpy dtypes
-                extension_dtypes = {
+                # Note: Can't do set difference, the whole bugfix is because numpy types can't be compared to
+                # ExtensionDtypes
+                actual_type_is_ext_dtype = isinstance(
+                    actual_column_type, pd.core.dtypes.base.ExtensionDtype
+                )
+                comp_types = {
                     dtype
                     for dtype in comp_types
                     if isinstance(dtype, pd.core.dtypes.base.ExtensionDtype)
+                    == actual_type_is_ext_dtype
                 }
-                # Note: Can't do set difference, the whole bugfix is because numpy types can't be compared to
-                # ExtensionDtypes
-                non_extension_dtypes = {
-                    dtype
-                    for dtype in comp_types
-                    if not isinstance(dtype, pd.core.dtypes.base.ExtensionDtype)
-                }
-
-                if isinstance(actual_column_type, pd.core.dtypes.base.ExtensionDtype):
-                    comp_types = extension_dtypes
-                else:
-                    comp_types = non_extension_dtypes
             ###
 
             success = actual_column_type in comp_types
