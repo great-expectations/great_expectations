@@ -730,9 +730,9 @@ def test_golden_path_sql_datasource_configuration(
         # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["a", "b", "c"])
         # assert my_evr.success
 
-        # Confirm that logs do not contain any exceptions or invalid messages
-        assert not usage_stats_exceptions_exist(messages=caplog.messages)
-        assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @mock.patch(
@@ -919,9 +919,9 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
         # assert mock_emit.call_count == 1
         assert mock_emit.call_count == 4
 
-        # Confirm that logs do not contain any exceptions or invalid messages
-        assert not usage_stats_exceptions_exist(messages=caplog.messages)
-        assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @mock.patch(
@@ -1131,9 +1131,9 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
         # No other usage stats calls detected
         assert mock_emit.call_count == 4
 
-        # Confirm that logs do not contain any exceptions or invalid messages
-        assert not usage_stats_exceptions_exist(messages=caplog.messages)
-        assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @mock.patch(
@@ -1221,9 +1221,9 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
             == "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
         )
 
-        # Confirm that logs do not contain any exceptions or invalid messages
-        assert not usage_stats_exceptions_exist(messages=caplog.messages)
-        assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @mock.patch(
@@ -1352,9 +1352,9 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
             "example_unmatched_data_references": [],
         }
 
-        # Confirm that logs do not contain any exceptions or invalid messages
-        assert not usage_stats_exceptions_exist(messages=caplog.messages)
-        assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)
 
 
 @mock.patch(
