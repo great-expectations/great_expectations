@@ -13,9 +13,9 @@ This guide will walk you through the process of creating a custom ColumnMapExpec
 
 </Prerequisites>
 
-### Steps
+## Steps
 
-#### 1. Choose a name for your Expectation
+### 1. Choose a name for your Expectation
 
 First, decide on a name for your own Expectation. By convention, `ColumnMapExpectations` always start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](/docs/contributing/style_guides/code_style#expectations)  of the code Style Guide.
 
@@ -24,7 +24,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 - `ExpectColumnValuesToEqualThree`
 - `expect_column_values_to_equal_three`
 
-#### 2. Copy and rename the template file
+### 2. Copy and rename the template file
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
@@ -52,7 +52,7 @@ mv column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_eq
   </div>
 </details>
 
-#### 3. Generate a diagnostic checklist for your Expectation
+### 3. Generate a diagnostic checklist for your Expectation
 
 Once you've copied and renamed the template file, you can execute it as follows.
 
@@ -66,19 +66,19 @@ The template file is set up so that this will run the Expectation's `generate_di
 Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
   ✔ Has a library_metadata object
     Has a docstring, including a one-line short description
-    Has at least one positive and negative example case
+    Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
     Has basic input validation and type checking
-    Has all four statement Renderers: question, descriptive, prescriptive, diagnostic
-    Has core logic that passes tests for all applicable Execution Engines and SQL dialects
+    Has all three statement Renderers: descriptive, prescriptive, diagnostic
+    Has core logic that passes tests for all applicable Execution Engines
   ✔ Passes all linting checks
-    Has a full suite of tests, as determined by project code standards
+    Has a robust suite of tests, as determined by a code owner
     Has passed a manual review by a code owner for code standards and style guides
 ```
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first four steps on the checklist.
 
-#### 4. Change the Expectation class name and add a docstring
+### 4. Change the Expectation class name and add a docstring
 
 Let's start by updating your Expectations's name and docstring.
 
@@ -100,11 +100,11 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L73
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L72
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L82
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L81
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -116,14 +116,14 @@ $ python expect_column_values_to_equal_three.py
 Completeness checklist for ExpectColumnValuesToEqualThree:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
-    Has at least one positive and negative example case
+    Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
 ...
 ```
 
 Congratulations! You're one step closer to implementing a Custom Expectation.
 
-#### 5. Add example cases
+### 5. Add example cases
 
 Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
 
@@ -139,7 +139,6 @@ Your examples will look something like this:
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
 
 * `data`: defines the input data of the example as a table/data frame. In this example the table has one column named `all_threes` and a second column named `some_zeroes`. Both columns have 5 rows. (Note: if you define multiple columns, make sure that they have the same number of rows.)
-
 * `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
 	* `include_in_gallery`: This must be set to `True` if you want this test case to be visible in the Gallery as an example.
@@ -156,11 +155,16 @@ $ python expect_column_values_to_equal_three.py
 Completeness checklist for ExpectColumnValuesToEqualThree:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
-  ✔ Has at least one positive and negative example case
+  ✔ Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
 ```
 
-#### 6. Implement your Metric and connect it to your Expectation
+:::note
+For more information on tests and example cases, <br/>
+see our guide [How to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
+:::
+
+### 6. Implement your Metric and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation.   
 To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your Expectation.  
@@ -236,7 +240,7 @@ $ python expect_column_values_to_equal_three.py
 Completeness checklist for ExpectColumnValuesToEqualThree:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
-  ✔ Has at least one positive and negative example case
+  ✔ Has at least one positive and negative example case, and all test cases pass
   ✔ Has core logic and passes tests on at least one Execution Engine
 ...
 ```
@@ -253,9 +257,11 @@ you may notice that we didn't implement a `_validate` method here. While we have
 Column Map Expectations come with that functionality built in; no extra `_validate` needed!
 :::
 
-#### 7. Update `library_metadata` (Optional)
+### 7. Contribution (Optional)
 
-If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your PR. For example:
+This guide will leave you with a Custom Expectation sufficient for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+
+If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
 ```python file=../../../../examples/expectations/column_map_expectation_template.py#L63-L69
 ```
@@ -264,3 +270,12 @@ would become
 
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L74-L78
 ```
+
+This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
+
+:::note
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
+
+To view the full script used in this page, see it on GitHub:
+- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
+:::

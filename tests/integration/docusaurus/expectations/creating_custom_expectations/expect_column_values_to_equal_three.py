@@ -72,11 +72,10 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",
         "tags": ["extremely basic math"],
         "contributors": ["@joegargery"],
     }
 
 
 if __name__ == "__main__":
-    print(ExpectColumnValuesToEqualThree().generate_diagnostic_checklist())
+    ExpectColumnValuesToEqualThree().print_diagnostic_checklist()
