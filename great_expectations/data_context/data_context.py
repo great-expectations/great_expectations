@@ -3276,6 +3276,17 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id=ge_cloud_id,
         )
 
+    def delete_profiler(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
+        profiler_toolkit.delete_profiler(
+            profiler_store=self.profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
     def list_profilers(self) -> List[str]:
         if self.profiler_store is None:
             raise ge_exceptions.StoreConfigurationError(
