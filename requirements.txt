@@ -23,4 +23,4 @@ termcolor>=1.1.0  # package
 tqdm>=4.59.0  # package
 typing-extensions>=3.10.0.0 # Leverage type annotations from recent Python releases
 tzlocal>=1.2  # package
-wheel>=0.37.0  # package
+wheel>=0.37.1  # package
