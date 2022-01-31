@@ -158,7 +158,7 @@ $ python expect_column_column_max_to_be_between_custom.py
 Completeness checklist for ExpectColumnValuesToBeBetweenCustom:
   ✔ Has a library_metadata object
   ✔ Has a docstring, including a one-line short description
-  ✔ Has at least one positive and negative example case
+  ✔ Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
 ```
 
