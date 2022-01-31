@@ -4,6 +4,7 @@ from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
+from packaging import version
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -363,6 +364,32 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 native_type = _native_type_type_map(type_)
                 if native_type is not None:
                     comp_types.extend(native_type)
+
+            # TODO: Remove when Pandas >=0.26 is pinned as a dependency
+            if (
+                version.parse("0.25")
+                <= version.parse(pd.__version__)
+                < version.parse("0.25.3")
+            ):
+                # This works around a bug where Pandas nullable int types aren't compatible with Numpy dtypes
+                extension_dtypes = {
+                    dtype
+                    for dtype in comp_types
+                    if isinstance(dtype, pd.core.dtypes.base.ExtensionDtype)
+                }
+                # Note: Can't do set difference, the whole bugfix is because numpy types can't be compared to
+                # ExtensionDtypes
+                non_extension_dtypes = {
+                    dtype
+                    for dtype in comp_types
+                    if not isinstance(dtype, pd.core.dtypes.base.ExtensionDtype)
+                }
+
+                if isinstance(actual_column_type, pd.core.dtypes.base.ExtensionDtype):
+                    comp_types = extension_dtypes
+                else:
+                    comp_types = non_extension_dtypes
+            ###
 
             success = actual_column_type in comp_types
 
