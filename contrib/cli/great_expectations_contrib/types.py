@@ -110,12 +110,7 @@ class GreatExpectationsContribPackage:
     # Existing configuration
     config_file: ClassVar[str] = ".great_expectations_package.json"
 
-    def to_json_file(self) -> None:
-        """
-        Write the contents of the class instance to disk.
-        Any null values are excluded.
-
-        """
+    def _to_json_file(self) -> None:
         json_dict = self._to_json_dict()
         data = json.dumps(json_dict, indent=4)
         with open(self.config_file, "w") as f:
@@ -158,11 +153,10 @@ class GreatExpectationsContribPackage:
     def update_package_state(self) -> None:
         """
         Parses diagnostic reports from package Expectations and uses them to update JSON state
-
         """
         diagnostics = self._retrieve_package_expectations_diagnostics()
         self._update_attrs_with_diagnostics(diagnostics)
-        self.to_json_file()
+        self._to_json_file()
 
     def _update_attrs_with_diagnostics(self, diagnostics: List[Diagnostics]) -> None:
         # TODO: Write logic to assign values to attrs
