@@ -122,6 +122,19 @@ If you are interested in contributing your Custom Expectation back to Great Expe
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L44-L76
 ```
 
+<details>
+  <summary>Can I test for errors?</summary>
+Yes! If you would like to define an example case illustrating when your Custom Expectation should throw an error, 
+you can replace the <code>out</code> key with an <code>error</code> key defining a <code>traceback_substring</code>. 
+<br/><br/>
+For example:
+<br/><br/>
+<code>{`"error": {
+          "traceback_substring" : "TypeError: Column values, min_value, and max_value must either be None or of the same type."
+        }`}
+</code>
+</details>
+
 ### 4. Verifying our tests
 
 If you now run your file, `print_diagnostic_checklist` will attempt to execute these example cases.

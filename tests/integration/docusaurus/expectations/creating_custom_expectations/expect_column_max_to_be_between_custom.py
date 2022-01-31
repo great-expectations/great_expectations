@@ -179,11 +179,11 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",
         "tags": ["flexible max comparisons"],
         "contributors": ["@joegargery"],
     }
 
 
 if __name__ == "__main__":
-    print(ExpectColumnMaxToBeBetweenCustom().run_diagnostics())
+    ExpectColumnMaxToBeBetweenCustom().print_diagnostic_checklist()
+
