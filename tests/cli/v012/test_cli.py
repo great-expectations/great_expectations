@@ -7,7 +7,6 @@ from great_expectations import __version__ as ge_version
 from great_expectations.cli.v012 import cli
 from great_expectations.exceptions import ConfigNotFoundError
 from tests.cli.v012.utils import assert_no_logging_messages_or_tracebacks
-from tests.test_utils import set_directory
 
 yaml = YAML()
 yaml.default_flow_style = False
