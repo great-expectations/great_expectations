@@ -26,21 +26,21 @@ Grouped together, they constitute a Definition of Done for Expectations at each 
 
 * Has a `library_metadata` object
 * Has a docstring, including a one-line short description
-* Has at least one positive and negative example case
+* Has at least one positive and negative example case, and all test cases pass
 * Has core logic and passes tests on at least one [**Execution Engine**](../../../reference/execution_engine.md)
 
 <i class="fas fa-circle" style={{color: "#ffc107"}}></i> A Beta Expectation...
 
 * Has basic input validation and type checking
-* Has all four Statement Renderers: question, descriptive, prescriptive, diagnostic
+* Has all three Statement Renderers: descriptive, prescriptive, diagnostic
 <!-- * Has default `Parameter Builders` and Domain hooks to support Profiling -->
-* Has core logic that passes tests for all applicable Execution Engines and SQL dialects
+* Has core logic that passes tests for all applicable Execution Engines
 
 <i class="fas fa-check-circle" style={{color: "#28a745"}}></i> A Production Expectation...
 
 * Passes all linting checks
 <!--  * Has all applicable Renderers, with fully typed and styled output -->
-* Has a full suite of tests, as determined by project code standards
+* Has a robust suite of tests, as determined by a code owner
 * Has passed a manual review by a code owner for code standards and style guides
 
 ## How these docs are organized
@@ -64,10 +64,10 @@ Beyond the first four steps, additional features are generally similar across al
 | Step | Guide |
 |------|-------|
 | Has basic input validation and type checking                                                     | [How to add configuration validation for an Expectation](../features_custom_expectations/how_to_add_input_validation_for_an_expectation.md) |
-| Has all four Statement Renderers: question, descriptive, prescriptive, diagnostic              | [How to add text renderers for custom Expectations](../features_custom_expectations/how_to_add_text_renderers_for_an_expectation.md) |
-| Has core logic that passes tests for all applicable Execution Engines and SQL dialects   | [How to add SQLAlchemy support for custom Metrics](../features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation.md)<br/> [How to add Spark support for custom Metrics](../features_custom_expectations/how_to_add_spark_support_for_an_expectation.md)|
+| Has all three Statement Renderers: descriptive, prescriptive, diagnostic              | [How to add text renderers for custom Expectations](../features_custom_expectations/how_to_add_text_renderers_for_an_expectation.md) |
+| Has core logic that passes tests for all applicable Execution Engines   | [How to add SQLAlchemy support for custom Metrics](../features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation.md)<br/> [How to add Spark support for custom Metrics](../features_custom_expectations/how_to_add_spark_support_for_an_expectation.md)|
 | Passes all linting checks                                                                        | |
-| Has a full suite of tests, as determined by project code standards                               | |
+| Has a robust suite of tests, as determined by a code owner                               | |
 | Has passed a manual review by a code owner for code standards and style guides                   | |
 
 ## Publishing your Expectation as an open source contribution
