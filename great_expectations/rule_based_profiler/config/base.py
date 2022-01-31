@@ -263,8 +263,6 @@ class RuleBasedProfilerConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    __config_class__ = RuleBasedProfilerConfig
-
     name = fields.String(required=True, allow_none=False)
     class_name = fields.String(required=True, allow_none=False)
     module_name = fields.String(
