@@ -1,12 +1,11 @@
 import importlib
 import inspect
-import json
 import logging
 import os
 import sys
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, ClassVar, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 
 from great_expectations.expectations.expectation import Expectation
 
@@ -18,20 +17,20 @@ Diagnostics = Dict[str, Any]
 
 
 @dataclass(frozen=True)
-class ExpectationCompletenessCheck:
+class ExpectationCompletenessCheckConfig:
     message: str
     passed: bool
 
 
 @dataclass(frozen=True)
-class ExpectationCompletenessChecklist:
-    experimental: List[ExpectationCompletenessCheck]
-    beta: List[ExpectationCompletenessCheck]
-    production: List[ExpectationCompletenessCheck]
+class ExpectationCompletenessChecklistConfig:
+    experimental: List[ExpectationCompletenessCheckConfig]
+    beta: List[ExpectationCompletenessCheckConfig]
+    production: List[ExpectationCompletenessCheckConfig]
 
 
 @dataclass(frozen=True)
-class PackageCompletenessStatus:
+class PackageCompletenessStatusConfig:
     concept_only: int
     experimental: int
     beta: int
@@ -40,22 +39,22 @@ class PackageCompletenessStatus:
 
 
 @dataclass(frozen=True)
-class RenderedExpectationDetail:
+class RenderedExpectationConfig:
     name: str
     tags: List[str]
     supported: List[str]
-    status: ExpectationCompletenessChecklist
+    status: ExpectationCompletenessChecklistConfig
 
 
 @dataclass(frozen=True)
-class Dependency:
+class DependencyConfig:
     text: str
     link: str
     version: Optional[str]
 
 
 @dataclass(frozen=True)
-class GitHubUser:
+class GitHubUserConfig:
     username: str
     full_name: Optional[str]
 
@@ -68,15 +67,15 @@ class SocialLinkType(Enum):
 
 
 @dataclass(frozen=True)
-class SocialLink:
+class SocialLinkConfig:
     account_type: SocialLinkType
     identifier: str
 
 
 @dataclass(frozen=True)
-class DomainExpert:
+class DomainExpertConfig:
     full_name: str
-    social_links: List[SocialLink]
+    social_links: List[SocialLinkConfig]
     picture: str
 
 
@@ -88,21 +87,21 @@ class Maturity(Enum):
 
 
 @dataclass(frozen=True)
-class GreatExpectationsContribPackage:
+class GreatExpectationsContribPackageConfig:
     # Core
     package_name: Optional[str] = None
     icon: Optional[str] = None
     description: Optional[str] = None
-    expectations: Optional[List[RenderedExpectationDetail]] = None
+    expectations: Optional[List[RenderedExpectationConfig]] = None
     expectation_count: Optional[int] = None
-    dependencies: Optional[List[Dependency]] = None
+    dependencies: Optional[List[DependencyConfig]] = None
     maturity: Optional[Maturity] = None
-    status: Optional[PackageCompletenessStatus] = None
+    status: Optional[PackageCompletenessStatusConfig] = None
 
     # Users
-    owners: Optional[List[GitHubUser]] = None
-    contributors: Optional[List[GitHubUser]] = None
-    domain_experts: Optional[List[DomainExpert]] = None
+    owners: Optional[List[GitHubUserConfig]] = None
+    contributors: Optional[List[GitHubUserConfig]] = None
+    domain_experts: Optional[List[DomainExpertConfig]] = None
 
     # Metadata
     version: Optional[str] = None
@@ -184,44 +183,3 @@ class GreatExpectationsContribPackage:
             logger.info(f"Successfully retrieved diagnostics from {expectation}")
 
         return diagnostics_list
-
-
-def read_package_from_file(path: str) -> GreatExpectationsContribPackage:
-    """Read a JSON file into a GreatExpectationsContribPackage instance.
-
-    Args:
-        path: The relative path to the target package JSON file.
-
-    Returns:
-        A GreatExpectationsContribPackage instance to represent the current package's state.
-    """
-    # If config file isn't found, create a blank JSON and write to disk
-    if not os.path.exists(path):
-        instance = GreatExpectationsContribPackage()
-        logger.debug(f"Could not find existing package JSON; instantiated a new one")
-        return instance
-
-    with open(path) as f:
-        contents = f.read()
-
-    data = json.loads(contents)
-    logger.info(f"Succesfully read existing package data from {path}")
-    return GreatExpectationsContribPackage(**data)
-
-
-def write_package_to_disk(package: GreatExpectationsContribPackage, path: str) -> None:
-    """Serialize a GreatExpectationsContribPackage instance into a JSON file.
-
-    Args:
-        package: The GreatExpectationsContribPackage you wish to serialize.
-        path: The relative path to the target package JSON file.
-    """
-    json_dict = asdict(package)
-    to_delete = [key for key, val in json_dict.items() if val is None]
-    for key in to_delete:
-        del json_dict[key]
-
-    data = json.dumps(json_dict, indent=4)
-    with open(path, "w") as f:
-        f.write(data)
-        logger.info(f"Succesfully wrote state to {path}.")

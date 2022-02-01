@@ -1,10 +1,17 @@
+import json
+import logging
 import os
 import subprocess
 import sys
 from collections import namedtuple
+from dataclasses import asdict
 
 import click
 from cookiecutter.main import cookiecutter
+from great_expectations_contrib.package import GreatExpectationsContribPackageConfig
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 Command = namedtuple("Command", ["name", "full_command", "error_message"])
 
@@ -134,3 +141,46 @@ def run_command(command: Command, suppress_output: bool = False) -> bool:
 
 def echo(msg: str, color: str, bold: bool = False) -> None:
     click.echo(click.style(msg, fg=color, bold=bold))
+
+
+def read_package_from_file(path: str) -> GreatExpectationsContribPackageConfig:
+    """Read a JSON file into a GreatExpectationsContribPackage instance.
+
+    Args:
+        path: The relative path to the target package JSON file.
+
+    Returns:
+        A GreatExpectationsContribPackage instance to represent the current package's state.
+    """
+    # If config file isn't found, create a blank JSON and write to disk
+    if not os.path.exists(path):
+        instance = GreatExpectationsContribPackageConfig()
+        logger.debug(f"Could not find existing package JSON; instantiated a new one")
+        return instance
+
+    with open(path) as f:
+        contents = f.read()
+
+    data = json.loads(contents)
+    logger.info(f"Succesfully read existing package data from {path}")
+    return GreatExpectationsContribPackageConfig(**data)
+
+
+def write_package_to_disk(
+    package: GreatExpectationsContribPackageConfig, path: str
+) -> None:
+    """Serialize a GreatExpectationsContribPackage instance into a JSON file.
+
+    Args:
+        package: The GreatExpectationsContribPackage you wish to serialize.
+        path: The relative path to the target package JSON file.
+    """
+    json_dict = asdict(package)
+    to_delete = [key for key, val in json_dict.items() if val is None]
+    for key in to_delete:
+        del json_dict[key]
+
+    data = json.dumps(json_dict, indent=4)
+    with open(path, "w") as f:
+        f.write(data)
+        logger.info(f"Succesfully wrote state to {path}.")
