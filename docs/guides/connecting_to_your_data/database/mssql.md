@@ -161,8 +161,6 @@ To view the full scripts used in this page, see them on GitHub:
 - [mssql_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/mssql_yaml_example.py)
 - [mssql_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/database/mssql_python_example.py)
 
-If your usecase requires passing custom `sqlalchemy.create_engine` paramaters; you can take advantage of that by passing them in your `connection_string`, the connection string will be processed as `sqlalchemy.create_engine(url, kwargs)`.
-
 ## Next Steps
 
 <NextSteps />
