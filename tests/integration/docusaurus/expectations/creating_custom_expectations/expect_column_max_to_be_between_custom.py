@@ -12,14 +12,14 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 
 
-class ColumnCustomMax(ColumnMetricProvider):
+class ColumnCustomMax(ColumnAggregateMetricProvider):
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
 
     metric_name = "column.custom_max"
@@ -187,3 +187,17 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
 if __name__ == "__main__":
     ExpectColumnMaxToBeBetweenCustom().print_diagnostic_checklist()
 
+# Note to users: code below this line is only for integration testing -- ignore!
+
+diagnostics = ExpectColumnMaxToBeBetweenCustom().run_diagnostics()
+
+for check in diagnostics["tests"]:
+    assert check["test_passed"] is True
+    assert check["error_message"] is None
+    assert check["stack_trace"] is None
+
+for check in diagnostics["errors"]:
+    assert check is None
+
+for check in diagnostics["maturity_checklist"]["experimental"]:
+    assert check["passed"] is True

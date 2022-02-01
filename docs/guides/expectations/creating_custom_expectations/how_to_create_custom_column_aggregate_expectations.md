@@ -183,7 +183,7 @@ Your Metric function will have the `@column_aggregate_value` decorator, with the
 ```
 
 This is all that you need to define for now. 
-The `ColumnMetricProvider` and `ColumnExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
+The `ColumnAggregateMetricProvider` and `ColumnExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
 
 <details>
   <summary>Other parameters</summary>
