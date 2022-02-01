@@ -24,8 +24,8 @@ from great_expectations.expectations.metrics import (
 
 
 class ColumnValuesConfidenceToBeGreaterThanOrEqualToThreshold(ColumnMapMetricProvider):
-    """MetricProvider Class for Data Label Probability greater than \
-    or equal to the user-specified threshold"""
+    """MetricProvider Class for determining if the dataprofiler's model confidence value is\
+        greater than or equal to the user-specified threshold"""
     
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.prediction_confidence_greater_than_or_equal_to_threshold"
@@ -39,14 +39,12 @@ class ColumnValuesConfidenceToBeGreaterThanOrEqualToThreshold(ColumnMapMetricPro
         Implement the yes/no question for the expectation
         """
         labeler = dp.DataLabeler(labeler_type='structured')
+        labeler.postprocessor.set_params(is_pred_labels=False)
         try:
-            results = labeler.predict(column, predict_options={"show_confidences": True})
+            results = labeler.predict(column, predict_options={"show_confidences": True},)
         except:
             results = None
-        label_map_vec_func = np.vectorize(lambda x: labeler.label_mapping.get(x, None))
-        results['pred'] = label_map_vec_func(results['pred'])
         return np.choose(results['pred'], results['conf'].T) >= threshold
-
 class ExpectColumnValuesToBeGreaterThanOrEqualToThreshold(ColumnMapExpectation):
     """
     This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.

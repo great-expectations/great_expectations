@@ -23,7 +23,7 @@ from great_expectations.expectations.metrics import (
 )
 
 
-class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrLessThanThreshold(ColumnMapMetricProvider):
+class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(ColumnMapMetricProvider):
     """MetricProvider Class for Data Label Probability greater than \
     or equal to the user-specified threshold"""
     
@@ -39,24 +39,26 @@ class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrLessThanThreshold(Colum
         Implement the yes/no question for the expectation
         """
         labeler = dp.DataLabeler(labeler_type='structured')
+        labeler.postprocessor.set_params(is_pred_labels=False)
         try:
-            results = labeler.predict(column, predict_options={"show_confidences": True})
+            results = labeler.predict(column, predict_options={"show_confidences": True},)
         except:
             results = None
-        
-        label_map_vec_func = np.vectorize(lambda x: labeler.label_mapping.get(x, None))
-        results['pred'] = label_map_vec_func(results['pred'])
-        test_int_data_label = label_map_vec_func(data_label)
 
-        # list comprehension to only select the confidence values for a given data label 
-        #   within the column specified
-        results_array = np.array([confidences[results['pred'][iter_value]]\
-            if results['pred'][iter_value] == test_int_data_label else .00\
-                for iter_value, confidences in enumerate(results['conf'])])
-        
-        return results_array >= threshold
+        if data_label.upper() in labeler.label_mapping.keys():
+            data_label_ind = labeler.label_mapping[data_label.upper()]
+        else:
+            raise ValueError("""
+                The only values acceptable for the data label parameter are as follows:
+                ['PAD', 'UNKNOWN', 'ADDRESS', 'BAN', 'CREDIT_CARD', 'DATE', 'TIME', 'DATETIME',\
+                    'DRIVERS_LICENSE', 'EMAIL_ADDRESS', 'UUID', 'HASH_OR_KEY', 'IPV4', 'IPV6',\
+                    'MAC_ADDRESS', 'PERSON', 'PHONE_NUMBER', 'SSN', 'URL', 'US_STATE', 'INTEGER',\
+                    'FLOAT', 'QUANTITY', 'ORDINAL']
+            """)
+        data_label_conf = results['conf'][:, data_label_ind]
+        return data_label_conf >= threshold
 
-class ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrLessThanThreshold(ColumnMapExpectation):
+class ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrEqualtoThreshold(ColumnMapExpectation):
     """
     This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.
 
@@ -108,6 +110,19 @@ class ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrLessThanThreshol
                         "success": True,
                     },
                 },
+                {
+                    "title": "failing_test_with_column_one",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "ZIP",
+                        "data_label": "ADDRESS",
+                        "threshold": 1.00
+                        },
+                    "out": {
+                        "success": False,
+                    },
+                },
             ],
         }
     ]
@@ -132,5 +147,5 @@ class ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrLessThanThreshol
     }
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrLessThanThreshold().run_diagnostics()
+    diagnostics_report = ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrEqualtoThreshold().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))
