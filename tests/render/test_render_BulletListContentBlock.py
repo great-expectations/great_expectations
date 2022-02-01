@@ -74,7 +74,7 @@ def test_all_expectations_using_test_definitions():
 
     dir_path = os.path.dirname(os.path.abspath(__file__))
     pattern = os.path.join(
-        dir_path, "..", "..", "tests/test_definitions/*/expect*.json"
+        dir_path, "..", "..", "tests", "test_definitions", "*", "expect*.json"
     )
     test_files = glob.glob(pattern)
 
