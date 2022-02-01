@@ -9,14 +9,14 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 
 
-class ColumnCustomMax(ColumnMetricProvider):
+class ColumnCustomMax(ColumnAggregateMetricProvider):
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
 
     metric_name = "column.custom_max"
