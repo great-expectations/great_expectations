@@ -107,62 +107,19 @@ class GreatExpectationsContribPackage:
     # Metadata
     version: Optional[str] = None
 
-    # Existing configuration
-    config_file: ClassVar[str] = ".great_expectations_package.json"
-
-    def _to_json_file(self) -> None:
-        json_dict = self._to_json_dict()
-        data = json.dumps(json_dict, indent=4)
-        with open(self.config_file, "w") as f:
-            f.write(data)
-            logger.info(f"Succesfully wrote state to {self.config_file}.")
-
-    def _to_json_dict(self) -> Dict[str, Any]:
-        # Convert to JSON and remove nulls
-        json_dict = asdict(self)
-        to_delete = [key for key, val in json_dict.items() if val is None]
-        for key in to_delete:
-            del json_dict[key]
-        return json_dict
-
-    @classmethod
-    def from_json_file(cls) -> "GreatExpectationsContribPackage":
-        """Reads data from JSON file to create class instance.
-
-        If the target file is not available, an empty package is created.
-
-        Returns:
-            An instance of GreatExpectationsContribPackage to represent the package's current state
-
-        """
-        # If config file isn't found, create a blank JSON and write to disk
-        if not os.path.exists(cls.config_file):
-            instance = cls()
-            logger.debug(
-                f"Could not find existing package JSON; instantiated a new one"
-            )
-            return instance
-
-        with open(cls.config_file) as f:
-            contents = f.read()
-
-        data = json.loads(contents)
-        logger.info(f"Succesfully read existing package data from {cls.config_file}")
-        return cls(**data)
-
     def update_package_state(self) -> None:
         """
         Parses diagnostic reports from package Expectations and uses them to update JSON state
         """
         diagnostics = self._retrieve_package_expectations_diagnostics()
         self._update_attrs_with_diagnostics(diagnostics)
-        self._to_json_file()
 
     def _update_attrs_with_diagnostics(self, diagnostics: List[Diagnostics]) -> None:
-        for diagnostic in diagnostics:
-            # TODO: Write logic to assign values to attrs
-            # This is a black box for now
-            ...
+        # TODO: Write logic to assign values to attrs
+        # This is a black box for now
+        # for diagnostic in diagnostics:
+        #     pass
+        raise NotImplementedError
 
     def _retrieve_package_expectations_diagnostics(self) -> List[Diagnostics]:
         try:
@@ -227,3 +184,44 @@ class GreatExpectationsContribPackage:
             logger.info(f"Successfully retrieved diagnostics from {expectation}")
 
         return diagnostics_list
+
+
+def read_package_from_file(path: str) -> GreatExpectationsContribPackage:
+    """Read a JSON file into a GreatExpectationsContribPackage instance.
+
+    Args:
+        path: The relative path to the target package JSON file.
+
+    Returns:
+        A GreatExpectationsContribPackage instance to represent the current package's state.
+    """
+    # If config file isn't found, create a blank JSON and write to disk
+    if not os.path.exists(path):
+        instance = GreatExpectationsContribPackage()
+        logger.debug(f"Could not find existing package JSON; instantiated a new one")
+        return instance
+
+    with open(path) as f:
+        contents = f.read()
+
+    data = json.loads(contents)
+    logger.info(f"Succesfully read existing package data from {path}")
+    return GreatExpectationsContribPackage(**data)
+
+
+def write_package_to_disk(package: GreatExpectationsContribPackage, path: str) -> None:
+    """Serialize a GreatExpectationsContribPackage instance into a JSON file.
+
+    Args:
+        package: The GreatExpectationsContribPackage you wish to serialize.
+        path: The relative path to the target package JSON file.
+    """
+    json_dict = asdict(package)
+    to_delete = [key for key, val in json_dict.items() if val is None]
+    for key in to_delete:
+        del json_dict[key]
+
+    data = json.dumps(json_dict, indent=4)
+    with open(path, "w") as f:
+        f.write(data)
+        logger.info(f"Succesfully wrote state to {path}.")
