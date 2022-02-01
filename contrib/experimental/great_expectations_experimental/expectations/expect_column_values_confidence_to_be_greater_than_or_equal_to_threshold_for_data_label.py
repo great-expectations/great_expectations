@@ -48,6 +48,8 @@ class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrLessThanThreshold(Colum
         results['pred'] = label_map_vec_func(results['pred'])
         test_int_data_label = label_map_vec_func(data_label)
 
+        # list comprehension to only select the confidence values for a given data label 
+        #   within the column specified
         results_array = np.array([confidences[results['pred'][iter_value]]\
             if results['pred'][iter_value] == test_int_data_label else .00\
                 for iter_value, confidences in enumerate(results['conf'])])
