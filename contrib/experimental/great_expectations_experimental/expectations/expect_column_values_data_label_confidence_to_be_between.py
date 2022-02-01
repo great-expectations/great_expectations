@@ -23,77 +23,72 @@ from great_expectations.expectations.metrics import (
 )
 
 
-class ColumnValuesProbabilisticallyMatchDataLabel(ColumnMapMetricProvider):
-    """MetricProvider Class for Data Label Probability greater than \
-    or equal to the user-specified threshold"""
-    
-    # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.are_probibalistically_greater_or_equal_to_threshold"
+# This class defines a Metric to support your Expectation.
+# For most ColumnMapExpectations, the main business logic for calculation will live in this class.
+class ColumnValuesDataLabelConfidenceToBeBetween(ColumnMapMetricProvider):
 
-    condition_value_keys = ("threshold",)
+    # This is the id string that will be used to reference your metric.
+    condition_metric_name = "column_values.data_label_confidence_to_be_between"
+
+    condition_value_keys = ("min_value", "max_value",)
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, threshold, **kwargs):
+    def _pandas(cls, column, min_value, max_value, **kwargs):
         """
-        Implement the yes/no question for the expectation
+        implement the yes/no question for the expectation
         """
         labeler = dp.DataLabeler(labeler_type='structured')
         try:
             preds = labeler.predict(column, predict_options={"show_confidences": True})
         except:
             preds = None
-        return preds["conf"] >= threshold
+        return np.logical_and(preds['conf']>=min_value, preds['conf']<=max_value)
 
 
-class ExpectColumnValuesToProbabilisticallyMatchDataLabel(ColumnMapExpectation):
+# This class defines the Expectation itself
+class ExpectColumnValuesDataLabelConfidenceToBeBetween(ColumnMapExpectation):
     """
-    This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.
+    df.expect_column_values_data_label_confidence_to_be_between(
 
-    :param: column,  
-    :param: data_label,
-    :param: threshold
-
-    df.expect_column_values_to_probabilistically_match_data_label(
-        column,
-        data_label=<>,
-        threshold=float(0<=1)
     )
     """
 
+    # These examples will be shown in the public gallery.
+    # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": {
-                "OPEID6": ['1002', '1052', '25034'],
+                "OPEID6": ['1002', '1052', '25034', 'McRoomyRoom'],
                 "INSTNM": ['Alabama A & M University',
-                    'University of Alabama at Birmingham', 'Amridge University'],
-                "ZIP": ['35762', '35294-0110', '36117-3553'],
+                    'University of Alabama at Birmingham', 'Amridge University', 'McRoomyRoom'],
+                "ZIP": ['35762', '35294-0110', '36117-3553', 'McRoomyRoom'],
                 "ACCREDAGENCY": ['Southern Association of Colleges and Schools Commission on Colleges',
                     'Southern Association of Colleges and Schools Commission on Colleges',
-                    'Southern Association of Colleges and Schools Commission on Colleges'],
+                    'Southern Association of Colleges and Schools Commission on Colleges', 'McRoomyRoom'],
                 "INSTURL": ['www.aamu.edu/', 'https://www.uab.edu',
-                    'www.amridgeuniversity.edu'],
+                    'www.amridgeuniversity.edu', 'McRoomyRoom'],
                 "NPCURL": ['www.aamu.edu/admissions-aid/tuition-fees/net-price-calculator.html',
                     'https://uab.studentaidcalculator.com/survey.aspx',
-                    'www2.amridgeuniversity.edu:9091/'],
-                "LATITUDE": ['34.783368', '33.505697', '32.362609'],
-                "LONGITUDE": ['-86.568502', '-86.799345', '-86.17401'],
-                "RELAFFIL": ['NULL', 'NULL', '74'],
-                "DEATH_YR2_RT": ['PrivacySuppressed', 'PrivacySuppressed', 'PrivacySuppressed'],
+                    'www2.amridgeuniversity.edu:9091/', 'McRoomyRoom'],
+                "LATITUDE": ['34.783368', '33.505697', '32.362609', 'McRoomyRoom'],
+                "LONGITUDE": ['-86.568502', '-86.799345', '-86.17401', 'McRoomyRoom'],
+                "RELAFFIL": ['NULL', 'NULL', '74', 'McRoomyRoom'],
+                "DEATH_YR2_RT": ['PrivacySuppressed', 'PrivacySuppressed', 'PrivacySuppressed', 'McRoomyRoom'],
                 "SEARCH_STRING": ['Alabama A & M University AAMU',
                     'University of Alabama at Birmingham ',
-                    'Amridge University Southern Christian University  Regions University']
+                    'Amridge University Southern Christian University  Regions University', 'McRoomyRoom'],
             },
             "tests": [
                 {
-                    "title": "positive_test_with_column_one",
+                    "title": "test_longitude_between_max_min_confidence",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "OPEID6",  "threshold": .65},
+                    "in": {"column": "OPEID6",  "min_value": 0.00, "max_value": 1.00},
                     "out": {
                         "success": True,
                         "unexpected_index_list": [3],
-                        "unexpected_list": [4, 5],
+                        "unexpected_list": ["McRoomyRoom"],
                     },
                 },
             ],
@@ -102,10 +97,10 @@ class ExpectColumnValuesToProbabilisticallyMatchDataLabel(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.are_probibalistically_greater_or_equal_to_threshold"
+    map_metric = "column_values.data_label_confidence_to_be_between"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    success_keys = ("threshold", "mostly",)
+    success_keys = ("min_value", "max_value", "mostly",)
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
@@ -120,5 +115,5 @@ class ExpectColumnValuesToProbabilisticallyMatchDataLabel(ColumnMapExpectation):
     }
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToProbabilisticallyMatchDataLabel().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    report = ExpectColumnValuesDataLabelConfidenceToBeBetween().run_diagnostics()
+    print (json.dumps(report, indent=2))
