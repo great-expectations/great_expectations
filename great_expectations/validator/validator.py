@@ -292,9 +292,6 @@ class Validator:
             configuration = ExpectationConfiguration(
                 expectation_type=name, kwargs=expectation_kwargs, meta=meta
             )
-            configuration.process_evaluation_parameters(
-                self._expectation_suite.evaluation_parameters, True, self._data_context
-            )
 
             exception_info: ExceptionInfo
 
@@ -307,6 +304,9 @@ class Validator:
                         expectation_config=copy.deepcopy(expectation.configuration)
                     )
                 else:
+                    configuration.process_evaluation_parameters(
+                        self._expectation_suite.evaluation_parameters, True, self._data_context
+                    )
                     validation_result = expectation.validate(
                         validator=self,
                         evaluation_parameters=self._expectation_suite.evaluation_parameters,
