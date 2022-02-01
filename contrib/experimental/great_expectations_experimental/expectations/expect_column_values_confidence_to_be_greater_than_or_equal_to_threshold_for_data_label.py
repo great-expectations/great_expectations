@@ -43,10 +43,15 @@ class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrLessThanThreshold(Colum
             results = labeler.predict(column, predict_options={"show_confidences": True})
         except:
             results = None
+        
         label_map_vec_func = np.vectorize(lambda x: labeler.label_mapping.get(x, None))
         results['pred'] = label_map_vec_func(results['pred'])
         test_int_data_label = label_map_vec_func(data_label)
-        results_array = np.array([confidences[results['pred'][iter_value]] if results['pred'][iter_value] == test_int_data_label else .00 for iter_value, confidences in enumerate(results['conf'])])
+
+        results_array = np.array([confidences[results['pred'][iter_value]]\
+            if results['pred'][iter_value] == test_int_data_label else .00\
+                for iter_value, confidences in enumerate(results['conf'])])
+        
         return results_array >= threshold
 
 class ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrLessThanThreshold(ColumnMapExpectation):
