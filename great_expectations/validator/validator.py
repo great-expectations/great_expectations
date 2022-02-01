@@ -248,6 +248,7 @@ class Validator:
                         Returns:
                             The Expectation's validation result
         """
+        expectation_impl = get_expectation_impl(name)
 
         def inst_expectation(*args, **kwargs):
             # this is used so that exceptions are caught appropriately when they occur in expectation config
@@ -265,7 +266,6 @@ class Validator:
                 {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
             )
 
-            expectation_impl = get_expectation_impl(name)
             allowed_config_keys = expectation_impl.get_allowed_config_keys()
 
             expectation_kwargs = recursively_convert_to_json_serializable(kwargs)
@@ -352,6 +352,8 @@ class Validator:
             return validation_result
 
         inst_expectation.__name__ = name
+        inst_expectation.__doc__ = expectation_impl.__doc__
+
         return inst_expectation
 
     @property
