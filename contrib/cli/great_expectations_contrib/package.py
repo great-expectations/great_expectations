@@ -17,20 +17,20 @@ Diagnostics = Dict[str, Any]
 
 
 @dataclass(frozen=True)
-class ExpectationCompletenessCheckConfig:
+class ExpectationCompletenessCheck:
     message: str
     passed: bool
 
 
 @dataclass(frozen=True)
-class ExpectationCompletenessChecklistConfig:
-    experimental: List[ExpectationCompletenessCheckConfig]
-    beta: List[ExpectationCompletenessCheckConfig]
-    production: List[ExpectationCompletenessCheckConfig]
+class ExpectationCompletenessChecklist:
+    experimental: List[ExpectationCompletenessCheck]
+    beta: List[ExpectationCompletenessCheck]
+    production: List[ExpectationCompletenessCheck]
 
 
 @dataclass(frozen=True)
-class PackageCompletenessStatusConfig:
+class PackageCompletenessStatus:
     concept_only: int
     experimental: int
     beta: int
@@ -39,22 +39,22 @@ class PackageCompletenessStatusConfig:
 
 
 @dataclass(frozen=True)
-class RenderedExpectationConfig:
+class RenderedExpectation:
     name: str
     tags: List[str]
     supported: List[str]
-    status: ExpectationCompletenessChecklistConfig
+    status: ExpectationCompletenessChecklist
 
 
 @dataclass(frozen=True)
-class DependencyConfig:
+class Dependency:
     text: str
     link: str
     version: Optional[str]
 
 
 @dataclass(frozen=True)
-class GitHubUserConfig:
+class GitHubUser:
     username: str
     full_name: Optional[str]
 
@@ -67,15 +67,15 @@ class SocialLinkType(Enum):
 
 
 @dataclass(frozen=True)
-class SocialLinkConfig:
+class SocialLink:
     account_type: SocialLinkType
     identifier: str
 
 
 @dataclass(frozen=True)
-class DomainExpertConfig:
+class DomainExpert:
     full_name: str
-    social_links: List[SocialLinkConfig]
+    social_links: List[SocialLink]
     picture: str
 
 
@@ -87,21 +87,21 @@ class Maturity(Enum):
 
 
 @dataclass(frozen=True)
-class GreatExpectationsContribPackageConfig:
+class GreatExpectationsContribPackageManifest:
     # Core
     package_name: Optional[str] = None
     icon: Optional[str] = None
     description: Optional[str] = None
-    expectations: Optional[List[RenderedExpectationConfig]] = None
+    expectations: Optional[List[RenderedExpectation]] = None
     expectation_count: Optional[int] = None
-    dependencies: Optional[List[DependencyConfig]] = None
+    dependencies: Optional[List[Dependency]] = None
     maturity: Optional[Maturity] = None
-    status: Optional[PackageCompletenessStatusConfig] = None
+    status: Optional[PackageCompletenessStatus] = None
 
     # Users
-    owners: Optional[List[GitHubUserConfig]] = None
-    contributors: Optional[List[GitHubUserConfig]] = None
-    domain_experts: Optional[List[DomainExpertConfig]] = None
+    owners: Optional[List[GitHubUser]] = None
+    contributors: Optional[List[GitHubUser]] = None
+    domain_experts: Optional[List[DomainExpert]] = None
 
     # Metadata
     version: Optional[str] = None

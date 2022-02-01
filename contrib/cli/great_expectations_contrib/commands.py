@@ -8,7 +8,7 @@ from dataclasses import asdict
 
 import click
 from cookiecutter.main import cookiecutter
-from great_expectations_contrib.package import GreatExpectationsContribPackageConfig
+from great_expectations_contrib.package import GreatExpectationsContribPackageManifest
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -143,14 +143,14 @@ def echo(msg: str, color: str, bold: bool = False) -> None:
     click.echo(click.style(msg, fg=color, bold=bold))
 
 
-def read_package_from_file(path: str) -> GreatExpectationsContribPackageConfig:
-    """Read a JSON file into a GreatExpectationsContribPackage instance.
+def read_package_from_file(path: str) -> GreatExpectationsContribPackageManifest:
+    """Read a JSON file into a GreatExpectationsContribPackageManifest instance.
 
     Args:
         path: The relative path to the target package JSON file.
 
     Returns:
-        A GreatExpectationsContribPackage instance to represent the current package's state.
+        A GreatExpectationsContribPackageManifest instance to represent the current package's state.
     """
     # If config file isn't found, create a blank JSON and write to disk
     if not os.path.exists(path):
@@ -167,12 +167,12 @@ def read_package_from_file(path: str) -> GreatExpectationsContribPackageConfig:
 
 
 def write_package_to_disk(
-    package: GreatExpectationsContribPackageConfig, path: str
+    package: GreatExpectationsContribPackageManifest, path: str
 ) -> None:
-    """Serialize a GreatExpectationsContribPackage instance into a JSON file.
+    """Serialize a GreatExpectationsContribPackageManifest instance into a JSON file.
 
     Args:
-        package: The GreatExpectationsContribPackage you wish to serialize.
+        package: The GreatExpectationsContribPackageManifest you wish to serialize.
         path: The relative path to the target package JSON file.
     """
     json_dict = asdict(package)
