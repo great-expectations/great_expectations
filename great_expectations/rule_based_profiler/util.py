@@ -7,14 +7,33 @@ import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
-from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations.rule_based_profiler.types import (
+    Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 from great_expectations.validator.validator import Validator
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
+
+
+def validate_builder_config(builder_config: dict):
+    if not (
+        isinstance(builder_config, dict)
+        and len(
+            (
+                set(builder_config.keys())
+                & {
+                    "class_name",
+                    "module_name",
+                }
+            )
+        )
+        == 2
+    ):
+        raise ge_exceptions.ProfilerConfigurationError(
+            'Both "class_name" and "module_name" must be specified.'
+        )
 
 
 def get_validator(

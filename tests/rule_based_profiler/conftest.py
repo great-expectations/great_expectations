@@ -16,21 +16,20 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.config.base import (
-    ruleBasedProfilerConfigSchema,
-)
-from great_expectations.rule_based_profiler.domain_builder import (
-    ColumnDomainBuilder,
-    Domain,
-)
+from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.types import (
+    Domain,
     ParameterContainer,
     ParameterNode,
 )
-from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.types.base import (
+    ruleBasedProfilerConfigSchema,
+)
 
 yaml = YAML()
 
@@ -2440,3 +2439,17 @@ def rule_with_parameters(
         column_Date_domain.id: multi_part_name_parameter_container,
     }
     return rule
+
+
+@pytest.fixture
+def profiler_with_placeholder_args(
+    empty_data_context,
+    profiler_config_with_placeholder_args,
+):
+    profiler_config_dict: dict = profiler_config_with_placeholder_args.to_json_dict()
+    profiler_config_dict.pop("class_name")
+    profiler_config_dict.pop("module_name")
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        **profiler_config_dict, data_context=empty_data_context
+    )
+    return profiler

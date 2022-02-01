@@ -45,7 +45,7 @@ from great_expectations.datasource import (
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.types import RuleBasedProfilerConfig
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -5036,7 +5036,7 @@ def profiler_config_with_placeholder_args(
                         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     },
                 ],
-            }
+            },
         },
     )
 

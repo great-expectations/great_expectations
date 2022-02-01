@@ -535,11 +535,9 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
     assert deep_filter_properties_iterable(
         properties=substituted_runtime_config,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties=expected_runtime_kwargs,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
 
@@ -617,11 +615,9 @@ def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_
     assert deep_filter_properties_iterable(
         properties=substituted_runtime_config,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties=expected_runtime_kwargs,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
 
@@ -705,11 +701,9 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_
     assert deep_filter_properties_iterable(
         properties=substituted_runtime_config,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties=expected_runtime_kwargs,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
 
@@ -824,11 +818,9 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     assert deep_filter_properties_iterable(
         properties=substituted_runtime_config,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties=expected_runtime_kwargs,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
 
@@ -991,7 +983,6 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
     assert deep_filter_properties_iterable(
         properties=checkpoint_config["batch_request"].to_json_dict(),
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == {
         "batch_identifiers": {"pipeline_stage_name": "first"},
         "data_asset_name": "users",

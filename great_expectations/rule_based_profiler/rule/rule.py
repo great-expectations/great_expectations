@@ -1,18 +1,20 @@
 import copy
+import json
 from typing import Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.rule_based_profiler.domain_builder import Domain, DomainBuilder
+from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
-    ParameterBuilder,
-    ParameterContainer,
-)
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.types import SerializableDictDot
+from great_expectations.util import deep_filter_properties_iterable
 
 
-class Rule:
+class Rule(SerializableDictDot):
     def __init__(
         self,
         name: str,
@@ -79,6 +81,54 @@ class Rule:
 
         return expectation_configurations
 
+    def to_dict(self) -> dict:
+        parameter_builders_as_dicts: Optional[List[dict]] = None
+        parameter_builders: Optional[
+            Dict[str, ParameterBuilder]
+        ] = self.parameter_builders
+        parameter_builder: ParameterBuilder
+        if parameter_builders is not None:
+            parameter_builders_as_dicts = [
+                parameter_builder.to_dict()
+                for parameter_builder in list(parameter_builders.values())
+            ]
+
+        expectation_configuration_builders_as_dicts: Optional[List[dict]] = None
+        expectation_configuration_builders: Optional[
+            Dict[str, ExpectationConfigurationBuilder]
+        ] = self.expectation_configuration_builders
+        expectation_configuration_builder: ExpectationConfigurationBuilder
+        if expectation_configuration_builders is not None:
+            expectation_configuration_builders_as_dicts = [
+                expectation_configuration_builder.to_dict()
+                for expectation_configuration_builder in list(
+                    expectation_configuration_builders.values()
+                )
+            ]
+
+        return {
+            "name": self.name,
+            "domain_builder": self.domain_builder.to_dict(),
+            "parameter_builders": parameter_builders_as_dicts,
+            "expectation_configuration_builders": expectation_configuration_builders_as_dicts,
+        }
+
+    def to_json_dict(self) -> dict:
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+    def __repr__(self) -> str:
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
+        )
+        return json.dumps(json_dict, indent=2)
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
     @property
     def name(self) -> str:
         return self._name
@@ -88,9 +138,9 @@ class Rule:
         return self._domain_builder
 
     @property
-    def parameter_builders(self) -> Optional[Dict[str, ParameterBuilder]]:
+    def parameter_builders(self) -> Dict[str, ParameterBuilder]:
         if self._parameter_builders is None:
-            return None
+            return {}
 
         parameter_builder: ParameterBuilder
         return {
