@@ -305,7 +305,9 @@ class Validator:
                     )
                 else:
                     configuration.process_evaluation_parameters(
-                        self._expectation_suite.evaluation_parameters, True, self._data_context
+                        self._expectation_suite.evaluation_parameters,
+                        True,
+                        self._data_context,
                     )
                     validation_result = expectation.validate(
                         validator=self,
