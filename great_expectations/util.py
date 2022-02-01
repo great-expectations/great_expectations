@@ -1097,7 +1097,7 @@ def filter_properties_dict(
 
 
 def deep_filter_properties_iterable(
-    properties: Optional[Union[dict, list, set]] = None,
+    properties: Optional[Union[dict, list, set, tuple]] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
@@ -1132,7 +1132,7 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
-    elif isinstance(properties, (list, set)):
+    elif isinstance(properties, (list, set, tuple)):
         if not inplace:
             properties = copy.deepcopy(properties)
 

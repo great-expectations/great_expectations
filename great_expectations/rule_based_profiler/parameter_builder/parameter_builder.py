@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context import DataContext
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
 from great_expectations.rule_based_profiler.util import build_metric_domain_kwargs
@@ -46,7 +46,7 @@ class ParameterBuilder(ABC):
 
         ```
         parameter_builders:
-          - parameter_name: my_parameter
+          - name: my_parameter_builder
             class_name: MetricMultiBatchParameterBuilder
             metric_name: column.mean
         ```
@@ -54,24 +54,24 @@ class ParameterBuilder(ABC):
 
     def __init__(
         self,
-        parameter_name: str,
-        data_context: Optional[DataContext] = None,
-        batch_request: Optional[Union[dict, str]] = None,
+        name: str,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         The ParameterBuilder will build parameters for the active domain from the rule.
 
         Args:
-            parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
+            name: the name of this parameter builder -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
-            data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+            data_context: DataContext
         """
 
-        self._parameter_name = parameter_name
-        self._data_context = data_context
+        self._name = name
         self._batch_request = batch_request
+        self._data_context = data_context
 
     def build_parameters(
         self,
@@ -245,13 +245,13 @@ class ParameterBuilder(ABC):
         )
 
     @property
-    def parameter_name(self) -> str:
-        return self._parameter_name
-
-    @property
-    def data_context(self) -> DataContext:
-        return self._data_context
-
-    @property
     def name(self) -> str:
-        return f"{self.parameter_name}_parameter_builder"
+        return self._name
+
+    @property
+    def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
+        return self._batch_request
+
+    @property
+    def data_context(self) -> "DataContext":  # noqa: F821
+        return self._data_context

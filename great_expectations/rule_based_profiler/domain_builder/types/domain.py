@@ -29,13 +29,19 @@ class InferredSemanticDomainType(SerializableDictDot):
     semantic_domain_type: Optional[Union[str, SemanticDomainTypes]] = None
     details: Optional[Dict[str, Any]] = None
 
+    def to_dict(self) -> dict:
+        return asdict(self)
+
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=asdict(self))
+        return convert_to_json_serializable(data=self.to_dict())
 
 
 class DomainKwargs(SerializableDotDict):
+    def to_dict(self) -> dict:
+        return dict(self)
+
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=dict(self))
+        return convert_to_json_serializable(data=self.to_dict())
 
 
 class Domain(SerializableDotDict):
