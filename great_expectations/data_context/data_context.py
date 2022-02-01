@@ -20,6 +20,8 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
+from great_expectations.marshmallow__shade import ValidationError
+
 try:
     from typing import Literal
 except ImportError:
@@ -3279,18 +3281,24 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         commented_map: Optional[CommentedMap] = None,
         ge_cloud_id: Optional[str] = None,
     ):
+        config_data = {
+            "name": name,
+            "config_version": config_version,
+            "rules": rules,
+            "class_name": class_name,
+            "module_name": module_name,
+            "variables": variables,
+            "commented_map": commented_map,
+        }
         # Package config and perform validation
-        config: RuleBasedProfilerConfig = ruleBasedProfilerConfigSchema.load(
-            {
-                "name": name,
-                "config_version": config_version,
-                "rules": rules,
-                "class_name": class_name,
-                "module_name": module_name,
-                "variables": variables,
-                "commented_map": commented_map,
-            }
+        errors: Dict[str, List[str]] = ruleBasedProfilerConfigSchema.validate(
+            config_data
         )
+        if errors:
+            raise ValidationError(
+                f"Something went wrong during profiler validation: {errors}"
+            )
+        config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**config_data)
 
         # Chetan - 20220127 - Open to refactor all Profiler CRUD from toolkit to class methods
         return profiler_toolkit.add_profiler(
