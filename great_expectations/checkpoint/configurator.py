@@ -7,9 +7,9 @@ from ruamel.yaml.comments import CommentedMap
 from great_expectations.checkpoint.util import (
     batch_request_contains_batch_data,
     batch_request_in_validations_contains_batch_data,
-    get_batch_request_as_dict,
     get_validations_with_batch_request_as_dict,
 )
+from great_expectations.core.batch import get_batch_request_as_dict
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     checkpointConfigSchema,
@@ -160,7 +160,9 @@ class SimpleCheckpointConfigurator:
         config_kwargs.update(specific_config_kwargs_overrides)
 
         # Roundtrip through schema validation to add any missing fields
-        checkpoint_config: CommentedMap = checkpointConfigSchema.load(config_kwargs)
+        checkpoint_config: dict = checkpointConfigSchema.load(
+            CommentedMap(**config_kwargs)
+        )
         config_kwargs = checkpointConfigSchema.dump(checkpoint_config)
 
         logger.debug(
