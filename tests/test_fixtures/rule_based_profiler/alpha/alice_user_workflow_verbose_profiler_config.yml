@@ -1,3 +1,7 @@
+name: alice user workflow
+class_name: RuleBasedProfiler
+config_version: 1.0
+
 variables:
   # BatchRequest yielding exactly one batch
   alice_single_batch_data_batch_request:
@@ -10,8 +14,6 @@ variables:
   min_timestamp: 2004-10-19 10:23:54
 rules:
   my_rule_for_user_ids:
-    class_name: Rule
-    module_name: great_expectations.rule_based_profiler.rule
     domain_builder: # If placing custom class into the general plugins directory works, remove module_name from config.
       class_name: MyCustomSemanticTypeColumnDomainBuilder
       module_name: tests.test_fixtures.rule_based_profiler.alpha.plugins
@@ -19,7 +21,7 @@ rules:
       semantic_types:
         - user_id
     parameter_builders:
-      - parameter_name: my_min_user_id
+      - name: my_min_user_id
         class_name: MetricMultiBatchParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
         batch_request: $variables.alice_single_batch_data_batch_request
@@ -42,8 +44,6 @@ rules:
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
   my_rule_for_timestamps:
-    class_name: Rule
-    module_name: great_expectations.rule_based_profiler.rule
     domain_builder:
       class_name: SimpleColumnSuffixDomainBuilder
       module_name: great_expectations.rule_based_profiler.domain_builder
@@ -52,13 +52,13 @@ rules:
         - _ts
     parameter_builders:
       # unused parameter my_max_ts
-      - parameter_name: my_max_ts
+      - name: my_max_ts
         class_name: MetricMultiBatchParameterBuilder
         batch_request: $variables.alice_single_batch_data_batch_request
         module_name: great_expectations.rule_based_profiler.parameter_builder
         metric_name: column.max
         metric_domain_kwargs: $domain.domain_kwargs
-      - parameter_name: my_max_event_ts
+      - name: my_max_event_ts
         class_name: MetricMultiBatchParameterBuilder
         batch_request: $variables.alice_single_batch_data_batch_request
         module_name: great_expectations.rule_based_profiler.parameter_builder
@@ -67,7 +67,7 @@ rules:
         metric_domain_kwargs:
           column: event_ts
       # unused parameter my_min_ts
-      - parameter_name: my_min_ts
+      - name: my_min_ts
         class_name: MetricMultiBatchParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
         batch_request: $variables.alice_single_batch_data_batch_request

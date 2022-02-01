@@ -32,7 +32,7 @@ Steps
 
     In your ``great_expectations.yml``, look for the following lines. The configuration tells Great Expectations to look for Validations in a store called ``validations_store``. The ``base_directory`` for ``validations_store`` is set to ``uncommitted/validations/`` by default.
 
-    ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L69-L76
+    ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L79-L86
     ```
 
 
@@ -40,7 +40,7 @@ Steps
 
     In our case, the name is set to ``validations_GCS_store``, but it can be any name you like.  We also need to make some changes to the ``store_backend`` settings.  The ``class_name`` will be set to ``TupleGCSStoreBackend``, ``project`` will be set to your GCP project, ``bucket`` will be set to the address of your GCS bucket, and ``prefix`` will be set to the folder on GCS where Validation files will be located.
 
-    ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L84-L93
+    ```yaml file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L94-L103
     ```
 
 :::warning
@@ -52,22 +52,22 @@ If you are also storing [Expectations in GCS](../configuring_metadata_stores/how
 
     One way to copy Validations into GCS is by using the ``gsutil cp`` command, which is part of the Google Cloud SDK. In the example below, two Validation results, ``validation_1`` and ``validation_2`` are copied to the GCS bucket. Information on other ways to copy Validation results, like the Cloud Storage browser in the Google Cloud Console, can be found in the [Documentation for Google Cloud](https://cloud.google.com/storage/docs/uploading-objects).
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L138-L139
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L148-L149
     ```
    
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L194
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L204
     ```
 
 
 
 5. **Confirm that the new Validations store has been added by running:**
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L199
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L209
     ```
    
     Only the active Stores will be listed. Great Expectations will look for Validations in GCS as long as we set the ``validations_store_name`` variable to ``validations_GCS_store``, and the config for ``validations_store`` can be removed if you would like.
 
-    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L210-L216
+    ```bash file=../../../../tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py#L220-L226
     ```
 
 6. **Confirm that the Validations store has been correctly configured.**

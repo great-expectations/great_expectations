@@ -23,6 +23,17 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 
+"""
+NOTE (Shinnnyshinshin): This is not the UpgradeHelperV11 that is normally used by the CLI.
+
+As of 2022-01, it is only triggered by running the CLI-command:
+
+great_expectations --v2-api upgrade project
+
+on a great_expectations/ directory, and cannot be used to fully migrate a v1.0 or v2.0 configuration to a v3.0 config. A
+task for the full deprecation of this path has been placed in the backlog.
+"""
+
 
 class UpgradeHelperV11(BaseUpgradeHelper):
     def __init__(self, data_context=None, context_root_dir=None):
@@ -455,10 +466,15 @@ class UpgradeHelperV11(BaseUpgradeHelper):
 
         upgrade_overview = f"""\
 <cyan>\
-++====================================++
-|| UpgradeHelperV11: Upgrade Overview ||
-++====================================++\
+++=====================================================++
+|| UpgradeHelperV11: Upgrade Overview (V2-API Version) ||
+++=====================================================++\
 </cyan>
+
+**WARNING**
+You have run the 'great_expectations project upgrade' command using the --v2-api flag, which is not able to perform the full upgrade to the configuration (3.0) that is fully compatible with the V3-API
+
+Please re-run the 'great_expectations project upgrade' command without the --v2-api flag.
 
 UpgradeHelperV11 will upgrade your project to be compatible with Great Expectations 0.11.x.
 """
