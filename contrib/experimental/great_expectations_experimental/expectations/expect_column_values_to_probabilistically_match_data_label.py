@@ -40,9 +40,9 @@ class ColumnValuesProbabilisticallyMatchDataLabel(ColumnMapMetricProvider):
         """
         labeler = dp.DataLabeler(labeler_type='structured')
         try:
-            preds = labeler.predict(column, predict_options={"show_confidences": True})
+            results = labeler.predict(column, predict_options={"show_confidences": True})
         except:
-            preds = None
+            results = None
         label_map_vec_func = np.vectorize(lambda x: labeler.label_mapping.get(x, None))
         results['pred'] = label_map_vec_func(results['pred'])
         return np.choose(results['pred'], results['conf'].T)
