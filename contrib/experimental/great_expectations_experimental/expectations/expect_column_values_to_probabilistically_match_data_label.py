@@ -43,8 +43,9 @@ class ColumnValuesProbabilisticallyMatchDataLabel(ColumnMapMetricProvider):
             preds = labeler.predict(column, predict_options={"show_confidences": True})
         except:
             preds = None
-        return preds["conf"] >= threshold
-
+        label_map_vec_func = np.vectorize(lambda x: labeler.label_mapping.get(x, None))
+        results['pred'] = label_map_vec_func(results['pred'])
+        return np.choose(results['pred'], results['conf'].T)
 
 class ExpectColumnValuesToProbabilisticallyMatchDataLabel(ColumnMapExpectation):
     """
@@ -64,25 +65,25 @@ class ExpectColumnValuesToProbabilisticallyMatchDataLabel(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "OPEID6": ['1002', '1052', '25034'],
+                "OPEID6": ['1002', '1052', '25034', "McRoomyRoom"],
                 "INSTNM": ['Alabama A & M University',
-                    'University of Alabama at Birmingham', 'Amridge University'],
-                "ZIP": ['35762', '35294-0110', '36117-3553'],
+                    'University of Alabama at Birmingham', 'Amridge University', "McRoomyRoom"],
+                "ZIP": ['35762', '35294-0110', '36117-3553', "McRoomyRoom"],
                 "ACCREDAGENCY": ['Southern Association of Colleges and Schools Commission on Colleges',
                     'Southern Association of Colleges and Schools Commission on Colleges',
-                    'Southern Association of Colleges and Schools Commission on Colleges'],
+                    'Southern Association of Colleges and Schools Commission on Colleges', "McRoomyRoom"],
                 "INSTURL": ['www.aamu.edu/', 'https://www.uab.edu',
-                    'www.amridgeuniversity.edu'],
+                    'www.amridgeuniversity.edu', "McRoomyRoom"],
                 "NPCURL": ['www.aamu.edu/admissions-aid/tuition-fees/net-price-calculator.html',
                     'https://uab.studentaidcalculator.com/survey.aspx',
-                    'www2.amridgeuniversity.edu:9091/'],
-                "LATITUDE": ['34.783368', '33.505697', '32.362609'],
-                "LONGITUDE": ['-86.568502', '-86.799345', '-86.17401'],
-                "RELAFFIL": ['NULL', 'NULL', '74'],
-                "DEATH_YR2_RT": ['PrivacySuppressed', 'PrivacySuppressed', 'PrivacySuppressed'],
+                    'www2.amridgeuniversity.edu:9091/', "McRoomyRoom"],
+                "LATITUDE": ['34.783368', '33.505697', '32.362609', "McRoomyRoom"],
+                "LONGITUDE": ['-86.568502', '-86.799345', '-86.17401', "McRoomyRoom"],
+                "RELAFFIL": ['NULL', 'NULL', '74', "McRoomyRoom"],
+                "DEATH_YR2_RT": ['PrivacySuppressed', 'PrivacySuppressed', 'PrivacySuppressed', "McRoomyRoom"],
                 "SEARCH_STRING": ['Alabama A & M University AAMU',
                     'University of Alabama at Birmingham ',
-                    'Amridge University Southern Christian University  Regions University']
+                    'Amridge University Southern Christian University  Regions University', "McRoomyRoom"],
             },
             "tests": [
                 {
@@ -93,7 +94,7 @@ class ExpectColumnValuesToProbabilisticallyMatchDataLabel(ColumnMapExpectation):
                     "out": {
                         "success": True,
                         "unexpected_index_list": [3],
-                        "unexpected_list": [4, 5],
+                        "unexpected_list": ["McRoomyRoom"],
                     },
                 },
             ],
