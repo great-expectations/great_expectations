@@ -257,6 +257,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
                 )
 
+        # these are two backends where temp_table_creation is not supported we set the default value to False.
+        if self.engine.dialect.name.lower() in [
+            "trino",
+            "awsathena",  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
+        ]:
+            self._create_temp_table = False
+
         # Get the dialect **for purposes of identifying types**
         if self.engine.dialect.name.lower() in [
             "postgresql",
@@ -1098,7 +1105,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self.engine.dialect.name.lower()
             not in [
                 "trino",
-                "awsathena",  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
             ]
         )
 
