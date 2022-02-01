@@ -215,7 +215,6 @@ module.exports = {
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
-                'guides/expectations/creating_custom_expectations/how_to_create_example_cases_for_an_expectation',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
                 //'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
               ]
@@ -226,6 +225,7 @@ module.exports = {
               items: [
                 'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
+                'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_text_renderers_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
@@ -281,6 +281,7 @@ module.exports = {
               items: [
                 // 'guides/validation/validation_actions/how_to_store_validation_results_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action',
+                'guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action'
@@ -321,7 +322,7 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_in_databricks',
         'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
-        'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
+        'deployment_patterns/how_to_use_great_expectations_with_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_flyte'
         // {
         // type: 'category',
@@ -365,7 +366,8 @@ module.exports = {
         { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
         { type: 'doc', id: 'reference/validation' },
         { type: 'doc', id: 'reference/anonymous_usage_statistics' },
-        { type: 'doc', id: 'reference/supporting_resources' }
+        { type: 'doc', id: 'reference/supporting_resources' },
+        { type: 'doc', id: 'glossary' }
       ]
     },
     {

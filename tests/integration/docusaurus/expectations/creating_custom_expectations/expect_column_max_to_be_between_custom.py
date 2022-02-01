@@ -9,14 +9,14 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 
 
-class ColumnCustomMax(ColumnMetricProvider):
+class ColumnCustomMax(ColumnAggregateMetricProvider):
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
 
     metric_name = "column.custom_max"
@@ -34,7 +34,7 @@ class ColumnCustomMax(ColumnMetricProvider):
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, _table, _column_name, **kwargs):
         """Spark Max Implementation"""
-        return F.maxcolumn()
+        return F.max(column)
 
 
 class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
@@ -46,7 +46,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
             "data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
             "tests": [
                 {
-                    "title": "positive_test",
+                    "title": "baisc_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
@@ -59,7 +59,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
                     "out": {"success": True},
                 },
                 {
-                    "title": "negative_test",
+                    "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
@@ -129,11 +129,25 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",
         "tags": ["flexible max comparisons"],
         "contributors": ["@joegargery"],
     }
 
 
 if __name__ == "__main__":
-    print(ExpectColumnMaxToBeBetweenCustom().generate_diagnostic_checklist())
+    ExpectColumnMaxToBeBetweenCustom().print_diagnostic_checklist()
+
+# Note to users: code below this line is only for integration testing -- ignore!
+
+diagnostics = ExpectColumnMaxToBeBetweenCustom().run_diagnostics()
+
+for check in diagnostics["tests"]:
+    assert check["test_passed"] is True
+    assert check["error_message"] is None
+    assert check["stack_trace"] is None
+
+for check in diagnostics["errors"]:
+    assert check is None
+
+for check in diagnostics["maturity_checklist"]["experimental"]:
+    assert check["passed"] is True

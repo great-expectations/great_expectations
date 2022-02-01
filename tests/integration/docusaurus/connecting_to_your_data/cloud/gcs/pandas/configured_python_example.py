@@ -29,7 +29,7 @@ datasource_config = {
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "bucket_or_name"
-] = "superconductive-integration-tests"
+] = "test_docs_data"
 datasource_config["data_connectors"]["configured_data_connector_name"][
     "prefix"
 ] = "data/taxi_yellow_tripdata_samples/"

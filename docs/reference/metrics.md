@@ -12,7 +12,7 @@ all the Metrics requested by the Expectation and provides them to the Expectatio
 can also expose Metrics, such as the observed value of a useful statistic via an Expectation Validation Result, where
 Data Docs -- or other Expectations -- can use them.
 
-Put simply, a Metric answers a question about your data posed by an [**Expectation**](expectations/expectations.md).
+Put simply, a Metric answers a question about your data posed by an [**Expectation**](./expectations/expectations.md).
 
 Metrics are produced using ExecutionEngine-specific logic that is defined in a `MetricProvider`. When a MetricProvider
 class is first encountered, Great Expectations will register the metric and any methods that it defines as able to
