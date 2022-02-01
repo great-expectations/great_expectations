@@ -224,28 +224,28 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
         # Profilers are v014+ specific
         os.rmdir(os.path.join(root_dir, "great_expectations", "profilers"))
 
-        obs_tree = gen_directory_tree_str(os.path.join(root_dir, "great_expectations"))
-        assert (
-            obs_tree
-            == """\
-    great_expectations/
-        .gitignore
-        great_expectations.yml
-        checkpoints/
-        expectations/
+    obs_tree = gen_directory_tree_str(os.path.join(root_dir, "great_expectations"))
+    assert (
+        obs_tree
+        == """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    checkpoints/
+    expectations/
+        .ge_store_backend_id
+    plugins/
+        custom_data_docs/
+            renderers/
+            styles/
+                data_docs_custom_styles.css
+            views/
+    uncommitted/
+        config_variables.yml
+        data_docs/
+        validations/
             .ge_store_backend_id
-        plugins/
-            custom_data_docs/
-                renderers/
-                styles/
-                    data_docs_custom_styles.css
-                views/
-        uncommitted/
-            config_variables.yml
-            data_docs/
-            validations/
-                .ge_store_backend_id
-    """
-        )
+"""
+    )
 
-        assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(caplog, result)

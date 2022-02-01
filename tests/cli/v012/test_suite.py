@@ -543,15 +543,15 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
         assert result.exit_code == 0
         assert (
             """Select a datasource
-        1. mydatasource
-        2. random
-        3. titanic"""
+    1. mydatasource
+    2. random
+    3. titanic"""
             in stdout
         )
         assert (
             """Which data would you like to use?
-        1. random (directory)
-        2. titanic (directory)"""
+    1. random (directory)
+    2. titanic (directory)"""
             in stdout
         )
 
