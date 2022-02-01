@@ -1098,6 +1098,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self.engine.dialect.name.lower()
             not in [
                 "trino",
+                "awsathena",  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
             ]
         )
 

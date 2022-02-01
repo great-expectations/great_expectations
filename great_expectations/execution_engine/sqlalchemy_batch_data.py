@@ -239,6 +239,9 @@ class SqlAlchemyBatchData(BatchData):
                 temp_table_name=temp_table_name
             )
         elif self.sql_engine_dialect.name.lower() == "awsathena":
+            logger.warning(
+                f"GE has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
+            )
             stmt = "CREATE TABLE {temp_table_name} AS {query}".format(
                 temp_table_name=temp_table_name, query=query
             )
