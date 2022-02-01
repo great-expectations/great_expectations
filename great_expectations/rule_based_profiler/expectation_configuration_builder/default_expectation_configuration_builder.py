@@ -25,8 +25,10 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         success_on_last_run: Optional[bool] = None,
         **kwargs,
     ):
-        self._expectation_type = expectation_type
+        super().__init__(expectation_type=expectation_type)
+
         self._expectation_kwargs = kwargs
+
         if meta is None:
             meta = {}
         if not isinstance(meta, dict):
@@ -35,6 +37,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 (value of type "{str(type())}" was encountered).
 """
             )
+
         self._meta = meta
         self._success_on_last_run = success_on_last_run
 
