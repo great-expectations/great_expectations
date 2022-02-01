@@ -374,6 +374,7 @@ module.exports = {
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
+            'terms/evaluation_parameter',
             'terms/execution_engine',
             'terms/plugin'
           ]
