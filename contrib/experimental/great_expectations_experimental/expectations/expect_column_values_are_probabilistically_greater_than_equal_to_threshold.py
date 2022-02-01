@@ -41,10 +41,10 @@ class ColumnValuesConfidenceToBeGreaterThanOrEqualToThreshold(ColumnMapMetricPro
         labeler = dp.DataLabeler(labeler_type='structured')
         labeler.postprocessor.set_params(is_pred_labels=False)
         try:
-            results = labeler.predict(column, predict_options={"show_confidences": True},)
+            results = labeler.predict(column, predict_options={"show_confidences": True})
         except:
             results = None
-        return np.choose(results['pred'], results['conf'].T) >= threshold
+        return np.choose(results['pred'].astype(int, copy=False), results['conf'].T) >= threshold
 class ExpectColumnValuesToBeGreaterThanOrEqualToThreshold(ColumnMapExpectation):
     """
     This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.
