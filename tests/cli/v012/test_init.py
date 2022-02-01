@@ -12,6 +12,7 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.v012.test_cli import yaml
 from tests.cli.v012.utils import assert_no_logging_messages_or_tracebacks
+from tests.test_utils import set_directory
 
 
 @pytest.mark.filterwarnings(
@@ -163,61 +164,65 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
 ):
     root_dir = tmp_path_factory.mktemp("bad_con_string_test")
     root_dir = str(root_dir)
-    os.chdir(root_dir)
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["init"],
-        input="\n\n2\n6\nmy_db\nsqlite:////subfolder_thats_not_real/not_a_real.db\n\nn\n",
-        catch_exceptions=False,
-    )
-    stdout = result.output
-    assert mock_webbrowser.call_count == 0
+    with set_directory(root_dir):
+        runner = CliRunner(mix_stderr=False)
+        result = runner.invoke(
+            cli,
+            ["init"],
+            input="\n\n2\n6\nmy_db\nsqlite:////subfolder_thats_not_real/not_a_real.db\n\nn\n",
+            catch_exceptions=False,
+        )
+        stdout = result.output
+        assert mock_webbrowser.call_count == 0
 
-    assert "Always know what to expect from your data" in stdout
-    assert "What data would you like Great Expectations to connect to" in stdout
-    assert "Which database backend are you using" in stdout
-    assert "What is the url/connection string for the sqlalchemy connection" in stdout
-    assert "Give your new Datasource a short name" in stdout
-    assert "Attempting to connect to your database. This may take a moment" in stdout
-    assert "Cannot connect to the database" in stdout
+        assert "Always know what to expect from your data" in stdout
+        assert "What data would you like Great Expectations to connect to" in stdout
+        assert "Which database backend are you using" in stdout
+        assert (
+            "What is the url/connection string for the sqlalchemy connection" in stdout
+        )
+        assert "Give your new Datasource a short name" in stdout
+        assert (
+            "Attempting to connect to your database. This may take a moment" in stdout
+        )
+        assert "Cannot connect to the database" in stdout
 
-    assert "Profiling" not in stdout
-    assert "Building" not in stdout
-    assert "Data Docs" not in stdout
-    assert "Great Expectations is now set up" not in stdout
+        assert "Profiling" not in stdout
+        assert "Building" not in stdout
+        assert "Data Docs" not in stdout
+        assert "Great Expectations is now set up" not in stdout
 
-    assert result.exit_code == 1
+        assert result.exit_code == 1
 
-    ge_dir = os.path.join(root_dir, DataContext.GE_DIR)
-    assert os.path.isdir(ge_dir)
-    config_path = os.path.join(ge_dir, DataContext.GE_YML)
-    assert os.path.isfile(config_path)
+        ge_dir = os.path.join(root_dir, DataContext.GE_DIR)
+        assert os.path.isdir(ge_dir)
+        config_path = os.path.join(ge_dir, DataContext.GE_YML)
+        assert os.path.isfile(config_path)
 
-    config = yaml.load(open(config_path))
-    assert config["datasources"] == {
-        "my_db": {
-            "data_asset_type": {
-                "module_name": None,
-                "class_name": "SqlAlchemyDataset",
-            },
-            "credentials": "${my_db}",
-            "class_name": "SqlAlchemyDatasource",
-            "module_name": "great_expectations.datasource",
+        config = yaml.load(open(config_path))
+        assert config["datasources"] == {
+            "my_db": {
+                "data_asset_type": {
+                    "module_name": None,
+                    "class_name": "SqlAlchemyDataset",
+                },
+                "credentials": "${my_db}",
+                "class_name": "SqlAlchemyDatasource",
+                "module_name": "great_expectations.datasource",
+            }
         }
-    }
 
-    config_path = os.path.join(
-        ge_dir, DataContext.GE_UNCOMMITTED_DIR, "config_variables.yml"
-    )
-    config = yaml.load(open(config_path))
-    assert config["my_db"] == {
-        "url": "sqlite:////subfolder_thats_not_real/not_a_real.db"
-    }
+        config_path = os.path.join(
+            ge_dir, DataContext.GE_UNCOMMITTED_DIR, "config_variables.yml"
+        )
+        config = yaml.load(open(config_path))
+        assert config["my_db"] == {
+            "url": "sqlite:////subfolder_thats_not_real/not_a_real.db"
+        }
 
-    # Profilers are v014+ specific
-    os.rmdir(os.path.join(root_dir, "great_expectations", "profilers"))
+        # Profilers are v014+ specific
+        os.rmdir(os.path.join(root_dir, "great_expectations", "profilers"))
 
     obs_tree = gen_directory_tree_str(os.path.join(root_dir, "great_expectations"))
     assert (
