@@ -16,12 +16,9 @@ class Rule:
     def __init__(
         self,
         name: str,
-        domain_builder: Optional[DomainBuilder] = None,
+        domain_builder: DomainBuilder,
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder],
         parameter_builders: Optional[List[ParameterBuilder]] = None,
-        expectation_configuration_builders: Optional[
-            List[ExpectationConfigurationBuilder]
-        ] = None,
-        variables: Optional[ParameterContainer] = None,
     ):
         """
         Sets Profiler rule name, domain builders, parameters builders, configuration builders,
@@ -31,18 +28,17 @@ class Rule:
         :param parameter_builders: A Parameter Builder list used to configure necessary rule evaluation parameters for
         every configuration
         :param expectation_configuration_builders: A list of Expectation Configuration Builders
-        :param variables: Any instance data required to verify a rule
         """
         self._name = name
         self._domain_builder = domain_builder
         self._parameter_builders = parameter_builders
         self._expectation_configuration_builders = expectation_configuration_builders
-        self._variables = variables
 
         self._parameters = {}
 
     def generate(
         self,
+        variables: Optional[ParameterContainer] = None,
     ) -> List[ExpectationConfiguration]:
         """
         Builds a list of Expectation Configurations, returning a single Expectation Configuration entry for every
@@ -52,9 +48,7 @@ class Rule:
         """
         expectation_configurations: List[ExpectationConfiguration] = []
 
-        domains: List[Domain] = self._domain_builder.get_domains(
-            variables=self.variables
-        )
+        domains: List[Domain] = self._domain_builder.get_domains(variables=variables)
 
         domain: Domain
         for domain in domains:
@@ -67,7 +61,7 @@ class Rule:
                 parameter_builder.build_parameters(
                     parameter_container=parameter_container,
                     domain=domain,
-                    variables=self.variables,
+                    variables=variables,
                     parameters=self.parameters,
                 )
 
@@ -78,7 +72,7 @@ class Rule:
                 expectation_configurations.append(
                     expectation_configuration_builder.build_expectation_configuration(
                         domain=domain,
-                        variables=self.variables,
+                        variables=variables,
                         parameters=self.parameters,
                     )
                 )
@@ -86,9 +80,33 @@ class Rule:
         return expectation_configurations
 
     @property
-    def variables(self) -> ParameterContainer:
-        # Returning a copy of the "self._variables" state variable in order to prevent write-before-read hazard.
-        return copy.deepcopy(self._variables)
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def domain_builder(self) -> DomainBuilder:
+        return self._domain_builder
+
+    @property
+    def parameter_builders(self) -> Optional[Dict[str, ParameterBuilder]]:
+        if self._parameter_builders is None:
+            return None
+
+        parameter_builder: ParameterBuilder
+        return {
+            parameter_builder.name: parameter_builder
+            for parameter_builder in self._parameter_builders
+        }
+
+    @property
+    def expectation_configuration_builders(
+        self,
+    ) -> Dict[str, ExpectationConfigurationBuilder]:
+        expectation_configuration_builder: ExpectationConfigurationBuilder
+        return {
+            expectation_configuration_builder.expectation_type: expectation_configuration_builder
+            for expectation_configuration_builder in self._expectation_configuration_builders
+        }
 
     @property
     def parameters(self) -> Dict[str, ParameterContainer]:
