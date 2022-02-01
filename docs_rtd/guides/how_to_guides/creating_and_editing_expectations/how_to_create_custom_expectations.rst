@@ -435,7 +435,7 @@ Beginning in version 0.13, we have introduced a new API focused on enabling Modu
 
         This guide will walk you through the process of creating your own Modular Expectations in 6 simple steps!
 
-        See also this `complete example <https://github.com/superconductive/ge_tutorials/tree/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py>`_.
+        See also this `complete example <https://github.com/superconductive/ge_tutorials/tree/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/custom_column_max_example.py>`_.
 
         .. admonition:: Prerequisites: This how-to guide assumes you have already:
 
