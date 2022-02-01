@@ -19,7 +19,7 @@ from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
 )
-from tests.test_utils import create_files_in_directory
+from tests.test_utils import create_files_in_directory, set_directory
 
 
 @mock.patch(
@@ -627,108 +627,108 @@ def test_golden_path_sql_datasource_configuration(
     """Tests the golden path for setting up a StreamlinedSQLDatasource using test_yaml_config"""
     context: DataContext = empty_data_context_stats_enabled
 
-    os.chdir(context.root_directory)
+    with set_directory(context.root_directory):
 
-    # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
-    import great_expectations as ge
+        # Everything below this line (except for asserts) is what we expect users to run as part of the golden path.
+        import great_expectations as ge
 
-    context = ge.get_context()
+        context = ge.get_context()
 
-    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-    yaml_config = f"""
-class_name: SimpleSqlalchemyDatasource
-credentials:
-    drivername: postgresql
-    username: postgres
-    password: ""
-    host: {db_hostname}
-    port: 5432
-    database: test_ci
+        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+        yaml_config = f"""
+    class_name: SimpleSqlalchemyDatasource
+    credentials:
+        drivername: postgresql
+        username: postgres
+        password: ""
+        host: {db_hostname}
+        port: 5432
+        database: test_ci
 
-introspection:
-    whole_table_with_limits:
-        sampling_method: _sample_using_limit
-        sampling_kwargs:
-            n: 10
-"""
-    # noinspection PyUnusedLocal
-    report_object = context.test_yaml_config(
-        name="my_datasource",
-        yaml_config=yaml_config,
-        return_mode="report_object",
-    )
-    assert mock_emit.call_count == 2
-    # Substitute anonymized names since it changes for each run
-    anonymized_datasource_name = mock_emit.call_args_list[1][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    anonymized_data_connector_name = mock_emit.call_args_list[1][0][0]["event_payload"][
-        "anonymized_data_connectors"
-    ][0]["anonymized_name"]
-    expected_call_args_list = [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_datasource_name,
-                    "parent_class": "SimpleSqlalchemyDatasource",
-                    "anonymized_execution_engine": {
-                        "parent_class": "SqlAlchemyExecutionEngine"
+    introspection:
+        whole_table_with_limits:
+            sampling_method: _sample_using_limit
+            sampling_kwargs:
+                n: 10
+    """
+        # noinspection PyUnusedLocal
+        report_object = context.test_yaml_config(
+            name="my_datasource",
+            yaml_config=yaml_config,
+            return_mode="report_object",
+        )
+        assert mock_emit.call_count == 2
+        # Substitute anonymized names since it changes for each run
+        anonymized_datasource_name = mock_emit.call_args_list[1][0][0]["event_payload"][
+            "anonymized_name"
+        ]
+        anonymized_data_connector_name = mock_emit.call_args_list[1][0][0][
+            "event_payload"
+        ]["anonymized_data_connectors"][0]["anonymized_name"]
+        expected_call_args_list = [
+            mock.call(
+                {"event_payload": {}, "event": "data_context.__init__", "success": True}
+            ),
+            mock.call(
+                {
+                    "event": "data_context.test_yaml_config",
+                    "event_payload": {
+                        "anonymized_name": anonymized_datasource_name,
+                        "parent_class": "SimpleSqlalchemyDatasource",
+                        "anonymized_execution_engine": {
+                            "parent_class": "SqlAlchemyExecutionEngine"
+                        },
+                        "anonymized_data_connectors": [
+                            {
+                                "anonymized_name": anonymized_data_connector_name,
+                                "parent_class": "InferredAssetSqlDataConnector",
+                            }
+                        ],
                     },
-                    "anonymized_data_connectors": [
-                        {
-                            "anonymized_name": anonymized_data_connector_name,
-                            "parent_class": "InferredAssetSqlDataConnector",
-                        }
-                    ],
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
+                    "success": True,
+                }
+            ),
+        ]
+        assert mock_emit.call_args_list == expected_call_args_list
 
-    print(json.dumps(report_object, indent=2))
-    print(context.datasources)
+        print(json.dumps(report_object, indent=2))
+        print(context.datasources)
 
-    my_batch = context.get_batch(
-        "my_datasource",
-        "whole_table_with_limits",
-        "test_df",
-    )
-    # assert len(my_batch.data.fetchall()) == 10
-
-    with pytest.raises(KeyError):
         my_batch = context.get_batch(
             "my_datasource",
             "whole_table_with_limits",
-            "DOES_NOT_EXIST",
+            "test_df",
         )
+        # assert len(my_batch.data.fetchall()) == 10
 
-    my_validator = context.get_validator(
-        datasource_name="my_datasource",
-        data_connector_name="whole_table_with_limits",
-        data_asset_name="test_df",
-        expectation_suite=ExpectationSuite(
-            "my_expectation_suite", data_context=context
-        ),
-    )
-    my_evr = my_validator.expect_table_columns_to_match_set(column_set=[])
-    print(my_evr)
+        with pytest.raises(KeyError):
+            my_batch = context.get_batch(
+                "my_datasource",
+                "whole_table_with_limits",
+                "DOES_NOT_EXIST",
+            )
 
-    # my_evr = my_validator.expect_column_values_to_be_between(
-    #     column="x",
-    #     min_value=0,
-    #     max_value=4,
-    # )
-    # assert my_evr.success
+        my_validator = context.get_validator(
+            datasource_name="my_datasource",
+            data_connector_name="whole_table_with_limits",
+            data_asset_name="test_df",
+            expectation_suite=ExpectationSuite(
+                "my_expectation_suite", data_context=context
+            ),
+        )
+        my_evr = my_validator.expect_table_columns_to_match_set(column_set=[])
+        print(my_evr)
 
-    # TODO: <Alex>ALEX</Alex>
-    # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["a", "b", "c"])
-    # assert my_evr.success
+        # my_evr = my_validator.expect_column_values_to_be_between(
+        #     column="x",
+        #     min_value=0,
+        #     max_value=4,
+        # )
+        # assert my_evr.success
+
+        # TODO: <Alex>ALEX</Alex>
+        # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["a", "b", "c"])
+        # assert my_evr.success
 
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
@@ -769,154 +769,155 @@ def test_golden_path_inferred_asset_pandas_datasource_configuration(
 
     context: DataContext = empty_data_context_stats_enabled
 
-    os.chdir(context.root_directory)
-    import great_expectations as ge
+    with set_directory(context.root_directory):
+        import great_expectations as ge
 
-    context = ge.get_context()
-    mock_emit.reset_mock()  # Remove data_context.__init__ call
+        context = ge.get_context()
+        mock_emit.reset_mock()  # Remove data_context.__init__ call
 
-    yaml_config = f"""
-class_name: Datasource
+        yaml_config = f"""
+    class_name: Datasource
 
-execution_engine:
-    class_name: PandasExecutionEngine
+    execution_engine:
+        class_name: PandasExecutionEngine
 
-data_connectors:
-    my_filesystem_data_connector:
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: {base_directory}/test_dir_charlie
-        glob_directive: "*/*.csv"
+    data_connectors:
+        my_filesystem_data_connector:
+            class_name: InferredAssetFilesystemDataConnector
+            base_directory: {base_directory}/test_dir_charlie
+            glob_directive: "*/*.csv"
 
-        default_regex:
-            pattern: (.+)/(.+)-(\\d+)\\.csv
-            group_names:
-                - subdirectory
-                - data_asset_name
-                - number
-"""
+            default_regex:
+                pattern: (.+)/(.+)-(\\d+)\\.csv
+                group_names:
+                    - subdirectory
+                    - data_asset_name
+                    - number
+    """
 
-    # noinspection PyUnusedLocal
-    report_object = context.test_yaml_config(
-        name="my_directory_datasource",
-        yaml_config=yaml_config,
-        return_mode="report_object",
-    )
-    # print(json.dumps(report_object, indent=2))
-    # print(context.datasources)
-    assert mock_emit.call_count == 1
-    # Substitute anonymized names since it changes for each run
-    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
-        "event_payload"
-    ]["anonymized_execution_engine"]["anonymized_name"]
-    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_data_connectors"
-    ][0]["anonymized_name"]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_datasource_name,
-                    "parent_class": "Datasource",
-                    "anonymized_execution_engine": {
-                        "anonymized_name": anonymized_execution_engine_name,
-                        "parent_class": "PandasExecutionEngine",
-                    },
-                    "anonymized_data_connectors": [
-                        {
-                            "anonymized_name": anonymized_data_connector_name,
-                            "parent_class": "InferredAssetFilesystemDataConnector",
-                        }
-                    ],
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
-
-    my_batch = context.get_batch(
-        datasource_name="my_directory_datasource",
-        data_connector_name="my_filesystem_data_connector",
-        data_asset_name="A",
-        batch_identifiers={
-            "number": "2",
-        },
-        batch_spec_passthrough={
-            "sampling_method": "_sample_using_hash",
-            "sampling_kwargs": {
-                "column_name": "date",
-                "hash_function_name": "md5",
-                "hash_value": "f",
-            },
-        },
-    )
-    assert my_batch.batch_definition["data_asset_name"] == "A"
-
-    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
-    assert mock_emit.call_count == 2
-
-    df_data = my_batch.data.dataframe
-    assert df_data.shape == (10, 10)
-    df_data["date"] = df_data.apply(
-        lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
-    )
-    assert (
-        test_df[
-            (test_df["date"] == datetime.date(2020, 1, 15))
-            | (test_df["date"] == datetime.date(2020, 1, 29))
-        ]
-        .drop("timestamp", axis=1)
-        .equals(df_data.drop("timestamp", axis=1))
-    )
-
-    with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
+        report_object = context.test_yaml_config(
+            name="my_directory_datasource",
+            yaml_config=yaml_config,
+            return_mode="report_object",
+        )
+        # print(json.dumps(report_object, indent=2))
+        # print(context.datasources)
+        assert mock_emit.call_count == 1
+        # Substitute anonymized names since it changes for each run
+        anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+            "anonymized_name"
+        ]
+        anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
+            "event_payload"
+        ]["anonymized_execution_engine"]["anonymized_name"]
+        anonymized_data_connector_name = mock_emit.call_args_list[0][0][0][
+            "event_payload"
+        ]["anonymized_data_connectors"][0]["anonymized_name"]
+        expected_call_args_list = [
+            mock.call(
+                {
+                    "event": "data_context.test_yaml_config",
+                    "event_payload": {
+                        "anonymized_name": anonymized_datasource_name,
+                        "parent_class": "Datasource",
+                        "anonymized_execution_engine": {
+                            "anonymized_name": anonymized_execution_engine_name,
+                            "parent_class": "PandasExecutionEngine",
+                        },
+                        "anonymized_data_connectors": [
+                            {
+                                "anonymized_name": anonymized_data_connector_name,
+                                "parent_class": "InferredAssetFilesystemDataConnector",
+                            }
+                        ],
+                    },
+                    "success": True,
+                }
+            ),
+        ]
+        assert mock_emit.call_args_list == expected_call_args_list
+
         my_batch = context.get_batch(
             datasource_name="my_directory_datasource",
             data_connector_name="my_filesystem_data_connector",
-            data_asset_name="DOES_NOT_EXIST",
+            data_asset_name="A",
+            batch_identifiers={
+                "number": "2",
+            },
+            batch_spec_passthrough={
+                "sampling_method": "_sample_using_hash",
+                "sampling_kwargs": {
+                    "column_name": "date",
+                    "hash_function_name": "md5",
+                    "hash_value": "f",
+                },
+            },
+        )
+        assert my_batch.batch_definition["data_asset_name"] == "A"
+
+        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+        assert mock_emit.call_count == 2
+
+        df_data = my_batch.data.dataframe
+        assert df_data.shape == (10, 10)
+        df_data["date"] = df_data.apply(
+            lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(),
+            axis=1,
+        )
+        assert (
+            test_df[
+                (test_df["date"] == datetime.date(2020, 1, 15))
+                | (test_df["date"] == datetime.date(2020, 1, 29))
+            ]
+            .drop("timestamp", axis=1)
+            .equals(df_data.drop("timestamp", axis=1))
         )
 
-    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
-    assert mock_emit.call_count == 3
+        with pytest.raises(ValueError):
+            # noinspection PyUnusedLocal
+            my_batch = context.get_batch(
+                datasource_name="my_directory_datasource",
+                data_connector_name="my_filesystem_data_connector",
+                data_asset_name="DOES_NOT_EXIST",
+            )
 
-    my_validator = context.get_validator(
-        datasource_name="my_directory_datasource",
-        data_connector_name="my_filesystem_data_connector",
-        data_asset_name="D",
-        data_connector_query={"batch_filter_parameters": {"number": "3"}},
-        expectation_suite=ExpectationSuite(
-            "my_expectation_suite", data_context=context
-        ),
-        batch_spec_passthrough={
-            "sampling_method": "_sample_using_hash",
-            "sampling_kwargs": {
-                "column_name": "date",
-                "hash_function_name": "md5",
-                "hash_value": "f",
+        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+        assert mock_emit.call_count == 3
+
+        my_validator = context.get_validator(
+            datasource_name="my_directory_datasource",
+            data_connector_name="my_filesystem_data_connector",
+            data_asset_name="D",
+            data_connector_query={"batch_filter_parameters": {"number": "3"}},
+            expectation_suite=ExpectationSuite(
+                "my_expectation_suite", data_context=context
+            ),
+            batch_spec_passthrough={
+                "sampling_method": "_sample_using_hash",
+                "sampling_kwargs": {
+                    "column_name": "date",
+                    "hash_function_name": "md5",
+                    "hash_value": "f",
+                },
             },
-        },
-    )
+        )
 
-    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
-    assert mock_emit.call_count == 4
+        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+        assert mock_emit.call_count == 4
 
-    my_evr = my_validator.expect_column_values_to_be_between(
-        column="d", min_value=1, max_value=31
-    )
-    assert my_evr.success
+        my_evr = my_validator.expect_column_values_to_be_between(
+            column="d", min_value=1, max_value=31
+        )
+        assert my_evr.success
 
-    # TODO: <Alex>ALEX</Alex>
-    # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
-    # assert my_evr.success
+        # TODO: <Alex>ALEX</Alex>
+        # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
+        # assert my_evr.success
 
-    # No other usage stats calls detected
-    # assert mock_emit.call_count == 1
-    assert mock_emit.call_count == 4
+        # No other usage stats calls detected
+        # assert mock_emit.call_count == 1
+        assert mock_emit.call_count == 4
 
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
@@ -959,175 +960,176 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
 
     context: DataContext = empty_data_context_stats_enabled
 
-    os.chdir(context.root_directory)
-    import great_expectations as ge
+    with set_directory(context.root_directory):
+        import great_expectations as ge
 
-    context = ge.get_context()
-    mock_emit.reset_mock()  # Remove data_context.__init__ call
+        context = ge.get_context()
+        mock_emit.reset_mock()  # Remove data_context.__init__ call
 
-    yaml_config = f"""
-class_name: Datasource
+        yaml_config = f"""
+    class_name: Datasource
 
-execution_engine:
-    class_name: PandasExecutionEngine
+    execution_engine:
+        class_name: PandasExecutionEngine
 
-data_connectors:
-    my_filesystem_data_connector:
-        class_name: ConfiguredAssetFilesystemDataConnector
-        base_directory: {base_directory}
-        # glob_directive: "*"
+    data_connectors:
+        my_filesystem_data_connector:
+            class_name: ConfiguredAssetFilesystemDataConnector
+            base_directory: {base_directory}
+            # glob_directive: "*"
 
-        default_regex:
-            pattern: (.+)\\.csv
-            group_names:
-                - alphanumeric
-
-        assets:
-            A:
-                base_directory: {base_directory}/test_dir_foxtrot/A
-                pattern: (.+)-(\\d+)\\.csv
+            default_regex:
+                pattern: (.+)\\.csv
                 group_names:
-                    - letter
-                    - number
-            B:
-                base_directory: {base_directory}/test_dir_foxtrot/B
-                pattern: (.+)-(\\d+)\\.csv
-                group_names:
-                    - letter
-                    - number
-            C:
-                base_directory: {base_directory}/test_dir_foxtrot/C
-                pattern: (.+)-(\\d+)\\.csv
-                group_names:
-                    - letter
-                    - year
-            D:
-                base_directory: {base_directory}/test_dir_foxtrot/D
-                pattern: (.+)-(\\d+)\\.csv
-                group_names:
-                    - letter
-                    - checksum
-"""
+                    - alphanumeric
 
-    # noinspection PyUnusedLocal
-    report_object = context.test_yaml_config(
-        name="my_directory_datasource",
-        yaml_config=yaml_config,
-        return_mode="report_object",
-    )
-    # print(json.dumps(report_object, indent=2))
-    # print(context.datasources)
-    assert mock_emit.call_count == 1
-    # Substitute anonymized names since it changes for each run
-    anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_name"
-    ]
-    anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
-        "event_payload"
-    ]["anonymized_execution_engine"]["anonymized_name"]
-    anonymized_data_connector_name = mock_emit.call_args_list[0][0][0]["event_payload"][
-        "anonymized_data_connectors"
-    ][0]["anonymized_name"]
-    expected_call_args_list = [
-        mock.call(
-            {
-                "event": "data_context.test_yaml_config",
-                "event_payload": {
-                    "anonymized_name": anonymized_datasource_name,
-                    "parent_class": "Datasource",
-                    "anonymized_execution_engine": {
-                        "anonymized_name": anonymized_execution_engine_name,
-                        "parent_class": "PandasExecutionEngine",
-                    },
-                    "anonymized_data_connectors": [
-                        {
-                            "anonymized_name": anonymized_data_connector_name,
-                            "parent_class": "ConfiguredAssetFilesystemDataConnector",
-                        }
-                    ],
-                },
-                "success": True,
-            }
-        ),
-    ]
-    assert mock_emit.call_args_list == expected_call_args_list
+            assets:
+                A:
+                    base_directory: {base_directory}/test_dir_foxtrot/A
+                    pattern: (.+)-(\\d+)\\.csv
+                    group_names:
+                        - letter
+                        - number
+                B:
+                    base_directory: {base_directory}/test_dir_foxtrot/B
+                    pattern: (.+)-(\\d+)\\.csv
+                    group_names:
+                        - letter
+                        - number
+                C:
+                    base_directory: {base_directory}/test_dir_foxtrot/C
+                    pattern: (.+)-(\\d+)\\.csv
+                    group_names:
+                        - letter
+                        - year
+                D:
+                    base_directory: {base_directory}/test_dir_foxtrot/D
+                    pattern: (.+)-(\\d+)\\.csv
+                    group_names:
+                        - letter
+                        - checksum
+    """
 
-    my_batch = context.get_batch(
-        datasource_name="my_directory_datasource",
-        data_connector_name="my_filesystem_data_connector",
-        data_asset_name="A",
-        batch_identifiers={
-            "number": "2",
-        },
-        batch_spec_passthrough={
-            "sampling_method": "_sample_using_hash",
-            "sampling_kwargs": {
-                "column_name": "date",
-                "hash_function_name": "md5",
-                "hash_value": "f",
-            },
-        },
-    )
-    assert my_batch.batch_definition["data_asset_name"] == "A"
-
-    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
-    assert mock_emit.call_count == 2
-
-    my_batch.head()
-
-    df_data = my_batch.data.dataframe
-    assert df_data.shape == (10, 10)
-    df_data["date"] = df_data.apply(
-        lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(), axis=1
-    )
-    assert (
-        test_df[
-            (test_df["date"] == datetime.date(2020, 1, 15))
-            | (test_df["date"] == datetime.date(2020, 1, 29))
-        ]
-        .drop("timestamp", axis=1)
-        .equals(df_data.drop("timestamp", axis=1))
-    )
-
-    with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
+        report_object = context.test_yaml_config(
+            name="my_directory_datasource",
+            yaml_config=yaml_config,
+            return_mode="report_object",
+        )
+        # print(json.dumps(report_object, indent=2))
+        # print(context.datasources)
+        assert mock_emit.call_count == 1
+        # Substitute anonymized names since it changes for each run
+        anonymized_datasource_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+            "anonymized_name"
+        ]
+        anonymized_execution_engine_name = mock_emit.call_args_list[0][0][0][
+            "event_payload"
+        ]["anonymized_execution_engine"]["anonymized_name"]
+        anonymized_data_connector_name = mock_emit.call_args_list[0][0][0][
+            "event_payload"
+        ]["anonymized_data_connectors"][0]["anonymized_name"]
+        expected_call_args_list = [
+            mock.call(
+                {
+                    "event": "data_context.test_yaml_config",
+                    "event_payload": {
+                        "anonymized_name": anonymized_datasource_name,
+                        "parent_class": "Datasource",
+                        "anonymized_execution_engine": {
+                            "anonymized_name": anonymized_execution_engine_name,
+                            "parent_class": "PandasExecutionEngine",
+                        },
+                        "anonymized_data_connectors": [
+                            {
+                                "anonymized_name": anonymized_data_connector_name,
+                                "parent_class": "ConfiguredAssetFilesystemDataConnector",
+                            }
+                        ],
+                    },
+                    "success": True,
+                }
+            ),
+        ]
+        assert mock_emit.call_args_list == expected_call_args_list
+
         my_batch = context.get_batch(
             datasource_name="my_directory_datasource",
             data_connector_name="my_filesystem_data_connector",
-            data_asset_name="DOES_NOT_EXIST",
+            data_asset_name="A",
+            batch_identifiers={
+                "number": "2",
+            },
+            batch_spec_passthrough={
+                "sampling_method": "_sample_using_hash",
+                "sampling_kwargs": {
+                    "column_name": "date",
+                    "hash_function_name": "md5",
+                    "hash_value": "f",
+                },
+            },
+        )
+        assert my_batch.batch_definition["data_asset_name"] == "A"
+
+        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+        assert mock_emit.call_count == 2
+
+        my_batch.head()
+
+        df_data = my_batch.data.dataframe
+        assert df_data.shape == (10, 10)
+        df_data["date"] = df_data.apply(
+            lambda row: datetime.datetime.strptime(row["date"], "%Y-%m-%d").date(),
+            axis=1,
+        )
+        assert (
+            test_df[
+                (test_df["date"] == datetime.date(2020, 1, 15))
+                | (test_df["date"] == datetime.date(2020, 1, 29))
+            ]
+            .drop("timestamp", axis=1)
+            .equals(df_data.drop("timestamp", axis=1))
         )
 
-    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
-    assert mock_emit.call_count == 3
+        with pytest.raises(ValueError):
+            # noinspection PyUnusedLocal
+            my_batch = context.get_batch(
+                datasource_name="my_directory_datasource",
+                data_connector_name="my_filesystem_data_connector",
+                data_asset_name="DOES_NOT_EXIST",
+            )
 
-    my_validator = context.get_validator(
-        datasource_name="my_directory_datasource",
-        data_connector_name="my_filesystem_data_connector",
-        data_asset_name="C",
-        data_connector_query={"batch_filter_parameters": {"year": "2019"}},
-        create_expectation_suite_with_name="my_expectations",
-        batch_spec_passthrough={
-            "sampling_method": "_sample_using_hash",
-            "sampling_kwargs": {
-                "column_name": "date",
-                "hash_function_name": "md5",
-                "hash_value": "f",
+        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+        assert mock_emit.call_count == 3
+
+        my_validator = context.get_validator(
+            datasource_name="my_directory_datasource",
+            data_connector_name="my_filesystem_data_connector",
+            data_asset_name="C",
+            data_connector_query={"batch_filter_parameters": {"year": "2019"}},
+            create_expectation_suite_with_name="my_expectations",
+            batch_spec_passthrough={
+                "sampling_method": "_sample_using_hash",
+                "sampling_kwargs": {
+                    "column_name": "date",
+                    "hash_function_name": "md5",
+                    "hash_value": "f",
+                },
             },
-        },
-    )
-    my_evr = my_validator.expect_column_values_to_be_between(
-        column="d", min_value=1, max_value=31
-    )
-    assert my_evr.success
+        )
+        my_evr = my_validator.expect_column_values_to_be_between(
+            column="d", min_value=1, max_value=31
+        )
+        assert my_evr.success
 
-    # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
-    assert mock_emit.call_count == 4
+        # "DataContext.get_batch()" calls "DataContext.get_batch_list()" (decorated by "@usage_statistics_enabled_method").
+        assert mock_emit.call_count == 4
 
-    # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
-    # assert my_evr.success
+        # my_evr = my_validator.expect_table_columns_to_match_ordered_list(ordered_list=["x", "y", "z"])
+        # assert my_evr.success
 
-    # No other usage stats calls detected
-    assert mock_emit.call_count == 4
+        # No other usage stats calls detected
+        assert mock_emit.call_count == 4
 
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
@@ -1166,56 +1168,58 @@ def test_golden_path_runtime_data_connector_pandas_datasource_configuration(
 
     context: DataContext = empty_data_context_stats_enabled
 
-    os.chdir(context.root_directory)
-    import great_expectations as ge
+    with set_directory(context.root_directory):
+        import great_expectations as ge
 
-    context = ge.get_context()
-    mock_emit.reset_mock()  # Remove data_context.__init__ call
+        context = ge.get_context()
+        mock_emit.reset_mock()  # Remove data_context.__init__ call
 
-    yaml_config = f"""
-       class_name: Datasource
+        yaml_config = f"""
+           class_name: Datasource
 
-       execution_engine:
-           class_name: PandasExecutionEngine
+           execution_engine:
+               class_name: PandasExecutionEngine
 
-       data_connectors:
-           default_runtime_data_connector_name:
-               class_name: RuntimeDataConnector
-               batch_identifiers:
-                   - default_identifier_name
-       """
+           data_connectors:
+               default_runtime_data_connector_name:
+                   class_name: RuntimeDataConnector
+                   batch_identifiers:
+                       - default_identifier_name
+           """
 
-    # noinspection PyUnusedLocal
-    report_object = context.test_yaml_config(
-        name="my_directory_datasource",
-        yaml_config=yaml_config,
-        return_mode="report_object",
-    )
+        # noinspection PyUnusedLocal
+        report_object = context.test_yaml_config(
+            name="my_directory_datasource",
+            yaml_config=yaml_config,
+            return_mode="report_object",
+        )
 
-    assert report_object["execution_engine"] == {
-        "caching": True,
-        "module_name": "great_expectations.execution_engine.pandas_execution_engine",
-        "class_name": "PandasExecutionEngine",
-        "discard_subset_failing_expectations": False,
-        "boto3_options": {},
-        "azure_options": {},
-        "gcs_options": {},
-    }
-    assert report_object["data_connectors"]["count"] == 1
+        assert report_object["execution_engine"] == {
+            "caching": True,
+            "module_name": "great_expectations.execution_engine.pandas_execution_engine",
+            "class_name": "PandasExecutionEngine",
+            "discard_subset_failing_expectations": False,
+            "boto3_options": {},
+            "azure_options": {},
+            "gcs_options": {},
+        }
+        assert report_object["data_connectors"]["count"] == 1
 
-    # checking the correct number of data_assets have come back
-    assert (
-        report_object["data_connectors"]["default_runtime_data_connector_name"][
-            "data_asset_count"
-        ]
-        == 0
-    )
+        # checking the correct number of data_assets have come back
+        assert (
+            report_object["data_connectors"]["default_runtime_data_connector_name"][
+                "data_asset_count"
+            ]
+            == 0
+        )
 
-    # checking that note has come back
-    assert (
-        report_object["data_connectors"]["default_runtime_data_connector_name"]["note"]
-        == "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
-    )
+        # checking that note has come back
+        assert (
+            report_object["data_connectors"]["default_runtime_data_connector_name"][
+                "note"
+            ]
+            == "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest"
+        )
 
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
@@ -1265,84 +1269,88 @@ def test_golden_path_runtime_data_connector_and_inferred_data_connector_pandas_d
 
     context: DataContext = empty_data_context_stats_enabled
 
-    os.chdir(context.root_directory)
-    import great_expectations as ge
+    with set_directory(context.root_directory):
+        import great_expectations as ge
 
-    context = ge.get_context()
-    mock_emit.reset_mock()  # Remove data_context.__init__ call
+        context = ge.get_context()
+        mock_emit.reset_mock()  # Remove data_context.__init__ call
 
-    yaml_config = f"""
-    class_name: Datasource
+        yaml_config = f"""
+        class_name: Datasource
 
-    execution_engine:
-        class_name: PandasExecutionEngine
+        execution_engine:
+            class_name: PandasExecutionEngine
 
-    data_connectors:
-        default_runtime_data_connector_name:
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-                - default_identifier_name
-        default_inferred_data_connector_name:
-            class_name: InferredAssetFilesystemDataConnector
-            base_directory: {base_directory}/test_dir_charlie
-            glob_directive: "*/*.csv"
+        data_connectors:
+            default_runtime_data_connector_name:
+                class_name: RuntimeDataConnector
+                batch_identifiers:
+                    - default_identifier_name
+            default_inferred_data_connector_name:
+                class_name: InferredAssetFilesystemDataConnector
+                base_directory: {base_directory}/test_dir_charlie
+                glob_directive: "*/*.csv"
 
-            default_regex:
-                pattern: (.+)/(.+)-(\\d+)\\.csv
-                group_names:
-                    - subdirectory
-                    - data_asset_name
-                    - number
-    """
+                default_regex:
+                    pattern: (.+)/(.+)-(\\d+)\\.csv
+                    group_names:
+                        - subdirectory
+                        - data_asset_name
+                        - number
+        """
 
-    # noinspection PyUnusedLocal
-    report_object = context.test_yaml_config(
-        name="my_directory_datasource",
-        yaml_config=yaml_config,
-        return_mode="report_object",
-    )
+        # noinspection PyUnusedLocal
+        report_object = context.test_yaml_config(
+            name="my_directory_datasource",
+            yaml_config=yaml_config,
+            return_mode="report_object",
+        )
 
-    assert report_object["execution_engine"] == {
-        "caching": True,
-        "module_name": "great_expectations.execution_engine.pandas_execution_engine",
-        "class_name": "PandasExecutionEngine",
-        "discard_subset_failing_expectations": False,
-        "boto3_options": {},
-        "azure_options": {},
-        "gcs_options": {},
-    }
-    assert report_object["data_connectors"]["count"] == 2
-    assert report_object["data_connectors"]["default_runtime_data_connector_name"] == {
-        "class_name": "RuntimeDataConnector",
-        "data_asset_count": 0,
-        "data_assets": {},
-        "example_data_asset_names": [],
-        "example_unmatched_data_references": [],
-        "note": "RuntimeDataConnector will not have data_asset_names until they are "
-        "passed in through RuntimeBatchRequest",
-        "unmatched_data_reference_count": 0,
-    }
-    assert report_object["data_connectors"]["default_inferred_data_connector_name"] == {
-        "class_name": "InferredAssetFilesystemDataConnector",
-        "data_asset_count": 4,
-        "example_data_asset_names": ["A", "B", "C"],
-        "data_assets": {
-            "A": {
-                "batch_definition_count": 3,
-                "example_data_references": ["A/A-1.csv", "A/A-2.csv", "A/A-3.csv"],
+        assert report_object["execution_engine"] == {
+            "caching": True,
+            "module_name": "great_expectations.execution_engine.pandas_execution_engine",
+            "class_name": "PandasExecutionEngine",
+            "discard_subset_failing_expectations": False,
+            "boto3_options": {},
+            "azure_options": {},
+            "gcs_options": {},
+        }
+        assert report_object["data_connectors"]["count"] == 2
+        assert report_object["data_connectors"][
+            "default_runtime_data_connector_name"
+        ] == {
+            "class_name": "RuntimeDataConnector",
+            "data_asset_count": 0,
+            "data_assets": {},
+            "example_data_asset_names": [],
+            "example_unmatched_data_references": [],
+            "note": "RuntimeDataConnector will not have data_asset_names until they are "
+            "passed in through RuntimeBatchRequest",
+            "unmatched_data_reference_count": 0,
+        }
+        assert report_object["data_connectors"][
+            "default_inferred_data_connector_name"
+        ] == {
+            "class_name": "InferredAssetFilesystemDataConnector",
+            "data_asset_count": 4,
+            "example_data_asset_names": ["A", "B", "C"],
+            "data_assets": {
+                "A": {
+                    "batch_definition_count": 3,
+                    "example_data_references": ["A/A-1.csv", "A/A-2.csv", "A/A-3.csv"],
+                },
+                "B": {
+                    "batch_definition_count": 3,
+                    "example_data_references": ["B/B-1.csv", "B/B-2.csv", "B/B-3.csv"],
+                },
+                "C": {
+                    "batch_definition_count": 3,
+                    "example_data_references": ["C/C-1.csv", "C/C-2.csv", "C/C-3.csv"],
+                },
             },
-            "B": {
-                "batch_definition_count": 3,
-                "example_data_references": ["B/B-1.csv", "B/B-2.csv", "B/B-3.csv"],
-            },
-            "C": {
-                "batch_definition_count": 3,
-                "example_data_references": ["C/C-1.csv", "C/C-2.csv", "C/C-3.csv"],
-            },
-        },
-        "unmatched_data_reference_count": 0,
-        "example_unmatched_data_references": [],
-    }
+            "unmatched_data_reference_count": 0,
+            "example_unmatched_data_references": [],
+        }
 
     # Confirm that logs do not contain any exceptions or invalid messages
     assert not usage_stats_exceptions_exist(messages=caplog.messages)
