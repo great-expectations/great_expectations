@@ -1101,11 +1101,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         create_temp_table: bool = batch_spec.get(
             "create_temp_table", self._create_temp_table
-        ) and (
-            self.engine.dialect.name.lower()
-            not in [
-                "trino",
-            ]
         )
 
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
