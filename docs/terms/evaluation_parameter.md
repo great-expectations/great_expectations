@@ -16,7 +16,7 @@ import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
 ### Definition
 
-An Evaluation Parameter is a connector to store and retrieve information about parameters used during Validation of an Expectation which reference simple expressions or previously generated metrics.
+An Evaluation Parameter is a connector to store and retrieve information about parameters used during <TechnicalTag relative="../" tag="validation" text="Validation" /> of an <TechnicalTag relative="../" tag="expectation" text="Expectation" /> which reference simple expressions or previously generated metrics.
 
 ### Features and promises
 
@@ -24,7 +24,7 @@ You can use Evaluation Parameters to configure Expectations to use dynamic value
 
 ### Relationship to other objects
 
-Evaluation Parameters are used in Expectations when Validating data.
+Evaluation Parameters are used in Expectations when Validating data.  <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> use <TechnicalTag relative="../" tag="validation_action" text="Action" /> to store Evaluation Parameters in the <TechnicalTag relative="../" tag="evaluation_parameter_store" text="Evaluation Parameter Store" />.
 
 ## Use cases
 
@@ -53,10 +53,7 @@ my_df.set_evaluation_parameter("upstream_row_count", 10)
 
 If the Evaluation Parameter's value is set in this way, you do not need to set it again (or define it alongside the use of the `$PARAMETER` key) for future Expectations.
 
-
-<ValidateHeader/>
-
-More typically, when validating Expectations, you can provide Evaluation Parameters that are only available at runtime.  In this case you will pass the value of the Evaluation Parameter to the 
+More typically, when validating Expectations, you can provide Evaluation Parameters that are only available at runtime.
 
 ```python title="Python code"
 my_df.validate(
@@ -65,13 +62,17 @@ my_df.validate(
 )
 ```
 
+<ValidateHeader/>
+
+Evaluation Parameters that are configured as part of a Checkpoint's Expectations will be used without further interaction from you.  Additionally, Evaluation Parameters will be stored by having the `StoreEvaluationParametersAction` subclass of the `ValidationAction` class defined in a Checkpoint configuration's `action_list`.
+
 
 
 ## Features
 
 ### Dynamic values
 
-Evaluation Parameters are defined by expressions that are evaluated at run time and replaced with the corresponding values.  This expressions can include such things as:
+Evaluation Parameters are defined by expressions that are evaluated at run time and replaced with the corresponding values.  These expressions can include such things as:
 - Values from previous Validation runs, such as the number of rows in a previous Validation.
 - Values modified by basic arithmatic, such as a percentage of rows in a previous Validation.
 - Temporal values, such as "now" or "timedelta."
@@ -85,7 +86,7 @@ Although complex values like lists can be used as the value of an Evaluation Par
 
 ### How to create
 
-An Evaluation Parameter is "created" when a parameter is referenced in the results of another Expectation Suite's Validation.
+An Evaluation Parameter is "created" when a parameter is referenced in the results of another Expectation Suite's Validation.  To store them, define a `StoreEvaluationParametersAction` subclass of the `ValidationAction` class in a Checkpoint configuration's `action_list`, and run that Checkpoint.
 
 Evaluation Parameters are *referenced* by making a dictionary with the `$PARAMETER` key.  The value for this key will be the Evaluation Parameter's expression, which will be evaluated at run time and replaced with the value described by said expression.
 
