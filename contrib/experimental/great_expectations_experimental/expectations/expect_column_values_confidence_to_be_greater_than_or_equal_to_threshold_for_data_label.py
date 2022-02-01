@@ -4,8 +4,9 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 
-import dataprofiler as dp
 import json
+
+import dataprofiler as dp
 import numpy as np
 
 # remove extra tf loggin
@@ -47,13 +48,11 @@ class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrEqualToThreshold(
         """
         labeler = dp.DataLabeler(labeler_type="structured")
         labeler.postprocessor.set_params(is_pred_labels=False)
-        try:
-            results = labeler.predict(
-                column,
-                predict_options={"show_confidences": True},
-            )
-        except:
-            results = None
+
+        results = labeler.predict(
+            column,
+            predict_options={"show_confidences": True},
+        )
 
         if data_label.upper() in labeler.label_mapping.keys():
             data_label_ind = labeler.label_mapping[data_label.upper()]
