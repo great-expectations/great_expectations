@@ -19,7 +19,12 @@ from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
-from typing_extensions import Literal
+
+try:
+    from typing import Literal
+except ImportError:
+    # Fallback for python < 3.8
+    from typing_extensions import Literal
 
 import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 import great_expectations.exceptions as ge_exceptions
@@ -474,7 +479,7 @@ class BaseDataContext:
                     datasource_name=datasource_name
                 )
             except ge_exceptions.DatasourceInitializationError as e:
-                logger.warn(f"Cannot initialize datasource {datasource_name}: {e}")
+                logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
@@ -3304,6 +3309,17 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id=ge_cloud_id,
         )
 
+    def delete_profiler(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
+        profiler_toolkit.delete_profiler(
+            profiler_store=self.profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
     def list_profilers(self) -> List[str]:
         if self.profiler_store is None:
             raise ge_exceptions.StoreConfigurationError(
@@ -3682,11 +3698,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         """
         print(f"\tInstantiating as a {class_name}, since class_name is {class_name}")
 
-        profiler_name = name or config.get("name") or "my_temp_profiler"
+        profiler_name: str = name or config.get("name") or "my_temp_profiler"
 
-        profiler_config = RuleBasedProfilerConfig.from_commented_map(
-            commented_map=config
-        )
+        profiler_config: Union[
+            RuleBasedProfilerConfig, dict
+        ] = RuleBasedProfilerConfig.from_commented_map(commented_map=config)
         profiler_config = profiler_config.to_json_dict()
         profiler_config.update({"name": profiler_name})
 
@@ -3696,11 +3712,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             config_defaults={"module_name": "great_expectations.rule_based_profiler"},
         )
 
-        profiler_anonymizer = ProfilerAnonymizer(self.data_context_id)
+        profiler_anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(
+            self.data_context_id
+        )
 
-        usage_stats_event_payload = profiler_anonymizer.anonymize_profiler_info(
+        usage_stats_event_payload: dict = profiler_anonymizer.anonymize_profiler_info(
             name=profiler_name, config=profiler_config
         )
+
         return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_misc_class_from_yaml_config(

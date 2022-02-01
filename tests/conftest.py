@@ -45,13 +45,7 @@ from great_expectations.datasource import (
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.rule_based_profiler.config import (
-    DomainBuilderConfig,
-    ExpectationConfigurationBuilderConfig,
-    ParameterBuilderConfig,
-    RuleBasedProfilerConfig,
-    RuleConfig,
-)
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -5008,49 +5002,43 @@ def profiler_name() -> str:
 
 
 @pytest.fixture(scope="function")
-def store_name() -> str:
+def profiler_store_name() -> str:
     return "profiler_store"
 
 
 @pytest.fixture(scope="function")
-def rules() -> Dict[str, RuleConfig]:
-    return {
-        "rule_1": RuleConfig(
-            name="rule_1",
-            domain_builder=DomainBuilderConfig(class_name="TableDomainBuilder"),
-            parameter_builders=[
-                ParameterBuilderConfig(
-                    class_name="MetricMultiBatchParameterBuilder",
-                    metric_name="my_metric",
-                    name="my_parameter",
-                )
-            ],
-            expectation_configuration_builders=[
-                ExpectationConfigurationBuilderConfig(
-                    class_name="DefaultExpectationConfigurationBuilder",
-                    expectation_type="expect_column_pair_values_A_to_be_greater_than_B",
-                )
-            ],
-        )
-    }
-
-
-@pytest.fixture(scope="function")
-def profiler_config(
-    profiler_name: str, rules: Dict[str, RuleConfig]
-) -> RuleBasedProfilerConfig:
+def profiler_config(profiler_name: str) -> RuleBasedProfilerConfig:
     return RuleBasedProfilerConfig(
         name=profiler_name,
         class_name="RuleBasedProfiler",
         module_name="great_expectations.rule_based_profiler",
         config_version=1.0,
-        rules=rules,
+        rules={
+            "rule_1": {
+                "domain_builder": {
+                    "class_name": "TableDomainBuilder",
+                },
+                "parameter_builders": [
+                    {
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_parameter",
+                        "metric_name": "my_metric",
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    },
+                ],
+            }
+        },
     )
 
 
 @pytest.fixture(scope="function")
-def empty_profiler_store(store_name: str) -> ProfilerStore:
-    return ProfilerStore(store_name)
+def empty_profiler_store(profiler_store_name: str) -> ProfilerStore:
+    return ProfilerStore(profiler_store_name)
 
 
 @pytest.fixture(scope="function")
