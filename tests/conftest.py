@@ -32,6 +32,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -5044,6 +5045,16 @@ def empty_profiler_store(profiler_store_name: str) -> ProfilerStore:
 @pytest.fixture(scope="function")
 def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
     return ConfigurationIdentifier(configuration_key=profiler_name)
+
+
+@pytest.fixture(scope="function")
+def ge_cloud_profiler_id() -> str:
+    return "my_ge_cloud_profiler_id"
+
+
+@pytest.fixture(scope="function")
+def ge_cloud_profiler_key(ge_cloud_profiler_id: str) -> GeCloudIdentifier:
+    return GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_profiler_id)
 
 
 @pytest.fixture(scope="function")

@@ -1,15 +1,19 @@
 from unittest import mock
 
+import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
+    GeCloudIdentifier,
 )
+from great_expectations.exceptions.exceptions import InvalidConfigError
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.toolkit import (
+    add_profiler,
     delete_profiler,
     get_profiler,
     list_profilers,
@@ -32,24 +36,81 @@ def test_get_profiler_with_too_many_args_raises_error(
     assert "either name or ge_cloud_id" in str(e.value)
 
 
-def test_add_profiler():
-    pass
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_add_profiler(
+    mock_data_context: mock.MagicMock,
+    profiler_key: ConfigurationIdentifier,
+    profiler_config: RuleBasedProfilerConfig,
+):
+    mock_data_context.ge_cloud_mode.return_value = False
+    profiler = add_profiler(profiler_config, mock_data_context)
+
+    assert isinstance(profiler, RuleBasedProfiler)
+    assert profiler.name == profiler_config.name
+    assert mock_data_context.profiler_store.set.call_args == mock.call(
+        key=profiler_key, value=profiler_config
+    )
 
 
-def test_add_profiler_with_batch_request_containing_batch_data_raises_error():
-    pass
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_add_profiler_ge_cloud_mode(
+    mock_data_context: mock.MagicMock,
+    ge_cloud_profiler_id: str,
+    ge_cloud_profiler_key: GeCloudIdentifier,
+    profiler_config: RuleBasedProfilerConfig,
+):
+    mock_data_context.ge_cloud_mode.return_value = True
+    profiler = add_profiler(
+        profiler_config, mock_data_context, ge_cloud_id=ge_cloud_profiler_id
+    )
+
+    assert isinstance(profiler, RuleBasedProfiler)
+    assert profiler.name == profiler_config.name
+    assert mock_data_context.profiler_store.set.call_args == mock.call(
+        key=ge_cloud_profiler_key, value=profiler_config
+    )
 
 
-def test_add_profiler_alice_integration():
-    pass
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
+    mock_data_context: mock.MagicMock,
+):
+    profiler_config = RuleBasedProfilerConfig(
+        name="my_profiler_config",
+        class_name="RuleBasedProfiler",
+        module_name="great_expectations.rule_based_profiler",
+        config_version=1.0,
+        rules={
+            "rule_1": {
+                "domain_builder": {
+                    "class_name": "TableDomainBuilder",
+                    "batch_request": {
+                        "runtime_parameters": {
+                            "batch_data": pd.DataFrame()  # Cannot be serialized in store
+                        }
+                    },
+                },
+                "parameter_builders": [
+                    {
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_parameter",
+                        "metric_name": "my_metric",
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    },
+                ],
+            }
+        },
+    )
 
+    with pytest.raises(InvalidConfigError) as e:
+        add_profiler(profiler_config, mock_data_context)
 
-def test_add_profiler_bobby_integration():
-    pass
-
-
-def test_add_profiler_bobster_integration():
-    pass
+    assert "batch_data found in batch_request" in str(e.value)
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")

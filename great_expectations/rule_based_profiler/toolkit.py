@@ -22,19 +22,20 @@ def add_profiler(
     data_context: "DataContext",  # noqa: F821
     ge_cloud_id: Optional[str] = None,
 ) -> RuleBasedProfiler:
-
     _check_validity_of_batch_requests_in_config(
         config, data_context.profiler_store_name
     )
 
+    profiler_config: dict = config.to_json_dict()
+
     new_profiler = instantiate_class_from_config(
-        config=config,
+        config=profiler_config,
         runtime_environment={"data_context": data_context},
         config_defaults={"module_name": "great_expectations.rule_based_profiler"},
     )
 
     key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-    if data_context.ge_cloud_mode:
+    if data_context.ge_cloud_mode and ge_cloud_id:
         key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
     else:
         key = ConfigurationIdentifier(
@@ -44,8 +45,10 @@ def add_profiler(
     profiler_store = data_context.profiler_store
     profiler_ref = profiler_store.set(key=key, value=config)
     if isinstance(profiler_ref, GeCloudIdAwareRef):
-        ge_cloud_id = profiler_ref.ge_cloud_id
-        new_profiler.ge_cloud_id = uuid.UUID(ge_cloud_id)
+        pass
+        # Chetan - 20220201 - Open to determine how to treat ge_cloud_id
+        # ge_cloud_id = profiler_ref.ge_cloud_id
+        # new_profiler.ge_cloud_id = uuid.UUID(ge_cloud_id)
 
     return new_profiler
 
@@ -57,15 +60,14 @@ def _check_validity_of_batch_requests_in_config(
     batch_requests = []
     for rule in config.rules.values():
 
-        domain_builder = rule.domain_builder
-        if domain_builder.batch_request:
-            batch_requests.append(domain_builder.batch_request)
+        domain_builder = rule["domain_builder"]
+        if "batch_request" in domain_builder:
+            batch_requests.append(domain_builder["batch_request"])
 
-        parameter_builders = rule.parameter_builders
-        if parameter_builders:
-            for parameter_builder in parameter_builders:
-                if parameter_builder.batch_request:
-                    batch_requests.append(parameter_builder.batch_request)
+        parameter_builders = rule.get("parameter_builders", [])
+        for parameter_builder in parameter_builders:
+            if "batch_request" in parameter_builder:
+                batch_requests.append(parameter_builder["batch_request"])
 
     # DataFrames shouldn't be saved to ProfilerStore
     for batch_request in batch_requests:
