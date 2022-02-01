@@ -16,7 +16,7 @@ from great_expectations.expectations.metrics import (
 )
 
 
-class ColumnValuesProbabilisticallyMatchDataLabel(ColumnMetricProvider):
+class ColumnValueDataLabelConfidenceToBeBetween(ColumnMetricProvider):
     """MetricProvider Class for Data Label Probability greater than \
     or equal to the user-specified threshold"""
     
@@ -44,18 +44,22 @@ class ColumnValuesProbabilisticallyMatchDataLabel(ColumnMetricProvider):
         raise NotImplementedError
 
 
-class ExpectColumnValuesToProbabilisticallyMatchDataLabel(ColumnMapExpectation):
+class ExpectColumnDataLabelConfidenceToBeBetween(ColumnMapExpectation):
     """
-    This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.
+    This function 
 
     :param: column,  
     :param: data_label,
-    :param: threshold
+    :param: min,
+    :param: max,
+    :param: trained_model
 
-    df.expect_column_values_to_probabilistically_match_data_label(
+    df.expect_column_proportion_of_data_labels_to_be_between(
         column,
         data_label=<>,
-        threshold=float(0<=1)
+        min,
+        max,
+        trained_model
     )
     """
 
@@ -116,5 +120,5 @@ class ExpectColumnValuesToProbabilisticallyMatchDataLabel(ColumnMapExpectation):
     }
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToProbabilisticallyMatchDataLabel().run_diagnostics()
+    diagnostics_report = ExpectColumnDataLabelConfidenceToBeBetween().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))
