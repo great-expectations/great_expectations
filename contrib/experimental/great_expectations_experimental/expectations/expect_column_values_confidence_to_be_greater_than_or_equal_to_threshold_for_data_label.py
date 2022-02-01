@@ -23,18 +23,18 @@ from great_expectations.expectations.metrics import (
 )
 
 
-class ColumnValuesProbabilisticallyMatchDataLabel(ColumnMapMetricProvider):
+class ColumnValuesConfidenceForDataLabelToBeGreaterThanOrLessThanThreshold(ColumnMapMetricProvider):
     """MetricProvider Class for Data Label Probability greater than \
     or equal to the user-specified threshold"""
     
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "column_values.are_probibalistically_greater_or_equal_to_threshold"
+    condition_metric_name = "column_values.prediction_confidence_for_data_label_greater_than_or_equal_to_threshold"
 
-    condition_value_keys = ("threshold",)
+    condition_value_keys = ("threshold", "data_label",)
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, threshold, **kwargs):
+    def _pandas(cls, column, threshold, data_label, **kwargs):
         """
         Implement the yes/no question for the expectation
         """
@@ -45,9 +45,11 @@ class ColumnValuesProbabilisticallyMatchDataLabel(ColumnMapMetricProvider):
             results = None
         label_map_vec_func = np.vectorize(lambda x: labeler.label_mapping.get(x, None))
         results['pred'] = label_map_vec_func(results['pred'])
-        return np.choose(results['pred'], results['conf'].T)
+        test_int_data_label = label_map_vec_func(data_label)
+        results_array = np.array([confidences[results['pred'][iter_value]] for iter_value, confidences in enumerate(results['conf']) if results['pred'][iter_value] == test_int_data_label])
+        return results_array >= threshold
 
-class ExpectColumnValuesToProbabilisticallyMatchDataLabel(ColumnMapExpectation):
+class ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrLessThanThreshold(ColumnMapExpectation):
     """
     This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.
 
@@ -90,11 +92,13 @@ class ExpectColumnValuesToProbabilisticallyMatchDataLabel(ColumnMapExpectation):
                     "title": "positive_test_with_column_one",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "OPEID6",  "threshold": .65},
+                    "in": {
+                        "column": "ZIP",
+                        "data_label": "ADDRESS",
+                        "threshold": .00
+                        },
                     "out": {
                         "success": True,
-                        "unexpected_index_list": [3],
-                        "unexpected_list": ["McRoomyRoom"],
                     },
                 },
             ],
@@ -103,10 +107,10 @@ class ExpectColumnValuesToProbabilisticallyMatchDataLabel(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.are_probibalistically_greater_or_equal_to_threshold"
+    map_metric = "column_values.prediction_confidence_for_data_label_greater_than_or_equal_to_threshold"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    success_keys = ("threshold", "mostly",)
+    success_keys = ("threshold", "data_label", "mostly",)
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
@@ -121,5 +125,5 @@ class ExpectColumnValuesToProbabilisticallyMatchDataLabel(ColumnMapExpectation):
     }
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToProbabilisticallyMatchDataLabel().run_diagnostics()
+    diagnostics_report = ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrLessThanThreshold().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))
