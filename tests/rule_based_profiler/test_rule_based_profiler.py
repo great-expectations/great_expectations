@@ -1,19 +1,7 @@
-import os
 from typing import Any, Dict, List, Optional
 
-from ruamel.yaml import YAML
-
-from great_expectations import DataContext
-from great_expectations.core import ExpectationSuite
-from great_expectations.core.batch import BatchRequest
 from great_expectations.rule_based_profiler.rule import Rule
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.types import ParameterContainer
-from great_expectations.rule_based_profiler.types.base import (
-    RuleBasedProfilerConfig,
-    ruleBasedProfilerConfigSchema,
-)
-from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 def test_reconcile_profiler_variables_no_overrides(
