@@ -8,7 +8,7 @@ from great_expectations_contrib.commands import (
     read_package_from_file,
     write_package_to_disk,
 )
-from great_expectations_contrib.package import GreatExpectationsContribPackageConfig
+from great_expectations_contrib.package import GreatExpectationsContribPackageManifest
 
 # The following link points to the repo where the Cookiecutter template is hosted
 URL = "https://github.com/great-expectations/great-expectations-contrib-cookiecutter"
@@ -37,7 +37,7 @@ def init() -> None:
 
 @cli.command(help="Publish your package to PyPi")
 @click.pass_obj
-def publish(pkg: GreatExpectationsContribPackageConfig) -> None:
+def publish(pkg: GreatExpectationsContribPackageManifest) -> None:
     publish_cmd()
     pkg.update_package_state()
     write_package_to_disk(pkg, PACKAGE_PATH)
@@ -45,7 +45,7 @@ def publish(pkg: GreatExpectationsContribPackageConfig) -> None:
 
 @cli.command(help="Check your package to make sure it's met all the requirements")
 @click.pass_obj
-def check(pkg: GreatExpectationsContribPackageConfig) -> None:
+def check(pkg: GreatExpectationsContribPackageManifest) -> None:
     check_cmd()
     pkg.update_package_state()
     write_package_to_disk(pkg, PACKAGE_PATH)
