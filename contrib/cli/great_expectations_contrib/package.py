@@ -5,15 +5,17 @@ import os
 import sys
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, List, Optional, Type
 
+import pkg_resources
+
+from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
+    ExpectationDiagnostics,
+)
 from great_expectations.expectations.expectation import Expectation
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-# Type alias that will need to be updated to reflect the complex nature of the 'run_diagnostics' return object
-Diagnostics = Dict[str, Any]
 
 
 @dataclass(frozen=True)
@@ -106,21 +108,52 @@ class GreatExpectationsContribPackageManifest:
     # Metadata
     version: Optional[str] = None
 
-    def update_package_state(self) -> None:
+    def update_package_state(self) -> "GreatExpectationsContribPackageManifest":
         """
         Parses diagnostic reports from package Expectations and uses them to update JSON state
         """
         diagnostics = self._retrieve_package_expectations_diagnostics()
-        self._update_attrs_with_diagnostics(diagnostics)
+        updated_package = self._update_attrs_with_diagnostics(diagnostics)
+        return updated_package
 
-    def _update_attrs_with_diagnostics(self, diagnostics: List[Diagnostics]) -> None:
-        # TODO: Write logic to assign values to attrs
-        # This is a black box for now
-        # for diagnostic in diagnostics:
-        #     pass
-        raise NotImplementedError
+    def _update_attrs_with_diagnostics(
+        self, diagnostics: List[ExpectationDiagnostics]
+    ) -> "GreatExpectationsContribPackageManifest":
+        """
+        expectations
+        expectation_count   # len(diagnostics)
+        dependencies        # _parse_rqeuirements_file
+        maturity
+        status
 
-    def _retrieve_package_expectations_diagnostics(self) -> List[Diagnostics]:
+        contributors        # diagnostic.library_metadata.contributors
+        """
+
+        for diagnostic in diagnostics:
+            pass
+
+        # return GreatExpectationsContribPackageManifest(**manifest_data)
+
+    def _parse_requirements_file(self, path: str) -> List[Dependency]:
+        if not os.path.exists(path):
+            raise FileNotFoundError("Could not find requirements file")
+
+        with open(path) as f:
+            requirements = [req for req in pkg_resources.parse_requirements(f)]
+
+        def _convert_to_dependency(
+            requirement: pkg_resources.Requirement,
+        ) -> Dependency:
+            name = requirement.name
+            pypi_url = f"https://pypi.org/project/{name}"
+            version = str(requirement.specs) if requirement.specs else None
+            return Dependency(text=name, link=pypi_url, version=version)
+
+        return list(map(_convert_to_dependency, requirements))
+
+    def _retrieve_package_expectations_diagnostics(
+        self,
+    ) -> List[ExpectationDiagnostics]:
         try:
             package = self._identify_user_package()
             expectations_module = self._import_expectations_module(package)
@@ -174,7 +207,7 @@ class GreatExpectationsContribPackageManifest:
 
     def _gather_diagnostics(
         self, expectations: List[Type[Expectation]]
-    ) -> List[Diagnostics]:
+    ) -> List[ExpectationDiagnostics]:
         diagnostics_list = []
         for expectation in expectations:
             instance = expectation()

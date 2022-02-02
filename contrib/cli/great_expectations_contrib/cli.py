@@ -26,8 +26,8 @@ def cli(ctx: click.Context) -> None:
 
     Create a package using `init`, check your code with `check`, and upload your work to PyPi with `publish`.
     """
-    pkg = read_package_from_file(PACKAGE_PATH)
-    ctx.obj = pkg
+    package = read_package_from_file(PACKAGE_PATH)
+    ctx.obj = package
 
 
 @cli.command(help="Initialize a contributor package")
@@ -37,18 +37,18 @@ def init() -> None:
 
 @cli.command(help="Publish your package to PyPi")
 @click.pass_obj
-def publish(pkg: GreatExpectationsContribPackageManifest) -> None:
+def publish(package: GreatExpectationsContribPackageManifest) -> None:
     publish_cmd()
-    pkg.update_package_state()
-    write_package_to_disk(pkg, PACKAGE_PATH)
+    updated_package = package.update_package_state()
+    write_package_to_disk(updated_package, PACKAGE_PATH)
 
 
 @cli.command(help="Check your package to make sure it's met all the requirements")
 @click.pass_obj
-def check(pkg: GreatExpectationsContribPackageManifest) -> None:
+def check(package: GreatExpectationsContribPackageManifest) -> None:
     check_cmd()
-    pkg.update_package_state()
-    write_package_to_disk(pkg, PACKAGE_PATH)
+    updated_package = package.update_package_state()
+    write_package_to_disk(updated_package, PACKAGE_PATH)
 
 
 if __name__ == "__main__":
