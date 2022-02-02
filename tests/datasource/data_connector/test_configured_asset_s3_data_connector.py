@@ -1147,3 +1147,5 @@ def test_sanitize_prefix_behaves_the_same_as_local_files():
     # A couple additional checks
     check_sameness("a/b/c", "a/b/c/")
     check_sameness("a.x/b/c", "a.x/b/c/")
+    check_sameness("path/to/folder.something/", "path/to/folder.something/")
+    check_sameness("path/to/folder.something", "path/to/folder.something")
