@@ -4,18 +4,15 @@ title: How to add Input Validation and Type Checking for a Custom Expectation
 
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
-This document describes how to add configuration validation for an Expectation. 
-
 <Prerequisites>
 
  - Created a [Custom Expectation](../creating_custom_expectations/overview.md)
 
 </Prerequisites>
 
-[Expectations](../../../reference/expectations/expectations.md) will typically be configured using input parameters: 
-for example, we might expect the fraction of null values to be most `mostly=.05`, or the mean of a row to adhere to a `min_value=5` bound.
+[Expectations](../../../reference/expectations/expectations.md) will typically be configured using input parameters which the Expectation's code will require to fulfill some criteria in order to be used or provide relevant results. Ensuring that these requirements are fulfilled is the purpose of Type Checking and validating your input parameters.
 
-This guide will use the Custom Expectation built in the [How to create a Custom Column Aggregate Expectation](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) tutorial to walk you through the implementation of a method to validate that the provided input parameters satisfy the requirements for your Custom Expectation.
+For example, we might expect the fraction of null values to be `mostly=.05`, in which case any value above 1 would indicate an impossible fraction of a single whole (since a value above one indicates more than a single whole), and should throw an error. Another example would be if we want to indicate that the the mean of a row adheres to a minimum value bound, such as `min_value=5`. In this case, attempting to pass in a non numerical value should clearly throw an error!
 
 ## Steps
 
@@ -47,6 +44,8 @@ To begin with, we want to create our `validate_configuration` method and ensure 
 ```
 
 Next, we're going to implement the logic for validating the four parameters we identified above.
+
+### 3. Accessing parameters and writing assertions
 
 First we need to access the parameters to be evaluated:
 
@@ -85,7 +84,7 @@ Finally, if no exception is raised, we return `True`, indicating a valid Expecta
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L95-L134
 ```
 
-### 3. Verifying our method
+### 4. Verifying our method
 
 If you now run your file, `print_diagnostic_checklist` will attempt to execute the `validate_configuration` using the input provided in your [Example Cases](how_to_add_example_cases_for_an_expectation.md).
 
@@ -101,7 +100,7 @@ Congratulations!<br/>&#127881; You've successfully added input validation & type
 </b></p>
 </div>
 
-### 4. Contribution (Optional)
+### 5. Contribution (Optional)
 
 The method implemented in this guide is an optional feature for Experimental Expectations, and a requirement for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at Beta and Production levels.  
 
