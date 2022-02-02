@@ -12,7 +12,7 @@ ATHENA_DB_NAME = os.getenv("ATHENA_DB_NAME")
 ATHENA_STAGING_S3 = os.getenv("ATHENA_STAGING_S3")
 
 
-connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3NA}"
+connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
 
 # create datasource and add athena
 context = ge.data_context.DataContext()

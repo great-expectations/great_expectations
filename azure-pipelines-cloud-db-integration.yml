@@ -145,7 +145,7 @@ stages:
           - script: |
               pip install pytest pytest-azurepipelines
               pip install "pyathena[SQLAlchemy]"
-              pytest -v --docs-tests -m docs --no-postgresql --no-spark --aws tests/integration/test_script_runner.py
+              pytest -v --docs-tests -m integration --no-postgresql --no-spark --aws tests/integration/test_script_runner.py
             displayName: 'pytest'
             env:
               # AWS credentials
