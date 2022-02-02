@@ -144,6 +144,7 @@ stages:
               retryCount: '2'
           - script: |
               pip install pytest pytest-azurepipelines
+              pip install "pyathena[SQLAlchemy]"
               pytest -v --docs-tests -m docs --no-postgresql --no-spark --aws tests/integration/test_script_runner.py
             displayName: 'pytest'
             env:
