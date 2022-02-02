@@ -52,13 +52,13 @@ class RenderedExpectation:
 class Dependency:
     text: str
     link: str
-    version: Optional[str]
+    version: Optional[str] = None
 
 
 @dataclass(frozen=True)
 class GitHubUser:
     username: str
-    full_name: Optional[str]
+    full_name: Optional[str] = None
 
 
 class SocialLinkType(Enum):
@@ -129,10 +129,18 @@ class GreatExpectationsContribPackageManifest:
         contributors        # diagnostic.library_metadata.contributors
         """
 
-        for diagnostic in diagnostics:
-            pass
+        manifest_data = self.__dict__
+        manifest_data["dependencies"] = self._parse_requirements_file(
+            "requirements.txt"
+        )
 
-        # return GreatExpectationsContribPackageManifest(**manifest_data)
+        manifest_data["contributors"] = set()
+
+        for diagnostic in diagnostics:
+            for contributor in diagnostic.library_metadata.contributors:
+                github_user = GitHubUser(contributor)
+
+        return GreatExpectationsContribPackageManifest(**manifest_data)
 
     def _parse_requirements_file(self, path: str) -> List[Dependency]:
         if not os.path.exists(path):
@@ -144,7 +152,7 @@ class GreatExpectationsContribPackageManifest:
         def _convert_to_dependency(
             requirement: pkg_resources.Requirement,
         ) -> Dependency:
-            name = requirement.name
+            name = requirement.project_name
             pypi_url = f"https://pypi.org/project/{name}"
             version = str(requirement.specs) if requirement.specs else None
             return Dependency(text=name, link=pypi_url, version=version)
