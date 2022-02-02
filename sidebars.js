@@ -375,6 +375,7 @@ module.exports = {
             'terms/data_context',
             'terms/data_asset',
             'terms/execution_engine',
+            'terms/metric',
             'terms/plugin'
           ]
         },
