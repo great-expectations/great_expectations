@@ -1,13 +1,8 @@
 import copy
 import uuid
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchRequest,
-    RuntimeBatchRequest,
-    get_batch_request_as_dict,
-)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
@@ -351,6 +346,16 @@ class RuleBasedProfiler:
     def reconcile_profiler_variables(
         self, variables: Optional[Dict[str, Any]] = None
     ) -> Optional[ParameterContainer]:
+        """
+        Profiler "variables" reconciliation involves combining the variables, instantiated from Profiler configuration
+        (e.g., stored in a YAML file managed by the Profiler store), with the variables overrides, provided at run time.
+
+        The reconciliation logic for "variables" is of the "replace" nature: An override value complements the original
+        on key "miss", and replaces the original on key "hit" (or "collision"), because "variables" is a unique member.
+
+        :param variables -- variables overrides, supplied in the dictionary (configuration) form
+        :return -- reconciled variables in their canonical ParameterContainer object form
+        """
         effective_variables: ParameterContainer
         if variables is not None and isinstance(variables, dict):
             variables_dict: dict = self.variables.to_dict()["parameter_nodes"][
@@ -368,6 +373,17 @@ class RuleBasedProfiler:
     def reconcile_profiler_rules(
         self, rules: Optional[Dict[str, Dict[str, Any]]] = None
     ) -> List[Rule]:
+        """
+        Profiler "rules" reconciliation involves combining the rules, instantiated from Profiler configuration (e.g.,
+        stored in a YAML file managed by the Profiler store), with the rules overrides, provided at run time.
+
+        The reconciliation logic for "rules" is of the "procedural" nature:
+        (1) Combine every rule override configuration with any instantiated rule into a reconciled configuration
+        (2) Re-instantiate Rule objects from the reconciled rule configurations
+
+        :param rules: rules overrides, supplied in the dictionary (configuration) form for each rule name as the key
+        :return: reconciled rules in their canonical List[Rule] object form
+        """
         if rules is None:
             rules = {}
 
@@ -467,7 +483,7 @@ class RuleBasedProfiler:
 
         current_parameter_builders: Dict[
             str, ParameterBuilder
-        ] = rule.parameter_builders
+        ] = rule._get_parameter_builders_as_dict()
 
         parameter_builder_name: str
         parameter_builder: ParameterBuilder
@@ -530,7 +546,7 @@ class RuleBasedProfiler:
 
         current_expectation_configuration_builders: Dict[
             str, ExpectationConfigurationBuilder
-        ] = rule.expectation_configuration_builders
+        ] = rule._get_expectation_configuration_builders_as_dict()
 
         expectation_configuration_builder_name: str
         expectation_configuration_builder: ExpectationConfigurationBuilder

@@ -85,7 +85,7 @@ class Rule(SerializableDictDot):
         parameter_builders_as_dicts: Optional[List[dict]] = None
         parameter_builders: Optional[
             Dict[str, ParameterBuilder]
-        ] = self.parameter_builders
+        ] = self._get_parameter_builders_as_dict()
         parameter_builder: ParameterBuilder
         if parameter_builders is not None:
             parameter_builders_as_dicts = [
@@ -96,7 +96,7 @@ class Rule(SerializableDictDot):
         expectation_configuration_builders_as_dicts: Optional[List[dict]] = None
         expectation_configuration_builders: Optional[
             Dict[str, ExpectationConfigurationBuilder]
-        ] = self.expectation_configuration_builders
+        ] = self._get_expectation_configuration_builders_as_dict()
         expectation_configuration_builder: ExpectationConfigurationBuilder
         if expectation_configuration_builders is not None:
             expectation_configuration_builders_as_dicts = [
@@ -133,12 +133,7 @@ class Rule(SerializableDictDot):
     def name(self) -> str:
         return self._name
 
-    @property
-    def domain_builder(self) -> DomainBuilder:
-        return self._domain_builder
-
-    @property
-    def parameter_builders(self) -> Dict[str, ParameterBuilder]:
+    def _get_parameter_builders_as_dict(self) -> Dict[str, ParameterBuilder]:
         if self._parameter_builders is None:
             return {}
 
@@ -148,8 +143,7 @@ class Rule(SerializableDictDot):
             for parameter_builder in self._parameter_builders
         }
 
-    @property
-    def expectation_configuration_builders(
+    def _get_expectation_configuration_builders_as_dict(
         self,
     ) -> Dict[str, ExpectationConfigurationBuilder]:
         expectation_configuration_builder: ExpectationConfigurationBuilder
@@ -157,6 +151,27 @@ class Rule(SerializableDictDot):
             expectation_configuration_builder.expectation_type: expectation_configuration_builder
             for expectation_configuration_builder in self._expectation_configuration_builders
         }
+
+    @property
+    def domain_builder(self) -> DomainBuilder:
+        return self._domain_builder
+
+    @property
+    def parameter_builders(self) -> Optional[List[ParameterBuilder]]:
+        parameter_builders_as_dict: Dict[
+            str, ParameterBuilder
+        ] = self._get_parameter_builders_as_dict()
+
+        if parameter_builders_as_dict:
+            return list(parameter_builders_as_dict.values())
+
+        return None
+
+    @property
+    def expectation_configuration_builders(
+        self,
+    ) -> List[ExpectationConfigurationBuilder]:
+        return list(self._get_expectation_configuration_builders_as_dict().values())
 
     @property
     def parameters(self) -> Dict[str, ParameterContainer]:
