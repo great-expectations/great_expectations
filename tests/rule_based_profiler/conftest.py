@@ -31,12 +31,9 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.rule_based_profiler.types.base import (
     ruleBasedProfilerConfigSchema,
 )
+from tests.conftest import skip_if_python_below_minimum_version
 
-if not sys.version_info >= (3, 7):
-    pytest.skip(
-        "Skipping Rule-Based Profiler tests (minimum Python version 3.7 is required).",
-        allow_module_level=True,
-    )
+skip_if_python_below_minimum_version()
 
 yaml = YAML()
 
@@ -2386,7 +2383,7 @@ def parameters_with_different_depth_level_values():
     return parameter_values
 
 
-@pytest.fixture()
+@pytest.fixture
 def variables_multi_part_name_parameter_container():
     variables_multi_part_name_parameter_node: ParameterNode = ParameterNode(
         {

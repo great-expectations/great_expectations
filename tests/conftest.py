@@ -59,6 +59,8 @@ from great_expectations.self_check.util import (
 from great_expectations.util import is_library_loadable
 from tests.test_utils import create_files_in_directory
 
+RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 7)
+
 yaml = YAML()
 ###
 #
@@ -72,7 +74,17 @@ logger = logging.getLogger(__name__)
 
 
 def skip_if_python_below_minimum_version():
-    if sys.version_info < (3, 7):
+    """
+    All test fixtures for Rule-Based Profiler must execute this method; for example:
+        ```
+        skip_if_python_below_minimum_version()
+        ```
+
+    This method can also be executed at the module level (by placing the above line at the top, just below the imports).
+
+    for as long as the support for Python versions less than 3.7 is provided.
+    """
+    if sys.version_info < RULE_BASED_PROFILER_MIN_PYTHON_VERSION:
         pytest.skip(
             "skipping fixture because Python version 3.7 (or greater) is required"
         )
@@ -5073,7 +5085,6 @@ def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
     return ConfigurationIdentifier(configuration_key=profiler_name)
 
 
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def populated_profiler_store(
     empty_profiler_store: ProfilerStore,
