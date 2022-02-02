@@ -137,12 +137,19 @@ def test_reconcile_profiler_rules_new_rule_override(
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+
     rule_name: str
+    effective_rule_configs_actual: dict = {
+        rule.name: rule.to_json_dict() for rule in effective_rules
+    }
+
     rule: Rule
     rule_config: dict
-    assert {rule.name: rule.to_json_dict() for rule in effective_rules} == {
+    effective_rule_configs_expected: dict = {
         rule_config["name"]: rule_config for rule_config in expected_rules
     }
+
+    assert effective_rule_configs_actual == effective_rule_configs_expected
 
 
 def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
@@ -187,12 +194,19 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+
     rule_name: str
+    effective_rule_configs_actual: dict = {
+        rule.name: rule.to_json_dict() for rule in effective_rules
+    }
+
     rule: Rule
     rule_config: dict
-    assert {rule.name: rule.to_json_dict() for rule in effective_rules} == {
+    effective_rule_configs_expected: dict = {
         rule_config["name"]: rule_config for rule_config in expected_rules
     }
+
+    assert effective_rule_configs_actual == effective_rule_configs_expected
 
 
 def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
@@ -254,12 +268,19 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+
     rule_name: str
+    effective_rule_configs_actual: dict = {
+        rule.name: rule.to_json_dict() for rule in effective_rules
+    }
+
     rule: Rule
     rule_config: dict
-    assert {rule.name: rule.to_json_dict() for rule in effective_rules} == {
+    effective_rule_configs_expected: dict = {
         rule_config["name"]: rule_config for rule_config in expected_rules
     }
+
+    assert effective_rule_configs_actual == effective_rule_configs_expected
 
 
 def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builder_overrides(
@@ -309,12 +330,19 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+
     rule_name: str
+    effective_rule_configs_actual: dict = {
+        rule.name: rule.to_json_dict() for rule in effective_rules
+    }
+
     rule: Rule
     rule_config: dict
-    assert {rule.name: rule.to_json_dict() for rule in effective_rules} == {
+    effective_rule_configs_expected: dict = {
         rule_config["name"]: rule_config for rule_config in expected_rules
     }
+
+    assert effective_rule_configs_actual == effective_rule_configs_expected
 
 
 def test_reconcile_profiler_rules_existing_rule_full_rule_override(
@@ -391,9 +419,16 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override(
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
+
     rule_name: str
+    effective_rule_configs_actual: dict = {
+        rule.name: rule.to_json_dict() for rule in effective_rules
+    }
+
     rule: Rule
     rule_config: dict
-    assert {rule.name: rule.to_json_dict() for rule in effective_rules} == {
+    effective_rule_configs_expected: dict = {
         rule_config["name"]: rule_config for rule_config in expected_rules
     }
+
+    assert effective_rule_configs_actual == effective_rule_configs_expected
