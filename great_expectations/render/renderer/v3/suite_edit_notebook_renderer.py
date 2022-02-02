@@ -408,7 +408,6 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         """
         deep_filter_properties_iterable(
             properties=batch_request,
-            keep_falsy_numerics=True,
             inplace=True,
         )
         self.render(
