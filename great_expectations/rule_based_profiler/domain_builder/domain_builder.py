@@ -4,9 +4,9 @@ from typing import List, Optional, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.types import (
+    Builder,
     Domain,
     ParameterContainer,
-    SerializableBuilder,
 )
 from great_expectations.rule_based_profiler.util import (
     get_batch_ids as get_batch_ids_from_batch_request,
@@ -17,7 +17,7 @@ from great_expectations.rule_based_profiler.util import (
 from great_expectations.validator.validator import Validator
 
 
-class DomainBuilder(SerializableBuilder, ABC):
+class DomainBuilder(Builder, ABC):
     """
     A DomainBuilder provides methods to get domains based on one or more batches of data.
     """

@@ -11,7 +11,7 @@ from .base import (
     RuleConfig,
     RuleConfigSchema,
 )
-from .serializable_builder import SerializableBuilder
+from .builder import Builder
 
 from .domain import (  # isort:skip
     Domain,

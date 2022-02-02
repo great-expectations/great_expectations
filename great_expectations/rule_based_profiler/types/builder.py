@@ -7,9 +7,9 @@ from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
 
 
-class SerializableBuilder(SerializableDictDot):
+class Builder(SerializableDictDot):
     """
-    A SerializableBuilder provides methods to serialize any builder object of a rule generically.
+    A Builder provides methods to serialize any builder object of a rule generically.
     """
 
     def to_dict(self) -> dict:

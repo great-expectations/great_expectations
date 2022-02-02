@@ -26,7 +26,7 @@ from great_expectations.rule_based_profiler.types.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
-from great_expectations.rule_based_profiler.types.serializable_builder import (
+from great_expectations.rule_based_profiler.types.builder import (
     validate_builder_override_config,
 )
 

@@ -3,13 +3,13 @@ from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.rule_based_profiler.types import (
+    Builder,
     Domain,
     ParameterContainer,
-    SerializableBuilder,
 )
 
 
-class ExpectationConfigurationBuilder(SerializableBuilder, ABC):
+class ExpectationConfigurationBuilder(Builder, ABC):
     def __init__(
         self,
         expectation_type: str,
