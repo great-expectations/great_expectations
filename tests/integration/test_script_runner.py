@@ -188,6 +188,9 @@ local_tests = [
     {
         "user_flow_script": "tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py",
     },
+    {
+        "user_flow_script": "tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py",
+    },
 ]
 
 dockerized_db_tests = [

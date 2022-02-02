@@ -35,7 +35,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
             },
             "tests": [
                 {
-                    "title": "positive_test",
+                    "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {"column": "all_threes"},
@@ -44,10 +44,10 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
                     },
                 },
                 {
-                    "title": "negative_test",
+                    "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "some_zeroes", "mostly": 0.6},
+                    "in": {"column": "some_zeroes", "mostly": 0.8},
                     "out": {
                         "success": False,
                         "unexpected_index_list": [3],
@@ -79,3 +79,18 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
 if __name__ == "__main__":
     ExpectColumnValuesToEqualThree().print_diagnostic_checklist()
+
+# Note to users: code below this line is only for integration testing -- ignore!
+
+diagnostics = ExpectColumnValuesToEqualThree().run_diagnostics()
+
+for check in diagnostics["tests"]:
+    assert check["test_passed"] is True
+    assert check["error_message"] is None
+    assert check["stack_trace"] is None
+
+for check in diagnostics["errors"]:
+    assert check is None
+
+for check in diagnostics["maturity_checklist"]["experimental"]:
+    assert check["passed"] is True
