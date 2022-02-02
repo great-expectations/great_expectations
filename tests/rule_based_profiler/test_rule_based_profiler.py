@@ -6,7 +6,7 @@ from great_expectations.rule_based_profiler.types import ParameterContainer
 
 def test_reconcile_profiler_variables_no_overrides(
     profiler_with_placeholder_args,
-    variables_multi_part_name_parameter_container: ParameterContainer,
+    variables_multi_part_name_parameter_container,
 ):
     variables: Dict[str, Any] = {}
     effective_variables: Optional[
