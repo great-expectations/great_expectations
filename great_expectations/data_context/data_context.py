@@ -3571,7 +3571,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
             )
         else:
-            # Roundtrip through schema validator to add missing fields
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             datasource_config = datasourceConfigSchema.load(instantiated_class.config)
             full_datasource_config = datasourceConfigSchema.dump(datasource_config)
             usage_stats_event_payload = datasource_anonymizer.anonymize_datasource_info(
@@ -3740,7 +3740,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ):
             datasource_name: str = name or config.get("name") or "my_temp_datasource"
             if datasource_anonymizer.is_parent_class_recognized_v3_api(config=config):
-                # Roundtrip through schema validator to add missing fields
+                # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
                 datasource_config = datasourceConfigSchema.load(
                     instantiated_class.config
                 )
@@ -3769,7 +3769,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             checkpoint_anonymizer.is_parent_class_recognized(config=config) is not None
         ):
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
-            # Roundtrip through schema validator to add missing fields
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             checkpoint_config: Union[CheckpointConfig, dict]
             checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config

@@ -503,7 +503,7 @@ class RuleBasedProfiler:
         domain_builder_as_dict["class_name"] = domain_builder.__class__.__name__
         domain_builder_as_dict["module_name"] = domain_builder.__class__.__module__
 
-        # Roundtrip through schema validation to add any missing fields
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
         deserialized_config: dict = domainBuilderConfigSchema.load(
             domain_builder_as_dict
         )
@@ -559,7 +559,7 @@ class RuleBasedProfiler:
                 "module_name"
             ] = parameter_builder.__class__.__module__
 
-            # Roundtrip through schema validation to add any missing fields
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             deserialized_config: dict = parameterBuilderConfigSchema.load(
                 parameter_builder_as_dict
             )
@@ -634,7 +634,7 @@ class RuleBasedProfiler:
                 "module_name"
             ] = expectation_configuration_builder.__class__.__module__
 
-            # Roundtrip through schema validation to add any missing fields
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             deserialized_config: dict = (
                 expectationConfigurationBuilderConfigSchema.load(
                     expectation_configuration_builder_as_dict
