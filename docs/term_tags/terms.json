@@ -119,10 +119,10 @@
     "definition": "The act of applying an Expectation Suite to a Batch.",
     "url": "terms/validation"
   },
-  "action": {
-    "term": "Action",
+  "validation_action": {
+    "term": "Validation Action",
     "definition": "A Python class with a run method that takes the result of validating a Batch against an Expectation Suite and does something with it",
-    "url": "terms/action"
+    "url": "terms/validation_action"
   },
   "validation_operator": {
     "term": "Validation Operator",
