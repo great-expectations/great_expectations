@@ -1,5 +1,4 @@
 import os
-import uuid
 from typing import List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -22,9 +21,10 @@ def add_profiler(
     data_context: "DataContext",  # noqa: F821
     ge_cloud_id: Optional[str] = None,
 ) -> RuleBasedProfiler:
-    _check_validity_of_batch_requests_in_config(
-        config, data_context.profiler_store_name
-    )
+    if not _check_validity_of_batch_requests_in_config(config):
+        raise ge_exceptions.InvalidConfigError(
+            f'batch_data found in batch_request cannot be saved to ProfilerStore "{data_context.profiler_store_name}"'
+        )
 
     profiler_config: dict = config.to_json_dict()
 
@@ -54,8 +54,8 @@ def add_profiler(
 
 
 def _check_validity_of_batch_requests_in_config(
-    config: RuleBasedProfilerConfig, profiler_store_name: str
-) -> None:
+    config: RuleBasedProfilerConfig,
+) -> bool:
     # Evaluate nested types in RuleConfig to parse out BatchRequests
     batch_requests = []
     for rule in config.rules.values():
@@ -72,9 +72,8 @@ def _check_validity_of_batch_requests_in_config(
     # DataFrames shouldn't be saved to ProfilerStore
     for batch_request in batch_requests:
         if batch_request_contains_batch_data(batch_request=batch_request):
-            raise ge_exceptions.InvalidConfigError(
-                f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store_name}"'
-            )
+            return False
+    return True
 
 
 def get_profiler(
