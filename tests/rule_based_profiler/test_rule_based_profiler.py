@@ -8,7 +8,7 @@ def test_reconcile_profiler_variables_no_overrides(
     profiler_with_placeholder_args,
     variables_multi_part_name_parameter_container: ParameterContainer,
 ):
-    variables: Optional[Dict[str, Any]] = {}
+    variables: Dict[str, Any] = {}
     effective_variables: Optional[
         ParameterContainer
     ] = profiler_with_placeholder_args.reconcile_profiler_variables(variables=variables)
@@ -18,7 +18,7 @@ def test_reconcile_profiler_variables_no_overrides(
 def test_reconcile_profiler_variables_with_overrides(
     profiler_with_placeholder_args,
 ):
-    variables: Optional[Dict[str, Any]] = {
+    variables: Dict[str, Any] = {
         "false_positive_threshold": 2.0e-2,
         "sampling_method": "bootstrap",
         "mostly": 8.0e-1,
@@ -38,7 +38,7 @@ def test_reconcile_profiler_variables_with_overrides(
 def test_reconcile_profiler_rules_no_overrides(
     profiler_with_placeholder_args,
 ):
-    rules: Optional[Dict[str, Dict[str, Any]]] = {}
+    rules: Dict[str, Dict[str, Any]] = {}
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
