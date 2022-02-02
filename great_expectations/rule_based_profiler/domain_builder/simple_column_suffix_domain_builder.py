@@ -31,6 +31,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
 
         if column_name_suffixes is None:
             column_name_suffixes = []
+
         self._column_name_suffixes = column_name_suffixes
 
     def _get_domains(
@@ -86,3 +87,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         ]
 
         return domains
+
+    @property
+    def column_name_suffixes(self) -> Optional[List[str]]:
+        return self._column_name_suffixes

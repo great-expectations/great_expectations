@@ -14,6 +14,8 @@ import Prerequisites from '../creating_custom_expectations/components/prerequisi
 
 For example, we might expect the fraction of null values to be `mostly=.05`, in which case any value above 1 would indicate an impossible fraction of a single whole (since a value above one indicates more than a single whole), and should throw an error. Another example would be if we want to indicate that the the mean of a row adheres to a minimum value bound, such as `min_value=5`. In this case, attempting to pass in a non numerical value should clearly throw an error!
 
+This guide will walk you through the process of adding validation and Type Checking to the input parameters of the Custom Expectation built in the guide for [how to create a Custom Column Aggregate Expectation](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).  When you have completed this guide, you will have implemented a method to validate that the input parameters provided to this Custom Expectation satisfy the requirements necessary for them to be used as intended by the Custom Expectation's code.
+
 ## Steps
 
 ### 1. Deciding what to validate
