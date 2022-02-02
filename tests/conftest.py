@@ -59,7 +59,7 @@ from great_expectations.self_check.util import (
 from great_expectations.util import is_library_loadable
 from tests.test_utils import create_files_in_directory
 
-RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 10)
+RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 7)
 
 yaml = YAML()
 ###
