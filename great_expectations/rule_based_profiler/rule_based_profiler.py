@@ -360,12 +360,12 @@ class RuleBasedProfiler:
         """
         effective_variables: ParameterContainer
         if variables is not None and isinstance(variables, dict):
-            variables_dict: dict = self.variables.to_dict()["parameter_nodes"][
+            variables_configs: dict = self.variables.to_dict()["parameter_nodes"][
                 "variables"
             ]["variables"]
-            variables_dict.update(variables)
+            variables_configs.update(variables)
             effective_variables = build_parameter_container_for_variables(
-                variables_configs=variables_dict
+                variables_configs=variables_configs
             )
         else:
             effective_variables = self.variables
