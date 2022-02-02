@@ -1418,10 +1418,10 @@ class Expectation(metaclass=MetaExpectation):
 
             keys = self.library_metadata.keys()
             has_all_required_keys = all(
-                [key in keys for key in {"maturity", "tags", "contributors"}]
+                [key in keys for key in {"tags", "contributors"}]
             )
             has_no_forbidden_keys = all(
-                [key in {"maturity", "tags", "contributors", "package"} for key in keys]
+                [key in {"tags", "contributors", "package"} for key in keys]
             )
             if has_all_required_keys and has_no_forbidden_keys:
                 augmented_library_metadata["library_metadata_passed_checks"] = True
