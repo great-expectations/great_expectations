@@ -5017,6 +5017,10 @@ def profiler_store_name() -> str:
 def profiler_config_with_placeholder_args(
     profiler_name: str,
 ) -> RuleBasedProfilerConfig:
+    """
+    This fixture does not correspond to a practical profiler with rules, whose constituent components perform meaningful
+    computations; rather, it uses "placeholder" style attribute values, which is adequate for configuration level tests.
+    """
     return RuleBasedProfilerConfig(
         name=profiler_name,
         class_name="RuleBasedProfiler",
