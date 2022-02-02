@@ -66,20 +66,64 @@ stages:
           - publish: pip-freeze.txt
             artifact: PipFreeze
 
-      - job: bigquery_expectations_test
-        timeoutInMinutes: 150 # Each stage runs in about 60 min and 30 min respectively.
+#      - job: bigquery_expectations_test
+#        timeoutInMinutes: 150 # Each stage runs in about 60 min and 30 min respectively.
+#        variables:
+#          python.version: '3.8'
+#
+#        strategy:
+#          matrix:
+#            expectations_cfe:
+#              test_script: 'tests/test_definitions/test_expectations_cfe.py'
+#              extra_args: ''
+#            expectations:
+#              test_script: 'tests/test_definitions/test_expectations.py'
+#              extra_args: ''
+#          maxParallel: 1
+#        steps:
+#          - task: UsePythonVersion@0
+#            inputs:
+#              versionSpec: '$(python.version)'
+#            displayName: 'Use Python $(python.version)'
+#
+#          - bash: python -m pip install --upgrade pip==20.2.4
+#            displayName: 'Update pip'
+#
+#          - script: |
+#              pip install -r requirements-dev.txt --constraint constraints-dev.txt
+#            displayName: 'Install dependencies'
+#          - script: |
+#              pip install google-cloud-bigquery-storage
+#            displayName: 'Install Google Cloud dependencies'
+#          - task: DownloadSecureFile@1
+#            name: gcp_authkey
+#            displayName: 'Download Google Service Account'
+#            inputs:
+#              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+#              retryCount: '2'
+#
+#          - script: |
+#              pip install pytest-azurepipelines
+#              pip freeze > pip-freeze.txt
+#              mkdir -p junit
+#              pytest -v $(test_script) \
+#                $(extra_args) \
+#                --bigquery \
+#                --junitxml=junit/test-results.xml \
+#                --no-spark --no-postgresql --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
+#                --ignore=tests/cli --ignore=tests/integration/usage_statistics
+#            displayName: 'pytest'
+#            env:
+#              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+#              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+#              GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+#          # The pip freeze output could be helpful to reproduce performance test results.
+#          - publish: pip-freeze.txt
+#            artifact: PipFreeze
+      - job: aws_integration_test
+        timeoutInMinutes: 60 # Each stage runs in about 60 min and 30 min respectively.
         variables:
           python.version: '3.8'
-
-        strategy:
-          matrix:
-            expectations_cfe:
-              test_script: 'tests/test_definitions/test_expectations_cfe.py'
-              extra_args: ''
-            expectations:
-              test_script: 'tests/test_definitions/test_expectations.py'
-              extra_args: ''
-          maxParallel: 1
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -92,31 +136,19 @@ stages:
           - script: |
               pip install -r requirements-dev.txt --constraint constraints-dev.txt
             displayName: 'Install dependencies'
-          - script: |
-              pip install google-cloud-bigquery-storage
-            displayName: 'Install Google Cloud dependencies'
           - task: DownloadSecureFile@1
-            name: gcp_authkey
-            displayName: 'Download Google Service Account'
+            name: aws_authkey
+            displayName: 'Download AWS Credentials'
             inputs:
-              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+              secureFile: 'aws_config_sandbox'
               retryCount: '2'
-
           - script: |
-              pip install pytest-azurepipelines
-              pip freeze > pip-freeze.txt
-              mkdir -p junit
-              pytest -v $(test_script) \
-                $(extra_args) \
-                --bigquery \
-                --junitxml=junit/test-results.xml \
-                --no-spark --no-postgresql --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
-                --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pip install pytest pytest-azurepipelines
+              pytest -v --docs-tests -m docs --aws tests/integration/test_script_runner.py
             displayName: 'pytest'
             env:
-              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
-              GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
-          # The pip freeze output could be helpful to reproduce performance test results.
-          - publish: pip-freeze.txt
-            artifact: PipFreeze
+              # AWS credentials
+              AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
+              # AWS Athena creds
+              ATHENA_DB_NAME: $(ATHENA_DB_NAME)
+              ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)

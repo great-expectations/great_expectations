@@ -101,12 +101,6 @@ stages:
           inputs:
               secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
-        - task: DownloadSecureFile@1
-          name: aws_authkey
-          displayName: 'Download AWS Credentials'
-          inputs:
-              secureFile: 'aws_config'
-              retryCount: '2'
 
         - script: |
             # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options

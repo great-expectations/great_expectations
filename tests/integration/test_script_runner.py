@@ -12,6 +12,7 @@ from great_expectations.data_context.util import file_relative_path
 
 
 class BackendDependencies(enum.Enum):
+    AWS = "AWS"
     BIGQUERY = "BIGQUERY"
     GCS = "GCS"
     MYSQL = "MYSQL"
@@ -428,12 +429,14 @@ cloud_azure_tests = [
 
 cloud_s3_tests = [
     {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        # "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
+        # "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        # "extra_backend_dependencies": BackendDependencies.AWS,
     },
     {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        # "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py",
+        # "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        # "extra_backend_dependencies": BackendDependencies.AWS,
     },
     # TODO: <Alex>ALEX -- uncomment all S3 tests once S3 testing in Azure Pipelines is re-enabled and items for specific tests below are addressed.</Alex>
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
@@ -441,35 +444,37 @@ cloud_s3_tests = [
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/configured_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "extra_backend_dependencies": BackendDependencies.AWS,
     # },
     # TODO: <Alex>ALEX -- Implement S3 Configured Python Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once S3 Configured Python Example is implemented.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/configured_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "extra_backend_dependencies": BackendDependencies.AWS,
     # },
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and S3 Configured YAML Example is implemented.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/configured_yaml_example.py",
-    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    #     "extra_backend_dependencies": [BackendDependencies.SPARK, BackendDependencies.AWS],
     # },
     # TODO: <Alex>ALEX -- Implement S3 Configured Python Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and S3 Configured Python Example is implemented.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/configured_python_example.py",
-    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    #     "extra_backend_dependencies": [BackendDependencies.SPARK, BackendDependencies.AWS],
     # },
     # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    #     "extra_backend_dependencies": [BackendDependencies.SPARK, BackendDependencies.AWS],
     # },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    #     "extra_backend_dependencies": [BackendDependencies.SPARK, BackendDependencies.AWS],
     # },
 ]
 
@@ -479,14 +484,14 @@ cloud_redshift_tests = [
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    #     "extra_backend_dependencies": [BackendDependencies.AWS, BackendDependencies.REDSHIFT],
     #     "util_script": "tests/test_utils.py",
     # },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    #     "extra_backend_dependencies": [BackendDependencies.AWS, BackendDependencies.REDSHIFT],
     #     "util_script": "tests/test_utils.py",
     # },
 ]
@@ -501,7 +506,7 @@ docs_test_matrix += cloud_azure_tests
 docs_test_matrix += cloud_s3_tests
 docs_test_matrix += cloud_redshift_tests
 
-integration_test_matrix = [
+pandas_integration_tests = [
     {
         "name": "pandas_one_multi_batch_request_one_validator",
         "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
@@ -541,6 +546,20 @@ integration_test_matrix = [
         ),
     },
 ]
+aws_integration_tests = [
+    {
+        "name": "awsathena_test",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "user_flow_script": "tests/integration/db/awsathena.py",
+        "extra_backend_dependencies": BackendDependencies.AWS,
+    }
+]
+
+
+# populate integration_test_matrix with sub-lists
+integration_test_matrix = []
+# integration_test_matrix += pandas_integration_tests
+integration_test_matrix += aws_integration_tests
 
 
 def idfn(test_configuration):
@@ -700,6 +719,8 @@ def _check_for_skipped_tests(pytest_args, test_configuration) -> None:
         pytest.skip("Skipping bigquery tests")
     elif dependencies == BackendDependencies.GCS and not pytest_args.bigquery:
         pytest.skip("Skipping GCS tests")
+    elif dependencies == BackendDependencies.AWS and not pytest_args.aws:
+        pytest.skip("Skipping AWS tests")
     elif dependencies == BackendDependencies.REDSHIFT and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping redshift tests")
     elif dependencies == BackendDependencies.SPARK and pytest_args.no_spark:
