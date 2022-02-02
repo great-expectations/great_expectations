@@ -143,5 +143,10 @@
     "term": "Validator",
     "definition": "Used to run an Expectation Suite against data.",
     "url": "terms/validator"
+  },
+  "plugin": {
+    "term": "Plugin",
+    "definition": "Extends Great Expectations' components and/or functionality.",
+    "url": "terms/plugin"
   }
 }
