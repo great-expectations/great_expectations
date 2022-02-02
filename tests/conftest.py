@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import shutil
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -4996,16 +4997,22 @@ def cloud_data_context_with_datasource_sqlalchemy_engine(
     return context
 
 
+# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def profiler_name() -> str:
     return "my_first_profiler"
 
 
+# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def profiler_store_name() -> str:
     return "profiler_store"
 
 
+# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def profiler_config_with_placeholder_args(
     profiler_name: str,
@@ -5041,16 +5048,22 @@ def profiler_config_with_placeholder_args(
     )
 
 
+# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def empty_profiler_store(profiler_store_name: str) -> ProfilerStore:
     return ProfilerStore(profiler_store_name)
 
 
+# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
     return ConfigurationIdentifier(configuration_key=profiler_name)
 
 
+# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def populated_profiler_store(
     empty_profiler_store: ProfilerStore,
