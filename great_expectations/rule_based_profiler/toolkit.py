@@ -28,7 +28,7 @@ def add_profiler(
 
     profiler_config: dict = config.to_json_dict()
 
-    new_profiler = instantiate_class_from_config(
+    new_profiler: RuleBasedProfiler = instantiate_class_from_config(
         config=profiler_config,
         runtime_environment={"data_context": data_context},
         config_defaults={"module_name": "great_expectations.rule_based_profiler"},
@@ -42,7 +42,7 @@ def add_profiler(
             configuration_key=config.name,
         )
 
-    profiler_store = data_context.profiler_store
+    profiler_store: ProfilerStore = data_context.profiler_store
     profiler_ref = profiler_store.set(key=key, value=config)
     if isinstance(profiler_ref, GeCloudIdAwareRef):
         pass

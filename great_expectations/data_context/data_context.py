@@ -3290,15 +3290,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "variables": variables,
             "commented_map": commented_map,
         }
+
         # Package config and perform validation
-        errors: Dict[str, List[str]] = ruleBasedProfilerConfigSchema.validate(
-            config_data
-        )
-        if errors:
-            raise ValidationError(
-                f"Something went wrong during profiler validation: {errors}"
-            )
-        config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**config_data)
+        validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
+        profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
+
+        config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
 
         # Chetan - 20220127 - Open to refactor all Profiler CRUD from toolkit to class methods
         return profiler_toolkit.add_profiler(
