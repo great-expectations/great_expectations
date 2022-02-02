@@ -1,7 +1,7 @@
 ---
 id: evaluation_parameter
 title: Evaluation Parameter
-hoverText: A connector to store and retrieve information about parameters used during Validation of an Expectation which reference simple expressions or previously generated metrics.
+hoverText: A dynamic value used during Validation of an Expectation which is populated by evaluating simple expressions or by referencing previously generated metrics.
 ---
 
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
@@ -16,7 +16,7 @@ import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
 ### Definition
 
-An Evaluation Parameter is a connector to store and retrieve information about parameters used during <TechnicalTag relative="../" tag="validation" text="Validation" /> of an <TechnicalTag relative="../" tag="expectation" text="Expectation" /> which reference simple expressions or previously generated metrics.
+An Evaluation Parameter is a dynamic value used during <TechnicalTag relative="../" tag="validation" text="Validation" /> of an <TechnicalTag relative="../" tag="expectation" text="Expectation" /> which is populated by evaluating simple expressions or by referencing previously generated <TechnicalTag relative="../" tag="metric" text="Metrics" />.
 
 ### Features and promises
 
@@ -24,19 +24,37 @@ You can use Evaluation Parameters to configure Expectations to use dynamic value
 
 ### Relationship to other objects
 
-Evaluation Parameters are used in Expectations when Validating data.  <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> use <TechnicalTag relative="../" tag="validation_action" text="Action" /> to store Evaluation Parameters in the <TechnicalTag relative="../" tag="evaluation_parameter_store" text="Evaluation Parameter Store" />.
+Evaluation Parameters are used in Expectations when Validating data.  <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> use <TechnicalTag relative="../" tag="validation_action" text="Actions" /> to store Evaluation Parameters in the <TechnicalTag relative="../" tag="evaluation_parameter_store" text="Evaluation Parameter Store" />.
 
 ## Use cases
 
 <CreateHeader/>
 
-When creating expectations through the interactive method, Evaluation Parameters can be provided a temporary initial value.  This will allow you to test Expectations that are meant to rely on values from previous Validation runs before you have actually used them to Validate data.  Say you have created a Pandas dataframe called `my_df` that references a CSV that contains ten rows of data.  (To do so in the interactive process for creating Expectations, you would use the `great_expectations.read_csv()` method).  You want to create an expression that asserts that the row count for each Validation remains the same as the previous `upstream_row_count`, but since there is no previous `upstream_row_count` you need to provide a value that matches what the Expectation you are creating will find.
+When creating Expectations based on introspection of Data, it can be useful to reference the results of a previous Expectation Suite's Validation.  To do this, you would use an `URN` directing to an Evaluation Parameter store.  An example of this might look something like the following:
+
+```python title="Python code"
+eval_param_urn = 'urn:great_expectations:validations:my_expectation_suite_1:expect_table_row_count_to_be_between.result.observed_value'
+downstream_batch.expect_table_row_count_to_equal(
+    value={
+        '$PARAMETER': eval_param_urn, # this is the actual parameter we're going to use in the validation
+    }
+)
+```
+
+The core of this is a `$PARAMETER : URN` pair. When Great Expectations encounters a `$PARAMETER` flag during validation, it will replace the `URN` with a value retrieved from an Evaluation Parameter Store or Metrics Store.
+
+If you do not have a previous Expectation Suite's Validation Results to reference, however, you can instead provide Evaluation Parameters with a temporary initial value. For example, the interactive method of creating Expectations is based on Validating Expectations against a previous run of the same Expectation Suite.  Since a previous run has not been performed when Expectations are being created, Evaluation Parameters cannot reference a past Validation and will require a temporary value instead.  This will allow you to test Expectations that are meant to rely on values from previous Validation runs before you have actually used them to Validate data.  
+
+Say you have created a Pandas dataframe called `my_df` that references a CSV that contains ten rows of data.  (To do so in the interactive process for creating Expectations, you would use the `great_expectations.read_csv()` method).  You want to create an expression that asserts that the row count for each Validation remains the same as the previous `upstream_row_count`, but since there is no previous `upstream_row_count` you need to provide a value that matches what the Expectation you are creating will find.
 
 To do so, you would define the parameter in question (`upstream_row_count`) by assigning it to the `$PARAMETER` value in a dictionary.  Then, you would provide the temporary value for that parameter by setting it as the value of the `$PARAMETER.<parameter_in_question>` key in the same dictionary.  Or, in this case, the `$PARAMETER.upstream_row_count`.
 
 For an example of this, see below:
 
 ```python title="Python code"
+import great_expectations
+csv_path = 'path/to/my_data.csv'
+my_df = great_expectations.read_csv(csv_path)
 my_df.expect_table_row_count_to_equal(
     value={"$PARAMETER": "upstream_row_count", "$PARAMETER.upstream_row_count": 10},
     result_format={'result_format': 'BOOLEAN_ONLY'}
@@ -86,9 +104,11 @@ Although complex values like lists can be used as the value of an Evaluation Par
 
 ### How to create
 
-An Evaluation Parameter is "created" when a parameter is referenced in the results of another Expectation Suite's Validation.  To store them, define a `StoreEvaluationParametersAction` subclass of the `ValidationAction` class in a Checkpoint configuration's `action_list`, and run that Checkpoint.
+An Evaluation Parameter is defined when an Expectation is created.  The Evaluation Parameter at that point will be a reference, either indicating a Metric from the results of a previous Validation, or an expression which will be evaluated prior to a Validation being run on the Expectation Suite.
 
-Evaluation Parameters are *referenced* by making a dictionary with the `$PARAMETER` key.  The value for this key will be the Evaluation Parameter's expression, which will be evaluated at run time and replaced with the value described by said expression.
+The Evaluation Parameter references take the form of a dictionary with the `$PARAMETER` key.  The value for this key will be directions to the desired Metric or the Evaluation Parameter's expression.  In either case, it will be evaluated at run time and replaced with the value described by the reference dictionary's value.  If the reference is pointing to a previous Validation's Metrics, it will be in the form of a `$PARAMETER`: `URN` pair, rather than a `$PARAMETER`: `expression` pair.
+
+To store Evaluation Parameters, define a `StoreEvaluationParametersAction` subclass of the `ValidationAction` class in a Checkpoint configuration's `action_list`, and run that Checkpoint.
 
 It is also possible to [dynamically load Evaluation Parameters from a database](../guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.md).
 
