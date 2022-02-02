@@ -30,6 +30,7 @@ export default class Prerequisites extends React.Component {
     }
   }
 
+
   defaultPrerequisiteItems () {
     return [
         <li key={0.1}>
@@ -38,6 +39,7 @@ export default class Prerequisites extends React.Component {
       </li>]
   }
 
+  
   render () {
     return (
       <div className='admonition admonition-note alert alert--secondary'>
