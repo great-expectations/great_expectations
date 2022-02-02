@@ -144,7 +144,7 @@ stages:
               retryCount: '2'
           - script: |
               pip install pytest pytest-azurepipelines
-              pytest -v --docs-tests -m docs --aws tests/integration/test_script_runner.py
+              pytest -v --docs-tests -m docs --no-postgresql --no-spark --aws tests/integration/test_script_runner.py
             displayName: 'pytest'
             env:
               # AWS credentials
