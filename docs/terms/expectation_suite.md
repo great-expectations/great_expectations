@@ -20,7 +20,7 @@ An Expectation Suite is a collection of verifiable assertions about data.
 
 ### Features and promises
 
-Expectation Suites combine multiple <TechnicalTag relative="../" tag="expectation" text="Expectations" /> into an overall description of a dataset. For example, a team can group all the Expectations about a given table in given database into an Expectation Suite and call it `my_database.my_table`. Note these names are completely flexible and the only constraint on the name of a suite is that it must be unique to a given project.
+Expectation Suites combine multiple <TechnicalTag relative="../" tag="expectation" text="Expectations" /> into an overall description of data. For example, a team can group all the Expectations about a given table in given database into an Expectation Suite and call it `my_database.my_table`. Note these names are completely flexible and the only constraint on the name of a suite is that it must be unique to a given project.
 
 ### Relationship to other objects
 
