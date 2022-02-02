@@ -15,7 +15,7 @@ This document describes how to add configuration validation for an Expectation.
 [Expectations](../../../reference/expectations/expectations.md) will typically be configured using input parameters: 
 for example, we might expect the fraction of null values to be most `mostly=.05`, or the mean of a row to adhere to a `min_value=5` bound.
 
-This guide will use the Custom Expectation built in the [How to create a Custom Column Aggregate Expectation](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) tutorial to walk you through the implementation of a method to validate that the provided input parameters satisfy the requirements for your Custom Expectation.
+This guide will walk you through the process of adding validation and Type Checking to the input parameters of the Custom Expectation built in the guide for [how to create a Custom Column Aggregate Expectation](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).  When you have completed this guide, you will have implemented a method to validate that the input parameters provided to this Custom Expectation satisfy the requirements necessary for them to be used as intended by the Custom Expectation's code.
 
 ## Steps
 
