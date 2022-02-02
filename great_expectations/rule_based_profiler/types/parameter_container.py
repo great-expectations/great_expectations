@@ -290,6 +290,7 @@ def build_parameter_container(
             parameter_container.set_parameter_node(
                 parameter_name_root=parameter_name_root, parameter_node=parameter_node
             )
+
         _build_parameter_node_tree_for_one_parameter(
             parameter_node=parameter_node,
             parameter_name_as_list=fully_qualified_parameter_name_as_list,
@@ -316,6 +317,7 @@ def _build_parameter_node_tree_for_one_parameter(
     if len(parameter_name_as_list) > 1:
         if parameter_name_part not in parameter_node:
             parameter_node[parameter_name_part] = ParameterNode({})
+
         _build_parameter_node_tree_for_one_parameter(
             parameter_node=parameter_node[parameter_name_part],
             parameter_name_as_list=parameter_name_as_list[1:],
