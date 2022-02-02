@@ -32,7 +32,6 @@ from great_expectations.rule_based_profiler.types.base import (
     ruleBasedProfilerConfigSchema,
 )
 
-# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
 if not sys.version_info >= (3, 7):
     pytest.skip(
         "Skipping Rule-Based Profiler tests (minimum Python version 3.7 is required).",

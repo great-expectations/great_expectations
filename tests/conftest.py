@@ -71,6 +71,13 @@ locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 logger = logging.getLogger(__name__)
 
 
+def skip_if_python_below_minimum_version():
+    if sys.version_info < (3, 7):
+        pytest.skip(
+            "skipping fixture because Python version 3.7 (or greater) is required"
+        )
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers",
@@ -4997,22 +5004,20 @@ def cloud_data_context_with_datasource_sqlalchemy_engine(
     return context
 
 
-# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def profiler_name() -> str:
+    skip_if_python_below_minimum_version()
+
     return "my_first_profiler"
 
 
-# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def profiler_store_name() -> str:
+    skip_if_python_below_minimum_version()
+
     return "profiler_store"
 
 
-# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def profiler_config_with_placeholder_args(
     profiler_name: str,
@@ -5021,6 +5026,8 @@ def profiler_config_with_placeholder_args(
     This fixture does not correspond to a practical profiler with rules, whose constituent components perform meaningful
     computations; rather, it uses "placeholder" style attribute values, which is adequate for configuration level tests.
     """
+    skip_if_python_below_minimum_version()
+
     return RuleBasedProfilerConfig(
         name=profiler_name,
         class_name="RuleBasedProfiler",
@@ -5052,21 +5059,20 @@ def profiler_config_with_placeholder_args(
     )
 
 
-# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def empty_profiler_store(profiler_store_name: str) -> ProfilerStore:
+    skip_if_python_below_minimum_version()
+
     return ProfilerStore(profiler_store_name)
 
 
-# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
+    skip_if_python_below_minimum_version()
+
     return ConfigurationIdentifier(configuration_key=profiler_name)
 
 
-# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def populated_profiler_store(
@@ -5074,6 +5080,8 @@ def populated_profiler_store(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
     profiler_key: ConfigurationIdentifier,
 ) -> ProfilerStore:
+    skip_if_python_below_minimum_version()
+
     profiler_store = empty_profiler_store
     profiler_store.set(key=profiler_key, value=profiler_config_with_placeholder_args)
     return profiler_store

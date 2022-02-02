@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import pytest
@@ -11,6 +12,12 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.rule_based_profiler.types import RuleBasedProfilerConfig
 from great_expectations.util import gen_directory_tree_str
 from tests.test_utils import build_profiler_store_using_filesystem
+
+if not sys.version_info >= (3, 7):
+    pytest.skip(
+        "Skipping Rule-Based Profiler tests (minimum Python version 3.7 is required).",
+        allow_module_level=True,
+    )
 
 
 def test_profiler_store_raises_error_with_invalid_value(
