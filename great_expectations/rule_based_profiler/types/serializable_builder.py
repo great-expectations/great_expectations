@@ -1,6 +1,7 @@
 import json
 from typing import Any
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
@@ -44,3 +45,29 @@ class SerializableBuilder(SerializableDictDot):
 
     def __str__(self) -> str:
         return self.__repr__()
+
+
+def validate_builder_override_config(builder_config: dict):
+    """
+    In order to insure successful instantiation of custom builder classes using "instantiate_class_from_config()",
+    candidate builder override configurations are required to supply both "class_name" and "module_name" attributes.
+
+    :param builder_config: candidate builder override configuration
+    :raises: ProfilerConfigurationError
+    """
+    if not (
+        isinstance(builder_config, dict)
+        and len(
+            (
+                set(builder_config.keys())
+                & {
+                    "class_name",
+                    "module_name",
+                }
+            )
+        )
+        == 2
+    ):
+        raise ge_exceptions.ProfilerConfigurationError(
+            'Both "class_name" and "module_name" must be specified.'
+        )

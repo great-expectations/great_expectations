@@ -26,7 +26,9 @@ from great_expectations.rule_based_profiler.types.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
-from great_expectations.rule_based_profiler.util import validate_builder_config
+from great_expectations.rule_based_profiler.types.serializable_builder import (
+    validate_builder_override_config,
+)
 
 
 class RuleBasedProfiler:
@@ -509,7 +511,7 @@ class RuleBasedProfiler:
 
         effective_domain_builder_config: dict = serialized_config
         if domain_builder_config:
-            validate_builder_config(builder_config=domain_builder_config)
+            validate_builder_override_config(builder_config=domain_builder_config)
             effective_domain_builder_config.update(domain_builder_config)
 
         return effective_domain_builder_config
@@ -534,7 +536,7 @@ class RuleBasedProfiler:
         """
         parameter_builder_config: dict
         for parameter_builder_config in parameter_builder_configs:
-            validate_builder_config(builder_config=parameter_builder_config)
+            validate_builder_override_config(builder_config=parameter_builder_config)
 
         effective_parameter_builder_configs: Dict[str, dict] = {}
 
@@ -586,7 +588,7 @@ class RuleBasedProfiler:
     @staticmethod
     def _reconcile_rule_expectation_configuration_builder_configs(
         rule: Rule, expectation_configuration_builder_configs: List[dict]
-    ) -> Optional[List[dict]]:
+    ) -> List[dict]:
         """
         Rule "expectation configuration builders" reconciliation involves combining the expectation configuration builders, instantiated from Rule
         configuration (e.g., stored in a YAML file managed by the Profiler store), with the expectation configuration builders
@@ -605,7 +607,7 @@ class RuleBasedProfiler:
         for (
             expectation_configuration_builder_config
         ) in expectation_configuration_builder_configs:
-            validate_builder_config(
+            validate_builder_override_config(
                 builder_config=expectation_configuration_builder_config
             )
 
@@ -658,7 +660,7 @@ class RuleBasedProfiler:
         )
 
         if not effective_expectation_configuration_builder_configs:
-            return None
+            return []
 
         return list(effective_expectation_configuration_builder_configs.values())
 
