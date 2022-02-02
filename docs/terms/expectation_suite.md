@@ -61,7 +61,7 @@ Each of the Expectation Suite methods that support a Create, Read, Update, or De
 
 - **expectation_configuration** - an `ExpectationConfiguration` object that is used to determine whether and where this Expectation already exists within the Suite. It can be a complete or a partial ExpectationConfiguration.
 - **match_type** - a string with the value of `domain`, `success`, or `runtime` which determines the criteria used for matching:
-    - `domain` checks whether two Expectation Configurations apply to the same data. It results in the loosest match, and can use the least complete ExpectationConfiguration object. For example, for a column map Expectation, `domain_kwargs` will include the Expectation_type, the column, and any row_conditions that may affect which rows are evaluated by the Expectation.
+    - `domain` checks whether two Expectation Configurations apply to the same data. It results in the loosest match, and can use the least complete ExpectationConfiguration object. For example, for a column map Expectation, a `domain` **match_type** will check that the expectation_type matches, and that the column and any row_conditions that affect which rows are evaluated by the Expectation match.
     - `success` criteria are more exacting - in addition to the `domain` kwargs, these include those kwargs used when evaluating the success of an Expectation, like `mostly`, `max`, or `value_set`.
     -`runtime` are the most specific - in addition to `domain_kwargs` and `success_kwargs`, these include kwargs used for runtime configuration. Currently, these include `result_format`, `include_config`, and `catch_exceptions`
 
