@@ -107,16 +107,6 @@ local_tests = [
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/dataconnector_docs",
     },
-    # { READ THIS MORE
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/dataconnector_docs",
-    # },
-    # { READ THIS MORE
-    #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "data_dir": "tests/test_sets/dataconnector_docs",
-    # },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
@@ -160,10 +150,6 @@ local_tests = [
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     },
-    # { #LOOOK INTO THIS MORE
-    #     "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
-    #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    # },
     {
         "user_flow_script": "tests/integration/docusaurus/miscellaneous/migration_guide_pandas_v3_api.py",
         "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/",
@@ -271,6 +257,11 @@ dockerized_db_tests = [
         "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/",
         "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
         "util_script": "tests/test_utils.py",
+        "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     },
 ]
@@ -429,14 +420,26 @@ cloud_azure_tests = [
 
 cloud_s3_tests = [
     {
-        # "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
-        # "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        # "extra_backend_dependencies": BackendDependencies.AWS,
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "extra_backend_dependencies": BackendDependencies.AWS,
     },
     {
-        # "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py",
-        # "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        # "extra_backend_dependencies": BackendDependencies.AWS,
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "extra_backend_dependencies": BackendDependencies.AWS,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/dataconnector_docs",
+        "extra_backend_dependencies": BackendDependencies.AWS,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/dataconnector_docs",
+        "extra_backend_dependencies": BackendDependencies.AWS,
     },
     # TODO: <Alex>ALEX -- uncomment all S3 tests once S3 testing in Azure Pipelines is re-enabled and items for specific tests below are addressed.</Alex>
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
@@ -498,13 +501,13 @@ cloud_redshift_tests = [
 
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
-# docs_test_matrix += dockerized_db_tests
-# docs_test_matrix += cloud_snowflake_tests
-# docs_test_matrix += cloud_gcp_tests
-# docs_test_matrix += cloud_bigquery_tests
-# docs_test_matrix += cloud_azure_tests
-# docs_test_matrix += cloud_s3_tests
-# docs_test_matrix += cloud_redshift_tests
+docs_test_matrix += dockerized_db_tests
+docs_test_matrix += cloud_snowflake_tests
+docs_test_matrix += cloud_gcp_tests
+docs_test_matrix += cloud_bigquery_tests
+docs_test_matrix += cloud_azure_tests
+docs_test_matrix += cloud_s3_tests
+docs_test_matrix += cloud_redshift_tests
 
 pandas_integration_tests = [
     {
