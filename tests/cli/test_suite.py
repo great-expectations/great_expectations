@@ -790,7 +790,6 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
     batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
-        keep_falsy_numerics=True,
     )
     batch_request = standardize_batch_request_display_ordering(
         batch_request=batch_request
@@ -1214,7 +1213,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
     batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
-        keep_falsy_numerics=True,
     )
     batch_request = standardize_batch_request_display_ordering(
         batch_request=batch_request
@@ -1469,7 +1467,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
     batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
-        keep_falsy_numerics=True,
     )
     batch_request = standardize_batch_request_display_ordering(
         batch_request=batch_request
@@ -1707,7 +1704,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
     batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
-        keep_falsy_numerics=True,
     )
     batch_request = standardize_batch_request_display_ordering(
         batch_request=batch_request
@@ -1965,7 +1961,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
     batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
-        keep_falsy_numerics=True,
     )
     batch_request = standardize_batch_request_display_ordering(
         batch_request=batch_request
@@ -3087,7 +3082,6 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
     batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
-        keep_falsy_numerics=True,
     )
     batch_request = standardize_batch_request_display_ordering(
         batch_request=batch_request
@@ -3329,7 +3323,6 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     batch_request_obj: BatchRequest = BatchRequest(**batch_request)
     batch_request = deep_filter_properties_iterable(
         properties=batch_request_obj.to_json_dict(),
-        keep_falsy_numerics=True,
     )
     batch_request = standardize_batch_request_display_ordering(
         batch_request=batch_request
