@@ -13,23 +13,23 @@ import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 
 ### Definition
 
-A Profiler generates Metrics and candidate Expectations from data.
+A Profiler generates <TechnicalTag relative="../" tag="metric" text="Metrics" /> and candidate <TechnicalTag relative="../" tag="expectation" text="Expectations" /> from data.
 
 ### Features and promises
 
-A Profiler makes it possible to quickly create a starting point for generating Expectations about a dataset. For example, during the [Getting Started Tutorial](../tutorials/getting_started/tutorial_overview.md), Great Expectations uses the `UserConfigurableProfiler` to demonstrate important features of Expectations by creating and validating an Expectation Suite that has several kinds of Expectations built from a small sample of data. A Profiler is also critical to generating the Expectation Suites used during profiling.
+A Profiler makes it possible to quickly create a starting point for generating Expectations about a dataset. For example, during the [Getting Started Tutorial](../tutorials/getting_started/tutorial_overview.md), Great Expectations uses the `UserConfigurableProfiler` to demonstrate important features of Expectations by creating and validating an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> that has several kinds of Expectations built from a small sample of data. A Profiler is also critical to generating the Expectation Suites used during profiling.
 
 There are several Profilers included with Great Expectations; conceptually, each Profiler is a checklist of questions which will generate an Expectation Suite when asked of a Batch of data.
 
 ### Relationship to other objects
 
-A Profiler builds an Expectation Suite from one or more Data Assets. It usually also Validates the data against the newly-generated Expectation Suite to return a Validation Result.
+A Profiler builds an Expectation Suite from one or more Data Assets. It usually also <TechnicalTag relative="../" tag="validation" text="Validates" /> the data against the newly-generated Expectation Suite to return a <TechnicalTag relative="../" tag="validation_result" text="Validation Result" />.
 
 ## Use cases
 
 <CreateHeader/>
 
-Profilers come into use when it is time to create Expectations for your project.  At this point in your workflow you can create a new Profiler, or use an existing one to generate Expectations from a Batch of data.
+Profilers come into use when it is time to create Expectations for your project.  At this point in your workflow you can create a new Profiler, or use an existing one to generate Expectations from a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
 
 For details on how to create a customized Profiler, see our guide on [how to create a new expectation suite using rule based Profilers](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md).
 
@@ -47,11 +47,11 @@ The `UserConfigurableProfiler` is used to build an Expectation Suite from a Data
 
 #### BasicDatasetProfiler
 
-The `BasicDatasetProfiler` examines a Batch of data and creates a report that answers the basic questions most data practitioners would ask about a dataset during exploratory data analysis. The profiler reports how unique the values in the column are, as well as the percentage of empty values in it. Based on the column's type it provides a description of the column by computing a number of statistics, such as min, max, mean and median, for numeric columns, and distribution of values, when appropriate.
+The `BasicDatasetProfiler` examines a Batch of data and creates a report that answers the basic questions most data practitioners would ask about a dataset during exploratory data analysis. The Profiler reports how unique the values in the column are, as well as the percentage of empty values in it. Based on the column's type it provides a description of the column by computing a number of statistics, such as min, max, mean and median, for numeric columns, and distribution of values, when appropriate.
 
 #### BasicSuiteBuilderProfiler
 
-The `BasicSuiteBuilderProfiler` is an extension of the BasicDatasetProfiler that creates a set of coarse Expectations for the profiled dataset.  Configuration of this Profiler is optional; if no configuration is provided, this Profiler will create Expectations for every column in the dataset.  
+The `BasicSuiteBuilderProfiler` is an extension of the `BasicDatasetProfiler` that creates a set of coarse Expectations for the profiled dataset.  Configuration of this Profiler is optional; if no configuration is provided, this Profiler will create Expectations for every column in the dataset.  
 
 The values in Expectations created by the `BasicSuiteBuilderProfiler` are extremely coarse and do not correspond to the actual values in the profiled data.  Rather, the purpose of this Profiler is to generate a broad range of candidate Expectations for the profiled data, which you can then prune down to those Expectations you find relevant and edit with values based on domain knowledge.  You will definitely want to edit the values used in Expectations created by this Profiler! 
 
@@ -66,19 +66,20 @@ The `JsonSchemaProfiler` creates Expectation Suites from JSONSchema artifacts. B
 :::note
 - There is not yet a notion of nested data types in Great Expectations so suites generated by a `JsonSchemaProfiler` use column map expectations.
 - A `JsonSchemaProfiler` does not traverse nested schemas and requires a top level object of type `object`.
-- For an example of how to use the `JsonSchemaProfiler`, see our guide on [how to create a new Expectation Suite by profiling from a JsonSchema file](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file.md).
 :::
+
+For an example of how to use the `JsonSchemaProfiler`, see our guide on [how to create a new Expectation Suite by profiling from a JsonSchema file](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file.md).
 
 ### Extendable to account for domain knowledge
 
-You can also extend Profilers to capture organizational knowledge about your data. For example, a team might have a convention that all columns **named** "id" are primary keys, whereas all columns ending with the **suffix** "_id" are foreign keys. In that case, when the team using Great Expectations first encounters a new dataset that followed the convention, a Profiler could use that knowledge to add an expect_column_values_to_be_unique Expectation to the "id" column (but not, for example an "address_id" column).
+You can also extend Profilers to capture organizational knowledge about your data. For example, a team might have a convention that all columns **named** "id" are primary keys, whereas all columns ending with the **suffix** "_id" are foreign keys. In that case, when the team using Great Expectations first encounters a new dataset that followed the convention, a Profiler could use that knowledge to add an `expect_column_values_to_be_unique` Expectation to the "id" column (but not, for example an "address_id" column).
 
 
 ## API basics
 
 ### How to access
 
-The recommended workflow for Profilers is to use the `UserConfigurableProfiler`.  Doing so can be as simple as importing it and instantiating a copy by passing a Validator to the class, like so:
+The recommended workflow for Profilers is to use the `UserConfigurableProfiler`.  Doing so can be as simple as importing it and instantiating a copy by passing a <TechnicalTag relative="../" tag="validator" text="Validator" /> to the class, like so:
 
 ```python title="Python code"
 from great_expectations.profile.user_configurable_profiler import UserConfigurableProfiler
@@ -89,28 +90,28 @@ There are additional parameters that can be passed to a `UserConfigurableProfile
 
 - **excluded_expectations:** A list of Expectations to not include in the suite.
 - **ignored_columns:** A list of columns for which you would like to NOT create Expectations.
-- **not_null_only:** Boolean, default False. By default, each column is evaluated for nullity. If the column values contain fewer than 50% null values, then the Profiler will add `expect_column_values_to_not_be_null`; if greater than 50% it will add `expect_column_values_to_be_null`. If `not_null_only` is set to `True`, the Profiler will add a not_null Expectation irrespective of the percent nullity (and therefore will not add an `expect_column_values_to_be_null`.
-- **primary_or_compound_key:** A list containing one or more columns which are a dataset's primary or compound key. This will create an `expect_column_values_to_be_unique` or `expect_compound_columns_to_be_unique` expectation. This will occur even if one or more of the primary or compound key columns are specified in ignored_columns.
+- **not_null_only:** Boolean, default False. By default, each column is evaluated for nullity. If the column values contain fewer than 50% null values, then the Profiler will add `expect_column_values_to_not_be_null`; if greater than 50% it will add `expect_column_values_to_be_null`. If `not_null_only` is set to `True`, the Profiler will add a not_null Expectation irrespective of the percent nullity (and therefore will not add an `expect_column_values_to_be_null`).
+- **primary_or_compound_key:** A list containing one or more columns which are a dataset's primary or compound key. This will create an `expect_column_values_to_be_unique` or `expect_compound_columns_to_be_unique` expectation. This will occur even if one or more of the `primary_or_compound_key` columns are specified in `ignored_columns`.
 - **semantic_types_dict:** A dictionary where the keys are available `semantic_types` (see profiler.base.ProfilerSemanticTypes) and the values are lists of columns for which you would like to create `semantic_type` specific Expectations e.g.: `"semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}`.
-- **table_expectations_only:** Boolean, default False. If True, this will only create the two table level Expectations available to this Profiler (`expect_table_columns_to_match_ordered_list` and `expect_table_row_count_to_be_between`). If a primary or compound key is specified, it will create a uniqueness expectation for that column as well.
-- **value_set_threshold:** Takes a string from the following ordered list - "none", "one", "two", "very_few", "few", "many", "very_many", "unique". When the Profiler runs without a semantic_types dict, each column is profiled for cardinality. This threshold determines the greatest cardinality for which to add `expect_column_values_to_be_in_set`. For example, if value_set_threshold is set to "unique", it will add a value_set expectation for every included column. If set to "few", it will add a value_set expectation for columns whose cardinality is one of "one", "two", "very_few" or "few". The default value is "many". For the purposes of comparing whether two tables are identical, it might make the most sense to set this to "unique".
+- **table_expectations_only:** Boolean, default False. If True, this will only create the two table level Expectations available to this Profiler (`expect_table_columns_to_match_ordered_list` and `expect_table_row_count_to_be_between`). If a `primary_or_compound_key` is specified, it will create a uniqueness Expectation for that column as well.
+- **value_set_threshold:** Takes a string from the following ordered list - "none", "one", "two", "very_few", "few", "many", "very_many", "unique". When the Profiler runs without a semantic_types dict, each column is profiled for cardinality. This threshold determines the greatest cardinality for which to add `expect_column_values_to_be_in_set`. For example, if `value_set_threshold` is set to "unique", it will add a value_set Expectation for every included column. If set to "few", it will add a value_set Expectation for columns whose cardinality is one of "one", "two", "very_few" or "few". The default value is "many". For the purposes of comparing whether two tables are identical, it might make the most sense to set this to "unique".
 
 
 ### How to create
 
-If you need to create a custom Profiler, you will be working with a Rule-Based Profiler, which is an instance of the `Profiler` class.  Most of the work done here will actually be done in the configuration that you will pass to the `Profiler` class when you initialize it.  The `Profiler` class only requres `profiler_config` and `data_context` as parameters, and since you should always be starting your work from the Data Context that parameter is simple to supply.
+If you need to create a custom Profiler, you will be working with a Rule-Based Profiler, which is an instance of the `RuleBasedProfiler` class.
 
 Configuring a custom Rule-Based Profiler is covered in more detail in the [Configuration](#configuration) section below.  You can also read our guide on [how to create a new expectation suite using rule based Profilers](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md) to be walked through the process, or view [the full source code for that guide](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py) on our GitHub as an example.
 
 ### Configuration
 
-**Rule-Based profilers** allow users to provide a highly configurable specification which is composed of **Rules** to use in order to build an **Expectation Suite** by profiling existing data.
+**Rule-Based Profilers** allow users to provide a highly configurable specification which is composed of **Rules** to use in order to build an **Expectation Suite** by profiling existing data.
 
 Imagine you have a table of Sales that comes in every month. You could profile last month's data, inspecting it in order to automatically create a number of expectations that you can use to validate next month's data.  
 
-A **Rule** in a rule-based profiler could say something like "Look at every column in my Sales table, and if that column is numeric, add an `expect_column_values_to_be_between` Expectation to my Expectation Suite, where the `min_value` for the Expectation is the minimum value for the column, and the `max_value` for the Expectation is the maximum value for the column."
+A **Rule** in a Rule-Based Profiler could say something like "Look at every column in my Sales table, and if that column is numeric, add an `expect_column_values_to_be_between` Expectation to my Expectation Suite, where the `min_value` for the Expectation is the minimum value for the column, and the `max_value` for the Expectation is the maximum value for the column."
 
-Each rule in a rule-based profiler has three types of components:
+Each rule in a Rule-Based Profiler has three types of components:
 
 1. **DomainBuilders**: A DomainBuilder will inspect some data that you provide to the Profiler, and compile a list of Domains for which you would like to build expectations
 1. **ParameterBuilders**: A ParameterBuilder will inspect some data that you provide to the Profiler, and compile a dictionary of Parameters that you can use when constructing your ExpectationConfigurations
@@ -118,10 +119,10 @@ Each rule in a rule-based profiler has three types of components:
 
 In the above example, imagine your table of Sales has twenty columns, of which five are numeric:
 * Your **DomainBuilder** would inspect all twenty columns, and then yield a list of the five numeric columns
-* You would specify two **ParameterBuilders**: one which gets the min of a column, and one which gets a max. Your Profiler would loop over the Domain (or column) list built by the **DomainBuilder** and use the two ParameterBuilders to get the min and max for each column.
-* Then the Profiler loops over Domains built by the DomainBuilder and uses the **ExpectationConfigurationBuilders** to add a `expect_column_values_to_between` column for each of these Domains, where the `min_value` and `max_value` are the values that we got in the ParameterBuilders.
+* You would specify two **ParameterBuilders**: one which gets the min of a column, and one which gets a max. Your Profiler would loop over the Domain (or column) list built by the **DomainBuilder** and use the two `ParameterBuilders` to get the min and max for each column.
+* Then the Profiler loops over Domains built by the `DomainBuilder` and uses the **ExpectationConfigurationBuilders** to add a `expect_column_values_to_between` column for each of these Domains, where the `min_value` and `max_value` are the values that we got in the `ParameterBuilders`.
 
-In addition to Rules, a rule-based profiler enables you to specify **Variables**, which are global and can be used in any of the Rules. For instance, you may want to reference the same BatchRequest or the same tolerance in multiple Rules, and declaring these as Variables will enable you to do so. 
+In addition to Rules, a Rule-Based Profiler enables you to specify **Variables**, which are global and can be used in any of the Rules. For instance, you may want to reference the same `BatchRequest` or the same tolerance in multiple Rules, and declaring these as Variables will enable you to do so. 
 
 Below is an example configuration based on this discussion:
 
