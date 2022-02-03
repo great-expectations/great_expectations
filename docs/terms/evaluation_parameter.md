@@ -71,6 +71,8 @@ my_df.set_evaluation_parameter("upstream_row_count", 10)
 
 If the Evaluation Parameter's value is set in this way, you do not need to set it again (or define it alongside the use of the `$PARAMETER` key) for future Expectations.
 
+It is also possible for advanced users to create Expectations using Evaluation Parameters by turning off interactive evaluation and adding the Expectation configuration directly to the Expectation Suite.  For more information on this, see our guide on [how to create and edit Expectations based on domain knowledge without inspecting data directly](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md).
+
 More typically, when validating Expectations, you can provide Evaluation Parameters that are only available at runtime.
 
 ```python title="Python code"
