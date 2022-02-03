@@ -43,7 +43,7 @@ Saved Validation Results allow you to track trends in how well your data adheres
 
 ### Actions and documentation
 
-Because Validation Results are passed to Actions in a Checkpoint's `action_list` you can create Actions that have behaviour conditional to the Validation Result.  An example of this might be sending a Slack or email notification if the Validation fails, or only launching a secondary process if the Validation Results report that Validation passed.
+Because Validation Results are passed to Actions in a Checkpoint's `action_list` you can create Actions that have behaviour conditional to the Validation Results.  Examples of this might be sending a Slack or email notification if the Validation fails, only launching a secondary process if the Validation Results report that Validation passed, or updating your Data Docs with specific information pulled from the Validation Results.
 
 ## API basics
 
@@ -51,7 +51,7 @@ Because Validation Results are passed to Actions in a Checkpoint's `action_list`
 
 Inside of Actions, Validation Results are a parameter that is passed to the Action when it is run.  The other place where you can access your Validation Results is in your Validation Result Store.
 
-In the Validation Result Store you will find your Validation Results stored as a list of dictionaries under the `results` key of the JSON file that corresponds to the Checkpoint run you are investigating.
+In the Validation Result Store you will find your individual Validation Results stored as a list of dictionaries under the `results` key of the JSON file that corresponds to the Checkpoint run you are investigating.
 
 ### How to create
 
@@ -59,7 +59,7 @@ Validation Results are created automatically when data is Validated in Great Exp
 
 A single Validation Result is created when an Expectation is created with the interactive workflow and the newly created Expectation validates itself against the sample data that is used in that process.  This is generated as an `ExpectationValidationResult` object.
 
-A Validation Result is also created for each Expectation in an Expectation Suite when a Checkpoint is run.  These are generated as values in the `results` list of an `ExpectationSuiteValidationREsult` object.
+A Validation Result is also created for each Expectation in an Expectation Suite when a Checkpoint is run.  These are generated as values in the `results` list of an `ExpectationSuiteValidationResult` object.
 
 ### Configuration
 
@@ -74,7 +74,7 @@ A Validation Result provides information as attributes that are accessible throu
   - `exception_traceback` contains the traceback of the raised exception, if an exception was raised.
   - `exception_message` contains the message associated with the raised exception, if an exception was raised.
 
-You may also interact with an `ExpectationSuiteValidationResult` object, which is configured to match the values that are saved to the Validation Result Store.  These are:
+You may also interact with an `ExpectationSuiteValidationResult` object, which matches the values that are saved to the Validation Result Store.  These are:
 
 - **success:** A `true` or `false` indicator of whether all the Expectations in the Expectation Suite passed.
 - **evaluation_parameters:** The Evaluation Parameters and their values at the time when the Expectation Suite was Validated.
