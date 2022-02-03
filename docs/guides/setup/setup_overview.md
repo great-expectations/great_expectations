@@ -83,6 +83,10 @@ Data Docs provide human readable renderings of your Expectation Suites and Valid
 
 See our [guides on configuring Data Docs](/docs/guides/setup/configuring_data_docs/index) for more information.
 
+#### Plugins
+
+Python files that are placed in the `plugins` directory in your project (which is created automatically when you initialize your <TechnicalTag relative="../" tag="data_context" text="Data Context" />) can be used to extend Great Expectations.  If you have Custom Expectations or other extensions to Great Expectations that you wish to use as Plugins in your deployment of Great Expectations, you should include them in the `plugins` directory.
+
 ## Wrapping up
 
 <!-- This section is essentially a victory lap.  It should reiterate what they have accomplished/are now capable of doing.  If there is a next process (such as the universal map steps) this should state that the reader is now ready to move on to it. -->
