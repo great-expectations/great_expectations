@@ -40,15 +40,15 @@ def test_get_profiler_with_too_many_args_raises_error(
 def test_add_profiler(
     mock_data_context: mock.MagicMock,
     profiler_key: ConfigurationIdentifier,
-    profiler_config: RuleBasedProfilerConfig,
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     mock_data_context.ge_cloud_mode.return_value = False
-    profiler = add_profiler(profiler_config, mock_data_context)
+    profiler = add_profiler(profiler_config_with_placeholder_args, mock_data_context)
 
     assert isinstance(profiler, RuleBasedProfiler)
-    assert profiler.name == profiler_config.name
+    assert profiler.name == profiler_config_with_placeholder_args.name
     assert mock_data_context.profiler_store.set.call_args == mock.call(
-        key=profiler_key, value=profiler_config
+        key=profiler_key, value=profiler_config_with_placeholder_args
     )
 
 
@@ -57,17 +57,19 @@ def test_add_profiler_ge_cloud_mode(
     mock_data_context: mock.MagicMock,
     ge_cloud_profiler_id: str,
     ge_cloud_profiler_key: GeCloudIdentifier,
-    profiler_config: RuleBasedProfilerConfig,
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     mock_data_context.ge_cloud_mode.return_value = True
     profiler = add_profiler(
-        profiler_config, mock_data_context, ge_cloud_id=ge_cloud_profiler_id
+        profiler_config_with_placeholder_args,
+        mock_data_context,
+        ge_cloud_id=ge_cloud_profiler_id,
     )
 
     assert isinstance(profiler, RuleBasedProfiler)
-    assert profiler.name == profiler_config.name
+    assert profiler.name == profiler_config_with_placeholder_args.name
     assert mock_data_context.profiler_store.set.call_args == mock.call(
-        key=ge_cloud_profiler_key, value=profiler_config
+        key=ge_cloud_profiler_key, value=profiler_config_with_placeholder_args
     )
 
 
