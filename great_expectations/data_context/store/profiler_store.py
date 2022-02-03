@@ -7,7 +7,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
 )
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.types.base import RuleBasedProfilerConfig
 
 
 class ProfilerStore(ConfigurationStore):

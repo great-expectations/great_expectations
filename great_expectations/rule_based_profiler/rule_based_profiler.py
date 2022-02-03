@@ -1,15 +1,11 @@
 import copy
 import uuid
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchRequest,
-    RuntimeBatchRequest,
-    get_batch_request_as_dict,
-)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.util import nested_update
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
@@ -20,11 +16,19 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder.ex
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder.parameter_container import (
+from great_expectations.rule_based_profiler.rule.rule import Rule
+from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     build_parameter_container_for_variables,
 )
-from great_expectations.rule_based_profiler.rule.rule import Rule
+from great_expectations.rule_based_profiler.types.base import (
+    domainBuilderConfigSchema,
+    expectationConfigurationBuilderConfigSchema,
+    parameterBuilderConfigSchema,
+)
+from great_expectations.rule_based_profiler.types.builder import (
+    validate_builder_override_config,
+)
 
 
 class RuleBasedProfiler:
@@ -145,9 +149,9 @@ class RuleBasedProfiler:
             "rules": rules,
         }
 
-        self._rules = self._init_rules(rules=rules)
+        self._rules = self._init_profiler_rules(rules=rules)
 
-    def _init_rules(
+    def _init_profiler_rules(
         self,
         rules: Dict[str, Dict[str, Any]],
     ) -> List[Rule]:
@@ -160,12 +164,12 @@ class RuleBasedProfiler:
         rule_config: Dict[str, Any]
         for rule_name, rule_config in rules.items():
             rule_object_list.append(
-                self._init_one_rule(rule_name=rule_name, rule_config=rule_config)
+                self._init_rule(rule_name=rule_name, rule_config=rule_config)
             )
 
         return rule_object_list
 
-    def _init_one_rule(
+    def _init_rule(
         self,
         rule_name: str,
         rule_config: Dict[str, Any],
@@ -182,19 +186,19 @@ class RuleBasedProfiler:
                 )
 
         # Instantiate builder attributes
-        domain_builder: DomainBuilder = RuleBasedProfiler._init_domain_builder(
+        domain_builder: DomainBuilder = RuleBasedProfiler._init_rule_domain_builder(
             domain_builder_config=rule_config["domain_builder"],
             data_context=self._data_context,
         )
         parameter_builders: Optional[
             List[ParameterBuilder]
-        ] = RuleBasedProfiler._init_parameter_builders(
+        ] = RuleBasedProfiler._init_rule_parameter_builders(
             parameter_builder_configs=rule_config.get("parameter_builders"),
             data_context=self._data_context,
         )
         expectation_configuration_builders: List[
             ExpectationConfigurationBuilder
-        ] = RuleBasedProfiler._init_expectation_configuration_builders(
+        ] = RuleBasedProfiler._init_rule_expectation_configuration_builders(
             expectation_configuration_builder_configs=rule_config[
                 "expectation_configuration_builders"
             ]
@@ -209,7 +213,7 @@ class RuleBasedProfiler:
         )
 
     @staticmethod
-    def _init_domain_builder(
+    def _init_rule_domain_builder(
         domain_builder_config: dict,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ) -> DomainBuilder:
@@ -224,7 +228,7 @@ class RuleBasedProfiler:
         return domain_builder
 
     @staticmethod
-    def _init_parameter_builders(
+    def _init_rule_parameter_builders(
         parameter_builder_configs: Optional[List[dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ) -> Optional[List[ParameterBuilder]]:
@@ -236,7 +240,7 @@ class RuleBasedProfiler:
         parameter_builder_config: dict
         for parameter_builder_config in parameter_builder_configs:
             parameter_builder: ParameterBuilder = (
-                RuleBasedProfiler._init_one_parameter_builder(
+                RuleBasedProfiler._init_parameter_builder(
                     parameter_builder_config=parameter_builder_config,
                     data_context=data_context,
                 )
@@ -246,7 +250,7 @@ class RuleBasedProfiler:
         return parameter_builders
 
     @staticmethod
-    def _init_one_parameter_builder(
+    def _init_parameter_builder(
         parameter_builder_config: dict,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ) -> ParameterBuilder:
@@ -260,7 +264,7 @@ class RuleBasedProfiler:
         return parameter_builder
 
     @staticmethod
-    def _init_expectation_configuration_builders(
+    def _init_rule_expectation_configuration_builders(
         expectation_configuration_builder_configs: List[dict],
     ) -> List[ExpectationConfigurationBuilder]:
         expectation_configuration_builders: List[ExpectationConfigurationBuilder] = []
@@ -269,7 +273,7 @@ class RuleBasedProfiler:
         for (
             expectation_configuration_builder_config
         ) in expectation_configuration_builder_configs:
-            expectation_configuration_builder: ExpectationConfigurationBuilder = RuleBasedProfiler._init_one_expectation_configuration_builder(
+            expectation_configuration_builder: ExpectationConfigurationBuilder = RuleBasedProfiler._init_expectation_configuration_builder(
                 expectation_configuration_builder_config=expectation_configuration_builder_config,
             )
             expectation_configuration_builders.append(expectation_configuration_builder)
@@ -277,7 +281,7 @@ class RuleBasedProfiler:
         return expectation_configuration_builders
 
     @staticmethod
-    def _init_one_expectation_configuration_builder(
+    def _init_expectation_configuration_builder(
         expectation_configuration_builder_config: dict,
     ) -> ExpectationConfigurationBuilder:
         expectation_configuration_builder: ExpectationConfigurationBuilder = instantiate_class_from_config(
@@ -305,13 +309,11 @@ class RuleBasedProfiler:
             :param include_citation: Whether or not to include the Profiler config in the metadata for the ExpectationSuite produced by the Profiler
         :return: Set of rule evaluation results in the form of an ExpectationSuite
         """
-        effective_variables: Optional[ParameterContainer] = self._reconcile_variables(
-            variables=variables
-        )
+        effective_variables: Optional[
+            ParameterContainer
+        ] = self.reconcile_profiler_variables(variables=variables)
 
-        # TODO: <Alex>ALEX -- Tests for Reconciliation are next immediate action items.</Alex>
-        # TODO: <Alex>ALEX -- Replace "getattr/setattr" with "__dict__" (in a "to_dict()" method on Rule and below).</Alex>
-        effective_rules: List[Rule] = self.reconcile_rules_for_profiler(rules=rules)
+        effective_rules: List[Rule] = self.reconcile_profiler_rules(rules=rules)
 
         if expectation_suite_name is None:
             expectation_suite_name = (
@@ -343,24 +345,47 @@ class RuleBasedProfiler:
 
         return expectation_suite
 
-    def _reconcile_variables(
+    def reconcile_profiler_variables(
         self, variables: Optional[Dict[str, Any]] = None
     ) -> Optional[ParameterContainer]:
+        """
+        Profiler "variables" reconciliation involves combining the variables, instantiated from Profiler configuration
+        (e.g., stored in a YAML file managed by the Profiler store), with the variables overrides, provided at run time.
+
+        The reconciliation logic for "variables" is of the "replace" nature: An override value complements the original
+        on key "miss", and replaces the original on key "hit" (or "collision"), because "variables" is a unique member.
+
+        :param variables: variables overrides, supplied in dictionary (configuration) form
+        :return: reconciled variables in their canonical ParameterContainer object form
+        """
         effective_variables: ParameterContainer
         if variables is not None and isinstance(variables, dict):
-            variables_dict: dict = self.variables.to_dict()
-            variables_dict.update(variables)
+            variables_configs: dict = self.variables.to_dict()["parameter_nodes"][
+                "variables"
+            ]["variables"]
+            variables_configs.update(variables)
             effective_variables = build_parameter_container_for_variables(
-                variables_configs=variables
+                variables_configs=variables_configs
             )
         else:
             effective_variables = self.variables
 
         return effective_variables
 
-    def reconcile_rules_for_profiler(
+    def reconcile_profiler_rules(
         self, rules: Optional[Dict[str, Dict[str, Any]]] = None
     ) -> List[Rule]:
+        """
+        Profiler "rules" reconciliation involves combining the rules, instantiated from Profiler configuration (e.g.,
+        stored in a YAML file managed by the Profiler store), with the rules overrides, provided at run time.
+
+        The reconciliation logic for "rules" is of the "procedural" nature:
+        (1) Combine every rule override configuration with any instantiated rule into a reconciled configuration
+        (2) Re-instantiate Rule objects from the reconciled rule configurations
+
+        :param rules: rules overrides, supplied in dictionary (configuration) form for each rule name as the key
+        :return: reconciled rules in their canonical List[Rule] object form
+        """
         if rules is None:
             rules = {}
 
@@ -370,7 +395,7 @@ class RuleBasedProfiler:
         rule_config: dict
 
         override_rule_configs: Dict[str, Dict[str, Any]] = {
-            rule_name: RuleBasedProfiler._reconcile_rule(
+            rule_name: RuleBasedProfiler._reconcile_rule_config(
                 existing_rules=effective_rules,
                 rule_name=rule_name,
                 rule_config=rule_config,
@@ -378,7 +403,7 @@ class RuleBasedProfiler:
             for rule_name, rule_config in rules.items()
         }
         override_rules: Dict[str, Rule] = {
-            rule_name: self._init_one_rule(rule_name=rule_name, rule_config=rule_config)
+            rule_name: self._init_rule(rule_name=rule_name, rule_config=rule_config)
             for rule_name, rule_config in override_rule_configs.items()
         }
         effective_rules.update(override_rules)
@@ -386,32 +411,66 @@ class RuleBasedProfiler:
         return list(effective_rules.values())
 
     @staticmethod
-    def _reconcile_rule(
+    def _reconcile_rule_config(
         existing_rules: Dict[str, Rule], rule_name: str, rule_config: dict
     ) -> Dict[str, Any]:
+        """
+        A "rule configuration" reconciliation is the process of combining the configuration of a single candidate
+        override rule with at most one configuration corresponding to the list of rules instantiated from Profiler
+        configuration (e.g., stored in a YAML file managed by the Profiler store).
+
+        The reconciliation logic for "rule configuration" employes the "by construction" principle:
+        (1) Find a common configuration between the domain builder configuration, possibly supplied as part of the
+        candiate override rule configuration, and the comain builder configuration of an instantiated rule
+        (2) Find common configurations between parameter builder configurations, possibly supplied as part of the
+        candiate override rule configuration, and the parameter builder configurations of an instantiated rule
+        (3) Find common configurations between expectation configuration builder configurations, possibly supplied as
+        part of the candiate override rule configuration, and the expectation configuration builder configurations of an
+        instantiated rule
+        (4) Construct the reconciled rule configuration dictionary using the formal rule properties ("domain_builder",
+        "parameter_builders", and "expectation_configuration_builders") as keys and their reconciled configuration
+        dictionaries as values
+
+        In order to insure successful instantiation of custom builder classes using "instantiate_class_from_config()",
+        candidate builder override configurations are required to supply both "class_name" and "module_name" attributes.
+
+        :param existing_rules: all currently instantiated rules represented as a dictionary, keyed by rule name
+        :param rule_name: name of the override rule candidate
+        :param rule_config: configuration of an override rule candidate, supplied in dictionary (configuration) form
+        :return: reconciled rule configuration, returned in dictionary (configuration) form
+        """
         effective_rule_config: Dict[str, Any]
         if rule_name in existing_rules:
             rule: Rule = existing_rules[rule_name]
+
             domain_builder_config: dict = rule_config.get("domain_builder", {})
             effective_domain_builder_config: dict = (
-                RuleBasedProfiler._reconcile_domain_builder_config(
+                RuleBasedProfiler._reconcile_rule_domain_builder_config(
                     domain_builder=rule.domain_builder,
                     domain_builder_config=domain_builder_config,
                 )
             )
+
+            parameter_builder_configs: List[dict] = rule_config.get(
+                "parameter_builders", []
+            )
             effective_parameter_builder_configs: Optional[
                 List[dict]
-            ] = RuleBasedProfiler._reconcile_parameter_builder_configs_for_rule(
+            ] = RuleBasedProfiler._reconcile_rule_parameter_builder_configs(
                 rule=rule,
-                rule_config=rule_config,
+                parameter_builder_configs=parameter_builder_configs,
             )
 
+            expectation_configuration_builder_configs: List[dict] = rule_config.get(
+                "expectation_configuration_builders", []
+            )
             effective_expectation_configuration_builder_configs: List[
                 dict
-            ] = RuleBasedProfiler._reconcile_expectation_configuration_builder_configs_for_rule(
+            ] = RuleBasedProfiler._reconcile_rule_expectation_configuration_builder_configs(
                 rule=rule,
-                rule_config=rule_config,
+                expectation_configuration_builder_configs=expectation_configuration_builder_configs,
             )
+
             effective_rule_config = {
                 "domain_builder": effective_domain_builder_config,
                 "parameter_builders": effective_parameter_builder_configs,
@@ -423,152 +482,187 @@ class RuleBasedProfiler:
         return effective_rule_config
 
     @staticmethod
-    def _reconcile_domain_builder_config(
+    def _reconcile_rule_domain_builder_config(
         domain_builder: DomainBuilder,
         domain_builder_config: dict,
     ) -> dict:
-        effective_domain_builder_config: dict = {}
-        batch_request: Optional[
-            Union[BatchRequest, RuntimeBatchRequest, dict]
-        ] = domain_builder_config.pop("batch_request", None)
-        if batch_request is None:
-            batch_request = get_batch_request_as_dict(
-                batch_request=domain_builder.batch_request
-            )
+        """
+        Rule "domain builder" reconciliation involves combining the domain builder, instantiated from Rule configuration
+        (e.g., stored in a YAML file managed by the Profiler store), with the domain builder override, possibly supplied
+        as part of the candiate override rule configuration.
 
-        effective_domain_builder_config["batch_request"] = batch_request
+        The reconciliation logic for "domain builder" is of the "replace" nature: An override value complements the
+        original on key "miss", and replaces the original on key "hit" (or "collision"), because "domain builder" is a
+        unique member for a rule.
 
-        key: str
-        value: Any
-        current_value: Any
-        for key, value in domain_builder_config.items():
-            if hasattr(domain_builder, f"{key}"):
-                current_value = getattr(domain_builder, key)
-                effective_domain_builder_config[key] = value or current_value
-            else:
-                effective_domain_builder_config[key] = value
+        :param domain_builder: existing domain builder of a rule
+        :param domain_builder_config: domain builder configuration override, supplied in dictionary (configuration) form
+        :return: reconciled domain builder configuration, returned in dictionary (configuration) form
+        """
+        domain_builder_as_dict: dict = domain_builder.to_dict()
+        domain_builder_as_dict["class_name"] = domain_builder.__class__.__name__
+        domain_builder_as_dict["module_name"] = domain_builder.__class__.__module__
+
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+        deserialized_config: dict = domainBuilderConfigSchema.load(
+            domain_builder_as_dict
+        )
+        serialized_config: dict = domainBuilderConfigSchema.dump(deserialized_config)
+
+        effective_domain_builder_config: dict = serialized_config
+        if domain_builder_config:
+            validate_builder_override_config(builder_config=domain_builder_config)
+            effective_domain_builder_config.update(domain_builder_config)
 
         return effective_domain_builder_config
 
     @staticmethod
-    def _reconcile_parameter_builder_configs_for_rule(
-        rule: Rule, rule_config: dict
+    def _reconcile_rule_parameter_builder_configs(
+        rule: Rule, parameter_builder_configs: List[dict]
     ) -> Optional[List[dict]]:
-        effective_parameter_builder_configs: List[dict] = []
-        parameter_builder_configs: Optional[List[dict]] = rule_config.get(
-            "parameter_builders", []
-        )
+        """
+        Rule "parameter builders" reconciliation involves combining the parameter builders, instantiated from Rule
+        configuration (e.g., stored in a YAML file managed by the Profiler store), with the parameter builders
+        overrides, possibly supplied as part of the candiate override rule configuration.
 
-        current_parameter_builders: Optional[
-            Dict[str, ParameterBuilder]
-        ] = rule.parameter_builders
+        The reconciliation logic for "parameter builders" is of the "upsert" nature: A candidate override parameter
+        builder configuration contributes to the parameter builders list of the rule if the corresponding parameter
+        builder name does not exist in the list of instantiated parameter builders of the rule; otherwise, once
+        instnatiated, it replaces the configuration associated with the original parameter builder having the same name.
+
+        :param rule: Profiler "rule", subject to parameter builder overrides
+        :param parameter_builder_configs: parameter builder configuration overrides, supplied in dictionary (configuration) form
+        :return: reconciled parameter builder configuration, returned in dictionary (configuration) form
+        """
         parameter_builder_config: dict
         for parameter_builder_config in parameter_builder_configs:
-            parameter_builder_name: str = parameter_builder_config["name"]
-            if parameter_builder_name in current_parameter_builders:
-                parameter_builder: ParameterBuilder = current_parameter_builders[
-                    parameter_builder_name
-                ]
-                effective_parameter_builder_configs.append(
-                    RuleBasedProfiler._reconcile_parameter_builder_config(
-                        parameter_builder=parameter_builder,
-                        parameter_builder_config=parameter_builder_config,
-                    )
-                )
-            else:
-                effective_parameter_builder_configs.append(parameter_builder_config)
+            validate_builder_override_config(builder_config=parameter_builder_config)
 
-        return effective_parameter_builder_configs
+        effective_parameter_builder_configs: Dict[str, dict] = {}
 
-    @staticmethod
-    def _reconcile_parameter_builder_config(
-        parameter_builder: ParameterBuilder,
-        parameter_builder_config: dict,
-    ) -> dict:
-        effective_parameter_builder_config: dict = {}
-        batch_request: Optional[
-            Union[BatchRequest, RuntimeBatchRequest, dict]
-        ] = parameter_builder_config.pop("batch_request", None)
-        if batch_request is None:
-            batch_request = get_batch_request_as_dict(
-                batch_request=parameter_builder.batch_request
+        current_parameter_builders: Dict[
+            str, ParameterBuilder
+        ] = rule._get_parameter_builders_as_dict()
+
+        parameter_builder_name: str
+        parameter_builder: ParameterBuilder
+        parameter_builder_as_dict: dict
+        for (
+            parameter_builder_name,
+            parameter_builder,
+        ) in current_parameter_builders.items():
+            parameter_builder_as_dict = parameter_builder.to_dict()
+            parameter_builder_as_dict[
+                "class_name"
+            ] = parameter_builder.__class__.__name__
+            parameter_builder_as_dict[
+                "module_name"
+            ] = parameter_builder.__class__.__module__
+
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            deserialized_config: dict = parameterBuilderConfigSchema.load(
+                parameter_builder_as_dict
+            )
+            serialized_config: dict = parameterBuilderConfigSchema.dump(
+                deserialized_config
             )
 
-        effective_parameter_builder_config["batch_request"] = batch_request
+            effective_parameter_builder_configs[
+                parameter_builder_name
+            ] = serialized_config
 
-        key: str
-        value: Any
-        current_value: Any
-        for key, value in parameter_builder_config.items():
-            if hasattr(parameter_builder, f"{key}"):
-                current_value = getattr(parameter_builder, key)
-                effective_parameter_builder_config[key] = value or current_value
-            else:
-                effective_parameter_builder_config[key] = value
-
-        return effective_parameter_builder_config
-
-    @staticmethod
-    def _reconcile_expectation_configuration_builder_configs_for_rule(
-        rule: Rule, rule_config: dict
-    ) -> List[dict]:
-        effective_expectation_configuration_builder_configs: List[dict] = []
-        expectation_configuration_builder_configs: List[dict] = rule_config.get(
-            "expectation_configuration_builders", []
+        effective_parameter_builder_configs = nested_update(
+            effective_parameter_builder_configs,
+            {
+                parameter_builder_config["name"]: parameter_builder_config
+                for parameter_builder_config in parameter_builder_configs
+            },
+            dedup=True,
         )
 
-        current_expectation_configuration_builders: Dict[
-            str, ExpectationConfigurationBuilder
-        ] = rule.expectation_configuration_builders
+        if not effective_parameter_builder_configs:
+            return None
+
+        return list(effective_parameter_builder_configs.values())
+
+    @staticmethod
+    def _reconcile_rule_expectation_configuration_builder_configs(
+        rule: Rule, expectation_configuration_builder_configs: List[dict]
+    ) -> List[dict]:
+        """
+        Rule "expectation configuration builders" reconciliation involves combining the expectation configuration builders, instantiated from Rule
+        configuration (e.g., stored in a YAML file managed by the Profiler store), with the expectation configuration builders
+        overrides, possibly supplied as part of the candiate override rule configuration.
+
+        The reconciliation logic for "expectation configuration builders" is of the "upsert" nature: A candidate override expectation configuration
+        builder configuration contributes to the expectation configuration builders list of the rule if the corresponding expectation configuration
+        builder name does not exist in the list of instantiated expectation configuration builders of the rule; otherwise, once
+        instnatiated, it replaces the configuration associated with the original expectation configuration builder having the same name.
+
+        :param rule: Profiler "rule", subject to expectations configuration builder overrides
+        :param expectation_configuration_builder_configs: expectation configuration builder configuration overrides, supplied in dictionary (configuration) form
+        :return: reconciled expectation configuration builder configuration, returned in dictionary (configuration) form
+        """
         expectation_configuration_builder_config: dict
         for (
             expectation_configuration_builder_config
         ) in expectation_configuration_builder_configs:
-            expectation_configuration_builder_name: str = (
-                expectation_configuration_builder_config["expectation_type"]
+            validate_builder_override_config(
+                builder_config=expectation_configuration_builder_config
             )
-            if (
+
+        effective_expectation_configuration_builder_configs: Dict[str, dict] = {}
+
+        current_expectation_configuration_builders: Dict[
+            str, ExpectationConfigurationBuilder
+        ] = rule._get_expectation_configuration_builders_as_dict()
+
+        expectation_configuration_builder_name: str
+        expectation_configuration_builder: ExpectationConfigurationBuilder
+        expectation_configuration_builder_as_dict: dict
+        for (
+            expectation_configuration_builder_name,
+            expectation_configuration_builder,
+        ) in current_expectation_configuration_builders.items():
+            expectation_configuration_builder_as_dict = (
+                expectation_configuration_builder.to_dict()
+            )
+            expectation_configuration_builder_as_dict[
+                "class_name"
+            ] = expectation_configuration_builder.__class__.__name__
+            expectation_configuration_builder_as_dict[
+                "module_name"
+            ] = expectation_configuration_builder.__class__.__module__
+
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            deserialized_config: dict = (
+                expectationConfigurationBuilderConfigSchema.load(
+                    expectation_configuration_builder_as_dict
+                )
+            )
+            serialized_config: dict = expectationConfigurationBuilderConfigSchema.dump(
+                deserialized_config
+            )
+
+            effective_expectation_configuration_builder_configs[
                 expectation_configuration_builder_name
-                in current_expectation_configuration_builders
-            ):
-                expectation_configuration_builder: ExpectationConfigurationBuilder = (
-                    current_expectation_configuration_builders[
-                        expectation_configuration_builder_name
-                    ]
-                )
-                effective_expectation_configuration_builder_configs.append(
-                    RuleBasedProfiler._reconcile_expectation_configuration_builder(
-                        expectation_configuration_builder=expectation_configuration_builder,
-                        expectation_configuration_builder_config=expectation_configuration_builder_config,
-                    )
-                )
-            else:
-                effective_expectation_configuration_builder_configs.append(
-                    expectation_configuration_builder_config
-                )
+            ] = serialized_config
 
-        return effective_expectation_configuration_builder_configs
+        effective_expectation_configuration_builder_configs = nested_update(
+            effective_expectation_configuration_builder_configs,
+            {
+                expectation_configuration_builder_config[
+                    "expectation_type"
+                ]: expectation_configuration_builder_config
+                for expectation_configuration_builder_config in expectation_configuration_builder_configs
+            },
+            dedup=True,
+        )
 
-    @staticmethod
-    def _reconcile_expectation_configuration_builder(
-        expectation_configuration_builder: ExpectationConfigurationBuilder,
-        expectation_configuration_builder_config: dict,
-    ) -> dict:
-        effective_expectation_configuration_builder_config: dict = {}
+        if not effective_expectation_configuration_builder_configs:
+            return []
 
-        key: str
-        value: Any
-        current_value: Any
-        for key, value in expectation_configuration_builder_config.items():
-            if hasattr(expectation_configuration_builder, f"{key}"):
-                current_value = getattr(expectation_configuration_builder, key)
-                effective_expectation_configuration_builder_config[key] = (
-                    value or current_value
-                )
-            else:
-                effective_expectation_configuration_builder_config[key] = value
-
-        return effective_expectation_configuration_builder_config
+        return list(effective_expectation_configuration_builder_configs.values())
 
     def _get_rules_as_dict(self) -> Dict[str, Rule]:
         rule: Rule
