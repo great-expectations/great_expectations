@@ -20,6 +20,7 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.data_context.types.base import ProgressBarsConfig
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
@@ -31,7 +32,7 @@ from great_expectations.expectations.core.expect_column_value_z_scores_to_be_les
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validation_graph import ValidationGraph
+from great_expectations.validator.validation_graph import MetricEdge, ValidationGraph
 from great_expectations.validator.validator import (
     MAX_METRIC_COMPUTATION_RETRIES,
     Validator,
@@ -150,7 +151,7 @@ def test_populate_dependencies():
                 metric_configuration=metric_configuration,
                 configuration=configuration,
             )
-    assert len(graph.edges) == 17
+    assert len(graph.edges) == 33
 
 
 def test_populate_dependencies_with_incorrect_metric_name():
@@ -648,6 +649,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
                 ge_cloud_id=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
             )
         ],
+        data_context=context,
         meta={"notes": "This is an expectation suite."},
     )
 
@@ -671,10 +673,15 @@ def multi_batch_taxi_validator_ge_cloud_mode(
 @mock.patch(
     "great_expectations.data_context.data_context.BaseDataContext.get_expectation_suite"
 )
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
+    mock_emit,
     mock_context_get_suite,
     mock_context_save_suite,
     multi_batch_taxi_validator_ge_cloud_mode,
+    empty_data_context_stats_enabled,
 ):
     """
     This checks that Validator in ge_cloud_mode properly updates underlying Expectation Suite on save.
@@ -682,6 +689,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
     :param mock_context_get_suite: Under normal circumstances, this would be ExpectationSuite object returned from GE Cloud
     :param mock_context_save_suite: Under normal circumstances, this would trigger post or patch to GE Cloud
     """
+    context: DataContext = empty_data_context_stats_enabled
     mock_suite = ExpectationSuite(
         expectation_suite_name="validating_taxi_data",
         expectations=[
@@ -698,6 +706,7 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
                 ge_cloud_id=UUID("3e8eee33-b425-4b36-a831-6e9dd31ad5af"),
             ),
         ],
+        data_context=context,
         meta={"notes": "This is an expectation suite."},
     )
     mock_context_save_suite.return_value = True
@@ -710,6 +719,10 @@ def test_ge_cloud_validator_updates_self_suite_with_ge_cloud_ids_on_save(
         multi_batch_taxi_validator_ge_cloud_mode.get_expectation_suite().to_json_dict()
         == mock_suite.to_json_dict()
     )
+
+    # add_expectation() will not send usage_statistics event when called from a Validator
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
 
 def test_validator_can_instantiate_with_a_multi_batch_request(
@@ -851,6 +864,27 @@ def test_custom_filter_function(
     assert batch_definitions_months_set == {"01", "02"}
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_adding_expectation_to_validator_not_send_usage_message(
+    mock_emit, multi_batch_taxi_validator
+):
+    """
+    What does this test and why?
+
+    When an Expectation is called using a Validator, it validates the dataset using the implementation of
+    the Expectation. As part of the process, it also adds the Expectation to the active
+    ExpectationSuite. This test ensures that this in-direct way of adding an Expectation to the ExpectationSuite
+    (ie not calling add_expectations() directly) does not emit a usage_stats event.
+    """
+    multi_batch_taxi_validator.expect_column_values_to_be_between(
+        column="trip_distance", min_value=11, max_value=22
+    )
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
+
+
 def test_validator_set_active_batch(
     multi_batch_taxi_validator,
 ):
@@ -982,4 +1016,74 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
         )
     assert ve.value.args == (
         "Only one of batch_request or batch_request_list may be specified",
+    )
+
+
+def test_validate_expectation(multi_batch_taxi_validator):
+    validator: Validator = multi_batch_taxi_validator
+    expect_column_values_to_be_between_config = validator.validate_expectation(
+        "expect_column_values_to_be_between"
+    )("passenger_count", 0, 5).expectation_config.kwargs
+    assert expect_column_values_to_be_between_config == {
+        "column": "passenger_count",
+        "min_value": 0,
+        "max_value": 5,
+        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+    }
+
+    expect_column_values_to_be_of_type_config = validator.validate_expectation(
+        "expect_column_values_to_be_of_type"
+    )("passenger_count", "int").expectation_config.kwargs
+
+    assert expect_column_values_to_be_of_type_config == {
+        "column": "passenger_count",
+        "type_": "int",
+        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+    }
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.validator.validation_graph.ValidationGraph")
+@mock.patch("great_expectations.validator.validator.tqdm")
+def test_validator_progress_bar_config_enabled(
+    mock_tqdm, mock_validation_graph, mock_data_context
+):
+    data_context = mock_data_context()
+    engine = PandasExecutionEngine()
+    validator = Validator(engine, data_context=data_context)
+
+    # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
+    mock_validation_graph.edges.__len__ = lambda _: 3
+    validator.resolve_validation_graph(mock_validation_graph, {})
+
+    # Still invoked but doesn't actually do anything due to `disabled`
+    assert mock_tqdm.called is True
+    assert mock_tqdm.call_args[1]["disable"] is False
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+@mock.patch("great_expectations.validator.validation_graph.ValidationGraph")
+@mock.patch("great_expectations.validator.validator.tqdm")
+def test_validator_progress_bar_config_disabled(
+    mock_tqdm, mock_validation_graph, mock_data_context
+):
+    data_context = mock_data_context()
+    data_context.progress_bars = ProgressBarsConfig(metric_calculations=False)
+    engine = PandasExecutionEngine()
+    validator = Validator(engine, data_context=data_context)
+
+    # ValidationGraph is a complex object that requires len > 3 to not trigger tqdm
+    mock_validation_graph.edges.__len__ = lambda _: 3
+    validator.resolve_validation_graph(mock_validation_graph, {})
+
+    assert mock_tqdm.called is True
+    assert mock_tqdm.call_args[1]["disable"] is True
+
+
+def test_validator_docstrings(multi_batch_taxi_validator):
+    expectation_impl = getattr(
+        multi_batch_taxi_validator, "expect_column_values_to_be_in_set", None
+    )
+    assert expectation_impl.__doc__.startswith(
+        "Expect each column value to be in a given set"
     )

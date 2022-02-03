@@ -1,7 +1,6 @@
 import datetime
 import json
 import os
-import uuid
 from collections import OrderedDict
 from unittest.mock import patch
 
@@ -11,7 +10,6 @@ import pytest
 from moto import mock_s3
 
 import tests.test_utils as test_utils
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import DataContext
@@ -139,7 +137,8 @@ def validation_operators_data_context(
 
 
 @pytest.fixture()
-def parameterized_expectation_suite():
+def parameterized_expectation_suite(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     fixture_path = file_relative_path(
         __file__,
         "../../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
@@ -147,7 +146,8 @@ def parameterized_expectation_suite():
     with open(
         fixture_path,
     ) as suite:
-        return expectationSuiteSchema.load(json.load(suite))
+        expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(suite))
+        return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 def test_StoreBackendValidation():
@@ -1351,7 +1351,7 @@ def test_GeCloudStoreBackend():
                                 ("class_name", "SimpleCheckpoint"),
                                 ("run_name_template", None),
                                 ("expectation_suite_name", None),
-                                ("batch_request", None),
+                                ("batch_request", {}),
                                 ("action_list", []),
                                 ("evaluation_parameters", {}),
                                 ("runtime_configuration", {}),

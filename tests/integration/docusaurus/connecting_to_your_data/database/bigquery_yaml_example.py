@@ -5,10 +5,15 @@ from ruamel import yaml
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
-# GCP project and BigQuery dataset information
-# Not for general use. It is only to support testing.
-gcp_project = os.environ.get("GCP_PROJECT")
-bigquery_dataset = os.environ.get("GCP_BIGQUERY_DATASET")
+# NOTE: The following code is only for testing and depends on an environment
+# variable to set the gcp_project. You can replace the value with your own
+# GCP project information
+gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+if not gcp_project:
+    raise ValueError(
+        "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
+    )
+bigquery_dataset = "demo"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
@@ -27,7 +32,7 @@ data_connectors:
            - default_identifier_name
    default_inferred_data_connector_name:
        class_name: InferredAssetSqlDataConnector
-       name: whole_table
+       include_schema_name: true
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -68,7 +73,7 @@ assert isinstance(validator, ge.validator.validator.Validator)
 batch_request = BatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
+    data_asset_name="demo.taxi_data",  # this is the name of the table you want to retrieve
     batch_spec_passthrough={
         "bigquery_temp_table": "ge_temp"
     },  # this is the name of the table you would like to use a 'temp_table'
@@ -84,7 +89,7 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_bigquery_datasource"]
-assert "taxi_data" in set(
+assert "demo.taxi_data" in set(
     context.get_available_data_asset_names()["my_bigquery_datasource"][
         "default_inferred_data_connector_name"
     ]

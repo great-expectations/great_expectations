@@ -14,6 +14,9 @@ from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
 )
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    CLISuiteInteractiveFlagCombinations,
+)
 from great_expectations.exceptions import (
     InvalidExpectationConfigurationError,
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
@@ -26,11 +29,12 @@ from tests.render.test_util import run_notebook
 
 
 @pytest.fixture
-def critical_suite_with_citations() -> ExpectationSuite:
+def critical_suite_with_citations(empty_data_context) -> ExpectationSuite:
     """
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including an BasicSuiteBuilderProfiler entry, and citations.
     """
+    context: DataContext = empty_data_context
     schema: ExpectationSuiteSchema = ExpectationSuiteSchema()
     critical_suite: dict = {
         "expectation_suite_name": "critical",
@@ -97,16 +101,18 @@ def critical_suite_with_citations() -> ExpectationSuite:
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(critical_suite))
+    expectation_suite_dict: dict = schema.loads(json.dumps(critical_suite))
+    return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 @pytest.fixture
-def suite_with_multiple_citations() -> ExpectationSuite:
+def suite_with_multiple_citations(empty_data_context) -> ExpectationSuite:
     """
     A handmade suite with multiple citations each with different batch_request.
 
     The most recent citation does not have batch_request
     """
+    context: DataContext = empty_data_context
     schema: ExpectationSuiteSchema = ExpectationSuiteSchema()
     critical_suite: dict = {
         "expectation_suite_name": "critical",
@@ -147,15 +153,17 @@ def suite_with_multiple_citations() -> ExpectationSuite:
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(critical_suite))
+    expectation_suite_dict: dict = schema.loads(json.dumps(critical_suite))
+    return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 @pytest.fixture
-def warning_suite() -> ExpectationSuite:
+def warning_suite(empty_data_context) -> ExpectationSuite:
     """
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including BasicSuiteBuilderProfiler entries.
     """
+    context: DataContext = empty_data_context
     schema: ExpectationSuiteSchema = ExpectationSuiteSchema()
     warning_suite: dict = {
         "expectation_suite_name": "warning",
@@ -390,7 +398,8 @@ def warning_suite() -> ExpectationSuite:
         ],
         "data_asset_type": "Dataset",
     }
-    return schema.loads(json.dumps(warning_suite))
+    expectation_suite_dict: dict = schema.loads(json.dumps(warning_suite))
+    return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 def test_render_with_no_column_cells_without_batch_request(
@@ -423,7 +432,7 @@ def test_render_with_no_column_cells_without_batch_request(
             {
                 "id": "strategic-exhibit",
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\n\nYou are adding Expectation configurations to the suite. Since you selected manual mode, there is no sample batch of data and no validation happens during this process. See our documentation for more info and examples: **[How to create a new Expectation Suite without a sample batch](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_a_sample_batch.html)**.\n\nNote that if you do use interactive mode you may specify a sample batch of data to use when creating your Expectation Suite. You can then use a `validator` to get immediate feedback on your Expectations against your specified sample batch.\n\n\nYou can see all the available expectations in the **[expectation glossary](https://greatexpectations.io/expectations/?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\n\nYou are adding Expectation configurations to the suite. Since you selected manual mode, there is no sample batch of data and no validation happens during this process. See our documentation for more info and examples: **[How to create a new Expectation Suite without a sample batch](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_a_sample_batch.html)**.\n\nNote that if you do use interactive mode you may specify a sample batch of data to use when creating your Expectation Suite. You can then use a `validator` to get immediate feedback on your Expectations against your specified sample batch.\n\n\nYou can see all the available expectations in the **[expectation gallery](https://greatexpectations.io/expectations)**.",
                 "metadata": {},
             },
             {
@@ -508,7 +517,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
             {
                 "id": "banned-television",
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\n\nAdd expectations by calling specific expectation methods on the `validator` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nBecause you selected interactive mode, you are now creating or editing an Expectation Suite with validator feedback from the sample batch of data that you specified (see `batch_request`).\n\nNote that if you select manual mode you may still create or edit an Expectation Suite directly, without feedback from the `validator`. See our documentation for more info and examples: [How to create a new Expectation Suite without a sample batch](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_a_sample_batch.html).\n\n\n\nYou can see all the available expectations in the **[expectation glossary](https://greatexpectations.io/expectations/?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\n\nAdd expectations by calling specific expectation methods on the `validator` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nBecause you selected interactive mode, you are now creating or editing an Expectation Suite with validator feedback from the sample batch of data that you specified (see `batch_request`).\n\nNote that if you select manual mode you may still create or edit an Expectation Suite directly, without feedback from the `validator`. See our documentation for more info and examples: [How to create a new Expectation Suite without a sample batch](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_a_sample_batch.html).\n\n\n\nYou can see all the available expectations in the **[expectation gallery](https://greatexpectations.io/expectations)**.",
                 "metadata": {},
             },
             {
@@ -948,7 +957,7 @@ def test_notebook_execution_with_pandas_backend(
         expectation_suite_name=expectation_suite_name,
         profile=False,
         usage_event="test_notebook_execution",
-        interactive=False,
+        interactive_mode=CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE,
         no_jupyter=True,
         create_if_not_exist=False,
         datasource_name=None,
@@ -1034,7 +1043,7 @@ def test_notebook_execution_with_custom_notebooks(
             {
                 "id": "legal-beauty",
                 "cell_type": "markdown",
-                "source": "## Create & Edit Expectations\n\n\nAdd expectations by calling specific expectation methods on the `validator` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nBecause you selected interactive mode, you are now creating or editing an Expectation Suite with validator feedback from the sample batch of data that you specified (see `batch_request`).\n\nNote that if you select manual mode you may still create or edit an Expectation Suite directly, without feedback from the `validator`. See our documentation for more info and examples: [How to create a new Expectation Suite without a sample batch](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_a_sample_batch.html).\n\n\n\nYou can see all the available expectations in the **[expectation glossary](https://greatexpectations.io/expectations/?utm_source=notebook&utm_medium=create_expectations)**.",
+                "source": "## Create & Edit Expectations\n\n\nAdd expectations by calling specific expectation methods on the `validator` object. They all begin with `.expect_` which makes autocompleting easy using tab.\n\nBecause you selected interactive mode, you are now creating or editing an Expectation Suite with validator feedback from the sample batch of data that you specified (see `batch_request`).\n\nNote that if you select manual mode you may still create or edit an Expectation Suite directly, without feedback from the `validator`. See our documentation for more info and examples: [How to create a new Expectation Suite without a sample batch](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_a_new_expectation_suite_without_a_sample_batch.html).\n\n\n\nYou can see all the available expectations in the **[expectation gallery](https://greatexpectations.io/expectations)**.",
                 "metadata": {},
             },
             {

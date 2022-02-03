@@ -1,7 +1,5 @@
 import datetime
-from typing import Iterable
 
-import numpy as np
 from dateutil.parser import parse
 from tqdm.auto import tqdm
 
@@ -13,6 +11,7 @@ from great_expectations.profile.basic_dataset_profiler import (
     BasicDatasetProfilerBase,
     logger,
 )
+from great_expectations.util import is_nan
 
 
 class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
@@ -231,7 +230,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             observed_min = dataset.expect_column_min_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not _is_nan(observed_min):
+            if not is_nan(observed_min):
                 dataset.expect_column_min_to_be_between(
                     column, min_value=observed_min - 1, max_value=observed_min + 1
                 )
@@ -250,7 +249,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             observed_max = dataset.expect_column_max_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not _is_nan(observed_max):
+            if not is_nan(observed_max):
                 dataset.expect_column_max_to_be_between(
                     column, min_value=observed_max - 1, max_value=observed_max + 1
                 )
@@ -269,7 +268,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             observed_mean = dataset.expect_column_mean_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not _is_nan(observed_mean):
+            if not is_nan(observed_mean):
                 dataset.expect_column_mean_to_be_between(
                     column, min_value=observed_mean - 1, max_value=observed_mean + 1
                 )
@@ -288,7 +287,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             observed_median = dataset.expect_column_median_to_be_between(
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
-            if not _is_nan(observed_median):
+            if not is_nan(observed_median):
                 dataset.expect_column_median_to_be_between(
                     column, min_value=observed_median - 1, max_value=observed_median + 1
                 )
@@ -839,10 +838,3 @@ def _check_that_columns_exist(dataset, columns):
         for column in columns:
             if column not in dataset.get_table_columns():
                 raise ProfilerError(f"Column {column} does not exist.")
-
-
-def _is_nan(value):
-    try:
-        return np.isnan(value)
-    except TypeError:
-        return False

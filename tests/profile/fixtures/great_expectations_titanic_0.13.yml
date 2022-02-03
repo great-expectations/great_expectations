@@ -117,5 +117,5 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 
 anonymous_usage_statistics:
-  enabled: false
+  enabled: true
 notebooks:

@@ -31,10 +31,10 @@ Steps
 
 2. **Test that your configuration is correct by building the site.**
 
-    Use the following CLI command: ``great_expectations --v3-api docs build --site-name local_site``. If successful, the CLI will open your newly built Data Docs site and provide the path to the index page.
+    Use the following CLI command: ``great_expectations docs build --site-name local_site``. If successful, the CLI will open your newly built Data Docs site and provide the path to the index page.
 
     ```bash
-    > great_expectations --v3-api docs build --site-name local_site
+    > great_expectations docs build --site-name local_site
 
     The following Data Docs sites will be built:
 

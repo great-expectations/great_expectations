@@ -2,9 +2,12 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
-from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.rule_based_profiler.types import (
+    Builder,
+    Domain,
+    ParameterContainer,
+)
 from great_expectations.rule_based_profiler.util import (
     get_batch_ids as get_batch_ids_from_batch_request,
 )
@@ -14,15 +17,15 @@ from great_expectations.rule_based_profiler.util import (
 from great_expectations.validator.validator import Validator
 
 
-class DomainBuilder(ABC):
+class DomainBuilder(Builder, ABC):
     """
     A DomainBuilder provides methods to get domains based on one or more batches of data.
     """
 
     def __init__(
         self,
-        data_context: DataContext,
-        batch_request: Optional[Union[dict, str]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
         Args:
@@ -102,5 +105,9 @@ class DomainBuilder(ABC):
         return batch_ids[0]
 
     @property
-    def data_context(self) -> DataContext:
+    def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
+        return self._batch_request
+
+    @property
+    def data_context(self) -> "DataContext":  # noqa: F821
         return self._data_context

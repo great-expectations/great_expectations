@@ -19,7 +19,7 @@ Steps
 1. **First, edit your Expectation Suite.**
 
     ```bash
-    great_expectations --v3-api suite edit <your_suite_name>
+    great_expectations suite edit <your_suite_name>
     ```
 
 2. **Next, add comments to specific Expectations.**

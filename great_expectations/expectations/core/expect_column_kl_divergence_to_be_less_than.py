@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple
 
 import altair as alt
 import numpy as np
@@ -186,6 +186,11 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "partition_object",
+        "threshold",
+    )
 
     def get_validation_dependencies(
         self,
@@ -226,7 +231,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
                     metric_configuration=partition_metric_configuration,
                     configuration=configuration,
                 )
-                resolved_metrics: Dict[Tuple, Any] = {}
+                resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
                 validator.resolve_validation_graph(
                     graph=graph, metrics=resolved_metrics
                 )

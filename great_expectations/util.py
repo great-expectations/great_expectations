@@ -32,7 +32,10 @@ from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
 
-from great_expectations.core.expectation_suite import expectationSuiteSchema
+from great_expectations.core.expectation_suite import (
+    ExpectationSuite,
+    expectationSuiteSchema,
+)
 from great_expectations.exceptions import (
     GreatExpectationsError,
     PluginClassNotFoundError,
@@ -821,7 +824,12 @@ def validate(
         )
     else:
         if isinstance(expectation_suite, dict):
-            expectation_suite = expectationSuiteSchema.load(expectation_suite)
+            expectation_suite_dict: dict = expectationSuiteSchema.load(
+                expectation_suite
+            )
+            expectation_suite: ExpectationSuite = ExpectationSuite(
+                **expectation_suite_dict, data_context=data_context
+            )
         if data_asset_name is not None:
             raise ValueError(
                 "When providing an expectation suite, data_asset_name cannot also be provided."
@@ -938,6 +946,47 @@ def lint_code(code: str) -> str:
         return code
 
 
+def convert_json_string_to_be_python_compliant(code: str) -> str:
+    """Cleans JSON-formatted string to adhere to Python syntax
+
+    Substitute instances of 'null' with 'None' in string representations of Python dictionaries.
+    Additionally, substitutes instances of 'true' or 'false' with their Python equivalents.
+
+    Args:
+        code: JSON string to update
+
+    Returns:
+        Clean, Python-compliant string
+
+    """
+    code = _convert_nulls_to_None(code)
+    code = _convert_json_bools_to_python_bools(code)
+    return code
+
+
+def _convert_nulls_to_None(code: str) -> str:
+    pattern = r'"([a-zA-Z0-9_]+)": null'
+    result = re.findall(pattern, code)
+    for match in result:
+        code = code.replace(f'"{match}": null', f'"{match}": None')
+        logger.info(
+            f"Replaced '{match}: null' with '{match}: None' before writing to file"
+        )
+    return code
+
+
+def _convert_json_bools_to_python_bools(code: str) -> str:
+    pattern = r'"([a-zA-Z0-9_]+)": (true|false)'
+    result = re.findall(pattern, code)
+    for match in result:
+        identifier, boolean = match
+        curr = f'"{identifier}": {boolean}'
+        updated = f'"{identifier}": {boolean.title()}'  # true -> True | false -> False
+        code = code.replace(curr, updated)
+        logger.info(f"Replaced '{curr}' with '{updated}' before writing to file")
+    return code
+
+
 def filter_properties_dict(
     properties: Optional[dict] = None,
     keep_fields: Optional[Set[str]] = None,
@@ -1048,7 +1097,7 @@ def filter_properties_dict(
 
 
 def deep_filter_properties_iterable(
-    properties: Optional[Union[dict, list, set]] = None,
+    properties: Optional[Union[dict, list, set, tuple]] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
@@ -1083,7 +1132,7 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
-    elif isinstance(properties, (list, set)):
+    elif isinstance(properties, (list, set, tuple)):
         if not inplace:
             properties = copy.deepcopy(properties)
 
@@ -1135,6 +1184,24 @@ def is_float(value: Any) -> bool:
     except (TypeError, ValueError):
         return False
     return True
+
+
+def is_nan(value: Any) -> bool:
+    """
+    If value is an array, test element-wise for NaN and return result as a boolean array.
+    If value is a scalar, return boolean.
+    Args:
+        value: The value to test
+
+    Returns:
+        The results of the test
+    """
+    import numpy as np
+
+    try:
+        return np.isnan(value)
+    except TypeError:
+        return True
 
 
 def is_parseable_date(value: Any, fuzzy: bool = False) -> bool:

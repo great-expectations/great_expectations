@@ -31,8 +31,10 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
+    from sqlalchemy.engine.row import LegacyRow
 except ImportError:
     sqlalchemy = None
+    LegacyRow = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
@@ -236,6 +238,10 @@ def convert_to_json_serializable(data):
             dict(zip(data.schema.names, zip(*data.collect())))
         )
 
+    # SQLAlchemy serialization
+    if LegacyRow and isinstance(data, LegacyRow):
+        return dict(data)
+
     if isinstance(data, decimal.Decimal):
         if requires_lossy_conversion(data):
             logger.warning(
@@ -356,6 +362,27 @@ def ensure_json_serializable(data):
             "%s is of type %s which cannot be serialized to json"
             % (str(data), type(data).__name__)
         )
+
+
+def safe_deep_copy(data, memo=None):
+    """
+    This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
+    """
+    if isinstance(data, (pd.Series, pd.DataFrame)) or (
+        pyspark and isinstance(data, pyspark.sql.DataFrame)
+    ):
+        return data
+
+    if isinstance(data, (list, tuple)):
+        return [safe_deep_copy(data=element, memo=memo) for element in data]
+
+    if isinstance(data, dict):
+        return {
+            key: safe_deep_copy(data=value, memo=memo) for key, value in data.items()
+        }
+
+    # noinspection PyArgumentList
+    return copy.deepcopy(data, memo)
 
 
 def requires_lossy_conversion(d):
