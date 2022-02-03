@@ -17,9 +17,10 @@ from integrations.databricks.dlt_expectation import (
 from integrations.databricks.dlt_expectation_translator import (
     translate_dlt_expectation_to_expectation_config,
 )
-from integrations.databricks.dlt_ge_utils import (
-    run_ge_checkpoint_on_dataframe_from_suite,
-)
+
+# from integrations.databricks.dlt_ge_utils import (
+#     run_ge_checkpoint_on_dataframe_from_suite,
+# )
 from integrations.databricks.exceptions import UnsupportedExpectationConfiguration
 
 try:

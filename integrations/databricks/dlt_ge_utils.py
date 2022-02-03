@@ -2,7 +2,8 @@ import datetime
 from typing import Union
 
 import pandas as pd
-import pyspark.sql
+
+# import pyspark.sql
 from ruamel import yaml
 
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -13,7 +14,8 @@ from great_expectations.data_context import BaseDataContext
 
 def run_ge_checkpoint_on_dataframe_from_suite(
     data_context: BaseDataContext,
-    df: Union[pd.DataFrame, pyspark.sql.DataFrame],
+    df,
+    # df: Union[pd.DataFrame, pyspark.sql.DataFrame],
     expectation_configuration: ExpectationConfiguration,
 ):
     batch_request = RuntimeBatchRequest(
