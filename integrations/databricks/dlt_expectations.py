@@ -87,7 +87,7 @@ def expect(
                 ge_expectation_configuration=ge_expectation_configuration,
             )
 
-            # Create DLT expectation
+            # Create DLT expectation object
             ge_expectation_from_dlt: Optional[ExpectationConfiguration] = None
             if dlt_expectation_condition is not None:
                 dlt_expectation: DLTExpectation = DLTExpectation(
@@ -138,10 +138,30 @@ def expect(
                 print(
                     f"Here we are instead calling @dlt_mock_library_injected.expect() with appropriate parameters, in the real system the `dlt_mock_library_injected` will be replaced with the main `dlt` library that we pass into the decorator via the `dlt` parameter."
                 )
-                dlt.expect(dlt_expectation.name, dlt_expectation.condition)
+                dlt_expect_return_value = dlt.expect(
+                    dlt_expectation.name, dlt_expectation.condition
+                )
                 print("\n")
 
-            return func(*args, **kwargs)
+            func_result = func(*args, **kwargs)
+            print(
+                "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            )
+            import sys
+
+            print("type(func_result):", type(func_result))
+            print("sys.getsizeof(func_result)", sys.getsizeof(func_result))
+            try:
+                print("type(dlt_expect_return_value):", type(dlt_expect_return_value))
+                print(
+                    "sys.getsizeof(dlt_expect_return_value)",
+                    sys.getsizeof(dlt_expect_return_value),
+                )
+            except:
+                pass
+            print(
+                "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            )
 
         return wrapper_expect
 
