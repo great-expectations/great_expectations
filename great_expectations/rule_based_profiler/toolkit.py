@@ -27,12 +27,7 @@ def add_profiler(
         )
 
     profiler_config: dict = config.to_json_dict()
-
-    new_profiler: RuleBasedProfiler = instantiate_class_from_config(
-        config=profiler_config,
-        runtime_environment={"data_context": data_context},
-        config_defaults={"module_name": "great_expectations.rule_based_profiler"},
-    )
+    new_profiler = RuleBasedProfiler(**profiler_config)
 
     key: Union[GeCloudIdentifier, ConfigurationIdentifier]
     if data_context.ge_cloud_mode and ge_cloud_id:
