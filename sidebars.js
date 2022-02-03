@@ -376,7 +376,8 @@ module.exports = {
             'terms/data_asset',
             'terms/checkpoint',
             'terms/execution_engine',
-            'terms/plugin'
+            'terms/plugin',
+            'terms/validation_result'
           ]
         },
         {
