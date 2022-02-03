@@ -20,8 +20,6 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
-from great_expectations.marshmallow__shade import ValidationError
-
 try:
     from typing import Literal
 except ImportError:
