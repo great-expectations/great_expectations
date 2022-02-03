@@ -80,9 +80,11 @@ def test_translate_expectation_config_to_dlt_expectation(
         == expect_column_values_to_not_be_null_config_dlt
     )
 
-    expect_column_values_to_be_between_config_dlt = [
-        ("my_between_config_col_a", "a >= 10 AND a <= 25")
-    ]
+    expect_column_values_to_be_between_config_dlt = (
+        "my_between_config_col_a",
+        "a >= 10 AND a <= 25",
+    )
+
     assert (
         translate_expectation_config_to_dlt_expectation(
             expectation_configuration=expect_column_values_to_be_between_config,
@@ -91,9 +93,10 @@ def test_translate_expectation_config_to_dlt_expectation(
         == expect_column_values_to_be_between_config_dlt
     )
 
-    expect_column_values_to_be_between_strict_config_dlt = [
-        ("my_between_config_col_a", "a > 10 AND a < 25")
-    ]
+    expect_column_values_to_be_between_strict_config_dlt = (
+        "my_between_config_col_a",
+        "a > 10 AND a < 25",
+    )
     assert (
         translate_expectation_config_to_dlt_expectation(
             expectation_configuration=expect_column_values_to_be_between_strict_config,
