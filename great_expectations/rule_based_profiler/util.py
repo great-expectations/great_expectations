@@ -7,8 +7,8 @@ import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
-from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations.rule_based_profiler.types import (
+    Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )

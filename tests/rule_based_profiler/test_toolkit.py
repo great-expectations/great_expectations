@@ -11,13 +11,13 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.exceptions.exceptions import InvalidConfigError
 from great_expectations.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.toolkit import (
     add_profiler,
     delete_profiler,
     get_profiler,
     list_profilers,
 )
+from great_expectations.rule_based_profiler.types.base import RuleBasedProfilerConfig
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
@@ -117,11 +117,11 @@ def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
 def test_get_profiler(
     mock_data_context: mock.MagicMock,
     populated_profiler_store: ProfilerStore,
-    profiler_config: RuleBasedProfilerConfig,
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     with mock.patch(
         "great_expectations.data_context.store.profiler_store.ProfilerStore.get",
-        return_value=profiler_config,
+        return_value=profiler_config_with_placeholder_args,
     ):
         profiler = get_profiler(
             data_context=mock_data_context,
