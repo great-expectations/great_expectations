@@ -566,7 +566,7 @@ aws_integration_tests = [
 
 # populate integration_test_matrix with sub-lists
 integration_test_matrix = []
-# integration_test_matrix += pandas_integration_tests
+integration_test_matrix += pandas_integration_tests
 integration_test_matrix += aws_integration_tests
 
 
