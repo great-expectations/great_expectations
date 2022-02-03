@@ -115,9 +115,11 @@ def expect(
             # print(data_context)
             # print(data_context.list_datasources())
             # Create RuntimeBatchRequest from computed resulting dataframe before records are removed
-            df = args[0]
 
             if data_context is not None:
+
+                # TODO: this is throwing an in-pipeline error, how do we get access to the dataframe?
+                df = args[0]
 
                 batch_request = RuntimeBatchRequest(
                     datasource_name="example_datasource",
