@@ -10,12 +10,12 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.types import RuleBasedProfilerConfig
 from great_expectations.util import filter_properties_dict
 
 
 def get_profiler(
-    data_context: "DataContext",
+    data_context: "DataContext",  # noqa: F821
     profiler_store: ProfilerStore,
     name: Optional[str] = None,
     ge_cloud_id: Optional[str] = None,

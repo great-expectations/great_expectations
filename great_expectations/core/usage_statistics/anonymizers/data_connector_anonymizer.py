@@ -58,7 +58,7 @@ class DataConnectorAnonymizer(Anonymizer):
             "anonymized_name": self.anonymize(name),
         }
 
-        # Roundtrip through schema validation to add any missing fields
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
         data_connector_config: DataConnectorConfig = dataConnectorConfigSchema.load(
             config
         )

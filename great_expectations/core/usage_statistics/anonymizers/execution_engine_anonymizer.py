@@ -27,7 +27,7 @@ class ExecutionEngineAnonymizer(Anonymizer):
         anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self.anonymize(name)
 
-        # Roundtrip through schema validation to add any missing fields
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
         execution_engine_config: ExecutionEngineConfig = (
             executionEngineConfigSchema.load(config)
         )
