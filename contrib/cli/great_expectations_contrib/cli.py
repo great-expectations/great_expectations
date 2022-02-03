@@ -39,16 +39,16 @@ def init() -> None:
 @click.pass_obj
 def publish(package: GreatExpectationsContribPackageManifest) -> None:
     publish_cmd()
-    updated_package = package.update_package_state()
-    write_package_to_disk(updated_package, PACKAGE_PATH)
+    package.update_package_state()
+    write_package_to_disk(package, PACKAGE_PATH)
 
 
 @cli.command(help="Check your package to make sure it's met all the requirements")
 @click.pass_obj
 def check(package: GreatExpectationsContribPackageManifest) -> None:
     check_cmd()
-    updated_package = package.update_package_state()
-    write_package_to_disk(updated_package, PACKAGE_PATH)
+    package.update_package_state()
+    write_package_to_disk(package, PACKAGE_PATH)
 
 
 if __name__ == "__main__":

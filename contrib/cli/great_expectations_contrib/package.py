@@ -5,12 +5,15 @@ import os
 import sys
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, List, Optional, Type
+from typing import Any, List, Optional, Set, Type
 
 import pkg_resources
 
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
+)
+from great_expectations.core.expectation_diagnostics.supporting_types import (
+    ExpectationDiagnosticMaturityMessages,
 )
 from great_expectations.expectations.expectation import Expectation
 
@@ -18,20 +21,20 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-@dataclass(frozen=True)
+@dataclass
 class ExpectationCompletenessCheck:
     message: str
     passed: bool
 
 
-@dataclass(frozen=True)
+@dataclass
 class ExpectationCompletenessChecklist:
     experimental: List[ExpectationCompletenessCheck]
     beta: List[ExpectationCompletenessCheck]
     production: List[ExpectationCompletenessCheck]
 
 
-@dataclass(frozen=True)
+@dataclass
 class PackageCompletenessStatus:
     concept_only: int
     experimental: int
@@ -40,22 +43,22 @@ class PackageCompletenessStatus:
     total: int
 
 
-@dataclass(frozen=True)
+@dataclass
 class RenderedExpectation:
     name: str
     tags: List[str]
     supported: List[str]
-    status: ExpectationCompletenessChecklist
+    status: ExpectationDiagnosticMaturityMessages
 
 
-@dataclass(frozen=True)
+@dataclass
 class Dependency:
     text: str
     link: str
     version: Optional[str] = None
 
 
-@dataclass(frozen=True)
+@dataclass
 class GitHubUser:
     username: str
     full_name: Optional[str] = None
@@ -68,13 +71,13 @@ class SocialLinkType(Enum):
     MEDIUM = "MEDIUM"
 
 
-@dataclass(frozen=True)
+@dataclass
 class SocialLink:
     account_type: SocialLinkType
     identifier: str
 
 
-@dataclass(frozen=True)
+@dataclass
 class DomainExpert:
     full_name: str
     social_links: List[SocialLink]
@@ -88,7 +91,7 @@ class Maturity(Enum):
     PRODUCTION = "PRODUCTION"
 
 
-@dataclass(frozen=True)
+@dataclass
 class GreatExpectationsContribPackageManifest:
     # Core
     package_name: Optional[str] = None
@@ -108,39 +111,36 @@ class GreatExpectationsContribPackageManifest:
     # Metadata
     version: Optional[str] = None
 
-    def update_package_state(self) -> "GreatExpectationsContribPackageManifest":
+    def update_package_state(self) -> None:
         """
         Parses diagnostic reports from package Expectations and uses them to update JSON state
         """
         diagnostics = self._retrieve_package_expectations_diagnostics()
-        updated_package = self._update_attrs_with_diagnostics(diagnostics)
-        return updated_package
+        self._update_attrs_with_diagnostics(diagnostics)
 
     def _update_attrs_with_diagnostics(
         self, diagnostics: List[ExpectationDiagnostics]
-    ) -> "GreatExpectationsContribPackageManifest":
-        """
-        expectations
-        expectation_count   # len(diagnostics)
-        dependencies        # _parse_rqeuirements_file
-        maturity
-        status
-
-        contributors        # diagnostic.library_metadata.contributors
-        """
-
-        manifest_data = self.__dict__
-        manifest_data["dependencies"] = self._parse_requirements_file(
-            "requirements.txt"
-        )
-
-        manifest_data["contributors"] = set()
+    ) -> None:
+        self.expectations = []
+        self.expectation_count = len(diagnostics)
+        self.dependencies = self._parse_requirements_file("requirements.txt")
+        self.contributors = []
 
         for diagnostic in diagnostics:
             for contributor in diagnostic.library_metadata.contributors:
                 github_user = GitHubUser(contributor)
+                if github_user not in self.contributors:
+                    self.contributors.append(github_user)
 
-        return GreatExpectationsContribPackageManifest(**manifest_data)
+            expectation = RenderedExpectation(
+                name=diagnostic.description.snake_name,
+                tags=diagnostic.library_metadata.tags,
+                supported=[],
+                status=diagnostic.maturity_checklist,
+            )
+            self.expectations.append(expectation)
+
+            # TODO(cdkini): Update maturity and status
 
     def _parse_requirements_file(self, path: str) -> List[Dependency]:
         if not os.path.exists(path):
