@@ -555,9 +555,14 @@ aws_integration_tests = [
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "user_flow_script": "tests/integration/db/awsathena.py",
         "extra_backend_dependencies": BackendDependencies.AWS,
+        "other_files": (
+            (
+                "tests/integration/db/utils.py",
+                "utils.py",
+            ),
+        ),
     }
 ]
-
 
 # populate integration_test_matrix with sub-lists
 integration_test_matrix = []
@@ -608,8 +613,10 @@ def _execute_integration_test(test_configuration, tmp_path):
         )
         os.chdir(tmp_path)
         # Ensure GE is installed in our environment
-        ge_requirement = test_configuration.get("ge_requirement", "great_expectations")
-        execute_shell_command(f"pip install {ge_requirement}")
+        if "ge_requirement" in test_configuration:
+            execute_shell_command(f"pip install {ge_requirement}")
+        else:
+            execute_shell_command("pip install -e .")
 
         #
         # Build test state
@@ -649,7 +656,8 @@ def _execute_integration_test(test_configuration, tmp_path):
                 source_file = os.path.join(base_dir, file_paths[0])
                 dest_file = os.path.join(tmp_path, file_paths[1])
                 dest_dir = os.path.dirname(dest_file)
-                os.makedirs(dest_dir)
+                if not os.path.exists(dest_dir):
+                    os.makedirs(dest_dir)
                 shutil.copyfile(src=source_file, dst=dest_file)
 
         # UAT Script

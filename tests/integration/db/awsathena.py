@@ -1,20 +1,26 @@
 import os
 
 from ruamel import yaml
-from sqlalchemy import text
-from sqlalchemy.engine import create_engine
+from utils import check_athena_table_count, clean_athena_db
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest
 from great_expectations.exceptions import DataContextError
 
 ATHENA_DB_NAME = os.getenv("ATHENA_DB_NAME")
+if not ATHENA_DB_NAME:
+    raise ValueError(
+        "Environment Variable ATHENA_DB_NAME is required to run integration tests against AWS Athena"
+    )
 ATHENA_STAGING_S3 = os.getenv("ATHENA_STAGING_S3")
-
+if not ATHENA_STAGING_S3:
+    raise ValueError(
+        "Environment Variable ATHENA_STAGING_S3 is required to run integration tests against AWS Athena"
+    )
 
 connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_DB_NAME}?s3_staging_dir={ATHENA_STAGING_S3}"
 
-# create datasource and add athena
+# create datasource and add to DataContext
 context = ge.data_context.DataContext()
 datasource_yaml = f"""
 name: my_awsathena_datasource
@@ -34,23 +40,21 @@ data_connectors:
     module_name: great_expectations.datasource.data_connector
     include_schema_name: true
 """
-
 context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 
+# clean db
+clean_athena_db(connection_string, ATHENA_DB_NAME, "taxitable")
 
-# Test 1: Create Temp Table = False
-# Note that if you modify this batch request, you may save the new version as a .json file
-#  to pass in later the --batch-request option
+# Test 1 : temp_table is not created (default)
 batch_request = {
     "datasource_name": "my_awsathena_datasource",
     "data_connector_name": "default_inferred_data_connector_name",
     "data_asset_name": f"{ATHENA_DB_NAME}.taxitable",
     "limit": 1000,
-    "batch_spec_passthrough": {"create_temp_table": False},
+    # "batch_spec_passthrough": {"create_temp_table": False},
 }
-# Feel free to change the name of your suite here. Renaming this will not remove the other one.
-expectation_suite_name = "mr_taxi"
+expectation_suite_name = "my_awsathena_expectation_suite"
 try:
     suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
     print(
@@ -70,16 +74,10 @@ validator = context.get_validator(
 validator.head(n_rows=5, fetch_all=False)
 assert validator
 
-# Check that new table has not been created
-# Create the SQLAlchemy connection. Note that you need to have pyathena installed for this.
-engine = create_engine(connection_string)
-athena_connection = engine.connect()
+# check that new table has not been created
+assert check_athena_table_count(connection_string, ATHENA_DB_NAME, 1)
 
-result = athena_connection.execute(text(f"SHOW TABLES in {ATHENA_DB_NAME}")).fetchall()
-assert len(result) == 1
-
-
-# second test with the thing?
+# Test 2: temp_table can be created with batch_spec_passthrough
 batch_request = {
     "datasource_name": "my_awsathena_datasource",
     "data_connector_name": "default_inferred_data_connector_name",
@@ -95,18 +93,11 @@ validator = context.get_validator(
 validator.head(n_rows=5, fetch_all=False)
 assert validator
 
-# Check that new table has not been created
-# Create the SQLAlchemy connection. Note that you need to have pyathena installed for this.
-engine = create_engine(connection_string)
-athena_connection = engine.connect()
+# Check that new table has been created
+assert check_athena_table_count(connection_string, ATHENA_DB_NAME, 2)
 
-# we have created a new table
-result = athena_connection.execute(text(f"SHOW TABLES in {ATHENA_DB_NAME};")).fetchall()
-assert len(result) == 2
+# clean db
+clean_athena_db(connection_string, ATHENA_DB_NAME, "taxitable")
 
-for table in result:
-    if table[0] != "taxitable":
-        athena_connection.execute(text(f"DROP TABLE `{table[0]}`;"))
-
-result = athena_connection.execute(text(f"SHOW TABLES in {ATHENA_DB_NAME};")).fetchall()
-assert len(result) == 1
+# Check that only our original table exists
+assert check_athena_table_count(connection_string, ATHENA_DB_NAME, 1)
