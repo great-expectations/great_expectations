@@ -5,15 +5,12 @@ import os
 import sys
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, List, Optional, Set, Type
+from typing import Any, List, Optional, Type
 
 import pkg_resources
 
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
-)
-from great_expectations.core.expectation_diagnostics.supporting_types import (
-    ExpectationDiagnosticMaturityMessages,
 )
 from great_expectations.expectations.expectation import Expectation
 
@@ -48,7 +45,7 @@ class RenderedExpectation:
     name: str
     tags: List[str]
     supported: List[str]
-    status: ExpectationDiagnosticMaturityMessages
+    status: ExpectationCompletenessChecklist
 
 
 @dataclass
@@ -123,8 +120,12 @@ class GreatExpectationsContribPackageManifest:
     ) -> None:
         self.expectations = []
         self.expectation_count = len(diagnostics)
-        self.dependencies = self._parse_requirements_file("requirements.txt")
+        self.dependencies = self._parse_requirements_file_to_dependencies(
+            "requirements.txt"
+        )
         self.contributors = []
+        self.maturity = NotImplementedError
+        self.status = PackageCompletenessStatus(0, 0, 0, 0, 0)
 
         for diagnostic in diagnostics:
             for contributor in diagnostic.library_metadata.contributors:
@@ -136,13 +137,25 @@ class GreatExpectationsContribPackageManifest:
                 name=diagnostic.description.snake_name,
                 tags=diagnostic.library_metadata.tags,
                 supported=[],
-                status=diagnostic.maturity_checklist,
+                status=diagnostic.maturity_checklist,  # Should be converted to the proper type
             )
             self.expectations.append(expectation)
 
+            expectation_maturity = diagnostic.library_metadata.maturity
+            if expectation_maturity == Maturity.CONCEPT_ONLY:
+                self.status.concept_only += 1
+            elif expectation_maturity == Maturity.EXPERIMENTAL:
+                self.status.experimental += 1
+            elif expectation_maturity == Maturity.BETA:
+                self.status.beta += 1
+            elif expectation_maturity == Maturity.PRODUCTION:
+                self.status.production += 1
+
+            self.status.total += 1
+
             # TODO(cdkini): Update maturity and status
 
-    def _parse_requirements_file(self, path: str) -> List[Dependency]:
+    def _parse_requirements_file_to_dependencies(self, path: str) -> List[Dependency]:
         if not os.path.exists(path):
             raise FileNotFoundError("Could not find requirements file")
 
@@ -163,6 +176,8 @@ class GreatExpectationsContribPackageManifest:
             return Dependency(text=name, link=pypi_url, version=version)
 
         return list(map(_convert_to_dependency, requirements))
+
+    # ========================================================================================================================================================================
 
     def _retrieve_package_expectations_diagnostics(
         self,
