@@ -1,9 +1,10 @@
 # This file contains several decorators used in Databricks Delta Live Tables
 # To use these decorators, import this module and then use the decorators in place of the
 # decorators provided by delta live tables.
-
 import datetime
 import functools
+from types import ModuleType
+from typing import Optional
 
 from ruamel.yaml import YAML
 
@@ -29,6 +30,27 @@ except:
 yaml = YAML()
 
 
+def _get_dlt_library(dlt_library: Optional[ModuleType] = None) -> ModuleType:
+    """
+    Check if dlt library is installed, if not then use the one passed in
+    Args:
+        dlt_library: dlt library to be used in dependency injection if dlt library
+            is not imported into the current environment
+
+    Returns:
+        dlt library if already loaded or passed in
+    """
+    try:
+        dlt.__version__
+    except NameError:
+        dlt = dlt_library
+
+    if dlt is None:
+        raise ModuleNotFoundError("dlt library was not found")
+    else:
+        return dlt
+
+
 def expect(
     _func=None,
     *,
@@ -36,7 +58,7 @@ def expect(
     dlt_expectation_condition: str = None,
     data_context: BaseDataContext = None,
     ge_expectation_configuration: ExpectationConfiguration = None,
-    dlt=dlt_mock_library,
+    dlt_library=dlt_mock_library,
 ):
     """
     Run a single expectation on a Delta Live Table
@@ -46,6 +68,8 @@ def expect(
     def decorator_expect(func):
         @functools.wraps(func)
         def wrapper_expect(*args, **kwargs):
+
+            dlt = _get_dlt_library(dlt_library=dlt_library)
 
             if (
                 dlt_expectation_condition is not None

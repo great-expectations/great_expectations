@@ -128,7 +128,7 @@ def test_dlt_expect_decorator(
         data_context=data_context,
         dlt_expectation_name="my_expect_column_values_to_be_between_expectation",
         ge_expectation_configuration=expect_column_values_to_be_between_strict_config,
-        dlt=dlt_mock_library_injected,
+        dlt_library=dlt_mock_library_injected,
     )
     def transformation_1(df):
         # Note that in DLT, the dataframe is retrieved in the function body
@@ -142,7 +142,7 @@ def test_dlt_expect_decorator(
         dlt_expectation_name="my_expect_column_values_to_not_be_null_expectation",
         # ge_expectation_configuration=expect_column_values_to_not_be_null_config,
         dlt_expectation_condition="col2 IS NOT NULL",
-        dlt=dlt_mock_library_injected,
+        dlt_library=dlt_mock_library_injected,
     )
     def transformation_2(df):
         df += 2
