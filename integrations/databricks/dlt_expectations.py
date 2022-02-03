@@ -87,66 +87,66 @@ def expect(
         @functools.wraps(func)
         def wrapper_expect(*args, **kwargs):
 
-            dlt = _get_dlt_library(dlt_library=dlt_library)
-
-            _validate_dlt_decorator_arguments(
-                dlt_expectation_condition=dlt_expectation_condition,
-                ge_expectation_configuration=ge_expectation_configuration,
-            )
-
-            # Create DLT expectation object
-            ge_expectation_from_dlt: Optional[ExpectationConfiguration] = None
-            if dlt_expectation_condition is not None:
-                dlt_expectation: DLTExpectation = DLTExpectation(
-                    name=dlt_expectation_name, condition=dlt_expectation_condition
-                )
-
-                # Translate DLT expectation to GE ExpectationConfiguration
-                ge_expectation_from_dlt = (
-                    translate_dlt_expectation_to_expectation_config(
-                        dlt_expectations=[
-                            (dlt_expectation.name, dlt_expectation.condition)
-                        ],
-                        ge_expectation_type="expect_column_values_to_not_be_null",
-                    )
-                )
-            elif ge_expectation_configuration is not None:
-                # Translate GE ExpectationConfiguration to DLT expectation
-                dlt_expectation_factory: DLTExpectationFactory = DLTExpectationFactory()
-                dlt_expectation: DLTExpectation = (
-                    dlt_expectation_factory.from_great_expectations_expectation(
-                        ge_expectation_configuration=ge_expectation_configuration,
-                        dlt_expectation_name=dlt_expectation_name,
-                    )
-                )
-
-            # Great Expectations evaluated first on the full dataset before any rows are dropped
-            #   via `expect_or_drop` Delta Live Tables expectations
-            if data_context is not None:
-                # TODO: Get rid of this ugly mess:
-                if ge_expectation_configuration is not None:
-                    ge_expectation_configuration_to_run = ge_expectation_configuration
-                elif ge_expectation_from_dlt is not None:
-                    ge_expectation_configuration_to_run = ge_expectation_from_dlt
-                else:
-                    ge_expectation_configuration_to_run = None
-                run_ge_checkpoint_on_dataframe_from_suite(
-                    data_context=data_context,
-                    df=args[0],
-                    expectation_configuration=ge_expectation_configuration_to_run,
-                )
-
-                # TODO: getting the df from args[0] is throwing an in-pipeline error, how do we get access to the dataframe?
-
-            if dlt_expectation is not None:
-                print(
-                    f'Here we would normally apply: @dlt.expect("{dlt_expectation.name}", "{dlt_expectation.condition}")'
-                )
-                print(
-                    f"Here we are instead calling @dlt_mock_library_injected.expect() with appropriate parameters, in the real system the `dlt_mock_library_injected` will be replaced with the main `dlt` library that we pass into the decorator via the `dlt` parameter."
-                )
-                # dlt.expect(dlt_expectation.name, dlt_expectation.condition)
-                print("\n")
+            # dlt = _get_dlt_library(dlt_library=dlt_library)
+            #
+            # _validate_dlt_decorator_arguments(
+            #     dlt_expectation_condition=dlt_expectation_condition,
+            #     ge_expectation_configuration=ge_expectation_configuration,
+            # )
+            #
+            # # Create DLT expectation object
+            # ge_expectation_from_dlt: Optional[ExpectationConfiguration] = None
+            # if dlt_expectation_condition is not None:
+            #     dlt_expectation: DLTExpectation = DLTExpectation(
+            #         name=dlt_expectation_name, condition=dlt_expectation_condition
+            #     )
+            #
+            #     # Translate DLT expectation to GE ExpectationConfiguration
+            #     ge_expectation_from_dlt = (
+            #         translate_dlt_expectation_to_expectation_config(
+            #             dlt_expectations=[
+            #                 (dlt_expectation.name, dlt_expectation.condition)
+            #             ],
+            #             ge_expectation_type="expect_column_values_to_not_be_null",
+            #         )
+            #     )
+            # elif ge_expectation_configuration is not None:
+            #     # Translate GE ExpectationConfiguration to DLT expectation
+            #     dlt_expectation_factory: DLTExpectationFactory = DLTExpectationFactory()
+            #     dlt_expectation: DLTExpectation = (
+            #         dlt_expectation_factory.from_great_expectations_expectation(
+            #             ge_expectation_configuration=ge_expectation_configuration,
+            #             dlt_expectation_name=dlt_expectation_name,
+            #         )
+            #     )
+            #
+            # # Great Expectations evaluated first on the full dataset before any rows are dropped
+            # #   via `expect_or_drop` Delta Live Tables expectations
+            # if data_context is not None:
+            #     # TODO: Get rid of this ugly mess:
+            #     if ge_expectation_configuration is not None:
+            #         ge_expectation_configuration_to_run = ge_expectation_configuration
+            #     elif ge_expectation_from_dlt is not None:
+            #         ge_expectation_configuration_to_run = ge_expectation_from_dlt
+            #     else:
+            #         ge_expectation_configuration_to_run = None
+            #     run_ge_checkpoint_on_dataframe_from_suite(
+            #         data_context=data_context,
+            #         df=args[0],
+            #         expectation_configuration=ge_expectation_configuration_to_run,
+            #     )
+            #
+            #     # TODO: getting the df from args[0] is throwing an in-pipeline error, how do we get access to the dataframe?
+            #
+            # if dlt_expectation is not None:
+            #     print(
+            #         f'Here we would normally apply: @dlt.expect("{dlt_expectation.name}", "{dlt_expectation.condition}")'
+            #     )
+            #     print(
+            #         f"Here we are instead calling @dlt_mock_library_injected.expect() with appropriate parameters, in the real system the `dlt_mock_library_injected` will be replaced with the main `dlt` library that we pass into the decorator via the `dlt` parameter."
+            #     )
+            #     # dlt.expect(dlt_expectation.name, dlt_expectation.condition)
+            #     print("\n")
 
             func(*args, **kwargs)
             # func_result = func(*args, **kwargs)
