@@ -46,7 +46,14 @@ def _get_dlt_library(dlt_library: Optional[ModuleType] = None) -> ModuleType:
         dlt library if already loaded or passed in
     """
     try:
-        dlt.__version__
+        print(
+            "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+        )
+        print("dlt.__version__", dlt.__version__)
+        print("dir(dlt)", dir(dlt))
+        print(
+            "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+        )
     except NameError:
         dlt = dlt_library
 
@@ -138,7 +145,7 @@ def expect(
                 print(
                     f"Here we are instead calling @dlt_mock_library_injected.expect() with appropriate parameters, in the real system the `dlt_mock_library_injected` will be replaced with the main `dlt` library that we pass into the decorator via the `dlt` parameter."
                 )
-                dlt.expect(dlt_expectation.name, dlt_expectation.condition)
+                # dlt.expect(dlt_expectation.name, dlt_expectation.condition)
                 print("\n")
 
             func(*args, **kwargs)
