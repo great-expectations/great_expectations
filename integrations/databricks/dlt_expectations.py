@@ -1,15 +1,14 @@
 # This file contains several decorators used in Databricks Delta Live Tables
 # To use these decorators, import this module and then use the decorators in place of the
 # decorators provided by delta live tables.
-import datetime
+
 import functools
 from types import ModuleType
 from typing import Optional
 
 from ruamel.yaml import YAML
 
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
-from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core import ExpectationConfiguration
 from great_expectations.data_context import BaseDataContext
 from integrations.databricks.dlt_expectation import (
     DLTExpectation,
@@ -17,7 +16,6 @@ from integrations.databricks.dlt_expectation import (
 )
 from integrations.databricks.dlt_expectation_translator import (
     translate_dlt_expectation_to_expectation_config,
-    translate_expectation_config_to_dlt_expectation,
 )
 from integrations.databricks.dlt_ge_utils import (
     run_ge_checkpoint_on_dataframe_from_suite,
@@ -84,33 +82,26 @@ def expect(
 
             dlt = _get_dlt_library(dlt_library=dlt_library)
 
-            if (
-                dlt_expectation_condition is not None
-                and ge_expectation_configuration is not None
-            ):
-                raise UnsupportedExpectationConfiguration(
-                    f"Please provide only one of dlt_expectation_condition OR ge_expectation_configuration, not both."
-                )
-            elif (
-                dlt_expectation_condition is None
-                and ge_expectation_configuration is None
-            ):
-                raise UnsupportedExpectationConfiguration(
-                    "Please provide at least one type of expectation configuration"
-                )
+            _validate_dlt_decorator_arguments(
+                dlt_expectation_condition=dlt_expectation_condition,
+                ge_expectation_configuration=ge_expectation_configuration,
+            )
 
             # Create DLT expectation
+            ge_expectation_from_dlt: Optional[ExpectationConfiguration] = None
             if dlt_expectation_condition is not None:
                 dlt_expectation: DLTExpectation = DLTExpectation(
                     name=dlt_expectation_name, condition=dlt_expectation_condition
                 )
 
                 # Translate DLT expectation to GE ExpectationConfiguration
-                ge_expectation = translate_dlt_expectation_to_expectation_config(
-                    dlt_expectations=[
-                        (dlt_expectation.name, dlt_expectation.condition)
-                    ],
-                    ge_expectation_type="expect_column_values_to_not_be_null",
+                ge_expectation_from_dlt = (
+                    translate_dlt_expectation_to_expectation_config(
+                        dlt_expectations=[
+                            (dlt_expectation.name, dlt_expectation.condition)
+                        ],
+                        ge_expectation_type="expect_column_values_to_not_be_null",
+                    )
                 )
             elif ge_expectation_configuration is not None:
                 # Translate GE ExpectationConfiguration to DLT expectation
@@ -125,10 +116,17 @@ def expect(
             # Great Expectations evaluated first on the full dataset before any rows are dropped
             #   via `expect_or_drop` Delta Live Tables expectations
             if data_context is not None:
+                # TODO: Get rid of this ugly mess:
+                if ge_expectation_configuration is not None:
+                    ge_expectation_configuration_to_run = ge_expectation_configuration
+                elif ge_expectation_from_dlt is not None:
+                    ge_expectation_configuration_to_run = ge_expectation_from_dlt
+                else:
+                    ge_expectation_configuration_to_run = None
                 run_ge_checkpoint_on_dataframe_from_suite(
                     data_context=data_context,
                     df=args[0],
-                    expectation_configuration=ge_expectation_configuration,
+                    expectation_configuration=ge_expectation_configuration_to_run,
                 )
 
                 # TODO: getting the df from args[0] is throwing an in-pipeline error, how do we get access to the dataframe?
@@ -152,3 +150,20 @@ def expect(
     #     return decorator_expect
     # else:
     #     return decorator_expect(_func)
+
+
+def _validate_dlt_decorator_arguments(
+    dlt_expectation_condition: str,
+    ge_expectation_configuration: ExpectationConfiguration,
+) -> None:
+    if (
+        dlt_expectation_condition is not None
+        and ge_expectation_configuration is not None
+    ):
+        raise UnsupportedExpectationConfiguration(
+            f"Please provide only one of dlt_expectation_condition OR ge_expectation_configuration, not both."
+        )
+    elif dlt_expectation_condition is None and ge_expectation_configuration is None:
+        raise UnsupportedExpectationConfiguration(
+            "Please provide at least one type of expectation configuration"
+        )
