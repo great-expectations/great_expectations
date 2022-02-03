@@ -3285,7 +3285,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "commented_map": commented_map,
         }
 
-        # Package config and perform validation
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
         validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
         profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
 

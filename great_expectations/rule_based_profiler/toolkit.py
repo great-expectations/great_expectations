@@ -43,12 +43,7 @@ def add_profiler(
         )
 
     profiler_store: ProfilerStore = data_context.profiler_store
-    profiler_ref = profiler_store.set(key=key, value=config)
-    if isinstance(profiler_ref, GeCloudIdAwareRef):
-        pass
-        # Chetan - 20220201 - Open to determine how to treat ge_cloud_id
-        # ge_cloud_id = profiler_ref.ge_cloud_id
-        # new_profiler.ge_cloud_id = uuid.UUID(ge_cloud_id)
+    profiler_store.set(key=key, value=config)
 
     return new_profiler
 

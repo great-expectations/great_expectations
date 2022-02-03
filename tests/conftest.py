@@ -5084,17 +5084,17 @@ def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
     return ConfigurationIdentifier(configuration_key=profiler_name)
 
 
-# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def ge_cloud_profiler_id() -> str:
+    skip_if_python_below_minimum_version()
+
     return "my_ge_cloud_profiler_id"
 
 
-# TODO: <Alex>ALEX -- come up with a more elegant way of excluding all Rule-Based Profiler tests and fixtures, unless minimum Python version requirements are satisfied.</Alex>
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 @pytest.fixture(scope="function")
 def ge_cloud_profiler_key(ge_cloud_profiler_id: str) -> GeCloudIdentifier:
+    skip_if_python_below_minimum_version()
+
     return GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_profiler_id)
 
 
