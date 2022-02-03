@@ -117,7 +117,7 @@
   "validation": {
     "term": "Validation",
     "definition": "The act of applying an Expectation Suite to a Batch.",
-    "url": "terms/validation"
+    "url": "guides/validation/validate_data_overview"
   },
   "action": {
     "term": "Action",
