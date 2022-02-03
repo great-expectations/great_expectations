@@ -79,10 +79,8 @@ def skip_if_python_below_minimum_version():
         ```
         skip_if_python_below_minimum_version()
         ```
-
-    This method can also be executed at the module level (by placing the above line at the top, just below the imports).
-
-    for as long as the support for Python versions less than 3.7 is provided.
+    for as long as the support for Python versions less than 3.7 is provided.  In particular, Python-3.6 support for
+    "dataclasses.asdict()" does not handle None values as well as the more recent versions of Python do.
     """
     if sys.version_info < RULE_BASED_PROFILER_MIN_PYTHON_VERSION:
         pytest.skip(

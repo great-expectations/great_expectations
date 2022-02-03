@@ -7,6 +7,7 @@ from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
 
 
+# TODO: <Alex>ALEX -- abstract general-purpose methods (e.g., "to_dict()"/"properties", "to_json_dict()", "__repr__()", and "__str__()") to the "DictDot" and "SerializableDictDot" classes.</Alex>
 class Builder(SerializableDictDot):
     """
     A Builder provides methods to serialize any builder object of a rule generically.
