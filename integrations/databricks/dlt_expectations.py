@@ -52,8 +52,8 @@ def _get_dlt_library(dlt_library: Optional[ModuleType] = None) -> ModuleType:
 
 
 def expect(
-    _func=None,
-    *,
+    # _func=None,
+    # *,
     dlt_expectation_name: str = None,
     dlt_expectation_condition: str = None,
     data_context: BaseDataContext = None,
@@ -205,7 +205,8 @@ def expect(
 
         return wrapper_expect
 
-    if _func is None:
-        return decorator_expect
-    else:
-        return decorator_expect(_func)
+    return decorator_expect
+    # if _func is None:
+    #     return decorator_expect
+    # else:
+    #     return decorator_expect(_func)
