@@ -2,7 +2,7 @@ import pytest
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.marshmallow__shade.exceptions import ValidationError
-from great_expectations.rule_based_profiler.config import (
+from great_expectations.rule_based_profiler.types import (
     DomainBuilderConfig,
     DomainBuilderConfigSchema,
     ExpectationConfigurationBuilderConfig,
