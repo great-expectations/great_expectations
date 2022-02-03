@@ -1,3 +1,13 @@
+schedules:
+- cron: 0 */4 * * *
+  displayName: Scheduled Runs
+  branches:
+    include:
+    - develop
+    exclude:
+    - main
+  always: false # Will only run if changes have been made since last scheduled run
+
 trigger:
   branches:
     include:
