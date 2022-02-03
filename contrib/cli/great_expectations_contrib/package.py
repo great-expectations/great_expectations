@@ -154,7 +154,12 @@ class GreatExpectationsContribPackageManifest:
         ) -> Dependency:
             name = requirement.project_name
             pypi_url = f"https://pypi.org/project/{name}"
-            version = str(requirement.specs) if requirement.specs else None
+            if requirement.specs:
+                version = ", ".join(
+                    "".join(symbol for symbol in pin) for pin in requirement.specs
+                )
+            else:
+                version = None
             return Dependency(text=name, link=pypi_url, version=version)
 
         return list(map(_convert_to_dependency, requirements))
