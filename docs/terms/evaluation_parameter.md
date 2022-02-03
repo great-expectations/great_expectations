@@ -86,6 +86,27 @@ my_df.validate(
 
 Evaluation Parameters that are configured as part of a Checkpoint's Expectations will be used without further interaction from you.  Additionally, Evaluation Parameters will be stored by having the `StoreEvaluationParametersAction` subclass of the `ValidationAction` class defined in a Checkpoint configuration's `action_list`.
 
+However, if you wish to provide specific values for Evaluation Parameters when running a Checkpoint (for instance, when you are testing a newly configured Checkpoint) you can do so by either defining the value of the Evaluation Parameter as an environment variable, or by passing the Evaluation Parameter value in as a dictionary assigned to the named parameter `evaluation_parameters` in the Data Context's `run_checkpoint()` method.
+
+For example, say you have a Checkpoint named `my_checkpoint` that is configured to use the Evaluation Parameter `upstream_row_count`.  To associate this Evaluation Parameter with an environment variable, you would edit the Checkpoint's configuration like this:
+
+```yaml title="YAML configuration"
+name: my_checkpoint
+...
+evaluation_parameters:
+    upstream_row_count: $MY_ENV_VAR
+```
+
+If you would rather pass the value of the Environment Variable `upstream_row_count` in as a dictionary when the Checkpoint is run, you can do so like this:
+
+```python title="Python code"
+import great_expectations as ge
+
+test_row_count = 10
+
+context = ge.get_context()
+context.run_checkpoint(`my_checkpoint`, evaluation_parameters={"upstream_row_count":test_row_count})
+```
 
 
 ## Features
