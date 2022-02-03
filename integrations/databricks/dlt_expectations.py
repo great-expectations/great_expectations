@@ -117,59 +117,63 @@ def expect(
             # Create RuntimeBatchRequest from computed resulting dataframe before records are removed
             df = args[0]
 
-            batch_request = RuntimeBatchRequest(
-                datasource_name="example_datasource",
-                data_connector_name="default_runtime_data_connector_name",
-                # TODO: data_asset_name as a decorator param with default?
-                data_asset_name="transformation_name",  # This can be anything that identifies this data_asset for you
-                runtime_parameters={"batch_data": df},  # df is your dataframe
-                # TODO: batch_identifiers as a decorator param with default?
-                batch_identifiers={"default_identifier_name": "default_identifier"},
-            )
-            # Create Expectation Suite (from Expectation Configuration, in multi-expectation decorators with suites we can use the suite directly)
-            # TODO: allow expectation suite customization
-            expectation_suite_name: str = f"tmp_expectation_suite_{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
-            expectation_suite: ExpectationSuite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name
-            )
-            if ge_expectation_configuration is not None:
-                expectation_suite.append_expectation(
-                    expectation_config=ge_expectation_configuration
+            if data_context is not None:
+
+                batch_request = RuntimeBatchRequest(
+                    datasource_name="example_datasource",
+                    data_connector_name="default_runtime_data_connector_name",
+                    # TODO: data_asset_name as a decorator param with default?
+                    data_asset_name="transformation_name",  # This can be anything that identifies this data_asset for you
+                    runtime_parameters={"batch_data": df},  # df is your dataframe
+                    # TODO: batch_identifiers as a decorator param with default?
+                    batch_identifiers={"default_identifier_name": "default_identifier"},
                 )
-            if ge_expectation is not None:
-                expectation_suite.append_expectation(expectation_config=ge_expectation)
+                # Create Expectation Suite (from Expectation Configuration, in multi-expectation decorators with suites we can use the suite directly)
+                # TODO: allow expectation suite customization
+                expectation_suite_name: str = f"tmp_expectation_suite_{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
+                expectation_suite: ExpectationSuite = ExpectationSuite(
+                    expectation_suite_name=expectation_suite_name
+                )
+                if ge_expectation_configuration is not None:
+                    expectation_suite.append_expectation(
+                        expectation_config=ge_expectation_configuration
+                    )
+                if ge_expectation is not None:
+                    expectation_suite.append_expectation(
+                        expectation_config=ge_expectation
+                    )
 
-            # TODO: We probably don't want to save this expectation suite, just doing it here out of convenience temporarily to use the checkpoint. In the future we may wish to work with in-memory Checkpoints.
-            data_context.save_expectation_suite(
-                expectation_suite=expectation_suite,
-                expectation_suite_name=expectation_suite_name,
-                overwrite_existing=True,
-            )
+                # TODO: We probably don't want to save this expectation suite, just doing it here out of convenience temporarily to use the checkpoint. In the future we may wish to work with in-memory Checkpoints.
+                data_context.save_expectation_suite(
+                    expectation_suite=expectation_suite,
+                    expectation_suite_name=expectation_suite_name,
+                    overwrite_existing=True,
+                )
 
-            # Run Checkpoint & Actions
-            checkpoint_name = "tmp_checkpoint"
-            yaml_config = f"""
-            name: {checkpoint_name}
-            config_version: 1.0
-            class_name: SimpleCheckpoint
-            run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
-            """
+                # Run Checkpoint & Actions
+                checkpoint_name = "tmp_checkpoint"
+                yaml_config = f"""
+                name: {checkpoint_name}
+                config_version: 1.0
+                class_name: SimpleCheckpoint
+                run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+                """
 
-            data_context.add_checkpoint(**yaml.load(yaml_config))
+                data_context.add_checkpoint(**yaml.load(yaml_config))
 
-            checkpoint_result = data_context.run_checkpoint(
-                checkpoint_name=checkpoint_name,
-                validations=[
-                    {
-                        "batch_request": batch_request,
-                        "expectation_suite_name": expectation_suite_name,
-                    }
-                ],
-            )
-            print(
-                f"GE Checkpoint was just run with converted expectations. Result of GE Checkpoint: {checkpoint_result.success}",
-                "\n",
-            )
+                checkpoint_result = data_context.run_checkpoint(
+                    checkpoint_name=checkpoint_name,
+                    validations=[
+                        {
+                            "batch_request": batch_request,
+                            "expectation_suite_name": expectation_suite_name,
+                        }
+                    ],
+                )
+                print(
+                    f"GE Checkpoint was just run with converted expectations. Result of GE Checkpoint: {checkpoint_result.success}",
+                    "\n",
+                )
 
             return func(*args, **kwargs)
 
