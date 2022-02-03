@@ -36,7 +36,10 @@ config = {
         "azure_secrets": ["azure-identity>=1.0.0", "azure-keyvault-secrets>=4.0.0"],
         "snowflake": ["snowflake-sqlalchemy>=1.2"],
     },
-    "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),
+    "packages": find_packages(
+        include=["great_expectations*", "integrations*"],
+        exclude=["contrib*", "docs*", "tests*", "examples*"],
+    ),
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
     },
