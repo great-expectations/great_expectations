@@ -212,6 +212,7 @@ module.exports = {
               label: 'Creating Custom Expectations',
               items: [
                 'guides/expectations/creating_custom_expectations/overview',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',

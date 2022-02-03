@@ -3,6 +3,7 @@ title: Changelog
 ---
 
 ### Develop
+* [FEATURE] Add Expectation.generate_diagnostic_checklist to assist with developing custom Expectations (#3906)
 
 ### 0.14.4
 * [BUGFIX] Fix typing_extensions requirement to allow for proper build (#4083) (thanks @vojtakopal and @Godoy)
