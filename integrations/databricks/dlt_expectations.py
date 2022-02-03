@@ -35,32 +35,32 @@ except:
 yaml = YAML()
 
 
-def _get_dlt_library(dlt_library: Optional[ModuleType] = None) -> ModuleType:
-    """
-    Check if dlt library is installed, if not then use the one passed in
-    Args:
-        dlt_library: dlt library to be used in dependency injection if dlt library
-            is not imported into the current environment
-
-    Returns:
-        dlt library if already loaded or passed in
-    """
-    try:
-        print(
-            "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-        )
-        print("dlt.__version__", dlt.__version__)
-        print("dir(dlt)", dir(dlt))
-        print(
-            "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-        )
-    except NameError:
-        dlt = dlt_library
-
-    if dlt is None:
-        raise ModuleNotFoundError("dlt library was not found")
-    else:
-        return dlt
+# def _get_dlt_library(dlt_library: Optional[ModuleType] = None) -> ModuleType:
+#     """
+#     Check if dlt library is installed, if not then use the one passed in
+#     Args:
+#         dlt_library: dlt library to be used in dependency injection if dlt library
+#             is not imported into the current environment
+#
+#     Returns:
+#         dlt library if already loaded or passed in
+#     """
+#     try:
+#         print(
+#             "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+#         )
+#         print("dlt.__version__", dlt.__version__)
+#         print("dir(dlt)", dir(dlt))
+#         print(
+#             "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+#         )
+#     except NameError:
+#         dlt = dlt_library
+#
+#     if dlt is None:
+#         raise ModuleNotFoundError("dlt library was not found")
+#     else:
+#         return dlt
 
 
 # Preparation outside of decorator:
