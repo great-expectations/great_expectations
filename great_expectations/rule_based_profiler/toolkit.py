@@ -5,7 +5,6 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.util import batch_request_contains_batch_data
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.base import DataContextConfigDefaults
-from great_expectations.data_context.types.refs import GeCloudIdAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GeCloudIdentifier,
@@ -19,25 +18,33 @@ from great_expectations.util import filter_properties_dict
 def add_profiler(
     config: RuleBasedProfilerConfig,
     data_context: "DataContext",  # noqa: F821
+    profiler_store: ProfilerStore,
     ge_cloud_id: Optional[str] = None,
 ) -> RuleBasedProfiler:
     if not _check_validity_of_batch_requests_in_config(config):
         raise ge_exceptions.InvalidConfigError(
-            f'batch_data found in batch_request cannot be saved to ProfilerStore "{data_context.profiler_store_name}"'
+            f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store.store_name}"'
         )
 
-    profiler_config: dict = config.to_json_dict()
-    new_profiler = RuleBasedProfiler(**profiler_config)
+    # Chetan - 20220204 - DataContext to be removed once it can be decoupled from RBP
+    new_profiler: RuleBasedProfiler = instantiate_class_from_config(
+        config=config.to_json_dict(),
+        runtime_environment={
+            "data_context": data_context,
+        },
+        config_defaults={
+            "module_name": "great_expectations.rule_based_profiler",
+        },
+    )
 
     key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-    if data_context.ge_cloud_mode and ge_cloud_id:
+    if ge_cloud_id:
         key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
     else:
         key = ConfigurationIdentifier(
             configuration_key=config.name,
         )
 
-    profiler_store: ProfilerStore = data_context.profiler_store
     profiler_store.set(key=key, value=config)
 
     return new_profiler

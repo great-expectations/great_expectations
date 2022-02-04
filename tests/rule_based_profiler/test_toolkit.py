@@ -43,7 +43,11 @@ def test_add_profiler(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     mock_data_context.ge_cloud_mode.return_value = False
-    profiler = add_profiler(profiler_config_with_placeholder_args, mock_data_context)
+    profiler = add_profiler(
+        profiler_config_with_placeholder_args,
+        data_context=mock_data_context,
+        profiler_store=mock_data_context.profiler_store,
+    )
 
     assert isinstance(profiler, RuleBasedProfiler)
     assert profiler.name == profiler_config_with_placeholder_args.name
@@ -62,7 +66,8 @@ def test_add_profiler_ge_cloud_mode(
     mock_data_context.ge_cloud_mode.return_value = True
     profiler = add_profiler(
         profiler_config_with_placeholder_args,
-        mock_data_context,
+        data_context=mock_data_context,
+        profiler_store=mock_data_context.profiler_store,
         ge_cloud_id=ge_cloud_profiler_id,
     )
 
@@ -110,7 +115,11 @@ def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
     )
 
     with pytest.raises(InvalidConfigError) as e:
-        add_profiler(profiler_config, mock_data_context)
+        add_profiler(
+            profiler_config,
+            data_context=mock_data_context,
+            profiler_store=mock_data_context.profiler_store,
+        )
 
     assert "batch_data found in batch_request" in str(e.value)
 

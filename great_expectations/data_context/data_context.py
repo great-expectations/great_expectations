@@ -3294,7 +3294,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         # Chetan - 20220127 - Open to refactor all Profiler CRUD from toolkit to class methods
         return profiler_toolkit.add_profiler(
-            config=config, data_context=self, ge_cloud_id=ge_cloud_id
+            config=config,
+            data_context=self,
+            profiler_store=self.profiler_store,
+            ge_cloud_id=ge_cloud_id,
         )
 
     def get_profiler(
