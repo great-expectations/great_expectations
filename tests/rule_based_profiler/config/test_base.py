@@ -2,7 +2,7 @@ import pytest
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.marshmallow__shade.exceptions import ValidationError
-from great_expectations.rule_based_profiler.config import (
+from great_expectations.rule_based_profiler.types import (
     DomainBuilderConfig,
     DomainBuilderConfigSchema,
     ExpectationConfigurationBuilderConfig,
@@ -25,18 +25,6 @@ def test_not_null_schema_raises_error_with_improperly_implemented_subclass():
         MySchema().load({})
 
     assert "must define its own custom __config_class__" in str(e.value)
-
-
-def test_not_null_schema_removes_unknown_kwargs_when_loading():
-    data = {
-        "class_name": "DomainBuilder",
-        "a": "foo",
-        "b": "bar",
-        "c": "baz",
-    }
-    schema = DomainBuilderConfigSchema()
-    config = schema.load(data)
-    assert all(not hasattr(config, attr) for attr in ("a", "b", "c"))
 
 
 def test_not_null_schema_removes_null_values_when_dumping():
@@ -167,7 +155,6 @@ def test_expectation_configuration_builder_config_unsuccessfully_loads_with_miss
 
 def test_rule_config_successfully_loads_with_required_args():
     data = {
-        "name": "rule_1",
         "domain_builder": {"class_name": "DomainBuilder"},
         "parameter_builders": [
             {"class_name": "ParameterBuilder", "name": "my_parameter"}
@@ -200,24 +187,20 @@ def test_rule_config_unsuccessfully_loads_with_missing_required_fields():
     with pytest.raises(ValidationError) as e:
         schema.load(data)
 
-    assert all(
-        f"'{attr}': ['Missing data for required field.']" in str(e.value)
-        for attr in (
-            "name",
-            "domain_builder",
-            "parameter_builders",
-            "expectation_configuration_builders",
-        )
+    assert (
+        "'expectation_configuration_builders': ['Missing data for required field.']"
+        in str(e.value)
     )
 
 
 def test_rule_based_profiler_config_successfully_loads_with_required_args():
     data = {
         "name": "my_RBP",
+        "class_name": "RuleBasedProfiler",
+        "module_name": "great_expectations.rule_based_profiler",
         "config_version": 1.0,
         "rules": {
             "rule_1": {
-                "name": "rule_1",
                 "domain_builder": {"class_name": "DomainBuilder"},
                 "parameter_builders": [
                     {"class_name": "ParameterBuilder", "name": "my_parameter"}
@@ -233,18 +216,21 @@ def test_rule_based_profiler_config_successfully_loads_with_required_args():
     }
     schema = RuleBasedProfilerConfigSchema()
     config = schema.load(data)
-    assert isinstance(config, RuleBasedProfilerConfig)
-    assert len(config.rules) == 1 and isinstance(config.rules["rule_1"], RuleConfig)
+    assert isinstance(config, dict)
+    assert len(config["rules"]) == 1 and isinstance(
+        config["rules"]["rule_1"], RuleConfig
+    )
 
 
 def test_rule_based_profiler_config_successfully_loads_with_optional_args():
     data = {
         "name": "my_RBP",
+        "class_name": "RuleBasedProfiler",
+        "module_name": "great_expectations.rule_based_profiler",
         "config_version": 1.0,
         "variables": {"foo": "bar"},
         "rules": {
             "rule_1": {
-                "name": "rule_1",
                 "domain_builder": {"class_name": "DomainBuilder"},
                 "parameter_builders": [
                     {"class_name": "ParameterBuilder", "name": "my_parameter"}
@@ -260,8 +246,8 @@ def test_rule_based_profiler_config_successfully_loads_with_optional_args():
     }
     schema = RuleBasedProfilerConfigSchema()
     config = schema.load(data)
-    assert isinstance(config, RuleBasedProfilerConfig)
-    assert data["variables"] == config.variables
+    assert isinstance(config, dict)
+    assert data["variables"] == config["variables"]
 
 
 def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_fields():
@@ -284,11 +270,12 @@ def test_rule_based_profiler_config_unsuccessfully_loads_with_missing_required_f
 def test_rule_based_profiler_from_commented_map():
     data = {
         "name": "my_RBP",
+        "class_name": "RuleBasedProfiler",
+        "module_name": "great_expectations.rule_based_profiler",
         "config_version": 1.0,
         "variables": {"foo": "bar"},
         "rules": {
             "rule_1": {
-                "name": "rule_1",
                 "domain_builder": {"class_name": "DomainBuilder"},
                 "parameter_builders": [
                     {"class_name": "ParameterBuilder", "name": "my_parameter"}

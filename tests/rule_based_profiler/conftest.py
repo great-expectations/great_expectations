@@ -1,6 +1,7 @@
 import datetime
 import os
 import shutil
+import sys
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -9,19 +10,28 @@ import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
-from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+    DefaultExpectationConfigurationBuilder,
+)
+from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.types import (
+    Domain,
     ParameterContainer,
     ParameterNode,
 )
-from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.types.base import (
+    ruleBasedProfilerConfigSchema,
+)
+from tests.conftest import skip_if_python_below_minimum_version
 
 yaml = YAML()
 
@@ -33,6 +43,7 @@ def multibatch_generic_csv_generator():
     """
     Construct a series of csv files with many data types for use in multibatch testing
     """
+    skip_if_python_below_minimum_version()
 
     def _multibatch_generic_csv_generator(
         data_path: str,
@@ -89,6 +100,8 @@ def multibatch_generic_csv_generator():
 
 @pytest.fixture
 def multibatch_generic_csv_generator_context(monkeypatch, empty_data_context):
+    skip_if_python_below_minimum_version()
+
     context: DataContext = empty_data_context
     monkeypatch.chdir(context.root_directory)
     data_relative_path = "../data"
@@ -185,6 +198,7 @@ def alice_columnar_table_single_batch(empty_data_context):
 
     Alice configures her Profiler using the YAML configurations and data file locations captured in this fixture.
     """
+    skip_if_python_below_minimum_version()
 
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__,
@@ -349,9 +363,18 @@ def alice_columnar_table_single_batch(empty_data_context):
     sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
 
     profiler_config: dict = yaml.load(verbose_profiler_config)
+
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
     expected_expectation_suite.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
-        profiler_config=profiler_config,
+        profiler_config=serialized_config,
     )
 
     return {
@@ -368,6 +391,8 @@ def alice_columnar_table_single_batch_context(
     empty_data_context,
     alice_columnar_table_single_batch,
 ):
+    skip_if_python_below_minimum_version()
+
     context: DataContext = empty_data_context
     monkeypatch.chdir(context.root_directory)
     data_relative_path: str = "../data"
@@ -478,6 +503,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
 
     Bobby configures his Profiler using the YAML configurations and data file locations captured in this fixture.
     """
+    skip_if_python_below_minimum_version()
 
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__,
@@ -1146,9 +1172,19 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         )
 
     profiler_config: dict = yaml.load(verbose_profiler_config)
+
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
+
     expected_expectation_suite_oneshot_sampling_method.add_citation(
         comment="Suite created by Rule-Based Profiler with the configuration included.",
-        profiler_config=profiler_config,
+        profiler_config=serialized_config,
     )
 
     return {
@@ -1165,6 +1201,8 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
     tmp_path_factory,
     monkeypatch,
 ) -> DataContext:
+    skip_if_python_below_minimum_version()
+
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
@@ -1268,6 +1306,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
 
     Bobster configures his Profiler using the YAML configurations and data file locations captured in this fixture.
     """
+    skip_if_python_below_minimum_version()
 
     verbose_profiler_config_file_path: str = file_relative_path(
         __file__,
@@ -1338,6 +1377,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
     of a batch sampled from a normal distribution with the mean of 5,000 rows and the standard deviation of 1,000 rows.
     """
+    skip_if_python_below_minimum_version()
+
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
@@ -1409,6 +1450,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
 
 @pytest.fixture
 def pandas_test_df():
+    skip_if_python_below_minimum_version()
+
     df: pd.DataFrame = pd.DataFrame(
         {
             "Age": pd.Series(
@@ -1450,6 +1493,8 @@ def pandas_test_df():
 # noinspection PyPep8Naming
 @pytest.fixture
 def table_Users_domain():
+    skip_if_python_below_minimum_version()
+
     return Domain(
         domain_type=MetricDomainTypes.TABLE,
         domain_kwargs=None,
@@ -1460,6 +1505,8 @@ def table_Users_domain():
 # noinspection PyPep8Naming
 @pytest.fixture
 def column_Age_domain():
+    skip_if_python_below_minimum_version()
+
     return Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
@@ -1473,6 +1520,8 @@ def column_Age_domain():
 # noinspection PyPep8Naming
 @pytest.fixture
 def column_Date_domain():
+    skip_if_python_below_minimum_version()
+
     return Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
@@ -1486,6 +1535,8 @@ def column_Date_domain():
 # noinspection PyPep8Naming
 @pytest.fixture
 def column_Description_domain():
+    skip_if_python_below_minimum_version()
+
     return Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs={
@@ -1498,6 +1549,8 @@ def column_Description_domain():
 
 @pytest.fixture
 def single_part_name_parameter_container():
+    skip_if_python_below_minimum_version()
+
     return ParameterContainer(
         parameter_nodes={
             "mean": ParameterNode(
@@ -1540,6 +1593,8 @@ def multi_part_name_parameter_container():
     $parameter.weekly_taxi_fairs.mean_values.value[21]['monday']
     $parameter.weekly_taxi_fairs.mean_values.details
     """
+    skip_if_python_below_minimum_version()
+
     root_mean_node: ParameterNode = ParameterNode(
         {
             "mean": 6.5e-1,
@@ -1993,6 +2048,8 @@ def multi_part_name_parameter_container():
 
 @pytest.fixture
 def parameters_with_different_depth_level_values():
+    skip_if_python_below_minimum_version()
+
     parameter_values: Dict[str, Any] = {
         "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.value": "%Y-%m-%d %H:%M:%S %Z",
         "$parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.details": {
@@ -2353,25 +2410,9 @@ def parameters_with_different_depth_level_values():
 
 
 @pytest.fixture
-def rule_without_variables_without_parameters():
-    rule: Rule = Rule(
-        name="rule_with_no_variables_no_parameters",
-        domain_builder=None,
-        parameter_builders=None,
-        expectation_configuration_builders=None,
-        variables=None,
-    )
-    return rule
+def variables_multi_part_name_parameter_container():
+    skip_if_python_below_minimum_version()
 
-
-# noinspection PyPep8Naming
-@pytest.fixture
-def rule_with_variables_with_parameters(
-    column_Age_domain,
-    column_Date_domain,
-    single_part_name_parameter_container,
-    multi_part_name_parameter_container,
-):
     variables_multi_part_name_parameter_node: ParameterNode = ParameterNode(
         {
             "false_positive_threshold": 1.0e-2,
@@ -2382,19 +2423,71 @@ def rule_with_variables_with_parameters(
             "variables": variables_multi_part_name_parameter_node,  # $variables.false_positive_threshold
         }
     )
+    variables: ParameterContainer = ParameterContainer(
+        parameter_nodes={
+            "variables": root_variables_node,
+        }
+    )
+    return variables
+
+
+@pytest.fixture
+def rule_without_parameters(
+    empty_data_context,
+):
+    skip_if_python_below_minimum_version()
+
     rule: Rule = Rule(
-        name="rule_with_variables_with_parameters",
-        domain_builder=None,
-        parameter_builders=None,
-        expectation_configuration_builders=None,
-        variables=ParameterContainer(
-            parameter_nodes={
-                "variables": root_variables_node,
-            }
-        ),
+        name="rule_with_no_variables_no_parameters",
+        domain_builder=ColumnDomainBuilder(data_context=empty_data_context),
+        expectation_configuration_builders=[
+            DefaultExpectationConfigurationBuilder(
+                expectation_type="expect_my_validation"
+            )
+        ],
+    )
+    return rule
+
+
+# noinspection PyPep8Naming
+@pytest.fixture
+def rule_with_parameters(
+    empty_data_context,
+    column_Age_domain,
+    column_Date_domain,
+    variables_multi_part_name_parameter_container,
+    single_part_name_parameter_container,
+    multi_part_name_parameter_container,
+):
+    skip_if_python_below_minimum_version()
+
+    rule: Rule = Rule(
+        name="rule_with_parameters",
+        domain_builder=ColumnDomainBuilder(data_context=empty_data_context),
+        expectation_configuration_builders=[
+            DefaultExpectationConfigurationBuilder(
+                expectation_type="expect_my_validation"
+            )
+        ],
     )
     rule._parameters = {
         column_Age_domain.id: single_part_name_parameter_container,
         column_Date_domain.id: multi_part_name_parameter_container,
     }
     return rule
+
+
+@pytest.fixture
+def profiler_with_placeholder_args(
+    empty_data_context,
+    profiler_config_with_placeholder_args,
+):
+    skip_if_python_below_minimum_version()
+
+    profiler_config_dict: dict = profiler_config_with_placeholder_args.to_json_dict()
+    profiler_config_dict.pop("class_name")
+    profiler_config_dict.pop("module_name")
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        **profiler_config_dict, data_context=empty_data_context
+    )
+    return profiler

@@ -1,7 +1,9 @@
 import logging
 import os
 import uuid
-from typing import List
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Generator, List, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -22,9 +24,14 @@ except ImportError:
     Table = None
     Select = None
 
-from great_expectations.data_context.store import CheckpointStore, StoreBackend
+from great_expectations.data_context.store import (
+    CheckpointStore,
+    ProfilerStore,
+    StoreBackend,
+)
 from great_expectations.data_context.store.util import (
     build_checkpoint_store_using_store_backend,
+    build_configuration_store,
     delete_checkpoint_config_from_store_backend,
     delete_config_from_store_backend,
     load_checkpoint_config_from_store_backend,
@@ -285,6 +292,40 @@ def build_checkpoint_store_using_filesystem(
     )
 
 
+def build_profiler_store_using_store_backend(
+    store_name: str,
+    store_backend: Union[StoreBackend, dict],
+    overwrite_existing: bool = False,
+) -> ProfilerStore:
+    return cast(
+        ProfilerStore,
+        build_configuration_store(
+            class_name="ProfilerStore",
+            module_name="great_expectations.data_context.store",
+            store_name=store_name,
+            store_backend=store_backend,
+            overwrite_existing=overwrite_existing,
+        ),
+    )
+
+
+def build_profiler_store_using_filesystem(
+    store_name: str,
+    base_directory: str,
+    overwrite_existing: bool = False,
+) -> ProfilerStore:
+    store_config: dict = {"base_directory": base_directory}
+    store_backend_obj: StoreBackend = build_tuple_filesystem_store_backend(
+        **store_config
+    )
+    store = build_profiler_store_using_store_backend(
+        store_name=store_name,
+        store_backend=store_backend_obj,
+        overwrite_existing=overwrite_existing,
+    )
+    return store
+
+
 def save_checkpoint_config_to_filesystem(
     store_name: str,
     base_directory: str,
@@ -435,3 +476,21 @@ def load_data_into_test_database(
     finally:
         connection.close()
         engine.dispose()
+
+
+@contextmanager
+def set_directory(path: str) -> Generator:
+    """Sets the cwd within the context
+
+    Args:
+        path: The string representation of the desired path to cd into
+
+    Yields:
+        None
+    """
+    origin = Path().absolute()
+    try:
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(origin)

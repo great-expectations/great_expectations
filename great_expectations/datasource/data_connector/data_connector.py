@@ -6,7 +6,6 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
-    BatchRequest,
     BatchRequestBase,
 )
 from great_expectations.core.id_dict import BatchSpec
@@ -196,7 +195,7 @@ class DataConnector:
 
     def get_batch_definition_list_from_batch_request(
         self,
-        batch_request: BatchRequest,
+        batch_request: BatchRequestBase,
     ) -> List[BatchDefinition]:
         raise NotImplementedError
 
@@ -411,7 +410,7 @@ class DataConnector:
             1. if configured datasource_name matches batch_request's datasource_name
             2. if current data_connector_name matches batch_request's data_connector_name
         Args:
-            batch_request (BatchRequest): batch_request to validate
+            batch_request (BatchRequestBase): batch_request object to validate
 
         """
         if batch_request.datasource_name != self.datasource_name:
