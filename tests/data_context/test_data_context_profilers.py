@@ -41,4 +41,4 @@ def test_add_profiler_with_invalid_config_raises_error(
     with pytest.raises(ValidationError) as e:
         empty_data_context.add_profiler(**args)
 
-    assert "config_version': ['Invalid value.']" in str(e.value)
+    assert "config_version" in str(e.value)
