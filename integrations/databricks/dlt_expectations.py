@@ -174,10 +174,16 @@ def expect(
                     "sys.getsizeof(dlt_expect_return_value)",
                     sys.getsizeof(dlt_expect_return_value),
                 )
-                print("dir(func_result)", dir(dlt_expect_return_value))
-                print("get_size(func_result)", get_size(dlt_expect_return_value))
+                print("dir(dlt_expect_return_value)", dir(dlt_expect_return_value))
+                print(
+                    "get_size(dlt_expect_return_value)",
+                    get_size(dlt_expect_return_value),
+                )
             except:
                 pass
+            df = dlt.read(func_result.name)
+            print("type(df)", type(df))
+            print("df.head()", df.head())
             print(
                 "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             )
