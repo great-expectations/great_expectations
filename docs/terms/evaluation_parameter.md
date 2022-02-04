@@ -45,18 +45,17 @@ The core of this is a `$PARAMETER : URN` pair. When Great Expectations encounter
 
 If you do not have a previous Expectation Suite's Validation Results to reference, however, you can instead provide Evaluation Parameters with a temporary initial value. For example, the interactive method of creating Expectations is based on Validating Expectations against a previous run of the same Expectation Suite.  Since a previous run has not been performed when Expectations are being created, Evaluation Parameters cannot reference a past Validation and will require a temporary value instead.  This will allow you to test Expectations that are meant to rely on values from previous Validation runs before you have actually used them to Validate data.  
 
-Say you have created a Pandas dataframe called `my_df` that references a CSV that contains ten rows of data.  (To do so in the interactive process for creating Expectations, you would use the `great_expectations.read_csv()` method).  You want to create an expression that asserts that the row count for each Validation remains the same as the previous `upstream_row_count`, but since there is no previous `upstream_row_count` you need to provide a value that matches what the Expectation you are creating will find.
+Say you are creating additional expectations for the data that you used in the [Getting Started Tutorial](../tutorials/getting_started/tutorial_overview.md). (You have completed the Getting Started Tutorial, right?)  You want to create an expression that asserts that the row count for each Validation remains the same as the previous `upstream_row_count`, but since there is no previous `upstream_row_count` you need to provide a value that matches what the Expectation you are creating will find.
 
-To do so, you would define the parameter in question (`upstream_row_count`) by assigning it to the `$PARAMETER` value in a dictionary.  Then, you would provide the temporary value for that parameter by setting it as the value of the `$PARAMETER.<parameter_in_question>` key in the same dictionary.  Or, in this case, the `$PARAMETER.upstream_row_count`.
+To do so, you would first edit your existing (or create a new) Expectation Suite using the CLI.  This will open a Jupyter Notebook.  After running the first cell, you will have access to a Validator object named `validator` that you can use to add new Expectations to the Expectation Suite.
+
+The Expectation you will want to add to solve the above problem is the `expect_table_row_count_to_equal` Expectation, and this Expectation uses an evaluation parameter: `upstream_row_count`.  Therefore, when using the validator to add the `expect_table_row_count_to_equal` Expectation you will have to define the parameter in question (`upstream_row_count`) by assigning it to the `$PARAMETER` value in a dictionary.  Then, you would provide the temporary value for that parameter by setting it as the value of the `$PARAMETER.<parameter_in_question>` key in the same dictionary.  Or, in this case, the `$PARAMETER.upstream_row_count`.
 
 For an example of this, see below:
 
 ```python title="Python code"
-import great_expectations
-csv_path = 'path/to/my_data.csv'
-my_df = great_expectations.read_csv(csv_path)
-my_df.expect_table_row_count_to_equal(
-    value={"$PARAMETER": "upstream_row_count", "$PARAMETER.upstream_row_count": 10},
+validator.expect_table_row_count_to_equal(
+    value={"$PARAMETER": "upstream_row_count", "$PARAMETER.upstream_row_count": 10000},
     result_format={'result_format': 'BOOLEAN_ONLY'}
 )
 ```
@@ -66,21 +65,21 @@ This will return `{'success': True}`.
 An alternative method of defining the temporary value for an Evaluation Parameter is the `set_evaluation_parameter()` method, as shown below:
 
 ```python title="Python code"
-my_df.set_evaluation_parameter("upstream_row_count", 10)
+validator.set_evaluation_parameter("upstream_row_count", 10)
+
+validator.expect_table_row_count_to_equal(
+    value={"$PARAMETER": "upstream_row_count"},
+    result_format={'result_format': 'BOOLEAN_ONLY'}
 ```
 
-If the Evaluation Parameter's value is set in this way, you do not need to set it again (or define it alongside the use of the `$PARAMETER` key) for future Expectations.
+This will also return `{'success': True}`.
+
+Additionally, if the Evaluation Parameter's value is set in this way, you do not need to set it again (or define it alongside the use of the `$PARAMETER` key) for future Expectations that you create with this Validator.
 
 It is also possible for advanced users to create Expectations using Evaluation Parameters by turning off interactive evaluation and adding the Expectation configuration directly to the Expectation Suite.  For more information on this, see our guide on [how to create and edit Expectations based on domain knowledge without inspecting data directly](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md).
 
-More typically, when validating Expectations, you can provide Evaluation Parameters that are only available at runtime.
+More typically, when validating Expectations, you will provide Evaluation Parameters that are only available at runtime.
 
-```python title="Python code"
-my_df.validate(
-    expectation_suite=my_dag_step_config, 
-    evaluation_parameters={"upstream_row_count": upstream_row_count}
-)
-```
 
 <ValidateHeader/>
 
@@ -102,7 +101,7 @@ If you would rather pass the value of the Environment Variable `upstream_row_cou
 ```python title="Python code"
 import great_expectations as ge
 
-test_row_count = 10
+test_row_count = 10000
 
 context = ge.get_context()
 context.run_checkpoint(`my_checkpoint`, evaluation_parameters={"upstream_row_count":test_row_count})
@@ -140,7 +139,9 @@ It is also possible to [dynamically load Evaluation Parameters from a database](
 Evaluation Parameters can include basic arithmetic and temporal expressions.  For example, we might want to specify that a new table's row count should be between 90 - 110 % of an upstream table's row count (or a count from a previous run). Evaluation parameters support basic arithmetic expressions to accomplish that goal:
 
 ```python title="Python code"
-my_df.expect_table_row_count_to_be_between(
+validator.set_evaluation_parameter("upstream_row_count", 10000)
+
+validator.expect_table_row_count_to_be_between(
     min_value={"$PARAMETER": "trunc(upstream_row_count * 0.9)"},
     max_value={"$PARAMETER": "trunc(upstream_row_count * 1.1)"}, 
     result_format={'result_format': 'BOOLEAN_ONLY'}
@@ -151,23 +152,24 @@ This will return `{'success': True}`.
 We can also use the temporal expressions "now" and "timedelta". This example states that we expect values for the "load_date" column to be within the last week.
 
 ```python title="Python code"
-my_df.expect_column_values_to_be_greater_than(
+validator.expect_column_values_to_be_greater_than(
     column="load_date",
     min_value={"$PARAMETER": "now() - timedelta(weeks=1)"}
 )
 ```
 
-Evaluation Parameters are not limited to simple values, for example you could include a list as a parameter value:
+Evaluation Parameters are not limited to simple values, for example you could include a list as a parameter value.  Going back to our taxi data, let's say that we know there are only two types of accepted payment: Cash or Credit Card, which are represented by a 1 or a 2 in the `payment_type` column.  We could verify that these are the only values present by using a list, as shown below:
 
 ```python title="Python code"
-my_df.expect_column_values_to_be_in_set(
-    "my_column", 
+validator.set_evaluation_parameter("runtime_values", [1,2])
+
+validator.expect_column_values_to_be_in_set(
+    "payment_type", 
     value_set={"$PARAMETER": "runtime_values"}
 )
-my_df.validate(
-    evaluation_parameters={"runtime_values": [1, 2, 3]}
-)
 ```
+
+This Expectation will fail (the NYC taxi data allows for four types of payments), and now we are aware that what we thought we knew about the `payment_type` column wasn't accurate, and that now we need to research what those other two payment types are!
 
 :::note
 - You cannot currently combine complex values with arithmetic expressions.
