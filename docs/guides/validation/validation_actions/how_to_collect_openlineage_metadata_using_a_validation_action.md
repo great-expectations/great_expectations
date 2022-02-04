@@ -51,7 +51,7 @@ Steps
 
     The `openlineage_host` and `openlineage_apiKey` values can be set via the environment, as shown above, or can be implemented as variables in `uncommitted/config_variables.yml`. The `openlineage_apiKey` value is optional, and is not required by all OpenLineage backends.
 
-    A Great Expectations checkpoint is recorded as a Job in OpenLineage, and will be named according to the `job_name` value. Similarly, the `openlineage_namespace` value can be optionally set. For more information on job naming, consult the [Naming section](https://github.com/OpenLineage/OpenLineage/blob/main/spec/Naming.md#job-namespace-and-constructing-job-names) of the OpenLineage spec.
+    A Great Expectations Checkpoint is recorded as a Job in OpenLineage, and will be named according to the `job_name` value. Similarly, the `openlineage_namespace` value can be optionally set. For more information on job naming, consult the [Naming section](https://github.com/OpenLineage/OpenLineage/blob/main/spec/Naming.md#job-namespace-and-constructing-job-names) of the OpenLineage spec.
 
 3. Run your Checkpoint to validate a batch of data and emit lineage events to the OpenLineage backend. This can be done in code:
 
