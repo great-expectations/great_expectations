@@ -1,4 +1,11 @@
-# TODO(cdkini): Add docstring
+# This file is responsible for configuring the `great_expectations` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+#
+# The pipeline is run under the following conditions:
+#   - On the main branch when a weekly release is being cut
+#   - On the develop branch as scheduled by the below cron job
+#
+#  `great_expectations` runs the entire test suite and is meant to safeguard the codebase against any errors that may have slipped through the cracks
+#  from `dependency_graph`. Additionally, it is responsible for deployment during the weekly release cut.
 
 schedules:
 - cron: 0 */4 * * *
@@ -13,7 +20,7 @@ schedules:
 trigger:
   branches:
     include:
-    - pre_pr-*
+    - pre_pr-* # Can be used to test both `great_expectations` and `dependency_graph` pipelines
     - main
     exclude:
     - develop
@@ -44,6 +51,7 @@ resources:
     ports:
       - 1433:1433
 
+# The pipeline is run under two primary conditions: if merging into main or as scheduled by the above cron job.
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
