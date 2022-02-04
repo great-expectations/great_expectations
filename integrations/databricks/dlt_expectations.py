@@ -49,7 +49,6 @@ def _get_dlt_library(dlt_library: Optional[ModuleType] = None) -> ModuleType:
         print(
             "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
         )
-        print("dlt.__version__", dlt.__version__)
         print("dir(dlt)", dir(dlt))
         print(
             "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
@@ -92,7 +91,6 @@ def expect(
             print(
                 "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             )
-            print("dlt.__version__", dlt.__version__)
             print("dir(dlt)", dir(dlt))
             print(
                 "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
