@@ -31,7 +31,7 @@ Steps
 
 2. Update the action_list key in your Checkpoint config.
 
-    Add the ``OpenLineageValidationAction`` action to the end of your Checkpoint's ``action_list``.
+    Add the ``OpenLineageValidationAction`` Action to the end of your Checkpoint's ``action_list``.
 
     ```yaml
     name: taxi_data
