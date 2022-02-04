@@ -188,9 +188,13 @@ def expect(
                 for dlt_attribute in dlt_attributes:
                     print(f"dir({dlt_attribute})", dir(getattr(dlt, dlt_attribute)))
                     print(f"type({dlt_attribute})", type(getattr(dlt, dlt_attribute)))
+                    # print(
+                    #     f"get_size({dlt_attribute})",
+                    #     get_size(getattr(dlt, dlt_attribute)),
+                    # )
                     print(
-                        f"get_size({dlt_attribute})",
-                        get_size(getattr(dlt, dlt_attribute)),
+                        f"sys.getsizeof({dlt_attribute})",
+                        sys.getsizeof(getattr(dlt, dlt_attribute)),
                     )
 
                 print(
@@ -201,7 +205,6 @@ def expect(
             print(
                 "\n\nreturn values DIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             )
-            import sys
 
             print("type(func_result):", type(func_result))
             print("sys.getsizeof(func_result)", sys.getsizeof(func_result))
