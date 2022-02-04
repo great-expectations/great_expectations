@@ -377,7 +377,8 @@ module.exports = {
             'terms/checkpoint',
             'terms/execution_engine',
             'terms/expectation_suite',
-            'terms/plugin'
+            'terms/plugin',
+            'terms/supporting_resource'
           ]
         },
         {
