@@ -202,7 +202,7 @@ def expect(
 
                 df = getattr(dlt, "DataFrame")
                 print("df.columns", df.columns)
-                print("df.count()", df.count())
+                # print("df.count()", df.count())
 
                 print(
                     "\n\ndlt DIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
