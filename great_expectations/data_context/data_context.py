@@ -119,7 +119,7 @@ from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.types.base import RuleBasedProfilerConfig
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
@@ -3276,6 +3276,17 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id=ge_cloud_id,
         )
 
+    def delete_profiler(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
+        profiler_toolkit.delete_profiler(
+            profiler_store=self.profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
     def list_profilers(self) -> List[str]:
         if self.profiler_store is None:
             raise ge_exceptions.StoreConfigurationError(
@@ -3560,7 +3571,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
             )
         else:
-            # Roundtrip through schema validator to add missing fields
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             datasource_config = datasourceConfigSchema.load(instantiated_class.config)
             full_datasource_config = datasourceConfigSchema.dump(datasource_config)
             usage_stats_event_payload = datasource_anonymizer.anonymize_datasource_info(
@@ -3654,11 +3665,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         """
         print(f"\tInstantiating as a {class_name}, since class_name is {class_name}")
 
-        profiler_name = name or config.get("name") or "my_temp_profiler"
+        profiler_name: str = name or config.get("name") or "my_temp_profiler"
 
-        profiler_config = RuleBasedProfilerConfig.from_commented_map(
-            commented_map=config
-        )
+        profiler_config: Union[
+            RuleBasedProfilerConfig, dict
+        ] = RuleBasedProfilerConfig.from_commented_map(commented_map=config)
         profiler_config = profiler_config.to_json_dict()
         profiler_config.update({"name": profiler_name})
 
@@ -3668,11 +3679,14 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             config_defaults={"module_name": "great_expectations.rule_based_profiler"},
         )
 
-        profiler_anonymizer = ProfilerAnonymizer(self.data_context_id)
+        profiler_anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(
+            self.data_context_id
+        )
 
-        usage_stats_event_payload = profiler_anonymizer.anonymize_profiler_info(
+        usage_stats_event_payload: dict = profiler_anonymizer.anonymize_profiler_info(
             name=profiler_name, config=profiler_config
         )
+
         return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_misc_class_from_yaml_config(
@@ -3726,7 +3740,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ):
             datasource_name: str = name or config.get("name") or "my_temp_datasource"
             if datasource_anonymizer.is_parent_class_recognized_v3_api(config=config):
-                # Roundtrip through schema validator to add missing fields
+                # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
                 datasource_config = datasourceConfigSchema.load(
                     instantiated_class.config
                 )
@@ -3755,7 +3769,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             checkpoint_anonymizer.is_parent_class_recognized(config=config) is not None
         ):
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
-            # Roundtrip through schema validator to add missing fields
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             checkpoint_config: Union[CheckpointConfig, dict]
             checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config

@@ -5,16 +5,16 @@ import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.parameter_builder import (
-    ParameterBuilder,
-    ParameterContainer,
-    build_parameter_container,
-)
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     MetricComputationDetails,
     MetricComputationResult,
     MetricComputationValues,
+    ParameterBuilder,
+)
+from great_expectations.rule_based_profiler.types import (
+    Domain,
+    ParameterContainer,
+    build_parameter_container,
 )
 from great_expectations.rule_based_profiler.util import (
     NP_EPSILON,
@@ -75,7 +75,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
     ):
         """
         Args:
-            parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
+            name: the name of this parameter -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
@@ -289,7 +289,7 @@ detected.
             max_value = min(max_value, upper_bound)
 
         parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.parameter_name}": {
+            f"$parameter.{self.name}": {
                 "value": {
                     "min_value": min_value,
                     "max_value": max_value,

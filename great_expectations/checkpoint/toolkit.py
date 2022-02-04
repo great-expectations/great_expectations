@@ -10,10 +10,13 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.checkpoint.util import (
     batch_request_contains_batch_data,
     batch_request_in_validations_contains_batch_data,
-    get_batch_request_as_dict,
     get_validations_with_batch_request_as_dict,
 )
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import (
+    BatchRequest,
+    RuntimeBatchRequest,
+    get_batch_request_as_dict,
+)
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -113,7 +116,6 @@ def add_checkpoint(
     checkpoint_config = deep_filter_properties_iterable(
         properties=checkpoint_config,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
     new_checkpoint: Union[
         Checkpoint, SimpleCheckpoint, LegacyCheckpoint
@@ -333,7 +335,6 @@ def run_checkpoint(
     filter_properties_dict(
         properties=checkpoint_run_arguments,
         clean_falsy=True,
-        keep_falsy_numerics=True,
         inplace=True,
     )
 

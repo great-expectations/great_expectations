@@ -4,6 +4,7 @@ from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
+from packaging import version
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -341,11 +342,18 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 except TypeError:
                     try:
                         pd_type = getattr(pd, type_)
-                        if isinstance(pd_type, type):
-                            comp_types.append(pd_type)
                     except AttributeError:
                         pass
-
+                    else:
+                        if isinstance(pd_type, type):
+                            comp_types.append(pd_type)
+                            try:
+                                if isinstance(
+                                    pd_type(), pd.core.dtypes.base.ExtensionDtype
+                                ):
+                                    comp_types.append(pd_type())
+                            except TypeError:
+                                pass
                     try:
                         pd_type = getattr(pd.core.dtypes.dtypes, type_)
                         if isinstance(pd_type, type):
@@ -356,6 +364,31 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                 native_type = _native_type_type_map(type_)
                 if native_type is not None:
                     comp_types.extend(native_type)
+
+            # TODO: Remove when Numpy >=1.21 is pinned as a dependency
+            _pandas_supports_extension_dtypes = version.parse(
+                pd.__version__
+            ) >= version.parse("0.24")
+            _numpy_doesnt_support_extensions_properly = version.parse(
+                np.__version__
+            ) < version.parse("1.21")
+            if (
+                _numpy_doesnt_support_extensions_properly
+                and _pandas_supports_extension_dtypes
+            ):
+                # This works around a bug where Pandas nullable int types aren't compatible with Numpy dtypes
+                # Note: Can't do set difference, the whole bugfix is because numpy types can't be compared to
+                # ExtensionDtypes
+                actual_type_is_ext_dtype = isinstance(
+                    actual_column_type, pd.core.dtypes.base.ExtensionDtype
+                )
+                comp_types = {
+                    dtype
+                    for dtype in comp_types
+                    if isinstance(dtype, pd.core.dtypes.base.ExtensionDtype)
+                    == actual_type_is_ext_dtype
+                }
+            ###
 
             success = actual_column_type in comp_types
 
