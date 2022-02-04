@@ -38,7 +38,7 @@ Expectations are obviously a fundamental component of the Create Expectations st
 
 <ValidateHeader/>
 
-When you create your Checkpoints, you will be able to configure them to use specific Expectation Suites.  Other than setting up this configuration (or arranging to pass Expectation Suites at runtime) you will not need to directly interact with the Expectations themselves.  Instead, when you run your Checkpoint it will handle using the Expectations in any of its Expectation Suites to Validate the data indicated in its Batch Request/s.  This will be done under the hood, with the <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> that are generated being passed along to the Checkpoint's (optional) <TechnicalTag relative="../" tag="action" text="Actions" /> for further processing.
+When you create your Checkpoints, you will be able to configure them to use specific Expectation Suites.  Other than setting up this configuration (or arranging to pass Expectation Suites at runtime) you will not need to directly interact with the Expectations themselves.  Instead, when you run your Checkpoint it will handle the use of the Expectations in any of its Expectation Suites to Validate the data indicated in its Batch Request/s.  This will be done under the hood, with the <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> that are generated being passed along to the Checkpoint's (optional) <TechnicalTag relative="../" tag="action" text="Actions" /> for further processing.
 
 
 ## Features
