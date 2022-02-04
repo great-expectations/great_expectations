@@ -51,7 +51,7 @@ A Great Expectations Expectation Suite enables you to perform Create, Read, Upda
 
 ### Reusability
 
-Expectation Suites are primarily used by Checkpoints, which can accept a list of one or more Expectation Suite.  Because they are stored independently of the Checkpoints that use them, the same Expectation Suite can be included in the list for multiple Checkpoints, provided the Expectation Suite contains a list of Expectations that describe the data that Checkpoint will Validate.  This allows you to, for example, create multiple Checkpoints with increasing vigor of in their validation, or create multiple Checkpoints with the same base set of Expectations and some additional Expectations tailored to specific data (such as one Checkpoint for validating raw data, and one with additional Expectation Suites for validating post-processing data).
+Expectation Suites are primarily used by Checkpoints, which can accept a list of one or more Expectation Suite and Batch Request pairs.  Because they are stored independently of the Checkpoints that use them, the same Expectation Suite can be included in the list for multiple Checkpoints, provided the Expectation Suite contains a list of Expectations that describe the data that Checkpoint will Validate.  You can even use the same Expectation Suite multiple times within the same Checkpoint by pairing it with different Batch Requests.
 
 ## API basics
 
