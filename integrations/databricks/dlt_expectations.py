@@ -1,8 +1,8 @@
 # This file contains several decorators used in Databricks Delta Live Tables
 # To use these decorators, import this module and then use the decorators in place of the
 # decorators provided by delta live tables.
-
 import functools
+import sys
 from types import ModuleType
 from typing import Optional
 
@@ -159,12 +159,23 @@ def expect(
             print("type(func_result):", type(func_result))
             print("sys.getsizeof(func_result)", sys.getsizeof(func_result))
             print("dir(func_result)", dir(func_result))
+            print("get_size(func_result)", get_size(func_result))
+            print("type(func_result.name):", type(func_result.name))
+            print("type(func_result.name_finalized):", type(func_result.name_finalized))
+            print("func_result.name", func_result.name)
+            print("func_result.name_finalized", func_result.name_finalized)
+            print("type(func_result.func):", type(func_result.func))
+            print("type(func_result.expectations):", type(func_result.expectations))
+            print("func_result.expectations", func_result.expectations)
+            print("type(func_result.builder):", type(func_result.builder))
             try:
                 print("type(dlt_expect_return_value):", type(dlt_expect_return_value))
                 print(
                     "sys.getsizeof(dlt_expect_return_value)",
                     sys.getsizeof(dlt_expect_return_value),
                 )
+                print("dir(func_result)", dir(dlt_expect_return_value))
+                print("get_size(func_result)", get_size(dlt_expect_return_value))
             except:
                 pass
             print(
@@ -196,3 +207,24 @@ def _validate_dlt_decorator_arguments(
         raise UnsupportedExpectationConfiguration(
             "Please provide at least one type of expectation configuration"
         )
+
+
+def get_size(obj, seen=None):
+    """Recursively finds size of objects"""
+    size = sys.getsizeof(obj)
+    if seen is None:
+        seen = set()
+    obj_id = id(obj)
+    if obj_id in seen:
+        return 0
+    # Important mark as seen *before* entering recursion to gracefully handle
+    # self-referential objects
+    seen.add(obj_id)
+    if isinstance(obj, dict):
+        size += sum([get_size(v, seen) for v in obj.values()])
+        size += sum([get_size(k, seen) for k in obj.keys()])
+    elif hasattr(obj, "__dict__"):
+        size += get_size(obj.__dict__, seen)
+    elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes, bytearray)):
+        size += sum([get_size(i, seen) for i in obj])
+    return size
