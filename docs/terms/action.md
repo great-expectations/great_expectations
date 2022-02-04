@@ -16,7 +16,7 @@ import ValidateHeader from '../images/universal_map/_um_validate_header.mdx';
 
 ### Definition
 
-An Action is a Python class with a `run()` method that takes the result of validating a <TechnicalTag relative="../" tag="batch" text="Batch" /> against an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> and does something with it.
+An Action is a Python class with a `run()` method that takes a <TechnicalTag relative="../" tag="validation_result" text="Validation Result" /> and does something with it.
 
 ### Features and promises
 
@@ -28,7 +28,7 @@ Actions are executed by <TechnicalTag relative="../" tag="validation_operator" t
 
 ## Use cases
 
-Creating custom Actions is a process that falls outside the workflow of using Great Expectations.  Configuring, implementing, and executing an Action (custom or otherwise) takes place in the Validate Data step.
+Configuring, implementing, and executing an Action (custom or otherwise) takes place in the Validate Data step. Creating custom Actions is a process that falls outside the workflow of using Great Expectations.
 
 <ValidateHeader/>
 
@@ -59,14 +59,14 @@ For a quick overview, however, some of the available pre-built Actions are:
 
 ### How to access
 
-Actions are not intended to be manually instantiated or accessed.  Instead, they are included in the `action_list` parameter of a Checkpoint's configuration, and when the Checkpoint finishes running a Validation it will then run the Actions in it's `action_list`.
+Actions are not intended to be manually instantiated or accessed.  Instead, they are included in the `action_list` parameter of a Checkpoint's configuration, and when the Checkpoint finishes running a Validation it will then run the Actions in its `action_list` in order of appearance.
 
 Classes that implement Actions can be found in the `great_expectations.checkpoint.actions` module, which you can view on GitHub:
 - [great_expectations.checkpoint.actions](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/checkpoint/actions.py)
 
 ### How to create
 
-Custom actions need to be created in Python code, and can be implemented as Plugins.  In order for a python class to be a valid Action, it must conform to the Action API.  Specifically, it must implement a `run()` method which accepts three required parameters, two named optional parameters, and any number of `**kwargs.`
+Custom actions need to be created in Python code, and can be implemented as Plugins.  In order for a Python class to be a valid Action, it must conform to the Action API.  Specifically, it must implement a `run()` method which accepts three required parameters, two named optional parameters, and any number of `**kwargs.`
 
 **Required parameters:**
 - `validation_result_suite`: an instance of the `ExpectationSuiteValidationResult` class.
@@ -85,9 +85,11 @@ The required and optional named parameters will be automatically passed to the A
 The best practice when creating a custom Action is to create a subclass of the `ValidationAction` class found in the `great_expectations.checkpoint.actions` module.  Leave the inherited `run()` method as its default, and overwrite the `_run()` method to contain your functionality.  There are numerous examples of this practice in the subclasses of `ValidationAction` located in the `great_expectations.checkpoint.actions` module, which you can view on GitHub:
 - [great_expectations.checkpoint.actions](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/checkpoint/actions.py)
 
+If you develop a custom Action, consider making it a contribution in the [Great Expectations open source GitHub project](https://github.com/great-expectations/great_expectations).  You can also [reach out to us on Slack](https://greatexpectations.io/slack) if you need additional guidance in your efforts.
+
 ### Configuration
 
-Actions are configured inside of the `action_list` parameter for Checkpoints.  In general, you will need to provide at least a `name` (which is user defined and does not need to correspond to anything specific) and, in the in the parameters under `action` a `class_name` (which should correspond to the name of the Action's python class).  If you are implementing a custom Action in a Plugin, you will also need to include a `module_name` in the parameters under `action` which references where your Plugin is located.  Any other keys placed under `action` will be passed to the Action's class as additional key word arguments.
+Actions are configured inside of the `action_list` parameter for Checkpoints.  In general, you will need to provide at least a `name` (which is user defined and does not need to correspond to anything specific) and, in the in the parameters under `action` a `class_name` (which should correspond to the name of the Action's Python class).  If you are implementing a custom Action in a Plugin, you will also need to include a `module_name` in the parameters under `action` which references where your Plugin is located.  Any other keys placed under `action` will be passed to the Action's class as additional key word arguments.
 
 Below is an example of an `action_list` configuration that performs some common Actions that are built in to the Great Expectations code base:
 

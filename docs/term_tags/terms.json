@@ -121,7 +121,7 @@
   },
   "action": {
     "term": "Action",
-    "definition": "A Python class with a run method that takes the result of validating a Batch against an Expectation Suite and does something with it",
+    "definition": "A Python class with a run method that takes a Validation Result and does something with it",
     "url": "terms/action"
   },
   "validation_operator": {
