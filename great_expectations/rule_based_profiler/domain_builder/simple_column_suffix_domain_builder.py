@@ -91,7 +91,3 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         ]
 
         return domains
-
-    @property
-    def column_name_suffixes(self) -> Optional[List[str]]:
-        return self._column_name_suffixes

@@ -176,7 +176,9 @@ detected.
         return self._round_decimals
 
     @property
-    def truncate_values(self) -> Optional[Union[str, Dict[str, Union[Optional[int], Optional[float]]]]]:
+    def truncate_values(
+        self,
+    ) -> Optional[Union[str, Dict[str, Union[Optional[int], Optional[float]]]]]:
         return self._truncate_values
 
     def _build_parameters(

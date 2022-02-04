@@ -4284,7 +4284,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
     assert type(repr(results)) == str
 
 
-# TODO: <Alex>ALEX_TEST -- come back to this and fix it.</Alex>
 def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_error_contradictory_batch_request_in_checkpoint_yml_and_checkpoint_run(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -4301,18 +4300,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
 
     # RuntimeBatchRequest with a path
     # Using typed object instead of dictionary, expected by "add_checkpoint()", on purpose to insure that checks work.
-    # TODO: <Alex>ALEX</Alex>
-    # batch_request: dict = {
-    #     "datasource_name": "my_datasource",
-    #     "data_connector_name": "my_runtime_data_connector",
-    #     "data_asset_name": "Titanic_19120414_1313.csv",
-    #     "batch_identifiers": {
-    #         "pipeline_stage_name": "core_processing",
-    #         "airflow_run_id": 1234567890,
-    #     },
-    #     "runtime_parameters": {"path": data_path},
-    # }
-    # TODO: <Alex>ALEX</Alex>
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
@@ -4373,18 +4360,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
         }
     )
 
-    # TODO: <Alex>ALEX</Alex>
-    # a = checkpoint.run(batch_request=runtime_batch_request)
-    # print(f'\n[ALEX_TEST] [************TEST_RUN] RESULTS: {a} ; TYPE: {str(type(a))}')
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     with pytest.raises(
         ge_exceptions.exceptions.InvalidBatchRequestError,
         match=r"The runtime_parameters dict must have one \(and only one\) of the following keys: 'batch_data', 'query', 'path'.",
     ):
         checkpoint.run(batch_request=runtime_batch_request)
-    # TODO: <Alex>ALEX</Alex>
-# TODO: <Alex>ALEX_TEST -- come back to this and fix it.</Alex>
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run(
@@ -4399,8 +4379,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         "data_connector_name": "my_basic_data_connector",
         "data_asset_name": "Titanic_1911",
     }
-    print(f'\n[ALEX_TEST] [************TEST_RUN] BATCH_REQUEST: {batch_request} ; TYPE: {str(type(batch_request))}')
-    runtime_batch_request = RuntimeBatchRequest(
+    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -4447,7 +4426,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     checkpoint = context.get_checkpoint(name="my_checkpoint")
 
     results = checkpoint.run()
-    print(f'\n[ALEX_TEST] [************TEST_RUN] RESULTS: {results} ; TYPE: {str(type(results))}')
     assert not results["success"]
     assert (
         list(results.run_results.values())[0]["validation_result"]["statistics"][

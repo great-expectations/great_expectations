@@ -249,61 +249,40 @@ class BatchRequestBase(SerializableDictDot):
     def id(self) -> str:
         return IDDict(self.to_json_dict()).to_id()
 
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     def to_dict(self) -> dict:
-        return standardize_batch_request_display_ordering(batch_request=super().to_dict())
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # def to_dict(self) -> dict:
-    #     # TODO: <Alex>ALEX</Alex>
-    #     # dict_obj: dict = {}
-    #     # TODO: <Alex>ALEX</Alex>
-    #
-    #     field_name: str
-    #     # TODO: <Alex>ALEX</Alex>
-    #     # field_value: Any
-    #     # for field_name in self.field_names:
-    #     #     if hasattr(self, f"_{field_name}"):
-    #     #         field_value = getattr(self, field_name)
-    #     #         dict_obj[field_name] = field_value
-    #     # TODO: <Alex>ALEX</Alex>
-    #
-    #     # TODO: <Alex>ALEX</Alex>
-    #     dict_obj: dict = {field_name: self[field_name] for field_name in self.field_names}
-    #     # TODO: <Alex>ALEX</Alex>
-    #     dict_obj = standardize_batch_request_display_ordering(batch_request=dict_obj)
-    #
-    #     return dict_obj
-    # TODO: <Alex>ALEX</Alex>
+        return standardize_batch_request_display_ordering(
+            batch_request=super().to_dict()
+        )
 
-    # TODO: <Alex>ALEX_TEST -- COULD_BE_SUPERCLASS</Alex>
-    # TODO: <Alex>ALEX</Alex>
     def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
         dict_obj: dict = self.to_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
-    # TODO: <Alex>ALEX</Alex>
 
-    # TODO: <Alex>ALEX_TEST -- COULD_BE_SUPERCLASS</Alex>
-    # TODO: <Alex>ALEX</Alex>
     def __deepcopy__(self, memo):
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__deepcopy__()" method occurs frequently and should ideally serve as the
+        reference implementation in the "DictDot" class itself.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
         cls = self.__class__
-        # print(f'\n[ALEX_TEST] [BATCH_REQUEST_BASE.__DEEPCOPY__()] CLS: {cls} ; TYPE: {str(type(cls))}')
         result = cls.__new__(cls)
 
         memo[id(self)] = result
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # for key, value in self.to_dict().items():
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         for key, value in self.to_raw_dict().items():
             value_copy = safe_deep_copy(data=value, memo=memo)
             setattr(result, key, value_copy)
 
         return result
-    # TODO: <Alex>ALEX</Alex>
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
@@ -312,22 +291,30 @@ class BatchRequestBase(SerializableDictDot):
 
         return self.id == other.id
 
-    # TODO: <Alex>ALEX_TEST -- COULD_BE_SUPERCLASS</Alex>
-    # TODO: <Alex>ALEX</Alex>
     def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
             inplace=True,
         )
         return json.dumps(json_dict, indent=2)
-    # TODO: <Alex>ALEX</Alex>
 
-    # TODO: <Alex>ALEX_TEST -- COULD_BE_SUPERCLASS</Alex>
-    # TODO: <Alex>ALEX</Alex>
     def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
         return self.__repr__()
-    # TODO: <Alex>ALEX</Alex>
 
     @staticmethod
     def _validate_init_parameters(

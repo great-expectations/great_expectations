@@ -41,12 +41,10 @@ def test_reconcile_profiler_rules_no_overrides(
 ):
     rules: Dict[str, Dict[str, Any]] = {}
 
-    # TODO: <Alex>ALEX</Alex>
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
     assert effective_rules == profiler_with_placeholder_args.rules
-    # TODO: <Alex>ALEX</Alex>
 
 
 def test_reconcile_profiler_rules_new_rule_override(

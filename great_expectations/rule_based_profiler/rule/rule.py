@@ -81,7 +81,6 @@ class Rule(SerializableDictDot):
 
         return expectation_configurations
 
-    # TODO: <Alex>ALEX_TEST</Alex>
     def to_dict(self) -> dict:
         parameter_builder_configs: Optional[List[dict]] = None
         parameter_builders: Optional[
@@ -89,7 +88,6 @@ class Rule(SerializableDictDot):
         ] = self._get_parameter_builders_as_dict()
         parameter_builder: ParameterBuilder
         if parameter_builders is not None:
-            # TODO: <Alex>ALEX_TEST</Alex>
             parameter_builder_configs = [
                 parameter_builder.to_dict()
                 for parameter_builder in parameter_builders.values()
@@ -102,12 +100,10 @@ class Rule(SerializableDictDot):
         expectation_configuration_builder: ExpectationConfigurationBuilder
         if expectation_configuration_builders is not None:
             expectation_configuration_builder_configs = [
-                # TODO: <Alex>ALEX_TEST</Alex>
                 expectation_configuration_builder.to_dict()
                 for expectation_configuration_builder in expectation_configuration_builders.values()
             ]
 
-        # TODO: <Alex>ALEX_TEST</Alex>
         return {
             "name": self.name,
             "domain_builder": self.domain_builder.to_dict(),
@@ -115,13 +111,26 @@ class Rule(SerializableDictDot):
             "expectation_configuration_builders": expectation_configuration_builder_configs,
         }
 
-    # TODO: <Alex>ALEX_TEST</Alex>
     def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
         dict_obj: dict = self.to_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
     def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
@@ -130,6 +139,13 @@ class Rule(SerializableDictDot):
         return json.dumps(json_dict, indent=2)
 
     def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
         return self.__repr__()
 
     @property

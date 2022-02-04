@@ -260,7 +260,6 @@ class RuntimeDataConnector(DataConnector):
             for key, val in runtime_parameters.items()
             if val is not None and key in ["batch_data", "query", "path"]
         ]
-        print(f'\n[ALEX_TEST] [RUNTRIME_DATA_CONNECTOR] KEYS_PRESENT: {keys_present} ; TYPE: {str(type(keys_present))}')
         if len(keys_present) != 1:
             raise ge_exceptions.InvalidBatchRequestError(
                 "The runtime_parameters dict must have one (and only one) of the following keys: 'batch_data', "

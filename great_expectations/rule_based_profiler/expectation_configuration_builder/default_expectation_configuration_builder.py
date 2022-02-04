@@ -17,7 +17,9 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     parameter_name-to-parameter_fully_qualified_parameter_name map (name-value pairs supplied in the kwargs dictionary).
     """
 
-    include_field_names: Set[str] = {"expectation_type"}
+    include_field_names: Set[str] = {
+        "expectation_type",
+    }
 
     def __init__(
         self,
@@ -41,16 +43,6 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 
         self._meta = meta
         self._success_on_last_run = success_on_last_run
-
-    # TODO: <Alex>ALEX</Alex>
-    # @property
-    # def meta(self) -> Optional[Dict[str, Any]]:
-    #     return self._meta
-    #
-    # @property
-    # def success_on_last_run(self) -> Optional[bool]:
-    #     return self._success_on_last_run
-    # TODO: <Alex>ALEX</Alex>
 
     def _build_expectation_configuration(
         self,
