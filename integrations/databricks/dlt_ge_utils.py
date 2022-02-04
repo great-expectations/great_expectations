@@ -44,7 +44,9 @@ def run_ge_checkpoint_on_dataframe_from_suite(
     )
 
     # Run Checkpoint & Actions
-    checkpoint_name: str = "tmp_checkpoint"
+    checkpoint_name: str = (
+        f"tmp_checkpoint_{datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')}"
+    )
     yaml_config: str = f"""
                     name: {checkpoint_name}
                     config_version: 1.0
