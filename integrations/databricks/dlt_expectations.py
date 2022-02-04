@@ -76,7 +76,7 @@ def expect(
     dlt_expectation_condition: str = None,
     data_context: BaseDataContext = None,
     ge_expectation_configuration: ExpectationConfiguration = None,
-    dlt_library=dlt_mock_library,
+    dlt=dlt_mock_library,
 ):
     """
     Run a single expectation on a Delta Live Table
@@ -88,6 +88,15 @@ def expect(
         def wrapper_expect(*args, **kwargs):
 
             # dlt = _get_dlt_library(dlt_library=dlt_library)
+
+            print(
+                "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            )
+            print("dlt.__version__", dlt.__version__)
+            print("dir(dlt)", dir(dlt))
+            print(
+                "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            )
 
             _validate_dlt_decorator_arguments(
                 dlt_expectation_condition=dlt_expectation_condition,
@@ -149,10 +158,18 @@ def expect(
                     dlt_expectation.name, dlt_expectation.condition
                 )
                 print("\n")
+                print(
+                    "\n\ndlt DIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+                )
+                print("dlt.__version__", dlt.__version__)
+                print("dir(dlt)", dir(dlt))
+                print(
+                    "\n\ndlt DIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+                )
 
             func_result = func(*args, **kwargs)
             print(
-                "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+                "\n\nreturn values DIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             )
             import sys
 
@@ -185,7 +202,7 @@ def expect(
             print("type(df)", type(df))
             print("df.head()", df.head())
             print(
-                "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+                "\n\nreturn values DIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             )
             return func_result
 
