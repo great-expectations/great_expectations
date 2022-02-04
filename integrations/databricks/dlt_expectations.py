@@ -4,7 +4,7 @@
 import functools
 import sys
 from types import ModuleType
-from typing import Optional
+from typing import Optional, Tuple
 
 from ruamel.yaml import YAML
 
@@ -73,10 +73,10 @@ def _get_dlt_library(dlt_library: Optional[ModuleType] = None) -> ModuleType:
 def expect(
     _func=None,
     *,
-    dlt_expectation_name: str = None,
-    dlt_expectation_condition: str = None,
-    data_context: BaseDataContext = None,
-    ge_expectation_configuration: ExpectationConfiguration = None,
+    dlt_expectation_name: Optional[str] = None,
+    dlt_expectation_condition: Optional[str] = None,
+    data_context: Optional[BaseDataContext] = None,
+    ge_expectation_configuration: Optional[ExpectationConfiguration] = None,
     dlt_library=dlt_mock_library,
 ):
     """
@@ -103,42 +103,19 @@ def expect(
                 ge_expectation_configuration=ge_expectation_configuration,
             )
 
-            # Create DLT expectation object
-            ge_expectation_from_dlt: Optional[ExpectationConfiguration] = None
-            if dlt_expectation_condition is not None:
-                dlt_expectation: DLTExpectation = DLTExpectation(
-                    name=dlt_expectation_name, condition=dlt_expectation_condition
-                )
-
-                # Translate DLT expectation to GE ExpectationConfiguration
-                ge_expectation_from_dlt = (
-                    translate_dlt_expectation_to_expectation_config(
-                        dlt_expectations=[
-                            (dlt_expectation.name, dlt_expectation.condition)
-                        ],
-                        ge_expectation_type="expect_column_values_to_not_be_null",
-                    )
-                )
-            elif ge_expectation_configuration is not None:
-                # Translate GE ExpectationConfiguration to DLT expectation
-                dlt_expectation_factory: DLTExpectationFactory = DLTExpectationFactory()
-                dlt_expectation: DLTExpectation = (
-                    dlt_expectation_factory.from_great_expectations_expectation(
-                        ge_expectation_configuration=ge_expectation_configuration,
-                        dlt_expectation_name=dlt_expectation_name,
-                    )
-                )
+            (
+                dlt_expectation,
+                ge_expectation_configuration_to_run,
+            ) = _translate_expectations(
+                dlt_expectation_name=dlt_expectation_name,
+                dlt_expectation_condition=dlt_expectation_condition,
+                ge_expectation_configuration=ge_expectation_configuration,
+            )
 
             # Great Expectations evaluated first on the full dataset before any rows are dropped
             #   via `expect_or_drop` Delta Live Tables expectations
             if data_context is not None:
-                # TODO: Get rid of this ugly mess:
-                if ge_expectation_configuration is not None:
-                    ge_expectation_configuration_to_run = ge_expectation_configuration
-                elif ge_expectation_from_dlt is not None:
-                    ge_expectation_configuration_to_run = ge_expectation_from_dlt
-                else:
-                    ge_expectation_configuration_to_run = None
+
                 run_ge_checkpoint_on_dataframe_from_suite(
                     data_context=data_context,
                     df=args[0],
@@ -350,3 +327,45 @@ def get_size(obj, seen=None):
     elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes, bytearray)):
         size += sum([get_size(i, seen) for i in obj])
     return size
+
+
+def _translate_expectations(
+    dlt_expectation_name: Optional[str] = None,
+    dlt_expectation_condition: Optional[str] = None,
+    ge_expectation_configuration: Optional[ExpectationConfiguration] = None,
+) -> Tuple[DLTExpectation, ExpectationConfiguration]:
+
+    # Initialize return values
+    ge_expectation_from_dlt: Optional[ExpectationConfiguration] = None
+    dlt_expectation: Optional[DLTExpectation] = None
+
+    # Create DLT expectation object
+    if dlt_expectation_condition is not None:
+        dlt_expectation: DLTExpectation = DLTExpectation(
+            name=dlt_expectation_name, condition=dlt_expectation_condition
+        )
+
+        # Translate DLT expectation to GE ExpectationConfiguration
+        ge_expectation_from_dlt = translate_dlt_expectation_to_expectation_config(
+            dlt_expectations=[(dlt_expectation.name, dlt_expectation.condition)],
+            ge_expectation_type="expect_column_values_to_not_be_null",
+        )
+    elif ge_expectation_configuration is not None:
+        # Translate GE ExpectationConfiguration to DLT expectation
+        dlt_expectation_factory: DLTExpectationFactory = DLTExpectationFactory()
+        dlt_expectation: DLTExpectation = (
+            dlt_expectation_factory.from_great_expectations_expectation(
+                ge_expectation_configuration=ge_expectation_configuration,
+                dlt_expectation_name=dlt_expectation_name,
+            )
+        )
+
+    # TODO: Get rid of this ugly mess:
+    if ge_expectation_configuration is not None:
+        ge_expectation_configuration_to_run = ge_expectation_configuration
+    elif ge_expectation_from_dlt is not None:
+        ge_expectation_configuration_to_run = ge_expectation_from_dlt
+    else:
+        ge_expectation_configuration_to_run = None
+
+    return dlt_expectation, ge_expectation_configuration_to_run
