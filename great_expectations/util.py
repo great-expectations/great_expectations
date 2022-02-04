@@ -1011,6 +1011,7 @@ def filter_properties_dict(
     Returns:
         The (possibly) filtered properties dictionary (or None if no entries remain after filtering is performed)
     """
+    # TODO: <Alex>ALEX -- change to disallow intersection of keys; otherwise, acceptable (include, exclude -- in that order).</Alex>
     if keep_fields and delete_fields:
         raise ValueError(
             "Only one of keep_fields and delete_fields filtering directives can be specified."

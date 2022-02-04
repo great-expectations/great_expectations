@@ -26,9 +26,20 @@ from great_expectations.rule_based_profiler.types.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
-from great_expectations.rule_based_profiler.types.builder import (
-    validate_builder_override_config,
-)
+
+
+def _validate_builder_override_config(builder_config: dict):
+    """
+    In order to insure successful instantiation of custom builder classes using "instantiate_class_from_config()",
+    candidate builder override configurations are required to supply both "class_name" and "module_name" attributes.
+
+    :param builder_config: candidate builder override configuration
+    :raises: ProfilerConfigurationError
+    """
+    if not (isinstance(builder_config, dict) and len(set(builder_config.keys()) & {"class_name", "module_name",}) == 2):
+        raise ge_exceptions.ProfilerConfigurationError(
+            'Both "class_name" and "module_name" must be specified.'
+        )
 
 
 class RuleBasedProfiler:
@@ -359,6 +370,7 @@ class RuleBasedProfiler:
         :return: reconciled variables in their canonical ParameterContainer object form
         """
         effective_variables: ParameterContainer
+        #ALEX_TEST
         if variables is not None and isinstance(variables, dict):
             variables_configs: dict = self.variables.to_dict()["parameter_nodes"][
                 "variables"
@@ -499,6 +511,7 @@ class RuleBasedProfiler:
         :param domain_builder_config: domain builder configuration override, supplied in dictionary (configuration) form
         :return: reconciled domain builder configuration, returned in dictionary (configuration) form
         """
+        # TODO: <Alex>ALEX_TEST</Alex>
         domain_builder_as_dict: dict = domain_builder.to_dict()
         domain_builder_as_dict["class_name"] = domain_builder.__class__.__name__
         domain_builder_as_dict["module_name"] = domain_builder.__class__.__module__
@@ -511,7 +524,7 @@ class RuleBasedProfiler:
 
         effective_domain_builder_config: dict = serialized_config
         if domain_builder_config:
-            validate_builder_override_config(builder_config=domain_builder_config)
+            _validate_builder_override_config(builder_config=domain_builder_config)
             effective_domain_builder_config.update(domain_builder_config)
 
         return effective_domain_builder_config
@@ -536,7 +549,7 @@ class RuleBasedProfiler:
         """
         parameter_builder_config: dict
         for parameter_builder_config in parameter_builder_configs:
-            validate_builder_override_config(builder_config=parameter_builder_config)
+            _validate_builder_override_config(builder_config=parameter_builder_config)
 
         effective_parameter_builder_configs: Dict[str, dict] = {}
 
@@ -551,6 +564,7 @@ class RuleBasedProfiler:
             parameter_builder_name,
             parameter_builder,
         ) in current_parameter_builders.items():
+            # TODO: <Alex>ALEX_TEST</Alex>
             parameter_builder_as_dict = parameter_builder.to_dict()
             parameter_builder_as_dict[
                 "class_name"
@@ -607,7 +621,7 @@ class RuleBasedProfiler:
         for (
             expectation_configuration_builder_config
         ) in expectation_configuration_builder_configs:
-            validate_builder_override_config(
+            _validate_builder_override_config(
                 builder_config=expectation_configuration_builder_config
             )
 
@@ -624,6 +638,7 @@ class RuleBasedProfiler:
             expectation_configuration_builder_name,
             expectation_configuration_builder,
         ) in current_expectation_configuration_builders.items():
+            # TODO: <Alex>ALEX_TEST</Alex>
             expectation_configuration_builder_as_dict = (
                 expectation_configuration_builder.to_dict()
             )

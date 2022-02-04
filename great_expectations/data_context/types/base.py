@@ -111,14 +111,15 @@ class BaseYamlConfig(SerializableDictDot):
         """
         return object_to_yaml_str(obj=self.commented_map)
 
-    def to_raw_dict(self) -> dict:
-        """
-        :returns a raw dict containing the project configuration
-        """
-        key: str
-        commented_map: CommentedMap = self.commented_map
-        # return {key: commented_map[key] for key in commented_map}
-        return {key: self[key] for key in commented_map}
+    # TODO: <Alex>ALEX</Alex>
+    # def to_dict(self) -> dict:
+    #     """
+    #     :returns a raw dict containing the project configuration
+    #     """
+    #     key: str
+    #     commented_map: CommentedMap = self.commented_map
+    #     return {key: self[key] for key in commented_map}
+    # TODO: <Alex>ALEX</Alex>
 
     def to_json_dict(self) -> dict:
         """
@@ -1464,11 +1465,13 @@ class BaseStoreBackendDefaults(DictDot):
         self.validation_operators = validation_operators
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
+
         self.stores = stores
         if data_docs_sites is None:
             data_docs_sites = copy.deepcopy(
                 DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
             )
+
         self.data_docs_sites = data_docs_sites
         self.data_docs_site_name = data_docs_site_name
 
@@ -2117,6 +2120,7 @@ class CheckpointConfigSchema(Schema):
         for key in self.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:
                 data.pop(key)
+
         return data
 
 
@@ -2187,6 +2191,8 @@ class CheckpointConfig(BaseYamlConfig):
         self._module_name = module_name or "great_expectations.checkpoint"
         self._class_name = class_name
 
+        print(f'\n[ALEX_TEST] [CHECKPOINT_CONFIG] BATCH_REQUEST: {batch_request} ; TYPE: {str(type(batch_request))}')
+        print(f'\n[ALEX_TEST] [CHECKPOINT_CONFIG] COMMENTED_MAP: {commented_map} ; TYPE: {str(type(commented_map))}')
         super().__init__(commented_map=commented_map)
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
@@ -2334,17 +2340,32 @@ class CheckpointConfig(BaseYamlConfig):
     def runtime_configuration(self, value: dict):
         self._runtime_configuration = value
 
+    # TODO: <Alex>ALEX_TEST -- COULD_BE_SUPERCLASS</Alex>
+    # TODO: <Alex>ALEX</Alex>
     def __deepcopy__(self, memo):
         cls = self.__class__
         result = cls.__new__(cls)
 
         memo[id(self)] = result
-        for key, value in self.to_dict().items():
+        for key, value in self.to_raw_dict().items():
             value_copy = safe_deep_copy(data=value, memo=memo)
             setattr(result, key, value_copy)
 
         return result
+    # TODO: <Alex>ALEX</Alex>
 
+    # TODO: <Alex>ALEX_TEST -- ELIMINATE -- NO ID HERE</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # def __eq__(self, other):
+    #     if not isinstance(other, self.__class__):
+    #         # Delegate comparison to the other instance's __eq__.
+    #         return NotImplemented
+    #
+    #     return self.id == other.id
+    # TODO: <Alex>ALEX</Alex>
+
+    # TODO: <Alex>ALEX_TEST -- COULD_BE_SUPERCLASS</Alex>
+    # TODO: <Alex>ALEX</Alex>
     def __repr__(self) -> str:
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
@@ -2352,6 +2373,13 @@ class CheckpointConfig(BaseYamlConfig):
             inplace=True,
         )
         return json.dumps(json_dict, indent=2)
+    # TODO: <Alex>ALEX</Alex>
+
+    # TODO: <Alex>ALEX_TEST -- COULD_BE_SUPERCLASS</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    def __str__(self) -> str:
+        return self.__repr__()
+    # TODO: <Alex>ALEX</Alex>
 
 
 class CheckpointValidationConfig(DictDot):

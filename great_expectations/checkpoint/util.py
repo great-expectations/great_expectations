@@ -14,7 +14,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     get_batch_request_as_dict,
 )
-from great_expectations.core.util import nested_update, safe_deep_copy
+from great_expectations.core.util import nested_update
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
@@ -317,7 +317,20 @@ def substitute_template_config(source_config: dict, template_config: dict) -> di
         dest_config["expectation_suite_ge_cloud_id"] = source_config[
             "expectation_suite_ge_cloud_id"
         ]
+    # TODO: <Alex>ALEX</Alex>
+    # if source_config.get("batch_request") is not None:
+    #     # TODO: <Alex>ALEX</Alex>
+    #     # batch_request = dest_config.get("batch_request") or {}
+    #     # TODO: <Alex>ALEX</Alex>
+    #     # updated_batch_request = nested_update(
+    #     #     batch_request,
+    #     #     source_config["batch_request"],
+    #     #     dedup=True,
+    #     # )
+    #     dest_config["batch_request"] = source_config["batch_request"]
+    # TODO: <Alex>ALEX</Alex>
 
+    # TODO: <Alex>ALEX</Alex>
     # update
     if source_config.get("batch_request") is not None:
         batch_request = dest_config.get("batch_request") or {}
@@ -327,6 +340,7 @@ def substitute_template_config(source_config: dict, template_config: dict) -> di
             dedup=True,
         )
         dest_config["batch_request"] = updated_batch_request
+    # TODO: <Alex>ALEX</Alex>
     if source_config.get("action_list") is not None:
         action_list = dest_config.get("action_list") or []
         dest_config["action_list"] = get_updated_action_list(
@@ -386,20 +400,55 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
         dest_config["expectation_suite_ge_cloud_id"] = runtime_kwargs[
             "expectation_suite_ge_cloud_id"
         ]
+    # TODO: <Alex>ALEX</Alex>
+    # if runtime_kwargs.get("batch_request") is not None:
+    #     # TODO: <Alex>ALEX</Alex>
+    #     # batch_request = dest_config.get("batch_request") or {}
+    #     # TODO: <Alex>ALEX</Alex>
+    #     # batch_request_from_runtime_kwargs = runtime_kwargs["batch_request"]
+    #     # # batch_request_from_runtime_kwargs = safe_deep_copy(
+    #     #     data=batch_request_from_runtime_kwargs
+    #     # )
+    #     batch_request_from_runtime_kwargs = get_batch_request_as_dict(
+    #         batch_request=runtime_kwargs["batch_request"]
+    #     )
+    #     # if isinstance(
+    #     #     batch_request_from_runtime_kwargs, (BatchRequest, RuntimeBatchRequest)
+    #     # ):
+    #     #     # TODO: <Alex>ALEX</Alex>
+    #     #     # noinspection PyUnresolvedReferences
+    #     #     batch_request_from_runtime_kwargs = (
+    #     #         batch_request_from_runtime_kwargs.to_dict()
+    #     #     )
+    #     #     # TODO: <Alex>ALEX</Alex>
+    #     # updated_batch_request = nested_update(
+    #     #     batch_request,
+    #     #     batch_request_from_runtime_kwargs,
+    #     #     dedup=True,
+    #     # )
+    #     dest_config["batch_request"] = batch_request_from_runtime_kwargs
+    # TODO: <Alex>ALEX</Alex>
     # update
     if runtime_kwargs.get("batch_request") is not None:
         batch_request = dest_config.get("batch_request") or {}
         batch_request_from_runtime_kwargs = runtime_kwargs["batch_request"]
-        batch_request_from_runtime_kwargs = safe_deep_copy(
-            data=batch_request_from_runtime_kwargs
+        batch_request_from_runtime_kwargs = get_batch_request_as_dict(
+            batch_request=batch_request_from_runtime_kwargs
         )
-        if isinstance(
-            batch_request_from_runtime_kwargs, (BatchRequest, RuntimeBatchRequest)
-        ):
-            # noinspection PyUnresolvedReferences
-            batch_request_from_runtime_kwargs = (
-                batch_request_from_runtime_kwargs.to_dict()
-            )
+        # TODO: <Alex>ALEX</Alex>
+        # batch_request_from_runtime_kwargs = safe_deep_copy(
+        #     data=batch_request_from_runtime_kwargs
+        # )
+        # if isinstance(
+        #     batch_request_from_runtime_kwargs, (BatchRequest, RuntimeBatchRequest)
+        # ):
+        #     # TODO: <Alex>ALEX</Alex>
+        #     # noinspection PyUnresolvedReferences
+        #     batch_request_from_runtime_kwargs = (
+        #         batch_request_from_runtime_kwargs.to_dict()
+        #     )
+        #     # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
         updated_batch_request = nested_update(
             batch_request,
             batch_request_from_runtime_kwargs,
@@ -483,6 +532,7 @@ def get_updated_action_list(
 def batch_request_contains_batch_data(
     batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
 ) -> bool:
+    print(f'\n[ALEX_TEST] [BATCH_REQUEST_CONTAINS_BATCH_DATA] BATCH_REQUEST: {batch_request} ; TYPE: {str(type(batch_request))}')
     return (
         batch_request is not None
         and batch_request.get("runtime_parameters") is not None

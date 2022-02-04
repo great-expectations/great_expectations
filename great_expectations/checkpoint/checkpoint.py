@@ -101,6 +101,7 @@ class Checkpoint:
 
         self._data_context = data_context
 
+        print(f'\n[ALEX_TEST] [CHECKPOINT.__INIT__()] BATCH_REQUEST: {batch_request} ; TYPE: {str(type(batch_request))}')
         config_kwargs: dict = {
             "name": name,
             "config_version": config_version,
@@ -119,6 +120,7 @@ class Checkpoint:
             "validation_operator_name": validation_operator_name,
             "batches": batches,
         } or {}
+        print(f'\n[ALEX_TEST] [CHECKPOINT.__INIT__()] CONFIG_KWARGS: {config_kwargs} ; TYPE: {str(type(config_kwargs))}')
 
         self._config_kwargs = Attributes(config_kwargs)
 
@@ -126,10 +128,12 @@ class Checkpoint:
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
     #  while run_name_template also undergoes strftime datetime substitution
+    # TODO: <Alex>ALEX</Alex>
     @usage_statistics_enabled_method(
         event_name="checkpoint.run",
         args_payload_fn=get_checkpoint_run_usage_statistics,
     )
+    # TODO: <Alex>ALEX</Alex>
     def run(
         self,
         template_name: Optional[str] = None,
@@ -156,6 +160,7 @@ class Checkpoint:
         result_format = result_format or runtime_configuration.get("result_format")
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
+        print(f'\n[ALEX_TEST] [CHECKPOINT.RUN()] BATCH_REQUEST: {batch_request} ; TYPE: {str(type(batch_request))}')
         validations = get_validations_with_batch_request_as_dict(
             validations=validations
         )
@@ -242,6 +247,7 @@ class Checkpoint:
         if runtime_kwargs is None:
             runtime_kwargs = {}
 
+        print(f'\n[ALEX_TEST] [CHECKPOINT.GET_SUBSTITUTED_CONFIG()] SELF.CONFIG_KWARGS: {self.config_kwargs} ; TYPE: {str(type(self.config_kwargs))}')
         config_kwargs: dict = copy.deepcopy(self.config_kwargs)
 
         template_name = runtime_kwargs.get("template_name")
@@ -251,9 +257,11 @@ class Checkpoint:
         substituted_runtime_config: dict = self._get_substituted_template(
             source_config=config_kwargs
         )
+        print(f'\n[ALEX_TEST] [---------->>>>>>>>>>>>>>>CHECKPOINT.GET_SUBSTITUTED_CONFIG()] SUBSTITUTED_RUNTIME_CONFIG-0: {substituted_runtime_config} ; TYPE: {str(type(substituted_runtime_config))}')
         substituted_runtime_config = self._get_substituted_runtime_kwargs(
             source_config=substituted_runtime_config, runtime_kwargs=runtime_kwargs
         )
+        print(f'\n[ALEX_TEST] [---------->>>>>>>>>>>>>>>CHECKPOINT.GET_SUBSTITUTED_CONFIG()] SUBSTITUTED_RUNTIME_CONFIG-1: {substituted_runtime_config} ; TYPE: {str(type(substituted_runtime_config))}')
 
         return substituted_runtime_config
 
@@ -495,6 +503,7 @@ is run), with each validation having its own defined "action_list" attribute.
             )
 
         if format == "dict":
+            print(f'\n[ALEX_TEST] [CHECKPOINT.GET_CONFIG()] CONFIG_KWARGS: {config_kwargs} ; TYPE: {str(type(config_kwargs))}')
             return config_kwargs
 
         if format in ["str", "dir", "repr"]:

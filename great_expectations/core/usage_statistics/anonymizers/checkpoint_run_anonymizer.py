@@ -115,7 +115,9 @@ class CheckpointRunAnonymizer(Anonymizer):
                 if isinstance(
                     validation_batch_request, (BatchRequest, RuntimeBatchRequest)
                 ):
+                    # TODO: <Alex>ALEX</Alex>
                     validation_batch_request = validation_batch_request.to_dict()
+                    # TODO: <Alex>ALEX</Alex>
 
                 anonymized_validation_batch_request: Optional[
                     Optional[Dict[str, List[str]]]

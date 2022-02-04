@@ -182,22 +182,6 @@ class BatchRequestBase(SerializableDictDot):
         self._batch_spec_passthrough = batch_spec_passthrough
 
     @property
-    def runtime_parameters(self) -> dict:
-        return self._runtime_parameters
-
-    @runtime_parameters.setter
-    def runtime_parameters(self, value: dict):
-        self._runtime_parameters = value
-
-    @property
-    def batch_identifiers(self) -> dict:
-        return self._batch_identifiers
-
-    @batch_identifiers.setter
-    def batch_identifiers(self, value: dict):
-        self._batch_identifiers = value
-
-    @property
     def datasource_name(self) -> str:
         return self._datasource_name
 
@@ -238,6 +222,22 @@ class BatchRequestBase(SerializableDictDot):
         self._limit = value
 
     @property
+    def runtime_parameters(self) -> dict:
+        return self._runtime_parameters
+
+    @runtime_parameters.setter
+    def runtime_parameters(self, value: dict):
+        self._runtime_parameters = value
+
+    @property
+    def batch_identifiers(self) -> dict:
+        return self._batch_identifiers
+
+    @batch_identifiers.setter
+    def batch_identifiers(self, value: dict):
+        self._batch_identifiers = value
+
+    @property
     def batch_spec_passthrough(self) -> dict:
         return self._batch_spec_passthrough
 
@@ -249,25 +249,71 @@ class BatchRequestBase(SerializableDictDot):
     def id(self) -> str:
         return IDDict(self.to_json_dict()).to_id()
 
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
     def to_dict(self) -> dict:
-        dict_obj: dict = {}
+        return standardize_batch_request_display_ordering(batch_request=super().to_dict())
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # def to_dict(self) -> dict:
+    #     # TODO: <Alex>ALEX</Alex>
+    #     # dict_obj: dict = {}
+    #     # TODO: <Alex>ALEX</Alex>
+    #
+    #     field_name: str
+    #     # TODO: <Alex>ALEX</Alex>
+    #     # field_value: Any
+    #     # for field_name in self.field_names:
+    #     #     if hasattr(self, f"_{field_name}"):
+    #     #         field_value = getattr(self, field_name)
+    #     #         dict_obj[field_name] = field_value
+    #     # TODO: <Alex>ALEX</Alex>
+    #
+    #     # TODO: <Alex>ALEX</Alex>
+    #     dict_obj: dict = {field_name: self[field_name] for field_name in self.field_names}
+    #     # TODO: <Alex>ALEX</Alex>
+    #     dict_obj = standardize_batch_request_display_ordering(batch_request=dict_obj)
+    #
+    #     return dict_obj
+    # TODO: <Alex>ALEX</Alex>
 
-        field_name: str
-        field_value: Any
-        for field_name in self.field_names:
-            if hasattr(self, f"_{field_name}"):
-                field_value = getattr(self, field_name)
-                dict_obj[field_name] = field_value
-
-        dict_obj = standardize_batch_request_display_ordering(batch_request=dict_obj)
-
-        return dict_obj
-
+    # TODO: <Alex>ALEX_TEST -- COULD_BE_SUPERCLASS</Alex>
+    # TODO: <Alex>ALEX</Alex>
     def to_json_dict(self) -> dict:
         dict_obj: dict = self.to_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
+    # TODO: <Alex>ALEX</Alex>
 
+    # TODO: <Alex>ALEX_TEST -- COULD_BE_SUPERCLASS</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        # print(f'\n[ALEX_TEST] [BATCH_REQUEST_BASE.__DEEPCOPY__()] CLS: {cls} ; TYPE: {str(type(cls))}')
+        result = cls.__new__(cls)
+
+        memo[id(self)] = result
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # for key, value in self.to_dict().items():
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        for key, value in self.to_raw_dict().items():
+            value_copy = safe_deep_copy(data=value, memo=memo)
+            setattr(result, key, value_copy)
+
+        return result
+    # TODO: <Alex>ALEX</Alex>
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            # Delegate comparison to the other instance's __eq__.
+            return NotImplemented
+
+        return self.id == other.id
+
+    # TODO: <Alex>ALEX_TEST -- COULD_BE_SUPERCLASS</Alex>
+    # TODO: <Alex>ALEX</Alex>
     def __repr__(self) -> str:
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
@@ -275,26 +321,13 @@ class BatchRequestBase(SerializableDictDot):
             inplace=True,
         )
         return json.dumps(json_dict, indent=2)
+    # TODO: <Alex>ALEX</Alex>
 
+    # TODO: <Alex>ALEX_TEST -- COULD_BE_SUPERCLASS</Alex>
+    # TODO: <Alex>ALEX</Alex>
     def __str__(self) -> str:
         return self.__repr__()
-
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-
-        memo[id(self)] = result
-        for key, value in self.to_dict().items():
-            value_copy = safe_deep_copy(data=value, memo=memo)
-            setattr(result, key, value_copy)
-
-        return result
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            # Delegate comparison to the other instance's __eq__.
-            return NotImplemented
-        return self.id == other.id
+    # TODO: <Alex>ALEX</Alex>
 
     @staticmethod
     def _validate_init_parameters(

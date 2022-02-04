@@ -43,6 +43,10 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
 
         self._semantic_types = semantic_types
 
+    @property
+    def semantic_types(self) -> Optional[Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]]:
+        return self._semantic_types
+
     def _get_domains(
         self,
         variables: Optional[ParameterContainer] = None,

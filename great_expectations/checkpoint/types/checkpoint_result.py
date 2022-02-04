@@ -12,10 +12,10 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.types import DictDot
+from great_expectations.types import SerializableDictDot
 
 
-class CheckpointResult(DictDot):
+class CheckpointResult(SerializableDictDot):
     """
     The run_results property forms the backbone of this type and defines the basic contract for what a checkpoint's
     run method returns. It is a dictionary where the top-level keys are the ValidationResultIdentifiers of
@@ -280,22 +280,26 @@ class CheckpointResult(DictDot):
             }
         return self._validation_statistics
 
+    # TODO: <Alex>ALEX</Alex>
     def to_json_dict(self) -> dict:
-        dict_obj: dict = self.to_dict()
+        dict_obj: dict = self.to_raw_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
+    # TODO: <Alex>ALEX</Alex>
 
+    # TODO: <Alex>ALEX</Alex>
     def __deepcopy__(self, memo):
         cls = self.__class__
         result = cls.__new__(cls)
 
         memo[id(self)] = result
-        for key, value in self.to_dict().items():
+        for key, value in self.to_raw_dict().items():
             if value is not None:
                 value_copy = safe_deep_copy(data=value, memo=memo)
                 setattr(result, key, value_copy)
 
         return result
+    # TODO: <Alex>ALEX</Alex>
 
     def __repr__(self):
         serializeable_dict: dict = self.to_json_dict()

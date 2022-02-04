@@ -2,7 +2,7 @@ import copy
 from abc import ABC, abstractmethod
 from dataclasses import make_dataclass
 from numbers import Number
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Set
 
 import numpy as np
 
@@ -54,6 +54,8 @@ class ParameterBuilder(Builder, ABC):
             metric_name: column.mean
         ```
     """
+
+    exclude_field_names: Set[str] = {"data_context"}
 
     def __init__(
         self,

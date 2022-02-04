@@ -76,6 +76,23 @@ def add_checkpoint(
 ) -> Union[Checkpoint, LegacyCheckpoint]:
     checkpoint_config: Union[CheckpointConfig, dict]
 
+    # TODO: <Alex>ALEX</Alex>
+    # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
+    batch_request = get_batch_request_as_dict(batch_request=batch_request)
+    validations = get_validations_with_batch_request_as_dict(validations=validations)
+    # TODO: <Alex>ALEX</Alex>
+
+    # DataFrames shouldn't be saved to CheckpointStore
+    if batch_request_contains_batch_data(batch_request=batch_request):
+        raise ge_exceptions.InvalidConfigError(
+            f'batch_data found in batch_request cannot be saved to CheckpointStore "{checkpoint_store_name}"'
+        )
+
+    if batch_request_in_validations_contains_batch_data(validations=validations):
+        raise ge_exceptions.InvalidConfigError(
+            f'batch_data found in validations cannot be saved to CheckpointStore "{checkpoint_store_name}"'
+        )
+
     checkpoint_config = {
         "name": name,
         "config_version": config_version,
@@ -101,22 +118,15 @@ def add_checkpoint(
         "ge_cloud_id": ge_cloud_id,
         "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
     }
-
-    # DataFrames shouldn't be saved to CheckpointStore
-    if batch_request_contains_batch_data(batch_request=batch_request):
-        raise ge_exceptions.InvalidConfigError(
-            f'batch_data found in batch_request cannot be saved to CheckpointStore "{checkpoint_store_name}"'
-        )
-
-    if batch_request_in_validations_contains_batch_data(validations=validations):
-        raise ge_exceptions.InvalidConfigError(
-            f'batch_data found in validations cannot be saved to CheckpointStore "{checkpoint_store_name}"'
-        )
+    print(f'\n[ALEX_TEST] [CHECKPOINT-TOOLKIT.ADD_CHECKPOINT()] BATCH_REQUEST-0: {batch_request} ; TYPE: {str(type(batch_request))}')
+    print(f'\n[ALEX_TEST] [CHECKPOINT-TOOLKIT.ADD_CHECKPOINT()] CHECKPOINT_CONFIG-0: {checkpoint_config} ; TYPE: {str(type(checkpoint_config))}')
 
     checkpoint_config = deep_filter_properties_iterable(
         properties=checkpoint_config,
         clean_falsy=True,
     )
+    print(f'\n[ALEX_TEST] [CHECKPOINT-TOOLKIT.ADD_CHECKPOINT()] CHECKPOINT_CONFIG-1: {checkpoint_config} ; TYPE: {str(type(checkpoint_config))}')
+
     new_checkpoint: Union[
         Checkpoint, SimpleCheckpoint, LegacyCheckpoint
     ] = instantiate_class_from_config(
@@ -138,7 +148,16 @@ def add_checkpoint(
             configuration_key=name,
         )
 
-    checkpoint_config = CheckpointConfig(**new_checkpoint.get_config())
+    # TODO: <Alex>ALEX</Alex>
+    a = new_checkpoint.get_config()
+    print(f'\n[ALEX_TEST] [CHECKPOINT-TOOLKIT.ADD_CHECKPOINT()] NEW_CHECKPOINT.GET_CONFIG-2a: {a} ; TYPE: {str(type(a))}')
+    # TODO: <Alex>ALEX</Alex>
+    # checkpoint_config = CheckpointConfig(**new_checkpoint.get_config())
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    checkpoint_config = CheckpointConfig(**a)
+    # TODO: <Alex>ALEX</Alex>
+    print(f'\n[ALEX_TEST] [CHECKPOINT-TOOLKIT.ADD_CHECKPOINT()] CHECKPOINT_CONFIG-2b: {checkpoint_config} ; TYPE: {str(type(checkpoint_config))}')
 
     checkpoint_ref = checkpoint_store.set(key=key, value=checkpoint_config)
     if isinstance(checkpoint_ref, GeCloudIdAwareRef):
@@ -172,6 +191,7 @@ def get_checkpoint(
         raise ge_exceptions.InvalidCheckpointConfigError(
             message="Invalid Checkpoint configuration", validation_error=exc_ve
         )
+    print(f'\n[ALEX_TEST] [CHECKPOINT-TOOLKIT.GET_CHECKPOINT()] CHECKPOINT_CONFIG-0: {checkpoint_config} ; TYPE: {str(type(checkpoint_config))}')
 
     if checkpoint_config.config_version is None:
         if not (
@@ -199,9 +219,14 @@ def get_checkpoint(
             )
 
     config: dict = checkpoint_config.to_json_dict()
+    print(f'\n[ALEX_TEST] [CHECKPOINT-TOOLKIT.GET_CHECKPOINT()] CONFIG-0: {config} ; TYPE: {str(type(config))}')
+
     if name:
         config.update({"name": name})
+
     config = filter_properties_dict(properties=config, clean_falsy=True)
+    print(f'\n[ALEX_TEST] [CHECKPOINT-TOOLKIT.GET_CHECKPOINT()] CONFIG-1: {config} ; TYPE: {str(type(config))}')
+
     checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
         config=config,
         runtime_environment={
