@@ -161,7 +161,7 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' --ignore 'tests/test_definitions' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'
@@ -243,7 +243,7 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' --ignore 'tests/test_definitions' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'
@@ -259,38 +259,6 @@ stages:
               codeCoverageTool: Cobertura
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
-
-      - job: json_parameterized_expectations
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-
-        services:
-          postgres: postgres
-
-        variables:
-          python.version: '3.8'
-          GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
-
-          - script: |
-              pip install --requirement requirements.txt
-              echo "about to run pip install $(GE_pytest_pip_opts)"
-              pip install $(GE_pytest_pip_opts)
-              pip install  .
-            displayName: 'Install dependencies'
-
-          - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest tests/test_definitions
-
-            displayName: 'pytest'
 
   - stage: usage_stats_integration
     dependsOn: [scope_check, lint]
@@ -376,7 +344,7 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' --ignore 'tests/test_definitions' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'
@@ -415,7 +383,7 @@ stages:
               pip install -e dgtest
 
               # Run dgtest
-              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' --ignore 'tests/test_definitions' \
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
                 --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
 
             displayName: 'dgtest'
