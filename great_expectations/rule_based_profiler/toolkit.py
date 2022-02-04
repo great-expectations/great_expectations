@@ -27,7 +27,6 @@ def add_profiler(
         )
 
     # Chetan - 20220204 - DataContext to be removed once it can be decoupled from RBP
-    # Necessary to use instantiate_class_from_config due to the possible presence of class_name/module_name in config
     new_profiler: RuleBasedProfiler = instantiate_class_from_config(
         config=config.to_json_dict(),
         runtime_environment={
@@ -35,6 +34,7 @@ def add_profiler(
         },
         config_defaults={
             "module_name": "great_expectations.rule_based_profiler",
+            # Chetan - 20220204 - class_name to be provided here in subsequent PR
         },
     )
 
