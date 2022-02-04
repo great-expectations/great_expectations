@@ -360,6 +360,7 @@ def test_filter_properties_dict():
             delete_fields={
                 "integer_zero",
                 "scientific_notation_floating_point_number",
+                "string",
             },
             clean_falsy=True,
         )
