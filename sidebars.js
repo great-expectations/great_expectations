@@ -375,6 +375,7 @@ module.exports = {
             'terms/data_asset',
             'terms/execution_engine',
             'terms/expectation',
+            'terms/expectation_suite',
             'terms/plugin'
           ]
         },
@@ -415,7 +416,9 @@ module.exports = {
             { type: 'doc', id: 'reference/profilers' },
             // { type: 'doc', id: 'reference/stores' },
             { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
-            { type: 'doc', id: 'reference/validation' }
+            { type: 'doc', id: 'reference/validation' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' },
+            { type: 'doc', id: 'reference/supporting_resources' }
           ]
         }
       ]
