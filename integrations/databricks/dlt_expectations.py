@@ -240,13 +240,13 @@ def expect(
                 print("df.columns", df.columns)
                 # print("df.count()", df.count())
 
-                clickstream_raw_df = dlt.read("clickstream_raw")
-                print("type(clickstream_raw_df)", type(clickstream_raw_df))
-                print("dir(clickstream_raw_df)", dir(clickstream_raw_df))
+                # clickstream_raw_df = dlt.read("clickstream_raw")
+                # print("type(clickstream_raw_df)", type(clickstream_raw_df))
+                # print("dir(clickstream_raw_df)", dir(clickstream_raw_df))
 
-                # clickstream_prepared_df = dlt.read("clickstream_prepared")
-                # print("type(clickstream_prepared_df)", type(clickstream_prepared_df))
-                # print("dir(clickstream_prepared_df)", dir(clickstream_prepared_df))
+                clickstream_prepared_df = dlt.read("clickstream_prepared")
+                print("type(clickstream_prepared_df)", type(clickstream_prepared_df))
+                print("dir(clickstream_prepared_df)", dir(clickstream_prepared_df))
 
                 print(
                     "\n\ndlt DIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
