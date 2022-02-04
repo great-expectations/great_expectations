@@ -49,9 +49,7 @@ def test_validation_operator_run_interactive_golden_path(
             https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide/
     """
     assert_no_logging_messages_or_tracebacks(
-        caplog,
-        result,
-        allowed_deprecation_message=dep_warning
+        caplog, result, allowed_deprecation_message=dep_warning
     )
 
 
@@ -185,7 +183,9 @@ def test_validation_operator_run_noninteractive_golden_path(
         project to use Checkpoints and the V3 (Batch Request) API:
             https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide/
     """
-    assert_no_logging_messages_or_tracebacks(caplog, result, allowed_deprecation_message=dep_warning)
+    assert_no_logging_messages_or_tracebacks(
+        caplog, result, allowed_deprecation_message=dep_warning
+    )
 
 
 def test_validation_operator_run_noninteractive_validation_config_file_does_not_exist(
