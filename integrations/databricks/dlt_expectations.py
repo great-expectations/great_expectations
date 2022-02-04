@@ -195,9 +195,9 @@ def expect(
                 )
             except:
                 pass
-            df = dlt.read(func_result.name)
-            print("type(df)", type(df))
-            print("df.head()", df.head())
+            # df = dlt.read(func_result.name)
+            # print("type(df)", type(df))
+            # print("df.head()", df.head())
             print(
                 "\n\nreturn values DIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
             )
