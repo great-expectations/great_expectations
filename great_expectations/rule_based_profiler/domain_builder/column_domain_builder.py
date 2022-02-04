@@ -1,4 +1,3 @@
-# Hello
 from typing import List, Optional
 
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
