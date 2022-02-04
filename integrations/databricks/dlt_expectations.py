@@ -87,7 +87,7 @@ def expect(
         @functools.wraps(func)
         def wrapper_expect(*args, **kwargs):
 
-            dlt = _get_dlt_library(dlt_library=dlt_library)
+            # dlt = _get_dlt_library(dlt_library=dlt_library)
 
             _validate_dlt_decorator_arguments(
                 dlt_expectation_condition=dlt_expectation_condition,
