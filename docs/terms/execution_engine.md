@@ -20,7 +20,7 @@ An Execution Engine is a system capable of processing data to compute <Technical
 
 ### Features and promises
 
-An Execution Engine provides the computing resources that will be used to actually perform <TechnicalTag relative="../" tag="validation" text="Validation" />. Great Expectations can take advantage of many different Execution Engines, such as Pandas, Spark, or SqlAlchemy, and even translate the same <TechnicalTag relative="../" tag="expectation" text="Expectations" /> to validate data using different engines.
+An Execution Engine provides the computing resources that will be used to actually perform <TechnicalTag relative="../" tag="validation" text="Validation" />. Great Expectations can take advantage of many Execution Engines, such as Pandas, Spark, or SqlAlchemy, and even translate the same <TechnicalTag relative="../" tag="expectation" text="Expectations" /> to validate data using different engines.
 
 Data is always viewed through the lens of an Execution Engine in Great Expectations. When we obtain a <TechnicalTag relative="../" tag="batch" text="Batch" />Batch of data, that Batch contains metadata that wraps the native Data Object of the Execution Engine -- for example, a `DataFrame` in Pandas or Spark, or a table or query result in SQL.
 
@@ -108,7 +108,7 @@ For specifics on the required keys for a given Execution Engine, please see our 
     - a validation_graph object is ready. Nodes are MetricConfigurations, edges are dependencies.
 5. `_parse_validation_graph`
 6. for each set of ready_metrics: Execution Engine resolve_metrics
-7. for each metric: bundleable?
+7. for each metric: bundle-able?
   a. yes -> add to bundle
   b. no -> `resolve_metric`
     i. call metric_fn to get **value of metric**
