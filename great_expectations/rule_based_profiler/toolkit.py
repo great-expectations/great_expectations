@@ -10,16 +10,20 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.types import RuleBasedProfilerConfig
 from great_expectations.util import filter_properties_dict
 
 
 def get_profiler(
-    data_context: "DataContext",
+    data_context: "DataContext",  # noqa: F821
     profiler_store: ProfilerStore,
     name: Optional[str] = None,
     ge_cloud_id: Optional[str] = None,
 ) -> RuleBasedProfiler:
+    assert bool(name) ^ bool(
+        ge_cloud_id
+    ), "Must provide either name or ge_cloud_id (but not both)"
+
     key: Union[GeCloudIdentifier, ConfigurationIdentifier]
     if ge_cloud_id:
         key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
@@ -51,6 +55,30 @@ def get_profiler(
     )
 
     return profiler
+
+
+def delete_profiler(
+    profiler_store: ProfilerStore,
+    name: Optional[str] = None,
+    ge_cloud_id: Optional[str] = None,
+) -> None:
+    assert bool(name) ^ bool(
+        ge_cloud_id
+    ), "Must provide either name or ge_cloud_id (but not both)"
+
+    key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+    if ge_cloud_id:
+        key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+    else:
+        key = ConfigurationIdentifier(configuration_key=name)
+
+    try:
+        profiler_store.remove_key(key=key)
+    except (ge_exceptions.InvalidKeyError, KeyError) as exc_ik:
+        id_ = key.configuration_key if isinstance(key, ConfigurationIdentifier) else key
+        raise ge_exceptions.ProfilerNotFoundError(
+            message=f'Non-existent Profiler configuration named "{id_}".\n\nDetails: {exc_ik}'
+        )
 
 
 def list_profilers(

@@ -272,7 +272,6 @@ class BatchRequestBase(SerializableDictDot):
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
-            keep_falsy_numerics=True,
             inplace=True,
         )
         return json.dumps(json_dict, indent=2)
@@ -567,7 +566,6 @@ class Batch(SerializableDictDot):
         json_dict: dict = self.to_dict()
         deep_filter_properties_iterable(
             properties=json_dict["batch_request"],
-            keep_falsy_numerics=True,
             inplace=True,
         )
         return json_dict
@@ -593,6 +591,18 @@ class Batch(SerializableDictDot):
             {"n_rows": n_rows, "fetch_all": fetch_all},
         )
         return self._data.execution_engine.resolve_metrics((metric,))[metric.id]
+
+
+def get_batch_request_as_dict(
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+) -> Optional[dict]:
+    if batch_request is None:
+        return None
+
+    if isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
+        batch_request = batch_request.to_dict()
+
+    return batch_request
 
 
 def get_batch_request_from_acceptable_arguments(
@@ -778,7 +788,6 @@ def get_batch_request_from_acceptable_arguments(
 
     deep_filter_properties_iterable(
         properties=batch_request_as_dict,
-        keep_falsy_numerics=True,
         inplace=True,
     )
 

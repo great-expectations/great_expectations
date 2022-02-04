@@ -1,16 +1,16 @@
-from typing import List, Optional
+from typing import List
 
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
-    Domain,
     DomainBuilder,
     SimpleSemanticTypeColumnDomainBuilder,
     TableDomainBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations.rule_based_profiler.types import (
+    Domain,
     ParameterContainer,
     build_parameter_container_for_variables,
 )
@@ -58,12 +58,14 @@ def test_column_domain_builder(
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
     full_profiler_config_dict: dict = yaml.load(profiler_config)
+
     variables_configs: dict = full_profiler_config_dict.get("variables")
-    variables: Optional[ParameterContainer] = None
-    if variables_configs:
-        variables = build_parameter_container_for_variables(
-            variables_configs=variables_configs
-        )
+    if variables_configs is None:
+        variables_configs = {}
+
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        variables_configs=variables_configs
+    )
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
@@ -143,12 +145,14 @@ def test_simple_semantic_type_column_domain_builder(
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
     full_profiler_config_dict: dict = yaml.load(profiler_config)
+
     variables_configs: dict = full_profiler_config_dict.get("variables")
-    variables: Optional[ParameterContainer] = None
-    if variables_configs:
-        variables = build_parameter_container_for_variables(
-            variables_configs=variables_configs
-        )
+    if variables_configs is None:
+        variables_configs = {}
+
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        variables_configs=variables_configs
+    )
 
     batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
