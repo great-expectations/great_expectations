@@ -11,6 +11,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
     InferredAssetFilesystemDataConnector,
 )
+from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
 yaml = YAML()
@@ -32,6 +33,7 @@ def test_basic_instantiation(tmp_path_factory):
         InferredAssetFilesystemDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
+            execution_engine=PandasExecutionEngine(),
             default_regex={
                 "pattern": r"(.+)/(.+)-(\d+)\.csv",
                 "group_names": ["data_asset_name", "letter", "number"],
@@ -83,6 +85,7 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(
         InferredAssetFilesystemDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
+            execution_engine=PandasExecutionEngine(),
             default_regex={
                 "pattern": r"(.+)-(\d+)\.csv",
                 "group_names": [
@@ -144,6 +147,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(tmp_path_factory):
         InferredAssetFilesystemDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
+            execution_engine=PandasExecutionEngine(),
             default_regex={
                 "pattern": r"(\d{4})/(\d{2})/(.+)-\d+\.csv",
                 "group_names": ["year_dir", "month_dir", "data_asset_name"],
@@ -249,6 +253,7 @@ def test_self_check(tmp_path_factory):
         InferredAssetFilesystemDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",
+            execution_engine=PandasExecutionEngine(),
             default_regex={
                 "pattern": r"(.+)-(\d+)\.csv",
                 "group_names": ["data_asset_name", "number"],
@@ -321,6 +326,9 @@ default_regex:
         - month_dir
         - data_asset_name
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -416,6 +424,9 @@ default_regex:
         - month_dir
         - data_asset_name
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -506,6 +517,9 @@ def test_nested_directory_data_asset_name_in_folder(
             - number
         pattern: (\\w{{1}})\\/(\\w{{1}})-(\\d{{1}})\\.csv
         """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -570,6 +584,9 @@ def test_redundant_information_in_naming_convention_random_hash(
               pattern: (\\d{{4}})/(\\d{{2}})/(\\d{{2}})/(log_file)-.*\\.txt\\.gz
 
               """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -629,6 +646,9 @@ def test_redundant_information_in_naming_convention_timestamp(
                 - day
               pattern: (log_file)-(\\d{{4}})-(\\d{{2}})-(\\d{{2}})-.*\\.*\\.txt\\.gz
       """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
     assert report_object == {
@@ -687,6 +707,9 @@ def test_redundant_information_in_naming_convention_bucket(
                   - day
               pattern: (\\w{{11}})/(\\d{{4}})/(\\d{{2}})/(\\d{{2}})/log_file-.*\\.txt\\.gz
               """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -938,6 +961,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
     )
 
     with pytest.raises(ge_exceptions.DataConnectorError):
+        # noinspection PyUnusedLocal
         my_data_connector: InferredAssetFilesystemDataConnector = (
             instantiate_class_from_config(
                 config=my_data_connector_yaml,

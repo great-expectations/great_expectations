@@ -5,8 +5,6 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.map_metric_provider import (
@@ -17,7 +15,7 @@ from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_value,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class ColumnValuesNonNull(ColumnMapMetricProvider):

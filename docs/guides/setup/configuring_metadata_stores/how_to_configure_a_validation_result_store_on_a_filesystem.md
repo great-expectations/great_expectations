@@ -6,13 +6,13 @@ import Prerequisites from '../../../guides/connecting_to_your_data/components/pr
 
 By default, Validation results are stored in the ``uncommitted/validations/`` directory.  Since Validations may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure a new storage location for Validations on your filesystem.
 
-This guide will explain how to use a Validation Action to update Data Docs sites with new validation results from Validation Operator runs.
+This guide will explain how to use a Validation Action to update Data Docs sites with new Validation Results from Validation Operator runs.
 
 <Prerequisites>
 
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- Configured an [Expectation Suite ](../../../tutorials/getting_started/create_your_first_expectations).
-- Configured a [Checkpoint](../../../guides/validation/checkpoints/how_to_create_a_new_checkpoint).
+- Configured an [Expectation Suite ](../../../tutorials/getting_started/create_your_first_expectations.md).
+- Configured a [Checkpoint](../../../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 - Determined a new storage location where you would like to store Validations. This can either be a local path, or a path to a secure network filesystem.
 
 </Prerequisites>
@@ -60,12 +60,12 @@ Steps
               base_directory: uncommitted/shared_validations/
    ```
 
-4. **Confirm that the location has been updated by running** ``great_expectations --v3-api store list``.
+4. **Confirm that the location has been updated by running** ``great_expectations store list``.
 
    Notice the output contains two Validation stores: the original ``validations_store`` and the ``shared_validations_filesystem_store`` we just configured.  This is ok, since Great Expectations will look for Validations in the ``uncommitted/shared_validations/`` folder as long as we set the ``validations_store_name`` variable to ``shared_validations_filesystem_store``. The config for ``validations_store`` can be removed if you would like.
 
    ```bash
-   great_expectations --v3-api store list
+   great_expectations store list
 
    - name: validations_store
      class_name: ValidationsStore
@@ -84,6 +84,3 @@ Steps
 5. **Confirm that the Validations store has been correctly configured**
 
     Run a [Checkpoint](../../../tutorials/getting_started/validate_your_data.md) to store results in the new Validations store on in your new location then visualize the results by re-building [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md).
-
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.

@@ -4,6 +4,7 @@ from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.build_docs import build_docs
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.exceptions import DataContextError
 
 
@@ -11,19 +12,11 @@ from great_expectations.exceptions import DataContextError
 @click.pass_context
 def docs(ctx):
     """Data Docs operations"""
-    directory: str = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context: DataContext = toolkit.load_data_context_with_error_handling(
-        directory=directory,
-        from_cli_upgrade_command=False,
-    )
-    # TODO consider moving this all the way up in to the CLIState constructor
-    ctx.obj.data_context = context
+    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
     usage_stats_prefix = f"cli.docs.{ctx.invoked_subcommand}"
-    toolkit.send_usage_message(
-        data_context=context,
+    send_usage_message(
+        data_context=ctx.obj.data_context,
         event=f"{usage_stats_prefix}.begin",
         success=True,
     )
@@ -68,8 +61,10 @@ def docs_build(ctx, site_name=None, no_view=False):
         view=not no_view,
         assume_yes=ctx.obj.assume_yes,
     )
-    toolkit.send_usage_message(
-        data_context=context, event=usage_event_end, success=True
+    send_usage_message(
+        data_context=context,
+        event=usage_event_end,
+        success=True,
     )
 
 
@@ -97,13 +92,14 @@ def docs_list(ctx):
             list_intro_string = _build_intro_string(docs_sites_strings)
             cli_message_list(docs_sites_strings, list_intro_string)
 
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=True
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
         )
-
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
@@ -143,8 +139,10 @@ def docs_clean(ctx, site_name=None, all_sites=False):
         # if site_name is None, context.clean_data_docs(site_name=site_name)
         # will clean all sites.
         context.clean_data_docs(site_name=site_name)
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=True
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
         )
         cli_message("<green>{}</green>".format("Cleaned data docs"))
     except DataContextError as de:

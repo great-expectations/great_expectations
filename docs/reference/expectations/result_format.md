@@ -9,6 +9,14 @@ The `result_format` parameter may be either a string or a dictionary which speci
     * `result_format`: Sets the fields to return in result.
     * `partial_unexpected_count`: Sets the number of results to include in partial_unexpected_count, if applicable. If 
       set to 0, this will suppress the unexpected counts.
+    * `include_unexpected_rows`: When running validations, this will return the entire row for each unexpected value in
+      dictionary form. When using `include_unexpected_rows`, you must explicitly specify `result_format` as well, and
+      `result_format` must be more verbose than `BOOLEAN_ONLY`. *WARNING: *
+
+  :::warning
+  `include_unexpected_rows` returns EVERY row for each unexpected value; for large tables, this could return an 
+  unwieldy amount of data.
+  :::
 
 
 ## result_format values
@@ -152,7 +160,7 @@ my_df.expect_column_values_to_be_in_set(
 ## Behavior for `BASIC`
 
 A `result` is generated with a basic justification for why an expectation was met or not. The format is intended 
-for quick, at-a-glance feedback. For example, it tends to work well in jupyter notebooks.
+for quick, at-a-glance feedback. For example, it tends to work well in Jupyter Notebooks.
 
 Great Expectations has standard behavior for support for describing the results of `column_map_expectation` and
 `column_aggregate_expectation` expectations.

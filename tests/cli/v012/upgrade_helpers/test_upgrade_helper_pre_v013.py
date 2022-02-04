@@ -8,6 +8,9 @@ from moto import mock_s3
 
 import great_expectations
 from great_expectations import DataContext
+
+# NOTE: we explicitly import the v012 CLI module, so the tests don't require the --v2-api flag explicitly,
+# although that is what is being run.
 from great_expectations.cli.v012 import cli
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str

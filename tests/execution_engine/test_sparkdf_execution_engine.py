@@ -9,6 +9,8 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import (
+    AzureBatchSpec,
+    GCSBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
@@ -16,7 +18,7 @@ from great_expectations.core.batch_spec import (
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.self_check.util import build_spark_engine
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
 
@@ -633,7 +635,7 @@ def test_get_batch_data(test_sparkdf, basic_spark_df_execution_engine):
 
 
 def test_get_batch_empty_splitter(
-    test_folder_connection_path_csv, spark_session, basic_spark_df_execution_engine
+    test_folder_connection_path_csv, basic_spark_df_execution_engine
 ):
     # reader_method not configured because spark will configure own reader by default
     # reader_options are needed to specify the fact that the first line of test file is the header
@@ -649,7 +651,7 @@ def test_get_batch_empty_splitter(
 
 
 def test_get_batch_empty_splitter_tsv(
-    test_folder_connection_path_tsv, spark_session, basic_spark_df_execution_engine
+    test_folder_connection_path_tsv, basic_spark_df_execution_engine
 ):
     # reader_method not configured because spark will configure own reader by default
     # reader_options are needed to specify the fact that the first line of test file is the header
@@ -666,7 +668,7 @@ def test_get_batch_empty_splitter_tsv(
 
 
 def test_get_batch_empty_splitter_parquet(
-    test_folder_connection_path_parquet, spark_session, basic_spark_df_execution_engine
+    test_folder_connection_path_parquet, basic_spark_df_execution_engine
 ):
     # Note: reader method and reader_options are not needed, because
     # SparkDFExecutionEngine automatically determines the file type as well as the schema of the Parquet file.
@@ -680,8 +682,20 @@ def test_get_batch_empty_splitter_parquet(
     assert len(test_sparkdf.columns) == 2
 
 
+def test_get_batch_with_split_on_whole_table_runtime(
+    test_sparkdf, basic_spark_df_execution_engine
+):
+    test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_sparkdf, splitter_method="_split_on_whole_table"
+        )
+    ).dataframe
+    assert test_sparkdf.count() == 120
+    assert len(test_sparkdf.columns) == 10
+
+
 def test_get_batch_with_split_on_whole_table_filesystem(
-    test_folder_connection_path_csv, spark_session, basic_spark_df_execution_engine
+    test_folder_connection_path_csv, basic_spark_df_execution_engine
 ):
     # reader_method not configured because spark will configure own reader by default
     test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
@@ -731,20 +745,82 @@ def test_get_batch_with_split_on_whole_table_s3(
     assert len(test_sparkdf.columns) == 2
 
 
-def test_get_batch_with_split_on_whole_table(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+def test_get_batch_with_split_on_whole_table_azure(
+    spark_session, basic_spark_df_execution_engine
 ):
-    test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf, splitter_method="_split_on_whole_table"
+    # noinspection PyUnusedLocal
+    def mocked_get_reader_function(*args, **kwargs):
+        # noinspection PyUnusedLocal,PyShadowingNames
+        def mocked_reader_function(*args, **kwargs):
+            pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+            df = spark_session.createDataFrame(
+                [
+                    tuple(
+                        None if isinstance(x, (float, int)) and np.isnan(x) else x
+                        for x in record.tolist()
+                    )
+                    for record in pd_df.to_records(index=False)
+                ],
+                pd_df.columns.tolist(),
+            )
+            return df
+
+        return mocked_reader_function
+
+    spark_engine = basic_spark_df_execution_engine
+    spark_engine._get_reader_fn = mocked_get_reader_function
+
+    test_sparkdf = spark_engine.get_batch_data(
+        AzureBatchSpec(
+            path="wasbs://test_container@test_account.blob.core.windows.net/test_dir/test_file.csv",
+            reader_method="csv",
+            reader_options={"header": True},
+            splitter_method="_split_on_whole_table",
         )
     ).dataframe
-    assert test_sparkdf.count() == 120
-    assert len(test_sparkdf.columns) == 10
+    assert test_sparkdf.count() == 4
+    assert len(test_sparkdf.columns) == 2
+
+
+def test_get_batch_with_split_on_whole_table_gcs(
+    spark_session, basic_spark_df_execution_engine
+):
+    # noinspection PyUnusedLocal
+    def mocked_get_reader_function(*args, **kwargs):
+        # noinspection PyUnusedLocal,PyShadowingNames
+        def mocked_reader_function(*args, **kwargs):
+            pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+            df = spark_session.createDataFrame(
+                [
+                    tuple(
+                        None if isinstance(x, (float, int)) and np.isnan(x) else x
+                        for x in record.tolist()
+                    )
+                    for record in pd_df.to_records(index=False)
+                ],
+                pd_df.columns.tolist(),
+            )
+            return df
+
+        return mocked_reader_function
+
+    spark_engine = basic_spark_df_execution_engine
+    spark_engine._get_reader_fn = mocked_get_reader_function
+
+    test_sparkdf = spark_engine.get_batch_data(
+        GCSBatchSpec(
+            path="gcs://bucket/test/test.csv",
+            reader_method="csv",
+            reader_options={"header": True},
+            splitter_method="_split_on_whole_table",
+        )
+    ).dataframe
+    assert test_sparkdf.count() == 4
+    assert len(test_sparkdf.columns) == 2
 
 
 def test_get_batch_with_split_on_column_value(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     split_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -777,7 +853,7 @@ def test_get_batch_with_split_on_column_value(
 
 
 def test_get_batch_with_split_on_converted_datetime(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     split_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -794,7 +870,7 @@ def test_get_batch_with_split_on_converted_datetime(
 
 
 def test_get_batch_with_split_on_divided_integer(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     split_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -816,7 +892,7 @@ def test_get_batch_with_split_on_divided_integer(
 
 
 def test_get_batch_with_split_on_mod_integer(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     split_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -839,7 +915,7 @@ def test_get_batch_with_split_on_mod_integer(
 
 
 def test_get_batch_with_split_on_multi_column_values(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     split_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -881,7 +957,6 @@ def test_get_batch_with_split_on_multi_column_values(
 
 def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(
     test_sparkdf,
-    spark_session,
     basic_spark_df_execution_engine,
 ):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
@@ -903,7 +978,7 @@ def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(
 
 
 def test_get_batch_with_split_on_hashed_column(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     split_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -924,9 +999,7 @@ def test_get_batch_with_split_on_hashed_column(
 
 
 # ### Sampling methods ###
-def test_get_batch_empty_sampler(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
-):
+def test_get_batch_empty_sampler(test_sparkdf, basic_spark_df_execution_engine):
     sampled_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(batch_data=test_sparkdf, sampling_method=None)
     ).dataframe
@@ -934,9 +1007,7 @@ def test_get_batch_empty_sampler(
     assert len(sampled_df.columns) == 10
 
 
-def test_sample_using_random(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
-):
+def test_sample_using_random(test_sparkdf, basic_spark_df_execution_engine):
     sampled_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf, sampling_method="_sample_using_random"
@@ -950,7 +1021,7 @@ def test_sample_using_random(
     assert sampled_df.count() < 25
 
 
-def test_sample_using_mod(test_sparkdf, spark_session, basic_spark_df_execution_engine):
+def test_sample_using_mod(test_sparkdf, basic_spark_df_execution_engine):
     sampled_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
@@ -966,9 +1037,7 @@ def test_sample_using_mod(test_sparkdf, spark_session, basic_spark_df_execution_
     assert len(sampled_df.columns) == 10
 
 
-def test_sample_using_a_list(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
-):
+def test_sample_using_a_list(test_sparkdf, basic_spark_df_execution_engine):
     sampled_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
@@ -984,7 +1053,7 @@ def test_sample_using_a_list(
 
 
 def test_sample_using_md5_wrong_hash_function_name(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
@@ -1000,7 +1069,7 @@ def test_sample_using_md5_wrong_hash_function_name(
         ).dataframe
 
 
-def test_sample_using_md5(test_sparkdf, spark_session, basic_spark_df_execution_engine):
+def test_sample_using_md5(test_sparkdf, basic_spark_df_execution_engine):
     sampled_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
@@ -1020,7 +1089,7 @@ def test_sample_using_md5(test_sparkdf, spark_session, basic_spark_df_execution_
 
 
 def test_split_on_multi_column_values_and_sample_using_random(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     returned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -1076,7 +1145,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=True, filter_nan=False
     )
-    assert new_domain_kwargs["row_condition"] == 'col("foo").notnull()'
+    assert new_domain_kwargs["row_condition"] == "foo IS NOT NULL"
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (2,), (3,), (4,), (5,), (6,)]
@@ -1114,7 +1183,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=True, filter_nan=False
     )
-    assert new_domain_kwargs["row_condition"] == 'col("foo").notnull()'
+    assert new_domain_kwargs["row_condition"] == "foo IS NOT NULL"
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     expected = [(1,), (2,), (3,), (3,), (np.nan,), (2,), (3,), (4,), (5,), (6,)]
@@ -1263,9 +1332,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
 
 
 # Ensuring functionality of compute_domain when no domain kwargs are given
-def test_get_compute_domain_with_no_domain_kwargs_alt(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_compute_domain_with_no_domain_kwargs_alt(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1288,9 +1355,7 @@ def test_get_compute_domain_with_no_domain_kwargs_alt(
 
 
 # Testing for only untested use case - multicolumn
-def test_get_compute_domain_with_column_pair(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_compute_domain_with_column_pair(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1316,9 +1381,7 @@ def test_get_compute_domain_with_column_pair(
 
 
 # Testing for only untested use case - multicolumn
-def test_get_compute_domain_with_multicolumn(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_compute_domain_with_multicolumn(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1343,9 +1406,7 @@ def test_get_compute_domain_with_multicolumn(
 
 
 # Testing whether compute domain is properly calculated, but this time obtaining a column
-def test_get_compute_domain_with_column_domain_alt(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_compute_domain_with_column_domain_alt(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1368,9 +1429,7 @@ def test_get_compute_domain_with_column_domain_alt(
 
 
 # Using an unmeetable row condition to see if empty dataset will result in errors
-def test_get_domain_records_with_row_condition_alt(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_domain_records_with_row_condition_alt(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1398,9 +1457,7 @@ def test_get_domain_records_with_row_condition_alt(
 
 
 # What happens when we filter such that no value meets the condition?
-def test_get_domain_records_with_unmeetable_row_condition_alt(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_domain_records_with_unmeetable_row_condition_alt(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1447,9 +1504,7 @@ def test_get_domain_records_with_unmeetable_row_condition_alt(
 
 
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
-def test_get_compute_domain_with_ge_experimental_condition_parser(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1499,9 +1554,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(
     ), "Data does not match after getting compute domain"
 
 
-def test_get_compute_domain_with_nonexistent_condition_parser(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_compute_domain_with_nonexistent_condition_parser(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1526,9 +1579,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(
 
 
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
-def test_resolve_metric_bundle_with_nonexistent_metric(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1573,9 +1624,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(
 
 
 # Making sure dataframe property is functional
-def test_dataframe_property_given_loaded_batch(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_dataframe_property_given_loaded_batch(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(

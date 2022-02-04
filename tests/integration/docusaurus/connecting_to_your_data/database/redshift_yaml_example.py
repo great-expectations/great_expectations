@@ -15,11 +15,11 @@ redshift_sslmode = os.environ.get("REDSHIFT_SSLMODE")
 CONNECTION_STRING = f"postgresql+psycopg2://{redshift_username}:{redshift_password}@{redshift_host}:{redshift_port}/{redshift_database}?sslmode={redshift_sslmode}"
 
 # This utility is not for general use. It is only to support testing.
-from util import load_data_into_database
+from tests.test_utils import load_data_into_test_database
 
-load_data_into_database(
+load_data_into_test_database(
     table_name="taxi_data",
-    csv_path="./data/yellow_trip_data_sample_2019-01.csv",
+    csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=CONNECTION_STRING,
 )
 
@@ -38,7 +38,7 @@ data_connectors:
            - default_identifier_name
    default_inferred_data_connector_name:
        class_name: InferredAssetSqlDataConnector
-       name: whole_table
+       include_schema_name: true
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -58,7 +58,7 @@ batch_request = RuntimeBatchRequest(
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
-    batch_identifiers={"default_identifier_name": "something_something"},
+    batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
 context.create_expectation_suite(

@@ -22,7 +22,7 @@ Take the following example setup:
 import json 
 import great_expectations as ge
 
-my_expectation_suite = json.load(file("my_titanic_expectations.json"))
+my_expectation_suite = json.load(open("my_titanic_expectations.json"))
 my_df = ge.read_csv(
   "./tests/examples/titanic.csv", 
   expectation_suite=my_expectation_suite
@@ -106,30 +106,30 @@ The resulting report returned looks like this:
 ## Reviewing Validation Results
 
 The easiest way to review Validation Results is to view them from your local Data Docs site, where you can also
-conveniently view Expectation Suites and with additional configuration, Profiling Results (
-see [Data Docs site configuration](./). Out of the box, Great Expectations Data Docs is configured to compile a local
+conveniently view Expectation Suites and with additional configuration, Profiling Results
+(see [Data Docs site configuration](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem)). Out of the box, Great Expectations Data Docs is configured to compile a local
 data documentation site when you start a new project by running `great_expectations init`. By default, this local site
 is saved to the `uncommitted/data_docs/local_site/` directory of your project and will contain pages for Expectation
 Suites and Validation Results.
 
-If you would like to review the raw validation results in JSON format, the default Validation Results directory
+If you would like to review the raw Validation Results in JSON format, the default Validation Results directory
 is `uncommitted/validations/`. Note that by default, Data Docs will only compile Validation Results located in this
 directory.
 
 ## Checkpoints (formerly known as Validation Operators)
 
-The example above demonstrates how to validate one batch of data against one expectation suite. The `validate` method
-returns a dictionary of validation results. This is sufficient when exploring your data and getting to know Great
+The example above demonstrates how to validate one batch of data against one Expectation Suite. The `validate` method
+returns a dictionary of Validation Results. This is sufficient when exploring your data and getting to know Great
 Expectations. When deploying Great Expectations in a real data pipeline, you will typically discover additional needs:
 
 * validating a group of batches that are logically related
-* validating a batch against several expectation suites
-* doing something with the validation results (e.g., saving them for a later review, sending notifications in case of
+* validating a batch against several Expectation Suites
+* doing something with the Validation Results (e.g., saving them for a later review, sending notifications in case of
   failures, etc.).
 
 Checkpoints are mini-applications that can be configured to implement these scenarios.
 
-Read [Checkpoints and Actions](./checkpoints_and_actions) to learn more.
+Read [Checkpoints and Actions](./checkpoints_and_actions.md) to learn more.
 
 ## Deployment patterns
 
@@ -146,4 +146,4 @@ Useful deployment patterns for validation include:
   problem is resolved. Alternatively, you can implement Expectations that raise warnings without halting the DAG.
 
 For certain deployment patterns, it may be useful to parameterize Expectations, and supply Evaluation Parameters at
-validation time. See [Evaluation Parameters](./evaluation_parameters) for more information.
+validation time. See [Evaluation Parameters](./evaluation_parameters.md) for more information.

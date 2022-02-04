@@ -5,21 +5,13 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
-    column_aggregate_partial,
-    column_aggregate_value,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
-    sa as sa,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 def unique_proportion(_metrics):
@@ -73,16 +65,6 @@ class ColumnUniqueProportion(ColumnAggregateMetricProvider):
         dependencies["column_values.nonnull.unexpected_count"] = MetricConfiguration(
             metric_name="column_values.nonnull.unexpected_count",
             metric_domain_kwargs=metric.metric_domain_kwargs,
-        )
-
-        table_domain_kwargs: dict = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
-        dependencies["table.row_count"] = MetricConfiguration(
-            metric_name="table.row_count",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs=None,
-            metric_dependencies=None,
         )
 
         return dependencies

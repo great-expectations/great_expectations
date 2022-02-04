@@ -63,8 +63,8 @@ class ConfigurationStore(Store):
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, TupleStoreBackend):
                 # Provide defaults for this common case
-                store_backend["filepath_template"] = store_backend.get(
-                    "filepath_template", "{0}.yml"
+                store_backend["filepath_suffix"] = store_backend.get(
+                    "filepath_suffix", ".yml"
                 )
 
         super().__init__(
@@ -91,7 +91,7 @@ class ConfigurationStore(Store):
         return self.store_backend.remove_key(key)
 
     def serialize(self, key, value):
-        if isinstance(self.store_backend, GeCloudStoreBackend):
+        if self.ge_cloud_mode:
             # GeCloudStoreBackend expects a json str
             config_schema = value.get_schema_class()()
             return config_schema.dump(value)

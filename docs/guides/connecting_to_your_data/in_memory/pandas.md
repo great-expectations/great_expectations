@@ -24,7 +24,7 @@ This will allow you to validate and explore your data.
 
 <WhereToRunCode />
 
-### 2. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 2. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 

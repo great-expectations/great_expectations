@@ -19,7 +19,7 @@ Steps
 
 1. **Configure the** ``config_variables.yml`` **file with your database credentials**
 
-    We recommend that database credentials be stored in the  ``config_variables.yml`` file, whice is located in the ``uncommitted/`` folder by default, and is not part of source control.  The following lines add database credentials under the key ``db_creds``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](../configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md).
+    We recommend that database credentials be stored in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following lines add database credentials under the key ``db_creds``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](../configuring_data_contexts/how_to_configure_credentials.md).
 
     ```yaml
     db_creds:
@@ -75,12 +75,12 @@ Steps
     ```
 
 
-5. **Confirm that the new Validations store has been added by running** ``great_expectations --v3-api store list``.
+5. **Confirm that the new Validations store has been added by running** ``great_expectations store list``.
 
     Notice the output contains two Validation stores: the original ``validations_store`` on the local filesystem and the ``validations_postgres_store`` we just configured.  This is ok, since Great Expectations will look for Validations in PostgreSQL as long as we set the ``validations_store_name`` variable to ``validations_postgres_store``. The config for ``validations_store`` can be removed if you would like.
 
     ```bash
-    great_expectations --v3-api store list
+    great_expectations store list
 
     - name: validations_store
     class_name: ValidationsStore
@@ -106,8 +106,3 @@ Steps
     Run a [Checkpoint](../../../tutorials/getting_started/validate_your_data.md) to store results in the new Validations store in PostgreSQL then visualize the results by re-building [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md).
 
     Behind the scenes, Great Expectations will create a new table in your database called ``ge_validations_store``, and populate the fields with information from the Validation results.
-
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.
-
-Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.

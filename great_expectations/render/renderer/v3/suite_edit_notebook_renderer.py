@@ -5,11 +5,11 @@ import jinja2
 import nbformat
 
 from great_expectations import DataContext
-from great_expectations.cli.batch_request import (
+from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.batch import (
+    BatchRequest,
     standardize_batch_request_display_ordering,
 )
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.types.base import (
     NotebookConfig,
@@ -21,7 +21,10 @@ from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    filter_properties_dict,
+)
 
 
 class SuiteEditNotebookRenderer(BaseNotebookRenderer):
@@ -136,7 +139,6 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         for expectation in expectations:
             if "column" in expectation["kwargs"]:
                 column_name = expectation["kwargs"]["column"]
-
                 if column_name not in expectations_by_column.keys():
                     expectations_by_column[column_name] = []
                 expectations_by_column[column_name].append(expectation)
@@ -151,15 +153,17 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         default_file_name: str,
         **default_kwargs,
     ):
+        template: jinja2.Template
         rendered: str
         if notebook_config:
-            rendered = self.template_env.get_template(
-                name=notebook_config.file_name
-            ).render(**{**default_kwargs, **notebook_config.template_kwargs})
-        else:
-            rendered = self.template_env.get_template(name=default_file_name).render(
-                **default_kwargs
+            template = self.template_env.get_template(name=notebook_config.file_name)
+            rendered = template.render(
+                **{**default_kwargs, **notebook_config.template_kwargs}
             )
+        else:
+            template = self.template_env.get_template(name=default_file_name)
+            rendered = template.render(**default_kwargs)
+
         return rendered
 
     def add_header(
@@ -402,6 +406,10 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         If batch_request dictionary is passed, its properties will override any found in suite citations.
         """
+        deep_filter_properties_iterable(
+            properties=batch_request,
+            inplace=True,
+        )
         self.render(
             suite=suite,
             batch_request=batch_request,

@@ -3,11 +3,16 @@ Checking project...[0m
 
 ================================================================================
 [0m
-++====================================++
-|| UpgradeHelperV13: Upgrade Overview ||
-++====================================++
+++=====================================================++
+|| UpgradeHelperV13: Upgrade Overview (V2-API Version) ||
+++=====================================================++
 
-UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations 0.13.x.
+**WARNING**
+You have run the 'great_expectations project upgrade' command using the --v2-api flag, which is not able to perform the full upgrade to the configuration (3.0) that is fully compatible with the V3-API
+
+Please re-run the 'great_expectations project upgrade' command without the --v2-api flag.
+
+UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations V3 API.
 
 **WARNING**: Before proceeding, please make sure you have appropriate backups of your project.
 
@@ -27,7 +32,7 @@ No manual upgrade steps are required.
 Upgrade Confirmation
 =====================
 
-Please consult the 0.13.x migration guide to learn more about the automated upgrade process:
+Please consult the V3 API migration guide to learn more about the automated upgrade process:
 
     https://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html
 
@@ -41,7 +46,7 @@ Upgrading project...[0m
 || Upgrade Report ||
 ++================++[0m
 
-[32mYour project was successfully upgraded to be compatible with Great Expectations 0.13.x.
+[32mYour project was successfully upgraded to be compatible with Great Expectations V3 API.
 The config_version of your great_expectations.yml has been automatically incremented to 3.0.
 
 A log detailing the upgrade can be found here:

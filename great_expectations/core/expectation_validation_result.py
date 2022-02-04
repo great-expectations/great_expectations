@@ -248,7 +248,10 @@ class ExpectationValidationResultSchema(Schema):
     @pre_dump
     def convert_result_to_serializable(self, data, **kwargs):
         data = deepcopy(data)
-        data.result = convert_to_json_serializable(data.result)
+        if isinstance(data, ExpectationValidationResult):
+            data.result = convert_to_json_serializable(data.result)
+        elif isinstance(data, dict):
+            data["result"] = convert_to_json_serializable(data.get("result"))
         return data
 
     # # noinspection PyUnusedLocal
@@ -368,6 +371,33 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             )
         )
 
+    def get_failed_validation_results(self) -> "ExpectationSuiteValidationResult":
+        validation_results = [result for result in self.results if not result.success]
+
+        successful_expectations = sum(exp.success for exp in validation_results)
+        evaluated_expectations = len(validation_results)
+        unsuccessful_expectations = evaluated_expectations - successful_expectations
+        success = successful_expectations == evaluated_expectations
+        try:
+            success_percent = successful_expectations / evaluated_expectations * 100
+        except ZeroDivisionError:
+            success_percent = None
+        statistics = {
+            "successful_expectations": successful_expectations,
+            "evaluated_expectations": evaluated_expectations,
+            "unsuccessful_expectations": unsuccessful_expectations,
+            "success_percent": success_percent,
+            "success": success,
+        }
+
+        return ExpectationSuiteValidationResult(
+            success=success,
+            results=validation_results,
+            evaluation_parameters=self.evaluation_parameters,
+            statistics=statistics,
+            meta=self.meta,
+        )
+
 
 class ExpectationSuiteValidationResultSchema(Schema):
     success = fields.Bool()
@@ -381,7 +411,10 @@ class ExpectationSuiteValidationResultSchema(Schema):
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
-        data.meta = convert_to_json_serializable(data.meta)
+        if isinstance(data, ExpectationSuiteValidationResult):
+            data.meta = convert_to_json_serializable(data.meta)
+        elif isinstance(data, dict):
+            data["meta"] = convert_to_json_serializable(data.get("meta"))
         return data
 
     # noinspection PyUnusedLocal

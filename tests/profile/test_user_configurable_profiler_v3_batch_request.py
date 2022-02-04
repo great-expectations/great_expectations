@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import string
+from unittest import mock
 
 import pandas as pd
 import pytest
@@ -9,6 +10,8 @@ import pytest
 import great_expectations as ge
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.data_context.data_context import DataContext
+from great_expectations.data_context.types.base import ProgressBarsConfig
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -16,7 +19,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
-    profiler_semantic_types,
+    ProfilerSemanticTypes,
 )
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
@@ -110,6 +113,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
 ):
     sa_engine_name = "postgresql"
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    # noinspection PyUnresolvedReferences
     try:
         engine = connection_manager.get_engine(
             f"postgresql://postgres@{db_hostname}/test_ci"
@@ -171,7 +175,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
     )
     batch = Batch(data=batch_data)
 
-    return Validator(execution_engine=execution_engine, batches=(batch,))
+    return Validator(execution_engine=execution_engine, batches=[batch])
 
 
 @pytest.fixture
@@ -195,7 +199,7 @@ def taxi_validator_pandas(titanic_data_context_modular_api):
     df = ge.read_csv(
         file_relative_path(
             __file__,
-            "../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv",
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
@@ -212,7 +216,7 @@ def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
     df = ge.read_csv(
         file_relative_path(
             __file__,
-            "../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv",
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
@@ -228,7 +232,7 @@ def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
     df = ge.read_csv(
         file_relative_path(
             __file__,
-            "../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv",
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         ),
         parse_dates=["pickup_datetime", "dropoff_datetime"],
     )
@@ -260,7 +264,7 @@ def cardinality_validator(titanic_data_context_modular_api):
             # TODO: Uncomment assertions that use col_none when proportion_of_unique_values bug is fixed for columns
             #  that are all NULL/None
             # "col_none": [None for i in range(0, 1000)],
-            "col_one": [0 for i in range(0, 1000)],
+            "col_one": [0 for _ in range(0, 1000)],
             "col_two": [i % 2 for i in range(0, 1000)],
             "col_very_few": [i % 10 for i in range(0, 1000)],
             "col_few": [i % 50 for i in range(0, 1000)],
@@ -364,11 +368,6 @@ def test_init_with_semantic_types(cardinality_validator):
 
     assert "col_one" not in profiler.column_info
 
-    # assert profiler.column_info.get("col_none") == {
-    #     "cardinality": "NONE",
-    #     "type": "NUMERIC",
-    #     "semantic_types": [],
-    # }
     assert profiler.column_info.get("col_two") == {
         "cardinality": "TWO",
         "type": "INT",
@@ -408,10 +407,12 @@ def test__validate_config(cardinality_validator):
     """
 
     with pytest.raises(AssertionError) as e:
+        # noinspection PyTypeChecker
         UserConfigurableProfiler(cardinality_validator, ignored_columns="col_name")
     assert e.typename == "AssertionError"
 
     with pytest.raises(AssertionError) as e:
+        # noinspection PyTypeChecker
         UserConfigurableProfiler(cardinality_validator, table_expectations_only="True")
     assert e.typename == "AssertionError"
 
@@ -424,6 +425,7 @@ def test__validate_semantic_types_dict(cardinality_validator):
 
     bad_semantic_types_dict_type = {"value_set": "col_few"}
     with pytest.raises(AssertionError) as e:
+        # noinspection PyTypeChecker
         UserConfigurableProfiler(
             cardinality_validator, semantic_types_dict=bad_semantic_types_dict_type
         )
@@ -439,7 +441,7 @@ def test__validate_semantic_types_dict(cardinality_validator):
         )
     assert e.value.args[0] == (
         f"incorrect_type is not a recognized semantic_type. Please only include one of "
-        f"{profiler_semantic_types}"
+        f"{[semantic_type.value for semantic_type in ProfilerSemanticTypes]}"
     )
 
     # Error if column is specified for both semantic_types and ignored
@@ -456,7 +458,14 @@ def test__validate_semantic_types_dict(cardinality_validator):
     )
 
 
-def test_build_suite_no_config(titanic_validator, possible_expectations_set):
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_build_suite_no_config(
+    mock_emit,
+    titanic_validator,
+    possible_expectations_set,
+):
     """
     What does this test do and why?
     Tests that the build_suite function works as expected with no config
@@ -467,6 +476,40 @@ def test_build_suite_no_config(titanic_validator, possible_expectations_set):
 
     assert expectations_from_suite.issubset(possible_expectations_set)
     assert len(suite.expectations) == 48
+
+    # Note 20211209 - Profiler will also call ExpectationSuite's add_expectation(), but it will not
+    # send a usage_stats event when called from a Profiler.
+    assert mock_emit.call_count == 1
+    assert "expectation_suite.add_expectation" not in [
+        mock_emit.call_args_list[0][0][0]["event"]
+    ]
+
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call]
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "legacy_profiler.build_suite",
+                "event_payload": {
+                    "profile_dataset_type": "Validator",
+                    "excluded_expectations_specified": False,
+                    "ignored_columns_specified": False,
+                    "not_null_only": False,
+                    "primary_or_compound_key_specified": False,
+                    "semantic_types_dict_specified": False,
+                    "table_expectations_only": False,
+                    "value_set_threshold_specified": True,
+                    "api_version": "v2",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
 
 
 def test_all_table_columns_populates(taxi_validator_pandas):
@@ -513,8 +556,11 @@ def test_profiler_works_with_batch_object(cardinality_validator):
     ]
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_build_suite_with_config_and_no_semantic_types_dict(
-    titanic_validator, possible_expectations_set
+    mock_emit, titanic_validator, possible_expectations_set
 ):
     """
     What does this test do and why?
@@ -540,8 +586,44 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     assert "expect_column_mean_to_be_between" not in expectations_from_suite
     assert len(suite.expectations) == 29
 
+    assert mock_emit.call_count == 1
+    assert "expectation_suite.add_expectation" not in [
+        mock_emit.call_args_list[0][0][0]["event"]
+    ]
 
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call]
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "legacy_profiler.build_suite",
+                "event_payload": {
+                    "profile_dataset_type": "Validator",
+                    "excluded_expectations_specified": True,
+                    "ignored_columns_specified": True,
+                    "not_null_only": False,
+                    "primary_or_compound_key_specified": True,
+                    "semantic_types_dict_specified": False,
+                    "table_expectations_only": False,
+                    "value_set_threshold_specified": True,
+                    "api_version": "v2",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_build_suite_with_semantic_types_dict(
+    mock_emit,
     cardinality_validator,
     possible_expectations_set,
 ):
@@ -585,8 +667,45 @@ def test_build_suite_with_semantic_types_dict(
     assert len(value_set_columns) == 2
     assert value_set_columns == {"col_two", "col_very_few"}
 
+    # Note 20211209 - Profiler will also call ExpectationSuite's add_expectation(), but it will not
+    # send a usage_stats event when called from a Profiler.
+    assert mock_emit.call_count == 1
 
-def test_build_suite_when_suite_already_exists(cardinality_validator):
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call]
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "legacy_profiler.build_suite",
+                "event_payload": {
+                    "profile_dataset_type": "Validator",
+                    "excluded_expectations_specified": True,
+                    "ignored_columns_specified": True,
+                    "not_null_only": False,
+                    "primary_or_compound_key_specified": True,
+                    "semantic_types_dict_specified": True,
+                    "table_expectations_only": False,
+                    "value_set_threshold_specified": True,
+                    "api_version": "v2",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_build_suite_when_suite_already_exists(
+    mock_emit,
+    cardinality_validator,
+):
     """
     What does this test do and why?
     Confirms that creating a new suite on an existing profiler wipes the previous suite
@@ -608,6 +727,52 @@ def test_build_suite_when_suite_already_exists(cardinality_validator):
     assert len(suite.expectations) == 1
     assert "expect_table_row_count_to_be_between" in expectations
 
+    assert mock_emit.call_count == 2
+
+    # noinspection PyUnresolvedReferences
+    expected_events: List[unittest.mock._Call]
+    # noinspection PyUnresolvedReferences
+    actual_events: List[unittest.mock._Call]
+
+    expected_events = [
+        mock.call(
+            {
+                "event": "legacy_profiler.build_suite",
+                "event_payload": {
+                    "profile_dataset_type": "Validator",
+                    "excluded_expectations_specified": True,
+                    "ignored_columns_specified": True,
+                    "not_null_only": False,
+                    "primary_or_compound_key_specified": False,
+                    "semantic_types_dict_specified": False,
+                    "table_expectations_only": True,
+                    "value_set_threshold_specified": True,
+                    "api_version": "v2",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "legacy_profiler.build_suite",
+                "event_payload": {
+                    "profile_dataset_type": "Validator",
+                    "excluded_expectations_specified": True,
+                    "ignored_columns_specified": True,
+                    "not_null_only": False,
+                    "primary_or_compound_key_specified": False,
+                    "semantic_types_dict_specified": False,
+                    "table_expectations_only": True,
+                    "value_set_threshold_specified": True,
+                    "api_version": "v2",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    actual_events = mock_emit.call_args_list
+    assert actual_events == expected_events
+
 
 def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
     """
@@ -622,13 +787,15 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
 
     # key includes a non-existent column, should fail
     with pytest.raises(ValueError) as e:
+        # noinspection PyUnusedLocal
         bad_key_profiler = UserConfigurableProfiler(
             cardinality_validator,
             primary_or_compound_key=["col_unique", "col_that_does_not_exist"],
         )
     assert e.value.args[0] == (
-        f"Column col_that_does_not_exist not found. Please ensure that this column is in the Validator if "
-        f"you would like to use it as a primary_or_compound_key."
+        """Column col_that_does_not_exist not found. Please ensure that this column is in the Validator if you would \
+like to use it as a primary_or_compound_key.
+"""
     )
 
     # key includes a column that exists, but is in ignored_columns, should pass
@@ -640,9 +807,7 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
     assert ignored_column_profiler.primary_or_compound_key == ["col_unique", "col_one"]
 
 
-def test_config_with_not_null_only(
-    titanic_data_context_modular_api, nulls_validator, possible_expectations_set
-):
+def test_config_with_not_null_only(nulls_validator, possible_expectations_set):
     """
     What does this test do and why?
     Confirms that the not_null_only key in config works as expected.
@@ -775,7 +940,10 @@ def test_profiler_all_expectation_types_pandas(
     )
 
     assert profiler.column_info.get("rate_code_id")
-    suite = profiler.build_suite()
+
+    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
+        suite = profiler.build_suite()
+
     assert len(suite.expectations) == 46
     (
         columns_with_expectations,
@@ -794,10 +962,10 @@ def test_profiler_all_expectation_types_pandas(
         i for i in columns_with_expectations if i in taxi_data_ignored_columns
     ]
     assert len(ignored_included_columns_overlap) == 0
-
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_pandas]
-    )
+    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
+        results = context.run_validation_operator(
+            "action_list_operator", assets_to_validate=[taxi_validator_pandas]
+        )
 
     assert results["success"]
 
@@ -835,7 +1003,9 @@ def test_profiler_all_expectation_types_spark(
     )
 
     assert profiler.column_info.get("rate_code_id")
-    suite = profiler.build_suite()
+    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
+        suite = profiler.build_suite()
+
     assert len(suite.expectations) == 45
     (
         columns_with_expectations,
@@ -856,9 +1026,10 @@ def test_profiler_all_expectation_types_spark(
     ]
     assert len(ignored_included_columns_overlap) == 0
 
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_spark]
-    )
+    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
+        results = context.run_validation_operator(
+            "action_list_operator", assets_to_validate=[taxi_validator_spark]
+        )
 
     assert results["success"]
 
@@ -878,7 +1049,7 @@ def test_profiler_all_expectation_types_sqlalchemy(
     What does this test do and why?
     Ensures that all available expectation types work as expected for sqlalchemy
     """
-    if taxi_validator_sqlalchemy == None:
+    if taxi_validator_sqlalchemy is None:
         pytest.skip("a message")
 
     context = titanic_data_context_modular_api
@@ -899,7 +1070,8 @@ def test_profiler_all_expectation_types_sqlalchemy(
     )
 
     assert profiler.column_info.get("rate_code_id")
-    suite = profiler.build_suite()
+    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
+        suite = profiler.build_suite()
     assert len(suite.expectations) == 45
     (
         columns_with_expectations,
@@ -919,10 +1091,10 @@ def test_profiler_all_expectation_types_sqlalchemy(
         i for i in columns_with_expectations if i in taxi_data_ignored_columns
     ]
     assert len(ignored_included_columns_overlap) == 0
-
-    results = context.run_validation_operator(
-        "action_list_operator", assets_to_validate=[taxi_validator_sqlalchemy]
-    )
+    with pytest.deprecated_call():  # parse_strings_as_datetimes is deprecated in V3
+        results = context.run_validation_operator(
+            "action_list_operator", assets_to_validate=[taxi_validator_sqlalchemy]
+        )
 
     assert results["success"]
 
@@ -1017,3 +1189,48 @@ def test_expect_compound_columns_to_be_unique(
     }
 
     assert expected_expectations == expectations_from_suite
+
+
+@mock.patch("great_expectations.profile.user_configurable_profiler.tqdm")
+def test_user_configurable_profiler_progress_bar_config_enabled(
+    mock_tqdm, cardinality_validator
+):
+    semantic_types = {
+        "numeric": ["col_few", "col_many", "col_very_many"],
+        "value_set": ["col_two", "col_very_few"],
+    }
+
+    profiler = UserConfigurableProfiler(
+        cardinality_validator,
+        semantic_types_dict=semantic_types,
+    )
+
+    profiler.build_suite()
+
+    assert mock_tqdm.called
+    assert mock_tqdm.call_count == 1
+
+
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_user_configurable_profiler_progress_bar_config_disabled(
+    mock_tqdm, cardinality_validator
+):
+    data_context = cardinality_validator.data_context
+    data_context.project_config_with_variables_substituted.progress_bars = (
+        ProgressBarsConfig(profilers=False)
+    )
+
+    semantic_types = {
+        "numeric": ["col_few", "col_many", "col_very_many"],
+        "value_set": ["col_two", "col_very_few"],
+    }
+
+    profiler = UserConfigurableProfiler(
+        cardinality_validator,
+        semantic_types_dict=semantic_types,
+    )
+
+    profiler.build_suite()
+
+    assert not mock_tqdm.called
+    assert mock_tqdm.call_count == 0

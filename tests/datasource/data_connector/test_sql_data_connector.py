@@ -2,10 +2,9 @@ import json
 import random
 
 import pytest
-from packaging.version import parse as parse_version
 from ruamel.yaml import YAML
 
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
@@ -19,6 +18,7 @@ from great_expectations.validator.validator import Validator
 yaml = YAML()
 
 
+# TODO: <Alex>ALEX -- Some methods in this module are misplaced and/or provide no action; this must be repaired.</Alex>
 def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
@@ -153,6 +153,7 @@ def test_get_batch_definition_list_from_batch_request(
     assert len(batch_definition_list) == 30
 
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="FAKE_Datasource_NAME",
@@ -161,11 +162,13 @@ def test_get_batch_definition_list_from_batch_request(
         )
 
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(datasource_name="FAKE_Datasource_NAME")
         )
 
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest()
         )
@@ -419,8 +422,8 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
                 "batch_definition_count": 49,
                 # TODO Abe 20201029 : These values should be sorted
                 "example_data_references": [
-                    {"session_id": 3},
                     {"session_id": 2},
+                    {"session_id": 3},
                     {"session_id": 4},
                 ],
             }
@@ -550,7 +553,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
     # }
 
 
-#  'table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D',
+#  ['table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D',
 #  'table_containing_id_spacers_for_D',
 #  'table_that_should_be_partitioned_by_random_hash__H']
 
@@ -572,16 +575,15 @@ def test_sampling_method__limit(
             }
         )
     )
-    execution_engine.load_batch_data("__", batch_data)
-    validator = Validator(execution_engine)
+
+    batch = Batch(data=batch_data)
+
+    validator = Validator(execution_engine, batches=[batch])
     assert len(validator.head(fetch_all=True)) == 20
 
-    assert (
-        validator.expect_column_values_to_be_in_set(
-            "date", value_set=["2020-01-02"]
-        ).success
-        == False
-    )
+    assert not validator.expect_column_values_to_be_in_set(
+        "date", value_set=["2020-01-02"]
+    ).success
 
 
 def test_sampling_method__random(
@@ -589,6 +591,7 @@ def test_sampling_method__random(
 ):
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
+    # noinspection PyUnusedLocal
     batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
             {
@@ -661,6 +664,7 @@ def test_sampling_method__a_list(
 def test_sampling_method__md5(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
+    # noinspection PyUnusedLocal
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
     # SQlite doesn't support MD5

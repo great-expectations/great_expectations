@@ -2,7 +2,6 @@ import datetime
 import os
 import re
 
-import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
@@ -11,7 +10,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.exceptions import BatchSpecError
+from great_expectations.exceptions import ExecutionEngineError
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -624,7 +623,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
     )
 
     # with no reader_method in batch_spec_passthrough
-    with pytest.raises(BatchSpecError):
+    with pytest.raises(ExecutionEngineError):
         context.get_batch(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -696,7 +695,7 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
     )
 
     # with no reader_method in batch_spec_passthrough
-    with pytest.raises(BatchSpecError):
+    with pytest.raises(ExecutionEngineError):
         context.get_validator(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",

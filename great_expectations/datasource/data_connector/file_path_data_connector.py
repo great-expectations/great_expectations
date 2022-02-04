@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Iterator, List, Optional, cast
 
 import great_expectations.exceptions as ge_exceptions
@@ -171,8 +172,16 @@ class FilePathDataConnector(DataConnector):
             )
 
         if batch_request.data_connector_query is not None:
+
+            data_connector_query_dict = batch_request.data_connector_query.copy()
+            if (
+                batch_request.limit is not None
+                and data_connector_query_dict.get("limit") is None
+            ):
+                data_connector_query_dict["limit"] = batch_request.limit
+
             batch_filter_obj: BatchFilter = build_batch_filter(
-                data_connector_query_dict=batch_request.data_connector_query
+                data_connector_query_dict=data_connector_query_dict
             )
             batch_definition_list = batch_filter_obj.select_from_data_connector_query(
                 batch_definition_list=batch_definition_list
@@ -243,6 +252,19 @@ class FilePathDataConnector(DataConnector):
         )
         return PathBatchSpec(batch_spec)
 
+    @staticmethod
+    def sanitize_prefix(text: str) -> str:
+        """
+        Takes in a given user-prefix and cleans it to work with file-system traversal methods
+        (i.e. add '/' to the end of a string meant to represent a directory)
+        """
+        _, ext = os.path.splitext(text)
+        if ext:
+            # Provided prefix is a filename so no adjustment is necessary
+            return text
+        # Provided prefix is a directory (so we want to ensure we append it with '/')
+        return os.path.join(text, "")
+
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:
@@ -253,7 +275,7 @@ class FilePathDataConnector(DataConnector):
             raise ValueError(
                 f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
 batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
-                """
+"""
             )
         path = self._get_full_file_path(
             path=path, data_asset_name=batch_definition.data_asset_name

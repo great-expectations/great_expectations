@@ -82,7 +82,7 @@ my_df[my_df.Sex=="male"].head()
 # etc., etc. 
 ```
 
-In addition, `my_df` has access to a wide array of Expectations. You can see the full list [here](../../reference/glossary_of_expectations.md). By convention, every Expectation method name starts with the name `expect_...`, so you can quickly access the full list with tab-based autocomplete:
+In addition, `my_df` has access to a wide array of Expectations. You can see the full list [in the Expectation Gallery](https://greatexpectations.io/expectations). By convention, every Expectation method name starts with the name `expect_...`, so you can quickly access the full list with tab-based autocomplete:
 
 ![image](../images/expectation_autocomplete.gif)
 
@@ -130,7 +130,7 @@ with open( "my_expectation_file.json", "w") as my_file:
     )
 ```
 
-As you develop more Expectation Suites, you'll probably want some kind of system for naming and organizing them, not to mention matching them up with data, validating them, and keeping track of validation results.
+As you develop more Expectation Suites, you'll probably want some kind of system for naming and organizing them, not to mention matching them up with data, validating them, and keeping track of Validation Results.
 
 When you get to this stage, we recommend following the [getting started tutorial](../../tutorials/getting_started/intro.md) to set up a [Data Context](../../reference/data_context.md). You can get through the basics in less than half an hour, and setting up a Data Context will unlock many additional power tools within Great Expectations.
         
@@ -225,4 +225,4 @@ As a general rule,
 
 ## Additional resources
 
-- [Glossary of Expectations](../../reference/glossary_of_expectations.md)
+- [Expectation Gallery](https://greatexpectations.io/expectations)

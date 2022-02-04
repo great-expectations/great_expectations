@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, cast
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -12,7 +12,10 @@ from great_expectations.datasource.data_connector.data_connector import DataConn
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 
 try:
     import sqlalchemy as sa
@@ -81,7 +84,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 table_name=table_name, **data_asset_config["splitter_kwargs"]
             )
 
-            rows = self._execution_engine.engine.execute(split_query).fetchall()
+            sqlalchemy_execution_engine: SqlAlchemyExecutionEngine = cast(
+                SqlAlchemyExecutionEngine, self._execution_engine
+            )
+            rows = sqlalchemy_execution_engine.engine.execute(split_query).fetchall()
 
             # Zip up split parameters with column names
             column_names = self._get_column_names_from_splitter_kwargs(
@@ -268,8 +274,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         """Split using the values in the named column"""
         # query = f"SELECT DISTINCT(\"{self.column_name}\") FROM {self.table_name}"
 
-        return sa.select([sa.func.distinct(sa.column(column_name))]).select_from(
-            sa.text(table_name)
+        return (
+            sa.select([sa.func.distinct(sa.column(column_name))])
+            .select_from(sa.text(table_name))
+            .order_by(sa.column(column_name).asc())
         )
 
     def _split_on_converted_datetime(

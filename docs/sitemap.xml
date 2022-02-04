@@ -6,699 +6,652 @@
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 <!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
 
+
 <url>
-  <loc>https://docs.greatexpectations.io/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <loc>https://docs.greatexpectations.io/docs/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <loc>https://docs.greatexpectations.io/docs/reference/api_reference/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/why_use_ge/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.64</priority>
+  <loc>https://docs.greatexpectations.io/docs/changelog/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.80</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/core_concepts/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.64</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.80</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/tutorials/getting_started/intro/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/contributing/contributing/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/reference/supporting_resources/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/contributing/style_guides/cli_and_notebooks_style/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/checkpoints_and_actions/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/data_context/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/data_discovery/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/data_docs/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/datasources/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/evaluation_parameters/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/execution_engine/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/metrics/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/profilers/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/expectations/result_format/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/reference/stores/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/dividing_data_assets_into_batches/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/validation/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/reference/anonymous_usage_statistics/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/expectations/expectations/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/expectations/conditional_expectations/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/expectations/distributional_expectations/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/expectations/implemented_expectations/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/reference/expectation_suite_operations/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/reference/glossary_of_expectations/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <loc>https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_flyte/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/tutorials/getting_started/initialize_a_data_context/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/tutorials/getting_started/connect_to_data/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/tutorials/getting_started/create_your_first_expectations/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/tutorials/getting_started/check_out_data_docs/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/tutorials/getting_started/validate_your_data/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.51</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/tutorials/getting_started/customize_your_deployment/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_setup/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_checklist/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_github/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_test/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_maturity/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_misc/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/contributing/style_guides/code_style/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/contributing/style_guides/docs_style/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_use_the_great_expectations_cli/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.51</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/.</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/reference/supporting_resources/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/contributing/contributing/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/deployment_patterns/contributing/how_to_contribute_to_an_existing_deployment_pattern_document/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
+  <loc>https://docs.greatexpectations.io/docs/deployment_patterns/how_to_instantiate_a_data_context_hosted_environments/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/installation/local/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/installation/spark_emr/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/installation/databricks/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_secrets_store/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
+  <loc>https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_databricks/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/athena/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/mssql/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/mysql/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/postgres/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/redshift/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/snowflake/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/sqlite/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/filesystem/spark/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/s3/spark/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/spark/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/azure/spark/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_store_validation_results_as_a_validation_action/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/advanced/how_to_implement_custom_notifications/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/advanced/how_to_validate_data_without_a_checkpoint/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.41</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/installation/local/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_to_postgresql/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_amazon_s3/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/athena/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/mssql/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/mysql/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/postgres/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/redshift/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/snowflake/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/sqlite/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/filesystem/spark/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/s3/spark/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/spark/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/validation/advanced/how_to_implement_custom_notifications/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/validation/advanced/how_to_validate_data_without_a_checkpoint/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_write_a_how_to_guide/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_use_the_project_check_config_command/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.41</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/how_to_instantiate_a_data_context/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_use_the_great_expectation_docker_images/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_template/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/filesystem/pandas/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.41</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_in_bulk/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_a_profiler/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/filesystem/pandas/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/reference/spare_parts/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_setup/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_checklist/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_github/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_test/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_maturity/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_style/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/contributing/contributing_misc/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/community/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/deployment_patterns/how_to_instantiate_a_data_context_hosted_environments/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/deployment_patterns/contributing/how_to_add_a_new_deployment_pattern_document/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_use_the_project_check_config_command/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
+  <loc>https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_use_the_great_expectations_cli/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/installation/hosted_environment/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
+  <loc>https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_use_the_great_expectation_docker_images/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_write_a_how_to_guide/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
+  <loc>https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/miscellaneous/how_to_template/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/in_memory/spark/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/s3/pandas/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/azure/pandas/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/azure/spark/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.33</priority>
+</url>
+<url>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/index/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.33</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.33</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/in_memory/spark/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <loc>https://docs.greatexpectations.io/docs/guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.33</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/advanced/database_credentials/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <loc>https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_in_bulk/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.33</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/s3/pandas/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.33</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.33</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/azure/pandas/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.33</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/contributing/how_to_add_support_for_a_new_sqlalchemy_dialect/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.33</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
   <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/how_to_add_a_validation_operator/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_run_a_checkpoint_in_terminal/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_run_a_checkpoint_in_python/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/contributing/how_to_contribute_a_new_validation_action/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.33</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/advanced/how_to_explore_changes_in_data_over_time_using_a_configured_datasource/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.26</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/reference/api_reference/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.26</priority>
-</url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/changelog/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.26</priority>
 </url>
 <url>
   <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/in_memory/pandas/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.26</priority>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.33</priority>
 </url>
 <url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/advanced/how_to_create_a_batch_from_a_sql_query/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.26</priority>
+  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store/</loc>
+  <lastmod>2021-12-22T12:47:19+00:00</lastmod>
+  <priority>0.33</priority>
 </url>
-<url>
-  <loc>https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/advanced/how_to_create_a_lightweight_data_catalog_by_applying_a_descriptive_profiler_to_a_configured_datasource/</loc>
-  <lastmod>2021-08-13T14:40:36+00:00</lastmod>
-  <priority>0.26</priority>
-</url>
+
+
 </urlset>

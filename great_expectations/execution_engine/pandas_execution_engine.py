@@ -16,27 +16,50 @@ from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
+    GCSBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.util import AzureUrl, S3Url, sniff_s3_compression
+from great_expectations.core.util import AzureUrl, GCSUrl, S3Url, sniff_s3_compression
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 
+logger = logging.getLogger(__name__)
+
 try:
     import boto3
+    from botocore.exceptions import ClientError, ParamValidationError
 except ImportError:
     boto3 = None
+    ClientError = None
+    ParamValidationError = None
+    logger.debug(
+        "Unable to load AWS connection object; install optional boto3 dependency for support"
+    )
 
 try:
     from azure.storage.blob import BlobServiceClient
-except:
+except ImportError:
     BlobServiceClient = None
+    logger.debug(
+        "Unable to load Azure connection object; install optional azure dependency for support"
+    )
 
+try:
+    from google.api_core.exceptions import GoogleAPIError
+    from google.auth.exceptions import DefaultCredentialsError
+    from google.cloud import storage
+    from google.oauth2 import service_account
+except ImportError:
+    storage = None
+    service_account = None
+    DefaultCredentialsError = None
+    logger.debug(
+        "Unable to load GCS connection object; install optional google dependency for support"
+    )
 
-logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
 
@@ -86,17 +109,13 @@ Notes:
         )
         boto3_options: dict = kwargs.pop("boto3_options", {})
         azure_options: dict = kwargs.pop("azure_options", {})
+        gcs_options: dict = kwargs.pop("gcs_options", {})
 
-        # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
-        try:
-            self._s3 = boto3.client("s3", **boto3_options)
-        except (TypeError, AttributeError):
-            self._s3 = None
-
-        try:
-            self._azure = BlobServiceClient(**azure_options)
-        except (TypeError, AttributeError):
-            self._azure = None
+        # Instantiate cloud provider clients as None at first.
+        # They will be instantiated if/when passed cloud-specific in BatchSpec is passed in
+        self._s3 = None
+        self._azure = None
+        self._gcs = None
 
         super().__init__(*args, **kwargs)
 
@@ -105,8 +124,54 @@ Notes:
                 "discard_subset_failing_expectations": self.discard_subset_failing_expectations,
                 "boto3_options": boto3_options,
                 "azure_options": azure_options,
+                "gcs_options": gcs_options,
             }
         )
+
+    def _instantiate_azure_client(self):
+        azure_options = self.config.get("azure_options", {})
+        try:
+            if "conn_str" in azure_options:
+                self._azure = BlobServiceClient.from_connection_string(**azure_options)
+            else:
+                self._azure = BlobServiceClient(**azure_options)
+        except (TypeError, AttributeError):
+            self._azure = None
+
+    def _instantiate_s3_client(self):
+        # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
+        boto3_options = self.config.get("boto3_options", {})
+        try:
+            self._s3 = boto3.client("s3", **boto3_options)
+        except (TypeError, AttributeError):
+            self._s3 = None
+
+    def _instantiate_gcs_client(self):
+        """
+        Helper method for instantiating GCS client when GCSBatchSpec is passed in.
+
+        The method accounts for 3 ways that a GCS connection can be configured:
+            1. setting an environment variable, which is typically GOOGLE_APPLICATION_CREDENTIALS
+            2. passing in explicit credentials via gcs_options
+            3. running Great Expectations from within a GCP container, at which you would be able to create a Client
+                without passing in an additional environment variable or explicit credentials
+        """
+        gcs_options = self.config.get("gcs_options", {})
+        try:
+            credentials = None  # If configured with gcloud CLI / env vars
+            if "filename" in gcs_options:
+                filename = gcs_options.pop("filename")
+                credentials = service_account.Credentials.from_service_account_file(
+                    filename=filename
+                )
+            elif "info" in gcs_options:
+                info = gcs_options.pop("info")
+                credentials = service_account.Credentials.from_service_account_info(
+                    info=info
+                )
+            self._gcs = storage.Client(credentials=credentials, **gcs_options)
+        except (TypeError, AttributeError, DefaultCredentialsError):
+            self._gcs = None
 
     def configure_validator(self, validator):
         super().configure_validator(validator)
@@ -156,19 +221,28 @@ Please check your config."""
 
         elif isinstance(batch_spec, S3BatchSpec):
             if self._s3 is None:
+                self._instantiate_s3_client()
+            # if we were not able to instantiate S3 client, then raise error
+            if self._s3 is None:
                 raise ge_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine has been passed a S3BatchSpec,
                         but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
                 )
             s3_engine = self._s3
-            s3_url = S3Url(batch_spec.path)
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            if "compression" not in reader_options.keys():
-                inferred_compression_param = sniff_s3_compression(s3_url)
-                if inferred_compression_param is not None:
-                    reader_options["compression"] = inferred_compression_param
-            s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
+            try:
+                reader_method: str = batch_spec.reader_method
+                reader_options: dict = batch_spec.reader_options or {}
+                path: str = batch_spec.path
+                s3_url = S3Url(path)
+                if "compression" not in reader_options.keys():
+                    inferred_compression_param = sniff_s3_compression(s3_url)
+                    if inferred_compression_param is not None:
+                        reader_options["compression"] = inferred_compression_param
+                s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
+            except (ParamValidationError, ClientError) as error:
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
+                )
             logger.debug(
                 "Fetching s3 object. Bucket: {} Key: {}".format(
                     s3_url.bucket, s3_url.key
@@ -181,14 +255,18 @@ Please check your config."""
 
         elif isinstance(batch_spec, AzureBatchSpec):
             if self._azure is None:
+                self._instantiate_azure_client()
+            # if we were not able to instantiate Azure client, then raise error
+            if self._azure is None:
                 raise ge_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine has been passed a AzureBatchSpec,
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
                 )
             azure_engine = self._azure
-            azure_url = AzureUrl(batch_spec.path)
             reader_method: str = batch_spec.reader_method
             reader_options: dict = batch_spec.reader_options or {}
+            path: str = batch_spec.path
+            azure_url = AzureUrl(path)
             blob_client = azure_engine.get_blob_client(
                 container=azure_url.container, blob=azure_url.blob
             )
@@ -198,6 +276,34 @@ Please check your config."""
             )
             reader_fn = self._get_reader_fn(reader_method, azure_url.blob)
             buf = BytesIO(azure_object.readall())
+            buf.seek(0)
+            df = reader_fn(buf, **reader_options)
+
+        elif isinstance(batch_spec, GCSBatchSpec):
+            if self._gcs is None:
+                self._instantiate_gcs_client()
+            # if we were not able to instantiate GCS client, then raise error
+            if self._gcs is None:
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine has been passed a GCSBatchSpec,
+                        but the ExecutionEngine does not have an GCS client configured. Please check your config."""
+                )
+            gcs_engine = self._gcs
+            gcs_url = GCSUrl(batch_spec.path)
+            reader_method: str = batch_spec.reader_method
+            reader_options: dict = batch_spec.reader_options or {}
+            try:
+                gcs_bucket = gcs_engine.get_bucket(gcs_url.bucket)
+                gcs_blob = gcs_bucket.blob(gcs_url.blob)
+                logger.debug(
+                    f"Fetching GCS blob. Bucket: {gcs_url.bucket} Blob: {gcs_url.blob}"
+                )
+            except GoogleAPIError as error:
+                raise ge_exceptions.ExecutionEngineError(
+                    f"""PandasExecutionEngine encountered the following error while trying to read data from GCS Bucket: {error}"""
+                )
+            reader_fn = self._get_reader_fn(reader_method, gcs_url.blob)
+            buf = BytesIO(gcs_blob.download_as_bytes())
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
 
@@ -246,41 +352,6 @@ Please check your config."""
 
         return self.active_batch_data.dataframe
 
-    def _get_reader_fn(self, reader_method=None, path=None):
-        """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
-        correct reader_method.
-
-        Args:
-            reader_method (str): the name of the reader method to use, if available.
-            path (str): the path used to guess
-
-        Returns:
-            ReaderMethod to use for the filepath
-
-        """
-        if reader_method is None and path is None:
-            raise ge_exceptions.BatchSpecError(
-                "Unable to determine pandas reader function without reader_method or path."
-            )
-
-        reader_options = {}
-        if reader_method is None:
-            path_guess = self.guess_reader_method_from_path(path)
-            reader_method = path_guess["reader_method"]
-            reader_options = path_guess.get(
-                "reader_options"
-            )  # This may not be there; use None in that case
-
-        try:
-            reader_fn = getattr(pd, reader_method)
-            if reader_options:
-                reader_fn = partial(reader_fn, **reader_options)
-            return reader_fn
-        except AttributeError:
-            raise ge_exceptions.BatchSpecError(
-                f'Unable to find reader_method "{reader_method}" in pandas.'
-            )
-
     # NOTE Abe 20201105: Any reason this shouldn't be a private method?
     @staticmethod
     def guess_reader_method_from_path(path):
@@ -311,9 +382,44 @@ Please check your config."""
                 "reader_options": {"compression": "gzip"},
             }
 
-        raise ge_exceptions.BatchSpecError(
+        raise ge_exceptions.ExecutionEngineError(
             f'Unable to determine reader method from path: "{path}".'
         )
+
+    def _get_reader_fn(self, reader_method=None, path=None):
+        """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
+        correct reader_method.
+
+        Args:
+            reader_method (str): the name of the reader method to use, if available.
+            path (str): the path used to guess
+
+        Returns:
+            ReaderMethod to use for the filepath
+
+        """
+        if reader_method is None and path is None:
+            raise ge_exceptions.ExecutionEngineError(
+                "Unable to determine pandas reader function without reader_method or path."
+            )
+
+        reader_options = {}
+        if reader_method is None:
+            path_guess = self.guess_reader_method_from_path(path)
+            reader_method = path_guess["reader_method"]
+            reader_options = path_guess.get(
+                "reader_options"
+            )  # This may not be there; use None in that case
+
+        try:
+            reader_fn = getattr(pd, reader_method)
+            if reader_options:
+                reader_fn = partial(reader_fn, **reader_options)
+            return reader_fn
+        except AttributeError:
+            raise ge_exceptions.ExecutionEngineError(
+                f'Unable to find reader_method "{reader_method}" in pandas.'
+            )
 
     def get_domain_records(
         self,
@@ -365,9 +471,7 @@ Please check your config."""
                 )
             else:
                 # Querying row condition
-                data = data.query(row_condition, parser=condition_parser).reset_index(
-                    drop=True
-                )
+                data = data.query(row_condition, parser=condition_parser)
 
         if "column" in domain_kwargs:
             return data
@@ -558,7 +662,6 @@ Please check your config."""
     def _split_on_column_value(
         df, column_name: str, batch_identifiers: dict
     ) -> pd.DataFrame:
-
         return df[df[column_name] == batch_identifiers[column_name]]
 
     @staticmethod
@@ -626,7 +729,7 @@ Please check your config."""
         """Split on the hashed value of the named column"""
         try:
             hash_method = getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
@@ -646,10 +749,7 @@ Please check your config."""
         df,
         p: float = 0.1,
     ):
-        """Take a random sample of rows, retaining proportion p
-
-        Note: the Random function behaves differently on different dialects of SQL
-        """
+        """Take a random sample of rows, retaining proportion p"""
         return df[df.index.map(lambda x: random.random() < p)]
 
     @staticmethod
@@ -679,10 +779,10 @@ Please check your config."""
         hash_value: str = "f",
         hash_function_name: str = "md5",
     ):
-        """Hash the values in the named column, and split on that"""
+        """Hash the values in the named column, and only keep rows that match the given hash_value"""
         try:
             hash_func = getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The sampling method used with PandasExecutionEngine has a reference to an invalid hash_function_name.
