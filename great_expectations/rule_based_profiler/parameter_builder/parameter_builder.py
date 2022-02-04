@@ -2,7 +2,7 @@ import copy
 from abc import ABC, abstractmethod
 from dataclasses import make_dataclass
 from numbers import Number
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 import numpy as np
 
@@ -55,6 +55,10 @@ class ParameterBuilder(Builder, ABC):
         ```
     """
 
+    exclude_field_names: Set[str] = {
+        "data_context",
+    }
+
     def __init__(
         self,
         name: str,
@@ -90,6 +94,18 @@ class ParameterBuilder(Builder, ABC):
             variables=variables,
             parameters=parameters,
         )
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
+        return self._batch_request
+
+    @property
+    def data_context(self) -> "DataContext":  # noqa: F821
+        return self._data_context
 
     @abstractmethod
     def _build_parameters(
@@ -246,15 +262,3 @@ class ParameterBuilder(Builder, ABC):
                 "num_batches": len(metric_values),
             },
         )
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
-        return self._batch_request
-
-    @property
-    def data_context(self) -> "DataContext":  # noqa: F821
-        return self._data_context

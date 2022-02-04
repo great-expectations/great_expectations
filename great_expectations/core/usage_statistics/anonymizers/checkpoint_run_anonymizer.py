@@ -112,10 +112,9 @@ class CheckpointRunAnonymizer(Anonymizer):
                 if validation_batch_request is None:
                     validation_batch_request = {}
 
-                if isinstance(
-                    validation_batch_request, (BatchRequest, RuntimeBatchRequest)
-                ):
-                    validation_batch_request = validation_batch_request.to_dict()
+                validation_batch_request = get_batch_request_as_dict(
+                    batch_request=validation_batch_request
+                )
 
                 anonymized_validation_batch_request: Optional[
                     Optional[Dict[str, List[str]]]

@@ -111,15 +111,6 @@ class BaseYamlConfig(SerializableDictDot):
         """
         return object_to_yaml_str(obj=self.commented_map)
 
-    def to_raw_dict(self) -> dict:
-        """
-        :returns a raw dict containing the project configuration
-        """
-        key: str
-        commented_map: CommentedMap = self.commented_map
-        # return {key: commented_map[key] for key in commented_map}
-        return {key: self[key] for key in commented_map}
-
     def to_json_dict(self) -> dict:
         """
         :returns a JSON-serialiable dict containing the project configuration
@@ -1464,11 +1455,13 @@ class BaseStoreBackendDefaults(DictDot):
         self.validation_operators = validation_operators
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
+
         self.stores = stores
         if data_docs_sites is None:
             data_docs_sites = copy.deepcopy(
                 DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
             )
+
         self.data_docs_sites = data_docs_sites
         self.data_docs_site_name = data_docs_site_name
 
@@ -2117,6 +2110,7 @@ class CheckpointConfigSchema(Schema):
         for key in self.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:
                 data.pop(key)
+
         return data
 
 
@@ -2335,23 +2329,47 @@ class CheckpointConfig(BaseYamlConfig):
         self._runtime_configuration = value
 
     def __deepcopy__(self, memo):
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__deepcopy__()" method occurs frequently and should ideally serve as the
+        reference implementation in the "DictDot" class itself.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
         cls = self.__class__
         result = cls.__new__(cls)
 
         memo[id(self)] = result
-        for key, value in self.to_dict().items():
+        for key, value in self.to_raw_dict().items():
             value_copy = safe_deep_copy(data=value, memo=memo)
             setattr(result, key, value_copy)
 
         return result
 
     def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
             inplace=True,
         )
         return json.dumps(json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
 
 
 class CheckpointValidationConfig(DictDot):

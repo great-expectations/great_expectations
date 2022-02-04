@@ -26,9 +26,30 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     build_parameter_container_for_variables,
 )
-from great_expectations.rule_based_profiler.types.builder import (
-    validate_builder_override_config,
-)
+
+
+def _validate_builder_override_config(builder_config: dict):
+    """
+    In order to insure successful instantiation of custom builder classes using "instantiate_class_from_config()",
+    candidate builder override configurations are required to supply both "class_name" and "module_name" attributes.
+
+    :param builder_config: candidate builder override configuration
+    :raises: ProfilerConfigurationError
+    """
+    if not (
+        isinstance(builder_config, dict)
+        and len(
+            set(builder_config.keys())
+            & {
+                "class_name",
+                "module_name",
+            }
+        )
+        == 2
+    ):
+        raise ge_exceptions.ProfilerConfigurationError(
+            'Both "class_name" and "module_name" must be specified.'
+        )
 
 
 class RuleBasedProfiler:
@@ -511,7 +532,7 @@ class RuleBasedProfiler:
 
         effective_domain_builder_config: dict = serialized_config
         if domain_builder_config:
-            validate_builder_override_config(builder_config=domain_builder_config)
+            _validate_builder_override_config(builder_config=domain_builder_config)
             effective_domain_builder_config.update(domain_builder_config)
 
         return effective_domain_builder_config
@@ -536,7 +557,7 @@ class RuleBasedProfiler:
         """
         parameter_builder_config: dict
         for parameter_builder_config in parameter_builder_configs:
-            validate_builder_override_config(builder_config=parameter_builder_config)
+            _validate_builder_override_config(builder_config=parameter_builder_config)
 
         effective_parameter_builder_configs: Dict[str, dict] = {}
 
@@ -607,7 +628,7 @@ class RuleBasedProfiler:
         for (
             expectation_configuration_builder_config
         ) in expectation_configuration_builder_configs:
-            validate_builder_override_config(
+            _validate_builder_override_config(
                 builder_config=expectation_configuration_builder_config
             )
 

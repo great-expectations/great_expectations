@@ -14,7 +14,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     get_batch_request_as_dict,
 )
-from great_expectations.core.util import nested_update, safe_deep_copy
+from great_expectations.core.util import nested_update
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
@@ -390,16 +390,9 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
     if runtime_kwargs.get("batch_request") is not None:
         batch_request = dest_config.get("batch_request") or {}
         batch_request_from_runtime_kwargs = runtime_kwargs["batch_request"]
-        batch_request_from_runtime_kwargs = safe_deep_copy(
-            data=batch_request_from_runtime_kwargs
+        batch_request_from_runtime_kwargs = get_batch_request_as_dict(
+            batch_request=batch_request_from_runtime_kwargs
         )
-        if isinstance(
-            batch_request_from_runtime_kwargs, (BatchRequest, RuntimeBatchRequest)
-        ):
-            # noinspection PyUnresolvedReferences
-            batch_request_from_runtime_kwargs = (
-                batch_request_from_runtime_kwargs.to_dict()
-            )
         updated_batch_request = nested_update(
             batch_request,
             batch_request_from_runtime_kwargs,

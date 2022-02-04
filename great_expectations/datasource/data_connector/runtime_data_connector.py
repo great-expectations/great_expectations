@@ -158,6 +158,7 @@ class RuntimeDataConnector(DataConnector):
                 batch_identifiers=batch_request.batch_identifiers
             )
             batch_identifiers = batch_request.batch_identifiers
+
         if not batch_identifiers:
             batch_identifiers = {}
 
@@ -254,7 +255,7 @@ class RuntimeDataConnector(DataConnector):
         "{str(type(runtime_parameters))}", which is illegal.
                         """
             )
-        keys_present = [
+        keys_present: List[str] = [
             key
             for key, val in runtime_parameters.items()
             if val is not None and key in ["batch_data", "query", "path"]
@@ -281,12 +282,14 @@ class RuntimeDataConnector(DataConnector):
                 both absent in the batch_request parameter.
                 """
             )
+
         if runtime_parameters:
             self._validate_runtime_parameters(runtime_parameters=runtime_parameters)
 
     def _validate_batch_identifiers(self, batch_identifiers: dict):
         if batch_identifiers is None:
             batch_identifiers = {}
+
         self._validate_batch_identifiers_configuration(
             batch_identifiers=list(batch_identifiers.keys())
         )
@@ -354,6 +357,7 @@ appear among the configured batch identifiers.
                 print(
                     f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}): {unmatched_data_references[:max_examples]}\n"
                 )
+
         report_obj["unmatched_data_reference_count"] = len_unmatched_data_references
         report_obj["example_unmatched_data_references"] = unmatched_data_references[
             :max_examples

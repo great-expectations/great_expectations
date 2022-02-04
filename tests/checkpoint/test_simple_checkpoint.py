@@ -2878,7 +2878,8 @@ def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_
     context.create_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a path
-    batch_request = RuntimeBatchRequest(
+    # Using typed object instead of dictionary, expected by "add_checkpoint()", on purpose to insure that checks work.
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -2892,7 +2893,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_
     )
 
     # add checkpoint config
-    checkpoint_config = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -2925,7 +2926,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_
     checkpoint = context.get_checkpoint(name="my_checkpoint")
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    batch_request = RuntimeBatchRequest(
+    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -2942,7 +2943,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_
         ge_exceptions.exceptions.InvalidBatchRequestError,
         match=r"The runtime_parameters dict must have one \(and only one\) of the following keys: 'batch_data', 'query', 'path'.",
     ):
-        checkpoint.run(batch_request=batch_request)
+        checkpoint.run(batch_request=runtime_batch_request)
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run(
@@ -2952,14 +2953,12 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    batch_request = BatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_basic_data_connector",
-            "data_asset_name": "Titanic_1911",
-        }
-    )
-    runtime_batch_request = RuntimeBatchRequest(
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -2973,7 +2972,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
     # add checkpoint config
-    checkpoint_config = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -3043,14 +3042,12 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    batch_request = BatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_basic_data_connector",
-            "data_asset_name": "Titanic_1911",
-        }
-    )
-    runtime_batch_request = RuntimeBatchRequest(
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -3064,7 +3061,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
     # add checkpoint config
-    checkpoint_config = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -3148,14 +3145,12 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    batch_request = BatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_basic_data_connector",
-            "data_asset_name": "Titanic_1911",
-        }
-    )
-    runtime_batch_request = RuntimeBatchRequest(
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -3169,7 +3164,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
     # add checkpoint config
-    checkpoint_config = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -3240,14 +3235,12 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    batch_request = BatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_basic_data_connector",
-            "data_asset_name": "Titanic_1911",
-        }
-    )
-    runtime_batch_request = RuntimeBatchRequest(
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -3261,7 +3254,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
     # add checkpoint config
-    checkpoint_config = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,

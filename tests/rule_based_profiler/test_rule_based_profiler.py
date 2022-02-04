@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional
 
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.types import ParameterContainer
+from great_expectations.util import deep_filter_properties_iterable
 
 
 def test_reconcile_profiler_variables_no_overrides(
@@ -39,6 +40,7 @@ def test_reconcile_profiler_rules_no_overrides(
     profiler_with_placeholder_args,
 ):
     rules: Dict[str, Dict[str, Any]] = {}
+
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
@@ -107,11 +109,9 @@ def test_reconcile_profiler_rules_new_rule_override(
             "expectation_configuration_builders": [
                 {
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                    "meta": {},
                 },
                 {
                     "expectation_type": "expect_column_min_to_be_between",
-                    "meta": {},
                 },
             ],
         },
@@ -129,21 +129,21 @@ def test_reconcile_profiler_rules_new_rule_override(
             "expectation_configuration_builders": [
                 {
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                    "meta": {},
                 },
             ],
         },
     ]
+
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
-    rule_name: str
+    rule: Rule
     effective_rule_configs_actual: dict = {
         rule.name: rule.to_json_dict() for rule in effective_rules
     }
+    deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
-    rule: Rule
     rule_config: dict
     effective_rule_configs_expected: dict = {
         rule_config["name"]: rule_config for rule_config in expected_rules
@@ -186,21 +186,21 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
             "expectation_configuration_builders": [
                 {
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                    "meta": {},
                 },
             ],
         },
     ]
+
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
-    rule_name: str
+    rule: Rule
     effective_rule_configs_actual: dict = {
         rule.name: rule.to_json_dict() for rule in effective_rules
     }
+    deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
-    rule: Rule
     rule_config: dict
     effective_rule_configs_expected: dict = {
         rule_config["name"]: rule_config for rule_config in expected_rules
@@ -260,21 +260,21 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
             "expectation_configuration_builders": [
                 {
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                    "meta": {},
                 },
             ],
         },
     ]
+
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
-    rule_name: str
+    rule: Rule
     effective_rule_configs_actual: dict = {
         rule.name: rule.to_json_dict() for rule in effective_rules
     }
+    deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
-    rule: Rule
     rule_config: dict
     effective_rule_configs_expected: dict = {
         rule_config["name"]: rule_config for rule_config in expected_rules
@@ -318,25 +318,24 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
             "expectation_configuration_builders": [
                 {
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                    "meta": {},
                 },
                 {
                     "expectation_type": "expect_column_min_to_be_between",
-                    "meta": {},
                 },
             ],
         },
     ]
+
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
-    rule_name: str
+    rule: Rule
     effective_rule_configs_actual: dict = {
         rule.name: rule.to_json_dict() for rule in effective_rules
     }
+    deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
-    rule: Rule
     rule_config: dict
     effective_rule_configs_expected: dict = {
         rule_config["name"]: rule_config for rule_config in expected_rules
@@ -407,25 +406,24 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override(
             "expectation_configuration_builders": [
                 {
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                    "meta": {},
                 },
                 {
                     "expectation_type": "expect_column_min_to_be_between",
-                    "meta": {},
                 },
             ],
         },
     ]
+
     effective_rules: List[
         Rule
     ] = profiler_with_placeholder_args.reconcile_profiler_rules(rules=rules)
 
-    rule_name: str
+    rule: Rule
     effective_rule_configs_actual: dict = {
         rule.name: rule.to_json_dict() for rule in effective_rules
     }
+    deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
 
-    rule: Rule
     rule_config: dict
     effective_rule_configs_expected: dict = {
         rule_config["name"]: rule_config for rule_config in expected_rules
