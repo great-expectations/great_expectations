@@ -46,7 +46,7 @@ When a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> Valida
 
 ### Standardized data and Expectations
 
-Execution engines handle the interactions with the source data system that their Datasource is configured for.  However, they also wrap data from those source data systems with metadata that allows Great Expectations to read it regardless of its native format. Additionally, Execution Engines translate of Expectations so that they can operate in a format appropriate to their associated source data system.  Because of this, the same Expectations can be used to validate data from different Datasources, even if those Datasources interact with source data systems so different in nature that they require different Execution Engines to access their data. 
+Execution engines handle the interactions with the source data system that their Datasource is configured for.  However, they also wrap data from those source data systems with metadata that allows Great Expectations to read it regardless of its native format. Additionally, Execution Engines enable the calculations of Metrics used by Expectations so that they can operate in a format appropriate to their associated source data system.  Because of this, the same Expectations can be used to validate data from different Datasources, even if those Datasources interact with source data systems so different in nature that they require different Execution Engines to access their data. 
 
 ### Deferred Metrics
 
