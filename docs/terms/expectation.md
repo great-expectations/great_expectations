@@ -21,7 +21,7 @@ An Expectation is a verifiable assertion about data.
 
 ### Features and promises
 
-Great Expectations is a framework for defining Expectations and running them against your data. Like assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, Great Expectations applies Expectations to data instead of code. For example, you could define an Expectation that a column contain no null values, and Great Expectations would run that Expectation against your data, and report if a null value was found.
+Great Expectations is a framework for defining Expectations and running them against your data. Like assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, Great Expectations applies Expectations to data instead of code. For example, you could define an Expectation that a column contains no null values, and Great Expectations would run that Expectation against your data, and report if a null value was found.
 
 Expectations *enhance communication* about your data and *improve quality* for data applications. They help you take the implicit assumptions about your data and make them explicit. Using Expectations helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
 
@@ -38,7 +38,7 @@ Expectations are obviously a fundamental component of the Create Expectations st
 
 <ValidateHeader/>
 
-When you create your Checkpoints, you will be able to configure them to use specific Expectation Suites.  Other than setting up this configuration (or arranging to pass Expectation Suites at runtime) you will not need to directly interact with the Expectations themselves.  Instead, when you run your Checkpoint it will handle using the Expectations in any of its Expectation Suites to Validate the data indicated in its Batch Request/s.  This will be done under the hood, with the <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> that are generated being passed along to the Checkpoint's (optional) <TechnicalTag relative="../" tag="action" text="Actions" /> for further processing.
+When you create your Checkpoints, you will be able to configure them to use specific Expectation Suites.  Other than setting up this configuration (or arranging to pass Expectation Suites at runtime) you will not need to directly interact with the Expectations themselves.  Instead, when you run your Checkpoint it will handle the use of the Expectations in any of its Expectation Suites to Validate the data indicated in its Batch Request/s.  This will be done under the hood, with the <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> that are generated being passed along to the Checkpoint's (optional) <TechnicalTag relative="../" tag="action" text="Actions" /> for further processing.
 
 
 ## Features
@@ -69,7 +69,7 @@ These Expectations aren't included in the default set, but could be very useful 
 
 Fear not! Great Expectations is designed for customization and extensibility.
 
-Building custom Expectations is easy and allows your custom logic to become part of the validation, documentation, and even profiling workflows that make Great Expectations stand out. See the guide on [creating custom Expectations](/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations) for more information on building Expectations and updating <TechnicalTag relative="../" tag="data_context" text="Data Context" /> configurations to automatically load <TechnicalTag relative="../" tag="batch" text="Batches" /> of data with custom <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />Data Assets.
+Building custom Expectations is easy and allows your custom logic to become part of the validation, documentation, and even profiling workflows that make Great Expectations stand out. See the guide on [creating custom Expectations](/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_expectations) for more information on building Expectations and updating <TechnicalTag relative="../" tag="data_context" text="Data Context" /> configurations to automatically load <TechnicalTag relative="../" tag="batch" text="Batches" /> of data with custom <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.
 
 ### Distributional Expectations
 
@@ -128,7 +128,7 @@ A **domain** makes it possible to address a specific set of data, such as a *tab
 
 A domain is defined by a set of key-value pairs. The **domain keys** are the keys that uniquely define the domain for an Expectation. They vary depending on the Expectation; for example, many Expectations apply to data in a single `column`, but others apply to data from multiple columns or to properties that do not apply to a column at all.
 
-An Expectation also defines **success keys** that determine the values of its metrics and when the Expectation will succeed.
+An Expectation also defines **success keys** that specify the values of metrics that determine when the Expectation will succeed.
 
 For example, the `expect_column_values_to_be_in_set` Expectation relies on the `batch_id`, `table`, `column`, and `row_condition` **domain keys** to determine what data are described by a particular configuration, and the `value_set` and `mostly` **success keys** to evaluate whether the Expectation is actually met for that data.
 
