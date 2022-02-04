@@ -373,6 +373,7 @@ module.exports = {
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
+            'terms/checkpoint',
             'terms/execution_engine',
             'terms/expectation',
             'terms/plugin'
