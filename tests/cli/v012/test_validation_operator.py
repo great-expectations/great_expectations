@@ -42,7 +42,17 @@ def test_validation_operator_run_interactive_golden_path(
     stdout = result.stdout
     assert "Validation failed" in stdout
     assert result.exit_code == 1
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    dep_warning = """
+        The `data_context.run_validation_operator` method is a legacy method from the V2
+        (Batch Kwargs) API, and has been deprecated. Please consider upgrading your 
+        project to use Checkpoints and the V3 (Batch Request) API:
+            https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide/
+    """
+    assert_no_logging_messages_or_tracebacks(
+        caplog,
+        result,
+        allowed_deprecation_message=dep_warning
+    )
 
 
 def test_validation_operator_run_interactive_pass_non_existing_expectation_suite(
@@ -169,7 +179,13 @@ def test_validation_operator_run_noninteractive_golden_path(
     stdout = result.stdout
     assert "Validation failed" in stdout
     assert result.exit_code == 1
-    assert_no_logging_messages_or_tracebacks(caplog, result)
+    dep_warning = """
+        The `data_context.run_validation_operator` method is a legacy method from the V2
+        (Batch Kwargs) API, and has been deprecated. Please consider upgrading your 
+        project to use Checkpoints and the V3 (Batch Request) API:
+            https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide/
+    """
+    assert_no_logging_messages_or_tracebacks(caplog, result, allowed_deprecation_message=dep_warning)
 
 
 def test_validation_operator_run_noninteractive_validation_config_file_does_not_exist(

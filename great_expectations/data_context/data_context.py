@@ -1439,7 +1439,8 @@ class BaseDataContext:
     ):
         """
         Run a validation operator to validate data assets and to perform the business logic around
-        validation that the operator implements.
+        validation that the operator implements. Note that this is a legacy method from the
+        V2 (Batch Kwargs) API, and has been deprecated.
 
         Args:
             validation_operator_name: name of the operator, as appears in the context's config file
@@ -1456,6 +1457,16 @@ class BaseDataContext:
         Returns:
             ValidationOperatorResult
         """
+
+        logger.warning(
+            """
+        The `data_context.run_validation_operator` method is a legacy method from the V2
+        (Batch Kwargs) API, and has been deprecated. Please consider upgrading your 
+        project to use Checkpoints and the V3 (Batch Request) API:
+            https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide/
+            """
+        )
+
         result_format = result_format or {"result_format": "SUMMARY"}
 
         if not assets_to_validate:
