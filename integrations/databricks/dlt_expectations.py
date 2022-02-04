@@ -159,7 +159,6 @@ def expect(
                 print(
                     "\n\ndlt DIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
                 )
-                print("dlt.__version__", dlt.__version__)
                 print("dir(dlt)", dir(dlt))
                 print(
                     "\n\ndlt DIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
