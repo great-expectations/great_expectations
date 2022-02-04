@@ -370,6 +370,7 @@ module.exports = {
           type: 'category',
           label: 'Technical Terms',
           items: [
+            'terms/action',
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
