@@ -87,7 +87,7 @@ The best practice when creating a custom Action is to create a subclass of the `
 
 ### Configuration
 
-Actions are configured inside of the `action_list` parameter for Checkpoints.  In general, you will need to provide at least a `name` (which is user defined and does not need to correspond to anything specific) and, in the in the parameters under `action` a `class_name` (which should correspond to the name of the Action's python class).  If you are implementing a custom Action in a plugin, you will also need to include a `module_name` in the parameters under `action`.  Any other keys placed under `action` will be passed to the Action's class as additional key word arguments.
+Actions are configured inside of the `action_list` parameter for Checkpoints.  In general, you will need to provide at least a `name` (which is user defined and does not need to correspond to anything specific) and, in the in the parameters under `action` a `class_name` (which should correspond to the name of the Action's python class).  If you are implementing a custom Action in a Plugin, you will also need to include a `module_name` in the parameters under `action` which references where your Plugin is located..  Any other keys placed under `action` will be passed to the Action's class as additional key word arguments.
 
 Below is an example of an `action_list` configuration that performs some common Actions that are built in to the Great Expectations code base:
 
