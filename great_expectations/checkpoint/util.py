@@ -15,7 +15,6 @@ from great_expectations.core.batch import (
     get_batch_request_as_dict,
 )
 from great_expectations.core.util import nested_update
-from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
@@ -284,14 +283,6 @@ def get_substituted_batch_request(
             raise ge_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )
-
-    # noinspection PyUnresolvedReferences
-    filter_properties_dict(
-        properties=effective_batch_request,
-        keep_fields=batch_request_class.field_names,
-        clean_nulls=False,
-        inplace=True,
-    )
 
     return batch_request_class(**effective_batch_request)
 

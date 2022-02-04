@@ -103,7 +103,7 @@ class DictDot:
                 new_dict[key] = value.to_raw_dict()
 
             # ...and Enums...
-            elif isinstance(value, Enum):
+            if isinstance(value, Enum):
                 new_dict[key] = value.value
 
             # ...and when DictDots and Enums are nested one layer deeper in lists or tuples
@@ -112,7 +112,8 @@ class DictDot:
                 for i, element in enumerate(value):
                     if isinstance(element, DictDot):
                         new_dict[key][i] = element.to_raw_dict()
-                    elif isinstance(element, Enum):
+
+                    if isinstance(element, Enum):
                         new_dict[key][i] = element.value
 
             # Note: conversion will not work automatically if there are additional layers in between.
@@ -130,7 +131,8 @@ class DictDot:
         for key, value in new_dict.items():
             if isinstance(value, DictDot):
                 new_dict[key] = value.to_dict()
-            elif isinstance(value, Enum):
+
+            if isinstance(value, Enum):
                 new_dict[key] = value.value
 
             if isinstance(value, list) or isinstance(value, tuple):
@@ -138,7 +140,8 @@ class DictDot:
                 for i, element in enumerate(value):
                     if isinstance(element, DictDot):
                         new_dict[key][i] = element.to_dict()
-                    elif isinstance(element, Enum):
+
+                    if isinstance(element, Enum):
                         new_dict[key][i] = element.value
 
         return new_dict

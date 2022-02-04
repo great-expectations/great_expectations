@@ -158,8 +158,6 @@ class BatchRequestBase(SerializableDictDot):
     validation (described above plus additional attribute validation) so as to formally validate user specified fields.
     """
 
-    field_names: Set[str] = set()
-
     def __init__(
         self,
         datasource_name: str,
@@ -364,7 +362,7 @@ class BatchRequest(BatchRequestBase):
     limit: refers to the number of batches requested (not rows per batch)
     """
 
-    field_names: Set[str] = {
+    include_field_names: Set[str] = {
         "datasource_name",
         "data_connector_name",
         "data_asset_name",
@@ -400,7 +398,7 @@ class BatchRequest(BatchRequestBase):
 
 
 class RuntimeBatchRequest(BatchRequestBase):
-    field_names: Set[str] = {
+    include_field_names: Set[str] = {
         "datasource_name",
         "data_connector_name",
         "data_asset_name",
