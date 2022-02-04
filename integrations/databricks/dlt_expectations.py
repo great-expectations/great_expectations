@@ -160,6 +160,39 @@ def expect(
                     "\n\ndlt DIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
                 )
                 print("dir(dlt)", dir(dlt))
+                dlt_attributes = [
+                    "DLT_DECORATOR_RETURN",
+                    "DataFrame",
+                    "Dataset",
+                    "Expectation",
+                    "FlowFunction",
+                    "SQLContext",
+                    "ViolationAction",
+                    "api",
+                    "create_table",
+                    "create_view",
+                    "dataset",
+                    "expect",
+                    "expect_all",
+                    "expect_all_or_drop",
+                    "expect_all_or_fail",
+                    "expect_or_drop",
+                    "expect_or_fail",
+                    "helpers",
+                    "pipeline",
+                    "read",
+                    "read_stream",
+                    "table",
+                    "view",
+                ]
+                for dlt_attribute in dlt_attributes:
+                    print(f"dir({dlt_attribute})", dir(getattr(dlt, dlt_attribute)))
+                    print(f"type({dlt_attribute})", type(getattr(dlt, dlt_attribute)))
+                    print(
+                        f"get_size({dlt_attribute})",
+                        get_size(getattr(dlt, dlt_attribute)),
+                    )
+
                 print(
                     "\n\ndlt DIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
                 )
