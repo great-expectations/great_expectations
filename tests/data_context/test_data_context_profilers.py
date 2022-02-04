@@ -34,11 +34,9 @@ def test_add_profiler_with_invalid_config_raises_error(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     args = profiler_config_with_placeholder_args.to_json_dict()
-    args[
-        "config_version"
-    ] = (
-        -1
-    )  # Setting invalid configuration to check that it is caught by DataContext wrapper method
+
+    # Setting invalid configuration to check that it is caught by DataContext wrapper method
+    args["config_version"] = -1
 
     with pytest.raises(ValidationError) as e:
         empty_data_context.add_profiler(**args)
