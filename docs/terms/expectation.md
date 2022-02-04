@@ -23,17 +23,17 @@ An Expectation is a verifiable assertion about data.
 
 Great Expectations is a framework for defining Expectations and running them against your data. Like assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, Great Expectations applies Expectations to data instead of code. For example, you could define an Expectation that a column contain no null values, and Great Expectations would run that Expectation against your data, and report if a null value was found.
 
-Expectations *enhance communication* about your data and *improve quality* for data applications. Using Expectations helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
+Expectations *enhance communication* about your data and *improve quality* for data applications. They help you take the implicit assumptions about your data and make them explicit. Using Expectations helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
 
 ### Relationship to other objects
 
-Expectations are grouped into <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, which are in turn stored in an <TechnicalTag relative="../" tag="expectation_store" text="Expectation Store" />.  <TechnicalTag relative="../" tag="profiler" text="Profilers" /> will analyze data in order to generate Expectations, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> rely on Expectation Suites (and the Expectations contained therein) to <TechnicalTag relative="../" tag="validation" text="Validate" /> data.
+Expectations are grouped into <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, which are in turn stored and retrieved through an <TechnicalTag relative="../" tag="expectation_store" text="Expectation Store" />.  <TechnicalTag relative="../" tag="profiler" text="Profilers" /> will analyze data in order to generate Expectations, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> rely on Expectation Suites (and the Expectations contained therein) to <TechnicalTag relative="../" tag="validation" text="Validate" /> data.
 
 ## Use cases
 
 <CreateHeader/>
 
-Expectations are obviously a fundamental component of the Create Expectations step in working with Great Expectations.  It is when you are creating Expectations that you will have the most direct interaction with them.  For further information on this process, please see [our overview on the Create Expectations process](../guides/expectations/create_expectations_overview.md), and [our related how-to guides](../guides/expectations/index.md).
+Expectations are obviously a fundamental component of the Create Expectations step in working with Great Expectations.  There are two points at which you will have direct interaction with them.  The first is when you are creating new Expectations.  The second is when you are editing them.  Expectations are not meant to be static: the recommended best practice is an iterative process where your Expectations are edited as your data, and your understanding of that data, change.  For further information on this process, please see [our overview on the Create Expectations process](../guides/expectations/create_expectations_overview.md), and [our related how-to guides](../guides/expectations/index.md).
 
 
 <ValidateHeader/>
@@ -73,13 +73,15 @@ Building custom Expectations is easy and allows your custom logic to become part
 
 ### Distributional Expectations
 
-Distributional Expectations rely on expected distributions or "partition objects", which are built from intervals for continuous data or categorical classes and their associated weights, in order to help identify when new datasets or samples may be different than expected.  You should use Distributional Expectations in the same way as other Expectations: to help accelerate identification of risks and changes to a modeled system or disruptions to a complex upstream data feed.
+Distributional Expectations rely on expected distributions or "partition objects", which are built from intervals for continuous data or categorical classes and their associated weights, in order to help identify when new datasets or samples may be different from expected.  Distributional Expectations represent specific Expectation types, such as `expect_column_kl_divergence_to_be_less_than`.  You should use Distributional Expectations in the same way as other Expectations: to help accelerate identification of risks and changes to a modeled system or disruptions to a complex upstream data feed.
 
 For more information, please see our [reference guide on Distributional Expectations](../reference/expectations/distributional_expectations.md).
 
 ### Conditional Expectations
 
-Conditional Expectations are those that are intended to be applied not to an entire dataset, but to a particular subset of the data.  Additionally, Conditional Expectations include those where what one expects of one variable depends on the value of another.  An example of this would be an Expectation that a column not have a null value only if another column's value falls into a specific subset.
+Conditional Expectations are those that are intended to be applied not to an entire dataset, but to a particular subset of the data.  Additionally, Conditional Expectations include those where what one expects of one variable depends on the value of another.  An example of this would be an Expectation that a column not have a null value only if another column's value falls into a specific subset.  Conditional Expectations represent a facet of map Expectations, including such things as `expect_column_values_to_be_in_set`.
+
+Conditional Expectations are currently only available for the Pandas backend.
 
 For more information on these Expectations, please see [our reference guide for Conditional Expectations](../reference/expectations/conditional_expectations.md).
 
@@ -103,7 +105,7 @@ did.
 There are several paths to generating Expectations:
 
 1. Automated inspection of datasets. Currently, the profiler mechanism in Great Expectations produces Expectation Suites that can be used for validation. In some cases, the goal is [profiling](../terms/profiler) your data, and in other cases automated inspection can produce Expectations that will be used in validating future batches of data.
-2. Expertise. Rich experience from subject matter experts, Analysts, and data owners is often a critical source of Expectations. Interviewing experts and encoding their tacit knowledge of common distributions, values, or failure conditions can be can excellent way to generate Expectations.
+2. Expertise. Rich experience from subject-matter experts, Analysts, and data owners is often a critical source of Expectations. Interviewing experts and encoding their tacit knowledge of common distributions, values, or failure conditions can be can excellent way to generate Expectations.
 3. Exploratory Analysis. Using Great Expectations in an exploratory analysis workflow (e.g. within Jupyter Notebooks)is an important way to develop experience with both raw and derived datasets and generate useful and testable Expectations about characteristics that may be important for the data's eventual purpose, whether reporting or feeding another downstream model or data system.
 
 For more information on these methods, please see our [overview guide for creating Expectations](../guides/expectations/create_expectations_overview.md#the-create-expectations-process).
@@ -122,9 +124,9 @@ All Expectations return a JSON-serializable dictionary when evaluated, which con
 
 ### Expectation Concepts: Domain and Success Keys
 
-A **domain** makes it possible to address a specific set of data, such as a *table*, *query result*, *column* in a table or dataframe, or even a Metric computed on a previous Batch of data.
+A **domain** makes it possible to address a specific set of data, such as a *table*, *query result*, *column* in a table or dataframe, or even a Metric computed on a previous Batch of data.  It does this by describing the locale of data to which a Metric or Expectation applies.
 
-A domain is defined by a set of key-value pairs. The **domain keys** are the keys that uniquely define the domain for an Expectation. They vary depending on the Expectatation; for example, many Expectations apply to data in a single `column`, but others apply to data from multiple columns or to properties that do not apply to a column at all.
+A domain is defined by a set of key-value pairs. The **domain keys** are the keys that uniquely define the domain for an Expectation. They vary depending on the Expectation; for example, many Expectations apply to data in a single `column`, but others apply to data from multiple columns or to properties that do not apply to a column at all.
 
 An Expectation also defines **success keys** that determine the values of its metrics and when the Expectation will succeed.
 
