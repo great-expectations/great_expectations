@@ -116,7 +116,6 @@ def add_checkpoint(
     checkpoint_config = deep_filter_properties_iterable(
         properties=checkpoint_config,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
     new_checkpoint: Union[
         Checkpoint, SimpleCheckpoint, LegacyCheckpoint
@@ -336,7 +335,6 @@ def run_checkpoint(
     filter_properties_dict(
         properties=checkpoint_run_arguments,
         clean_falsy=True,
-        keep_falsy_numerics=True,
         inplace=True,
     )
 
