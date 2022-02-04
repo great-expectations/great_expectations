@@ -1011,9 +1011,15 @@ def filter_properties_dict(
     Returns:
         The (possibly) filtered properties dictionary (or None if no entries remain after filtering is performed)
     """
-    if keep_fields and delete_fields:
+    if keep_fields is None:
+        keep_fields = set()
+
+    if delete_fields is None:
+        delete_fields = set()
+
+    if keep_fields & delete_fields:
         raise ValueError(
-            "Only one of keep_fields and delete_fields filtering directives can be specified."
+            "Common keys between sets of keep_fields and delete_fields filtering directives are illegal."
         )
 
     if clean_falsy:
@@ -1097,7 +1103,7 @@ def filter_properties_dict(
 
 
 def deep_filter_properties_iterable(
-    properties: Optional[Union[dict, list, set]] = None,
+    properties: Optional[Union[dict, list, set, tuple]] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
@@ -1132,7 +1138,7 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
-    elif isinstance(properties, (list, set)):
+    elif isinstance(properties, (list, set, tuple)):
         if not inplace:
             properties = copy.deepcopy(properties)
 

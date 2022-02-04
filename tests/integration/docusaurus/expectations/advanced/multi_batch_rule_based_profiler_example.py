@@ -1,7 +1,7 @@
 from ruamel import yaml
 
 from great_expectations import DataContext
-from great_expectations.rule_based_profiler.profiler import Profiler
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 profiler_config = """
 # This profiler is meant to be used on the NYC taxi data (yellow_tripdata_sample_<YEAR>-<MONTH>.csv)
@@ -99,14 +99,17 @@ rules:
 
 data_context = DataContext()
 
-# Instantiate Profiler
+# Instantiate RuleBasedProfiler
 full_profiler_config_dict: dict = yaml.load(profiler_config)
-profiler: Profiler = Profiler(
-    profiler_config=full_profiler_config_dict,
+rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
+    name=full_profiler_config_dict["name"],
+    config_version=full_profiler_config_dict["config_version"],
+    rules=full_profiler_config_dict["rules"],
+    variables=full_profiler_config_dict["variables"],
     data_context=data_context,
 )
 
-suite = profiler.profile(expectation_suite_name="test_suite_name")
+suite = rule_based_profiler.run(expectation_suite_name="test_suite_name")
 print(suite)
 
 # Please note that this docstring is here to demonstrate output for docs. It is not needed for normal use.

@@ -305,7 +305,7 @@ module.exports = {
         'deployment_patterns/how_to_use_great_expectations_in_databricks',
         'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
-        'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
+        'deployment_patterns/how_to_use_great_expectations_with_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_flyte'
         // {
         // type: 'category',
@@ -349,7 +349,8 @@ module.exports = {
         { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
         { type: 'doc', id: 'reference/validation' },
         { type: 'doc', id: 'reference/anonymous_usage_statistics' },
-        { type: 'doc', id: 'reference/supporting_resources' }
+        { type: 'doc', id: 'reference/supporting_resources' },
+        { type: 'doc', id: 'glossary' }
       ]
     },
     {

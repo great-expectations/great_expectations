@@ -207,7 +207,7 @@ validations:
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "print(my_checkpoint.get_substituted_config().to_yaml_str())",
+            "source": 'print(my_checkpoint.get_config(format="yaml"))',
             "outputs": [],
         },
     ]

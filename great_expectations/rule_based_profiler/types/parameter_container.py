@@ -1,12 +1,24 @@
 from dataclasses import asdict, dataclass
 from typing import Any, Dict, List, Optional, Union
 
+from pyparsing import (
+    Literal,
+    ParseException,
+    ParseResults,
+    Suppress,
+    Word,
+    ZeroOrMore,
+    alphanums,
+    alphas,
+    nums,
+)
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.domain_builder import Domain
+from great_expectations.rule_based_profiler.types import Domain
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import deep_filter_properties_iterable
 
 FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
 
@@ -16,6 +28,49 @@ VARIABLES_KEY: str = f"$variables{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARA
 
 FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: str = "value"
 FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: str = "details"
+
+attribute_name = Word(alphas, alphanums + "_.") + ZeroOrMore(
+    (
+        (
+            Suppress(Literal('["'))
+            + Word(alphas, alphanums + "_.")
+            + Suppress(Literal('"]'))
+        )
+        ^ (
+            Suppress(Literal("['"))
+            + Word(alphas, alphanums + "_.")
+            + Suppress(Literal("']"))
+        )
+    )
+    ^ (
+        Suppress(Literal("["))
+        + Word(nums).setParseAction(lambda s, l, t: [int(t[0])])
+        + Suppress(Literal("]"))
+    )
+)
+
+
+class ParameterAttributeNameParserError(ge_exceptions.GreatExpectationsError):
+    pass
+
+
+def _parse_attribute_name(name: str) -> ParseResults:
+    """
+    Using the grammer defined by "attribute_name", provides the parsing of collection (list, dictionary) access syntax:
+    List: variable[index: int]
+    Dictionary: variable[key: str]
+    Nested List/Dictionary: variable[index_0: int][key_0: str][index_1: int][key_1: str][key_2: str][index_2: int]...
+
+    Applicability: To be used as part of configuration (e.g., YAML-based files or text strings).
+    Extendability: Readily extensible to include "slice" and other standard accessors (as long as no dynamic elements).
+    """
+
+    try:
+        return attribute_name.parseString(name)
+    except ParseException:
+        raise ParameterAttributeNameParserError(
+            f'Unable to parse Parameter Attribute Name: "{name}".'
+        )
 
 
 def validate_fully_qualified_parameter_name(fully_qualified_parameter_name: str):
@@ -68,15 +123,34 @@ class ParameterContainer(SerializableDictDot):
     "max_num_conversion_attempts" refers to the operations on date/time, while in the other -- it applies to characters.
 
     $variables.false_positive_threshold
-    $parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format
-    $parameter.date_strings.yyyy_mm_dd_date_format
-    $parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format
-    $parameter.date_strings.mm_yyyy_dd_date_format
+    $parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.value
+    $parameter.date_strings.yyyy_mm_dd_hh_mm_ss_tz_date_format.details
+    $parameter.date_strings.yyyy_mm_dd_date_format.value
+    $parameter.date_strings.yyyy_mm_dd_date_format.details
+    $parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.value
+    $parameter.date_strings.mm_yyyy_dd_hh_mm_ss_tz_date_format.details
+    $parameter.date_strings.mm_yyyy_dd_date_format.value
+    $parameter.date_strings.mm_yyyy_dd_date_format.details
     $parameter.date_strings.tolerances.max_abs_error_time_milliseconds
     $parameter.date_strings.tolerances.max_num_conversion_attempts
     $parameter.tolerances.mostly
     $parameter.tolerances.financial.usd
     $mean
+    $parameter.monthly_taxi_fairs.mean_values.value[0]
+    $parameter.monthly_taxi_fairs.mean_values.value[1]
+    $parameter.monthly_taxi_fairs.mean_values.value[2]
+    $parameter.monthly_taxi_fairs.mean_values.value[3]
+    $parameter.monthly_taxi_fairs.mean_values.details
+    $parameter.daily_taxi_fairs.mean_values.value["friday"]
+    $parameter.daily_taxi_fairs.mean_values.value["saturday"]
+    $parameter.daily_taxi_fairs.mean_values.value["sunday"]
+    $parameter.daily_taxi_fairs.mean_values.value["monday"]
+    $parameter.daily_taxi_fairs.mean_values.details
+    $parameter.weekly_taxi_fairs.mean_values.value[1]['friday']
+    $parameter.weekly_taxi_fairs.mean_values.value[18]['saturday']
+    $parameter.weekly_taxi_fairs.mean_values.value[20]['sunday']
+    $parameter.weekly_taxi_fairs.mean_values.value[21]['monday']
+    $parameter.weekly_taxi_fairs.mean_values.details
     $custom.lang.character_encodings
 
     The reason that ParameterContainer is needed is that each ParameterNode can point only to one tree structure,
@@ -95,6 +169,7 @@ class ParameterContainer(SerializableDictDot):
     ):
         if self.parameter_nodes is None:
             self.parameter_nodes = {}
+
         self.parameter_nodes[parameter_name_root] = parameter_node
 
     def get_parameter_node(self, parameter_name_root: str) -> Optional[ParameterNode]:
@@ -115,7 +190,7 @@ class ParameterContainer(SerializableDictDot):
 
         if isinstance(source, dict):
             if not isinstance(source, ParameterNode):
-                filter_properties_dict(properties=source, inplace=True)
+                deep_filter_properties_iterable(properties=source, inplace=True)
                 source = ParameterNode(source)
             key: str
             value: Any
@@ -126,8 +201,11 @@ class ParameterContainer(SerializableDictDot):
 
         return source
 
+    def to_dict(self) -> dict:
+        return asdict(self)
+
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=asdict(self))
+        return convert_to_json_serializable(data=self.to_dict())
 
 
 def build_parameter_container_for_variables(
@@ -212,6 +290,7 @@ def build_parameter_container(
             parameter_container.set_parameter_node(
                 parameter_name_root=parameter_name_root, parameter_node=parameter_node
             )
+
         _build_parameter_node_tree_for_one_parameter(
             parameter_node=parameter_node,
             parameter_name_as_list=fully_qualified_parameter_name_as_list,
@@ -238,6 +317,7 @@ def _build_parameter_node_tree_for_one_parameter(
     if len(parameter_name_as_list) > 1:
         if parameter_name_part not in parameter_node:
             parameter_node[parameter_name_part] = ParameterNode({})
+
         _build_parameter_node_tree_for_one_parameter(
             parameter_node=parameter_node[parameter_name_part],
             parameter_name_as_list=parameter_name_as_list[1:],
@@ -277,6 +357,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
         if domain:
             # Supports the "$domain.domain_kwargs" style syntax.
             return domain[DOMAIN_KWARGS_PARAMETER_NAME]
+
         return None
 
     if fully_qualified_parameter_name.startswith(
@@ -289,16 +370,17 @@ def get_parameter_value_by_fully_qualified_parameter_name(
                     (len(DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME) + 1) :
                 ]
             )
+
         return None
 
     parameter_container: ParameterContainer
 
     if fully_qualified_parameter_name.startswith(VARIABLES_KEY):
-        fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
         parameter_container = variables
     else:
-        fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
         parameter_container = parameters[domain.id]
+
+    fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
 
     fully_qualified_parameter_name_as_list: List[
         str
@@ -328,21 +410,39 @@ def _get_parameter_value_from_parameter_container(
         return None
 
     parameter_name_part: Optional[str] = None
+    attribute_value_reference: Optional[str] = None
     return_value: Optional[Union[Any, ParameterNode]] = parameter_node
     parent_parameter_node: Optional[ParameterNode] = None
     try:
         for parameter_name_part in fully_qualified_parameter_name_as_list:
-            parent_parameter_node = return_value
-            if parameter_name_part in return_value:
-                return_value = return_value[parameter_name_part]
+            parsed_attribute_name: ParseResults = _parse_attribute_name(
+                name=parameter_name_part
+            )
+            if len(parsed_attribute_name) < 1:
+                raise KeyError(
+                    f"""Unable to get value for parameter name "{fully_qualified_parameter_name}": Part \
+"{parameter_name_part}" in fully-qualified parameter name does not represent a valid expression.
+"""
+                )
 
+            parent_parameter_node = return_value
+
+            attribute_value_reference = parsed_attribute_name[0]
+            return_value = return_value[attribute_value_reference]
+
+            parsed_attribute_name = parsed_attribute_name[1:]
+
+            attribute_value_accessor: Union[str, int]
+            for attribute_value_accessor in parsed_attribute_name:
+                return_value = return_value[attribute_value_accessor]
     except KeyError:
         raise KeyError(
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" does not exist in fully-qualified parameter name.
 """
         )
-    if parameter_name_part not in parent_parameter_node:
+
+    if attribute_value_reference not in parent_parameter_node:
         raise KeyError(
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" of fully-qualified parameter name does not exist.

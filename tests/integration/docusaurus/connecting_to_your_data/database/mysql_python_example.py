@@ -6,9 +6,9 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 CONNECTION_STRING = "mysql+pymysql://root@localhost/test_ci"
 
 # This utility is not for general use. It is only to support testing.
-from util import load_data_into_database
+from tests.test_utils import load_data_into_test_database
 
-load_data_into_database(
+load_data_into_test_database(
     table_name="taxi_data",
     csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=CONNECTION_STRING,
@@ -50,6 +50,11 @@ batch_request = RuntimeBatchRequest(
     data_asset_name="default_name",  # this can be anything that identifies this data
     runtime_parameters={"query": "SELECT * from test_ci.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
+    batch_spec_passthrough={
+        "reader_options": {
+            "pool_size": 5
+        }  # NOTE: create_engine arguments may be passed here
+    },
 )
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
