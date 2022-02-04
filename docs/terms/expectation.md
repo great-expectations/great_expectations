@@ -21,7 +21,7 @@ An Expectation is a verifiable assertion about data.
 
 ### Features and promises
 
-Great Expectations is a framework for defining Expectations and running them against your data. Like assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, Great Expectations applies Expectations to data instead of code. For example, you could define an Expectation that a column contain no null values, and Great Expectations would run that Expectation against your data, and report if a null value was found.
+Great Expectations is a framework for defining Expectations and running them against your data. Like assertions in traditional Python unit tests, Expectations provide a flexible, declarative language for describing expected behavior. Unlike traditional unit tests, Great Expectations applies Expectations to data instead of code. For example, you could define an Expectation that a column contains no null values, and Great Expectations would run that Expectation against your data, and report if a null value was found.
 
 Expectations *enhance communication* about your data and *improve quality* for data applications. Using Expectations helps reduce trips to domain experts and avoids leaving insights about data on the "cutting room floor."
 
