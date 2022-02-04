@@ -126,7 +126,7 @@ A **domain** makes it possible to address a specific set of data, such as a *tab
 
 A domain is defined by a set of key-value pairs. The **domain keys** are the keys that uniquely define the domain for an Expectation. They vary depending on the Expectatation; for example, many Expectations apply to data in a single `column`, but others apply to data from multiple columns or to properties that do not apply to a column at all.
 
-An Expectation also defines **success keys** that determine the values of its metrics and when the Expectation will succeed.
+An Expectation also defines **success keys** that specify the values of metrics that determine when the Expectation will succeed.
 
 For example, the `expect_column_values_to_be_in_set` Expectation relies on the `batch_id`, `table`, `column`, and `row_condition` **domain keys** to determine what data are described by a particular configuration, and the `value_set` and `mostly` **success keys** to evaluate whether the Expectation is actually met for that data.
 
