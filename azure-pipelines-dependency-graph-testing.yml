@@ -262,6 +262,10 @@ stages:
 
       - job: json_parameterized_expectations
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+
+        services:
+          postgres: postgres
+
         variables:
           python.version: '3.8'
           GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
