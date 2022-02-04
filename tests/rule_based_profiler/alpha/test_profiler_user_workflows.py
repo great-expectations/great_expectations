@@ -13,10 +13,10 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
-from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.types.base import (
+from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 

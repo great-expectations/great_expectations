@@ -8,12 +8,12 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
 from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.toolkit import (
     delete_profiler,
     get_profiler,
     list_profilers,
 )
-from great_expectations.rule_based_profiler.types.base import RuleBasedProfilerConfig
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")

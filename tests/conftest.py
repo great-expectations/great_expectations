@@ -46,7 +46,7 @@ from great_expectations.datasource import (
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.rule_based_profiler.types.base import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )

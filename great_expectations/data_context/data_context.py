@@ -119,7 +119,7 @@ from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.types.base import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 

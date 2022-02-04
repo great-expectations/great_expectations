@@ -18,6 +18,9 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
@@ -27,9 +30,6 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     ParameterNode,
-)
-from great_expectations.rule_based_profiler.types.base import (
-    ruleBasedProfilerConfigSchema,
 )
 from tests.conftest import skip_if_python_below_minimum_version
 
