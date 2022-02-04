@@ -46,6 +46,8 @@ def _get_dlt_library(dlt_library: Optional[ModuleType] = None) -> ModuleType:
         dlt library if already loaded or passed in
     """
     try:
+        import dlt
+
         print(
             "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
         )
@@ -75,7 +77,7 @@ def expect(
     dlt_expectation_condition: str = None,
     data_context: BaseDataContext = None,
     ge_expectation_configuration: ExpectationConfiguration = None,
-    dlt=dlt_mock_library,
+    dlt_library=dlt_mock_library,
 ):
     """
     Run a single expectation on a Delta Live Table
@@ -86,7 +88,7 @@ def expect(
         @functools.wraps(func)
         def wrapper_expect(*args, **kwargs):
 
-            # dlt = _get_dlt_library(dlt_library=dlt_library)
+            dlt = _get_dlt_library(dlt_library=dlt_library)
 
             print(
                 "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
@@ -200,8 +202,9 @@ def expect(
                 # dir(DataFrame)[
                 #     '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattr__', '__getattribute__', '__getitem__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_collect_as_arrow', '_jcols', '_jmap', '_jseq', '_repr_html_', '_sort_cols', '_to_corrected_pandas_type', 'agg', 'alias', 'approxQuantile', 'cache', 'checkpoint', 'coalesce', 'colRegex', 'collect', 'columns', 'corr', 'count', 'cov', 'createGlobalTempView', 'createOrReplaceGlobalTempView', 'createOrReplaceTempView', 'createTempView', 'crossJoin', 'crosstab', 'cube', 'describe', 'display', 'distinct', 'drop', 'dropDuplicates', 'drop_duplicates', 'dropna', 'dtypes', 'exceptAll', 'explain', 'fillna', 'filter', 'first', 'foreach', 'foreachPartition', 'freqItems', 'groupBy', 'groupby', 'head', 'hint', 'inputFiles', 'intersect', 'intersectAll', 'isLocal', 'isStreaming', 'join', 'limit', 'localCheckpoint', 'mapInPandas', 'na', 'orderBy', 'persist', 'printSchema', 'randomSplit', 'rdd', 'registerTempTable', 'repartition', 'repartitionByRange', 'replace', 'rollup', 'sameSemantics', 'sample', 'sampleBy', 'schema', 'select', 'selectExpr', 'semanticHash', 'show', 'sort', 'sortWithinPartitions', 'stat', 'storageLevel', 'subtract', 'summary', 'tail', 'take', 'toDF', 'toJSON', 'toLocalIterator', 'toPandas', 'to_koalas', 'transform', 'union', 'unionAll', 'unionByName', 'unpersist', 'where', 'withColumn', 'withColumnRenamed', 'withWatermark', 'write', 'writeStream', 'writeTo']
 
+                # This DataFrame is not an object with data, it is a type.
                 df = getattr(dlt, "DataFrame")
-                print("df.columns", df.columns())
+                print("df.columns", df.columns)
                 # print("df.count()", df.count())
 
                 print(
