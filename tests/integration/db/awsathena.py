@@ -52,7 +52,6 @@ batch_request = {
     "data_connector_name": "default_inferred_data_connector_name",
     "data_asset_name": f"{ATHENA_DB_NAME}.taxitable",
     "limit": 1000,
-    # "batch_spec_passthrough": {"create_temp_table": False},
 }
 expectation_suite_name = "my_awsathena_expectation_suite"
 try:

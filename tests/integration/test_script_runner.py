@@ -617,7 +617,7 @@ def _execute_integration_test(test_configuration, tmp_path):
         if "ge_requirement" in test_configuration:
             execute_shell_command(f"pip install {ge_requirement}")
         else:
-            execute_shell_command("pip install -e .")
+            execute_shell_command("pip install .")
 
         #
         # Build test state
