@@ -43,7 +43,14 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     stdout: str = result.stdout
 
     assert "Checking project..." in stdout
-    assert "Your project is up-to-date - no further upgrade is necessary." in stdout
+    assert (
+        "The Upgrade Helper has performed the automated upgrade steps as part of upgrading your project to be compatible with Great Expectations V3 API, and the config_version of your great_expectations.yml has been automatically incremented to 3.0.  However, manual steps are required in order for the upgrade process to be completed successfully."
+        in stdout
+    )
+    assert (
+        "Your project requires manual upgrade steps in order to be up-to-date."
+        in stdout
+    )
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
@@ -85,7 +92,7 @@ def test_upgrade_helper_intervention_on_cli_command(
     )
     assert (
         "To learn more about the upgrade process, visit ["
-        "36mhttps://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html"
+        "36mhttps://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
         in stdout
     )
     assert_no_logging_messages_or_tracebacks(
@@ -450,9 +457,9 @@ great_expectations/
 
 
 @freeze_time("01/19/2021 13:26:39")
-def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
-    # test project upgrade that requires no manual steps
-
+def test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_validation_operators(
+    v20_project_directory, caplog
+):
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
@@ -465,7 +472,7 @@ def test_v2_to_v3_project_upgrade(v20_project_directory, caplog):
     with open(
         file_relative_path(
             __file__,
-            "../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_expected_stdout.fixture",
+            "../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints_datasources_validation_operators_expected_stdout.fixture",
         )
     ) as f:
         expected_stdout: str = f.read()
@@ -532,7 +539,7 @@ great_expectations/
     with open(
         file_relative_path(
             __file__,
-            "../../test_fixtures/upgrade_helper/UpgradeHelperV13_basic_upgrade_log.json",
+            "../../test_fixtures/upgrade_helper/UpgradeHelperV13_upgrade_with_manual_steps_checkpoints_datasources_validation_operators_log.json",
         )
     ) as f:
         expected_upgrade_log_dict: dict = json.load(f)
@@ -544,6 +551,228 @@ great_expectations/
 
     with open(
         f"{v20_project_directory}/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json"
+    ) as f:
+        obs_upgrade_log_dict: dict = json.load(f)
+
+    assert obs_upgrade_log_dict == expected_upgrade_log_dict
+
+
+@freeze_time("01/19/2021 13:26:39")
+def test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints(
+    v20_project_directory_with_v30_configuration_and_v20_checkpoints, caplog
+):
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        [
+            "-c",
+            v20_project_directory_with_v30_configuration_and_v20_checkpoints,
+            "--v3-api",
+            "project",
+            "upgrade",
+        ],
+        input="\n",
+        catch_exceptions=False,
+    )
+    stdout: str = result.stdout
+
+    with open(
+        file_relative_path(
+            __file__,
+            "../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints.fixture",
+        )
+    ) as f:
+        expected_stdout: str = f.read()
+        expected_stdout = expected_stdout.replace(
+            "GE_PROJECT_DIR",
+            v20_project_directory_with_v30_configuration_and_v20_checkpoints,
+        )
+        assert stdout == expected_stdout
+
+    expected_project_tree_str: str = """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    checkpoints/
+        .gitkeep
+        my_checkpoint.yml
+        titanic_checkpoint_0.yml
+        titanic_checkpoint_1.yml
+        titanic_checkpoint_2.yml
+    expectations/
+        .ge_store_backend_id
+        .gitkeep
+    notebooks/
+        .gitkeep
+        pandas/
+            validation_playground.ipynb
+        spark/
+            validation_playground.ipynb
+        sql/
+            validation_playground.ipynb
+    plugins/
+        custom_data_docs/
+            styles/
+                data_docs_custom_styles.css
+    uncommitted/
+        config_variables.yml
+        data_docs/
+            local_site/
+                expectations/
+                    .gitkeep
+                static/
+                    .gitkeep
+                validations/
+                    diabetic_data/
+                        warning/
+                            20200430T191246.763896Z/
+                                c3b4c5df224fef4b1a056a0f3b93aba5.html
+        logs/
+            project_upgrades/
+                UpgradeHelperV13_20210119T132639.000000Z.json
+        validations/
+            .ge_store_backend_id
+            diabetic_data/
+                warning/
+                    20200430T191246.763896Z/
+                        c3b4c5df224fef4b1a056a0f3b93aba5.json
+"""
+    obs_project_tree_str: str = gen_directory_tree_str(
+        startpath=v20_project_directory_with_v30_configuration_and_v20_checkpoints
+    )
+    assert obs_project_tree_str == expected_project_tree_str
+    # make sure config number incremented
+    assert (
+        DataContext.get_ge_config_version(
+            context_root_dir=v20_project_directory_with_v30_configuration_and_v20_checkpoints
+        )
+        == 3.0
+    )
+
+    with open(
+        file_relative_path(
+            __file__,
+            "../../test_fixtures/upgrade_helper/UpgradeHelperV13_upgrade_with_manual_steps_checkpoints_log.json",
+        )
+    ) as f:
+        expected_upgrade_log_dict: dict = json.load(f)
+        expected_upgrade_log_str: str = json.dumps(expected_upgrade_log_dict)
+        expected_upgrade_log_str = expected_upgrade_log_str.replace(
+            "GE_PROJECT_DIR",
+            v20_project_directory_with_v30_configuration_and_v20_checkpoints,
+        )
+        expected_upgrade_log_dict = json.loads(expected_upgrade_log_str)
+
+    with open(
+        f"{v20_project_directory_with_v30_configuration_and_v20_checkpoints}/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json"
+    ) as f:
+        obs_upgrade_log_dict: dict = json.load(f)
+
+    assert obs_upgrade_log_dict == expected_upgrade_log_dict
+
+
+@freeze_time("01/19/2021 13:26:39")
+def test_v2_to_v3_project_upgrade_without_manual_steps(
+    v20_project_directory_with_v30_configuration_and_no_checkpoints, caplog
+):
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    result: Result = runner.invoke(
+        cli,
+        [
+            "-c",
+            v20_project_directory_with_v30_configuration_and_no_checkpoints,
+            "--v3-api",
+            "project",
+            "upgrade",
+        ],
+        input="\n",
+        catch_exceptions=False,
+    )
+    stdout: str = result.stdout
+
+    with open(
+        file_relative_path(
+            __file__,
+            "../../test_fixtures/upgrade_helper/test_v2_to_v3_project_upgrade_without_manual_steps_expected_stdout.fixture",
+        )
+    ) as f:
+        expected_stdout: str = f.read()
+        expected_stdout = expected_stdout.replace(
+            "GE_PROJECT_DIR",
+            v20_project_directory_with_v30_configuration_and_no_checkpoints,
+        )
+        assert stdout == expected_stdout
+
+    expected_project_tree_str: str = """\
+great_expectations/
+    .gitignore
+    great_expectations.yml
+    expectations/
+        .ge_store_backend_id
+        .gitkeep
+    notebooks/
+        .gitkeep
+        pandas/
+            validation_playground.ipynb
+        spark/
+            validation_playground.ipynb
+        sql/
+            validation_playground.ipynb
+    plugins/
+        custom_data_docs/
+            styles/
+                data_docs_custom_styles.css
+    uncommitted/
+        config_variables.yml
+        data_docs/
+            local_site/
+                expectations/
+                    .gitkeep
+                static/
+                    .gitkeep
+                validations/
+                    diabetic_data/
+                        warning/
+                            20200430T191246.763896Z/
+                                c3b4c5df224fef4b1a056a0f3b93aba5.html
+        logs/
+            project_upgrades/
+                UpgradeHelperV13_20210119T132639.000000Z.json
+        validations/
+            .ge_store_backend_id
+            diabetic_data/
+                warning/
+                    20200430T191246.763896Z/
+                        c3b4c5df224fef4b1a056a0f3b93aba5.json
+"""
+    obs_project_tree_str: str = gen_directory_tree_str(
+        startpath=v20_project_directory_with_v30_configuration_and_no_checkpoints
+    )
+    assert obs_project_tree_str == expected_project_tree_str
+    # make sure config number incremented
+    assert (
+        DataContext.get_ge_config_version(
+            context_root_dir=v20_project_directory_with_v30_configuration_and_no_checkpoints
+        )
+        == 3.0
+    )
+
+    with open(
+        file_relative_path(
+            __file__,
+            "../../test_fixtures/upgrade_helper/UpgradeHelperV13_upgrade_without_manual_steps_log.json",
+        )
+    ) as f:
+        expected_upgrade_log_dict: dict = json.load(f)
+        expected_upgrade_log_str: str = json.dumps(expected_upgrade_log_dict)
+        expected_upgrade_log_str = expected_upgrade_log_str.replace(
+            "GE_PROJECT_DIR",
+            v20_project_directory_with_v30_configuration_and_no_checkpoints,
+        )
+        expected_upgrade_log_dict = json.loads(expected_upgrade_log_str)
+
+    with open(
+        f"{v20_project_directory_with_v30_configuration_and_no_checkpoints}/uncommitted/logs/project_upgrades/UpgradeHelperV13_20210119T132639.000000Z.json"
     ) as f:
         obs_upgrade_log_dict: dict = json.load(f)
 

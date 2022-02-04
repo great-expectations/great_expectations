@@ -60,6 +60,14 @@
         "ts": "DATETIME",
         "alpha": "VARCHAR",
         "numeric": "INTEGER"
+      },
+      "bigquery": {
+        "x": "NUMERIC",
+        "y": "STRING",
+        "z": "NUMERIC",
+        "ts": "DATETIME",
+        "alpha": "STRING",
+        "numeric": "NUMERIC"
       }
     },
     "tests": [
@@ -197,7 +205,6 @@
         "title": "basic_negative_test_with_timestamps",
         "exact_match_out": false,
         "out": {
-          "unexpected_list": ["Jan 01 2001 12:00:01"],
           "unexpected_index_list": [0, 9],
           "success": false
         },
@@ -553,7 +560,7 @@
           "max_value": 10,
           "min_value": 10,
           "strict_max": false,
-          "row_condition": "y == 'abc'",
+          "row_condition": "y == \"abc\"",
           "condition_parser": "pandas"
         },
         "out": {
@@ -575,7 +582,7 @@
         },
         "out": {
           "unexpected_list": [9],
-          "unexpected_index_list": [0],
+          "unexpected_index_list": [8],
           "success": false
         }
       },{

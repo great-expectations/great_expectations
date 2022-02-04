@@ -1,18 +1,10 @@
 import logging
 
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
-    column_aggregate_partial,
+from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import sa as sa
 from great_expectations.expectations.metrics.util import (
     _scipy_distribution_positional_args_from_dict,
     validate_distribution_parameters,
@@ -31,7 +23,7 @@ except ImportError as e:
 from scipy import stats
 
 
-class ColumnParameterizedDistributionKSTestPValue(ColumnMetricProvider):
+class ColumnParameterizedDistributionKSTestPValue(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Standard Deviation metric"""
 
     metric_name = "column.parameterized_distribution_ks_test_p_value"

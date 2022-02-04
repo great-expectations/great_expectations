@@ -78,19 +78,13 @@ def test_cli_init_on_new_project(
     checkpoints/
     expectations/
         .ge_store_backend_id
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -226,17 +220,18 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     # Test the second invocation of init (answer N to update broken init)
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
-    result = runner.invoke(
-        cli,
-        ["--v3-api", "init"],
-        input="N\n",
-        catch_exceptions=False,
-    )
+    with pytest.warns(UserWarning):
+        result = runner.invoke(
+            cli,
+            ["--v3-api", "init"],
+            input="N\n",
+            catch_exceptions=False,
+        )
     stdout = result.stdout
 
     assert result.exit_code == 0
     assert (
-        "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the missing files (existing files will not be modified)?"
+        "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the following missing files (existing files will not be modified)?"
         in stdout
     )
     assert "Great Expectations added some missing files required to run." not in stdout
@@ -266,7 +261,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
 
     assert result.exit_code == 0
     assert (
-        "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the missing files (existing files will not be modified)?"
+        "It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the following missing files (existing files will not be modified)?"
         in stdout
     )
     assert "Great Expectations added some missing files required to run." in stdout

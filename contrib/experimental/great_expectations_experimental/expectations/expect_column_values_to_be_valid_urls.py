@@ -85,7 +85,7 @@ class ExpectColumnValuesToBeValidUrls(ColumnMapExpectation):
                     "http://www.bvp.com",
                     "http://www.tlccollective.space",
                     "kittens",
-                    "www.google.com",
+                    "wwww.googlecom",
                 ],
                 "valid_urls": [
                     "http://www.facebook.com",

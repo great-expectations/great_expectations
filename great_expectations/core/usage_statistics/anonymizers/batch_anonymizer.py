@@ -3,6 +3,7 @@ from great_expectations.core.usage_statistics.anonymizers.batch_kwargs_anonymize
     BatchKwargsAnonymizer,
 )
 from great_expectations.data_asset import DataAsset
+from great_expectations.validator.validator import Validator
 
 
 class BatchAnonymizer(Anonymizer):
@@ -22,8 +23,11 @@ class BatchAnonymizer(Anonymizer):
             batch_kwargs = batch.batch_kwargs
             expectation_suite_name = batch.expectation_suite_name
             datasource_name = batch_kwargs.get("datasource")
+        if isinstance(batch, Validator):
+            expectation_suite_name = batch.expectation_suite_name
+            datasource_name = batch.active_batch_definition.datasource_name
 
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
 
         if batch_kwargs:
             anonymized_info_dict[

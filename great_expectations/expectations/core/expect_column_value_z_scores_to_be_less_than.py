@@ -16,13 +16,12 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
             and also for PandasExecutionEngine where the column dtype and provided type_ are unambiguous constraints
             (any dtype except 'object' or dtype of 'object' with type_ specified as 'object').
 
-            Parameters:
+            Args:
                 column (str): \
                     The column name of a numerical column.
                 threshold (number): \
                     A maximum Z-score threshold. All column Z-scores that are lower than this threshold will evaluate
                     successfully.
-
 
             Keyword Args:
                 mostly (None or a float between 0 and 1): \
@@ -33,7 +32,6 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
                     Example:
                     double_sided = True, threshold = 2 -> Z scores in non-inclusive interval(-2,2)
                     double_sided = False, threshold = 2 -> Z scores in non-inclusive interval (-infinity,2)
-
 
             Other Parameters:
                 result_format (str or None): \
@@ -80,11 +78,12 @@ class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = ("column", "threshold")
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        neccessary configuration arguments have been provided for the validation of the expectation.
+        necessary configuration arguments have been provided for the validation of the expectation.
 
         Args:
             configuration (OPTIONAL[ExpectationConfiguration]): \

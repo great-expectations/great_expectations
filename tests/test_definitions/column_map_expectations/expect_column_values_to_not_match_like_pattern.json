@@ -150,7 +150,7 @@
         "unexpected_index_list": [0, 1, 2, 3],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
       },
-      "only_for": ["sqlite", "postresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql"]
     },
     {
       "title": "positive_test_exact_mostly_w_one_non_matching_value",
@@ -165,7 +165,7 @@
         "unexpected_index_list": [0, 1, 2, 3],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
       },
-      "only_for": ["sqlite", "postresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql"]
     },
     {
       "title": "positive_test_sufficient_mostly_w_one_non_matching_value",
@@ -180,7 +180,7 @@
         "unexpected_index_list": [0, 1, 2, 3],
         "unexpected_list": ["aaa", "abb", "acc", "add"]
       },
-      "only_for": ["sqlite", "postresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql"]
     },
     {
       "title": "negative_test_one_missing_value_and_insufficent_mostly",
@@ -195,7 +195,7 @@
         "unexpected_index_list": [0, 1, 2],
         "unexpected_list": ["aaa", "abb", "acc"]
       },
-      "only_for": ["sqlite", "postresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql"]
     },
     {
       "title": "positive_test_one_missing_value_no_exceptions",
@@ -209,7 +209,7 @@
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "only_for": ["sqlite", "postresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql"]
     },
     {
       "title": "positive_test_all_missing_values",
@@ -223,7 +223,7 @@
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "only_for": ["sqlite", "postresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql"]
     },
     {
       "title": "positive_test_all_missing_values_mostly",
@@ -238,7 +238,7 @@
         "unexpected_index_list": [],
         "unexpected_list": []
       },
-      "only_for": ["sqlite", "postresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql"]
     },
     {
       "title": "negative_test_match_characters_not_at_the_beginning_of_string_exact_mostly",
@@ -253,7 +253,7 @@
         "unexpected_index_list": [1, 4],
         "unexpected_list": ["abb", "bee"]
       },
-      "only_for": ["sqlite", "postresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql"]
     }
    ]
   }]

@@ -62,7 +62,7 @@ def test_add_datasource(empty_data_context):
             "data_connectors": {
                 "test_runtime_data_connector": {
                     "class_name": "RuntimeDataConnector",
-                    "runtime_keys": ["run_id", "y", "m", "d"],
+                    "batch_identifiers": ["run_id", "y", "m", "d"],
                 }
             },
         },

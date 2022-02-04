@@ -7,7 +7,8 @@
       "y" : [1, 2, 3, 4, 5, 6, 7, 8, 9, null],
       "z" : [1, 2, 3, 4, 5, null, null, null, null, null],
       "a" : ["1/1/2016", "2/2/2016", "3/3/2016", "4/4/2016", "5/5/2016", null, null, null, null, null],
-      "b" : ["1/1/2016", "2/1/2016", "3/1/2016", "4/1/2016", "5/1/2020", null, null, null, null, null]
+      "b" : ["1/1/2016", "2/1/2016", "3/1/2016", "4/1/2016", "5/1/2020", null, null, null, null, null],
+      "c" : [1, 2, 3, 6, 7, 6, 7, 8, 9, 10]
     },
     "schemas": {
       "spark": {
@@ -16,7 +17,8 @@
         "y": "IntegerType",
         "z": "IntegerType",
         "a": "StringType",
-        "b": "StringType"
+        "b": "StringType",
+        "c": "IntegerType"
       }
     },
     "tests" : [{
@@ -80,6 +82,7 @@
     },{
       "title" : "test_parse_strings_as_datetimes_and_mostly",
       "exact_match_out" : false,
+      "only_for": ["pandas"],
       "in": {
         "column_A": "a",
         "column_B": "b",
@@ -89,6 +92,19 @@
       "out" : {
         "unexpected_list": [["1/1/2016", "1/1/2016"], ["5/5/2016", "5/1/2020"]],
         "unexpected_index_list": [0,4],
+        "success": true
+      }
+    },{
+      "title" : "test_mostly",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "x",
+        "column_B": "c",
+        "mostly": 0.8
+      },
+      "out" : {
+        "unexpected_list": [[5, 6], [6, 7]],
+        "unexpected_index_list": [3,4],
         "success": true
       }
     }]

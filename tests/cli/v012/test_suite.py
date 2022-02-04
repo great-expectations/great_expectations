@@ -2,15 +2,18 @@ import json
 import os
 from unittest import mock
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.util import filter_properties_dict
 from tests.cli.v012.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
 )
+from tests.test_utils import set_directory
 
 
 def test_suite_help_output(caplog):
@@ -131,6 +134,9 @@ def test_suite_demo_enter_existing_suite_name_as_arg(
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_answer_suite_name_prompts_with_name_of_existing_suite(
@@ -230,72 +236,72 @@ def test_suite_new_creates_empty_suite(
     project_root_dir = data_context_parameterized_expectation_suite.root_directory
     os.mkdir(os.path.join(project_root_dir, "uncommitted"))
     root_dir = project_root_dir
-    os.chdir(root_dir)
-    runner = CliRunner(mix_stderr=False)
-    csv = os.path.join(filesystem_csv_2, "f1.csv")
-    result = runner.invoke(
-        cli,
-        ["suite", "new", "-d", root_dir, "--suite", "foo"],
-        input=f"{csv}\n",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
 
-    assert result.exit_code == 0
-    assert "Enter the path" in stdout
-    assert "Name the new expectation suite" not in stdout
-    assert (
-        "Great Expectations will choose a couple of columns and generate expectations"
-        not in stdout
-    )
-    assert "Generating example Expectation Suite..." not in stdout
-    assert "The following Data Docs sites were built" not in stdout
-    assert (
-        "Great Expectations will create a new Expectation Suite 'foo' and store it here"
-        in stdout
-    )
-    assert (
-        "Because you requested an empty suite, we'll open a notebook for you now to edit it!"
-        in stdout
-    )
+    with set_directory(root_dir):
+        runner = CliRunner(mix_stderr=False)
+        csv = os.path.join(filesystem_csv_2, "f1.csv")
+        result = runner.invoke(
+            cli,
+            ["suite", "new", "-d", root_dir, "--suite", "foo"],
+            input=f"{csv}\n",
+            catch_exceptions=False,
+        )
+        stdout = result.stdout
 
-    expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
-    assert os.path.isfile(expected_suite_path)
+        assert result.exit_code == 0
+        assert "Enter the path" in stdout
+        assert "Name the new expectation suite" not in stdout
+        assert (
+            "Great Expectations will choose a couple of columns and generate expectations"
+            not in stdout
+        )
+        assert "Generating example Expectation Suite..." not in stdout
+        assert "The following Data Docs sites were built" not in stdout
+        assert (
+            "Great Expectations will create a new Expectation Suite 'foo' and store it here"
+            in stdout
+        )
+        assert (
+            "Because you requested an empty suite, we'll open a notebook for you now to edit it!"
+            in stdout
+        )
 
-    expected_notebook = os.path.join(root_dir, "uncommitted", "edit_foo.ipynb")
-    assert os.path.isfile(expected_notebook)
+        expected_suite_path = os.path.join(root_dir, "expectations", "foo.json")
+        assert os.path.isfile(expected_suite_path)
 
-    context = DataContext(root_dir)
-    assert "foo" in context.list_expectation_suite_names()
-    suite = context.get_expectation_suite("foo")
-    assert suite.expectations == []
-    citations = suite.get_citations()
-    citations[0].pop("citation_date")
-    assert citations[0] == {
-        "batch_kwargs": {
-            "data_asset_name": "f1",
-            "datasource": "mydatasource",
-            "path": csv,
-            "reader_method": "read_csv",
-        },
-        "batch_markers": None,
-        "batch_parameters": None,
-        "comment": "New suite added via CLI",
-    }
+        expected_notebook = os.path.join(root_dir, "uncommitted", "edit_foo.ipynb")
+        assert os.path.isfile(expected_notebook)
 
-    assert mock_subprocess.call_count == 1
-    call_args = mock_subprocess.call_args[0][0]
-    assert call_args[0] == "jupyter"
-    assert call_args[1] == "notebook"
-    assert expected_notebook in call_args[2]
+        context = DataContext(root_dir)
+        assert "foo" in context.list_expectation_suite_names()
+        suite = context.get_expectation_suite("foo")
+        assert suite.expectations == []
+        citations = suite.get_citations()
+        citations[0].pop("citation_date", None)
+        citations[0].pop("interactive", None)
+        assert filter_properties_dict(properties=citations[0], clean_falsy=True) == {
+            "batch_kwargs": {
+                "data_asset_name": "f1",
+                "datasource": "mydatasource",
+                "path": csv,
+                "reader_method": "read_csv",
+            },
+            "comment": "New suite added via CLI",
+        }
 
-    assert mock_webbroser.call_count == 0
+        assert mock_subprocess.call_count == 1
+        call_args = mock_subprocess.call_args[0][0]
+        assert call_args[0] == "jupyter"
+        assert call_args[1] == "notebook"
+        assert expected_notebook in call_args[2]
 
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
+        assert mock_webbroser.call_count == 0
+
+        assert_no_logging_messages_or_tracebacks(
+            my_caplog=caplog,
+            click_result=result,
+            allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+        )
 
 
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
@@ -355,16 +361,15 @@ def test_suite_new_empty_with_no_jupyter(
     suite = context.get_expectation_suite("foo")
     assert suite.expectations == []
     citations = suite.get_citations()
-    citations[0].pop("citation_date")
-    assert citations[0] == {
+    citations[0].pop("citation_date", None)
+    citations[0].pop("interactive", None)
+    assert filter_properties_dict(properties=citations[0], clean_falsy=True) == {
         "batch_kwargs": {
             "data_asset_name": "f1",
             "datasource": "mydatasource",
             "path": csv,
             "reader_method": "read_csv",
         },
-        "batch_markers": None,
-        "batch_parameters": None,
         "comment": "New suite added via CLI",
     }
 
@@ -378,6 +383,47 @@ def test_suite_new_empty_with_no_jupyter(
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_empty_with_csv_gz(
+    mock_webbroser,
+    mock_subprocess,
+    caplog,
+    data_context_parameterized_expectation_suite,
+    filesystem_csv_2_gz,
+):
+    os.mkdir(
+        os.path.join(
+            data_context_parameterized_expectation_suite.root_directory, "uncommitted"
+        )
+    )
+    root_dir = data_context_parameterized_expectation_suite.root_directory
+    runner = CliRunner(mix_stderr=False)
+    csv = os.path.join(filesystem_csv_2_gz, "f1.csv.gz")
+    result = runner.invoke(
+        cli,
+        ["suite", "new", "-d", root_dir, "--suite", "foo"],
+        input=f"{csv}\n",
+        catch_exceptions=False,
+    )
+    print(result.stdout)
+    stdout = result.stdout
+
+    assert result.exit_code == 0
+    assert "Cannot load file" not in stdout
+    context = DataContext(root_dir)
+    suite = context.get_expectation_suite("foo")
+    citations = suite.get_citations()
+    assert citations[0]["batch_kwargs"]["reader_method"] == "read_csv"
+    assert citations[0]["batch_kwargs"]["reader_options"] == {"compression": "gzip"}
+
+
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_one_datasource_without_generator_without_suite_name_argument(
@@ -458,6 +504,9 @@ def test_suite_demo_one_datasource_without_generator_without_suite_name_argument
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argument(
@@ -480,71 +529,77 @@ def test_suite_demo_multiple_datasources_with_generator_without_suite_name_argum
     root_dir = (
         site_builder_data_context_v013_with_html_store_titanic_random.root_directory
     )
-    os.chdir(root_dir)
-    context = DataContext(root_dir)
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["suite", "demo", "-d", root_dir],
-        input="1\n1\n1\nmy_new_suite\n\n",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert result.exit_code == 0
-    assert (
-        """Select a datasource
+
+    with set_directory(root_dir):
+        context = DataContext(root_dir)
+        runner = CliRunner(mix_stderr=False)
+        result = runner.invoke(
+            cli,
+            ["suite", "demo", "-d", root_dir],
+            input="1\n1\n1\nmy_new_suite\n\n",
+            catch_exceptions=False,
+        )
+        stdout = result.stdout
+        assert result.exit_code == 0
+        assert (
+            """Select a datasource
     1. mydatasource
     2. random
     3. titanic"""
-        in stdout
-    )
-    assert (
-        """Which data would you like to use?
+            in stdout
+        )
+        assert (
+            """Which data would you like to use?
     1. random (directory)
     2. titanic (directory)"""
-        in stdout
-    )
+            in stdout
+        )
 
-    assert "Name the new Expectation Suite [random.warning]" in stdout
-    assert (
-        "Great Expectations will choose a couple of columns and generate expectations"
-        in stdout
-    )
+        assert "Name the new Expectation Suite [random.warning]" in stdout
+        assert (
+            "Great Expectations will choose a couple of columns and generate expectations"
+            in stdout
+        )
 
-    assert (
-        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
-        in stdout
-    )
-    assert "Generating example Expectation Suite..." in stdout
-    assert "Building" in stdout
-    assert "The following Data Docs sites will be built" in stdout
+        assert (
+            "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
+            in stdout
+        )
+        assert "Generating example Expectation Suite..." in stdout
+        assert "Building" in stdout
+        assert "The following Data Docs sites will be built" in stdout
 
-    obs_urls = context.get_docs_sites_urls()
+        obs_urls = context.get_docs_sites_urls()
 
-    assert len(obs_urls) == 2
-    assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-        in obs_urls[0]["site_url"]
-    )
+        assert len(obs_urls) == 2
+        assert (
+            "great_expectations/uncommitted/data_docs/local_site/index.html"
+            in obs_urls[0]["site_url"]
+        )
 
-    expected_index_path = os.path.join(
-        root_dir, "uncommitted", "data_docs", "local_site", "index.html"
-    )
-    assert os.path.isfile(expected_index_path)
+        expected_index_path = os.path.join(
+            root_dir, "uncommitted", "data_docs", "local_site", "index.html"
+        )
+        assert os.path.isfile(expected_index_path)
 
-    expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
-    assert os.path.isfile(expected_suite_path)
+        expected_suite_path = os.path.join(
+            root_dir, "expectations", "my_new_suite.json"
+        )
+        assert os.path.isfile(expected_suite_path)
 
-    assert mock_webbrowser.call_count == 2
-    assert mock_subprocess.call_count == 0
+        assert mock_webbrowser.call_count == 2
+        assert mock_subprocess.call_count == 0
 
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
+        assert_no_logging_messages_or_tracebacks(
+            my_caplog=caplog,
+            click_result=result,
+            allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+        )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument(
@@ -565,56 +620,57 @@ def test_suite_demo_multiple_datasources_with_generator_with_suite_name_argument
     root_dir = (
         site_builder_data_context_v013_with_html_store_titanic_random.root_directory
     )
-    os.chdir(root_dir)
-    context = DataContext(root_dir)
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
-        input="2\n1\n1\n\n",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
 
-    assert result.exit_code == 0
-    assert "Select a datasource" in stdout
-    assert "Which data would you like to use" in stdout
-    assert (
-        "Great Expectations will choose a couple of columns and generate expectations"
-        in stdout
-    )
-    assert "Generating example Expectation Suite..." in stdout
-    assert "Building" in stdout
-    assert "The following Data Docs sites will be built" in stdout
-    assert (
-        "Great Expectations will store these expectations in a new Expectation Suite 'foo_suite' here:"
-        in stdout
-    )
+    with set_directory(root_dir):
+        context = DataContext(root_dir)
+        runner = CliRunner(mix_stderr=False)
+        result = runner.invoke(
+            cli,
+            ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
+            input="2\n1\n1\n\n",
+            catch_exceptions=False,
+        )
+        stdout = result.stdout
 
-    obs_urls = context.get_docs_sites_urls()
+        assert result.exit_code == 0
+        assert "Select a datasource" in stdout
+        assert "Which data would you like to use" in stdout
+        assert (
+            "Great Expectations will choose a couple of columns and generate expectations"
+            in stdout
+        )
+        assert "Generating example Expectation Suite..." in stdout
+        assert "Building" in stdout
+        assert "The following Data Docs sites will be built" in stdout
+        assert (
+            "Great Expectations will store these expectations in a new Expectation Suite 'foo_suite' here:"
+            in stdout
+        )
 
-    assert len(obs_urls) == 2
-    assert (
-        "great_expectations/uncommitted/data_docs/local_site/index.html"
-        in obs_urls[0]["site_url"]
-    )
+        obs_urls = context.get_docs_sites_urls()
 
-    expected_index_path = os.path.join(
-        root_dir, "uncommitted", "data_docs", "local_site", "index.html"
-    )
-    assert os.path.isfile(expected_index_path)
+        assert len(obs_urls) == 2
+        assert (
+            "great_expectations/uncommitted/data_docs/local_site/index.html"
+            in obs_urls[0]["site_url"]
+        )
 
-    expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
-    assert os.path.isfile(expected_suite_path)
+        expected_index_path = os.path.join(
+            root_dir, "uncommitted", "data_docs", "local_site", "index.html"
+        )
+        assert os.path.isfile(expected_index_path)
 
-    assert mock_webbrowser.call_count == 2
-    assert mock_subprocess.call_count == 0
+        expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
+        assert os.path.isfile(expected_suite_path)
 
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
+        assert mock_webbrowser.call_count == 2
+        assert mock_subprocess.call_count == 0
+
+        assert_no_logging_messages_or_tracebacks(
+            my_caplog=caplog,
+            click_result=result,
+            allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+        )
 
 
 def test_suite_edit_without_suite_name_raises_error():
@@ -717,7 +773,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite edit not_a_real_suite -d {}".format(project_dir),
+        f"suite edit not_a_real_suite -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -770,6 +826,9 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_without_citations(
@@ -798,66 +857,70 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     root_dir = (
         site_builder_data_context_v013_with_html_store_titanic_random.root_directory
     )
-    os.chdir(root_dir)
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
-        input="2\n1\n1\n\n",
-        catch_exceptions=False,
-    )
-    assert result.exit_code == 0
-    assert mock_webbrowser.call_count == 2
-    assert mock_subprocess.call_count == 0
-    mock_webbrowser.reset_mock()
-    mock_subprocess.reset_mock()
 
-    # remove the citations from the suite
-    context = DataContext(root_dir)
-    suite = context.get_expectation_suite("foo_suite")
-    assert isinstance(suite, ExpectationSuite)
-    suite.meta.pop("citations")
-    context.save_expectation_suite(suite)
+    with set_directory(root_dir):
+        runner = CliRunner(mix_stderr=False)
+        result = runner.invoke(
+            cli,
+            ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
+            input="2\n1\n1\n\n",
+            catch_exceptions=False,
+        )
+        assert result.exit_code == 0
+        assert mock_webbrowser.call_count == 2
+        assert mock_subprocess.call_count == 0
+        mock_webbrowser.reset_mock()
+        mock_subprocess.reset_mock()
 
-    # Actual testing really starts here
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        [
-            "suite",
-            "edit",
-            "foo_suite",
-            "-d",
-            root_dir,
-        ],
-        input="2\n1\n1\n\n",
-        catch_exceptions=False,
-    )
+        # remove the citations from the suite
+        context = DataContext(root_dir)
+        suite = context.get_expectation_suite("foo_suite")
+        assert isinstance(suite, ExpectationSuite)
+        suite.meta.pop("citations", None)
+        context.save_expectation_suite(suite)
 
-    assert result.exit_code == 0
-    stdout = result.stdout
-    assert "A batch of data is required to edit the suite" in stdout
-    assert "Select a datasource" in stdout
-    assert "Which data would you like to use" in stdout
+        # Actual testing really starts here
+        runner = CliRunner(mix_stderr=False)
+        result = runner.invoke(
+            cli,
+            [
+                "suite",
+                "edit",
+                "foo_suite",
+                "-d",
+                root_dir,
+            ],
+            input="2\n1\n1\n\n",
+            catch_exceptions=False,
+        )
 
-    expected_notebook_path = os.path.join(
-        root_dir, "uncommitted", "edit_foo_suite.ipynb"
-    )
-    assert os.path.isfile(expected_notebook_path)
+        assert result.exit_code == 0
+        stdout = result.stdout
+        assert "A batch of data is required to edit the suite" in stdout
+        assert "Select a datasource" in stdout
+        assert "Which data would you like to use" in stdout
 
-    expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
-    assert os.path.isfile(expected_suite_path)
+        expected_notebook_path = os.path.join(
+            root_dir, "uncommitted", "edit_foo_suite.ipynb"
+        )
+        assert os.path.isfile(expected_notebook_path)
 
-    assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 1
+        expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
+        assert os.path.isfile(expected_suite_path)
 
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
+        assert mock_webbrowser.call_count == 0
+        assert mock_subprocess.call_count == 1
+
+        assert_no_logging_messages_or_tracebacks(
+            my_caplog=caplog,
+            click_result=result,
+            allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+        )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_with_suite_containing_citations(
@@ -883,54 +946,58 @@ def test_suite_edit_multiple_datasources_with_generator_with_no_additional_args_
     root_dir = (
         site_builder_data_context_v013_with_html_store_titanic_random.root_directory
     )
-    os.chdir(root_dir)
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
-        input="2\n1\n1\n\n",
-        catch_exceptions=False,
-    )
-    assert mock_webbrowser.call_count == 2
-    assert mock_subprocess.call_count == 0
-    mock_subprocess.reset_mock()
-    mock_webbrowser.reset_mock()
-    assert result.exit_code == 0
-    context = DataContext(root_dir)
-    suite = context.get_expectation_suite("foo_suite")
-    assert isinstance(suite, ExpectationSuite)
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["suite", "edit", "foo_suite", "-d", root_dir],
-        input="2\n1\n1\n\n",
-        catch_exceptions=False,
-    )
+    with set_directory(root_dir):
+        runner = CliRunner(mix_stderr=False)
+        result = runner.invoke(
+            cli,
+            ["suite", "demo", "-d", root_dir, "--suite", "foo_suite"],
+            input="2\n1\n1\n\n",
+            catch_exceptions=False,
+        )
+        assert mock_webbrowser.call_count == 2
+        assert mock_subprocess.call_count == 0
+        mock_subprocess.reset_mock()
+        mock_webbrowser.reset_mock()
+        assert result.exit_code == 0
+        context = DataContext(root_dir)
+        suite = context.get_expectation_suite("foo_suite")
+        assert isinstance(suite, ExpectationSuite)
 
-    assert result.exit_code == 0
-    stdout = result.stdout
-    assert "Select a datasource" not in stdout
-    assert "Which data would you like to use" not in stdout
+        runner = CliRunner(mix_stderr=False)
+        result = runner.invoke(
+            cli,
+            ["suite", "edit", "foo_suite", "-d", root_dir],
+            input="2\n1\n1\n\n",
+            catch_exceptions=False,
+        )
 
-    expected_notebook_path = os.path.join(
-        root_dir, "uncommitted", "edit_foo_suite.ipynb"
-    )
-    assert os.path.isfile(expected_notebook_path)
+        assert result.exit_code == 0
+        stdout = result.stdout
+        assert "Select a datasource" not in stdout
+        assert "Which data would you like to use" not in stdout
 
-    expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
-    assert os.path.isfile(expected_suite_path)
+        expected_notebook_path = os.path.join(
+            root_dir, "uncommitted", "edit_foo_suite.ipynb"
+        )
+        assert os.path.isfile(expected_notebook_path)
 
-    assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 1
+        expected_suite_path = os.path.join(root_dir, "expectations", "foo_suite.json")
+        assert os.path.isfile(expected_suite_path)
 
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
+        assert mock_webbrowser.call_count == 0
+        assert mock_subprocess.call_count == 1
+
+        assert_no_logging_messages_or_tracebacks(
+            my_caplog=caplog,
+            click_result=result,
+            allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
+        )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_multiple_datasources_with_generator_with_batch_kwargs_arg(
@@ -1145,6 +1212,9 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_citations(
@@ -1173,60 +1243,65 @@ def test_suite_edit_one_datasources_no_generator_with_no_additional_args_and_no_
     project_root_dir = not_so_empty_data_context.root_directory
 
     root_dir = project_root_dir
-    os.chdir(root_dir)
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["suite", "demo", "-d", root_dir],
-        input="{:s}\nmy_new_suite\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert mock_webbrowser.call_count == 1
-    assert mock_subprocess.call_count == 0
-    mock_subprocess.reset_mock()
-    mock_webbrowser.reset_mock()
-    assert result.exit_code == 0
-    assert (
-        "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
-        in stdout
-    )
 
-    # remove the citations from the suite
-    context = DataContext(project_root_dir)
-    suite = context.get_expectation_suite("my_new_suite")
-    suite.meta.pop("citations")
-    context.save_expectation_suite(suite)
+    with set_directory(root_dir):
+        runner = CliRunner(mix_stderr=False)
+        result = runner.invoke(
+            cli,
+            ["suite", "demo", "-d", root_dir],
+            input="{:s}\nmy_new_suite\n\n".format(
+                os.path.join(filesystem_csv_2, "f1.csv")
+            ),
+            catch_exceptions=False,
+        )
+        stdout = result.stdout
+        assert mock_webbrowser.call_count == 1
+        assert mock_subprocess.call_count == 0
+        mock_subprocess.reset_mock()
+        mock_webbrowser.reset_mock()
+        assert result.exit_code == 0
+        assert (
+            "Great Expectations will store these expectations in a new Expectation Suite 'my_new_suite' here:"
+            in stdout
+        )
 
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        ["suite", "edit", "my_new_suite", "-d", root_dir],
-        input="{:s}\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
-        catch_exceptions=False,
-    )
+        # remove the citations from the suite
+        context = DataContext(project_root_dir)
+        suite = context.get_expectation_suite("my_new_suite")
+        suite.meta.pop("citations")
+        context.save_expectation_suite(suite)
 
-    assert result.exit_code == 0
-    stdout = result.stdout
-    assert "Select a datasource" not in stdout
-    assert "Which data would you like to use" not in stdout
-    assert "Enter the path" in stdout
+        runner = CliRunner(mix_stderr=False)
+        result = runner.invoke(
+            cli,
+            ["suite", "edit", "my_new_suite", "-d", root_dir],
+            input="{:s}\n\n".format(os.path.join(filesystem_csv_2, "f1.csv")),
+            catch_exceptions=False,
+        )
 
-    expected_notebook_path = os.path.join(
-        root_dir, "uncommitted", "edit_my_new_suite.ipynb"
-    )
-    assert os.path.isfile(expected_notebook_path)
+        assert result.exit_code == 0
+        stdout = result.stdout
+        assert "Select a datasource" not in stdout
+        assert "Which data would you like to use" not in stdout
+        assert "Enter the path" in stdout
 
-    expected_suite_path = os.path.join(root_dir, "expectations", "my_new_suite.json")
-    assert os.path.isfile(expected_suite_path)
+        expected_notebook_path = os.path.join(
+            root_dir, "uncommitted", "edit_my_new_suite.ipynb"
+        )
+        assert os.path.isfile(expected_notebook_path)
 
-    assert mock_webbrowser.call_count == 0
-    assert mock_subprocess.call_count == 1
+        expected_suite_path = os.path.join(
+            root_dir, "expectations", "my_new_suite.json"
+        )
+        assert os.path.isfile(expected_suite_path)
 
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-    )
+        assert mock_webbrowser.call_count == 0
+        assert mock_subprocess.call_count == 1
+
+        assert_no_logging_messages_or_tracebacks(
+            my_caplog=caplog,
+            click_result=result,
+        )
 
 
 def test_suite_list_with_zero_suites(caplog, empty_data_context):
@@ -1235,7 +1310,7 @@ def test_suite_list_with_zero_suites(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"suite list -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1255,7 +1330,7 @@ def test_suite_list_with_one_suite(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"suite list -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1278,7 +1353,7 @@ def test_suite_list_with_multiple_suites(caplog, empty_data_context):
 
     result = runner.invoke(
         cli,
-        "suite list -d {}".format(project_dir),
+        f"suite list -d {project_dir}",
         catch_exceptions=False,
     )
     output = result.output
@@ -1390,7 +1465,7 @@ def test_suite_delete_with_one_suite(
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
-        "suite delete a.warning -d {}".format(project_dir),
+        f"suite delete a.warning -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

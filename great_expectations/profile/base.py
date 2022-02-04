@@ -50,7 +50,9 @@ class OrderedProfilerCardinality(OrderedEnum):
     UNIQUE = 7
 
     @classmethod
-    def get_basic_column_cardinality(cls, num_unique=0, pct_unique=0):
+    def get_basic_column_cardinality(
+        cls, num_unique=0, pct_unique=0
+    ) -> "OrderedProfilerCardinality":  # noqa: F821
         """
         Takes the number and percentage of unique values in a column and returns the column cardinality.
         If you are unexpectedly returning a cardinality of "None", ensure that you are passing in values for both
@@ -109,8 +111,6 @@ class ProfilerCardinality(Enum):
 class ProfilerTypeMapping:
     """Useful backend type mapping for building profilers."""
 
-    # Future support possibility: JSON (RECORD)
-    # Future support possibility: BINARY (BYTES)
     INT_TYPE_NAMES = [
         "INTEGER",
         "integer",
@@ -124,40 +124,56 @@ class ProfilerTypeMapping:
         "uint16",
         "uint32",
         "uint64",
+        "Int8Dtype",
+        "Int16Dtype",
+        "Int32Dtype",
+        "Int64Dtype",
+        "UInt8Dtype",
+        "UInt16Dtype",
+        "UInt32Dtype",
+        "UInt64Dtype",
         "INT",
+        "INTEGER",
+        "INT64",
         "TINYINT",
         "BYTEINT",
         "SMALLINT",
         "BIGINT",
         "IntegerType",
         "LongType",
-        "DECIMAL",
     ]
     FLOAT_TYPE_NAMES = [
         "FLOAT",
-        "DOUBLE",
         "FLOAT4",
         "FLOAT8",
+        "FLOAT64",
+        "DOUBLE",
         "DOUBLE_PRECISION",
         "NUMERIC",
         "FloatType",
         "DoubleType",
+        "float",
         "float_",
         "float16",
         "float32",
         "float64",
         "number",
         "DECIMAL",
+        "REAL",
     ]
     STRING_TYPE_NAMES = [
         "CHAR",
+        "NCHAR",
         "VARCHAR",
         "NVARCHAR",
         "TEXT",
+        "NTEXT",
         "STRING",
         "StringType",
         "string",
         "str",
+        "object",
+        "dtype('O')",
     ]
     BOOLEAN_TYPE_NAMES = [
         "BOOLEAN",
@@ -169,15 +185,47 @@ class ProfilerTypeMapping:
         "BooleanType",
     ]
     DATETIME_TYPE_NAMES = [
-        "DATETIME",
         "DATE",
         "TIME",
+        "DATETIME",
+        "DATETIME2",
+        "DATETIME64",
+        "SMALLDATETIME",
+        "DATETIMEOFFSET",
         "TIMESTAMP",
-        "DateType",
-        "TimestampType",
-        "datetime64",
         "Timestamp",
+        "TimestampType",
+        "DateType",
+        "datetime64",
         "datetime64[ns]",
+        "timedelta[ns]",
+        "<M8[ns]",
+    ]
+    BINARY_TYPE_NAMES = [
+        "BINARY",
+        "binary",
+        "VARBINARY",
+        "varbinary",
+        "IMAGE",
+        "image",
+    ]
+    CURRENCY_TYPE_NAMES = [
+        "MONEY",
+        "money",
+        "SMALLMONEY",
+        "smallmoney",
+    ]
+    IDENTIFIER_TYPE_NAMES = [
+        "UNIQUEIDENTIFIER",
+        "uniqueidentifier",
+    ]
+    MISCELLANEOUS_TYPE_NAMES = [
+        "SQL_VARIANT",
+        "sql_variant",
+    ]
+    RECORD_TYPE_NAMES = [
+        "JSON",
+        "json",
     ]
 
 
@@ -194,26 +242,26 @@ profiler_data_types_with_mapping = {
     "UNKNOWN": ["unknown"],
 }
 
-profiler_semantic_types = {
-    "DATETIME",
-    "NUMERIC",
-    "STRING",
-    "VALUE_SET",
-    "BOOLEAN",
-    "OTHER",
-}
+
+class ProfilerSemanticTypes(Enum):
+    DATETIME = "DATETIME"
+    NUMERIC = "NUMERIC"
+    STRING = "STRING"
+    VALUE_SET = "VALUE_SET"
+    BOOLEAN = "BOOLEAN"
+    OTHER = "OTHER"
 
 
 class Profiler(metaclass=abc.ABCMeta):
     """
-    Profilers creates suites from various sources of truth.
+    Profiler creates suites from various sources of truth.
 
     These sources of truth can be data or non-data sources such as DDLs.
 
     When implementing a Profiler ensure that you:
     - Implement a . _profile() method
     - Optionally implement .validate() method that verifies you are running on the right
-     kind of object. You should raise an appropriate Exception if the object is not valid.
+      kind of object. You should raise an appropriate Exception if the object is not valid.
     """
 
     def __init__(self, configuration: dict = None):

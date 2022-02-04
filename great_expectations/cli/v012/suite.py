@@ -12,6 +12,7 @@ from great_expectations.cli.v012.util import cli_message, cli_message_list
 from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
@@ -118,8 +119,11 @@ def _suite_edit(
                     )
                 )
                 if not suppress_usage_message:
-                    toolkit.send_usage_message(
-                        data_context=context, event=usage_event, success=False
+                    send_usage_message(
+                        data_context=context,
+                        event=usage_event,
+                        api_version="v2",
+                        success=True,
                     )
                 sys.exit(1)
             except ge_exceptions.DataContextError:
@@ -127,8 +131,11 @@ def _suite_edit(
                     "<red>Please check that your batch_kwargs are able to load a batch.</red>"
                 )
                 if not suppress_usage_message:
-                    toolkit.send_usage_message(
-                        data_context=context, event=usage_event, success=False
+                    send_usage_message(
+                        data_context=context,
+                        event=usage_event,
+                        api_version="v2",
+                        success=False,
                     )
                 sys.exit(1)
             except ValueError as ve:
@@ -138,8 +145,11 @@ def _suite_edit(
                     )
                 )
                 if not suppress_usage_message:
-                    toolkit.send_usage_message(
-                        data_context=context, event=usage_event, success=False
+                    send_usage_message(
+                        data_context=context,
+                        event=usage_event,
+                        api_version="v2",
+                        success=False,
                     )
                 sys.exit(1)
         elif citations:
@@ -158,17 +168,23 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                     context, datasource_name=datasource
                 )
             except ValueError as ve:
-                cli_message("<red>{}</red>".format(ve))
-                toolkit.send_usage_message(
-                    data_context=context, event=usage_event, success=False
+                cli_message(f"<red>{ve}</red>")
+                send_usage_message(
+                    data_context=context,
+                    event=usage_event,
+                    api_version="v2",
+                    success=False,
                 )
                 sys.exit(1)
 
             if not data_source:
                 cli_message("<red>No datasources found in the context.</red>")
                 if not suppress_usage_message:
-                    toolkit.send_usage_message(
-                        data_context=context, event=usage_event, success=False
+                    send_usage_message(
+                        data_context=context,
+                        event=usage_event,
+                        api_version="v2",
+                        success=False,
                     )
                 sys.exit(1)
 
@@ -186,7 +202,7 @@ A batch of data is required to edit the suite - let's help you to specify it."""
                     additional_batch_kwargs=additional_batch_kwargs,
                 )
 
-        notebook_name = "edit_{}.ipynb".format(suite.expectation_suite_name)
+        notebook_name = f"edit_{suite.expectation_suite_name}.ipynb"
         notebook_path = _get_notebook_path(context, notebook_name)
         SuiteEditNotebookRenderer.from_data_context(context).render_to_disk(
             suite, notebook_path, batch_kwargs
@@ -202,10 +218,11 @@ A batch of data is required to edit the suite - let's help you to specify it."""
         )
 
         if not suppress_usage_message:
-            toolkit.send_usage_message(
+            send_usage_message(
                 data_context=context,
                 event=usage_event,
                 event_payload=payload,
+                api_version="v2",
                 success=True,
             )
 
@@ -213,8 +230,11 @@ A batch of data is required to edit the suite - let's help you to specify it."""
             toolkit.launch_jupyter_notebook(notebook_path)
 
     except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+        send_usage_message(
+            data_context=context,
+            event=usage_event,
+            api_version="v2",
+            success=False,
         )
         raise e
 
@@ -327,8 +347,11 @@ def _suite_new(
                         """<green>Because you requested an empty suite, we'll open a notebook for you now to edit it!
 If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
                     )
-            toolkit.send_usage_message(
-                data_context=context, event=usage_event, success=True
+            send_usage_message(
+                data_context=context,
+                event=usage_event,
+                api_version="v2",
+                success=True,
             )
 
             _suite_edit(
@@ -341,8 +364,11 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
                 suppress_usage_message=True,  # dont want actually send usage_message since the function call is not the result of actual usage
             )
         else:
-            toolkit.send_usage_message(
-                data_context=context, event=usage_event, success=False
+            send_usage_message(
+                data_context=context,
+                event=usage_event,
+                api_version="v2",
+                success=False,
             )
     except (
         ge_exceptions.DataContextError,
@@ -350,14 +376,20 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         OSError,
         SQLAlchemyError,
     ) as e:
-        cli_message("<red>{}</red>".format(e))
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+        cli_message(f"<red>{e}</red>")
+        send_usage_message(
+            data_context=context,
+            event=usage_event,
+            api_version="v2",
+            success=False,
         )
         sys.exit(1)
     except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+        send_usage_message(
+            data_context=context,
+            event=usage_event,
+            api_version="v2",
+            success=False,
         )
         raise e
 
@@ -392,7 +424,12 @@ def suite_delete(suite, directory):
 
     context.delete_expectation_suite(suite)
     cli_message(f"Deleted the expectation suite named: {suite}")
-    toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
+    send_usage_message(
+        data_context=context,
+        event=usage_event,
+        api_version="v2",
+        success=True,
+    )
 
 
 @suite.command(name="scaffold")
@@ -428,15 +465,21 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
             cli_message(
                 f"  - If you wish to adjust your scaffolding, you can open this notebook with jupyter: `{notebook_path}` <red>(Please note that if you run that notebook, you will overwrite your existing suite.)</red>"
             )
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+        send_usage_message(
+            data_context=context,
+            event=usage_event,
+            api_version="v2",
+            success=False,
         )
         sys.exit(1)
 
     datasource = toolkit.select_datasource(context)
     if datasource is None:
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event, success=False
+        send_usage_message(
+            data_context=context,
+            event=usage_event,
+            api_version="v2",
+            success=False,
         )
         sys.exit(1)
 
@@ -445,7 +488,12 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
     renderer = SuiteScaffoldNotebookRenderer(context, _suite, batch_kwargs)
     renderer.render_to_disk(notebook_path)
 
-    toolkit.send_usage_message(data_context=context, event=usage_event, success=True)
+    send_usage_message(
+        data_context=context,
+        event=usage_event,
+        api_version="v2",
+        success=True,
+    )
 
     if jupyter:
         toolkit.launch_jupyter_notebook(notebook_path)
@@ -468,27 +516,36 @@ def suite_list(directory):
 
     try:
         suite_names = [
-            " - <cyan>{}</cyan>".format(suite_name)
+            f" - <cyan>{suite_name}</cyan>"
             for suite_name in context.list_expectation_suite_names()
         ]
         if len(suite_names) == 0:
             cli_message("No Expectation Suites found")
-            toolkit.send_usage_message(
-                data_context=context, event="cli.suite.list", success=True
+            send_usage_message(
+                data_context=context,
+                event="cli.suite.list",
+                api_version="v2",
+                success=True,
             )
             return
         elif len(suite_names) == 1:
             list_intro_string = "1 Expectation Suite found:"
         else:
-            list_intro_string = "{} Expectation Suites found:".format(len(suite_names))
+            list_intro_string = f"{len(suite_names)} Expectation Suites found:"
 
         cli_message_list(suite_names, list_intro_string)
-        toolkit.send_usage_message(
-            data_context=context, event="cli.suite.list", success=True
+        send_usage_message(
+            data_context=context,
+            event="cli.suite.list",
+            api_version="v2",
+            success=True,
         )
     except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event="cli.suite.list", success=False
+        send_usage_message(
+            data_context=context,
+            event="cli.suite.list",
+            api_version="v2",
+            success=False,
         )
         raise e
 

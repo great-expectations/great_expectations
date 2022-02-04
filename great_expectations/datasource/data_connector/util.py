@@ -6,24 +6,32 @@ import os
 import re
 import sre_constants
 import sre_parse
+import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import pandas as pd
-
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
-from great_expectations.core.id_dict import (
-    PartitionDefinition,
-    PartitionDefinitionSubset,
-)
+from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.sorter import Sorter
-from great_expectations.execution_engine.sqlalchemy_batch_data import (
-    SqlAlchemyBatchData,
-)
 
 logger = logging.getLogger(__name__)
+
+try:
+    from azure.storage.blob import BlobPrefix
+except ImportError:
+    BlobPrefix = None
+    logger.debug(
+        "Unable to load azure types; install optional Azure dependency for support."
+    )
+
+try:
+    from google.cloud import storage
+except ImportError:
+    storage = None
+    logger.debug(
+        "Unable to load GCS connection object; install optional Google dependency for support"
+    )
 
 try:
     import pyspark
@@ -32,7 +40,7 @@ except ImportError:
     pyspark = None
     pyspark_sql = None
     logger.debug(
-        "Unable to load pyspark and pyspark.sql; install optional spark dependency for support."
+        "Unable to load pyspark and pyspark.sql; install optional Spark dependency for support."
     )
 
 
@@ -62,20 +70,32 @@ def batch_definition_matches_batch_request(
     ):
         return False
 
-    if batch_request.partition_request:
-        batch_identifiers: Any = batch_request.partition_request.get(
-            "batch_identifiers"
+    if batch_request.data_connector_query:
+        batch_filter_parameters: Any = batch_request.data_connector_query.get(
+            "batch_filter_parameters"
         )
-        if batch_identifiers:
-            if not isinstance(batch_identifiers, dict):
+        if batch_filter_parameters:
+            if not isinstance(batch_filter_parameters, dict):
                 return False
-            for key in batch_identifiers.keys():
+            for key in batch_filter_parameters.keys():
                 if not (
-                    key in batch_definition.partition_definition
-                    and batch_definition.partition_definition[key]
-                    == batch_identifiers[key]
+                    key in batch_definition.batch_identifiers
+                    and batch_definition.batch_identifiers[key]
+                    == batch_filter_parameters[key]
                 ):
                     return False
+
+    if batch_request.batch_identifiers:
+        if not isinstance(batch_request.batch_identifiers, dict):
+            return False
+        for key in batch_request.batch_identifiers.keys():
+            if not (
+                key in batch_definition.batch_identifiers
+                and batch_definition.batch_identifiers[key]
+                == batch_request.batch_identifiers[key]
+            ):
+                return False
+
     return True
 
 
@@ -88,49 +108,70 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     data_asset_name: Optional[str] = None,
 ) -> Optional[List[BatchDefinition]]:
     processed_data_reference: Optional[
-        Tuple[str, PartitionDefinitionSubset]
-    ] = convert_data_reference_string_to_partition_definition_using_regex(
+        Tuple[str, IDDict]
+    ] = convert_data_reference_string_to_batch_identifiers_using_regex(
         data_reference=data_reference,
         regex_pattern=regex_pattern,
         group_names=group_names,
     )
     if processed_data_reference is None:
         return None
-    data_asset_name_from_partition_definition: str = processed_data_reference[0]
-    partition_definition: PartitionDefinitionSubset = processed_data_reference[1]
+    data_asset_name_from_batch_identifiers: str = processed_data_reference[0]
+    batch_identifiers: IDDict = processed_data_reference[1]
     if data_asset_name is None:
-        data_asset_name = data_asset_name_from_partition_definition
+        data_asset_name = data_asset_name_from_batch_identifiers
 
     return [
         BatchDefinition(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
-            partition_definition=PartitionDefinition(partition_definition),
+            batch_identifiers=IDDict(batch_identifiers),
         )
     ]
 
 
-def convert_data_reference_string_to_partition_definition_using_regex(
+def convert_data_reference_string_to_batch_identifiers_using_regex(
     data_reference: str,
     regex_pattern: str,
     group_names: List[str],
-) -> Optional[Tuple[str, PartitionDefinitionSubset]]:
+) -> Optional[Tuple[str, IDDict]]:
     # noinspection PyUnresolvedReferences
-    matches: Optional[re.Match] = re.match(regex_pattern, data_reference)
+    pattern = re.compile(regex_pattern)
+    matches: Optional[re.Match] = pattern.match(data_reference)
     if matches is None:
         return None
-    groups: list = list(matches.groups())
-    partition_definition: PartitionDefinitionSubset = PartitionDefinitionSubset(
-        dict(zip(group_names, groups))
-    )
 
-    # TODO: <Alex>Accommodating "data_asset_name" inside partition_definition (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
-    # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that PartitionDefinition never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
-    data_asset_name: str = DEFAULT_DATA_ASSET_NAME
-    if "data_asset_name" in partition_definition:
-        data_asset_name = partition_definition.pop("data_asset_name")
-    return data_asset_name, partition_definition
+    # Check for `(?P<name>)` named group syntax
+    match_dict = matches.groupdict()
+    if match_dict:  # Only named groups will populate this dict
+        batch_identifiers = _determine_batch_identifiers_using_named_groups(
+            match_dict, group_names
+        )
+    else:
+        groups: list = list(matches.groups())
+        batch_identifiers: IDDict = IDDict(dict(zip(group_names, groups)))
+
+    # TODO: <Alex>Accommodating "data_asset_name" inside batch_identifiers (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
+    # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that IDDict never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
+    data_asset_name: str = batch_identifiers.pop(
+        "data_asset_name", DEFAULT_DATA_ASSET_NAME
+    )
+    return data_asset_name, batch_identifiers
+
+
+def _determine_batch_identifiers_using_named_groups(
+    match_dict: dict, group_names: List[str]
+) -> IDDict:
+    batch_identifiers = IDDict()
+    for key, value in match_dict.items():
+        if key in group_names:
+            batch_identifiers[key] = value
+        else:
+            logger.warning(
+                f"The named group '{key}' must explicitly be stated in group_names to be parsed"
+            )
+    return batch_identifiers
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
@@ -144,34 +185,29 @@ def map_batch_definition_to_data_reference_string_using_regex(
         )
 
     data_asset_name: str = batch_definition.data_asset_name
-    partition_definition: PartitionDefinition = batch_definition.partition_definition
+    batch_identifiers: IDDict = batch_definition.batch_identifiers
     data_reference: str = (
-        convert_partition_definition_to_data_reference_string_using_regex(
-            data_asset_name=data_asset_name,
-            partition_definition=partition_definition,
+        convert_batch_identifiers_to_data_reference_string_using_regex(
+            batch_identifiers=batch_identifiers,
             regex_pattern=regex_pattern,
             group_names=group_names,
+            data_asset_name=data_asset_name,
         )
     )
     return data_reference
 
 
 # TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
-def convert_partition_definition_to_data_reference_string_using_regex(
-    partition_definition: PartitionDefinition,
+def convert_batch_identifiers_to_data_reference_string_using_regex(
+    batch_identifiers: IDDict,
     regex_pattern: str,
     group_names: List[str],
     data_asset_name: Optional[str] = None,
 ) -> str:
-    if not isinstance(
-        partition_definition, (PartitionDefinitionSubset, PartitionDefinition)
-    ):
-        raise TypeError(
-            "partition_definition is not "
-            "an instance of type PartitionDefinitionSubset or PartitionDefinition"
-        )
+    if not isinstance(batch_identifiers, IDDict):
+        raise TypeError("batch_identifiers is not " "an instance of type IDDict")
 
-    template_arguments: dict = copy.deepcopy(partition_definition)
+    template_arguments: dict = copy.deepcopy(batch_identifiers)
     # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>
     if data_asset_name is not None:
         template_arguments["data_asset_name"] = data_asset_name
@@ -180,7 +216,7 @@ def convert_partition_definition_to_data_reference_string_using_regex(
         regex_pattern=regex_pattern,
         group_names=group_names,
     )
-    converted_string = filepath_template.format(**template_arguments)
+    converted_string: str = filepath_template.format(**template_arguments)
 
     return converted_string
 
@@ -190,7 +226,7 @@ def _invert_regex_to_data_reference_template(
     regex_pattern: str,
     group_names: List[str],
 ) -> str:
-    """Create a string template based on a regex and corresponding list of group names.
+    r"""Create a string template based on a regex and corresponding list of group names.
 
     For example:
 
@@ -282,6 +318,110 @@ def get_filesystem_one_level_directory_glob_path_list(
         for posix_path in globbed_paths
     ]
     return path_list
+
+
+def list_azure_keys(
+    azure,
+    query_options: dict,
+    recursive: bool = False,
+) -> List[str]:
+    """
+    Utilizes the Azure Blob Storage connection object to retrieve blob names based on user-provided criteria.
+
+    For InferredAssetAzureDataConnector, we take container and name_starts_with and search for files using RegEx at and below the level
+    specified by those parameters. However, for ConfiguredAssetAzureDataConnector, we take container and name_starts_with and
+    search for files using RegEx only at the level specified by that bucket and prefix.
+
+    This restriction for the ConfiguredAssetAzureDataConnector is needed, because paths on Azure are comprised not only the leaf file name
+    but the full path that includes both the prefix and the file name.  Otherwise, in the situations where multiple data assets
+    share levels of a directory tree, matching files to data assets will not be possible, due to the path ambiguity.
+
+    Args:
+        azure (BlobServiceClient): Azure connnection object responsible for accessing container
+        query_options (dict): Azure query attributes ("container", "name_starts_with", "delimiter")
+        recursive (bool): True for InferredAssetAzureDataConnector and False for ConfiguredAssetAzureDataConnector (see above)
+
+    Returns:
+        List of keys representing Azure file paths (as filtered by the query_options dict)
+    """
+    container: str = query_options["container"]
+    container_client = azure.get_container_client(container)
+
+    path_list: List[str] = []
+
+    def _walk_blob_hierarchy(name_starts_with: str) -> None:
+        for item in container_client.walk_blobs(name_starts_with=name_starts_with):
+            if isinstance(item, BlobPrefix):
+                if recursive:
+                    _walk_blob_hierarchy(name_starts_with=item.name)
+            else:
+                path_list.append(item.name)
+
+    name_starts_with: str = query_options["name_starts_with"]
+    _walk_blob_hierarchy(name_starts_with)
+
+    return path_list
+
+
+def list_gcs_keys(
+    gcs,
+    query_options: dict,
+    recursive: bool = False,
+) -> List[str]:
+    """
+    Utilizes the GCS connection object to retrieve blob names based on user-provided criteria.
+
+    For InferredAssetGCSDataConnector, we take `bucket_or_name` and `prefix` and search for files using RegEx at and below the level
+    specified by those parameters. However, for ConfiguredAssetGCSDataConnector, we take `bucket_or_name` and `prefix` and
+    search for files using RegEx only at the level specified by that bucket and prefix.
+
+    This restriction for the ConfiguredAssetGCSDataConnector is needed because paths on GCS are comprised not only the leaf file name
+    but the full path that includes both the prefix and the file name. Otherwise, in the situations where multiple data assets
+    share levels of a directory tree, matching files to data assets will not be possible due to the path ambiguity.
+
+    Please note that the SDK's `list_blobs` method takes in a `delimiter` key that drastically alters the traversal of a given bucket:
+        - If a delimiter is not set (default), the traversal is recursive and the output will contain all blobs in the current directory
+          as well as those in any nested directories.
+        - If a delimiter is set, the traversal will continue until that value is seen; as the default is "/", traversal will be scoped
+          within the current directory and end before visiting nested directories.
+
+    In order to provide users with finer control of their config while also ensuring output that is in line with the `recursive` arg,
+    we deem it appropriate to manually override the value of the delimiter only in cases where it is absolutely necessary.
+
+    Args:
+        gcs (storage.Client): GCS connnection object responsible for accessing bucket
+        query_options (dict): GCS query attributes ("bucket_or_name", "prefix", "delimiter", "max_results")
+        recursive (bool): True for InferredAssetGCSDataConnector and False for ConfiguredAssetGCSDataConnector (see above)
+
+    Returns:
+        List of keys representing GCS file paths (as filtered by the `query_options` dict)
+    """
+    # Delimiter determines whether or not traversal of bucket is recursive
+    # Manually set to appropriate default if not already set by user
+    delimiter = query_options["delimiter"]
+    if delimiter is None and not recursive:
+        warnings.warn(
+            'In order to access blobs with a ConfiguredAssetGCSDataConnector, \
+            the delimiter that has been passed to gcs_options in your config cannot be empty; \
+            please note that the value is being set to the default "/" in order to work with the Google SDK.'
+        )
+        query_options["delimiter"] = "/"
+    elif delimiter is not None and recursive:
+        warnings.warn(
+            "In order to access blobs with an InferredAssetGCSDataConnector, \
+            the delimiter that has been passed to gcs_options in your config must be empty; \
+            please note that the value is being set to None in order to work with the Google SDK."
+        )
+        query_options["delimiter"] = None
+
+    keys: List[str] = []
+    for blob in gcs.list_blobs(**query_options):
+        name: str = blob.name
+        if name.endswith("/"):  # GCS includes directories in blob output
+            continue
+        keys.append(name)
+
+    return keys
 
 
 def list_s3_keys(

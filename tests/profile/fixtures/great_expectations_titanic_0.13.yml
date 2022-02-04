@@ -22,7 +22,7 @@ datasources:
       my_data_connector:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
-        runtime_keys:
+        batch_identifiers:
           - an_example_key
           - another_example_key
   my_spark_datasource:
@@ -33,7 +33,7 @@ datasources:
       my_data_connector:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
-        runtime_keys:
+        batch_identifiers:
           - an_example_key
           - another_example_key
 config_variables_file_path: uncommitted/config_variables.yml
@@ -117,5 +117,5 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 
 anonymous_usage_statistics:
-  enabled: false
+  enabled: true
 notebooks:

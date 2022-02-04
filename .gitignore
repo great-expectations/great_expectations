@@ -1,5 +1,12 @@
 # Documentation build
 docs/source/_build
+node_modules
+docs/build
+.docusaurus
+.cache-loader
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Render test output
 tests/render/output/*
@@ -35,6 +42,7 @@ wheels/
 .installed.cfg
 *.egg
 .vscode/
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -125,3 +133,6 @@ ENV/
 
 # Special "scratchpad" directory for notes, code samples, experiments, etc.
 DO_NOT_COMMIT
+
+# Hive Metastore from Spark
+metastore_db

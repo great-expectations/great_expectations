@@ -1,9 +1,20 @@
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.dataset import Dataset
+from great_expectations.expectations.registry import (
+    list_registered_expectation_implementations,
+)
 
-GE_EXPECTATION_TYPES = [
+v2_batchkwargs_api_supported_expectation_types = [
     el for el in Dataset.__dict__.keys() if el.startswith("expect_")
 ]
+
+v3_batchrequest_api_supported_expectation_types = (
+    list_registered_expectation_implementations()
+)
+
+GE_EXPECTATION_TYPES = set(v2_batchkwargs_api_supported_expectation_types).union(
+    set(v3_batchrequest_api_supported_expectation_types)
+)
 
 
 class ExpectationSuiteAnonymizer(Anonymizer):
@@ -12,7 +23,7 @@ class ExpectationSuiteAnonymizer(Anonymizer):
         self._ge_expectation_types = GE_EXPECTATION_TYPES
 
     def anonymize_expectation_suite_info(self, expectation_suite):
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
         anonymized_expectation_counts = list()
 
         expectations = expectation_suite.expectations

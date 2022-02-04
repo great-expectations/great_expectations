@@ -76,11 +76,11 @@ class DataAsset:
             )
         super().__init__(*args, **kwargs)
         self._config = {"interactive_evaluation": interactive_evaluation}
+        self._data_context = data_context
         self._initialize_expectations(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
         )
-        self._data_context = data_context
         self._batch_kwargs = BatchKwargs(batch_kwargs)
         self._batch_markers = batch_markers
         self._batch_parameters = batch_parameters
@@ -297,8 +297,9 @@ class DataAsset:
                     stored_config = expectation_config
                 else:
                     # Append the expectation to the config.
-                    stored_config = self._expectation_suite.add_expectation(
-                        expectation_config
+                    stored_config = self._expectation_suite._add_expectation(
+                        expectation_configuration=expectation_config,
+                        send_usage_event=False,
                     )
 
                 if include_config:
@@ -318,7 +319,7 @@ class DataAsset:
 
                 if len(substituted_parameters) > 0:
                     if meta is None:
-                        meta = dict()
+                        meta = {}
                     meta["substituted_parameters"] = substituted_parameters
 
                 # Add meta to return object
@@ -363,9 +364,15 @@ class DataAsset:
         """
         if expectation_suite is not None:
             if isinstance(expectation_suite, dict):
-                expectation_suite = expectationSuiteSchema.load(expectation_suite)
+                expectation_suite_dict: dict = expectationSuiteSchema.load(
+                    expectation_suite
+                )
+                expectation_suite: ExpectationSuite = ExpectationSuite(
+                    **expectation_suite_dict, data_context=self._data_context
+                )
             else:
                 expectation_suite = copy.deepcopy(expectation_suite)
+
             self._expectation_suite = expectation_suite
 
             if expectation_suite_name is not None:
@@ -385,7 +392,8 @@ class DataAsset:
             if expectation_suite_name is None:
                 expectation_suite_name = "default"
             self._expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name
+                expectation_suite_name=expectation_suite_name,
+                data_context=self._data_context,
             )
 
         self._expectation_suite.data_asset_type = self._data_asset_type
@@ -829,7 +837,12 @@ class DataAsset:
             elif isinstance(expectation_suite, str):
                 try:
                     with open(expectation_suite) as infile:
-                        expectation_suite = expectationSuiteSchema.loads(infile.read())
+                        expectation_suite_dict: dict = expectationSuiteSchema.loads(
+                            infile.read()
+                        )
+                        expectation_suite: ExpectationSuite = ExpectationSuite(
+                            **expectation_suite_dict, data_context=self._data_context
+                        )
                 except ValidationError:
                     raise
                 except OSError:
@@ -837,6 +850,11 @@ class DataAsset:
                         "Unable to load expectation suite: IO error while reading %s"
                         % expectation_suite
                     )
+            elif isinstance(expectation_suite, dict):
+                expectation_suite_dict: dict = expectation_suite
+                expectation_suite: ExpectationSuite = ExpectationSuite(
+                    **expectation_suite_dict, data_context=None
+                )
             elif not isinstance(expectation_suite, ExpectationSuite):
                 logger.error(
                     "Unable to validate using the provided value for expectation suite; does it need to be "
@@ -977,6 +995,18 @@ class DataAsset:
 
             expectation_suite_name = expectation_suite.expectation_suite_name
 
+            expectation_meta = copy.deepcopy(expectation_suite.meta)
+
+            meta = {
+                "great_expectations_version": ge_version,
+                "expectation_suite_name": expectation_suite_name,
+                "run_id": run_id,
+                "batch_kwargs": self.batch_kwargs,
+                "batch_markers": self.batch_markers,
+                "batch_parameters": self.batch_parameters,
+                "validation_time": validation_time,
+                "expectation_suite_meta": expectation_meta,
+            }
             result = ExpectationSuiteValidationResult(
                 results=results,
                 success=statistics.success,
@@ -987,15 +1017,7 @@ class DataAsset:
                     "success_percent": statistics.success_percent,
                 },
                 evaluation_parameters=runtime_evaluation_parameters,
-                meta={
-                    "great_expectations_version": ge_version,
-                    "expectation_suite_name": expectation_suite_name,
-                    "run_id": run_id,
-                    "batch_kwargs": self.batch_kwargs,
-                    "batch_markers": self.batch_markers,
-                    "batch_parameters": self.batch_parameters,
-                    "validation_time": validation_time,
-                },
+                meta=meta,
             )
 
             self._data_context = validate__data_context

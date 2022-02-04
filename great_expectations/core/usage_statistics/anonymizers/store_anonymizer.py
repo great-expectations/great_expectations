@@ -3,10 +3,13 @@ from great_expectations.core.usage_statistics.anonymizers.store_backend_anonymiz
     StoreBackendAnonymizer,
 )
 from great_expectations.data_context.store import (
+    CheckpointStore,
+    ConfigurationStore,
     EvaluationParameterStore,
     ExpectationsStore,
     HtmlSiteStore,
     MetricStore,
+    ProfilerStore,
     Store,
     ValidationsStore,
 )
@@ -17,17 +20,20 @@ class StoreAnonymizer(Anonymizer):
         super().__init__(salt=salt)
         # ordered bottom up in terms of inheritance order
         self._ge_classes = [
+            ProfilerStore,
+            CheckpointStore,
             ValidationsStore,
             ExpectationsStore,
             EvaluationParameterStore,
             MetricStore,
+            ConfigurationStore,
             Store,
             HtmlSiteStore,
         ]
         self._store_backend_anonymizer = StoreBackendAnonymizer(salt=salt)
 
     def anonymize_store_info(self, store_name, store_obj):
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self.anonymize(store_name)
         store_backend_obj = store_obj.store_backend
 
@@ -44,3 +50,8 @@ class StoreAnonymizer(Anonymizer):
         )
 
         return anonymized_info_dict
+
+    def is_parent_class_recognized(self, store_obj):
+        return self._is_parent_class_recognized(
+            classes_to_check=self._ge_classes, object_=store_obj
+        )

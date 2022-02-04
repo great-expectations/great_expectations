@@ -599,12 +599,12 @@ class TestUtilMethods(unittest.TestCase):
         self.assertTrue(results[0].success)
         self.assertTrue(results[1].success)
 
-        # Key error when non-existant column is called
+        # Key error when non-existent column is called
         with self.assertRaises(KeyError):
             ge.dataset.util.create_multiple_expectations(
                 D, ["p"], "expect_column_values_to_be_in_set", ["hi"]
             )
-        # Attribute error when non-existant expectation is called
+        # Attribute error when non-existent expectation is called
         with self.assertRaises(AttributeError):
             ge.dataset.util.create_multiple_expectations(
                 D, ["z"], "expect_column_values_to_be_fake_news"

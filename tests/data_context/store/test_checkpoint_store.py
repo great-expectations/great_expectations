@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 from typing import Dict, List, Union
+from unittest import mock
 
 import pytest
 
@@ -11,6 +12,10 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
 from great_expectations.util import filter_properties_dict, gen_directory_tree_str
+from tests.core.usage_statistics.util import (
+    usage_stats_exceptions_exist,
+    usage_stats_invalid_messages_exist,
+)
 from tests.test_utils import build_checkpoint_store_using_filesystem
 
 logger = logging.getLogger(__name__)
@@ -97,8 +102,10 @@ def test_checkpoint_store(empty_data_context):
 
     assert filter_properties_dict(
         properties=checkpoint_store.get(key=key_0).to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=my_checkpoint_config_0.to_json_dict(),
+        clean_falsy=True,
     )
 
     dir_tree: str = gen_directory_tree_str(startpath=base_directory)
@@ -173,8 +180,10 @@ def test_checkpoint_store(empty_data_context):
 
     assert filter_properties_dict(
         properties=checkpoint_store.get(key=key_1).to_json_dict(),
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties=my_checkpoint_config_1.to_json_dict(),
+        clean_falsy=True,
     )
 
     dir_tree: str = gen_directory_tree_str(startpath=base_directory)
@@ -205,7 +214,7 @@ def test_checkpoint_store(empty_data_context):
                 "suppress_store_backend_id": False,
                 "module_name": "great_expectations.data_context.store.tuple_store_backend",
                 "class_name": "TupleFilesystemStoreBackend",
-                "filepath_template": "{0}.yml",
+                "filepath_suffix": ".yml",
             },
         },
     }
@@ -213,3 +222,44 @@ def test_checkpoint_store(empty_data_context):
     checkpoint_store.remove_key(key=key_0)
     checkpoint_store.remove_key(key=key_1)
     assert len(checkpoint_store.list_keys()) == 0
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_instantiation_with_test_yaml_config(
+    mock_emit, caplog, empty_data_context_stats_enabled
+):
+    empty_data_context_stats_enabled.test_yaml_config(
+        yaml_config="""
+module_name: great_expectations.data_context.store.checkpoint_store
+class_name: CheckpointStore
+store_backend:
+    class_name: TupleFilesystemStoreBackend
+    base_directory: checkpoints/
+"""
+    )
+    assert mock_emit.call_count == 1
+    # Substitute current anonymized name since it changes for each run
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "CheckpointStore",
+                    "anonymized_store_backend": {
+                        "parent_class": "TupleFilesystemStoreBackend"
+                    },
+                },
+                "success": True,
+            }
+        ),
+    ]
+
+    # Confirm that logs do not contain any exceptions or invalid messages
+    assert not usage_stats_exceptions_exist(messages=caplog.messages)
+    assert not usage_stats_invalid_messages_exist(messages=caplog.messages)

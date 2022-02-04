@@ -68,6 +68,7 @@ class ExpectColumnToExist(TableExpectation):
         "column": None,
         "column_index": None,
     }
+    args_keys = ("column", "column_index")
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -103,6 +104,48 @@ class ExpectColumnToExist(TableExpectation):
         return True
 
     @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["column", "column_index"],
+        )
+
+        if params["column_index"] is None:
+            if include_column_name:
+                template_str = "$column is a required field."
+            else:
+                template_str = "is a required field."
+        else:
+            params["column_indexth"] = ordinal(params["column_index"])
+            if include_column_name:
+                template_str = "$column must be the $column_indexth field."
+            else:
+                template_str = "must be the $column_indexth field."
+
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "column_index": {
+                "schema": {"type": "number"},
+                "value": params.get("column_index"),
+            },
+        }
+
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -111,7 +154,7 @@ class ExpectColumnToExist(TableExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)

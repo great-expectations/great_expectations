@@ -3,6 +3,8 @@ import uuid
 from abc import ABCMeta, abstractmethod
 from typing import Optional
 
+import pyparsing as pp
+
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.util import filter_properties_dict
 
@@ -77,9 +79,16 @@ class StoreBackend(metaclass=ABCMeta):
             return None
         try:
             try:
-                return self.get(key=self.STORE_BACKEND_ID_KEY).replace(
-                    self.STORE_BACKEND_ID_PREFIX, ""
+                ge_store_backend_id_file_contents = self.get(
+                    key=self.STORE_BACKEND_ID_KEY
                 )
+                store_backend_id_file_parser = self.STORE_BACKEND_ID_PREFIX + pp.Word(
+                    pp.hexnums + "-"
+                )
+                parsed_store_backend_id = store_backend_id_file_parser.parseString(
+                    ge_store_backend_id_file_contents
+                )
+                return parsed_store_backend_id[1]
             except InvalidKeyError:
                 store_id = (
                     self._manually_initialize_store_backend_id
@@ -88,7 +97,7 @@ class StoreBackend(metaclass=ABCMeta):
                 )
                 self.set(
                     key=self.STORE_BACKEND_ID_KEY,
-                    value=f"{self.STORE_BACKEND_ID_PREFIX}{store_id}",
+                    value=f"{self.STORE_BACKEND_ID_PREFIX}{store_id}\n",
                 )
                 return store_id
         except Exception:
@@ -98,7 +107,7 @@ class StoreBackend(metaclass=ABCMeta):
                 )
             return self.STORE_BACKEND_INVALID_CONFIGURATION_ID
 
-    # NOTE: AJB20201130 This store_backend_id and store_backend_id_warnings_suppressed was implemented to remove multiple warnings in DataContext.__init__ but this can be done more cleanly by more carefully going thorugh initialization order in DataContext
+    # NOTE: AJB20201130 This store_backend_id and store_backend_id_warnings_suppressed was implemented to remove multiple warnings in DataContext.__init__ but this can be done more cleanly by more carefully going through initialization order in DataContext
     @property
     def store_backend_id(self):
         return self._construct_store_backend_id(suppress_warning=False)
@@ -230,7 +239,7 @@ class InMemoryStoreBackend(StoreBackend):
             "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,
         }
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
     def _get(self, key):
         try:

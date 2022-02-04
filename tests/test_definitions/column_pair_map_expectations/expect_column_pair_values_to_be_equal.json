@@ -5,14 +5,18 @@
       "w" : [1, 2, 3, 4, 5, 6, 7, 8, 9, null],
       "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       "y" : [1, 2, 3, 4, 5, 6, 7, 8, 9, "abc"],
-      "z" : [1, 2, 3, 4, 5, null, null, null, null, null]
+      "z" : [1, 2, 3, 4, 5, null, null, null, null, null],
+      "a" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 11],
+      "b" : [1, 2, 3, 4, 5, null, null, null, null, null]
     },
     "schemas": {
       "spark": {
         "w": "IntegerType",
         "x": "IntegerType",
         "y": "StringType",
-        "z": "IntegerType"
+        "z": "IntegerType",
+        "a": "IntegerType",
+        "b": "IntegerType"
       }
     },
     "tests" : [{
@@ -28,8 +32,9 @@
         "success": true
       }
     },{
-      "title" : "basic_negative_example",
+      "title" : "basic_negative_example_compare_number_to_text",
       "exact_match_out" : false,
+      "only_for": ["pandas"],
       "in": {
         "column_A": "x",
         "column_B": "y"
@@ -40,9 +45,23 @@
         ],
         "success": false
       }
-    }, {
-      "title" : "positive_example_with_mostly",
+    },{
+      "title" : "basic_negative_example_compare_numbers",
       "exact_match_out" : false,
+      "in": {
+        "column_A": "a",
+        "column_B": "x"
+      },
+      "out" : {
+        "unexpected_list": [
+          [11, 10]
+        ],
+        "success": false
+      }
+    },{
+      "title" : "positive_example_with_mostly_compare_number_to_text",
+      "exact_match_out" : false,
+      "only_for": ["pandas"],
       "in": {
         "column_A": "x",
         "column_B": "y",
@@ -54,12 +73,39 @@
         ],
         "success": true
       }
-    }, {
-      "title" : "positive_example_with_mismatched_null_values_and_ignore_row_if__either_value_is_missing",
+    },{
+      "title" : "positive_example_with_mostly_compare_numbers",
       "exact_match_out" : false,
+      "in": {
+        "column_A": "a",
+        "column_B": "x",
+        "mostly": 0.9
+      },
+      "out" : {
+        "unexpected_list": [
+          [11, 10]
+        ],
+        "success": true
+      }
+    },{
+      "title" : "positive_example_with_mismatched_null_values_and_ignore_row_if__either_value_is_missing_compare_number_to_text",
+      "exact_match_out" : false,
+      "only_for": ["pandas"],
       "in": {
         "column_A": "y",
         "column_B": "z",
+        "ignore_row_if": "either_value_is_missing"
+      },
+      "out" : {
+        "unexpected_list": [],
+        "success": true
+      }
+    },{
+      "title" : "positive_example_with_mismatched_null_values_and_ignore_row_if__either_value_is_missing_compare_numbers",
+      "exact_match_out" : false,
+      "in": {
+        "column_A": "a",
+        "column_B": "b",
         "ignore_row_if": "either_value_is_missing"
       },
       "out" : {

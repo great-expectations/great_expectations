@@ -242,7 +242,7 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
             "@talagluck",
         ],
         "package": "experimental_expectations",
-        "requirements": ["uszipcode"],
+        "requirements": ["uszipcode", "sqlalchemy"],
     }
 
     # This is the id string of the Metric used by this Expectation.

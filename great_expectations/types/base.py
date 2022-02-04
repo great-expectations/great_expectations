@@ -9,7 +9,7 @@ yaml = YAML()
 
 @yaml_object(yaml)
 class DotDict(dict):
-    """This class provides dot.notation dot.notation access to dictionary attributes.
+    """This class provides dot.notation access to dictionary attributes.
 
     It is also serializable by the ruamel.yaml library used in Great Expectations for managing
     configuration objects.
@@ -26,6 +26,7 @@ class DotDict(dict):
 
     # Cargo-cultishly copied from: https://github.com/spindlelabs/pyes/commit/d2076b385c38d6d00cebfe0df7b0d1ba8df934bc
     def __deepcopy__(self, memo):
+        # noinspection PyArgumentList
         return DotDict(
             [(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()]
         )
@@ -45,3 +46,14 @@ class DotDict(dict):
     def to_yaml(cls, representer, node):
         """Use dict representation for DotDict (and subtypes by default)"""
         return representer.represent_dict(node)
+
+
+class SerializableDotDict(DotDict):
+    """
+    Analogously to the way "SerializableDictDot" extends "DictDot" to provide JSON serialization, the present class,
+    "SerializableDotDict" extends "DotDict" to provide JSON-serializable version of the "DotDict" class as well.
+    Since "DotDict" is already YAML-serializable, "SerializableDotDict" is both YAML-serializable and JSON-serializable.
+    """
+
+    def to_json_dict(self) -> dict:
+        raise NotImplementedError

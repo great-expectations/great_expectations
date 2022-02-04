@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 import pandas as pd
 
@@ -8,14 +8,14 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
 
-class ColumnValueCounts(ColumnMetricProvider):
+class ColumnValueCounts(ColumnAggregateMetricProvider):
     metric_name = "column.value_counts"
     value_keys = ("sort", "collate")
 
@@ -27,7 +27,7 @@ class ColumnValueCounts(ColumnMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
@@ -67,7 +67,7 @@ class ColumnValueCounts(ColumnMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])
@@ -125,7 +125,7 @@ class ColumnValueCounts(ColumnMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         sort = metric_value_kwargs.get("sort", cls.default_kwarg_values["sort"])

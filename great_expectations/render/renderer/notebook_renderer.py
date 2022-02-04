@@ -4,7 +4,10 @@ import nbformat
 
 from great_expectations import DataContext
 from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.util import lint_code
+from great_expectations.util import (
+    convert_json_string_to_be_python_compliant,
+    lint_code,
+)
 
 
 class BaseNotebookRenderer(Renderer):
@@ -19,7 +22,9 @@ class BaseNotebookRenderer(Renderer):
         # self.render() and/or self.render_to_disk() method(s):
         self._notebook: Optional[nbformat.NotebookNode] = None
 
-    def add_code_cell(self, code: str, lint: bool = False) -> None:
+    def add_code_cell(
+        self, code: str, lint: bool = False, enforce_py_syntax: bool = True
+    ) -> None:
         """
         Add the given code as a new code cell.
         Args:
@@ -29,8 +34,11 @@ class BaseNotebookRenderer(Renderer):
         Returns:
             Nothing, adds a cell to the class instance notebook
         """
+        if enforce_py_syntax:
+            code = convert_json_string_to_be_python_compliant(code)
+
         if lint:
-            code: str = lint_code(code).rstrip("\n")
+            code = lint_code(code).rstrip("\n")
 
         cell = nbformat.v4.new_code_cell(code)
         self._notebook["cells"].append(cell)

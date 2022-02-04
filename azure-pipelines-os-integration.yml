@@ -4,17 +4,72 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
 # Deactivate os-integration to preserve scarce build resources
-# trigger:
-#   - main
+trigger:
+  - main
 #   - develop
 
 # pr: none
 
+resources:
+  containers:
+  - container: postgres
+    image: postgres:11
+    ports:
+    - 5432:5432
+    env:
+      POSTGRES_DB: "test_ci"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+  - container: mysql
+    image: mysql:8.0.20
+    ports:
+      - 3306:3306
+    env:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: test_ci
+  - container: mssql
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    env:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
+      MSSQL_DB: test_ci
+      MSSQL_PID: Developer
+    ports:
+      - 1433:1433
+
+variables:
+  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+
 stages:
+  - stage: scope_check
+    pool:
+      vmImage: 'ubuntu-20.04'
+    jobs:
+      - job: changes
+        steps:
+          - task: ChangedFiles@1
+            name: CheckChanges
+            inputs:
+              verbose: true
+              rules: |
+                [ContribChanged]
+                contrib/**
+
+                [ExperimentalChanged]
+                contrib/experimental/**
+
+                [DocsChanged]
+                docs/**
+
+                [GEChanged]
+                great_expectations/**
+                tests/**
+                /*.txt
+                /*.yml
+
   - stage: os_integration
     variables:
       python.version: '3.x'
-      GE_pytest_pip_opts: '--requirement requirements-dev-util.txt --requirement requirements-dev-test.txt'
+      GE_pytest_pip_opts: '--requirement requirements-dev-base.txt'
       GE_pytest_opts: '--no-sqlalchemy --no-spark'
 
     jobs:
@@ -65,4 +120,119 @@ stages:
           - script: |
               pip install pytest pytest-cov pytest-azurepipelines
               pytest $(GE_pytest_opts)
+            displayName: 'pytest'
+
+  - stage: db_integration_latest_sqlalchemy
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: mysql
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+
+        services:
+          mysql: mysql
+
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==20.2.4
+            displayName: 'Update pip'
+
+          - script: |
+              printf 'Waiting for MySQL database to accept connections'
+              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+                printf '.'
+                sleep 1;
+              done;
+            displayName: Wait for database to initialise
+
+          - script: |
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+            displayName: 'Configure mysql'
+
+          - script: |
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              # Install latest sqlalchemy version
+              pip install --upgrade SQLAlchemy
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install --requirement requirements.txt
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            displayName: 'pytest'
+
+      - job: mssql
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+
+        services:
+          mssql: mssql
+
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==20.2.4
+            displayName: 'Update pip'
+
+          - script: |
+              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+
+          - script: |
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              # Install latest sqlalchemy version
+              pip install --upgrade SQLAlchemy
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            displayName: 'pytest'
+
+      - job: postgres
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+
+        services:
+          postgres: postgres
+
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==20.2.4
+            displayName: 'Update pip'
+
+          - script: |
+              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt
+              # Install latest sqlalchemy version
+              pip install --upgrade SQLAlchemy
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'

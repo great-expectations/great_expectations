@@ -53,7 +53,7 @@ def titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled(
     yaml = YAML()
     context = titanic_data_context_stats_enabled_config_version_2
     context.save_expectation_suite(titanic_expectation_suite)
-    # TODO context should save a checkpoint
+    # TODO context should save a Checkpoint
     checkpoint_path = os.path.join(
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
@@ -289,7 +289,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_g
         # TODO: <Alex>ALEX</Alex>
         #     assert (
         #         """\
-        # # This checkpoint was created by the command `great_expectations checkpoint new`.
+        # # This Checkpoint was created by the command `great_expectations checkpoint new`.
         # #
         # # A checkpoint is a list of one or more batches paired with one or more
         # # Expectation Suites and a configurable Validation Operator.
@@ -421,7 +421,7 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        'Attempted to access the "checkpoint_store_name" field with a legacy config version (2.0) and no `checkpoints` directory.'
+        'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.'
         in stdout
     )
 
@@ -578,7 +578,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
     #     in stdout
     # )
     # assert (
-    #     "Please verify these batch kwargs in checkpoint bad_batch`"
+    #     "Please verify these batch kwargs in Checkpoint bad_batch`"
     #     in stdout
     # )
     # assert "No such file or directory" in stdout
@@ -651,7 +651,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge
         'Batch: {"path": "/totally/not/a/file.csv", "datasource": "mydatasource", "reader_method": "read_csv"}'
         in stdout
     )
-    assert "Please add at least one suite to checkpoint bad_batch" in stdout
+    assert "Please add at least one suite to Checkpoint bad_batch" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -991,7 +991,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_c
     caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -1044,7 +1044,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
     caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)

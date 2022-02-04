@@ -29,6 +29,15 @@
         "a": "INTEGER",
         "b": "INTEGER"
       },
+      "bigquery": {
+        "w": "INTEGER",
+        "x": "INTEGER",
+        "y": "INTEGER",
+        "z": "STRING",
+        "zz": "TIMESTAMP",
+        "a": "INTEGER",
+        "b": "INTEGER"
+      },
       "spark": {
         "w": "IntegerType",
         "x": "IntegerType",

@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 import numpy as np
 
@@ -14,8 +14,8 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.import_manager import Bucketizer, F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
@@ -23,7 +23,7 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 logger = logging.getLogger(__name__)
 
 
-class ColumnHistogram(ColumnMetricProvider):
+class ColumnHistogram(ColumnAggregateMetricProvider):
     metric_name = "column.histogram"
     value_keys = ("bins",)
 
@@ -33,7 +33,7 @@ class ColumnHistogram(ColumnMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
@@ -50,7 +50,7 @@ class ColumnHistogram(ColumnMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         """return a list of counts corresponding to bins
@@ -72,7 +72,7 @@ class ColumnHistogram(ColumnMetricProvider):
         else:
             bins = list(bins)
 
-        # If we have an infinte lower bound, don't express that in sql
+        # If we have an infinite lower bound, don't express that in sql
         if (
             bins[0]
             == get_sql_dialect_floating_point_infinity_value(
@@ -163,7 +163,7 @@ class ColumnHistogram(ColumnMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
