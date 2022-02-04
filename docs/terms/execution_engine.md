@@ -64,6 +64,8 @@ You will not need to directly access an Execution Engine.  Instead, you will con
 
 You will not need to directly instantiate an Execution Engine.  Instead, they are automatically created as a component in a Datasource.
 
+If you are interested in using and accessing data with an Execution Engine that Great Expectations does not yet support, consider making your work a contribution to the [Great Expectations open source GitHub project](https://github.com/great-expectations/great_expectations).  This is a considerable undertaking, so you may also wish to [reach out to us on Slack](https://greatexpectations.io/slack) as we will be happy to provide guidance and support.
+
 ### Execution Engine init arguments
 
 - `name`
@@ -90,31 +92,3 @@ Execution Engines and their configurations are specified in the configurations o
 If additional configuration is required by the Execution Engine, it will also be specified in the `execution_engine` configuration.  For example, the `SqlAlchemyExecutionEngine` will also expect the key `connection_string` as part of its configuration.
 
 For specifics on the required keys for a given Execution Engine, please see our [how-to guides for Connecting to Data](../guides/connecting_to_your_data/index.md).
-
-## More details
-
-### Design motivation: Validation flow
-
-1. Validator.graph_validate(expectation_suite)
-2. for each Expectation: get_validation_dependencies
-    ```python
-      {
-          "user_useful_name": MetricConfiguration,
-          ...
-      }
-   ```
-3. _populate_dependencies
-4. for each dependent metric: get_evaluation_dependencies
-    - a validation_graph object is ready. Nodes are MetricConfigurations, edges are dependencies.
-5. `_parse_validation_graph`
-6. for each set of ready_metrics: Execution Engine resolve_metrics
-7. for each metric: bundle-able?
-  a. yes -> add to bundle
-  b. no -> `resolve_metric`
-    i. call metric_fn to get **value of metric**
-8. `resolve_metric_bundle`
-  a. for each metric in bundle:
-    i. call metric_fn to get: **tuple(engine_function, domain_kwargs)**
-    ii. add engine_function to resolve call for the domain
-  b. for each domain, dispatch call to engine, and add resulting metrics to metrics dictionary
-9. Expectation.validate(metrics) (now metrics are populated)
