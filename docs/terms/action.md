@@ -1,14 +1,12 @@
 ---
 title: Action
 ---
-
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '../term_tags/_tag.mdx';
 import SetupHeader from '../images/universal_map/_um_setup_header.mdx'
 import ConnectHeader from '../images/universal_map/_um_connect_header.mdx';
 import CreateHeader from '../images/universal_map/_um_create_header.mdx';
 import ValidateHeader from '../images/universal_map/_um_validate_header.mdx';
-
 
 <UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/> 
 
@@ -107,4 +105,3 @@ action_list:
 ```
 
 For more examples of how to configure Actions in a Checkpoint, please see our [how-to guides on Actions](../guides/validation/index.md#validation-actions).
-
