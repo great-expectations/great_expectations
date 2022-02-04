@@ -153,15 +153,15 @@ def expect(
             #     # dlt.expect(dlt_expectation.name, dlt_expectation.condition)
             #     print("\n")
 
-            func(*args, **kwargs)
-            # func_result = func(*args, **kwargs)
-            # print(
-            #     "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-            # )
-            # import sys
-            #
-            # print("type(func_result):", type(func_result))
-            # print("sys.getsizeof(func_result)", sys.getsizeof(func_result))
+            # return func(*args, **kwargs)
+            func_result = func(*args, **kwargs)
+            print(
+                "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            )
+            import sys
+
+            print("type(func_result):", type(func_result))
+            print("sys.getsizeof(func_result)", sys.getsizeof(func_result))
             # try:
             #     print("type(dlt_expect_return_value):", type(dlt_expect_return_value))
             #     print(
@@ -170,13 +170,14 @@ def expect(
             #     )
             # except:
             #     pass
-            # print(
-            #     "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-            # )
+            print(
+                "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+            )
+            return func_result
 
         return wrapper_expect
 
-    return decorator_expect
+    # return decorator_expect
     if _func is None:
         return decorator_expect
     else:
