@@ -106,4 +106,3 @@ action_list:
 
 For more examples of how to configure Actions in a Checkpoint, please see our [how-to guides on Actions](../guides/validation/index.md#validation-actions).
 
-
