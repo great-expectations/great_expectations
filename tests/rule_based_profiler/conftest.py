@@ -115,7 +115,7 @@ def multibatch_generic_csv_generator_context(monkeypatch, empty_data_context):
     datasource_name = "generic_csv_generator"
     data_connector_name = "daily_data_connector"
     asset_name = "daily_data_asset"
-    datasource_config = fr"""
+    datasource_config = rf"""
 class_name: Datasource
 module_name: great_expectations.datasource
 execution_engine:
@@ -420,7 +420,7 @@ def alice_columnar_table_single_batch_context(
     datasource_name: str = "alice_columnar_table_single_batch_datasource"
     data_connector_name: str = "alice_columnar_table_single_batch_data_connector"
     data_asset_name: str = "alice_columnar_table_single_batch_data_asset"
-    datasource_config: str = fr"""
+    datasource_config: str = rf"""
 class_name: Datasource
 module_name: great_expectations.datasource
 execution_engine:
