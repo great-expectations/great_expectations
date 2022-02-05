@@ -15,7 +15,7 @@ from great_expectations.util import filter_properties_dict
 
 
 def get_profiler(
-    data_context: "DataContext",
+    data_context: "DataContext",  # noqa: F821
     profiler_store: ProfilerStore,
     name: Optional[str] = None,
     ge_cloud_id: Optional[str] = None,

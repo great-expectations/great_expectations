@@ -12,7 +12,6 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
-    get_batch_request_as_dict,
     get_substituted_validation_dict,
     get_validations_with_batch_request_as_dict,
     substitute_runtime_config,
@@ -20,7 +19,11 @@ from great_expectations.checkpoint.util import (
 )
 from great_expectations.core import RunIdentifier
 from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import (
+    BatchRequest,
+    RuntimeBatchRequest,
+    get_batch_request_as_dict,
+)
 from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
     usage_statistics_enabled_method,
@@ -488,7 +491,6 @@ is run), with each validation having its own defined "action_list" attribute.
             filter_properties_dict(
                 properties=config_kwargs,
                 clean_falsy=True,
-                keep_falsy_numerics=True,
                 inplace=True,
             )
 
@@ -499,7 +501,6 @@ is run), with each validation having its own defined "action_list" attribute.
             json_dict: dict = convert_to_json_serializable(data=config_kwargs)
             deep_filter_properties_iterable(
                 properties=json_dict,
-                keep_falsy_numerics=True,
                 inplace=True,
             )
             return json.dumps(json_dict, indent=2)
@@ -541,7 +542,6 @@ is run), with each validation having its own defined "action_list" attribute.
         json_dict: dict = convert_to_json_serializable(data=self.get_config())
         deep_filter_properties_iterable(
             properties=json_dict,
-            keep_falsy_numerics=True,
             inplace=True,
         )
         return json.dumps(json_dict, indent=2)

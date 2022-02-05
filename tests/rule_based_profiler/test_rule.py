@@ -3,14 +3,16 @@ from typing import Any
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations.rule_based_profiler.types import (
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 
 
 # noinspection PyPep8Naming
 def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter_name(
-    rule_with_variables_with_parameters, column_Age_domain
+    column_Age_domain,
+    variables_multi_part_name_parameter_container,
+    rule_with_parameters,
 ):
     with pytest.raises(
         ge_exceptions.ProfilerExecutionError, match=r".+start with \$.*"
@@ -19,8 +21,8 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter
         parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name="mean",
             domain=column_Age_domain,
-            variables=rule_with_variables_with_parameters.variables,
-            parameters=rule_with_variables_with_parameters.parameters,
+            variables=variables_multi_part_name_parameter_container,
+            parameters=rule_with_parameters.parameters,
         )
 
 
@@ -289,9 +291,10 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter
     ],
 )
 def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_name(
-    rule_with_variables_with_parameters,
     column_Age_domain,
     column_Date_domain,
+    rule_with_parameters,
+    variables_multi_part_name_parameter_container,
     domain_name,
     fully_qualified_parameter_name,
     value,
@@ -325,8 +328,8 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
             domain=domain,
-            variables=rule_with_variables_with_parameters.variables,
-            parameters=rule_with_variables_with_parameters.parameters,
+            variables=variables_multi_part_name_parameter_container,
+            parameters=rule_with_parameters.parameters,
         )
         == value
     )
@@ -340,8 +343,8 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_valid_parameter_n
             get_parameter_value_by_fully_qualified_parameter_name(
                 fully_qualified_parameter_name=fully_qualified_parameter_name_for_details,
                 domain=domain,
-                variables=rule_with_variables_with_parameters.variables,
-                parameters=rule_with_variables_with_parameters.parameters,
+                variables=variables_multi_part_name_parameter_container,
+                parameters=rule_with_parameters.parameters,
             )
             == details
         )

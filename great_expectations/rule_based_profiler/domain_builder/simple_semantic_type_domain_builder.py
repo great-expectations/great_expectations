@@ -4,13 +4,13 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.profile.base import ProfilerTypeMapping
-from great_expectations.rule_based_profiler.domain_builder import (
+from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.types import (
     Domain,
-    DomainBuilder,
     InferredSemanticDomainType,
+    ParameterContainer,
     SemanticDomainTypes,
 )
-from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -40,6 +40,7 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
 
         if semantic_types is None:
             semantic_types = []
+
         self._semantic_types = semantic_types
 
     def _get_domains(
@@ -198,6 +199,14 @@ information.  Please ensure that the specified column name refers to exactly one
         )
 
         return inferred_semantic_column_type
+
+    @property
+    def semantic_types(
+        self,
+    ) -> Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ]:
+        return self._semantic_types
 
 
 def _parse_semantic_domain_type_argument(
