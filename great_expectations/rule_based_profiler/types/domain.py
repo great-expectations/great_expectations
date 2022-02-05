@@ -8,7 +8,10 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    filter_properties_dict,
+)
 
 
 class SemanticDomainTypes(Enum):
@@ -130,7 +133,7 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
 
         if isinstance(source, dict):
             if not isinstance(source, Domain):
-                filter_properties_dict(properties=source, inplace=True)
+                deep_filter_properties_iterable(properties=source, inplace=True)
                 source = DomainKwargs(source)
             key: str
             value: Any
