@@ -295,6 +295,13 @@ class Validator:
 
             exception_info: ExceptionInfo
 
+            if self.interactive_evaluation:
+                configuration.process_evaluation_parameters(
+                    self._expectation_suite.evaluation_parameters,
+                    True,
+                    self._data_context,
+                )
+
             try:
                 expectation = expectation_impl(configuration)
                 """Given an implementation and a configuration for any Expectation, returns its validation result"""
@@ -304,11 +311,6 @@ class Validator:
                         expectation_config=copy.deepcopy(expectation.configuration)
                     )
                 else:
-                    configuration.process_evaluation_parameters(
-                        self._expectation_suite.evaluation_parameters,
-                        True,
-                        self._data_context,
-                    )
                     validation_result = expectation.validate(
                         validator=self,
                         evaluation_parameters=self._expectation_suite.evaluation_parameters,
