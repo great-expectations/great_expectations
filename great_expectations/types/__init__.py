@@ -1,9 +1,12 @@
 import copy
+import logging
 from enum import Enum
 from typing import Optional, Set
 
 from .base import SerializableDotDict
 from .configurations import ClassConfig
+
+logger = logging.getLogger(__name__)
 
 
 class DictDot:
@@ -232,8 +235,17 @@ def _safe_deep_copy(data, memo=None):
     "great_expectations/core/util.py" module.  The reason for the duplication stems from encountering the circular
     import dependency, when attempting to import "safe_deep_copy()" from "great_expectations/core/util.py" directly.
     """
+
+    # Putting specific imports here (once this method is relocated to more apropriate module, they will not be needed).
     import pandas as pd
-    import pyspark
+
+    try:
+        import pyspark
+    except ImportError:
+        pyspark = None
+        logger.debug(
+            "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
+        )
 
     """
     This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
