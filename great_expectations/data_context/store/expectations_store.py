@@ -4,7 +4,6 @@ from typing import Dict
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
-from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
