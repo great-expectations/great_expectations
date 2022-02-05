@@ -1,5 +1,8 @@
 from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render.types import RenderedTableContent
+from great_expectations.render.types import (
+    RenderedStringTemplateContent,
+    RenderedTableContent,
+)
 
 from .content_block import ContentBlockRenderer
 
