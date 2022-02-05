@@ -11,15 +11,13 @@ This guide will help you create [Expectations](../../../reference/expectations/e
 - Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
 - Configured a [Datasource](../../../reference/datasources.md) (or several Datasources) with at least two **Data Assets** and understand the basics of **Batch Requests**.
 - Also created [Expectations Suites](../../../tutorials/getting_started/create_your_first_expectations.md) for those Data Assets.
-- Have a working [Evaluation Parameter store](../../../reference/data_context.md#evaluation-parameter-stores). (The default in-memory store from ``great_expectations init`` can work for this.)
+- Have a working [Evaluation Parameter store](../../../reference/data_context.md#evaluation-parameter-stores). (Included by default in the base ``great_expectations.yml`` created by ``great_expectations init``)
 - Have a working [Checkpoint](../../../guides/validation/how_to_validate_data_by_running_a_checkpoint.md)
 
 </Prerequisites>
 
 Steps
 -----
-
-In a notebook,
 
 1. **Import great_expectations and instantiate your Data Context**
    ```python
@@ -31,9 +29,8 @@ In a notebook,
 
     We'll call one of these Validators the *upstream* Validator and the other the *downstream* Validator. Evaluation Parameters will allow us to use Validation Results from the upstream Validator as parameters passed into Expectations on the downstream.
 
-    It's common (but not required) for both Batch Requests to have the same [Datasource and Data Connector](../../../reference/datasources.md).
-
     ```python
+   from great_expectations.core.batch import BatchRequest
     batch_request_1 = BatchRequest(
         datasource_name="my_datasource",
         data_connector_name="my_data_connector",
@@ -48,30 +45,71 @@ In a notebook,
     )
     downstream_validator = context.get_validator(batch_request=batch_request_2, expectation_suite_name="my_expectation_suite_2")
     ```
+   
+   :::note
 
-3. **Disable interactive evaluation for the downstream Validator.**
+   The Batch Requests can use the same [Datasource and Data Connector](../../../reference/datasources.md), or can use reference different Datasources.
+ 
+   :::
+   
+3. **Add an Expectation to the upstream Validator**
+   In order to create a Validation Result on the upstream Validator, we need to create and save an Expectation:
+   ```python
+   upstream_validator.expect_table_row_count_to_be_between(
+      min_value=1,
+      max_value=100
+   )
+   upstream_validator.save_expectation_suite()
+   ```
 
-    ```python
-    downstream_validator.interactive_evaluation = False
-    ```
-    Disabling interactive evaluation allows you to declare an Expectation even when it cannot be evaluated immediately.
+5. **Define a URN (Uniform Resource Identifier)**
+   An Evaluation Parameter ``URN`` is a string which Great Expectations resolves at runtime to obtain a Metric.
+   A ``URN`` represents a series of namespaces separated by colons (``:``), and always begins with the prefix ``urn:great_expectations``.
+   It can access Validations, Metrics, and Stores, and uses the following syntax:
+   1. ```python
+      # Validations
+      validation_urn = "urn:great_expectations:validations:<expectation suite name>:<metric name>:<metric kwargs>"
+      ```
+   2. ```python
+      # Metrics
+      metric_urn = "urn:great_expectations:metrics:<run id>:<expectation suite name>:<metric name>:<metric kwargs>"
+      ```
+   3. ```python
+      # Stores
+      store_urn = "urn:great_expectations:stores:<store name>:<metric name>:<metric kwargs>"
+      ```
+      
 
-4. **Define an Expectation using an Evaluation Parameter on the downstream Validator.**
+   For example, if your project contains an Expectation Suite called ``my_expectation_suite_1``, which has a ``expect_table_row_count_to_be_between`` Expectation, you could reference the Expectation's ``observed_value`` metric from its most recent Validation Result with the following URN:
+   ``'urn:great_expectations:validations:my_expectation_suite_1:expect_table_row_count_to_be_between.result.observed_value'``
+
+6. **Add an Expectation using an Evaluation Parameter to the downstream Validator.**
+   Next, create and save an Expectation on the downstream Validator.
+   This Expectation's `value` kwarg will reference a value obtained from the upstream Validation Result. 
+   Disable interactive evaluation on the Validator to declare an Expectation even when it cannot be evaluated immediately.
+   Then, when saving the Expectation, set the ``discard_failed_expectations`` flag to ``False``, since this Expectation will only be successful when run in the same Checkpoint as the upstream Validator.
 
    ```python
+   downstream_validator.interactive_evaluation = False
    eval_param_urn = 'urn:great_expectations:validations:my_expectation_suite_1:expect_table_row_count_to_be_between.result.observed_value'
    downstream_validator.expect_table_row_count_to_equal(
       value={
          '$PARAMETER': eval_param_urn, # this is the actual parameter we're going to use in the validation
       }
    )
+   downstream_validator.save_expectation_suite(discard_failed_expectations=False) 
    ```
+   ::: 
 
+   **A Closer Look**
    The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during validation, it will replace the ``URN`` with a value retrieved from an [Evaluation Parameter stores](../../../reference/data_context.md#evaluation-parameter-stores) or [Metrics Store](../../../reference/metrics.md) (see also [How to configure a MetricsStore](../../../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)).
 
-   This declaration above includes two ``$PARAMETERS``. The first is the real parameter that will be used after the Expectation Suite is stored and deployed in a Validation Operator. The second parameter supports immediate evaluation in the notebook.
+   This declaration above includes two ``$PARAMETERS``.
+   The first is the real parameter that will be used after the Expectation Suite is Validated as part of a Checkpoint.
+   The second parameter supports immediate evaluation in the notebook.
 
-   When executed in the notebook, this Expectation will generate an [Expectation Validation Result](../../../reference/validation.md). Most values will be missing, since interactive evaluation was disabled.
+   When executed in the notebook, this Expectation will generate an [Expectation Validation Result](../../../reference/validation.md). 
+   Most values will be missing, since interactive evaluation was disabled.
 
    ```python
    {
@@ -85,6 +123,8 @@ In a notebook,
       }
    }
     ```
+   
+   :::
 
    :::warning
 
@@ -92,47 +132,46 @@ In a notebook,
 
    :::
 
-5. **Save your Expectation Suite**
 
-    ```python
-    downstream_validator.save_expectation_suite(discard_failed_expectations=False)
-    ```
+8. **Validate using a Checkpoint.**
+   First, [Add your new Expectation Suites to your Checkpoint](../../validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md) by adding the Expectation Suites created above to the `validations` list of your Checkpoint config.
+    
+   Then, validate the Checkpoint from the CLI: 
+   ```bash
+   $ great_expectations checkpoint run <checkpoint name>
+   ```
+   
+   Alternately, validate the Checkpoint directly from your code:
 
-    This step is necessary because your ``$PARAMETER`` will only function properly when invoked within a Validation operation with multiple Validators. The simplest way to execute such an operation is through a :ref:`Validation Operator <reference__core_concepts__validation__validation_operator>`, and Validation Operators are configured to load Expectation Suites from Expectation Stores, not memory.
+   ```python
+   results = context.run_checkpoint(
+       checkpoint_name="my_checkpoint"
+   )
+   ```
+   
 
-6. **Execute an existing Checkpoint.**
+9. **Rebuild Data Docs and review results in docs.**
+   
+   Build or update Data Docs from the command line:
+   ```bash
+   great_expectations docs build
+   ```
+   
+   Alternately, build or update Data Docs directly from your code:
 
-    You can do this within your notebook by running ``context.run_checkpoint``.
+   ```python
+   context.build_data_docs()
+   ```
 
-    ```python
-    results = context.run_checkpoint(
-        checkpoint_name="my_checkpoint"
-    )
-    ```
+       Once your Docs rebuild, open them in a browser and navigate to the page for the new Validation Result.
 
-7. **Rebuild Data Docs and review results in docs.**
+       If your Evaluation Parameter was executed successfully, you'll see something like this:
 
-    You can do this within your notebook by running:
+       ![image](../../../../docs/images/evaluation_parameter_success.png)
 
-    ```python
-    context.build_data_docs()
-    ```
+       If it encountered an error, you'll see something like this. The most common problem is a mis-specified URN name.
 
-    You can also execute from the command line with:
-
-    ```bash
-    great_expectations docs build
-    ```
-
-    Once your Docs rebuild, open them in a browser and navigate to the page for the new Validation Result.
-
-    If your Evaluation Parameter was executed successfully, you'll see something like this:
-
-    ![image](../../../../docs/images/evaluation_parameter_success.png)
-
-    If it encountered an error, you'll see something like this. The most common problem is a mis-specified URN name.
-
-    ![image](../../../../docs/images/evaluation_parameter_error.png)
+       ![image](../../../../docs/images/evaluation_parameter_error.png)
 
 Comments
 --------
