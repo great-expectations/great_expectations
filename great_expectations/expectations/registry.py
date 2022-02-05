@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict

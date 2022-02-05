@@ -1,8 +1,6 @@
-import os
 import sys
 
 import click
-import requests
 
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.cli_logging import logger

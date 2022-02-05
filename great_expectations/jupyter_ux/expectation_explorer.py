@@ -1,10 +1,8 @@
 import datetime
 import logging
 from itertools import chain
-from typing import Optional
 
 import ipywidgets as widgets
-from IPython.display import display
 
 logger = logging.getLogger(__name__)
 
