@@ -4,7 +4,7 @@ import itertools
 import json
 import logging
 import uuid
-from typing import Any, Dict, List, MutableMapping, Optional, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
 from ruamel.yaml import YAML
@@ -53,6 +53,10 @@ def object_to_yaml_str(obj):
 
 class BaseYamlConfig(SerializableDictDot):
     _config_schema_class = None
+
+    exclude_field_names: Set[str] = {
+        "commented_map",
+    }
 
     def __init__(self, commented_map: Optional[CommentedMap] = None):
         if commented_map is None:
