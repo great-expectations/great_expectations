@@ -15,7 +15,7 @@ schedules:
     - develop
     exclude:
     - main
-  always: false # Will only run if changes have been made since last scheduled run
+  always: true # Will always trigger but be conditionally run based on `scope_check` below
 
 trigger:
   branches:
