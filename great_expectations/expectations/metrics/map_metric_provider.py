@@ -22,7 +22,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
 from great_expectations.expectations.metrics import MetaMetricProvider
-from great_expectations.expectations.metrics.import_manager import F, Window, sa
+from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
