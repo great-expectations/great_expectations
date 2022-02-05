@@ -305,17 +305,14 @@ def test_result_format_argument_in_decorators():
         == exp_output
     )
 
-    assert (
-        df.expect_column_values_to_be_between(
-            "y",
-            1,
-            6,
-            result_format=None,
-            condition_parser="pandas",
-            row_condition='group=="a"',
-        )
-        != df.expect_column_values_to_be_between("y", 1, 6, result_format=None)
-    )
+    assert df.expect_column_values_to_be_between(
+        "y",
+        1,
+        6,
+        result_format=None,
+        condition_parser="pandas",
+        row_condition='group=="a"',
+    ) != df.expect_column_values_to_be_between("y", 1, 6, result_format=None)
     # Test unknown output format
     with pytest.raises(ValueError):
         df.expect_column_values_to_be_between(
