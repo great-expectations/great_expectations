@@ -2,6 +2,7 @@ import datetime
 import logging
 from pathlib import Path
 from string import Template
+from urllib.parse import urlparse
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import nested_update
