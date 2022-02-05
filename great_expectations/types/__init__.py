@@ -233,7 +233,11 @@ def _safe_deep_copy(data, memo=None):
     import dependency, when attempting to import "safe_deep_copy()" from "great_expectations/core/util.py" directly.
     """
     import pandas as pd
-    import pyspark
+
+    try:
+        import pyspark
+    except ImportError:
+        pyspark = None
 
     """
     This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
