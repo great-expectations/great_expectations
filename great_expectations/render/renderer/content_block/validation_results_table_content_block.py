@@ -4,20 +4,11 @@ import warnings
 from copy import deepcopy
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (
-    ExpectColumnKlDivergenceToBeLessThan,
-)
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
 )
-from great_expectations.render.types import (
-    CollapseContent,
-    RenderedContentBlockContainer,
-    RenderedStringTemplateContent,
-    RenderedTableContent,
-)
-from great_expectations.render.util import num_to_str
+from great_expectations.render.types import RenderedTableContent
 
 logger = logging.getLogger(__name__)
 
