@@ -12,7 +12,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -24,7 +24,7 @@ from great_expectations.marshmallow__shade import (
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
-from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.base import SerializableDotDict
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
@@ -2333,13 +2333,6 @@ class CheckpointConfig(BaseYamlConfig):
         self._runtime_configuration = value
 
     def __deepcopy__(self, memo):
-        """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of a custom "__deepcopy__()" method occurs frequently and should ideally serve as the
-        reference implementation in the "DictDot" class itself.  However, the circular import dependencies, due to the
-        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
-        refactoring infeasible at the present time.
-        """
         cls = self.__class__
         result = cls.__new__(cls)
 

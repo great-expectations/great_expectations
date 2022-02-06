@@ -6,13 +6,13 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
-from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import Attributes
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.types import SerializableDictDot
+from great_expectations.types import SerializableDictDot, safe_deep_copy
 
 
 class CheckpointResult(SerializableDictDot):
@@ -293,13 +293,6 @@ class CheckpointResult(SerializableDictDot):
         return serializeable_dict
 
     def __deepcopy__(self, memo):
-        """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
-        make this refactoring infeasible at the present time.
-        """
         cls = self.__class__
         result = cls.__new__(cls)
 

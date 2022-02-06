@@ -1,7 +1,7 @@
 import json
 
-from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
-from great_expectations.types import SerializableDictDot
+from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.types import SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
 
 
@@ -23,13 +23,6 @@ class Builder(SerializableDictDot):
         return serializeable_dict
 
     def __deepcopy__(self, memo):
-        """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of a custom "__deepcopy__()" method occurs frequently and should ideally serve as the
-        reference implementation in the "DictDot" class itself.  However, the circular import dependencies, due to the
-        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
-        refactoring infeasible at the present time.
-        """
         cls = self.__class__
         result = cls.__new__(cls)
 

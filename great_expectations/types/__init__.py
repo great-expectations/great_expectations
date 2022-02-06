@@ -3,8 +3,18 @@ import logging
 from enum import Enum
 from typing import Optional, Set
 
+import pandas as pd
+
 from .base import SerializableDotDict
 from .configurations import ClassConfig
+
+try:
+    import pyspark
+except ImportError:
+    pyspark = None
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +103,7 @@ class DictDot:
         This is often convenient for serialization, and in cases where an untyped version of the object is required.
         """
 
-        new_dict = _safe_deep_copy(data=self.__dict__)
+        new_dict = safe_deep_copy(data=self.__dict__)
 
         # This is needed to play nice with pydantic.
         if "__initialised__" in new_dict:
@@ -228,25 +238,7 @@ class SerializableDictDot(DictDot):
         raise NotImplementedError
 
 
-def _safe_deep_copy(data, memo=None):
-    """
-    # TODO: <Alex>2/4/2022</Alex>
-    This is an exact duplication of the implementation of the "safe_deep_copy()" method as the one located in the
-    "great_expectations/core/util.py" module.  The reason for the duplication stems from encountering the circular
-    import dependency, when attempting to import "safe_deep_copy()" from "great_expectations/core/util.py" directly.
-    """
-
-    # Putting specific imports here (once this method is relocated to more apropriate module, they will not be needed).
-    import pandas as pd
-
-    try:
-        import pyspark
-    except ImportError:
-        pyspark = None
-        logger.debug(
-            "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-        )
-
+def safe_deep_copy(data, memo=None):
     """
     This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
     """
@@ -256,11 +248,11 @@ def _safe_deep_copy(data, memo=None):
         return data
 
     if isinstance(data, (list, tuple)):
-        return [_safe_deep_copy(data=element, memo=memo) for element in data]
+        return [safe_deep_copy(data=element, memo=memo) for element in data]
 
     if isinstance(data, dict):
         return {
-            key: _safe_deep_copy(data=value, memo=memo) for key, value in data.items()
+            key: safe_deep_copy(data=value, memo=memo) for key, value in data.items()
         }
 
     # noinspection PyArgumentList
