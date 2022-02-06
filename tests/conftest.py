@@ -5041,8 +5041,6 @@ def profiler_config_with_placeholder_args(
 
     return RuleBasedProfilerConfig(
         name=profiler_name,
-        class_name="RuleBasedProfiler",
-        module_name="great_expectations.rule_based_profiler",
         config_version=1.0,
         variables={
             "false_positive_threshold": 1.0e-2,
