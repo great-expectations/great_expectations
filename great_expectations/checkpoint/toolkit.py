@@ -8,13 +8,13 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
-    batch_request_contains_batch_data,
     batch_request_in_validations_contains_batch_data,
     get_validations_with_batch_request_as_dict,
 )
 from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
+    batch_request_contains_batch_data,
     get_batch_request_as_dict,
 )
 from great_expectations.data_context.store import CheckpointStore

@@ -605,6 +605,16 @@ class Batch(SerializableDictDot):
         return self._data.execution_engine.resolve_metrics((metric,))[metric.id]
 
 
+def batch_request_contains_batch_data(
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+) -> bool:
+    return (
+        batch_request is not None
+        and batch_request.get("runtime_parameters") is not None
+        and batch_request["runtime_parameters"].get("batch_data") is not None
+    )
+
+
 def get_batch_request_as_dict(
     batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
 ) -> Optional[dict]:

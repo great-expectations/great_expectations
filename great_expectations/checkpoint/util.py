@@ -464,16 +464,6 @@ def get_updated_action_list(
     return list(base_action_list_dict.values())
 
 
-def batch_request_contains_batch_data(
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
-) -> bool:
-    return (
-        batch_request is not None
-        and batch_request.get("runtime_parameters") is not None
-        and batch_request["runtime_parameters"].get("batch_data") is not None
-    )
-
-
 def batch_request_in_validations_contains_batch_data(
     validations: Optional[List[dict]] = None,
 ) -> bool:
