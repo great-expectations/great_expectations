@@ -25,6 +25,9 @@ def test_add_profiler(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     args = profiler_config_with_placeholder_args.to_json_dict()
+    for attr in ("class_name", "module_name"):
+        args.pop(attr, None)
+
     profiler = empty_data_context.add_profiler(**args)
     assert isinstance(profiler, RuleBasedProfiler)
 
@@ -34,6 +37,8 @@ def test_add_profiler_with_invalid_config_raises_error(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     args = profiler_config_with_placeholder_args.to_json_dict()
+    for attr in ("class_name", "module_name"):
+        args.pop(attr, None)
 
     # Setting invalid configuration to check that it is caught by DataContext wrapper method
     args["config_version"] = -1
