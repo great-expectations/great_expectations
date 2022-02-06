@@ -8,6 +8,8 @@ import pandas as pd
 from .base import SerializableDotDict
 from .configurations import ClassConfig
 
+logger = logging.getLogger(__name__)
+
 try:
     import pyspark
 except ImportError:
@@ -15,8 +17,6 @@ except ImportError:
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
-
-logger = logging.getLogger(__name__)
 
 
 class DictDot:
