@@ -89,7 +89,7 @@ class NotNullSchema(Schema):
 class DomainBuilderConfig(DictDot):
     def __init__(
         self,
-        class_name: str,
+        class_name: str,  # Chetan - 20220204 - class_name to be made optional in a subsequent PR
         module_name: Optional[str] = None,
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
@@ -110,7 +110,9 @@ class DomainBuilderConfigSchema(NotNullSchema):
 
     __config_class__ = DomainBuilderConfig
 
-    class_name = fields.String(required=True)
+    class_name = fields.String(
+        required=True
+    )  # Chetan - 20220204 - class_name to be made optional in a subsequent PR
     module_name = fields.String(
         required=False,
         all_none=True,
@@ -123,13 +125,13 @@ class ParameterBuilderConfig(DictDot):
     def __init__(
         self,
         name: str,
-        class_name: str,
+        class_name: str,  # Chetan - 20220204 - class_name to be made optional in a subsequent PR
         module_name: Optional[str] = None,
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
     ):
         self.name = name
-        self.class_name = class_name
+        self.class_name = class_name  # Chetan - 20220204 - class_name to be made optional in a subsequent PR
         self.module_name = module_name
         self.batch_request = batch_request
         for k, v in kwargs.items():
@@ -146,7 +148,9 @@ class ParameterBuilderConfigSchema(NotNullSchema):
     __config_class__ = ParameterBuilderConfig
 
     name = fields.String(required=True)
-    class_name = fields.String(required=True)
+    class_name = fields.String(
+        required=True
+    )  # Chetan - 20220204 - class_name to be made optional in a subsequent PR
     module_name = fields.String(
         required=False,
         all_none=True,
@@ -159,7 +163,7 @@ class ExpectationConfigurationBuilderConfig(DictDot):
     def __init__(
         self,
         expectation_type: str,
-        class_name: str,
+        class_name: str,  # Chetan - 20220204 - class_name to be made optional in a subsequent PR
         module_name: Optional[str] = None,
         **kwargs,
     ):
@@ -179,7 +183,9 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
 
     __config_class__ = ExpectationConfigurationBuilderConfig
 
-    class_name = fields.String(required=True)
+    class_name = fields.String(
+        required=True
+    )  # Chetan - 20220204 - class_name to be made optional in a subsequent PR
     module_name = fields.String(
         required=False,
         all_none=True,
@@ -231,7 +237,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
-        class_name: str,
+        class_name: str,  # Chetan - 20220204 - class_name to be made optional in a subsequent PR
         module_name: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
@@ -264,7 +270,9 @@ class RuleBasedProfilerConfigSchema(Schema):
         unknown = INCLUDE
 
     name = fields.String(required=True, allow_none=False)
-    class_name = fields.String(required=True, allow_none=False)
+    class_name = fields.String(
+        required=True, allow_none=False
+    )  # Chetan - 20220204 - class_name to be made optional in a subsequent PR
     module_name = fields.String(
         required=False,
         all_none=True,
