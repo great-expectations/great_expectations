@@ -2160,9 +2160,9 @@ class CheckpointConfig(BaseYamlConfig):
         self._config_version = config_version
         if self.config_version is None:
             class_name = class_name or "LegacyCheckpoint"
-            self.validation_operator_name = validation_operator_name
+            self._validation_operator_name = validation_operator_name
             if batches is not None and isinstance(batches, list):
-                self.batches = batches
+                self._batches = batches
         else:
             class_name = class_name or "Checkpoint"
             self._template_name = template_name
@@ -2195,6 +2195,22 @@ class CheckpointConfig(BaseYamlConfig):
     @classmethod
     def get_schema_class(cls):
         return CheckpointConfigSchema
+
+    @property
+    def validation_operator_name(self) -> str:
+        return self._validation_operator_name
+
+    @validation_operator_name.setter
+    def validation_operator_name(self, value: str):
+        self._validation_operator_name = value
+
+    @property
+    def batches(self) -> List[dict]:
+        return self._batches
+
+    @batches.setter
+    def batches(self, value: List[dict]):
+        self._batches = value
 
     @property
     def ge_cloud_id(self) -> Optional[Union[UUID, str]]:
@@ -2304,17 +2320,33 @@ class CheckpointConfig(BaseYamlConfig):
     def site_names(self) -> List[str]:
         return self._site_names
 
+    @site_names.setter
+    def site_names(self, value: List[str]):
+        self._site_names = value
+
     @property
     def slack_webhook(self) -> str:
         return self._slack_webhook
+
+    @slack_webhook.setter
+    def slack_webhook(self, value: str):
+        self._slack_webhook = value
 
     @property
     def notify_on(self) -> str:
         return self._notify_on
 
+    @notify_on.setter
+    def notify_on(self, value: str):
+        self._notify_on = value
+
     @property
     def notify_with(self) -> str:
         return self._notify_with
+
+    @notify_with.setter
+    def notify_with(self, value: str):
+        self._notify_with = value
 
     @property
     def evaluation_parameters(self) -> dict:
@@ -2338,9 +2370,14 @@ class CheckpointConfig(BaseYamlConfig):
 
         memo[id(self)] = result
 
-        for key, value in self.to_raw_dict().items():
-            value_copy = safe_deep_copy(data=value, memo=memo)
-            setattr(result, key, value_copy)
+        attributes_to_copy = set(CheckpointConfigSchema().fields.keys())
+        for key in attributes_to_copy:
+            try:
+                value = self[key]
+                value_copy = safe_deep_copy(data=value, memo=memo)
+                setattr(result, key, value_copy)
+            except AttributeError as e:
+                pass
 
         return result
 

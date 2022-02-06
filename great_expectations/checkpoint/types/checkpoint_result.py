@@ -298,10 +298,11 @@ class CheckpointResult(SerializableDictDot):
 
         memo[id(self)] = result
 
-        for key, value in self.to_raw_dict().items():
-            if value is not None:
-                value_copy = safe_deep_copy(data=value, memo=memo)
-                setattr(result, key, value_copy)
+        attributes_to_copy = set(CheckpointResultSchema().fields.keys())
+        for key in attributes_to_copy:
+            value = self[key]
+            value_copy = safe_deep_copy(data=value, memo=memo)
+            setattr(result, key, value_copy)
 
         return result
 
