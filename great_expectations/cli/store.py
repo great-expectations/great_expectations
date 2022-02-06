@@ -1,6 +1,5 @@
 import click
 
-from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.core.usage_statistics.util import send_usage_message

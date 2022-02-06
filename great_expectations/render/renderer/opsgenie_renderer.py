@@ -1,7 +1,5 @@
 import logging
 
-from great_expectations.exceptions import InvalidKeyError
-
 logger = logging.getLogger(__name__)
 
 from ...core.id_dict import BatchKwargs

@@ -1,3 +1,12 @@
+# This file is responsible for configuring the `great_expectations` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+#
+# The pipeline is run under the following conditions:
+#   - On the main branch when a weekly release is being cut
+#   - On the develop branch as scheduled by the below cron job
+#
+#  `great_expectations` runs the entire test suite and is meant to safeguard the codebase against any errors that may have slipped through the cracks
+#  from `dependency_graph`. Additionally, it is responsible for deployment during the weekly release cut.
+
 schedules:
 - cron: 0 */4 * * *
   displayName: Scheduled Runs
@@ -6,14 +15,15 @@ schedules:
     - develop
     exclude:
     - main
-  always: false # Will only run if changes have been made since last scheduled run
+  always: true # Will always trigger but be conditionally run based on `scope_check` below
 
 trigger:
   branches:
     include:
-    - pre_pr-*
-    - develop
+    - pre_pr-* # Can be used to test both `great_expectations` and `dependency_graph` pipelines
     - main
+    exclude:
+    - develop
 
 resources:
   containers:
@@ -41,9 +51,10 @@ resources:
     ports:
       - 1433:1433
 
+# The pipeline is run under two primary conditions: if merging into main or as scheduled by the above cron job.
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
-  isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
+  isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 stages:
@@ -83,7 +94,7 @@ stages:
 
     jobs:
       - job: lint
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -91,7 +102,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==21.8b0 pyupgrade==2.7.2
+              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==22.1.0 pyupgrade==2.7.2
               EXIT_STATUS=0
               isort . --check-only --skip docs/ || EXIT_STATUS=$?
               black --check --exclude docs/ . || EXIT_STATUS=$?
@@ -106,7 +117,7 @@ stages:
 
     jobs:
       - job: compatibility_matrix
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
         variables:
           GE_pytest_opts: '--no-sqlalchemy --no-spark'
         strategy:
@@ -181,7 +192,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
       - job: comprehensive
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
 
         services:
           postgres: postgres
@@ -261,7 +272,7 @@ stages:
 
     jobs:
       - job: test_usage_stats_messages
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
         variables:
           python.version: '3.8'
 
@@ -293,7 +304,7 @@ stages:
 
     jobs:
       - job: mysql
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
 
         services:
           mysql: mysql
@@ -336,7 +347,7 @@ stages:
             displayName: 'pytest'
 
       - job: mssql
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
 
         services:
           mssql: mssql
@@ -374,7 +385,7 @@ stages:
 
     jobs:
       - job: test_cli
-        condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true), eq(variables.isMain, true))
+        condition: or(and(eq(variables.isScheduled, true), eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)), eq(variables.isMain, true))
 
         services:
           postgres: postgres
@@ -408,7 +419,7 @@ stages:
             displayName: 'pytest'
 
   - stage: deploy_gallery
-    condition: and(succeeded(), or(eq(variables.isMain, true), eq(variables.isDevelop, true)))
+    condition: and(succeeded(), or(eq(variables.isScheduled, true), eq(variables.isMain, true)))
     pool:
       vmImage: 'ubuntu-latest'
     dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]

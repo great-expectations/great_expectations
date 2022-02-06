@@ -40,7 +40,7 @@ from great_expectations.self_check.util import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-from ..core.util import convert_to_json_serializable, nested_update
+from ..core.util import nested_update
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..execution_engine.execution_engine import MetricDomainTypes
 from ..render.renderer.renderer import renderer
