@@ -5,12 +5,12 @@ from ruamel.yaml import YAML
 from great_expectations import DataContext
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
-    Domain,
     DomainBuilder,
     SimpleSemanticTypeColumnDomainBuilder,
     TableDomainBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations.rule_based_profiler.types import (
+    Domain,
     ParameterContainer,
     build_parameter_container_for_variables,
 )

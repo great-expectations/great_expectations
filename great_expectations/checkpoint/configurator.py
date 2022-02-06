@@ -159,7 +159,7 @@ class SimpleCheckpointConfigurator:
         }
         config_kwargs.update(specific_config_kwargs_overrides)
 
-        # Roundtrip through schema validation to add any missing fields
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
         checkpoint_config: dict = checkpointConfigSchema.load(
             CommentedMap(**config_kwargs)
         )

@@ -2,16 +2,16 @@ from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.parameter_builder import (
-    ParameterBuilder,
-    ParameterContainer,
-    build_parameter_container,
-)
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     MetricComputationDetails,
     MetricComputationResult,
     MetricComputationValues,
+    ParameterBuilder,
+)
+from great_expectations.rule_based_profiler.types import (
+    Domain,
+    ParameterContainer,
+    build_parameter_container,
 )
 from great_expectations.validator.validator import Validator
 

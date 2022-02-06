@@ -137,7 +137,6 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
     json_dict: dict = convert_to_json_serializable(data=resolved_runtime_kwargs)
     deep_filter_properties_iterable(
         properties=json_dict,
-        keep_falsy_numerics=True,
         inplace=True,
     )
     checkpoint_config_repr: str = json.dumps(json_dict, indent=2)

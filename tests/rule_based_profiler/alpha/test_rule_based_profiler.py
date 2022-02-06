@@ -169,7 +169,7 @@ def test_profile_excludes_citations(
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
 
-    # Roundtrip through schema validation to add any missing fields
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
 
