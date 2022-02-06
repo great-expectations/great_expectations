@@ -2337,6 +2337,7 @@ class CheckpointConfig(BaseYamlConfig):
         result = cls.__new__(cls)
 
         memo[id(self)] = result
+
         for key, value in self.to_raw_dict().items():
             value_copy = safe_deep_copy(data=value, memo=memo)
             setattr(result, key, value_copy)

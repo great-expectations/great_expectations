@@ -297,6 +297,7 @@ class CheckpointResult(SerializableDictDot):
         result = cls.__new__(cls)
 
         memo[id(self)] = result
+
         for key, value in self.to_raw_dict().items():
             if value is not None:
                 value_copy = safe_deep_copy(data=value, memo=memo)
