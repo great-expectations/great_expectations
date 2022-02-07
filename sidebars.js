@@ -379,7 +379,8 @@ module.exports = {
             'terms/expectation',
             'terms/expectation_suite',
             'terms/plugin',
-            'terms/supporting_resource'
+            'terms/supporting_resource',
+            'terms/validation_result'
           ]
         },
         {
