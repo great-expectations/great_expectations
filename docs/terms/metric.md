@@ -93,7 +93,7 @@ Configuration of Metrics is applied when they are defined as part of an Expectat
 
 Metrics can have any name. However, for the "core" Great Expectations Metrics, we use the following conventions:
 
-* For **aggregate Metrics**, such as the mean value of a column, we use describe the domain and name of the statistic, such as `column.mean` or `column.max`.
+* For **aggregate Metrics**, such as the mean value of a column, we use the domain and name of the statistic, such as `column.mean` or `column.max`.
 * For **map Metrics**, which produce values for individual records or rows, we define the domain using the prefix "column_values" and use several consistent suffixes to provide related Metrics. For example, for the Metric that defines whether specific column values fall into an expected set, several related Metrics are defined:
     * `column_values.in_set.unexpected_count` provides the total number of unexpected values in the domain.
     * `column_values.in_set.unexpected_values` provides a sample of unexpected_values; "result_format" is one of its
