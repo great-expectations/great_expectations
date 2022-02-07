@@ -23,17 +23,17 @@ There are several Profilers included with Great Expectations; conceptually, each
 
 ### Relationship to other objects
 
-A Profiler builds an Expectation Suite from one or more Data Assets. It usually also <TechnicalTag relative="../" tag="validation" text="Validates" /> the data against the newly-generated Expectation Suite to return a <TechnicalTag relative="../" tag="validation_result" text="Validation Result" />.
+A Profiler builds an Expectation Suite from one or more Data Assets. Many Profiler workflows will also include a step that <TechnicalTag relative="../" tag="validation" text="Validates" /> the data against the newly-generated Expectation Suite to return a <TechnicalTag relative="../" tag="validation_result" text="Validation Result" />.
 
 ## Use cases
 
 <CreateHeader/>
 
-Profilers come into use when it is time to create Expectations for your project.  At this point in your workflow you can create a new Profiler, or use an existing one to generate Expectations from a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
+Profilers come into use when it is time to configure Expectations for your project.  At this point in your workflow you can configure a new Profiler, or use an existing one to generate Expectations from a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
 
-For details on how to create a customized Profiler, see our guide on [how to create a new expectation suite using rule based Profilers](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md).
+For details on how to configure a customized Rule-Based Profiler, see our guide on [how to create a new expectation suite using Rule-Based Profilers](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md).
 
-For instructions on how to use a Profiler to generate Expectations from data, see our guide on [how to create and edit Expectations with a Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md).
+For instructions on how to use a `UserConfigurableProfiler` to generate Expectations from data, see our guide on [how to create and edit Expectations with a Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md).
 
 ## Features
 
@@ -43,21 +43,9 @@ There are multiple types of Profilers built in to Great Expectations.  Below is 
 
 #### UserConfigurableProfiler
 
-The `UserConfigurableProfiler` is used to build an Expectation Suite from a dataset. The Expectations built are strict - they can be used to determine whether two tables are the same.
+The `UserConfigurableProfiler` is used to build an Expectation Suite from a dataset. The Expectations built are strict - they can be used to determine whether two tables are the same.  When these Profilers are instantiated they can be configured by providing one or more input configuration parameters, allowing you to rapidly create a Profiler without needing to edit configuration files.  However, if you need to change these parameters you will also need to instantiate a new `UserConfigurableProfiler` using the updated parameters.
 
-#### BasicDatasetProfiler
-
-The `BasicDatasetProfiler` examines a Batch of data and creates a report that answers the basic questions most data practitioners would ask about a dataset during exploratory data analysis. The Profiler reports how unique the values in the column are, as well as the percentage of empty values in it. Based on the column's type it provides a description of the column by computing a number of statistics, such as min, max, mean and median, for numeric columns, and distribution of values, when appropriate.
-
-#### BasicSuiteBuilderProfiler
-
-The `BasicSuiteBuilderProfiler` is an extension of the `BasicDatasetProfiler` that creates a set of coarse Expectations for the profiled dataset.  Configuration of this Profiler is optional; if no configuration is provided, this Profiler will create Expectations for every column in the dataset.  
-
-The values in Expectations created by the `BasicSuiteBuilderProfiler` are extremely coarse and do not correspond to the actual values in the profiled data.  Rather, the purpose of this Profiler is to generate a broad range of candidate Expectations for the profiled data, which you can then prune down to those Expectations you find relevant and edit with values based on domain knowledge.  You will definitely want to edit the values used in Expectations created by this Profiler! 
-
-#### ColumnsExistProfiler
-
-The `ColumnsExistProfiler` is an extension of the `BasicDatasetProfiler` that additionally adds an Expectation that each column found in the profiled dataset exists in the source data system. 
+For instructions on how to use a `UserConfigurableProfiler` to generate Expectations from data, see our guide on [how to create and edit Expectations with a Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md).
 
 #### JsonSchemaProfiler
 
@@ -70,10 +58,11 @@ The `JsonSchemaProfiler` creates Expectation Suites from JSONSchema artifacts. B
 
 For an example of how to use the `JsonSchemaProfiler`, see our guide on [how to create a new Expectation Suite by profiling from a JsonSchema file](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file.md).
 
-### Extendable to account for domain knowledge
+### Rule-Based Profiler
 
-You can also extend Profilers to capture organizational knowledge about your data. For example, a team might have a convention that all columns **named** "id" are primary keys, whereas all columns ending with the **suffix** "_id" are foreign keys. In that case, when the team using Great Expectations first encounters a new dataset that followed the convention, a Profiler could use that knowledge to add an `expect_column_values_to_be_unique` Expectation to the "id" column (but not, for example an "address_id" column).
+Rule-Based Profilers are a newer implementation of Profiler that allows you to directly configure the Profiler through a YAML configuration.  Rule-Based Profilers allow you to integrate organizational knowledge about your data into the profiling process. For example, a team might have a convention that all columns **named** "id" are primary keys, whereas all columns ending with the **suffix** "_id" are foreign keys. In that case, when the team using Great Expectations first encounters a new dataset that followed the convention, a Profiler could use that knowledge to add an `expect_column_values_to_be_unique` Expectation to the "id" column (but not, for example an "address_id" column).
 
+For details on how to configure a customized Rule-Based Profiler, see our guide on [how to create a new expectation suite using Rule-Based Profilers](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md).
 
 ## API basics
 
@@ -99,11 +88,13 @@ There are additional parameters that can be passed to a `UserConfigurableProfile
 
 ### How to create
 
-If you need to create a custom Profiler, you will be working with a Rule-Based Profiler, which is an instance of the `RuleBasedProfiler` class.
+It is unlikely that you will need to create a custom Profiler by extending an existing Profiler with a subclass.  Instead, you should work with a Rule-Based Profiler which can be fully configured in a YAML configuration file.
 
-Configuring a custom Rule-Based Profiler is covered in more detail in the [Configuration](#configuration) section below.  You can also read our guide on [how to create a new expectation suite using rule based Profilers](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md) to be walked through the process, or view [the full source code for that guide](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py) on our GitHub as an example.
+Configuring a custom Rule-Based Profiler is covered in more detail in the [Configuration](#configuration) section below.  You can also read our guide on [how to create a new expectation suite using Rule-Based Profilers](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md) to be walked through the process, or view [the full source code for that guide](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py) on our GitHub as an example.
 
 ### Configuration
+
+#### Rule-Based Profilers
 
 **Rule-Based Profilers** allow users to provide a highly configurable specification which is composed of **Rules** to use in order to build an **Expectation Suite** by profiling existing data.
 
