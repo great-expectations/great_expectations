@@ -173,17 +173,6 @@ class DictDot:
         :param exclude_keys: exclusion list ("exclude only these properties, while include all the rest")
         :return: property names, subject to inclusion/exclusion filtering
         """
-
-        def assert_valid_keys(keys: Set[str], purpose: str):
-            name: str
-            for name in keys:
-                try:
-                    _ = self[name]
-                except AttributeError:
-                    raise ValueError(
-                        f'Property "{name}", marked for {purpose} on object "{str(type(self))}", does not exist.'
-                    )
-
         if include_keys is None:
             include_keys = set()
 
@@ -197,6 +186,8 @@ class DictDot:
 
         key: str
 
+        # Gather private fields:
+        # By Python convention, properties of non-trivial length, prefixed by underscore ("_") character, are private.
         property_names: Set[str] = set(
             filter(
                 lambda name: len(name) > 1,
@@ -205,6 +196,16 @@ class DictDot:
         )
 
         keys_for_exclusion: list = []
+
+        def assert_valid_keys(keys: Set[str], purpose: str):
+            name: str
+            for name in keys:
+                try:
+                    _ = self[name]
+                except AttributeError:
+                    raise ValueError(
+                        f'Property "{name}", marked for {purpose} on object "{str(type(self))}", does not exist.'
+                    )
 
         if include_keys:
             # Make sure that all properties, marked for inclusion, actually exist on the object.

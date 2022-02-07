@@ -33,6 +33,7 @@ yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 CURRENT_GE_CONFIG_VERSION = 3
 FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
@@ -2376,8 +2377,10 @@ class CheckpointConfig(BaseYamlConfig):
                 value = self[key]
                 value_copy = safe_deep_copy(data=value, memo=memo)
                 setattr(result, key, value_copy)
-            except AttributeError as e:
-                pass
+            except AttributeError:
+                logger.warning(
+                    f'Schema attribute "{key}" on CheckpointConfig instance with name field "{self.name}" is not set.'
+                )
 
         return result
 
