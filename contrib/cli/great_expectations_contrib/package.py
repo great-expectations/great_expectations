@@ -62,7 +62,7 @@ class GitHubUser(SerializableDictDot):
     full_name: Optional[str] = None
 
 
-class SocialLinkType(Enum):
+class SocialLinkType(str, Enum):
     TWITTER = "TWITTER"
     INSTAGRAM = "INSTAGRAM"
     LINKEDIN = "LINKEDIN"
@@ -82,7 +82,7 @@ class DomainExpert(SerializableDictDot):
     picture: str
 
 
-class Maturity(Enum):
+class Maturity(str, Enum):
     CONCEPT_ONLY = "CONCEPT_ONLY"
     EXPERIMENTAL = "EXPERIMENTAL"
     BETA = "BETA"

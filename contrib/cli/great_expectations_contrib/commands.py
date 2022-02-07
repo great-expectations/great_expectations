@@ -176,10 +176,6 @@ def write_package_to_disk(
         path: The relative path to the target package JSON file.
     """
     json_dict = asdict(package)
-    to_delete = [key for key, val in json_dict.items() if val is None]
-    for key in to_delete:
-        del json_dict[key]
-
     data = json.dumps(json_dict, indent=4)
     with open(path, "w") as f:
         f.write(data)
