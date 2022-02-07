@@ -16,6 +16,7 @@ from great_expectations.expectations.expectation import Expectation
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 @dataclass
@@ -146,8 +147,8 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         # Enum is all caps but status attributes are lowercase
         lowercase_status = {k.lower(): v for k, v in status.items()}
         lowercase_status["total"] = sum(status.values())
-
         self.status = PackageCompletenessStatus(**lowercase_status)
+
         maturity = max(status, key=status.get)  # Get the key with the max value
         self.maturity = Maturity[maturity]
 
