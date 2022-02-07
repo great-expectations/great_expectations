@@ -71,7 +71,7 @@ A Validation Result is also created for each Expectation in an Expectation Suite
 
 - **success:** A `true` or `false` indicator of whether the Expectation passed.
 - **expectation_config:** The config used by the Expectation, including such things as type of Expectation and key word arguments that were passed to the Expectation.
-- **result:** The observed value generated when the Expectation was run.
+- **result:** The observed values generated when the Expectation was run.
 - **meta:** Provides additional information about the Validation Result of some Expectations.
 - **exception_info:** This is a dictionary with three keys. 
   - `raised_exception` indicates if an exception was raised during the Validation. 
