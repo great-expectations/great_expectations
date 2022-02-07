@@ -12,7 +12,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.types import SerializableDictDot, safe_deep_copy
+from great_expectations.types import SerializableDictDot
 
 
 class CheckpointResult(SerializableDictDot):
@@ -291,20 +291,6 @@ class CheckpointResult(SerializableDictDot):
         dict_obj: dict = self.to_raw_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
-
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-
-        memo[id(self)] = result
-
-        attributes_to_copy = set(CheckpointResultSchema().fields.keys())
-        for key in attributes_to_copy:
-            value = self[key]
-            value_copy = safe_deep_copy(data=value, memo=memo)
-            setattr(result, key, value_copy)
-
-        return result
 
     def __repr__(self):
         serializeable_dict: dict = self.to_json_dict()

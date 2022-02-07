@@ -2378,9 +2378,7 @@ class CheckpointConfig(BaseYamlConfig):
                 value_copy = safe_deep_copy(data=value, memo=memo)
                 setattr(result, key, value_copy)
             except AttributeError:
-                logger.warning(
-                    f'Schema attribute "{key}" on CheckpointConfig instance with name field "{self.name}" is not set.'
-                )
+                pass
 
         return result
 
