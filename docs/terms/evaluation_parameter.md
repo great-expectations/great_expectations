@@ -65,11 +65,12 @@ This will return `{'success': True}`.
 An alternative method of defining the temporary value for an Evaluation Parameter is the `set_evaluation_parameter()` method, as shown below:
 
 ```python title="Python code"
-validator.set_evaluation_parameter("upstream_row_count", 10)
+validator.set_evaluation_parameter("upstream_row_count", 10000)
 
 validator.expect_table_row_count_to_equal(
     value={"$PARAMETER": "upstream_row_count"},
     result_format={'result_format': 'BOOLEAN_ONLY'}
+)
 ```
 
 This will also return `{'success': True}`.
