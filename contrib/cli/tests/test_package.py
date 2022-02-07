@@ -58,7 +58,7 @@ def test_update_expectations(
     assert package.maturity == Maturity.PRODUCTION
 
 
-def test_update_dependencies(
+def test_update_dependencies_with_valid_path(
     tmpdir: py.path.local, package: GreatExpectationsContribPackageManifest
 ):
     requirements_file = tmpdir.mkdir("tmp").join("requirements.txt")
@@ -93,6 +93,14 @@ ruamel.yaml>=0.16,<0.17.18  # package
             version="<0.17.18, >=0.16",
         ),
     ]
+
+
+def test_update_dependencies_with_invalid_path_exists_early(
+    package: GreatExpectationsContribPackageManifest,
+):
+    package.dependencies = [Dependency(text="my_dep", link="my_link")]
+    package._update_dependencies("my_fake_path.txt")
+    assert package.dependencies == []
 
 
 def test_update_attrs_with_diagnostics_does_not_overwrite_static_fields(

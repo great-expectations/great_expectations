@@ -154,7 +154,9 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
 
     def _update_dependencies(self, path: str) -> None:
         if not os.path.exists(path):
-            raise FileNotFoundError("Could not find requirements file")
+            logger.warning(f"Could not find requirements file {path}")
+            self.dependencies = []
+            return
 
         with open(path) as f:
             requirements = [req for req in pkg_resources.parse_requirements(f)]
