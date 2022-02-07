@@ -15,7 +15,7 @@ def run_ge_checkpoint_on_dataframe_from_suite(
     data_context: BaseDataContext,
     df: Union[pd.DataFrame, pyspark.sql.DataFrame],
     expectation_configuration: ExpectationConfiguration,
-):
+) -> CheckpointResult:
     batch_request = RuntimeBatchRequest(
         datasource_name="example_datasource",
         data_connector_name="default_runtime_data_connector_name",

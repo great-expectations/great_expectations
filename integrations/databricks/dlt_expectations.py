@@ -90,14 +90,6 @@ def expect(
 
             dlt = _get_dlt_library(dlt_library=dlt_library)
 
-            print(
-                "\n\nDIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-            )
-            print("dir(dlt)", dir(dlt))
-            print(
-                "\n\nDIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-            )
-
             _validate_dlt_decorator_arguments(
                 dlt_expectation_condition=dlt_expectation_condition,
                 ge_expectation_configuration=ge_expectation_configuration,
@@ -116,12 +108,12 @@ def expect(
             #   via `expect_or_drop` Delta Live Tables expectations
             if data_context is not None:
 
-                run_ge_checkpoint_on_dataframe_from_suite(
-                    data_context=data_context,
-                    df=args[0],
-                    expectation_configuration=ge_expectation_configuration_to_run,
-                )
-
+                # checkpoint_result: CheckpointResult = run_ge_checkpoint_on_dataframe_from_suite(
+                #     data_context=data_context,
+                #     df=args[0],
+                #     expectation_configuration=ge_expectation_configuration_to_run,
+                # )
+                pass
                 # TODO: getting the df from args[0] is throwing an in-pipeline error, how do we get access to the dataframe?
 
             if dlt_expectation is not None:
@@ -135,159 +127,17 @@ def expect(
                     dlt_expectation.name, dlt_expectation.condition
                 )
                 print("\n")
-                print(
-                    "\n\ndlt DIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-                )
-                print("dir(dlt)", dir(dlt))
-                dlt_attributes = [
-                    "DLT_DECORATOR_RETURN",
-                    "DataFrame",
-                    "Dataset",
-                    "Expectation",
-                    "FlowFunction",
-                    "SQLContext",
-                    "ViolationAction",
-                    "api",
-                    "create_table",
-                    "create_view",
-                    "dataset",
-                    "expect",
-                    "expect_all",
-                    "expect_all_or_drop",
-                    "expect_all_or_fail",
-                    "expect_or_drop",
-                    "expect_or_fail",
-                    "helpers",
-                    "pipeline",
-                    "read",
-                    "read_stream",
-                    "table",
-                    "view",
-                ]
-                for dlt_attribute in dlt_attributes:
-                    print(f"type({dlt_attribute})", type(getattr(dlt, dlt_attribute)))
-                    # print(
-                    #     f"get_size({dlt_attribute})",
-                    #     get_size(getattr(dlt, dlt_attribute)),
-                    # )
-                    print(
-                        f"sys.getsizeof({dlt_attribute})",
-                        sys.getsizeof(getattr(dlt, dlt_attribute)),
-                    )
-                    print(f"dir({dlt_attribute})", dir(getattr(dlt, dlt_attribute)))
 
-                api_attributes = [
-                    "DLT_DECORATOR_RETURN",
-                    "DataFrame",
-                    "Dataset",
-                    "Expectation",
-                    "FlowFunction",
-                    "SQLContext",
-                    "ViolationAction",
-                    "_add_expectations",
-                    "_register_dataset",
-                    "_register_table",
-                    "_register_view",
-                    "_sql",
-                    "expect",
-                    "expect_all",
-                    "expect_all_or_drop",
-                    "expect_all_or_fail",
-                    "expect_or_drop",
-                    "expect_or_fail",
-                    "pipeline",
-                    "read",
-                    "read_stream",
-                    "table",
-                    "view",
-                ]
-
-                for api_attribute in api_attributes:
-                    print(
-                        f"type({api_attribute})", type(getattr(dlt.api, api_attribute))
-                    )
-                    print(
-                        f"sys.getsizeof({api_attribute})",
-                        sys.getsizeof(getattr(dlt.api, api_attribute)),
-                    )
-                    print(f"dir({api_attribute})", dir(getattr(dlt.api, api_attribute)))
-
-                print(type(dlt.dataset.Dataset))
-                import inspect
-
-                print(
-                    "inspect.getfullargspec(dlt.create_table)",
-                    inspect.getfullargspec(dlt.create_table),
-                )
-                print(
-                    "inspect.getfullargspec(dlt.api.table)",
-                    inspect.getfullargspec(dlt.api.table),
-                )
-                print(
-                    "inspect.getfullargspec(dlt.api.view)",
-                    inspect.getfullargspec(dlt.api.view),
-                )
-                print(
-                    "inspect.getfullargspec(dlt.api.expect)",
-                    inspect.getfullargspec(dlt.api.expect),
-                )
-
-                # dir(DataFrame)[
-                #     '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattr__', '__getattribute__', '__getitem__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_collect_as_arrow', '_jcols', '_jmap', '_jseq', '_repr_html_', '_sort_cols', '_to_corrected_pandas_type', 'agg', 'alias', 'approxQuantile', 'cache', 'checkpoint', 'coalesce', 'colRegex', 'collect', 'columns', 'corr', 'count', 'cov', 'createGlobalTempView', 'createOrReplaceGlobalTempView', 'createOrReplaceTempView', 'createTempView', 'crossJoin', 'crosstab', 'cube', 'describe', 'display', 'distinct', 'drop', 'dropDuplicates', 'drop_duplicates', 'dropna', 'dtypes', 'exceptAll', 'explain', 'fillna', 'filter', 'first', 'foreach', 'foreachPartition', 'freqItems', 'groupBy', 'groupby', 'head', 'hint', 'inputFiles', 'intersect', 'intersectAll', 'isLocal', 'isStreaming', 'join', 'limit', 'localCheckpoint', 'mapInPandas', 'na', 'orderBy', 'persist', 'printSchema', 'randomSplit', 'rdd', 'registerTempTable', 'repartition', 'repartitionByRange', 'replace', 'rollup', 'sameSemantics', 'sample', 'sampleBy', 'schema', 'select', 'selectExpr', 'semanticHash', 'show', 'sort', 'sortWithinPartitions', 'stat', 'storageLevel', 'subtract', 'summary', 'tail', 'take', 'toDF', 'toJSON', 'toLocalIterator', 'toPandas', 'to_koalas', 'transform', 'union', 'unionAll', 'unionByName', 'unpersist', 'where', 'withColumn', 'withColumnRenamed', 'withWatermark', 'write', 'writeStream', 'writeTo']
-
-                # This DataFrame is not an object with data, it is a type.
-                df = getattr(dlt, "DataFrame")
-                print("df.columns", df.columns)
-                # print("df.count()", df.count())
-
-                # clickstream_raw_df = dlt.read("clickstream_raw")
-                # print("type(clickstream_raw_df)", type(clickstream_raw_df))
-                # print("dir(clickstream_raw_df)", dir(clickstream_raw_df))
-
-                # clickstream_prepared_df = dlt.read("clickstream_prepared")
-                # print("type(clickstream_prepared_df)", type(clickstream_prepared_df))
-                # print("dir(clickstream_prepared_df)", dir(clickstream_prepared_df))
-
-                print(
-                    "\n\ndlt DIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-                )
+                # TODO: Remove, these diagnostics are for development work only:
+                _dlt_diagnostics(dlt)
 
             func_result = func(*args, **kwargs)
-            print(
-                "\n\nreturn values DIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-            )
 
-            print("type(func_result):", type(func_result))
-            print("sys.getsizeof(func_result)", sys.getsizeof(func_result))
-            print("dir(func_result)", dir(func_result))
-            print("get_size(func_result)", get_size(func_result))
-            print("type(func_result.name):", type(func_result.name))
-            print("type(func_result.name_finalized):", type(func_result.name_finalized))
-            print("func_result.name", func_result.name)
-            print("func_result.name_finalized", func_result.name_finalized)
-            print("type(func_result.func):", type(func_result.func))
-            print("type(func_result.expectations):", type(func_result.expectations))
-            print("func_result.expectations", func_result.expectations)
-            print("type(func_result.builder):", type(func_result.builder))
-            try:
-                print("type(dlt_expect_return_value):", type(dlt_expect_return_value))
-                print(
-                    "sys.getsizeof(dlt_expect_return_value)",
-                    sys.getsizeof(dlt_expect_return_value),
-                )
-                print("dir(dlt_expect_return_value)", dir(dlt_expect_return_value))
-                print(
-                    "get_size(dlt_expect_return_value)",
-                    get_size(dlt_expect_return_value),
-                )
-            except:
-                pass
-            # df = dlt.read(func_result.name)
-            # print("type(df)", type(df))
-            # print("df.head()", df.head())
-            print(
-                "\n\nreturn values DIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
-            )
+            # TODO: Remove, these diagnostics are for development work only:
+            _func_result_diagnostics(func_result)
+
+            _dlt_expect_return_value_diagnostics(dlt_expect_return_value)
+
             return func_result
 
         return wrapper_expect
@@ -377,3 +227,170 @@ def _translate_expectations(
         ge_expectation_configuration_to_run = None
 
     return dlt_expectation, ge_expectation_configuration_to_run
+
+
+def _dlt_diagnostics(dlt):
+    """TODO: For use in development, remove before release"""
+    print(
+        "\n\ndlt DIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+    )
+    print("dir(dlt)", dir(dlt))
+    dlt_attributes = [
+        "DLT_DECORATOR_RETURN",
+        "DataFrame",
+        "Dataset",
+        "Expectation",
+        "FlowFunction",
+        "SQLContext",
+        "ViolationAction",
+        "api",
+        "create_table",
+        "create_view",
+        "dataset",
+        "expect",
+        "expect_all",
+        "expect_all_or_drop",
+        "expect_all_or_fail",
+        "expect_or_drop",
+        "expect_or_fail",
+        "helpers",
+        "pipeline",
+        "read",
+        "read_stream",
+        "table",
+        "view",
+    ]
+    for dlt_attribute in dlt_attributes:
+        print(f"type({dlt_attribute})", type(getattr(dlt, dlt_attribute)))
+        # print(
+        #     f"get_size({dlt_attribute})",
+        #     get_size(getattr(dlt, dlt_attribute)),
+        # )
+        print(
+            f"sys.getsizeof({dlt_attribute})",
+            sys.getsizeof(getattr(dlt, dlt_attribute)),
+        )
+        print(f"dir({dlt_attribute})", dir(getattr(dlt, dlt_attribute)))
+
+    api_attributes = [
+        "DLT_DECORATOR_RETURN",
+        "DataFrame",
+        "Dataset",
+        "Expectation",
+        "FlowFunction",
+        "SQLContext",
+        "ViolationAction",
+        "_add_expectations",
+        "_register_dataset",
+        "_register_table",
+        "_register_view",
+        "_sql",
+        "expect",
+        "expect_all",
+        "expect_all_or_drop",
+        "expect_all_or_fail",
+        "expect_or_drop",
+        "expect_or_fail",
+        "pipeline",
+        "read",
+        "read_stream",
+        "table",
+        "view",
+    ]
+
+    for api_attribute in api_attributes:
+        print(f"type({api_attribute})", type(getattr(dlt.api, api_attribute)))
+        print(
+            f"sys.getsizeof({api_attribute})",
+            sys.getsizeof(getattr(dlt.api, api_attribute)),
+        )
+        print(f"dir({api_attribute})", dir(getattr(dlt.api, api_attribute)))
+
+    print(type(dlt.dataset.Dataset))
+    import inspect
+
+    print(
+        "inspect.getfullargspec(dlt.create_table)",
+        inspect.getfullargspec(dlt.create_table),
+    )
+    print(
+        "inspect.getfullargspec(dlt.api.table)",
+        inspect.getfullargspec(dlt.api.table),
+    )
+    print(
+        "inspect.getfullargspec(dlt.api.view)",
+        inspect.getfullargspec(dlt.api.view),
+    )
+    print(
+        "inspect.getfullargspec(dlt.api.expect)",
+        inspect.getfullargspec(dlt.api.expect),
+    )
+
+    # dir(DataFrame)[
+    #     '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattr__', '__getattribute__', '__getitem__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_collect_as_arrow', '_jcols', '_jmap', '_jseq', '_repr_html_', '_sort_cols', '_to_corrected_pandas_type', 'agg', 'alias', 'approxQuantile', 'cache', 'checkpoint', 'coalesce', 'colRegex', 'collect', 'columns', 'corr', 'count', 'cov', 'createGlobalTempView', 'createOrReplaceGlobalTempView', 'createOrReplaceTempView', 'createTempView', 'crossJoin', 'crosstab', 'cube', 'describe', 'display', 'distinct', 'drop', 'dropDuplicates', 'drop_duplicates', 'dropna', 'dtypes', 'exceptAll', 'explain', 'fillna', 'filter', 'first', 'foreach', 'foreachPartition', 'freqItems', 'groupBy', 'groupby', 'head', 'hint', 'inputFiles', 'intersect', 'intersectAll', 'isLocal', 'isStreaming', 'join', 'limit', 'localCheckpoint', 'mapInPandas', 'na', 'orderBy', 'persist', 'printSchema', 'randomSplit', 'rdd', 'registerTempTable', 'repartition', 'repartitionByRange', 'replace', 'rollup', 'sameSemantics', 'sample', 'sampleBy', 'schema', 'select', 'selectExpr', 'semanticHash', 'show', 'sort', 'sortWithinPartitions', 'stat', 'storageLevel', 'subtract', 'summary', 'tail', 'take', 'toDF', 'toJSON', 'toLocalIterator', 'toPandas', 'to_koalas', 'transform', 'union', 'unionAll', 'unionByName', 'unpersist', 'where', 'withColumn', 'withColumnRenamed', 'withWatermark', 'write', 'writeStream', 'writeTo']
+
+    # This DataFrame is not an object with data, it is a type.
+    df = getattr(dlt, "DataFrame")
+    print("df.columns", df.columns)
+    # print("df.count()", df.count())
+
+    # clickstream_raw_df = dlt.read("clickstream_raw")
+    # print("type(clickstream_raw_df)", type(clickstream_raw_df))
+    # print("dir(clickstream_raw_df)", dir(clickstream_raw_df))
+
+    # clickstream_prepared_df = dlt.read("clickstream_prepared")
+    # print("type(clickstream_prepared_df)", type(clickstream_prepared_df))
+    # print("dir(clickstream_prepared_df)", dir(clickstream_prepared_df))
+
+    print(
+        "\n\ndlt DIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+    )
+
+
+def _func_result_diagnostics(func_result):
+    """TODO: For use in development, remove before release"""
+    print(
+        "\n\nfunc_result DIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+    )
+
+    print("type(func_result):", type(func_result))
+    print("sys.getsizeof(func_result)", sys.getsizeof(func_result))
+    print("dir(func_result)", dir(func_result))
+    print("get_size(func_result)", get_size(func_result))
+    print("type(func_result.name):", type(func_result.name))
+    print("type(func_result.name_finalized):", type(func_result.name_finalized))
+    print("func_result.name", func_result.name)
+    print("func_result.name_finalized", func_result.name_finalized)
+    print("type(func_result.func):", type(func_result.func))
+    print("type(func_result.expectations):", type(func_result.expectations))
+    print("func_result.expectations", func_result.expectations)
+    print("type(func_result.builder):", type(func_result.builder))
+    print(
+        "\n\nfunc_result DIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+    )
+
+
+def _dlt_expect_return_value_diagnostics(dlt_expect_return_value):
+    """TODO: For use in development, remove before release"""
+    print(
+        "\n\ndlt_expect_return_value DIAGNOSTICS START =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+    )
+    try:
+        print("type(dlt_expect_return_value):", type(dlt_expect_return_value))
+        print(
+            "sys.getsizeof(dlt_expect_return_value)",
+            sys.getsizeof(dlt_expect_return_value),
+        )
+        print("dir(dlt_expect_return_value)", dir(dlt_expect_return_value))
+        print(
+            "get_size(dlt_expect_return_value)",
+            get_size(dlt_expect_return_value),
+        )
+    except:
+        pass
+    # df = dlt.read(func_result.name)
+    # print("type(df)", type(df))
+    # print("df.head()", df.head())
+    print(
+        "\n\ndlt_expect_return_value DIAGNOSTICS END =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+    )
