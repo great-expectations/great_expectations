@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import Any, List
 
 import numpy as np
 import pandas as pd

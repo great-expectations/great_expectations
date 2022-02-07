@@ -2,7 +2,7 @@ import pytest
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.marshmallow__shade.exceptions import ValidationError
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.config import (
     DomainBuilderConfig,
     DomainBuilderConfigSchema,
     ExpectationConfigurationBuilderConfig,
@@ -64,16 +64,6 @@ def test_domain_builder_config_successfully_loads_with_optional_args():
     assert all(getattr(config, k) == v for k, v in data.items())
 
 
-def test_domain_builder_config_unsuccessfully_loads_with_missing_required_fields():
-    data = {}
-    schema = DomainBuilderConfigSchema()
-
-    with pytest.raises(ValidationError) as e:
-        schema.load(data)
-
-    assert "'class_name': ['Missing data for required field.']" in str(e.value)
-
-
 def test_parameter_builder_config_successfully_loads_with_required_args():
     data = {"class_name": "ParameterBuilder", "name": "my_parameter_builder"}
     schema = ParameterBuilderConfigSchema()
@@ -105,10 +95,7 @@ def test_parameter_builder_config_unsuccessfully_loads_with_missing_required_fie
     with pytest.raises(ValidationError) as e:
         schema.load(data)
 
-    assert all(
-        f"'{attr}': ['Missing data for required field.']" in str(e.value)
-        for attr in ("class_name", "name")
-    )
+    assert "'name': ['Missing data for required field.']" in str(e.value)
 
 
 def test_expectation_configuration_builder_config_successfully_loads_with_required_args():
@@ -147,10 +134,7 @@ def test_expectation_configuration_builder_config_unsuccessfully_loads_with_miss
     with pytest.raises(ValidationError) as e:
         schema.load(data)
 
-    assert all(
-        f"'{attr}': ['Missing data for required field.']" in str(e.value)
-        for attr in ("class_name", "expectation_type")
-    )
+    assert "'expectation_type': ['Missing data for required field.']" in str(e.value)
 
 
 def test_rule_config_successfully_loads_with_required_args():
