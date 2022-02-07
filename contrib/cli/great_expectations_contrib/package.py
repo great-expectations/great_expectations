@@ -16,7 +16,6 @@ from great_expectations.expectations.expectation import Expectation
 from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 @dataclass
@@ -149,7 +148,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         lowercase_status["total"] = sum(status.values())
 
         self.status = PackageCompletenessStatus(**lowercase_status)
-        maturity = max(status, key=status.get)
+        maturity = max(status, key=status.get)  # Get the key with the max value
         self.maturity = Maturity[maturity]
 
     def _update_dependencies(self, path: str) -> None:
