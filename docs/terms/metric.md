@@ -40,7 +40,7 @@ Past Metrics can also be accessed by some Expectations through Evaluation Parame
 
 ## Features
 
-### Metrics are the core tool used to Validate data
+### Metrics are core to the Validation of data
 
 When an Expectation should be evaluated, Great Expectations collects all the Metrics requested by the Expectation and provides them to the Expectation's validation logic. Most validation is done by comparing values from a column or columns to a Metric associated with the Expectation being evaluated.
 
