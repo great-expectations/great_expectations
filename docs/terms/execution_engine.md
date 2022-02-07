@@ -20,7 +20,7 @@ An Execution Engine is a system capable of processing data to compute <Technical
 
 ### Features and promises
 
-An Execution Engine provides the computing resources that will be used to actually perform <TechnicalTag relative="../" tag="validation" text="Validation" />. Great Expectations can take advantage of many different Execution Engines, such as Pandas, Spark, or SqlAlchemy, and even translate the same <TechnicalTag relative="../" tag="expectation" text="Expectations" /> to validate data using different engines.
+An Execution Engine provides the computing resources that will be used to actually perform <TechnicalTag relative="../" tag="validation" text="Validation" />. Great Expectations can take advantage of different Execution Engines, such as Pandas, Spark, or SqlAlchemy, and even translate the same <TechnicalTag relative="../" tag="expectation" text="Expectations" /> to validate data using different engines.
 
 Data is always viewed through the lens of an Execution Engine in Great Expectations. When we obtain a <TechnicalTag relative="../" tag="batch" text="Batch" />Batch of data, that Batch contains metadata that wraps the native Data Object of the Execution Engine -- for example, a `DataFrame` in Pandas or Spark, or a table or query result in SQL.
 
@@ -46,7 +46,13 @@ When a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> Valida
 
 ### Standardized data and Expectations
 
-Execution engines handle the interactions with the source data system that their Datasource is configured for.  However, they also wrap data from those source data systems with metadata that allows Great Expectations to read it regardless of its native format. Additionally, Execution Engines translate of Expectations so that they can operate in a format appropriate to their associated source data system.  Because of this, the same Expectations can be used to validate data from different Datasources, even if those Datasources interact with source data systems so different in nature that they require different Execution Engines to access their data. 
+Execution engines handle the interactions with the source data system that their Datasource is configured for.  However, they also wrap data from those source data systems with metadata that allows Great Expectations to read it regardless of its native format. Additionally, Execution Engines enable the calculations of Metrics used by Expectations so that they can operate in a format appropriate to their associated source data system.  Because of this, the same Expectations can be used to validate data from different Datasources, even if those Datasources interact with source data systems so different in nature that they require different Execution Engines to access their data. 
+
+### Deferred Metrics
+
+SqlAlchemyExecutionEngine and SparkDFExecutionEngine provide an additional feature that allows deferred resolution of Metrics, making it possible to bundle the request for several metrics into a single trip to the backend. Additional Execution Engines may also support this feature in the future.
+
+The `resolve_metric_bundle()` method of these engines computes values of a bundle of Metrics; this function is used internally by `resolve_metrics()` on Execution Engines that support bundled metrics
 
 ## API basics
 
@@ -57,6 +63,27 @@ You will not need to directly access an Execution Engine.  Instead, you will con
 ### How to create
 
 You will not need to directly instantiate an Execution Engine.  Instead, they are automatically created as a component in a Datasource.
+
+If you are interested in using and accessing data with an Execution Engine that Great Expectations does not yet support, consider making your work a contribution to the [Great Expectations open source GitHub project](https://github.com/great-expectations/great_expectations).  This is a considerable undertaking, so you may also wish to [reach out to us on Slack](https://greatexpectations.io/slack) as we will be happy to provide guidance and support.
+
+### Execution Engine init arguments
+
+- `name`
+- `caching`
+- `batch_spec_defaults` (is this needed?)
+- `batch_data_dict`
+- `validator`
+
+### Execution Engine Properties
+
+- `loaded_batch_data` (all "loaded" batches)
+- `active_batch_data_id`
+
+### Execution Engine Methods
+
+- `load_batch_data(batrch_id, batch_data)`
+- `resolve_metrics`: computes metric values
+- `get_compute_domain`: gets the compute domain for a particular type of intermediate metric.
 
 ### Configuration
 
