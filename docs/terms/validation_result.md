@@ -53,7 +53,7 @@ Because Validation Results are passed to Actions in a Checkpoint's `action_list`
 
 Inside of Actions, Validation Results are a parameter that is passed to the Action when it is run.  The other place where you can access your Validation Results is in your Validation Result Store.  In both of these cases, you will be working with either an `ExpectationSuiteValidationResult` instance, or the serialization of such an instance into a JSON file.
 
-Outside of Actions, you will generally only encounter Validation Results when validating a single expectation against some sample data in the interactive workflow for creating Expectations.  When an individual Validation Result is generated, it is generated as an `ExpectationValidationResult` instance.
+Outside of Actions and your Validation Result Store, you will generally only encounter Validation Results when validating a single expectation against some sample data in the interactive workflow for creating Expectations.  When an individual Validation Result is generated, it is generated as an `ExpectationValidationResult` instance.
 
 ### How to create
 
