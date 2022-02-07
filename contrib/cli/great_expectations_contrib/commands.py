@@ -180,3 +180,8 @@ def write_package_to_disk(
     with open(path, "w") as f:
         f.write(data)
         logger.info(f"Succesfully wrote state to {path}.")
+
+
+def sync_package(package: GreatExpectationsContribPackageManifest, path: str) -> None:
+    package.update_package_state()
+    write_package_to_disk(package, path)
