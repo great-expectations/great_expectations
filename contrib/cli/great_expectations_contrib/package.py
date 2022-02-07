@@ -13,26 +13,27 @@ from great_expectations.core.expectation_diagnostics.expectation_diagnostics imp
     ExpectationDiagnostics,
 )
 from great_expectations.expectations.expectation import Expectation
+from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
 @dataclass
-class ExpectationCompletenessCheck:
+class ExpectationCompletenessCheck(SerializableDictDot):
     message: str
     passed: bool
 
 
 @dataclass
-class ExpectationCompletenessChecklist:
+class ExpectationCompletenessChecklist(SerializableDictDot):
     experimental: List[ExpectationCompletenessCheck]
     beta: List[ExpectationCompletenessCheck]
     production: List[ExpectationCompletenessCheck]
 
 
 @dataclass
-class PackageCompletenessStatus:
+class PackageCompletenessStatus(SerializableDictDot):
     concept_only: int
     experimental: int
     beta: int
@@ -41,7 +42,7 @@ class PackageCompletenessStatus:
 
 
 @dataclass
-class RenderedExpectation:
+class RenderedExpectation(SerializableDictDot):
     name: str
     tags: List[str]
     supported: List[str]
@@ -49,14 +50,14 @@ class RenderedExpectation:
 
 
 @dataclass
-class Dependency:
+class Dependency(SerializableDictDot):
     text: str
     link: str
     version: Optional[str] = None
 
 
 @dataclass
-class GitHubUser:
+class GitHubUser(SerializableDictDot):
     username: str
     full_name: Optional[str] = None
 
@@ -69,13 +70,13 @@ class SocialLinkType(Enum):
 
 
 @dataclass
-class SocialLink:
+class SocialLink(SerializableDictDot):
     account_type: SocialLinkType
     identifier: str
 
 
 @dataclass
-class DomainExpert:
+class DomainExpert(SerializableDictDot):
     full_name: str
     social_links: List[SocialLink]
     picture: str
@@ -89,7 +90,7 @@ class Maturity(Enum):
 
 
 @dataclass
-class GreatExpectationsContribPackageManifest:
+class GreatExpectationsContribPackageManifest(SerializableDictDot):
     # Core
     package_name: Optional[str] = None
     icon: Optional[str] = None
@@ -120,11 +121,11 @@ class GreatExpectationsContribPackageManifest:
     ) -> None:
         self.expectations = []
         self.expectation_count = len(diagnostics)
-        self.dependencies = self._parse_requirements_file_to_dependencies(
+        self.dependencies = self._parse_dependencies_from_requirements_file(
             "requirements.txt"
         )
         self.contributors = []
-        self.maturity = NotImplementedError
+        self.maturity = Maturity.CONCEPT_ONLY
         self.status = PackageCompletenessStatus(0, 0, 0, 0, 0)
 
         for diagnostic in diagnostics:
@@ -142,20 +143,13 @@ class GreatExpectationsContribPackageManifest:
             self.expectations.append(expectation)
 
             expectation_maturity = diagnostic.library_metadata.maturity
-            if expectation_maturity == Maturity.CONCEPT_ONLY:
-                self.status.concept_only += 1
-            elif expectation_maturity == Maturity.EXPERIMENTAL:
-                self.status.experimental += 1
-            elif expectation_maturity == Maturity.BETA:
-                self.status.beta += 1
-            elif expectation_maturity == Maturity.PRODUCTION:
-                self.status.production += 1
-
+            self.status[expectation_maturity.lower()] += 1
             self.status.total += 1
 
-            # TODO(cdkini): Update maturity and status
+        maturity = self.status.to_dict()
+        self.maturity = max(maturity, key=maturity.get).upper()
 
-    def _parse_requirements_file_to_dependencies(self, path: str) -> List[Dependency]:
+    def _parse_dependencies_from_requirements_file(self, path: str) -> List[Dependency]:
         if not os.path.exists(path):
             raise FileNotFoundError("Could not find requirements file")
 
@@ -176,8 +170,6 @@ class GreatExpectationsContribPackageManifest:
             return Dependency(text=name, link=pypi_url, version=version)
 
         return list(map(_convert_to_dependency, requirements))
-
-    # ========================================================================================================================================================================
 
     def _retrieve_package_expectations_diagnostics(
         self,
