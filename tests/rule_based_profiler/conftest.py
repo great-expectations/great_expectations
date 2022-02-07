@@ -18,6 +18,9 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
@@ -27,9 +30,6 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     ParameterNode,
-)
-from great_expectations.rule_based_profiler.types.base import (
-    ruleBasedProfilerConfigSchema,
 )
 from tests.conftest import skip_if_python_below_minimum_version
 
@@ -115,7 +115,7 @@ def multibatch_generic_csv_generator_context(monkeypatch, empty_data_context):
     datasource_name = "generic_csv_generator"
     data_connector_name = "daily_data_connector"
     asset_name = "daily_data_asset"
-    datasource_config = fr"""
+    datasource_config = rf"""
 class_name: Datasource
 module_name: great_expectations.datasource
 execution_engine:
@@ -420,7 +420,7 @@ def alice_columnar_table_single_batch_context(
     datasource_name: str = "alice_columnar_table_single_batch_datasource"
     data_connector_name: str = "alice_columnar_table_single_batch_data_connector"
     data_asset_name: str = "alice_columnar_table_single_batch_data_asset"
-    datasource_config: str = fr"""
+    datasource_config: str = rf"""
 class_name: Datasource
 module_name: great_expectations.datasource
 execution_engine:

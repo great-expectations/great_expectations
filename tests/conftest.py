@@ -33,6 +33,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -46,7 +47,7 @@ from great_expectations.datasource import (
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.rule_based_profiler.types.base import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -5069,21 +5070,35 @@ def profiler_config_with_placeholder_args(
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def empty_profiler_store(profiler_store_name: str) -> ProfilerStore:
     skip_if_python_below_minimum_version()
 
     return ProfilerStore(profiler_store_name)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
     skip_if_python_below_minimum_version()
 
     return ConfigurationIdentifier(configuration_key=profiler_name)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
+def ge_cloud_profiler_id() -> str:
+    skip_if_python_below_minimum_version()
+
+    return "my_ge_cloud_profiler_id"
+
+
+@pytest.fixture
+def ge_cloud_profiler_key(ge_cloud_profiler_id: str) -> GeCloudIdentifier:
+    skip_if_python_below_minimum_version()
+
+    return GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_profiler_id)
+
+
+@pytest.fixture
 def populated_profiler_store(
     empty_profiler_store: ProfilerStore,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
