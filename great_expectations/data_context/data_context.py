@@ -3330,6 +3330,12 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_mode=self.ge_cloud_mode,
         )
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.run_profiler",
+    )
+    def run_profiler(self):
+        raise NotImplementedError
+
     def test_yaml_config(
         self,
         yaml_config: str,
