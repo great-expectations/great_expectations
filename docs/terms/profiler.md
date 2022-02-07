@@ -43,7 +43,7 @@ There are multiple types of Profilers built in to Great Expectations.  Below is 
 
 #### UserConfigurableProfiler
 
-The `UserConfigurableProfiler` is used to build an Expectation Suite from a Dataset. The Expectations built are strict - they can be used to determine whether two tables are the same.
+The `UserConfigurableProfiler` is used to build an Expectation Suite from a dataset. The Expectations built are strict - they can be used to determine whether two tables are the same.
 
 #### BasicDatasetProfiler
 
