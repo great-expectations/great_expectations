@@ -3333,8 +3333,25 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     @usage_statistics_enabled_method(
         event_name="data_context.run_profiler",
     )
-    def run_profiler(self):
-        raise NotImplementedError
+    def run_profiler(
+        self,
+        profiler: Optional[RuleBasedProfiler] = None,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        variables: Optional[dict] = None,
+        rules: Optional[dict] = None,
+        expectation_suite_name: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+    ) -> ExpectationSuite:
+        return profiler_toolkit.run_profiler(
+            profiler,
+            name,
+            ge_cloud_id,
+            variables,
+            rules,
+            expectation_suite_name,
+            expectation_suite_ge_cloud_id,
+        )
 
     def test_yaml_config(
         self,

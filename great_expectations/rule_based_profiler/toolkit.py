@@ -3,6 +3,7 @@ from typing import List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.util import batch_request_contains_batch_data
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.types.resource_identifiers import (
@@ -13,6 +14,21 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import filter_properties_dict
+
+
+def run_profiler(
+    profiler: Optional[RuleBasedProfiler] = None,
+    name: Optional[str] = None,
+    ge_cloud_id: Optional[str] = None,
+    variables: Optional[dict] = None,
+    rules: Optional[dict] = None,
+    expectation_suite_name: Optional[str] = None,
+    expectation_suite_ge_cloud_id: Optional[str] = None,
+) -> ExpectationSuite:
+    """
+    TODO(cdkini): Write docstring!
+    """
+    pass
 
 
 def add_profiler(
