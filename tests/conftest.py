@@ -2497,7 +2497,7 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
 
     # noinspection PyUnusedLocal
     datasource: BaseDatasource = context.add_datasource(
-        "my_additional_datasource", **yaml.load(datasource_config)
+        "my_additional_datasource", **yaml.safe_load(datasource_config)
     )
 
     return context
@@ -2557,7 +2557,7 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
 
         # noinspection PyUnusedLocal
         datasource: BaseDatasource = context.add_datasource(
-            "my_sqlite_db_datasource", **yaml.load(datasource_config)
+            "my_sqlite_db_datasource", **yaml.safe_load(datasource_config)
         )
 
     return context
@@ -4506,7 +4506,7 @@ def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
         my_sql_datasource: Optional[
             Union[SimpleSqlalchemyDatasource, LegacyDatasource]
         ] = context.add_datasource(
-            "test_sqlite_db_datasource", **yaml.load(datasource_config)
+            "test_sqlite_db_datasource", **yaml.safe_load(datasource_config)
         )
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
@@ -4587,7 +4587,7 @@ introspection:
 """
 
     try:
-        context.add_datasource("my_sqlite_db", **yaml.load(datasource_config))
+        context.add_datasource("my_sqlite_db", **yaml.safe_load(datasource_config))
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
@@ -4625,7 +4625,7 @@ def data_context_with_pandas_datasource_for_testing_get_batch(
         directory=base_directory, file_name_list=sample_file_names
     )
 
-    config = yaml.load(
+    config = yaml.safe_load(
         f"""
 class_name: Datasource
 execution_engine:
@@ -4657,7 +4657,7 @@ def basic_datasource(tmp_path_factory):
     )
 
     basic_datasource: Datasource = instantiate_class_from_config(
-        config=yaml.load(
+        config=yaml.safe_load(
             f"""
 class_name: Datasource
 
@@ -4789,7 +4789,7 @@ def db_file():
 @pytest.fixture
 def data_context_with_datasource_pandas_engine(empty_data_context):
     context = empty_data_context
-    config = yaml.load(
+    config = yaml.safe_load(
         f"""
     class_name: Datasource
     execution_engine:
@@ -4811,7 +4811,7 @@ def data_context_with_datasource_pandas_engine(empty_data_context):
 @pytest.fixture
 def data_context_with_datasource_spark_engine(empty_data_context, spark_session):
     context = empty_data_context
-    config = yaml.load(
+    config = yaml.safe_load(
         f"""
     class_name: Datasource
     execution_engine:
@@ -4835,7 +4835,7 @@ def data_context_with_datasource_spark_engine_batch_spec_passthrough(
     empty_data_context, spark_session
 ):
     context = empty_data_context
-    config = yaml.load(
+    config = yaml.safe_load(
         f"""
     class_name: Datasource
     execution_engine:
@@ -4861,7 +4861,7 @@ def data_context_with_datasource_spark_engine_batch_spec_passthrough(
 @pytest.fixture
 def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
     context = empty_data_context
-    config = yaml.load(
+    config = yaml.safe_load(
         f"""
     class_name: Datasource
     execution_engine:
@@ -4952,7 +4952,7 @@ expectations_store_name: default_expectations_store
 validations_store_name: default_validations_store
 checkpoint_store_name: default_checkpoint_store
 """
-    data_context_config_dict = yaml.load(config_yaml_str)
+    data_context_config_dict = yaml.safe_load(config_yaml_str)
     return DataContextConfig(**data_context_config_dict)
 
 
@@ -4977,7 +4977,7 @@ def empty_cloud_data_context(
 @pytest.fixture
 def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
     context = empty_cloud_data_context
-    config = yaml.load(
+    config = yaml.safe_load(
         f"""
     class_name: Datasource
     execution_engine:
@@ -5001,7 +5001,7 @@ def cloud_data_context_with_datasource_sqlalchemy_engine(
     empty_cloud_data_context, db_file
 ):
     context = empty_cloud_data_context
-    config = yaml.load(
+    config = yaml.safe_load(
         f"""
     class_name: Datasource
     execution_engine:

@@ -23,7 +23,7 @@ data_connectors:
           pattern: (.*)
           group_names:
             - data_asset_name
-            
+
     configured_data_connector_name:
         class_name: ConfiguredAssetFilesystemDataConnector
         base_directory: <PATH_TO_YOUR_DATA_HERE>
@@ -55,7 +55,7 @@ datasource_yaml = datasource_yaml.replace("<PATH_TO_YOUR_DATA_HERE>", data_dir_p
 
 context.test_yaml_config(datasource_yaml)
 
-context.add_datasource(**yaml.load(datasource_yaml))
+context.add_datasource(**yaml.safe_load(datasource_yaml))
 available_data_asset_names = context.datasources[
     "taxi_datasource"
 ].get_available_data_asset_names(

@@ -168,7 +168,7 @@ def _load_checkpoint_yml_template() -> dict:
         __file__, os.path.join("..", "data_context", "checkpoint_template.yml")
     )
     with open(template_file) as f:
-        template = yaml.load(f)
+        template = yaml.safe_load(f)
     return template
 
 

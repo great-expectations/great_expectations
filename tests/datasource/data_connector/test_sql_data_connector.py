@@ -23,7 +23,7 @@ def test_basic_self_check(test_cases_for_sql_data_connector_sqlite_execution_eng
     random.seed(0)
     execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    config = yaml.load(
+    config = yaml.safe_load(
         """
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
@@ -79,7 +79,7 @@ def test_get_batch_definition_list_from_batch_request(
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    config = yaml.load(
+    config = yaml.safe_load(
         """
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
@@ -178,7 +178,7 @@ def test_example_A(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    config = yaml.load(
+    config = yaml.safe_load(
         """
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
@@ -232,7 +232,7 @@ def test_example_B(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    config = yaml.load(
+    config = yaml.safe_load(
         """
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
@@ -285,7 +285,7 @@ def test_example_C(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    config = yaml.load(
+    config = yaml.safe_load(
         """
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
@@ -341,7 +341,7 @@ def test_example_E(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    config = yaml.load(
+    config = yaml.safe_load(
         """
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
@@ -394,7 +394,7 @@ def test_example_F(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    config = yaml.load(
+    config = yaml.safe_load(
         """
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
@@ -448,7 +448,7 @@ def test_example_G(test_cases_for_sql_data_connector_sqlite_execution_engine):
     random.seed(0)
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    config = yaml.load(
+    config = yaml.safe_load(
         """
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
@@ -513,7 +513,7 @@ def test_example_H(test_cases_for_sql_data_connector_sqlite_execution_engine):
 
     # db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    # config = yaml.load("""
+    # config = yaml.safe_load("""
     # name: my_sql_data_connector
     # datasource_name: FAKE_Datasource_NAME
 
@@ -738,7 +738,7 @@ def test_default_behavior_with_no_splitter(
 ):
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    config = yaml.load(
+    config = yaml.safe_load(
         """
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME
@@ -797,7 +797,7 @@ def test_behavior_with_whole_table_splitter(
 ):
     db = test_cases_for_sql_data_connector_sqlite_execution_engine
 
-    config = yaml.load(
+    config = yaml.safe_load(
         """
     name: my_sql_data_connector
     datasource_name: FAKE_Datasource_NAME

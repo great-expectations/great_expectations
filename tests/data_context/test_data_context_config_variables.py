@@ -214,7 +214,7 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     )
     path_to_yml = file_relative_path(__file__, path_to_yml)
     with open(path_to_yml) as data:
-        config_commented_map_from_yaml = yaml.load(data)
+        config_commented_map_from_yaml = yaml.safe_load(data)
     expected_config = DataContextConfig.from_commented_map(
         config_commented_map_from_yaml
     )

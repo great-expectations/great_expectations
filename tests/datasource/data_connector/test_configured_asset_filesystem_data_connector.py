@@ -274,7 +274,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         ],
     )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
             class_name: ConfiguredAssetFilesystemDataConnector
             datasource_name: test_environment
@@ -445,7 +445,7 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
         ],
     )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
         class_name: ConfiguredAssetFilesystemDataConnector
         datasource_name: test_environment
@@ -659,7 +659,7 @@ def test_alpha(tmp_path_factory):
         ],
     )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
                 module_name: great_expectations.datasource.data_connector
                 class_name: ConfiguredAssetFilesystemDataConnector
@@ -749,7 +749,7 @@ def test_foxtrot(tmp_path_factory):
         ],
     )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
             module_name: great_expectations.datasource.data_connector
             class_name: ConfiguredAssetFilesystemDataConnector
@@ -856,7 +856,7 @@ def test_relative_asset_base_directory_path(tmp_path_factory):
         ],
     )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
             module_name: great_expectations.datasource.data_connector
             class_name: ConfiguredAssetFilesystemDataConnector
@@ -948,7 +948,7 @@ def test_relative_default_and_relative_asset_base_directory_paths(tmp_path_facto
         ],
     )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
             module_name: great_expectations.datasource.data_connector
             class_name: ConfiguredAssetFilesystemDataConnector
@@ -1048,7 +1048,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
             "alex_20200819_1300.csv",
         ],
     )
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
         class_name: ConfiguredAssetFilesystemDataConnector
         datasource_name: test_environment
@@ -1113,7 +1113,7 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
             "alex_20200819_1300.csv",
         ],
     )
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
         class_name: ConfiguredAssetFilesystemDataConnector
         datasource_name: test_environment
@@ -1197,7 +1197,7 @@ assets:
         glob_directive: "*.csv"
 
     """
-    config = yaml.load(yaml_string)
+    config = yaml.safe_load(yaml_string)
     my_data_connector = instantiate_class_from_config(
         config,
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},

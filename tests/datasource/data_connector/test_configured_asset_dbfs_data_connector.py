@@ -52,7 +52,7 @@ def test__get_full_file_path_for_asset_pandas(fs):
         ],
     )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
             module_name: great_expectations.datasource.data_connector
             class_name: ConfiguredAssetDBFSDataConnector
@@ -156,7 +156,7 @@ def test__get_full_file_path_for_asset_spark(basic_spark_df_execution_engine, fs
         ],
     )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
             module_name: great_expectations.datasource.data_connector
             class_name: ConfiguredAssetDBFSDataConnector

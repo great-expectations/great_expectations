@@ -301,7 +301,7 @@ def test_return_all_batch_definitions_unsorted():
             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
             class_name: ConfiguredAssetS3DataConnector
             datasource_name: test_environment
@@ -475,7 +475,7 @@ def test_return_all_batch_definitions_sorted():
             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
         class_name: ConfiguredAssetS3DataConnector
         datasource_name: test_environment
@@ -694,7 +694,7 @@ def test_alpha():
             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
                 module_name: great_expectations.datasource.data_connector
                 class_name: ConfiguredAssetS3DataConnector
@@ -789,7 +789,7 @@ def test_foxtrot():
             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
             module_name: great_expectations.datasource.data_connector
             class_name: ConfiguredAssetS3DataConnector
@@ -904,7 +904,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
         class_name: ConfiguredAssetS3DataConnector
         datasource_name: test_environment
@@ -976,7 +976,7 @@ def test_return_all_batch_definitions_too_many_sorters():
             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
         class_name: ConfiguredAssetS3DataConnector
         datasource_name: test_environment
@@ -1069,7 +1069,7 @@ assets:
         pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
 
     """
-    config = yaml.load(yaml_string)
+    config = yaml.safe_load(yaml_string)
     my_data_connector = instantiate_class_from_config(
         config,
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},

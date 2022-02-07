@@ -92,7 +92,7 @@ def test_create_pandas_datasource(
             "great_expectations.yml",
         ),
     ) as data_context_config_file:
-        data_context_file_config = yaml.load(data_context_config_file)
+        data_context_file_config = yaml.safe_load(data_context_config_file)
 
     assert (
         data_context_file_config["datasources"][name]
@@ -137,7 +137,7 @@ def test_pandas_datasource_custom_data_asset(
             "great_expectations.yml",
         ),
     ) as data_context_config_file:
-        data_context_file_config = yaml.load(data_context_config_file)
+        data_context_file_config = yaml.safe_load(data_context_config_file)
 
     assert (
         data_context_file_config["datasources"][name]["data_asset_type"]["module_name"]

@@ -749,7 +749,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(tmp_path_facto
         ],
     )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetFilesystemDataConnector
@@ -875,7 +875,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
         ],
     )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetFilesystemDataConnector
@@ -933,7 +933,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
         ],
     )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
         module_name: great_expectations.datasource.data_connector
         class_name: InferredAssetFilesystemDataConnector

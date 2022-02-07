@@ -35,7 +35,7 @@ def create_files_and_instantiate_data_connector(tmp_path_factory):
         ],
     )
 
-    my_data_connector_yaml = yaml.load(
+    my_data_connector_yaml = yaml.safe_load(
         f"""
             class_name: ConfiguredAssetFilesystemDataConnector
             datasource_name: test_environment

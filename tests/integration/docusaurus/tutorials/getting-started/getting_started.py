@@ -47,7 +47,7 @@ datasource_yaml = datasource_yaml.replace(
 )
 
 context.test_yaml_config(datasource_yaml)
-context.add_datasource(**yaml.load(datasource_yaml))
+context.add_datasource(**yaml.safe_load(datasource_yaml))
 
 # Get Validator by creating ExpectationSuite and passing in BatchRequest
 batch_request = BatchRequest(
@@ -145,7 +145,7 @@ my_checkpoint_config = my_checkpoint_config.replace(
 )
 
 
-my_checkpoint_config = yaml.load(my_checkpoint_config)
+my_checkpoint_config = yaml.safe_load(my_checkpoint_config)
 
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
 # In the current test, site_names are set to None because we do not want to update and build data_docs
@@ -185,7 +185,7 @@ yaml_config = yaml_config.replace(
     GETTING_STARTED_EXPECTATION_SUITE_NAME,
 )
 
-my_new_checkpoint_config = yaml.load(yaml_config)
+my_new_checkpoint_config = yaml.safe_load(yaml_config)
 
 # NOTE: The following code (up to and including the assert) is only for testing and can be ignored by users.
 # In the current test, site_names are set to None because we do not want to update and build data_docs

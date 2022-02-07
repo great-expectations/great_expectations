@@ -122,7 +122,7 @@ def test_v3_configuration_store(tmp_path_factory):
 
     stored_file_name_0: str = Path(base_directory) / f"{configuration_name_0}.yml"
     with open(stored_file_name_0) as f:
-        config: CommentedMap = yaml.load(f)
+        config: CommentedMap = yaml.safe_load(f)
         expected_config: CommentedMap = CommentedMap(
             {"some_param_0": "test_str_0", "some_param_1": 65}
         )
@@ -190,7 +190,7 @@ def test_v3_configuration_store(tmp_path_factory):
 
     stored_file_name_1: str = Path(base_directory) / f"{configuration_name_1}.yml"
     with open(stored_file_name_1) as f:
-        config: CommentedMap = yaml.load(f)
+        config: CommentedMap = yaml.safe_load(f)
         expected_config: CommentedMap = CommentedMap(
             {"some_param_0": "test_str_1", "some_param_1": 26}
         )

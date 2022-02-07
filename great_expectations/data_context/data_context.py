@@ -996,7 +996,7 @@ class BaseDataContext:
                     root_directory = ""
                 var_path = os.path.join(root_directory, defined_path)
                 with open(var_path) as config_variables_file:
-                    return yaml.load(config_variables_file) or {}
+                    return yaml.safe_load(config_variables_file) or {}
             except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
@@ -3536,7 +3536,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             raise e
 
         try:
-            config: CommentedMap = yaml.load(config_str_with_substituted_variables)
+            config: CommentedMap = yaml.safe_load(config_str_with_substituted_variables)
             return config
 
         except Exception as e:
@@ -3950,7 +3950,7 @@ class DataContext(BaseDataContext):
 
         # TODO this is so brittle and gross
         with open(path_to_yml) as f:
-            config = yaml.load(f)
+            config = yaml.safe_load(f)
         config_var_path = config.get("config_variables_file_path")
         config_var_path = os.path.join(ge_dir, config_var_path)
         return os.path.isfile(config_var_path)
@@ -4187,7 +4187,7 @@ class DataContext(BaseDataContext):
         path_to_yml = os.path.join(self.root_directory, self.GE_YML)
         try:
             with open(path_to_yml) as data:
-                config_commented_map_from_yaml = yaml.load(data)
+                config_commented_map_from_yaml = yaml.safe_load(data)
 
         except YAMLError as err:
             raise ge_exceptions.InvalidConfigurationYamlError(
@@ -4277,7 +4277,7 @@ class DataContext(BaseDataContext):
             return
 
         with open(yml_path) as f:
-            config_commented_map_from_yaml = yaml.load(f)
+            config_commented_map_from_yaml = yaml.safe_load(f)
 
         config_version = config_commented_map_from_yaml.get("config_version")
         return float(config_version) if config_version else None
@@ -4310,7 +4310,7 @@ class DataContext(BaseDataContext):
             return False
 
         with open(yml_path) as f:
-            config_commented_map_from_yaml = yaml.load(f)
+            config_commented_map_from_yaml = yaml.safe_load(f)
             config_commented_map_from_yaml["config_version"] = float(config_version)
 
         with open(yml_path, "w") as f:

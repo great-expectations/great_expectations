@@ -29,7 +29,7 @@ def basic_data_connector(tmp_path_factory):
     )
 
     basic_data_connector = instantiate_class_from_config(
-        yaml.load(
+        yaml.safe_load(
             f"""
 class_name: ConfiguredAssetFilesystemDataConnector
 name: my_data_connector
