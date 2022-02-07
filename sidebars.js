@@ -378,7 +378,8 @@ module.exports = {
             'terms/execution_engine',
             'terms/expectation',
             'terms/expectation_suite',
-            'terms/plugin'
+            'terms/plugin',
+            'terms/supporting_resource'
           ]
         },
         {
