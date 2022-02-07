@@ -9,7 +9,7 @@ azure-identity>=1.0.0  # all_tests
 azure-keyvault-secrets>=4.0.0  # all_tests
 azure-storage-blob>=12.5.0 # all_test
 
-black==21.8b0  # lint
+black==22.1.0  # lint
 boto3>=1.9  # all_tests
 feather-format>=0.4.1  # all_tests
 

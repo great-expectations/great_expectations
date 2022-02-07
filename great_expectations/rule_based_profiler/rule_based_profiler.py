@@ -7,6 +7,11 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.rule_based_profiler.config.base import (
+    domainBuilderConfigSchema,
+    expectationConfigurationBuilderConfigSchema,
+    parameterBuilderConfigSchema,
+)
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
@@ -20,11 +25,6 @@ from great_expectations.rule_based_profiler.rule.rule import Rule
 from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     build_parameter_container_for_variables,
-)
-from great_expectations.rule_based_profiler.types.base import (
-    domainBuilderConfigSchema,
-    expectationConfigurationBuilderConfigSchema,
-    parameterBuilderConfigSchema,
 )
 from great_expectations.rule_based_profiler.types.builder import (
     validate_builder_override_config,
