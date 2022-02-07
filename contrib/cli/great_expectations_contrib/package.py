@@ -165,8 +165,10 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
             name = requirement.project_name
             pypi_url = f"https://pypi.org/project/{name}"
             if requirement.specs:
+                # Stringify tuple of pins
                 version = ", ".join(
-                    "".join(symbol for symbol in pin) for pin in requirement.specs
+                    "".join(symbol for symbol in pin)
+                    for pin in sorted(requirement.specs)
                 )
             else:
                 version = None

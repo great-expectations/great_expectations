@@ -1,5 +1,5 @@
+import copy
 from typing import List
-from unittest import mock
 
 import py
 import pytest
@@ -82,7 +82,7 @@ ruamel.yaml>=0.16,<0.17.18  # package
         Dependency(
             text="mistune",
             link="https://pypi.org/project/mistune",
-            version=">=0.8.4, <2.0.0",
+            version="<2.0.0, >=0.8.4",
         ),
         Dependency(
             text="numpy", link="https://pypi.org/project/numpy", version=">=1.14.1"
@@ -93,3 +93,19 @@ ruamel.yaml>=0.16,<0.17.18  # package
             version="<0.17.18, >=0.16",
         ),
     ]
+
+
+def test_update_attrs_with_diagnostics_does_not_overwrite_static_fields(
+    diagnostics: List[ExpectationDiagnostics],
+):
+    package = GreatExpectationsContribPackageManifest(
+        package_name="my_package",
+        icon="my/icon/path",
+        description="my_description",
+        version="0.1.0",
+    )
+    package_before_update = copy.deepcopy(package)
+    package._update_attrs_with_diagnostics(diagnostics)
+
+    for attr in ("package_name", "icon", "description", "version"):
+        assert package[attr] == package_before_update[attr]
