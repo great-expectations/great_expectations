@@ -162,7 +162,7 @@ def read_package_from_file(path: str) -> GreatExpectationsContribPackageManifest
         contents = f.read()
 
     data = json.loads(contents)
-    logger.info(f"Succesfully read existing package data from {path}")
+    logger.info(f"Successfully read existing package data from {path}")
     return GreatExpectationsContribPackageManifest(**data)
 
 
@@ -183,5 +183,10 @@ def write_package_to_disk(
 
 
 def sync_package(package: GreatExpectationsContribPackageManifest, path: str) -> None:
+    """Evaluate the state of the contributor package and update the existing manifest.
+
+    Args:
+        package: The GreatExpectationsContribPackageManifest you wish to update/sync.
+    """
     package.update_package_state()
     write_package_to_disk(package, path)
