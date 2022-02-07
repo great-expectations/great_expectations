@@ -1,19 +1,15 @@
 from unittest import mock
 
-import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
 )
-from great_expectations.exceptions.exceptions import InvalidConfigError
 from great_expectations.rule_based_profiler import RuleBasedProfiler
-from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.toolkit import (
-    add_profiler,
     delete_profiler,
     get_profiler,
     list_profilers,
@@ -37,102 +33,14 @@ def test_get_profiler_with_too_many_args_raises_error(
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
-def test_add_profiler(
-    mock_data_context: mock.MagicMock,
-    profiler_key: ConfigurationIdentifier,
-    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
-):
-    mock_data_context.ge_cloud_mode.return_value = False
-    profiler = add_profiler(
-        profiler_config_with_placeholder_args,
-        data_context=mock_data_context,
-        profiler_store=mock_data_context.profiler_store,
-    )
-
-    assert isinstance(profiler, RuleBasedProfiler)
-    assert profiler.name == profiler_config_with_placeholder_args.name
-    assert mock_data_context.profiler_store.set.call_args == mock.call(
-        key=profiler_key, value=profiler_config_with_placeholder_args
-    )
-
-
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-def test_add_profiler_ge_cloud_mode(
-    mock_data_context: mock.MagicMock,
-    ge_cloud_profiler_id: str,
-    ge_cloud_profiler_key: GeCloudIdentifier,
-    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
-):
-    mock_data_context.ge_cloud_mode.return_value = True
-    profiler = add_profiler(
-        profiler_config_with_placeholder_args,
-        data_context=mock_data_context,
-        profiler_store=mock_data_context.profiler_store,
-        ge_cloud_id=ge_cloud_profiler_id,
-    )
-
-    assert isinstance(profiler, RuleBasedProfiler)
-    assert profiler.name == profiler_config_with_placeholder_args.name
-    assert mock_data_context.profiler_store.set.call_args == mock.call(
-        key=ge_cloud_profiler_key, value=profiler_config_with_placeholder_args
-    )
-
-
-@mock.patch("great_expectations.data_context.data_context.DataContext")
-def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
-    mock_data_context: mock.MagicMock,
-):
-    profiler_config = RuleBasedProfilerConfig(
-        name="my_profiler_config",
-        class_name="RuleBasedProfiler",
-        module_name="great_expectations.rule_based_profiler",
-        config_version=1.0,
-        rules={
-            "rule_1": {
-                "domain_builder": {
-                    "class_name": "TableDomainBuilder",
-                    "batch_request": {
-                        "runtime_parameters": {
-                            "batch_data": pd.DataFrame()  # Cannot be serialized in store
-                        }
-                    },
-                },
-                "parameter_builders": [
-                    {
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "name": "my_parameter",
-                        "metric_name": "my_metric",
-                    },
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                    },
-                ],
-            }
-        },
-    )
-
-    with pytest.raises(InvalidConfigError) as e:
-        add_profiler(
-            profiler_config,
-            data_context=mock_data_context,
-            profiler_store=mock_data_context.profiler_store,
-        )
-
-    assert "batch_data found in batch_request" in str(e.value)
-
-
-@mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_get_profiler(
     mock_data_context: mock.MagicMock,
     populated_profiler_store: ProfilerStore,
-    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+    profiler_config: RuleBasedProfilerConfig,
 ):
     with mock.patch(
         "great_expectations.data_context.store.profiler_store.ProfilerStore.get",
-        return_value=profiler_config_with_placeholder_args,
+        return_value=profiler_config,
     ):
         profiler = get_profiler(
             data_context=mock_data_context,

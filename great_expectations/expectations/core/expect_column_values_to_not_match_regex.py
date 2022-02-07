@@ -4,8 +4,16 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
+from ...core.batch import Batch
+from ...data_asset.util import parse_result_format
+from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import (
@@ -13,7 +21,12 @@ from ...render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
+from ..expectation import (
+    ColumnMapExpectation,
+    Expectation,
+    InvalidExpectationConfigurationError,
+    _format_map_output,
+)
 
 try:
     import sqlalchemy as sa

@@ -6,6 +6,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationSuiteValidationResultSchema,
 )
+from great_expectations.data_context.store import GeCloudStoreBackend
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )

@@ -20,10 +20,6 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
-from great_expectations.rule_based_profiler.config.base import (
-    ruleBasedProfilerConfigSchema,
-)
-
 try:
     from typing import Literal
 except ImportError:
@@ -3268,39 +3264,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs,
         )
 
-    def add_profiler(
-        self,
-        name: str,
-        config_version: float,
-        rules: Dict[str, dict],
-        class_name: str,
-        module_name: Optional[str] = None,
-        variables: Optional[dict] = None,
-        ge_cloud_id: Optional[str] = None,
-    ):
-        config_data = {
-            "name": name,
-            "config_version": config_version,
-            "rules": rules,
-            "class_name": class_name,
-            "module_name": module_name,
-            "variables": variables,
-        }
-
-        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-        validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
-        profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
-
-        config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
-
-        # Chetan - 20220127 - Open to refactor all Profiler CRUD from toolkit to class methods
-        return profiler_toolkit.add_profiler(
-            config=config,
-            data_context=self,
-            profiler_store=self.profiler_store,
-            ge_cloud_id=ge_cloud_id,
-        )
-
     def get_profiler(
         self,
         name: Optional[str] = None,
@@ -3608,7 +3571,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
             )
         else:
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            # Roundtrip through schema validator to add missing fields
             datasource_config = datasourceConfigSchema.load(instantiated_class.config)
             full_datasource_config = datasourceConfigSchema.dump(datasource_config)
             usage_stats_event_payload = datasource_anonymizer.anonymize_datasource_info(
@@ -3777,7 +3740,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ):
             datasource_name: str = name or config.get("name") or "my_temp_datasource"
             if datasource_anonymizer.is_parent_class_recognized_v3_api(config=config):
-                # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+                # Roundtrip through schema validator to add missing fields
                 datasource_config = datasourceConfigSchema.load(
                     instantiated_class.config
                 )
@@ -3806,7 +3769,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             checkpoint_anonymizer.is_parent_class_recognized(config=config) is not None
         ):
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            # Roundtrip through schema validator to add missing fields
             checkpoint_config: Union[CheckpointConfig, dict]
             checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config

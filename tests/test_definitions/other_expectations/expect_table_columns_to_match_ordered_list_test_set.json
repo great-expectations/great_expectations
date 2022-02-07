@@ -1,0 +1,75 @@
+{
+  "expectation_type" : "expect_table_columns_to_match_ordered_list",
+  "datasets" : [
+    {
+      "data": {
+        "c1" : [4,5,6,7],
+        "c2" : ["a","b","c","d"],
+        "c3" : [null,null,null,null]
+      },
+      "schemas": {
+        "spark": {
+          "c1": "IntegerType",
+          "c2": "StringType",
+          "c3": "StringType"
+        }
+      },
+    "tests": [{
+      "title": "basic_positive_test",
+      "exact_match_out": false,
+      "in":{
+        "column_list": ["c1", "c2", "c3"]
+      },
+      "out":{
+        "success":true
+      }
+    },{
+      "title": "negative_test_column_is_missing",
+      "exact_match_out": false,
+      "in":{
+        "column_list": ["c1", "c2"]
+      },
+      "out":{
+        "success":false
+      }
+    },{
+      "title": "negative_test_column_is_misnamed",
+      "exact_match_out": false,
+      "in":{
+        "column_list": ["b1", "c2", "c3"]
+      },
+      "out":{
+        "success":false
+      }
+    },{
+      "title": "negative_test_columns_are_right_but_ordering_wrong",
+      "exact_match_out": false,
+      "in":{
+        "column_list": ["c3", "c2", "c1"]
+      },
+      "out":{
+        "success":false
+      }
+    },{
+      "title": "negative_test_extra_column",
+      "exact_match_out": false,
+      "in":{
+        "column_list": ["c1", "c2", "c3", "c4"]
+      },
+      "out":{
+        "success": false
+      }
+    },{
+      "title": "null_list_provides_vacuously_true_expectation",
+      "exact_match_out": false,
+      "in":{
+        "column_list": null
+      },
+      "out":{
+        "success": true,
+        "observed_value": ["c1", "c2", "c3"]
+      }
+    }
+  ]
+  }]
+}

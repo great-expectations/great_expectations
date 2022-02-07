@@ -2,14 +2,11 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.rule_based_profiler.types import (
-    Builder,
-    Domain,
-    ParameterContainer,
-)
+from great_expectations.rule_based_profiler.domain_builder import Domain
+from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
 
 
-class ExpectationConfigurationBuilder(Builder, ABC):
+class ExpectationConfigurationBuilder(ABC):
     def __init__(
         self,
         expectation_type: str,

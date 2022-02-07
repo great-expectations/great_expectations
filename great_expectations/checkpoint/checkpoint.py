@@ -491,6 +491,7 @@ is run), with each validation having its own defined "action_list" attribute.
             filter_properties_dict(
                 properties=config_kwargs,
                 clean_falsy=True,
+                keep_falsy_numerics=True,
                 inplace=True,
             )
 
@@ -501,6 +502,7 @@ is run), with each validation having its own defined "action_list" attribute.
             json_dict: dict = convert_to_json_serializable(data=config_kwargs)
             deep_filter_properties_iterable(
                 properties=json_dict,
+                keep_falsy_numerics=True,
                 inplace=True,
             )
             return json.dumps(json_dict, indent=2)
@@ -542,6 +544,7 @@ is run), with each validation having its own defined "action_list" attribute.
         json_dict: dict = convert_to_json_serializable(data=self.get_config())
         deep_filter_properties_iterable(
             properties=json_dict,
+            keep_falsy_numerics=True,
             inplace=True,
         )
         return json.dumps(json_dict, indent=2)

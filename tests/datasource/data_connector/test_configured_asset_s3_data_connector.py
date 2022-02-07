@@ -1,5 +1,4 @@
 import json
-import os
 from typing import List
 from unittest import mock
 
@@ -18,10 +17,7 @@ from great_expectations.core.batch import (
     IDDict,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetS3DataConnector,
-    FilePathDataConnector,
-)
+from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
 from great_expectations.execution_engine import PandasExecutionEngine
 
 yaml = YAML()
@@ -1121,31 +1117,3 @@ assets:
         )
         == 5
     )
-
-
-def test_sanitize_prefix_behaves_the_same_as_local_files():
-    def check_sameness(prefix, expected_output):
-        s3_sanitized = ConfiguredAssetS3DataConnector.sanitize_prefix_for_s3(prefix)
-        file_system_sanitized = FilePathDataConnector.sanitize_prefix(prefix)
-        if os.sep == "\\":  # Fix to ensure tests work on Windows
-            file_system_sanitized = file_system_sanitized.replace("\\", "/")
-
-        assert file_system_sanitized == expected_output, (
-            f"Expected output does not match original sanitization behavior, got "
-            f"{file_system_sanitized} instead of {expected_output}"
-        )
-        assert (
-            s3_sanitized == expected_output == file_system_sanitized
-        ), f'S3 sanitized result is incorrect, "{s3_sanitized} instead of {expected_output}'
-
-    # Copy of all samples from tests/datasource/data_connector/test_file_path_data_connector.py
-    check_sameness("foo/", "foo/")
-    check_sameness("bar", "bar/")
-    check_sameness("baz.txt", "baz.txt")
-    check_sameness("a/b/c/baz.txt", "a/b/c/baz.txt")
-
-    # A couple additional checks
-    check_sameness("a/b/c", "a/b/c/")
-    check_sameness("a.x/b/c", "a.x/b/c/")
-    check_sameness("path/to/folder.something/", "path/to/folder.something/")
-    check_sameness("path/to/folder.something", "path/to/folder.something")

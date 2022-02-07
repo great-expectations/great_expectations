@@ -8,6 +8,7 @@ from zipfile import ZipFile, is_zipfile
 
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
     SiteSectionIdentifier,
     ValidationResultIdentifier,
 )

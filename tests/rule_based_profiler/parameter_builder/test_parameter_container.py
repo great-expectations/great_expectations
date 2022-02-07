@@ -1,4 +1,4 @@
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterContainer,
     build_parameter_container,
 )

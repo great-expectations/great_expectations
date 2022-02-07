@@ -10,6 +10,7 @@ from great_expectations.data_context.util import (
     verify_dynamic_loading_support,
 )
 from great_expectations.exceptions import ClassInstantiationError
+from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)
 yaml = YAML()

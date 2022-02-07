@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 
 import pytest
@@ -25,13 +24,11 @@ def test_profiler_store_raises_error_with_invalid_value(
 
 def test_profiler_store_set_adds_valid_key(
     empty_profiler_store: ProfilerStore,
-    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+    profiler_config: RuleBasedProfilerConfig,
     profiler_key: ConfigurationIdentifier,
 ):
     assert len(empty_profiler_store.list_keys()) == 0
-    empty_profiler_store.set(
-        key=profiler_key, value=profiler_config_with_placeholder_args
-    )
+    empty_profiler_store.set(key=profiler_key, value=profiler_config)
     assert len(empty_profiler_store.list_keys()) == 1
 
 
@@ -39,7 +36,7 @@ def test_profiler_store_integration(
     empty_data_context: DataContext,
     profiler_store_name: str,
     profiler_name: str,
-    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+    profiler_config: RuleBasedProfilerConfig,
 ):
     base_directory: str = str(Path(empty_data_context.root_directory) / "profilers")
 
@@ -62,7 +59,7 @@ def test_profiler_store_integration(
     key: ConfigurationIdentifier = ConfigurationIdentifier(
         configuration_key=profiler_name
     )
-    profiler_store.set(key=key, value=profiler_config_with_placeholder_args)
+    profiler_store.set(key=key, value=profiler_config)
 
     dir_tree = gen_directory_tree_str(startpath=base_directory)
     assert (

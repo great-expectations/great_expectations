@@ -444,6 +444,7 @@ def test_checkpoint_config_print(
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_and_runtime_kwargs,
         clean_falsy=True,
+        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -451,6 +452,7 @@ def test_checkpoint_config_print(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
+        keep_falsy_numerics=True,
     )
 
     substituted_config_template_and_runtime_kwargs_json_dict: dict = (
@@ -461,6 +463,7 @@ def test_checkpoint_config_print(
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_and_runtime_kwargs_json_dict,
         clean_falsy=True,
+        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -468,4 +471,5 @@ def test_checkpoint_config_print(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
+        keep_falsy_numerics=True,
     )

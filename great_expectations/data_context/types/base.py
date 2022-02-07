@@ -2349,6 +2349,7 @@ class CheckpointConfig(BaseYamlConfig):
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
+            keep_falsy_numerics=True,
             inplace=True,
         )
         return json.dumps(json_dict, indent=2)

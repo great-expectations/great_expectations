@@ -1,8 +1,8 @@
 from typing import List, Optional
 
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.domain_builder import Domain, DomainBuilder
+from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
 
 
 class TableDomainBuilder(DomainBuilder):

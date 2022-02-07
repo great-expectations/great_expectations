@@ -27,6 +27,7 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
 
         deep_filter_properties_iterable(
             properties=batch_request,
+            keep_falsy_numerics=True,
             inplace=True,
         )
         batch_request = standardize_batch_request_display_ordering(

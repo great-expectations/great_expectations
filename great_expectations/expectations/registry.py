@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, U
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric import Metric
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 

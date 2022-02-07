@@ -87,7 +87,7 @@ def test_alice_profiler_user_workflow_single_batch(
     # Instantiate Profiler
     profiler_config: CommentedMap = yaml.load(yaml_config)
 
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    # Roundtrip through schema validation to add any missing fields
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
 
@@ -203,7 +203,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
 
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    # Roundtrip through schema validation to add any missing fields
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
 
@@ -253,7 +253,7 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     # Instantiate Profiler
     profiler_config: CommentedMap = yaml.load(yaml_config)
 
-    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    # Roundtrip through schema validation to add any missing fields
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
     serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
 

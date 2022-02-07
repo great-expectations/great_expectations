@@ -1906,6 +1906,7 @@ expectation_suite_ge_cloud_id:
     assert deep_filter_properties_iterable(
         properties=checkpoint_from_yaml.get_config(),
         clean_falsy=True,
+        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -1913,12 +1914,14 @@ expectation_suite_ge_cloud_id:
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
+        keep_falsy_numerics=True,
     )
 
     checkpoint_from_store = context.get_checkpoint(name=checkpoint_name)
     assert deep_filter_properties_iterable(
         properties=checkpoint_from_store.get_config(),
         clean_falsy=True,
+        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -1926,6 +1929,7 @@ expectation_suite_ge_cloud_id:
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
+        keep_falsy_numerics=True,
     )
 
     expected_action_list = [

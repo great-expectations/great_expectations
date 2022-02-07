@@ -24,5 +24,5 @@ t1 = BashOperator(
     bash_command="(cd /home/airflow/gcsfuse/great_expectations/ ; great_expectations --v3-api checkpoint run bigquery_checkpoint ) ",
     dag=dag,
     depends_on_past=False,
-    priority_weight=2**31 - 1,
+    priority_weight=2 ** 31 - 1,
 )
