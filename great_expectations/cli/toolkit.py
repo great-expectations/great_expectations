@@ -877,8 +877,8 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
         filename: Optional[str]
         directory: Optional[str]
         if config_file_location_path.is_file():
-            filename = rf"{str(config_file_location_path.name)}"
-            directory = rf"{str(config_file_location_path.parent)}"
+            filename = fr"{str(config_file_location_path.name)}"
+            directory = fr"{str(config_file_location_path.parent)}"
         elif config_file_location_path.is_dir():
             filename = None
             directory = config_file_location

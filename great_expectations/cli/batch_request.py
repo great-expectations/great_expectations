@@ -362,7 +362,7 @@ You have selected a datasource that is a SQL database. How would you like to spe
             else:
                 data_asset_name = table_name
         elif single_or_multiple_data_asset_selection == "2":  # list it all
-            msg_prompt_warning: str = rf"""Warning: If you have a large number of tables in your datasource, this may take a very long time.
+            msg_prompt_warning: str = fr"""Warning: If you have a large number of tables in your datasource, this may take a very long time.
 Would you like to continue?"""
             confirmation: str = click.prompt(
                 msg_prompt_warning, type=click.Choice(["y", "n"]), show_choices=True

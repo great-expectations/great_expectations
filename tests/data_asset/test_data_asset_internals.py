@@ -255,13 +255,16 @@ def test_test_column_map_expectation_function():
         is_odd, column="y", result_format="BOOLEAN_ONLY", include_config=False
     ) == ExpectationValidationResult(success=False)
 
-    assert asset.test_column_map_expectation_function(
-        is_odd,
-        column="y",
-        result_format="BOOLEAN_ONLY",
-        mostly=0.7,
-        include_config=False,
-    ) == ExpectationValidationResult(success=True)
+    assert (
+        asset.test_column_map_expectation_function(
+            is_odd,
+            column="y",
+            result_format="BOOLEAN_ONLY",
+            mostly=0.7,
+            include_config=False,
+        )
+        == ExpectationValidationResult(success=True)
+    )
 
 
 def test_test_column_aggregate_expectation_function():
@@ -319,21 +322,27 @@ def test_test_column_aggregate_expectation_function():
         success=True,
     )
 
-    assert asset.test_column_aggregate_expectation_function(
-        expect_second_value_to_be,
-        "y",
-        value=3,
-        result_format="BOOLEAN_ONLY",
-        include_config=False,
-    ) == ExpectationValidationResult(success=False)
+    assert (
+        asset.test_column_aggregate_expectation_function(
+            expect_second_value_to_be,
+            "y",
+            value=3,
+            result_format="BOOLEAN_ONLY",
+            include_config=False,
+        )
+        == ExpectationValidationResult(success=False)
+    )
 
-    assert asset.test_column_aggregate_expectation_function(
-        expect_second_value_to_be,
-        "y",
-        2,
-        result_format="BOOLEAN_ONLY",
-        include_config=False,
-    ) == ExpectationValidationResult(success=True)
+    assert (
+        asset.test_column_aggregate_expectation_function(
+            expect_second_value_to_be,
+            "y",
+            2,
+            result_format="BOOLEAN_ONLY",
+            include_config=False,
+        )
+        == ExpectationValidationResult(success=True)
+    )
 
 
 def test_format_map_output():
@@ -354,15 +363,18 @@ def test_format_map_output():
     unexpected_list = []
     unexpected_index_list = []
 
-    assert df._format_map_output(
-        "BOOLEAN_ONLY",
-        success,
-        element_count,
-        nonnull_count,
-        len(unexpected_list),
-        unexpected_list,
-        unexpected_index_list,
-    ) == {"success": True}
+    assert (
+        df._format_map_output(
+            "BOOLEAN_ONLY",
+            success,
+            element_count,
+            nonnull_count,
+            len(unexpected_list),
+            unexpected_list,
+            unexpected_index_list,
+        )
+        == {"success": True}
+    )
 
     assert df._format_map_output(
         "BASIC",
@@ -447,15 +459,18 @@ def test_format_map_output():
     unexpected_list = []
     unexpected_index_list = []
 
-    assert df._format_map_output(
-        "BOOLEAN_ONLY",
-        success,
-        element_count,
-        nonnull_count,
-        len(unexpected_list),
-        unexpected_list,
-        unexpected_index_list,
-    ) == {"success": True}
+    assert (
+        df._format_map_output(
+            "BOOLEAN_ONLY",
+            success,
+            element_count,
+            nonnull_count,
+            len(unexpected_list),
+            unexpected_list,
+            unexpected_index_list,
+        )
+        == {"success": True}
+    )
 
     assert df._format_map_output(
         "BASIC",
@@ -540,15 +555,18 @@ def test_format_map_output():
     unexpected_list = []
     unexpected_index_list = []
 
-    assert df._format_map_output(
-        "BOOLEAN_ONLY",
-        success,
-        element_count,
-        nonnull_count,
-        len(unexpected_list),
-        unexpected_list,
-        unexpected_index_list,
-    ) == {"success": False}
+    assert (
+        df._format_map_output(
+            "BOOLEAN_ONLY",
+            success,
+            element_count,
+            nonnull_count,
+            len(unexpected_list),
+            unexpected_list,
+            unexpected_index_list,
+        )
+        == {"success": False}
+    )
 
     assert df._format_map_output(
         "BASIC",

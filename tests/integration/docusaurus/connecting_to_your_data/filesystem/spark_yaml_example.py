@@ -18,7 +18,7 @@ data_context_config = DataContextConfig(
 )
 context = BaseDataContext(project_config=data_context_config)
 
-datasource_yaml = rf"""
+datasource_yaml = fr"""
 name: my_filesystem_datasource
 class_name: Datasource
 execution_engine:
