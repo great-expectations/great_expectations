@@ -225,20 +225,23 @@ def test_compile_evaluation_parameter_dependencies(
         == {}
     )
     data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
-    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
-        "source_diabetes_data.default": [
-            {
-                "metric_kwargs_id": {
-                    "column=patient_nbr": [
-                        "expect_column_unique_value_count_to_be_between.result.observed_value"
-                    ]
+    assert (
+        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
+        == {
+            "source_diabetes_data.default": [
+                {
+                    "metric_kwargs_id": {
+                        "column=patient_nbr": [
+                            "expect_column_unique_value_count_to_be_between.result.observed_value"
+                        ]
+                    }
                 }
-            }
-        ],
-        "source_patient_data.default": [
-            "expect_table_row_count_to_equal.result.observed_value"
-        ],
-    }
+            ],
+            "source_patient_data.default": [
+                "expect_table_row_count_to_equal.result.observed_value"
+            ],
+        }
+    )
 
 
 def test_list_datasources(data_context_parameterized_expectation_suite):
@@ -1903,7 +1906,6 @@ expectation_suite_ge_cloud_id:
     assert deep_filter_properties_iterable(
         properties=checkpoint_from_yaml.get_config(),
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -1911,14 +1913,12 @@ expectation_suite_ge_cloud_id:
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
     checkpoint_from_store = context.get_checkpoint(name=checkpoint_name)
     assert deep_filter_properties_iterable(
         properties=checkpoint_from_store.get_config(),
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -1926,7 +1926,6 @@ expectation_suite_ge_cloud_id:
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
     expected_action_list = [

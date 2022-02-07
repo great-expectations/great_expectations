@@ -8,8 +8,11 @@ import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
+from great_expectations.rule_based_profiler.types import (
+    Builder,
+    Domain,
+    ParameterContainer,
+)
 from great_expectations.rule_based_profiler.util import build_metric_domain_kwargs
 from great_expectations.rule_based_profiler.util import (
     get_batch_ids as get_batch_ids_from_batch_request,
@@ -34,7 +37,7 @@ MetricComputationResult = make_dataclass(
 )
 
 
-class ParameterBuilder(ABC):
+class ParameterBuilder(Builder, ABC):
     """
     A ParameterBuilder implementation provides support for building Expectation Configuration Parameters suitable for
     use in other ParameterBuilders or in ConfigurationBuilders as part of profiling.

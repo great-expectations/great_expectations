@@ -2519,7 +2519,6 @@ def test_newstyle_checkpoint_config_substitution_simple(
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_only,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -2527,14 +2526,12 @@ def test_newstyle_checkpoint_config_substitution_simple(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
     # make sure operation is idempotent
     simplified_checkpoint.get_substituted_config()
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_only,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -2542,7 +2539,6 @@ def test_newstyle_checkpoint_config_substitution_simple(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
     # template and runtime kwargs
@@ -2690,7 +2686,6 @@ def test_newstyle_checkpoint_config_substitution_simple(
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_and_runtime_kwargs,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -2698,7 +2693,6 @@ def test_newstyle_checkpoint_config_substitution_simple(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
 
@@ -2820,7 +2814,6 @@ def test_newstyle_checkpoint_config_substitution_nested(
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_only,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -2828,14 +2821,12 @@ def test_newstyle_checkpoint_config_substitution_nested(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
     # make sure operation is idempotent
     nested_checkpoint.get_substituted_config()
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_only,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -2843,7 +2834,6 @@ def test_newstyle_checkpoint_config_substitution_nested(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
     # runtime kwargs with new checkpoint template name passed at runtime
@@ -3007,7 +2997,6 @@ def test_newstyle_checkpoint_config_substitution_nested(
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_and_runtime_kwargs,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -3015,7 +3004,6 @@ def test_newstyle_checkpoint_config_substitution_nested(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
 
