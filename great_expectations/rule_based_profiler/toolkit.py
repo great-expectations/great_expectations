@@ -38,7 +38,7 @@ def add_profiler(
         },
         config_defaults={
             "module_name": "great_expectations.rule_based_profiler",
-            # Chetan - 20220204 - class_name to be provided here in subsequent PR
+            "class_name": "RuleBasedProfiler",
         },
     )
 
@@ -119,6 +119,7 @@ def get_profiler(
         },
         config_defaults={
             "module_name": "great_expectations.rule_based_profiler",
+            "class_name": "RuleBasedProfiler",
         },
     )
 

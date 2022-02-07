@@ -2,7 +2,7 @@ import itertools
 import logging
 import traceback
 from collections.abc import Iterable
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import numpy as np
 

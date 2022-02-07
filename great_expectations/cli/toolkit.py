@@ -26,12 +26,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.datasource import BaseDatasource
 from great_expectations.validator.validator import Validator
 
-try:
-    from termcolor import colored
-except ImportError:
-    pass
-
-
 EXIT_UPGRADE_CONTINUATION_MESSAGE = (
     "\nOk, exiting now. To upgrade at a later time, use the following command: "
     "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade "
