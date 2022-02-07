@@ -3273,8 +3273,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         name: str,
         config_version: float,
         rules: Dict[str, dict],
-        class_name: str,
-        module_name: Optional[str] = None,
         variables: Optional[dict] = None,
         ge_cloud_id: Optional[str] = None,
     ):
@@ -3282,8 +3280,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             "name": name,
             "config_version": config_version,
             "rules": rules,
-            "class_name": class_name,
-            "module_name": module_name,
             "variables": variables,
         }
 
@@ -3713,7 +3709,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         instantiated_class = instantiate_class_from_config(
             config=profiler_config,
             runtime_environment={"data_context": self},
-            config_defaults={"module_name": "great_expectations.rule_based_profiler"},
+            config_defaults={
+                "module_name": "great_expectations.rule_based_profiler",
+                "class_name": "RuleBasedProfiler",
+            },
         )
 
         profiler_anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(
