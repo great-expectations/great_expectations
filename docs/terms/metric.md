@@ -19,11 +19,11 @@ A Metric is a computed attribute of data such as the mean of a column.
 
 ### Features and promises
 
-Metrics are values derived from one or more <TechnicalTag relative="../" tag="batch" text="Batches" /> that can be used to evaluate <TechnicalTag relative="../" tag="expectation" text="Expectations" /> or to summarize the result of <TechnicalTag relative="../" tag="validation" text="Validation" />. A Metric could be a statistic, such as the minimum value of the column, or a more complex object, such as a histogram. Metrics are the core tool used to Validate data. 
+Metrics are values derived from one or more <TechnicalTag relative="../" tag="batch" text="Batches" /> that can be used to evaluate <TechnicalTag relative="../" tag="expectation" text="Expectations" /> or to summarize the result of <TechnicalTag relative="../" tag="validation" text="Validation" />. It can be helpful to think of a Metric as the answer to a question.  A Metric could be a statistic, such as the minimum value of the column, or a more complex object, such as a histogram. Metrics are a core part of Validating data.
 
 ### Relationship to other objects
 
-Metrics are generated and stored as part of running Expectations against a Batch (and can be referenced as such). For example, if you have an Expectation that the mean of a column fall within a certain range, the mean of the column must first be computed to see if its value is as expected.  The generation of Metrics involves <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" /> specific logic.  Metrics from previously run Expectation Suites can also be referenced through the use of <TechnicalTag relative="../" tag="evaluation_parameter" text="Evaluation Parameters" />.
+Metrics are generated as part of running Expectations against a Batch (and can be referenced as such). For example, if you have an Expectation that the mean of a column falls within a certain range, the mean of the column must first be computed to see if its value is as expected.  The generation of Metrics involves <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" /> specific logic.  These Metrics can be included in <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, based on the `result_format` configured for them.  In memory Validation Results can in turn be accessed by Actions, including the `StoreValidationResultAction` which will store them in the <TechnicalTag relative="../" tag="validation_result_store" text="Validation Results Store" />.  Therefore, Metrics from previously run Expectation Suites can also be referenced by accessing stored Validation Results that contain them.
 
 ## Use cases
 
@@ -35,7 +35,7 @@ Past Metrics can also be accessed by some Expectations through Evaluation Parame
 
 <ValidateHeader/>
 
-<TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> Validate data by running the Expectations in one or more <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" />.  In the process, Metrics will be generated.  These Metrics will be passed to the Actions in the Checkpoint's `action_list` as part of the <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> for the Expectations, and will be stored in a <TechnicalTag relative="../" tag="metric_store" text="Metric Store" /> if the `StoreMetricsAction` is one of the <TechnicalTag relative="../" tag="validation_action" text="Actions" /> in the Checkpoint's `action_list`.
+<TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> Validate data by running the Expectations in one or more <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" />.  In the process, Metrics will be generated.  These Metrics can be passed to the Actions in the Checkpoint's `action_list` as part of the <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> for the Expectations (depending on the Validation Result's `result_format`), and will be stored in a <TechnicalTag relative="../" tag="metric_store" text="Metric Store" /> if the `StoreMetricsAction` is one of the <TechnicalTag relative="../" tag="validation_action" text="Actions" /> in the Checkpoint's `action_list`.
 
 
 ## Features
@@ -75,15 +75,7 @@ See the [How to configure a MetricsStore](../guides/setup/configuring_metadata_s
 
 ### How to create
 
-Metrics are produced using logic specific to the Execution Engine associated with the Datasource that provides the data for the Batch Request/s that the Metric is calculated for.  That logic that is defined in a `MetricProvider`. When a `MetricProvider` class is first encountered, Great Expectations will register the Metric and any methods that it defines as able to produce Metrics.  This means that after Validation, that Metric can then be referenced in Evaluation Parameters. Furthermore, the methods associated with a Metric can also be referenced through dot notation using the Metric as a base (as shown above in the [section on accessing Metrics](#how-to-access)). 
-
-#### Types of MetricProvider Functions
-
-The diagram below shows the relationship between different types of MetricProvider functions.
-
-![Image](../images/metricprovider.png)
-
-You can view the implementations of MetricProvider subclasses in the `great_expectations/expectations/metrics` folder of a Great Expectations deployment, or [in the same folder of our GitHub](https://github.com/great-expectations/great_expectations/tree/develop/great_expectations/expectations/metrics).
+Metrics are produced using logic specific to the Execution Engine associated with the Datasource that provides the data for the Batch Request/s that the Metric is calculated for.  That logic that is defined in a `MetricProvider`. When a `MetricProvider` class is first encountered, Great Expectations will register the Metric and any methods that it defines as able to produce Metrics.  The registered metric will then be able to be used with `validator.get_metric()` or `validator.get_metrics()`. 
 
 ### Configuration
 
@@ -100,8 +92,3 @@ Metrics can have any name. However, for the "core" Great Expectations Metrics, w
       value_keys to determine how many values should be returned.
     * `column_values.in_set.unexpected_rows` provides full rows for which the value in the domain column was unexpected
     * `column_values.in_set.unexpected_value_counts` provides a count of how many times each unexpected value occurred
-
-Additionally, to facilitate optimized computation of Metrics, we use **Metric Partials** which define partially-parameterized functions that are necessary to build a desired Metric.
-
-* For aggregate Metrics, we often use an `ExecutionEngine` specific function with the suffix `.aggregate_fn`, such as `column.max.aggregate_fn`.
-* For map Metrics, to compute `column_values.in_set.unexpected_count`, we will rely on a **condition** called `column_values.in_set.condition`.
