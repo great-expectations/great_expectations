@@ -99,7 +99,7 @@ class ConfigurationStore(Store):
     def deserialize(self, key, value):
         config = value
         if isinstance(value, str):
-            config: CommentedMap = yaml.safe_load(value)
+            config: CommentedMap = yaml.load(value)
         try:
             return self._configuration_class.from_commented_map(commented_map=config)
         except ge_exceptions.InvalidBaseYamlConfigError:

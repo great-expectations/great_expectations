@@ -161,7 +161,7 @@ You can run the following cell to print out the full yaml configuration. For exa
 Run the following cell to save this Checkpoint to your Checkpoint Store."""
         )
         self.add_code_cell(
-            f"context.add_checkpoint(**yaml.safe_load(yaml_config))",
+            f"context.add_checkpoint(**yaml.load(yaml_config))",
             lint=True,
         )
 

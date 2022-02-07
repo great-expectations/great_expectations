@@ -91,7 +91,7 @@ my_spark_datasource_config = my_spark_datasource_config.replace("*.csv.gz", "*.c
 
 context.test_yaml_config(my_spark_datasource_config)
 
-context.add_datasource(**yaml.safe_load(my_spark_datasource_config))
+context.add_datasource(**yaml.load(my_spark_datasource_config))
 
 batch_request = BatchRequest(
     datasource_name="insert_your_datasource_name_here",
@@ -206,7 +206,7 @@ checkpoint_config = checkpoint_config.replace(
 
 my_checkpoint = context.test_yaml_config(checkpoint_config)
 
-context.add_checkpoint(**yaml.safe_load(checkpoint_config))
+context.add_checkpoint(**yaml.load(checkpoint_config))
 
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,

@@ -920,7 +920,7 @@ def test_redundant_information_in_naming_convention_bucket(
 def test_redundant_information_in_naming_convention_bucket_sorted(
     mock_gcs_conn, mock_list_keys, mock_emit
 ):
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetGCSDataConnector
@@ -1044,7 +1044,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
 def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match_group(
     mock_gcs_conn, mock_list_keys, mock_emit
 ):
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetGCSDataConnector
@@ -1102,7 +1102,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
 def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
     mock_gcs_conn, mock_list_keys, mock_emit
 ):
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
         module_name: great_expectations.datasource.data_connector
         class_name: InferredAssetGCSDataConnector
@@ -1166,7 +1166,7 @@ default_regex:
        - year_dir
        - month_dir
    """
-    config = yaml.safe_load(yaml_string)
+    config = yaml.load(yaml_string)
 
     mock_list_keys.return_value = [
         "my_base_directory/alpha/files/go/here/alpha-202001.csv",

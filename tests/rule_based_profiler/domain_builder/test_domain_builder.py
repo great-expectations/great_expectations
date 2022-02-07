@@ -57,7 +57,7 @@ def test_column_domain_builder(
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
-    full_profiler_config_dict: dict = yaml.safe_load(profiler_config)
+    full_profiler_config_dict: dict = yaml.load(profiler_config)
 
     variables_configs: dict = full_profiler_config_dict.get("variables")
     if variables_configs is None:
@@ -144,7 +144,7 @@ def test_simple_semantic_type_column_domain_builder(
 
     profiler_config: str = alice_columnar_table_single_batch["profiler_config"]
 
-    full_profiler_config_dict: dict = yaml.safe_load(profiler_config)
+    full_profiler_config_dict: dict = yaml.load(profiler_config)
 
     variables_configs: dict = full_profiler_config_dict.get("variables")
     if variables_configs is None:

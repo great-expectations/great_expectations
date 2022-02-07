@@ -32,7 +32,7 @@ data_connectors:
             - some_other_key_maybe_airflow_run_id
 """
 
-context.add_datasource(**yaml.safe_load(datasource_yaml))
+context.add_datasource(**yaml.load(datasource_yaml))
 
 # RuntimeBatchRequest with batch_data as Pandas Dataframe
 path_to_file: str = "some_path.csv"

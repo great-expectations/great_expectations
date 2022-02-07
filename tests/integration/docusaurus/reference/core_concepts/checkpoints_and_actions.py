@@ -37,7 +37,7 @@ data_connectors:
       - default_identifier_name
 """
 context.test_yaml_config(datasource_yaml)
-context.add_datasource(**yaml.safe_load(datasource_yaml))
+context.add_datasource(**yaml.load(datasource_yaml))
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 context.create_expectation_suite("my_expectation_suite")
 context.create_expectation_suite("my_other_expectation_suite")
@@ -65,14 +65,14 @@ validations:
         action:
           class_name: UpdateDataDocsAction
 """
-context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
+context.add_checkpoint(**yaml.load(checkpoint_yaml))
 assert context.list_checkpoints() == ["test_checkpoint"]
 
 results = context.run_checkpoint(checkpoint_name="test_checkpoint")
 assert results.success is True
 run_id_type = type(results.run_id)
 assert run_id_type == RunIdentifier
-validation_result_id_type_set = {type(k) for k in results.run_results.keys()}
+validation_result_id_type_set = set(type(k) for k in results.run_results.keys())
 assert len(validation_result_id_type_set) == 1
 validation_result_id_type = next(iter(validation_result_id_type_set))
 assert validation_result_id_type == ValidationResultIdentifier
@@ -170,7 +170,7 @@ runtime_configuration:
     result_format: BASIC
     partial_unexpected_count: 20
 """
-context.add_checkpoint(**yaml.safe_load(no_nesting))
+context.add_checkpoint(**yaml.load(no_nesting))
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 assert results.success is True
 assert (
@@ -219,7 +219,7 @@ runtime_configuration:
     result_format: BASIC
     partial_unexpected_count: 20
 """
-context.add_checkpoint(**yaml.safe_load(nesting_with_defaults))
+context.add_checkpoint(**yaml.load(nesting_with_defaults))
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 assert results.success is True
 first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
@@ -275,7 +275,7 @@ runtime_configuration:
     result_format: BASIC
     partial_unexpected_count: 20
 """
-context.add_checkpoint(**yaml.safe_load(keys_passed_at_runtime))
+context.add_checkpoint(**yaml.load(keys_passed_at_runtime))
 results = context.run_checkpoint(
     checkpoint_name="my_base_checkpoint",
     validations=[
@@ -334,7 +334,7 @@ validations:
       data_asset_name: yellow_tripdata_sample_2019-02
     expectation_suite_name: my_other_expectation_suite
 """
-context.add_checkpoint(**yaml.safe_load(using_template))
+context.add_checkpoint(**yaml.load(using_template))
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 assert results.success is True
 first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
@@ -371,7 +371,7 @@ notify_with: all
 using_simple_checkpoint = using_simple_checkpoint.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
-context.add_checkpoint(**yaml.safe_load(using_simple_checkpoint))
+context.add_checkpoint(**yaml.load(using_simple_checkpoint))
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 assert results.success is True
 
@@ -408,7 +408,7 @@ action_list:
 equivalent_using_checkpoint = equivalent_using_checkpoint.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
-context.add_checkpoint(**yaml.safe_load(equivalent_using_checkpoint))
+context.add_checkpoint(**yaml.load(equivalent_using_checkpoint))
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 assert results.success is True
 validation_result = list(results.run_results.items())[0][1]["validation_result"]

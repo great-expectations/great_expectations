@@ -34,7 +34,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_in
         file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
     )
 
-    config = yaml.safe_load(
+    config = yaml.load(
         f"""
 class_name: Datasource
 
@@ -110,7 +110,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
     )
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
-    config = yaml.safe_load(
+    config = yaml.load(
         f"""
 class_name: Datasource
 
@@ -175,7 +175,7 @@ def test_get_batch_list_from_new_style_datasource_with_runtime_data_connector(
     empty_data_context, tmp_path_factory
 ):
     context = empty_data_context
-    config = yaml.safe_load(
+    config = yaml.load(
         f"""
 class_name: Datasource
 
@@ -246,7 +246,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
     )
 
-    config = yaml.safe_load(
+    config = yaml.load(
         f"""
     class_name: Datasource
 
@@ -339,7 +339,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
     )
 
-    config = yaml.safe_load(
+    config = yaml.load(
         f"""
     class_name: Datasource
 
@@ -436,7 +436,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
     )
 
-    config = yaml.safe_load(
+    config = yaml.load(
         f"""
     class_name: Datasource
 
@@ -541,7 +541,7 @@ def test_get_batch_list_from_new_style_datasource_with_file_system_datasource_co
         file_content_fn=lambda: "x,y,z\n1,2,3\n2,3,5",
     )
 
-    config = yaml.safe_load(
+    config = yaml.load(
         f"""
     class_name: Datasource
 

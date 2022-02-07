@@ -41,7 +41,7 @@ datasource_yaml = datasource_yaml.replace(
 
 context.test_yaml_config(datasource_yaml)
 
-context.add_datasource(**yaml.safe_load(datasource_yaml))
+context.add_datasource(**yaml.load(datasource_yaml))
 
 # Here is a RuntimeBatchRequest using a query
 batch_request = RuntimeBatchRequest(

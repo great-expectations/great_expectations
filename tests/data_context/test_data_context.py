@@ -1665,7 +1665,7 @@ data_connectors:
             A:
 """
 
-    config = yaml.safe_load(yaml_config)
+    config = yaml.load(yaml_config)
     context.add_datasource(
         "my_directory_datasource",
         **config,
@@ -1719,7 +1719,7 @@ data_connectors:
             A:
 """
 
-    config = yaml.safe_load(yaml_config)
+    config = yaml.load(yaml_config)
     context.add_datasource(
         "my_directory_datasource",
         **config,
@@ -1856,7 +1856,7 @@ validations:
     assert len(context.list_checkpoints()) == 0
 
     checkpoint_from_yaml = context.add_checkpoint(
-        **yaml.safe_load(checkpoint_yaml_config),
+        **yaml.load(checkpoint_yaml_config),
     )
 
     expected_checkpoint_yaml: str = """name: my_new_checkpoint
@@ -1909,7 +1909,7 @@ expectation_suite_ge_cloud_id:
     ) == deep_filter_properties_iterable(
         properties={
             key: value
-            for key, value in dict(yaml.safe_load(expected_checkpoint_yaml)).items()
+            for key, value in dict(yaml.load(expected_checkpoint_yaml)).items()
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
@@ -1922,7 +1922,7 @@ expectation_suite_ge_cloud_id:
     ) == deep_filter_properties_iterable(
         properties={
             key: value
-            for key, value in dict(yaml.safe_load(expected_checkpoint_yaml)).items()
+            for key, value in dict(yaml.load(expected_checkpoint_yaml)).items()
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
@@ -2031,7 +2031,7 @@ validations:
 
     with pytest.raises(AttributeError):
         context.add_checkpoint(
-            **yaml.safe_load(checkpoint_yaml_config),
+            **yaml.load(checkpoint_yaml_config),
         )
 
     assert checkpoint_name not in context.list_checkpoints()
@@ -2117,7 +2117,7 @@ def test_add_datasource_from_yaml(mock_emit, empty_data_context_stats_enabled):
     assert mock_emit.call_args_list == expected_call_args_list
 
     datasource_from_yaml = context.add_datasource(
-        name=datasource_name, **yaml.safe_load(example_yaml)
+        name=datasource_name, **yaml.load(example_yaml)
     )
     assert mock_emit.call_count == 2
     expected_call_args_list.extend(
@@ -2253,7 +2253,7 @@ def test_add_datasource_from_yaml_sql_datasource(
     ]
     assert mock_emit.call_args_list == expected_call_args_list
     datasource_from_yaml = context.add_datasource(
-        name=datasource_name, **yaml.safe_load(example_yaml)
+        name=datasource_name, **yaml.load(example_yaml)
     )
     assert mock_emit.call_count == 2
     expected_call_args_list.extend(
@@ -2465,7 +2465,7 @@ def test_add_datasource_from_yaml_sql_datasource_with_credentials(
     ]
     assert mock_emit.call_args_list == expected_call_args_list
     datasource_from_yaml = context.add_datasource(
-        name=datasource_name, **yaml.safe_load(example_yaml)
+        name=datasource_name, **yaml.load(example_yaml)
     )
     assert mock_emit.call_count == 2
     expected_call_args_list.extend(
@@ -2646,7 +2646,7 @@ def test_add_datasource_from_yaml_with_substitution_variables(
     ]
     assert mock_emit.call_args_list == expected_call_args_list
     datasource_from_yaml = context.add_datasource(
-        name=datasource_name, **yaml.safe_load(example_yaml)
+        name=datasource_name, **yaml.load(example_yaml)
     )
     assert mock_emit.call_count == 2
     expected_call_args_list.extend(

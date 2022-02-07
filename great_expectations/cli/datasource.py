@@ -319,7 +319,7 @@ data_connectors:
     class_name: InferredAssetFilesystemDataConnector
     base_directory: {self.base_path}
     default_regex:
-      group_names:
+      group_names: 
         - data_asset_name
       pattern: (.*)
   default_runtime_data_connector_name:
@@ -785,7 +785,7 @@ def sanitize_yaml_and_save_datasource(
         raise ValueError("Please verify the yaml and try again.")
     if not isinstance(datasource_yaml, str):
         raise TypeError("Please pass in a valid yaml string.")
-    config = yaml.safe_load(datasource_yaml)
+    config = yaml.load(datasource_yaml)
     try:
         datasource_name = config.pop("name")
     except KeyError:

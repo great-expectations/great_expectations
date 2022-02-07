@@ -76,7 +76,7 @@ introspection:
         my_sql_datasource: Optional[
             Union[SimpleSqlalchemyDatasource, LegacyDatasource]
         ] = context.add_datasource(
-            "test_sqlite_db_datasource", **yaml.safe_load(datasource_config)
+            "test_sqlite_db_datasource", **yaml.load(datasource_config)
         )
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
@@ -1102,7 +1102,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -1301,7 +1301,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -1409,7 +1409,7 @@ def test_checkpoint_run_on_non_existent_validations(
           result_format: BASIC
           partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -1529,7 +1529,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -1743,7 +1743,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -1958,7 +1958,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -2186,7 +2186,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -2389,7 +2389,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -2595,7 +2595,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -2817,7 +2817,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -3017,7 +3017,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -3224,7 +3224,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -3620,7 +3620,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -3744,7 +3744,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )
@@ -3866,7 +3866,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
         result_format: BASIC
         partial_unexpected_count: 20
     """
-    config: dict = dict(yaml.safe_load(checkpoint_yaml_config))
+    config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
         config=config, checkpoint_file_path=checkpoint_file_path
     )

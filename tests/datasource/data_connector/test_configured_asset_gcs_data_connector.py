@@ -528,7 +528,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
 def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
            class_name: ConfiguredAssetGCSDataConnector
            datasource_name: test_environment
@@ -587,7 +587,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
 def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_raises_error(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
            class_name: ConfiguredAssetGCSDataConnector
            datasource_name: test_environment
@@ -640,7 +640,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     empty_data_context_stats_enabled,
     expected_batch_definitions_unsorted,
 ):
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
            class_name: ConfiguredAssetGCSDataConnector
            datasource_name: test_environment
@@ -714,7 +714,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     empty_data_context_stats_enabled,
     expected_batch_definitions_unsorted,
 ):
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
            class_name: ConfiguredAssetGCSDataConnector
            datasource_name: test_environment
@@ -788,7 +788,7 @@ def test_return_all_batch_definitions_basic_sorted(
     empty_data_context_stats_enabled,
     expected_batch_definitions_sorted,
 ):
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
        class_name: ConfiguredAssetGCSDataConnector
        datasource_name: test_environment
@@ -869,7 +869,7 @@ def test_return_all_batch_definitions_basic_sorted(
 def test_return_all_batch_definitions_returns_specified_partition(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
        class_name: ConfiguredAssetGCSDataConnector
        datasource_name: test_environment
@@ -980,7 +980,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
     empty_data_context_stats_enabled,
     expected_batch_definitions_sorted,
 ):
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
        class_name: ConfiguredAssetGCSDataConnector
        datasource_name: test_environment
@@ -1061,7 +1061,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
 def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_match_group(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
        class_name: ConfiguredAssetGCSDataConnector
        datasource_name: test_environment
@@ -1130,7 +1130,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
 def test_return_all_batch_definitions_too_many_sorters(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
        class_name: ConfiguredAssetGCSDataConnector
        datasource_name: test_environment
@@ -1216,7 +1216,7 @@ assets:
    gamma:
        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
    """
-    config = yaml.safe_load(yaml_string)
+    config = yaml.load(yaml_string)
 
     mock_list_keys.return_value = [  # Initial return value during instantiation
         "my_base_directory/alpha/files/go/here/alpha-202001.csv",
@@ -1347,7 +1347,7 @@ assets:
    gamma:
        pattern: ^(.+)-(\\d{{4}})(\\d{{2}})\\.csv$
    """
-    config = yaml.safe_load(yaml_string)
+    config = yaml.load(yaml_string)
 
     mock_list_keys.return_value = [
         "my_base_directory/alpha/files/go/here/alpha-202001.csv",

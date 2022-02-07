@@ -200,7 +200,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
         config_path = os.path.join(ge_dir, DataContext.GE_YML)
         assert os.path.isfile(config_path)
 
-        config = yaml.safe_load(open(config_path))
+        config = yaml.load(open(config_path))
         assert config["datasources"] == {
             "my_db": {
                 "data_asset_type": {
@@ -216,7 +216,7 @@ def test_cli_init_connection_string_non_working_db_connection_instructs_user_and
         config_path = os.path.join(
             ge_dir, DataContext.GE_UNCOMMITTED_DIR, "config_variables.yml"
         )
-        config = yaml.safe_load(open(config_path))
+        config = yaml.load(open(config_path))
         assert config["my_db"] == {
             "url": "sqlite:////subfolder_thats_not_real/not_a_real.db"
         }

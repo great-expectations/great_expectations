@@ -50,7 +50,7 @@ datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", CREDENTIAL)
 
 context.test_yaml_config(datasource_yaml)
 
-context.add_datasource(**yaml.safe_load(datasource_yaml))
+context.add_datasource(**yaml.load(datasource_yaml))
 
 # Here is a BatchRequest naming a data_asset
 batch_request = BatchRequest(

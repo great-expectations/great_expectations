@@ -65,7 +65,7 @@ def test_cli_init_on_new_project(
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
-    config = yaml.safe_load(open(config_path))
+    config = yaml.load(open(config_path))
     assert config["datasources"] == {}
 
     obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))

@@ -64,7 +64,7 @@ def _library_not_loaded_test(
         config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
         assert os.path.isfile(config_path)
 
-        config = yaml.safe_load(open(config_path))
+        config = yaml.load(open(config_path))
         assert config["datasources"] == {}
 
         obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))
@@ -251,7 +251,7 @@ def test_cli_init_spark_without_library_installed_instructs_user(
         config_path = os.path.join(basedir, "great_expectations/great_expectations.yml")
         assert os.path.isfile(config_path)
 
-        config = yaml.safe_load(open(config_path))
+        config = yaml.load(open(config_path))
         assert config["datasources"] == {}
 
         obs_tree = gen_directory_tree_str(os.path.join(basedir, "great_expectations"))

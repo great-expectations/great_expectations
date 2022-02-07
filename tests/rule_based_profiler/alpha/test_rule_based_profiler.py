@@ -136,7 +136,7 @@ def test_profile_includes_citations(
     yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
 
     # Instantiate Profiler
-    profiler_config = yaml.safe_load(yaml_config)
+    profiler_config = yaml.load(yaml_config)
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
     # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
     profiler_config.pop("class_name")
@@ -167,7 +167,7 @@ def test_profile_excludes_citations(
     yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
 
     # Instantiate Profiler
-    profiler_config: dict = yaml.safe_load(yaml_config)
+    profiler_config: dict = yaml.load(yaml_config)
 
     # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)

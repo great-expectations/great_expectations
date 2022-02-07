@@ -233,7 +233,7 @@ def profiler_config():
              profiler_details: $parameter.row_count_range.details
     """
     yaml = YAML()
-    return yaml.safe_load(yaml_config)
+    return yaml.load(yaml_config)
 
 
 def test_expectation_suite_equality(baseline_suite, identical_suite, equivalent_suite):

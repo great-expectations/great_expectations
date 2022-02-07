@@ -821,7 +821,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted():
             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetS3DataConnector
@@ -949,7 +949,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
           module_name: great_expectations.datasource.data_connector
           class_name: InferredAssetS3DataConnector
@@ -1011,7 +1011,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
-    my_data_connector_yaml = yaml.safe_load(
+    my_data_connector_yaml = yaml.load(
         f"""
         module_name: great_expectations.datasource.data_connector
         class_name: InferredAssetS3DataConnector

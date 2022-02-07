@@ -221,7 +221,7 @@ validations:
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": f"context.add_checkpoint(**yaml.safe_load(yaml_config))",
+            "source": f"context.add_checkpoint(**yaml.load(yaml_config))",
             "outputs": [],
         },
     ]

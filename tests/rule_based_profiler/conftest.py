@@ -140,7 +140,7 @@ data_connectors:
     module_name: great_expectations.datasource.data_connector
         """
 
-    context.add_datasource(name=datasource_name, **yaml.safe_load(datasource_config))
+    context.add_datasource(name=datasource_name, **yaml.load(datasource_config))
 
     assert context.list_datasources() == [
         {
@@ -362,7 +362,7 @@ def alice_columnar_table_single_batch(empty_data_context):
     # because the device_ts is ahead of the event_ts for the latest event
     sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
 
-    profiler_config: dict = yaml.safe_load(verbose_profiler_config)
+    profiler_config: dict = yaml.load(verbose_profiler_config)
 
     # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
@@ -444,7 +444,7 @@ data_connectors:
     module_name: great_expectations.datasource.data_connector
         """
 
-    context.add_datasource(name=datasource_name, **yaml.safe_load(datasource_config))
+    context.add_datasource(name=datasource_name, **yaml.load(datasource_config))
 
     assert context.list_datasources() == [
         {
@@ -1171,7 +1171,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             expectation_configuration=expectation_configuration, send_usage_event=False
         )
 
-    profiler_config: dict = yaml.safe_load(verbose_profiler_config)
+    profiler_config: dict = yaml.load(verbose_profiler_config)
 
     # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
     deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)

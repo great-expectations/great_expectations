@@ -45,7 +45,7 @@ def basic_pandas_datasource_v013(tmp_path_factory):
     )
 
     basic_datasource: Datasource = instantiate_class_from_config(
-        yaml.safe_load(
+        yaml.load(
             f"""
 class_name: Datasource
 
@@ -92,7 +92,7 @@ def basic_spark_datasource(tmp_path_factory, spark_session):
     )
 
     basic_datasource: Datasource = instantiate_class_from_config(
-        yaml.safe_load(
+        yaml.load(
             f"""
 class_name: Datasource
 
@@ -139,7 +139,7 @@ def sample_datasource_v013_with_single_partition_file_data_connector(
     )
 
     sample_datasource: Datasource = instantiate_class_from_config(
-        yaml.safe_load(
+        yaml.load(
             f"""
 class_name: Datasource
 
@@ -823,7 +823,7 @@ x,y
         )
 
     my_datasource: Datasource = instantiate_class_from_config(
-        yaml.safe_load(
+        yaml.load(
             rf"""
 class_name: Datasource
 
@@ -898,7 +898,7 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
         ],
     )
     basic_datasource: Datasource = instantiate_class_from_config(
-        yaml.safe_load(
+        yaml.load(
             f"""
         class_name: Datasource
 

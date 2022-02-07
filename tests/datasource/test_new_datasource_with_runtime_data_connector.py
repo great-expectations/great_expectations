@@ -33,7 +33,7 @@ yaml = YAML()
 @pytest.fixture
 def datasource_with_runtime_data_connector_and_pandas_execution_engine():
     basic_datasource: Datasource = instantiate_class_from_config(
-        yaml.safe_load(
+        yaml.load(
             f"""
     class_name: Datasource
 
@@ -59,7 +59,7 @@ def datasource_with_runtime_data_connector_and_pandas_execution_engine():
 @pytest.fixture
 def datasource_with_runtime_data_connector_and_sparkdf_execution_engine(spark_session):
     basic_datasource: Datasource = instantiate_class_from_config(
-        yaml.safe_load(
+        yaml.load(
             f"""
     class_name: Datasource
 
@@ -85,7 +85,7 @@ def datasource_with_runtime_data_connector_and_sparkdf_execution_engine(spark_se
 @pytest.fixture
 def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_file, sa):
     basic_datasource: Datasource = instantiate_class_from_config(
-        yaml.safe_load(
+        yaml.load(
             f"""
     class_name: Datasource
 
@@ -849,7 +849,7 @@ def test_sparkdf_execution_engine_get_batch_definitions_and_get_batch_basics(
 @pytest.fixture
 def datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine(db_file, sa):
     basic_datasource: Datasource = instantiate_class_from_config(
-        yaml.safe_load(
+        yaml.load(
             f"""
     class_name: Datasource
 

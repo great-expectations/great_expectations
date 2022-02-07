@@ -79,7 +79,7 @@ def test_cli_init_on_new_project(
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
-    config = yaml.safe_load(open(config_path))
+    config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["data__dir"]["data_asset_type"][
         "class_name"
     ]
@@ -266,7 +266,7 @@ def _load_config_file(config_path):
 
     with open(config_path) as f:
         read = f.read()
-        config = yaml.safe_load(read)
+        config = yaml.load(read)
 
     assert isinstance(config, dict)
     return config
@@ -528,7 +528,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_without_trying_again(
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
-    config = yaml.safe_load(open(config_path))
+    config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["data__dir"]["data_asset_type"][
         "class_name"
     ]
@@ -610,7 +610,7 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
     config_path = os.path.join(project_dir, "great_expectations/great_expectations.yml")
     assert os.path.isfile(config_path)
 
-    config = yaml.safe_load(open(config_path))
+    config = yaml.load(open(config_path))
     data_source_class = config["datasources"]["data__dir"]["data_asset_type"][
         "class_name"
     ]

@@ -108,7 +108,7 @@ data_connectors:
         class_name: InferredAssetFilesystemDataConnector
         module_name: great_expectations.datasource.data_connector
 """
-    config: CommentedMap = yaml.safe_load(yaml_config)
+    config: CommentedMap = yaml.load(yaml_config)
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     anonymized_datasource = datasource_anonymizer.anonymize_datasource_info(
         name=name, config=config
@@ -141,7 +141,7 @@ def test_anonymize_datasource_info_v2_api_custom_subclass():
 module_name: tests.data_context.fixtures.plugins.my_custom_v2_api_datasource
 class_name: MyCustomV2ApiDatasource
 """
-    config: CommentedMap = yaml.safe_load(yaml_config)
+    config: CommentedMap = yaml.load(yaml_config)
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     anonymized_datasource = datasource_anonymizer.anonymize_datasource_info(
         name=name, config=config
@@ -168,7 +168,7 @@ data_connectors:
         class_name: InferredAssetFilesystemDataConnector
         module_name: great_expectations.datasource.data_connector
 """
-    config: CommentedMap = yaml.safe_load(yaml_config)
+    config: CommentedMap = yaml.load(yaml_config)
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     anonymized_datasource = datasource_anonymizer.anonymize_datasource_info(
         name=name, config=config
@@ -202,7 +202,7 @@ introspection:
         sampling_kwargs:
             n: 10
 """
-    config: CommentedMap = yaml.safe_load(yaml_config)
+    config: CommentedMap = yaml.load(yaml_config)
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     anonymized_datasource = (
         datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
@@ -233,7 +233,7 @@ introspection:
     my_custom_datasource_name:
         data_asset_name_suffix: some_suffix
 """
-    config: CommentedMap = yaml.safe_load(yaml_config)
+    config: CommentedMap = yaml.load(yaml_config)
     datasource_anonymizer = DatasourceAnonymizer(salt=CONSISTENT_SALT)
     anonymized_datasource = (
         datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(

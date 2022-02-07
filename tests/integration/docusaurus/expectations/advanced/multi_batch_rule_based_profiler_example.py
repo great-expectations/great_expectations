@@ -100,7 +100,7 @@ rules:
 data_context = DataContext()
 
 # Instantiate RuleBasedProfiler
-full_profiler_config_dict: dict = yaml.safe_load(profiler_config)
+full_profiler_config_dict: dict = yaml.load(profiler_config)
 rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
     name=full_profiler_config_dict["name"],
     config_version=full_profiler_config_dict["config_version"],

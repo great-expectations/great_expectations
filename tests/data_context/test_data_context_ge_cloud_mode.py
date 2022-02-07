@@ -114,7 +114,7 @@ def ge_cloud_data_context_config(
       usage_statistics_url: https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics
       data_context_id: {ge_cloud_data_context_config}
     """
-    config = yaml.safe_load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
+    config = yaml.load(DEFAULT_GE_CLOUD_DATA_CONTEXT_CONFIG)
     return DataContextConfig(**config)
 
 
