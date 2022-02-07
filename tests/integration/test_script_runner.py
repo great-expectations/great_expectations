@@ -1,9 +1,11 @@
 import enum
+import importlib.machinery
+import importlib.util
 import os
 import shutil
-import subprocess
 import sys
-from typing import Tuple
+from dataclasses import dataclass
+from typing import List, Optional, Tuple
 
 import pytest
 
@@ -25,153 +27,202 @@ class BackendDependencies(enum.Enum):
     SNOWFLAKE = "SNOWFLAKE"
 
 
-# to be populated by the smaller lists below
-docs_test_matrix = []
+@dataclass
+class IntegrationTextFixture:
+    """
+    Prepare and environment and run integration tests from a list of tests.
 
-local_tests = [
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "name": "getting_started",
-        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        "user_flow_script": "tests/integration/docusaurus/tutorials/getting-started/getting_started.py",
-    },
-    {
-        "name": "how_to_get_a_batch_of_data_from_a_configured_datasource",
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py",
-        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/template/script_example.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/dataconnector_docs",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/dataconnector_docs",
-    },
+    Note that the only required parameter for a test in the matrix is
+    `user_flow_script` and `name` and that all other parameters are optional.
+    """
+
+    name: str
+    user_flow_script: str
+    data_context_dir: Optional[str] = None
+    data_dir: Optional[str] = None
+    extra_backend_dependencies: Optional[BackendDependencies] = None
+    other_files: Optional[Tuple[Tuple[str, str]]] = None
+    ge_requirement: Optional[str] = None
+    util_script: Optional[str] = None
+
+
+# to be populated by the smaller lists below
+docs_test_matrix_new: List[IntegrationTextFixture] = []
+
+local_tests_new = [
+    IntegrationTextFixture(
+        name="how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTextFixture(
+        name="how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTextFixture(
+        name="getting_started",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        user_flow_script="tests/integration/docusaurus/tutorials/getting-started/getting_started.py",
+    ),
+    IntegrationTextFixture(
+        name="how_to_get_a_batch_of_data_from_a_configured_datasource",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+    ),
+    IntegrationTextFixture(
+        name="connecting_to_your_data_pandas_yaml",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTextFixture(
+        name="connecting_to_your_data_pandas_python",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTextFixture(
+        name="how_to_introspect_and_partition_your_data_yaml_gradual",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    ),
+    IntegrationTextFixture(
+        name="how_to_introspect_and_partition_your_data_yaml_complete",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
+    ),
+    IntegrationTextFixture(
+        name="in_memory_pandas_yaml",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
+    IntegrationTextFixture(
+        name="in_memory_pandas_python",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
+    IntegrationTextFixture(
+        name="docusaurus_template_script_example",
+        user_flow_script="tests/integration/docusaurus/template/script_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
+    IntegrationTextFixture(
+        name="in_memory_spark_yaml",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTextFixture(
+        name="in_memory_spark_python",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTextFixture(
+        name="filesystem_spark_yaml",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTextFixture(
+        name="filesystem_spark_python",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTextFixture(
+        name="how_to_choose_which_dataconnector_to_use",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/dataconnector_docs",
+    ),
+    IntegrationTextFixture(
+        name="how_to_configure_a_runtimedataconnector",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/dataconnector_docs",
+    ),
     # Chetan - 20220125 - Commenting out RBP-specific test due to the feature and related doc undergoing significant changes as part of development.
     #                     Both the doc and test will be rewritten after the feature is complete - only then should this be reenabled.
-    # {
-    #     "name": "rule_base_profiler_multi_batch_example",
-    #     "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
-    # },
-    {
-        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/miscellaneous/migration_guide_pandas_v3_api.py",
-        "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/",
-        "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/miscellaneous/migration_guide_pandas_v2_api.py",
-        "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/",
-        "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/miscellaneous/migration_guide_spark_v3_api.py",
-        "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/",
-        "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/miscellaneous/migration_guide_spark_v2_api.py",
-        "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/",
-        "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
-        "extra_backend_dependencies": BackendDependencies.SPARK,
-    },
+    # IntegrationTextFixture(
+    #     name= "rule_base_profiler_multi_batch_example",
+    #     data_context_dir= "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+    #     data_dir= "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    #     user_flow_script= "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
+    # ),
+    IntegrationTextFixture(
+        name="databricks_deployment_patterns_file_yaml_configs",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTextFixture(
+        name="databricks_deployment_patterns_file_python_configs",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTextFixture(
+        name="databricks_deployment_patterns_file_yaml_configs",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTextFixture(
+        name="databricks_deployment_patterns_file_python_configs",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTextFixture(
+        name="checkpoints_and_actions_core_concepts",
+        user_flow_script="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTextFixture(
+        name="how_to_pass_an_in_memory_dataframe_to_a_checkpoint",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTextFixture(
+        name="how_to_configure_credentials",
+        user_flow_script="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
+    IntegrationTextFixture(
+        name="migration_guide_pandas_v3_api",
+        user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_pandas_v3_api.py",
+        data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/",
+        data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
+    ),
+    IntegrationTextFixture(
+        name="migration_guide_pandas_v2_api",
+        user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_pandas_v2_api.py",
+        data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/",
+        data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
+    ),
+    IntegrationTextFixture(
+        name="migration_guide_spark_v3_api",
+        user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_spark_v3_api.py",
+        data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/",
+        data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
+    IntegrationTextFixture(
+        name="migration_guide_spark_v2_api",
+        user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_spark_v2_api.py",
+        data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/",
+        data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
+        extra_backend_dependencies=BackendDependencies.SPARK,
+    ),
 ]
 
 dockerized_db_tests = [
@@ -441,6 +492,20 @@ cloud_s3_tests = [
         "data_dir": "tests/test_sets/dataconnector_docs",
         "extra_backend_dependencies": BackendDependencies.AWS,
     },
+    IntegrationTextFixture(
+        name="how_to_configure_an_inferredassetdataconnector",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/dataconnector_docs",
+        extra_backend_dependencies=BackendDependencies.AWS,
+    ),
+    IntegrationTextFixture(
+        name="how_to_configure_a_configuredassetdataconnector",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/dataconnector_docs",
+        extra_backend_dependencies=BackendDependencies.AWS,
+    ),
     # TODO: <Alex>ALEX -- uncomment all S3 tests once S3 testing in Azure Pipelines is re-enabled and items for specific tests below are addressed.</Alex>
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once S3 Configured YAML Example is implemented.</Alex>
@@ -500,14 +565,15 @@ cloud_redshift_tests = [
 ]
 
 # populate docs_test_matrix with sub-lists
-docs_test_matrix += local_tests
-docs_test_matrix += dockerized_db_tests
-docs_test_matrix += cloud_snowflake_tests
-docs_test_matrix += cloud_gcp_tests
-docs_test_matrix += cloud_bigquery_tests
-docs_test_matrix += cloud_azure_tests
-docs_test_matrix += cloud_s3_tests
-docs_test_matrix += cloud_redshift_tests
+# docs_test_matrix += local_tests
+# docs_test_matrix += dockerized_db_tests
+# docs_test_matrix += cloud_snowflake_tests
+# docs_test_matrix += cloud_gcp_tests
+# docs_test_matrix += cloud_bigquery_tests
+# docs_test_matrix += cloud_azure_tests
+# docs_test_matrix += cloud_s3_tests
+# docs_test_matrix += cloud_redshift_tests
+docs_test_matrix_new += local_tests_new
 
 pandas_integration_tests = [
     {
@@ -572,7 +638,7 @@ integration_test_matrix += pandas_integration_tests
 
 
 def idfn(test_configuration):
-    return test_configuration.get("user_flow_script")
+    return test_configuration.name
 
 
 @pytest.fixture
@@ -582,36 +648,31 @@ def pytest_parsed_arguments(request):
 
 @pytest.mark.docs
 @pytest.mark.integration
-@pytest.mark.parametrize("test_configuration", docs_test_matrix, ids=idfn)
+@pytest.mark.parametrize("integration_test_fixture", docs_test_matrix_new, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
-def test_docs(test_configuration, tmp_path, pytest_parsed_arguments):
-    _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
-    _execute_integration_test(test_configuration, tmp_path)
+def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
+    _check_for_skipped_tests(pytest_parsed_arguments, integration_test_fixture)
+    _execute_integration_test(integration_test_fixture, tmp_path)
 
 
-@pytest.mark.integration
-@pytest.mark.parametrize("test_configuration", integration_test_matrix, ids=idfn)
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
-def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments):
-    _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
-    _execute_integration_test(test_configuration, tmp_path)
+# @pytest.mark.integration
+# @pytest.mark.parametrize("test_configuration", integration_test_matrix, ids=idfn)
+# @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
+# def test_integration_tests(test_configuration, tmp_path, pytest_parsed_arguments):
+#     _check_for_skipped_tests(pytest_parsed_arguments, test_configuration)
+#     _execute_integration_test(test_configuration, tmp_path)
 
 
-def _execute_integration_test(test_configuration, tmp_path):
+def _execute_integration_test(integration_test_fixture, tmp_path):
     """
     Prepare and environment and run integration tests from a list of tests.
 
     Note that the only required parameter for a test in the matrix is
     `user_flow_script` and that all other parameters are optional.
     """
-    assert (
-        "user_flow_script" in test_configuration.keys()
-    ), "a `user_flow_script` is required"
     workdir = os.getcwd()
     try:
-        base_dir = test_configuration.get(
-            "base_dir", file_relative_path(__file__, "../../")
-        )
+        base_dir = file_relative_path(__file__, "../../")
         os.chdir(tmp_path)
         # Ensure GE is installed in our environment
         if "ge_requirement" in test_configuration:
@@ -624,10 +685,9 @@ def _execute_integration_test(test_configuration, tmp_path):
         #
 
         # DataContext
-        if test_configuration.get("data_context_dir"):
-            context_source_dir = os.path.join(
-                base_dir, test_configuration.get("data_context_dir")
-            )
+        data_context_dir = integration_test_fixture.data_context_dir
+        if data_context_dir:
+            context_source_dir = os.path.join(base_dir, data_context_dir)
             test_context_dir = os.path.join(tmp_path, "great_expectations")
             shutil.copytree(
                 context_source_dir,
@@ -635,25 +695,22 @@ def _execute_integration_test(test_configuration, tmp_path):
             )
 
         # Test Data
-        if test_configuration.get("data_dir") is not None:
-            source_data_dir = os.path.join(base_dir, test_configuration.get("data_dir"))
-            test_data_dir = os.path.join(tmp_path, "data")
+        data_dir = integration_test_fixture.data_dir
+        if data_dir:
+            source_data_dir = os.path.join(base_dir, data_dir)
+            target_data_dir = os.path.join(tmp_path, "data")
             shutil.copytree(
                 source_data_dir,
-                test_data_dir,
+                target_data_dir,
             )
 
         # Other files
         # Other files to copy should be supplied as a tuple of tuples with source, dest pairs
         # e.g. (("/source1/file1", "/dest1/file1"), ("/source2/file2", "/dest2/file2"))
-        other_files: Tuple[Tuple[str, str]] = test_configuration.get("other_files")
-        if other_files is not None:
-            if not isinstance(other_files, Tuple):
-                raise TypeError("other_files must be of type Tuple[Tuple[str, str]]")
-            if not all(isinstance(t, Tuple) for t in other_files):
-                raise TypeError("other_files must be of type Tuple[Tuple[str, str]]")
-
+        other_files = integration_test_fixture.other_files
+        if other_files:
             for file_paths in other_files:
+                # check to see if these work
                 source_file = os.path.join(base_dir, file_paths[0])
                 dest_file = os.path.join(tmp_path, file_paths[1])
                 dest_dir = os.path.dirname(dest_file)
@@ -662,55 +719,35 @@ def _execute_integration_test(test_configuration, tmp_path):
                 shutil.copyfile(src=source_file, dst=dest_file)
 
         # UAT Script
+        user_flow_script = integration_test_fixture.user_flow_script
         script_source = os.path.join(
             base_dir,
-            test_configuration.get("user_flow_script"),
+            user_flow_script,
         )
         script_path = os.path.join(tmp_path, "test_script.py")
         shutil.copyfile(script_source, script_path)
 
-        # Util Script
-        if test_configuration.get("util_script") is not None:
-            script_source = os.path.join(
-                base_dir,
-                test_configuration.get("util_script"),
-            )
+        # Util Script WILL : THERE MAY BE A BETTER WAY TO DO THIS
+        util_script = integration_test_fixture.util_script
+        if util_script:
+            script_source = os.path.join(base_dir, util_script)
             os.makedirs(os.path.join(tmp_path, "tests/"))
             util_script_path = os.path.join(tmp_path, "tests/test_utils.py")
             shutil.copyfile(script_source, util_script_path)
 
-        # Check initial state
+        # Run script as module
+        loader = importlib.machinery.SourceFileLoader("mymodule", script_path)
+        spec = importlib.util.spec_from_loader("mymodule", loader)
+        mymodule = importlib.util.module_from_spec(spec)
+        loader.exec_module(mymodule)
 
-        # Execute test
-        res = subprocess.run(["python", script_path], capture_output=True)
-        # Check final state
-        expected_stderrs = test_configuration.get("expected_stderrs")
-        expected_stdouts = test_configuration.get("expected_stdouts")
-        expected_failure = test_configuration.get("expected_failure")
-        outs = res.stdout.decode("utf-8")
-        errs = res.stderr.decode("utf-8")
-        print(outs)
-        print(errs)
-
-        if expected_stderrs:
-            assert expected_stderrs == errs
-
-        if expected_stdouts:
-            assert expected_stdouts == outs
-
-        if expected_failure:
-            assert res.returncode != 0
-        else:
-            assert res.returncode == 0
-    except:
-        raise
     finally:
         os.chdir(workdir)
 
 
-def _check_for_skipped_tests(pytest_args, test_configuration) -> None:
+def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
     """Enable scripts to be skipped based on pytest invocation flags."""
-    dependencies = test_configuration.get("extra_backend_dependencies", None)
+    dependencies = integration_test_fixture.extra_backend_dependencies
     if not dependencies:
         return
     elif dependencies == BackendDependencies.POSTGRESQL and (
