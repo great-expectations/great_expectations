@@ -129,14 +129,15 @@ def expect(
                 print("\n")
 
                 # TODO: Remove, these diagnostics are for development work only:
-                _dlt_diagnostics(dlt)
+                _dlt_expect_return_value_diagnostics(dlt_expect_return_value)
+
+            # TODO: Remove, these diagnostics are for development work only:
+            _dlt_diagnostics(dlt)
 
             func_result = func(*args, **kwargs)
 
             # TODO: Remove, these diagnostics are for development work only:
             _func_result_diagnostics(func_result)
-
-            _dlt_expect_return_value_diagnostics(dlt_expect_return_value)
 
             return func_result
 
