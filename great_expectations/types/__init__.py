@@ -173,6 +173,17 @@ class DictDot:
         :param exclude_keys: exclusion list ("exclude only these properties, while include all the rest")
         :return: property names, subject to inclusion/exclusion filtering
         """
+
+        def assert_valid_keys(keys: Set[str], purpose: str):
+            name: str
+            for name in keys:
+                try:
+                    _ = self[name]
+                except AttributeError:
+                    raise ValueError(
+                        f'Property "{name}", marked for {purpose} on object "{str(type(self))}", does not exist.'
+                    )
+
         if include_keys is None:
             include_keys = set()
 
@@ -197,28 +208,14 @@ class DictDot:
 
         if include_keys:
             # Make sure that all properties, marked for inclusion, actually exist on the object.
-            for key in include_keys:
-                try:
-                    _ = self[key]
-                except AttributeError:
-                    raise ValueError(
-                        f'Property "{key}", marked for inclusion on object "{str(type(self))}", does not exist.'
-                    )
-
+            assert_valid_keys(keys=include_keys, purpose="inclusion")
             keys_for_exclusion.extend(
                 [key for key in property_names if key not in include_keys]
             )
 
         if exclude_keys:
             # Make sure that all properties, marked for exclusion, actually exist on the object.
-            for key in exclude_keys:
-                try:
-                    _ = self[key]
-                except AttributeError:
-                    raise ValueError(
-                        f'Property "{key}", marked for exclusion on object "{str(type(self))}", does not exist.'
-                    )
-
+            assert_valid_keys(keys=exclude_keys, purpose="exclusion")
             keys_for_exclusion.extend(
                 [key for key in property_names if key in exclude_keys]
             )

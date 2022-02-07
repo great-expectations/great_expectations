@@ -36,16 +36,12 @@ def _validate_builder_override_config(builder_config: dict):
     :param builder_config: candidate builder override configuration
     :raises: ProfilerConfigurationError
     """
-    if not (
-        isinstance(builder_config, dict)
-        and len(
-            set(builder_config.keys())
-            & {
-                "class_name",
-                "module_name",
-            }
-        )
-        == 2
+    if not all(
+        [
+            isinstance(builder_config, dict),
+            "class_name" in builder_config,
+            "module_name" in builder_config,
+        ]
     ):
         raise ge_exceptions.ProfilerConfigurationError(
             'Both "class_name" and "module_name" must be specified.'
