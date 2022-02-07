@@ -162,7 +162,7 @@ You can find more information about [how to configure this profiler, including a
 
     def _add_scaffold_cell(self):
         self.add_code_cell(
-            f"""\
+            """\
 profiler = UserConfigurableProfiler(profile_dataset=batch,
     ignored_columns=ignored_columns,
     excluded_expectations=None,

@@ -564,7 +564,7 @@ continue.
             azure_options = data["azure_options"]
             if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
                 raise ge_exceptions.InvalidConfigError(
-                    f"""Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
+                    """Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
                     You must only select one between `conn_str` or `account_url`. Please update your configuration to continue.
                     """
                 )
@@ -590,7 +590,7 @@ continue.
             gcs_options = data["gcs_options"]
             if "filename" in gcs_options and "info" in gcs_options:
                 raise ge_exceptions.InvalidConfigError(
-                    f"""Your current configuration can only use a single method of authentication for the GCS type of data connector.
+                    """Your current configuration can only use a single method of authentication for the GCS type of data connector.
                     You must only select one between `filename` (from_service_account_file) and `info` (from_service_account_info). Please update your configuration to continue.
                     """
                 )
@@ -2088,7 +2088,7 @@ class CheckpointConfigSchema(Schema):
             "name" in data or "validation_operator_name" in data or "batches" in data
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
+                """Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
                 continue.
                 """
             )
@@ -2096,7 +2096,7 @@ class CheckpointConfigSchema(Schema):
         if data.get("config_version"):
             if "name" not in data:
                 raise ge_exceptions.InvalidConfigError(
-                    f"""Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
+                    """Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
                     configuration to continue.
                     """
                 )

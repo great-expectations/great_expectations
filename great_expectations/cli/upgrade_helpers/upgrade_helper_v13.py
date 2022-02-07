@@ -175,7 +175,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
             and not self.upgrade_log["skipped_checkpoint_store_upgrade"]
         )
 
-        upgrade_overview = f"""\
+        upgrade_overview = """\
 <cyan>\
 ++====================================++
 || UpgradeHelperV13: Upgrade Overview ||
@@ -185,7 +185,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 """
         if increment_version:
             upgrade_overview += (
-                f"""\
+                """\
 UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations V3 API.
 """
                 + self._upgrade_overview_common_content(
@@ -203,12 +203,12 @@ more about the automated upgrade process:
 """
             )
             if confirmation_required:
-                upgrade_overview += f"""\
+                upgrade_overview += """\
 
 Would you like to proceed with the project upgrade?\
 """
         else:
-            upgrade_overview += f"""\
+            upgrade_overview += """\
 Your project needs to be upgraded in order to be compatible with Great Expectations V3 API.
 """ + self._upgrade_overview_common_content(
                 manual_steps_required=manual_steps_required
@@ -375,7 +375,7 @@ No manual upgrade steps are required.
     def _generate_upgrade_report(self):
         upgrade_log_path = self._save_upgrade_log()
         increment_version = self.upgrade_log["update_version"]
-        upgrade_report = f"""\
+        upgrade_report = """\
 <cyan>\
 ++================++
 || Upgrade Report ||
