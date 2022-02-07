@@ -34,7 +34,7 @@ data_connectors:
 
 context.test_yaml_config(datasource_yaml)
 
-context.add_datasource(**yaml.load(datasource_yaml))
+context.add_datasource(**yaml.safe_load(datasource_yaml))
 
 # Here is an example BatchRequest for all batches associated with the specified DataAsset
 batch_request = BatchRequest(

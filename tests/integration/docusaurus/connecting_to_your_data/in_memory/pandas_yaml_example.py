@@ -22,7 +22,7 @@ data_connectors:
 
 context.test_yaml_config(datasource_yaml)
 
-context.add_datasource(**yaml.load(datasource_yaml))
+context.add_datasource(**yaml.safe_load(datasource_yaml))
 
 # creating our example Pandas dataframe
 df = pd.DataFrame([[1, 2, 3], [4, 5, 6], [7, 8, 9]], columns=["a", "b", "c"])

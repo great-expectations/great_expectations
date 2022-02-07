@@ -79,7 +79,7 @@ datasource_yaml = datasource_yaml.replace("<CONNECTION_STRING>", CONNECTION_STRI
 
 context.test_yaml_config(datasource_yaml)
 
-context.add_datasource(**yaml.load(datasource_yaml))
+context.add_datasource(**yaml.safe_load(datasource_yaml))
 available_data_asset_names = context.datasources[
     "taxi_datasource"
 ].get_available_data_asset_names(data_connector_names="whole_table")["whole_table"]

@@ -675,7 +675,7 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
         base_dir = file_relative_path(__file__, "../../")
         os.chdir(tmp_path)
         # Ensure GE is installed in our environment
-        if "ge_requirement" in test_configuration:
+        if integration_test_fixture.ge_requirement:
             execute_shell_command(f"pip install {ge_requirement}")
         else:
             execute_shell_command("pip install .")
