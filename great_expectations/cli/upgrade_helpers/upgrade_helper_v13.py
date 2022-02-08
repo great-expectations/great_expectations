@@ -115,7 +115,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 
             if len(self.upgrade_checklist["manual"]["checkpoints"]) == 0:
                 self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
-        except ge_exceptions.InvalidTopLevelConfigKeyError as e:
+        except ge_exceptions.InvalidTopLevelConfigKeyError:
             self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
 
     # noinspection SpellCheckingInspection
