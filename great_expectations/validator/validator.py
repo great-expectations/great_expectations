@@ -1529,7 +1529,7 @@ set as active.
             )
 
             self._data_context = validation_data_context
-        except Exception as e:
+        except Exception:
             if getattr(data_context, "_usage_statistics_handler", None):
                 # noinspection PyProtectedMember
                 handler = data_context._usage_statistics_handler
