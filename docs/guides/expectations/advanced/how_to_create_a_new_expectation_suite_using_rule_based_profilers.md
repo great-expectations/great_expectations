@@ -8,8 +8,7 @@ In this tutorial, you will develop hands-on experience with configuring a Rule-B
 :::warning
 
 Please note that Rule Based Profiler is currently undergoing development and is considered an experimental feature.
-While the contents of this document accurately reflect the state of the feature, they are susceptible to change as
-we continue to iterate and grow out the capabilites of the Rule Based Profiler.
+While the contents of this document accurately reflect the state of the feature, they are susceptible to change.
 
 :::
 
