@@ -66,6 +66,10 @@ class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
         return column.map(is_parseable)
 
 
+## When the correct map_metric was added to ExpectColumnValuesToBeEdtfParseable below
+## and tests were run, the tests for spark were failing with
+## `ModuleNotFoundError: No module named 'expectations'`, so commenting out for now
+
 #     @column_condition_partial(engine=SparkDFExecutionEngine)
 #     def _spark(cls, column, level=None, **kwargs):
 #         def is_parseable(val):
