@@ -7,11 +7,15 @@ import pytest
 from freezegun import freeze_time
 from packaging import version
 from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource import DataConnector, Datasource
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -81,13 +85,19 @@ def test_alice_profiler_user_workflow_single_batch(
     yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
 
     # Instantiate Profiler
-    profiler_config: dict = yaml.load(yaml_config)
+    profiler_config: CommentedMap = yaml.load(yaml_config)
+
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
     # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
-    profiler_config.pop("class_name")
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        **profiler_config,
+        **serialized_config,
         data_context=data_context,
     )
 
@@ -192,12 +202,18 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
 
     # Instantiate Profiler
     profiler_config: dict = yaml.load(yaml_config)
+
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
     # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
-    profiler_config.pop("class_name")
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        **profiler_config,
+        **serialized_config,
         data_context=data_context,
     )
 
@@ -235,13 +251,19 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
     ]
 
     # Instantiate Profiler
-    profiler_config: dict = yaml.load(yaml_config)
+    profiler_config: CommentedMap = yaml.load(yaml_config)
+
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
     # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
     # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
-    profiler_config.pop("class_name")
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
 
     profiler: RuleBasedProfiler = RuleBasedProfiler(
-        **profiler_config,
+        **serialized_config,
         data_context=data_context,
     )
 

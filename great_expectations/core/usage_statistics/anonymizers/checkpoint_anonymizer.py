@@ -19,8 +19,8 @@ class CheckpointAnonymizer(Anonymizer):
             "anonymized_name": self.anonymize(name),
         }
 
-        # Roundtrip through schema validation to add any missing fields
-        checkpoint_config: CommentedMap = checkpointConfigSchema.load(config)
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+        checkpoint_config: dict = checkpointConfigSchema.load(CommentedMap(**config))
         checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
 
         self.anonymize_object_info(

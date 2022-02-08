@@ -1,7 +1,9 @@
 import logging
 import os
 import uuid
-from typing import List, Union, cast
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Generator, List, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -474,3 +476,21 @@ def load_data_into_test_database(
     finally:
         connection.close()
         engine.dispose()
+
+
+@contextmanager
+def set_directory(path: str) -> Generator:
+    """Sets the cwd within the context
+
+    Args:
+        path: The string representation of the desired path to cd into
+
+    Yields:
+        None
+    """
+    origin = Path().absolute()
+    try:
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(origin)

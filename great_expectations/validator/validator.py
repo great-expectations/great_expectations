@@ -150,7 +150,6 @@ class Validator:
         self._data_context = data_context
         self._execution_engine = execution_engine
         self._expose_dataframe_methods = False
-        self._validator_config = {}
 
         if batches is None:
             batches = []
@@ -173,7 +172,6 @@ class Validator:
         self._default_expectation_args = copy.deepcopy(
             Validator.DEFAULT_RUNTIME_CONFIGURATION
         )
-        self._validator_config = {}
 
         # This special state variable tracks whether a validation run is going on, which will disable
         # saving expectation config objects
@@ -250,6 +248,7 @@ class Validator:
                         Returns:
                             The Expectation's validation result
         """
+        expectation_impl = get_expectation_impl(name)
 
         def inst_expectation(*args, **kwargs):
             # this is used so that exceptions are caught appropriately when they occur in expectation config
@@ -267,7 +266,6 @@ class Validator:
                 {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
             )
 
-            expectation_impl = get_expectation_impl(name)
             allowed_config_keys = expectation_impl.get_allowed_config_keys()
 
             expectation_kwargs = recursively_convert_to_json_serializable(kwargs)
@@ -341,10 +339,8 @@ class Validator:
                     exception_traceback = traceback.format_exc()
                     exception_message = f"{type(err).__name__}: {str(err)}"
                     exception_info = ExceptionInfo(
-                        **{
-                            "exception_traceback": exception_traceback,
-                            "exception_message": exception_message,
-                        }
+                        exception_traceback=exception_traceback,
+                        exception_message=exception_message,
                     )
                     validation_result = ExpectationValidationResult(
                         success=False,
@@ -356,6 +352,8 @@ class Validator:
             return validation_result
 
         inst_expectation.__name__ = name
+        inst_expectation.__doc__ = expectation_impl.__doc__
+
         return inst_expectation
 
     @property
@@ -377,22 +375,15 @@ class Validator:
             provider_cls, _ = get_metric_provider(
                 metric_configuration.metric_name, self.execution_engine
             )
-            for key in provider_cls.domain_keys:
-                if (
-                    key not in metric_configuration.metric_domain_kwargs
-                    and key in provider_cls.default_kwarg_values
-                ):
-                    metric_configuration.metric_domain_kwargs[
-                        key
-                    ] = provider_cls.default_kwarg_values[key]
-            for key in provider_cls.value_keys:
-                if (
-                    key not in metric_configuration.metric_value_kwargs
-                    and key in provider_cls.default_kwarg_values
-                ):
-                    metric_configuration.metric_value_kwargs[
-                        key
-                    ] = provider_cls.default_kwarg_values[key]
+            self._get_default_domain_kwargs(
+                metric_provider_cls=provider_cls,
+                metric_configuration=metric_configuration,
+            )
+            self._get_default_value_kwargs(
+                metric_provider_cls=provider_cls,
+                metric_configuration=metric_configuration,
+            )
+
             self.build_metric_dependency_graph(
                 graph=graph,
                 execution_engine=self._execution_engine,
@@ -412,6 +403,32 @@ class Validator:
             metric_name: resolved_metrics[metric_configuration.id]
             for (metric_name, metric_configuration) in metrics.items()
         }
+
+    @staticmethod
+    def _get_default_domain_kwargs(
+        metric_provider_cls: "MetricProvider", metric_configuration: MetricConfiguration
+    ) -> None:
+        for key in metric_provider_cls.domain_keys:
+            if (
+                key not in metric_configuration.metric_domain_kwargs
+                and key in metric_provider_cls.default_kwarg_values
+            ):
+                metric_configuration.metric_domain_kwargs[
+                    key
+                ] = metric_provider_cls.default_kwarg_values[key]
+
+    @staticmethod
+    def _get_default_value_kwargs(
+        metric_provider_cls: "MetricProvider", metric_configuration: MetricConfiguration
+    ) -> None:
+        for key in metric_provider_cls.value_keys:
+            if (
+                key not in metric_configuration.metric_value_kwargs
+                and key in metric_provider_cls.default_kwarg_values
+            ):
+                metric_configuration.metric_value_kwargs[
+                    key
+                ] = metric_provider_cls.default_kwarg_values[key]
 
     def get_metric(self, metric: MetricConfiguration) -> Any:
         """return the value of the requested metric."""
@@ -445,15 +462,98 @@ class Validator:
         else:
             catch_exceptions = False
 
+        evrs: List[ExpectationValidationResult]
+
+        expectation_validation_graphs: List[ExpectationValidationGraph] = []
+
+        processed_configurations: List[ExpectationConfiguration] = []
+        (
+            evrs,
+            processed_configurations,
+        ) = self._generate_metric_dependency_subgraphs_for_each_expectation_configuration(
+            expectation_configurations=configurations,
+            expectation_validation_graphs=expectation_validation_graphs,
+            processed_configurations=processed_configurations,
+            catch_exceptions=catch_exceptions,
+            runtime_configuration=runtime_configuration,
+        )
+
+        if metrics is None:
+            metrics = {}
+
+        graph: ValidationGraph = (
+            self._generate_suite_level_graph_from_expectation_level_sub_graphs(
+                expectation_validation_graphs=expectation_validation_graphs
+            )
+        )
+
+        try:
+            (
+                evrs,
+                processed_configurations,
+            ) = self._resolve_suite_level_graph_and_process_metric_evaluation_errors(
+                validation_graph=graph,
+                metrics=metrics,
+                runtime_configuration=runtime_configuration,
+                expectation_validation_graphs=expectation_validation_graphs,
+                evrs=evrs,
+                processed_configurations=processed_configurations,
+            )
+        except Exception as err:
+            # If a general Exception occurs during the execution of "Validator.resolve_validation_graph()", then all
+            # expectations in the suite are impacted, because it is impossible to attribute the failure to a metric.
+            if catch_exceptions:
+                exception_traceback: str = traceback.format_exc()
+                evrs = self._catch_exceptions_in_failing_expectation_validations(
+                    exception_traceback=exception_traceback,
+                    exception=err,
+                    failing_expectation_configurations=processed_configurations,
+                    evrs=evrs,
+                )
+                return evrs
+            else:
+                raise err
+
+        configuration: ExpectationConfiguration
+        result: ExpectationValidationResult
+        for configuration in processed_configurations:
+            try:
+                result = configuration.metrics_validate(
+                    metrics,
+                    execution_engine=self._execution_engine,
+                    runtime_configuration=runtime_configuration,
+                )
+                evrs.append(result)
+            except Exception as err:
+                if catch_exceptions:
+                    exception_traceback: str = traceback.format_exc()
+                    evrs = self._catch_exceptions_in_failing_expectation_validations(
+                        exception_traceback=exception_traceback,
+                        exception=err,
+                        failing_expectation_configurations=[configuration],
+                        evrs=evrs,
+                    )
+                else:
+                    raise err
+
+        return evrs
+
+    def _generate_metric_dependency_subgraphs_for_each_expectation_configuration(
+        self,
+        expectation_configurations: List[ExpectationConfiguration],
+        expectation_validation_graphs: List[ExpectationValidationGraph],
+        processed_configurations: List[ExpectationConfiguration],
+        catch_exceptions: bool,
+        runtime_configuration: Optional[dict] = None,
+    ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
         # While evaluating expectation configurations, create sub-graph for every metric dependency and incorporate
         # these sub-graphs under corresponding expectation-level sub-graph (state of ExpectationValidationGraph object).
+        evrs: List[ExpectationValidationResult] = []
+        configuration: ExpectationConfiguration
+        evaluated_config: ExpectationConfiguration
+        metric_configuration: MetricConfiguration
         graph: ValidationGraph
-        expectation_validation_graphs: List[ExpectationValidationGraph] = []
-        exception_info: ExceptionInfo
-        processed_configurations = []
-        # noinspection SpellCheckingInspection
-        evrs = []
-        for configuration in configurations:
+        for configuration in expectation_configurations:
             # Validating
             try:
                 assert (
@@ -466,9 +566,11 @@ class Validator:
             evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
-            validation_dependencies = expectation_impl().get_validation_dependencies(
-                evaluated_config, self._execution_engine, runtime_configuration
-            )["metrics"]
+            validation_dependencies: dict = (
+                expectation_impl().get_validation_dependencies(
+                    evaluated_config, self._execution_engine, runtime_configuration
+                )["metrics"]
+            )
 
             try:
                 expectation_validation_graph: ExpectationValidationGraph = (
@@ -488,15 +590,13 @@ class Validator:
                 processed_configurations.append(evaluated_config)
             except Exception as err:
                 if catch_exceptions:
-                    exception_traceback = traceback.format_exc()
-                    exception_message = str(err)
-                    exception_info = ExceptionInfo(
-                        **{
-                            "exception_traceback": exception_traceback,
-                            "exception_message": exception_message,
-                        }
+                    exception_traceback: str = traceback.format_exc()
+                    exception_message: str = str(err)
+                    exception_info: ExceptionInfo = ExceptionInfo(
+                        exception_traceback=exception_traceback,
+                        exception_message=exception_message,
                     )
-                    result = ExpectationValidationResult(
+                    result: ExpectationValidationResult = ExpectationValidationResult(
                         success=False,
                         exception_info=exception_info,
                         expectation_config=evaluated_config,
@@ -505,6 +605,12 @@ class Validator:
                 else:
                     raise err
 
+        return evrs, processed_configurations
+
+    @staticmethod
+    def _generate_suite_level_graph_from_expectation_level_sub_graphs(
+        expectation_validation_graphs: List[ExpectationValidationGraph],
+    ) -> ValidationGraph:
         # Collect edges from all expectation-level sub-graphs and incorporate them under common suite-level graph.
         expectation_validation_graph: ExpectationValidationGraph
         edges: List[MetricEdge] = list(
@@ -515,96 +621,89 @@ class Validator:
                 ]
             )
         )
-        graph = ValidationGraph(edges=edges)
+        validation_graph: ValidationGraph = ValidationGraph(edges=edges)
+        return validation_graph
 
-        if metrics is None:
-            metrics = {}
+    def _resolve_suite_level_graph_and_process_metric_evaluation_errors(
+        self,
+        validation_graph: ValidationGraph,
+        metrics: Dict[Tuple[str, str, str], Any],
+        runtime_configuration: dict,
+        expectation_validation_graphs: List[ExpectationValidationGraph],
+        evrs: List[ExpectationValidationResult],
+        processed_configurations: List[ExpectationConfiguration],
+    ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
+        # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
+        aborted_metrics_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ] = self.resolve_validation_graph(
+            graph=validation_graph,
+            metrics=metrics,
+            runtime_configuration=runtime_configuration,
+        )
 
-        try:
-            # Resolve overall suite-level graph and process any MetricResolutionError type exceptions that might occur.
-            aborted_metrics_info: Dict[
-                Tuple[str, str, str],
-                Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
-            ] = self.resolve_validation_graph(
-                graph=graph,
-                metrics=metrics,
-                runtime_configuration=runtime_configuration,
+        # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
+        rejected_configurations: List[ExpectationConfiguration] = []
+        for expectation_validation_graph in expectation_validation_graphs:
+            metric_exception_info: Set[
+                ExceptionInfo
+            ] = expectation_validation_graph.get_exception_info(
+                metric_info=aborted_metrics_info
             )
-
-            # Trace MetricResolutionError occurrences to expectations relying on corresponding malfunctioning metrics.
-            rejected_configurations: List[ExpectationConfiguration] = []
-            for expectation_validation_graph in expectation_validation_graphs:
-                metric_exception_info: Set[
-                    ExceptionInfo
-                ] = expectation_validation_graph.get_exception_info(
-                    metric_info=aborted_metrics_info
-                )
-                # Report all MetricResolutionError occurrences impacting expectation and append it to rejected list.
-                if len(metric_exception_info) > 0:
-                    configuration = expectation_validation_graph.configuration
-                    for exception_info in metric_exception_info:
-                        result = ExpectationValidationResult(
-                            success=False,
-                            exception_info=exception_info,
-                            expectation_config=configuration,
-                        )
-                        evrs.append(result)
-
-                    if configuration not in rejected_configurations:
-                        rejected_configurations.append(configuration)
-
-            # Exclude all rejected expectations from list of expectations cleared for validation.
-            for configuration in rejected_configurations:
-                processed_configurations.remove(configuration)
-        except Exception as err:
-            # If a general Exception occurs during the execution of "Validator.resolve_validation_graph()", then all
-            # expectations in the suite are impacted, because it is impossible to attribute the failure to a metric.
-            if catch_exceptions:
-                exception_traceback = traceback.format_exc()
-                exception_message = str(err)
-                exception_info = ExceptionInfo(
-                    **{
-                        "exception_traceback": exception_traceback,
-                        "exception_message": exception_message,
-                    }
-                )
-                for configuration in processed_configurations:
+            # Report all MetricResolutionError occurrences impacting expectation and append it to rejected list.
+            if len(metric_exception_info) > 0:
+                configuration = expectation_validation_graph.configuration
+                for exception_info in metric_exception_info:
                     result = ExpectationValidationResult(
                         success=False,
                         exception_info=exception_info,
                         expectation_config=configuration,
                     )
                     evrs.append(result)
-                return evrs
-            else:
-                raise err
 
-        for configuration in processed_configurations:
-            try:
-                result = configuration.metrics_validate(
-                    metrics,
-                    execution_engine=self._execution_engine,
-                    runtime_configuration=runtime_configuration,
-                )
-                evrs.append(result)
-            except Exception as err:
-                if catch_exceptions:
-                    exception_traceback = traceback.format_exc()
-                    exception_message = str(err)
-                    exception_info = ExceptionInfo(
-                        **{
-                            "exception_traceback": exception_traceback,
-                            "exception_message": exception_message,
-                        }
-                    )
-                    result = ExpectationValidationResult(
-                        success=False,
-                        exception_info=exception_info,
-                        expectation_config=configuration,
-                    )
-                    evrs.append(result)
-                else:
-                    raise err
+                if configuration not in rejected_configurations:
+                    rejected_configurations.append(configuration)
+
+        # Exclude all rejected expectations from list of expectations cleared for validation.
+        for configuration in rejected_configurations:
+            processed_configurations.remove(configuration)
+
+        return evrs, processed_configurations
+
+    @staticmethod
+    def _catch_exceptions_in_failing_expectation_validations(
+        exception_traceback: str,
+        exception: Exception,
+        failing_expectation_configurations: List[ExpectationConfiguration],
+        evrs: List[ExpectationValidationResult],
+    ) -> List[ExpectationValidationResult]:
+        """
+        Catch exceptions in failing Expectation validations and convert to unsuccessful ExpectationValidationResult
+        Args:
+            exception_traceback: Traceback related to raised Exception
+            exception: Exception raised
+            failing_expectation_configurations: ExpectationConfigurations that failed
+            evrs: List of ExpectationValidationResult objects to append failures to
+
+        Returns:
+            List of ExpectationValidationResult objects with unsuccessful ExpectationValidationResult objects appended
+        """
+        exception_message: str = str(exception)
+        exception_info: ExceptionInfo = ExceptionInfo(
+            exception_traceback=exception_traceback,
+            exception_message=exception_message,
+        )
+
+        configuration: ExpectationConfiguration
+        result: ExpectationValidationResult
+        for configuration in failing_expectation_configurations:
+            result = ExpectationValidationResult(
+                success=False,
+                exception_info=exception_info,
+                expectation_config=configuration,
+            )
+            evrs.append(result)
 
         return evrs
 
@@ -748,10 +847,8 @@ class Validator:
                     exception_traceback = traceback.format_exc()
                     exception_message = str(err)
                     exception_info = ExceptionInfo(
-                        **{
-                            "exception_traceback": exception_traceback,
-                            "exception_message": exception_message,
-                        }
+                        exception_traceback=exception_traceback,
+                        exception_message=exception_message,
                     )
                     for failed_metric in err.failed_metrics:
                         if failed_metric.id in failed_metric_info:
@@ -846,14 +943,6 @@ aborting graph resolution.
             remove_multiple_matches=remove_multiple_matches,
             ge_cloud_id=ge_cloud_id,
         )
-
-    def set_config_value(self, key, value) -> None:
-        """Setter for config value"""
-        self._validator_config[key] = value
-
-    def get_config_value(self, key):
-        """Getter for config value"""
-        return self._validator_config.get(key)
 
     def load_batch_list(self, batch_list: List[Batch]) -> List[Batch]:
         for batch in batch_list:
@@ -1449,7 +1538,7 @@ set as active.
             )
 
             self._data_context = validation_data_context
-        except Exception as e:
+        except Exception:
             if getattr(data_context, "_usage_statistics_handler", None):
                 # noinspection PyProtectedMember
                 handler = data_context._usage_statistics_handler

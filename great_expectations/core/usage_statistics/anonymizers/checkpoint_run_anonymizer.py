@@ -5,12 +5,15 @@ from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.util import (
-    get_batch_request_as_dict,
     get_substituted_validation_dict,
     get_validations_with_batch_request_as_dict,
 )
 from great_expectations.core import RunIdentifier
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import (
+    BatchRequest,
+    RuntimeBatchRequest,
+    get_batch_request_as_dict,
+)
 from great_expectations.core.usage_statistics.anonymizers.action_anonymizer import (
     ActionAnonymizer,
 )
@@ -109,10 +112,9 @@ class CheckpointRunAnonymizer(Anonymizer):
                 if validation_batch_request is None:
                     validation_batch_request = {}
 
-                if isinstance(
-                    validation_batch_request, (BatchRequest, RuntimeBatchRequest)
-                ):
-                    validation_batch_request = validation_batch_request.to_dict()
+                validation_batch_request = get_batch_request_as_dict(
+                    batch_request=validation_batch_request
+                )
 
                 anonymized_validation_batch_request: Optional[
                     Optional[Dict[str, List[str]]]

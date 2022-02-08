@@ -8,7 +8,17 @@ import great_expectations as ge
 
 context = ge.get_context()
 
-datasource_config = """
+# NOTE: The following code is only for testing and depends on an environment
+# variable to set the gcp_project. You can replace the value with your own
+# GCP project information
+gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
+if not gcp_project:
+    raise ValueError(
+        "Environment Variable GE_TEST_GCP_PROJECT is required to run GCS integration tests"
+    )
+
+
+datasource_config = r"""
 name: my_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -51,7 +61,7 @@ context.run_checkpoint(checkpoint_name=checkpoint_name)
 great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
-with open(great_expectations_yaml_file_path, "r") as f:
+with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.safe_load(f)
 
 stores = great_expectations_yaml["stores"]
@@ -97,10 +107,10 @@ validations_store_name: validations_GCS_store
 configured_validations_store = yaml.safe_load(configured_validations_store_yaml)
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "project"
-] = "superconductive-internal"
+] = gcp_project
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "bucket"
-] = "superconductive-integration-tests"
+] = "test_metadata_store"
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "prefix"
 ] = "how_to_configure_a_validation_result_store_in_gcs/validations"
@@ -124,7 +134,7 @@ context.add_store(
     store_name=configured_validations_store["validations_store_name"],
     store_config=configured_validations_store["stores"]["validations_GCS_store"],
 )
-with open(great_expectations_yaml_file_path, "r") as f:
+with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.safe_load(f)
 great_expectations_yaml["validations_store_name"] = "validations_GCS_store"
 great_expectations_yaml["stores"]["validations_GCS_store"]["store_backend"].pop(
@@ -241,7 +251,7 @@ result = subprocess.run(
 )
 stdout = result.stdout.decode("utf-8")
 assert (
-    "gs://superconductive-integration-tests/how_to_configure_a_validation_result_store_in_gcs/validations/my_expectation_suite/"
+    "gs://test_metadata_store/how_to_configure_a_validation_result_store_in_gcs/validations/my_expectation_suite/"
     not in stdout
 )
 
@@ -258,7 +268,7 @@ result = subprocess.run(
 )
 stdout = result.stdout.decode("utf-8")
 assert (
-    "gs://superconductive-integration-tests/how_to_configure_a_validation_result_store_in_gcs/validations/my_expectation_suite/"
+    "gs://test_metadata_store/how_to_configure_a_validation_result_store_in_gcs/validations/my_expectation_suite/"
     in stdout
 )
 

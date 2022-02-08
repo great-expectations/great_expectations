@@ -19,7 +19,16 @@ from dateutil.parser import parse
 from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
-from typing_extensions import Literal
+
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
+
+try:
+    from typing import Literal
+except ImportError:
+    # Fallback for python < 3.8
+    from typing_extensions import Literal
 
 import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 import great_expectations.exceptions as ge_exceptions
@@ -470,7 +479,7 @@ class BaseDataContext:
                     datasource_name=datasource_name
                 )
             except ge_exceptions.DatasourceInitializationError as e:
-                logger.warn(f"Cannot initialize datasource {datasource_name}: {e}")
+                logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
@@ -1719,7 +1728,7 @@ class BaseDataContext:
         else:
             raise ge_exceptions.DatasourceError(
                 datasource_name,
-                f"The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
+                "The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
             )
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
@@ -2112,14 +2121,14 @@ class BaseDataContext:
             active_store_names.append(self.checkpoint_store_name)
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
             logger.info(
-                f"Checkpoint store is not configured; omitting it from active stores"
+                "Checkpoint store is not configured; omitting it from active stores"
             )
 
         try:
             active_store_names.append(self.profiler_store_name)
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
             logger.info(
-                f"Profiler store is not configured; omitting it from active stores"
+                "Profiler store is not configured; omitting it from active stores"
             )
 
         return [
@@ -3259,6 +3268,35 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs,
         )
 
+    def add_profiler(
+        self,
+        name: str,
+        config_version: float,
+        rules: Dict[str, dict],
+        variables: Optional[dict] = None,
+        ge_cloud_id: Optional[str] = None,
+    ):
+        config_data = {
+            "name": name,
+            "config_version": config_version,
+            "rules": rules,
+            "variables": variables,
+        }
+
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+        validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
+        profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
+
+        config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
+
+        # Chetan - 20220127 - Open to refactor all Profiler CRUD from toolkit to class methods
+        return profiler_toolkit.add_profiler(
+            config=config,
+            data_context=self,
+            profiler_store=self.profiler_store,
+            ge_cloud_id=ge_cloud_id,
+        )
+
     def get_profiler(
         self,
         name: Optional[str] = None,
@@ -3271,10 +3309,21 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_id=ge_cloud_id,
         )
 
+    def delete_profiler(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
+        profiler_toolkit.delete_profiler(
+            profiler_store=self.profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
     def list_profilers(self) -> List[str]:
         if self.profiler_store is None:
             raise ge_exceptions.StoreConfigurationError(
-                f"Attempted to list profilers from a Profiler Store, which is not a configured store."
+                "Attempted to list profilers from a Profiler Store, which is not a configured store."
             )
         return profiler_toolkit.list_profilers(
             profiler_store=self.profiler_store,
@@ -3555,7 +3604,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
             )
         else:
-            # Roundtrip through schema validator to add missing fields
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             datasource_config = datasourceConfigSchema.load(instantiated_class.config)
             full_datasource_config = datasourceConfigSchema.dump(datasource_config)
             usage_stats_event_payload = datasource_anonymizer.anonymize_datasource_info(
@@ -3649,25 +3698,31 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         """
         print(f"\tInstantiating as a {class_name}, since class_name is {class_name}")
 
-        profiler_name = name or config.get("name") or "my_temp_profiler"
+        profiler_name: str = name or config.get("name") or "my_temp_profiler"
 
-        profiler_config = RuleBasedProfilerConfig.from_commented_map(
-            commented_map=config
-        )
+        profiler_config: Union[
+            RuleBasedProfilerConfig, dict
+        ] = RuleBasedProfilerConfig.from_commented_map(commented_map=config)
         profiler_config = profiler_config.to_json_dict()
         profiler_config.update({"name": profiler_name})
 
         instantiated_class = instantiate_class_from_config(
             config=profiler_config,
             runtime_environment={"data_context": self},
-            config_defaults={"module_name": "great_expectations.rule_based_profiler"},
+            config_defaults={
+                "module_name": "great_expectations.rule_based_profiler",
+                "class_name": "RuleBasedProfiler",
+            },
         )
 
-        profiler_anonymizer = ProfilerAnonymizer(self.data_context_id)
+        profiler_anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(
+            self.data_context_id
+        )
 
-        usage_stats_event_payload = profiler_anonymizer.anonymize_profiler_info(
+        usage_stats_event_payload: dict = profiler_anonymizer.anonymize_profiler_info(
             name=profiler_name, config=profiler_config
         )
+
         return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_misc_class_from_yaml_config(
@@ -3721,7 +3776,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ):
             datasource_name: str = name or config.get("name") or "my_temp_datasource"
             if datasource_anonymizer.is_parent_class_recognized_v3_api(config=config):
-                # Roundtrip through schema validator to add missing fields
+                # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
                 datasource_config = datasourceConfigSchema.load(
                     instantiated_class.config
                 )
@@ -3750,7 +3805,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             checkpoint_anonymizer.is_parent_class_recognized(config=config) is not None
         ):
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
-            # Roundtrip through schema validator to add missing fields
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             checkpoint_config: Union[CheckpointConfig, dict]
             checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config

@@ -1373,13 +1373,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     # add checkpoint config
-    batch_request = BatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_basic_data_connector",
-            "data_asset_name": "Titanic_1911",
-        }
-    )
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
     checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -1551,13 +1549,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     # add checkpoint config
-    batch_request = BatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_basic_data_connector",
-            "data_asset_name": "Titanic_1911",
-        }
-    )
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
     runtime_batch_request = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
@@ -2519,7 +2515,6 @@ def test_newstyle_checkpoint_config_substitution_simple(
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_only,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -2527,14 +2522,12 @@ def test_newstyle_checkpoint_config_substitution_simple(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
     # make sure operation is idempotent
     simplified_checkpoint.get_substituted_config()
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_only,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -2542,7 +2535,6 @@ def test_newstyle_checkpoint_config_substitution_simple(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
     # template and runtime kwargs
@@ -2690,7 +2682,6 @@ def test_newstyle_checkpoint_config_substitution_simple(
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_and_runtime_kwargs,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -2698,7 +2689,6 @@ def test_newstyle_checkpoint_config_substitution_simple(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
 
@@ -2820,7 +2810,6 @@ def test_newstyle_checkpoint_config_substitution_nested(
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_only,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -2828,14 +2817,12 @@ def test_newstyle_checkpoint_config_substitution_nested(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
     # make sure operation is idempotent
     nested_checkpoint.get_substituted_config()
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_only,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -2843,7 +2830,6 @@ def test_newstyle_checkpoint_config_substitution_nested(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
     # runtime kwargs with new checkpoint template name passed at runtime
@@ -3007,7 +2993,6 @@ def test_newstyle_checkpoint_config_substitution_nested(
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_and_runtime_kwargs,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -3015,7 +3000,6 @@ def test_newstyle_checkpoint_config_substitution_nested(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
 
@@ -4315,7 +4299,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
     context.create_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a path
-    batch_request = RuntimeBatchRequest(
+    # Using typed object instead of dictionary, expected by "add_checkpoint()", on purpose to insure that checks work.
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -4329,7 +4314,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
     )
 
     # add checkpoint config
-    checkpoint_config = {
+    checkpoint_config: dict = {
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -4362,7 +4347,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
     checkpoint = context.get_checkpoint(name="my_checkpoint")
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    batch_request = RuntimeBatchRequest(
+    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -4379,7 +4364,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
         ge_exceptions.exceptions.InvalidBatchRequestError,
         match=r"The runtime_parameters dict must have one \(and only one\) of the following keys: 'batch_data', 'query', 'path'.",
     ):
-        checkpoint.run(batch_request=batch_request)
+        checkpoint.run(batch_request=runtime_batch_request)
 
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run(
@@ -4389,14 +4374,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    batch_request = BatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_basic_data_connector",
-            "data_asset_name": "Titanic_1911",
-        }
-    )
-    runtime_batch_request = RuntimeBatchRequest(
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -4410,7 +4393,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
     # add checkpoint config
-    checkpoint_config = {
+    checkpoint_config: dict = {
         "class_name": "Checkpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -4443,7 +4426,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     checkpoint = context.get_checkpoint(name="my_checkpoint")
 
     results = checkpoint.run()
-    assert results["success"] == False
+    assert not results["success"]
     assert (
         list(results.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
@@ -4480,13 +4463,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    batch_request = BatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_basic_data_connector",
-            "data_asset_name": "Titanic_1911",
-        }
-    )
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
     runtime_batch_request = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
@@ -4585,13 +4566,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    batch_request = BatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_basic_data_connector",
-            "data_asset_name": "Titanic_1911",
-        }
-    )
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
     runtime_batch_request = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
@@ -4678,13 +4657,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # add checkpoint config
-    batch_request = BatchRequest(
-        **{
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_basic_data_connector",
-            "data_asset_name": "Titanic_1911",
-        }
-    )
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
     runtime_batch_request = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",

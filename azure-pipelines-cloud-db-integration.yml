@@ -35,7 +35,7 @@ stages:
             name: gcp_authkey
             displayName: 'Download Google Service Account'
             inputs:
-              secureFile: 'superconductive-service-acct.json'
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
 
           - script: |
@@ -51,8 +51,9 @@ stages:
             displayName: 'pytest'
             env:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GE_TEST_BIGQUERY_PROJECT: $(GE_TEST_BIGQUERY_PROJECT)
+              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+              GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
           - task: PublishTestResults@2
             inputs:
               searchFolder: junit
@@ -98,7 +99,7 @@ stages:
             name: gcp_authkey
             displayName: 'Download Google Service Account'
             inputs:
-              secureFile: 'superconductive-service-acct.json'
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
 
           - script: |
@@ -114,7 +115,7 @@ stages:
             displayName: 'pytest'
             env:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GE_TEST_BIGQUERY_PROJECT: $(GE_TEST_BIGQUERY_PROJECT)
+              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
           # The pip freeze output could be helpful to reproduce performance test results.
           - publish: pip-freeze.txt

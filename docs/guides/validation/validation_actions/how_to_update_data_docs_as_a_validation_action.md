@@ -1,70 +1,83 @@
 ---
-title: How to update Data Docs as a Validation Action
+title: How to update Data Docs after validating a Checkpoint
 ---
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 
-This guide will explain how to use a Validation Action to update Data Docs sites with new Validation Results from Validation Operator runs.
+This guide will explain how to use a Validation Action to update Data Docs sites with new Validation Results from running a Checkpoint.
 
 <Prerequisites>
 
-  - Set up a `.py` class: `great_expectations.validation_operators.validation_operators.ActionListValidationOperator` **or**
- - Set up a `.py` class: `great_expectations.validation_operators.validation_operators.WarningAndFailureExpectationSuitesValidationOperator`
  - Created at least one Expectation Suite.
- - Created at least one [Checkpoint](../checkpoints/how_to_create_a_new_checkpoint.md). You will need it in order to test that your new Validation Operator is working.
+ - Created at least one [Checkpoint](../checkpoints/how_to_create_a_new_checkpoint.md).
 
 </Prerequisites>
 
 Steps
 ------
 
-1. **Update the action_list key in your Validation Operator config.**
+1. **Update your Checkpoint**
 
-   Add the ``UpdateDataDocsAction`` action to the ``action_list`` key of the ``ActionListValidationOperator`` or ``WarningAndFailureExpectationSuitesValidationOperator`` config in your ``great_expectations.yml``. This action will update all configured Data Docs sites with the new validation from the Validation Operator run.
+   A Checkpoint's ``action_list`` contains a list of Validation Actions.
+   After the checkpoint is validated, these actions are called in order. 
+   Add a Validation Action to the end of the ``action_list`` and name it ``update_data_docs``.
+   Validation Actions are required to have a single field, ``action``. 
+   Inside of the ``action`` field, a ``class_name`` field must be defined, which determines which class will be instantiated to execute this action. 
+   Add ``class_name: UpdateDataDocsAction`` to the action.
 
    :::note Note:
-   The ``StoreValidationResultAction`` action must appear before this action, since Data Docs are rendered from Validation Results from the store.
+   The ``StoreValidationResultAction`` action must appear before  ``UpdateDataDocsAction`` action, since Data Docs are rendered from Validation Results from the store.
    :::
 
    ```yaml
-   validation_operators:
-     action_list_operator: # this is a user-selected name
-       class_name: ActionListValidationOperator
-       action_list:
-       - name: store_validation_result # this is a user-selected name
-         action:
-           class_name: StoreValidationResultAction
-       - name: update_data_docs # this is a user-selected name
-         action:
-           class_name: UpdateDataDocsAction
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
    ```
 
-2. **If you only want to update certain configured Data Docs sites**:
+2. **Specify Data Docs sites (optional)**:
 
-   - Add a ``site_names`` key to the ``UpdateDataDocsAction`` config.
+   - By default, the ``UpdateDataDocsAction`` updates all Data Docs sites found within your project. 
+     To specify which Data Docs sites to update, provide a ``site_names`` key to the ``action`` config inside your ``UpdateDataDocsAction``.
+     This field accepts a list of Data Docs site names, and when provided, will only update the specified sites.
 
    ```yaml
-   validation_operators:
-     action_list_operator: # this is a user-selected name
-       class_name: ActionListValidationOperator
-       action_list:
-       - name: store_validation_result # this is a user-selected name
-         action:
-           class_name: StoreValidationResultAction
-       - name: update_data_docs # this is a user-selected name
-         action:
-           class_name: UpdateDataDocsAction
-           site_names:
-             - team_site
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+      - name: update_data_docs
+        action:
+          class_name: UpdateDataDocsAction
+          site_names:
+            - team_site
    ```
 
 3. **Test your configuration.**
 
-   Test that your new Validation Operator Action is configured correctly:
+   Test that your new Validation Action is configured correctly:
 
-   1. Open the configuration file of a Checkpoint you created earlier and replace the value of ``validation_operator_name`` with the name of the Validation Operator you added the ``UpdateDataDocs`` action to. The details of Checkpoint configuration can be found in this [How to add validations data or suites to a Checkpoint](../../../guides/validation/checkpoints/how_to_add_validations_data_or_suites_to_a_checkpoint.md).
-   2. Run the Checkpoint and verify that no errors are thrown. You can run the Checkpoint from the CLI or using Python as explained in [How to validate your data using a Checkpoint](../how_to_validate_data_by_running_a_checkpoint.md).
-   3. Check your configured Data Docs sites to confirm that a new Validation Result has been added.
+   1. Run the Checkpoint from your code or the CLI and verify that no errors are thrown.
+   ```python
+   import great_expectations as ge
+   context = ge.get_context()
+   checkpoint_name = "your checkpoint name here"
+   context.run_checkpoint(checkpoint_name=checkpoint_name)
+   ```
+   ```bash
+   $ great_expectations checkpoint run <your checkpoint name>
+   ```
+   2. Check your Data Docs sites to confirm that a new Validation Result has been added.
 
 Additional notes
 ----------------

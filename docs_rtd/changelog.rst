@@ -8,11 +8,35 @@ Changelog
 develop
 -----------------
 
+0.14.5
+-----------------
+* [FEATURE] Delete profilers from DataContext (#4067)
+* [FEATURE] [BUGFIX] Support nullable int column types (#4044) (thanks @scnerd)
+* [FEATURE] Rule-Based Profiler Configuration and Runtime Arguments Reconciliation Logic (#4111)
+* [BUGFIX] Add default BIGQUERY_TYPES (#4096)
+* [BUGFIX] Pin `pip --upgrade` to a specific version for CI/CD pipeline (#4100)
+* [BUGFIX] Use `pip==20.2.4` for usage statistics stage of CI/CD (#4102)
+* [BUGFIX] Fix shared state issue in renderer test (#4000)
+* [BUGFIX] Missing docstrings on validator expect_ methods (#4062) (#4081)
+* [BUGFIX] Fix s3 path suffix bug on windows (#4042) (thanks @scnerd)
+* [MAINTENANCE] fix typos in changelogs (#4093)
+* [MAINTENANCE] Migration of GCP tests to new project (#4072)
+* [MAINTENANCE] Refactor Validator methods (#4095)
+* [MAINTENANCE] Fix Configuration Schema and Refactor Rule-Based Profiler; Initial Implementation of Reconciliation Logic Between Configuration and Runtime Arguments (#4088)
+* [MAINTENANCE] Minor Cleanup -- remove unnecessary default arguments from dictionary cleaner (#4110)
+
+0.14.4
+-----------------
+* [BUGFIX] Fix typing_extensions requirement to allow for proper build (#4083) (thanks @vojtakopal and @Godoy)
+* [DOCS] data docs action rewrite (#4087)
+* [DOCS] metric store how to rewrite (#4086)
+* [MAINTENANCE] Change `logger.warn` to `logger.warning` to remove deprecation warnings (#4085)
+
 0.14.3
 -----------------
 * [FEATURE] Profiler Store (#3990)
 * [FEATURE] List profilers from DataContext (#4023)
-* [FEATURE] add bigqquery json credentials kwargs for sqlalchemy connect (#4039)
+* [FEATURE] add bigquery json credentials kwargs for sqlalchemy connect (#4039)
 * [FEATURE] Get profilers from DataContext (#4033)
 * [FEATURE] Add RuleBasedProfiler to `test_yaml_config` utility (#4038)
 * [BUGFIX] Checkpoint Configurator fix to allow notebook logging suppression (#4057)

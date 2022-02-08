@@ -6,7 +6,7 @@ import pandas as pd
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.util import (
     convert_to_json_serializable,
     requires_lossy_conversion,
@@ -69,7 +69,7 @@ def test_serialization_of_spark_df(spark_session):
 
 def test_batch_request_deepcopy():
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    batch_request: BatchRequest = RuntimeBatchRequest(
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -82,7 +82,7 @@ def test_batch_request_deepcopy():
         }
     )
 
-    batch_request_copy: BatchRequest = copy.deepcopy(batch_request)
+    batch_request_copy: RuntimeBatchRequest = copy.deepcopy(batch_request)
     assert deep_filter_properties_iterable(
         properties=batch_request_copy.to_dict(),
         clean_falsy=True,
@@ -105,7 +105,7 @@ def test_checkpoint_config_deepcopy(
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    batch_request: BatchRequest = RuntimeBatchRequest(
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -444,15 +444,13 @@ def test_checkpoint_config_print(
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_and_runtime_kwargs,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
-            for key, value in expected_nested_checkpoint_config_template_and_runtime_template_name.to_raw_dict().items()
+            for key, value in expected_nested_checkpoint_config_template_and_runtime_template_name.to_dict().items()
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )
 
     substituted_config_template_and_runtime_kwargs_json_dict: dict = (
@@ -463,7 +461,6 @@ def test_checkpoint_config_print(
     assert deep_filter_properties_iterable(
         properties=substituted_config_template_and_runtime_kwargs_json_dict,
         clean_falsy=True,
-        keep_falsy_numerics=True,
     ) == deep_filter_properties_iterable(
         properties={
             key: value
@@ -471,5 +468,4 @@ def test_checkpoint_config_print(
             if key not in ["module_name", "class_name"]
         },
         clean_falsy=True,
-        keep_falsy_numerics=True,
     )

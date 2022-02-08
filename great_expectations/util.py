@@ -1055,9 +1055,15 @@ def filter_properties_dict(
     Returns:
         The (possibly) filtered properties dictionary (or None if no entries remain after filtering is performed)
     """
-    if keep_fields and delete_fields:
+    if keep_fields is None:
+        keep_fields = set()
+
+    if delete_fields is None:
+        delete_fields = set()
+
+    if keep_fields & delete_fields:
         raise ValueError(
-            "Only one of keep_fields and delete_fields filtering directives can be specified."
+            "Common keys between sets of keep_fields and delete_fields filtering directives are illegal."
         )
 
     if clean_falsy:
