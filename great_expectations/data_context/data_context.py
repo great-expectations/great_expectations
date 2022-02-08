@@ -603,9 +603,9 @@ class BaseDataContext:
             UUID to use as the data_context_id
         """
 
-        # if in ge_cloud_mode, use ge_cloud_account_id
+        # if in ge_cloud_mode, use ge_cloud_organization_id
         if self.ge_cloud_mode:
-            return self.ge_cloud_config.account_id
+            return self.ge_cloud_config.organization_id
         # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self._stores[
             self.project_config_with_variables_substituted.expectations_store_name
@@ -4019,12 +4019,14 @@ class DataContext(BaseDataContext):
         )
         shutil.copyfile(styles_template, styles_destination_path)
 
+    # TODO: deprecate ge_cloud_account_id
     @classmethod
     def _get_ge_cloud_config_dict(
         cls,
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None
     ):
         ge_cloud_base_url = (
             ge_cloud_base_url
@@ -4035,11 +4037,30 @@ class DataContext(BaseDataContext):
             )
             or "https://app.greatexpectations.io/"
         )
-        ge_cloud_account_id = ge_cloud_account_id or super()._get_global_config_value(
-            environment_variable="GE_CLOUD_ACCOUNT_ID",
-            conf_file_section="ge_cloud_config",
-            conf_file_option="account_id",
-        )
+
+        # TODO: remove if/else block when ge_cloud_account_id is deprecated.
+        if ge_cloud_account_id is not None:
+            logger.warning('The "ge_cloud_account_id" argument has been renamed "ge_cloud_organization_id" and will be '
+                           'deprecated in the next major release.')
+        else:
+            ge_cloud_account_id = super()._get_global_config_value(
+                environment_variable="GE_CLOUD_ACCOUNT_ID",
+                conf_file_section="ge_cloud_config",
+                conf_file_option="account_id",
+            )
+            logger.warning('If you have an environment variable named "GE_CLOUD_ACCOUNT_ID", please rename it to '
+                           '"GE_CLOUD_ORGANIZATION_ID". If you have a global config file with an "account_id" '
+                           'option, please rename it to "organization_id". "GE_CLOUD_ACCOUNT_ID" and "account_id" '
+                           'will be deprecated in the next major release.')
+
+        if ge_cloud_organization_id is None:
+            ge_cloud_organization_id = super()._get_global_config_value(
+                environment_variable="GE_CLOUD_ORGANIZATION_ID",
+                conf_file_section="ge_cloud_config",
+                conf_file_option="organization_id",
+            )
+
+        ge_cloud_organization_id = ge_cloud_organization_id or ge_cloud_account_id
         ge_cloud_access_token = (
             ge_cloud_access_token
             or super()._get_global_config_value(
@@ -4050,15 +4071,17 @@ class DataContext(BaseDataContext):
         )
         return {
             "base_url": ge_cloud_base_url,
-            "account_id": ge_cloud_account_id,
+            "organization_id": ge_cloud_organization_id,
             "access_token": ge_cloud_access_token,
         }
 
+    # TODO: deprecate ge_cloud_ascount_id
     def get_ge_cloud_config(
         self,
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None
     ):
         """
         Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
@@ -4068,6 +4091,7 @@ class DataContext(BaseDataContext):
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_account_id=ge_cloud_account_id,
             ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
         )
 
         missing_keys = []
@@ -4086,6 +4110,7 @@ class DataContext(BaseDataContext):
 
         return GeCloudConfig(**ge_cloud_config_dict)
 
+    # TODO: deprecate ge_cloud_account_id
     def __init__(
         self,
         context_root_dir: Optional[str] = None,
@@ -4094,6 +4119,7 @@ class DataContext(BaseDataContext):
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
     ):
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = None
@@ -4104,6 +4130,7 @@ class DataContext(BaseDataContext):
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_account_id=ge_cloud_account_id,
                 ge_cloud_access_token=ge_cloud_access_token,
+                ge_cloud_organization_id=ge_cloud_organization_id,
             )
             self._ge_cloud_config = ge_cloud_config
             # in ge_cloud_mode, if not provided, set context_root_dir to cwd
@@ -4154,7 +4181,7 @@ class DataContext(BaseDataContext):
         """
         ge_cloud_url = (
             self.ge_cloud_config.base_url
-            + f"/accounts/{self.ge_cloud_config.account_id}/data-context-configuration"
+            + f"/organizations/{self.ge_cloud_config.organization_id}/data-context-configuration"
         )
         auth_headers = {
             "Content-Type": "application/vnd.api+json",
@@ -4164,7 +4191,7 @@ class DataContext(BaseDataContext):
         response = requests.get(ge_cloud_url, headers=auth_headers)
         if response.status_code != 200:
             raise ge_exceptions.GeCloudError(
-                f"Bad request made to GE Cloud; {response.json().get('message')}"
+                f"Bad request made to GE Cloud; {response.text}"
             )
         config = response.json()
         return DataContextConfig(**config)
