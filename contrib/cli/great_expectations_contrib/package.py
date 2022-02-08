@@ -8,6 +8,7 @@ from enum import Enum
 from typing import Any, List, Optional, Type
 
 import pkg_resources
+from ruaml.yaml import YAML
 
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
@@ -17,6 +18,8 @@ from great_expectations.types import SerializableDictDot
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+yaml = YAML()
 
 
 @dataclass
@@ -121,9 +124,38 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
     def _update_attrs_with_diagnostics(
         self, diagnostics: List[ExpectationDiagnostics]
     ) -> None:
+        self._update_from_package_info("package_info.yml")
         self._update_expectations(diagnostics)
         self._update_dependencies("requirements.txt")
         self._update_contributors(diagnostics)
+
+    def _update_from_package_info(self, path: str) -> None:
+        if not os.path.exists(path):
+            logger.warning(f"Could not find package info file {path}")
+            return
+
+        with open(path) as f:
+            data: dict = yaml.load(f.read())
+
+        # Assign general attrs
+        for attr in ("package_name", "info", "description"):
+            self[attr] = data.get("general", {}).get(attr)
+
+        # Assign code owners
+        code_owners = data.get("code_owners")
+        if code_owners:
+            self.code_owners = []
+            for owner in code_owners:
+                code_owner = GitHubUser(**owner)
+                self.code_owners.append(code_owner)
+
+        # Assign domain experts
+        domain_experts = data.get("domain_experts")
+        if domain_experts:
+            self.domain_experts = []
+            for expert in domain_experts:
+                domain_expert = DomainExpert(**expert)
+                self.domain_experts.append(domain_expert)
 
     def _update_expectations(self, diagnostics: List[ExpectationDiagnostics]) -> None:
         expectations = []

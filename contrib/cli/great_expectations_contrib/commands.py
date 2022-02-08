@@ -154,9 +154,9 @@ def read_package_from_file(path: str) -> GreatExpectationsContribPackageManifest
     """
     # If config file isn't found, create a blank JSON and write to disk
     if not os.path.exists(path):
-        instance = GreatExpectationsContribPackageManifest()
-        logger.debug(f"Could not find existing package JSON; instantiated a new one")
-        return instance
+        raise FileNotFoundError(
+            "Could not find package manifest; are you sure you're in the right directory?"
+        )
 
     with open(path) as f:
         contents = f.read()
