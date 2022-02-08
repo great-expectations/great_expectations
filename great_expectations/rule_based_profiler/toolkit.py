@@ -33,7 +33,7 @@ def run_profiler(
     if profiler:
         if name or ge_cloud_id:
             raise ge_exceptions.ProfilerError(
-                "Amibiguous argument provided; you may either pass a RuleBasedProfiler or instantiate one with a name/ge_cloud_id (but not both)"
+                "Amibiguous arguments provided; you may either pass a RuleBasedProfiler or retrieve one from your ProfilerStore with a name/ge_cloud_id"
             )
     else:
         profiler = get_profiler(
