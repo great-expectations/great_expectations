@@ -79,6 +79,8 @@ edr = ExpectationDiagnostics(
             "contributors": ["@shinnyshinshin", "@abegong"],
             "requirements": [],
             "library_metadata_passed_checks": True,
+            "has_full_test_suite": False,
+            "manually_reviewed_code": False,
         }
     ),
     renderers=[

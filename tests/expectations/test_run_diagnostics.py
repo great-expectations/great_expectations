@@ -34,6 +34,8 @@ def test_expectation_self_check():
             "tags": [],
             "contributors": [],
             "requirements": [],
+            "has_full_test_suite": False,
+            "manually_reviewed_code": False,
             "library_metadata_passed_checks": False,
             "package": None,
         },
@@ -115,7 +117,26 @@ def test_expectation_self_check():
         "tests": [],
         "errors": [],
         "maturity_checklist": {
-            "beta": [],
+            "beta": [
+                {
+                    "doc_url": None,
+                    "message": "Has basic input validation and type checking",
+                    "passed": False,
+                    "sub_messages": [],
+                },
+                {
+                    "doc_url": None,
+                    "message": "Has all three statement Renderers: descriptive, prescriptive, diagnostic",
+                    "passed": False,
+                    "sub_messages": [],
+                },
+                {
+                    "doc_url": None,
+                    "message": "Has core logic that passes tests for all applicable Execution Engines and SQL dialects",
+                    "passed": True,
+                    "sub_messages": [],
+                },
+            ],
             "experimental": [
                 {
                     "doc_url": None,
@@ -142,7 +163,26 @@ def test_expectation_self_check():
                     "sub_messages": [],
                 },
             ],
-            "production": [],
+            "production": [
+                {
+                    "doc_url": None,
+                    "message": "Passes all linting checks",
+                    "passed": True,
+                    "sub_messages": [],
+                },
+                {
+                    "doc_url": None,
+                    "message": "Has a full suite of tests, as determined by project code standards",
+                    "passed": False,
+                    "sub_messages": [],
+                },
+                {
+                    "doc_url": None,
+                    "message": "Has passed a manual review by a code owner for code standards and style guides",
+                    "passed": False,
+                    "sub_messages": [],
+                },
+            ],
         },
     }
 

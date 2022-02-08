@@ -1400,11 +1400,19 @@ class Expectation(metaclass=MetaExpectation):
         for provider in execution_engine_names:
             all_true = True
             for metric_diagnostics in metric_diagnostics_list:
-                has_provider = (
-                    provider in registered_metrics[metric_diagnostics.name]["providers"]
-                )
-                if not has_provider:
-                    all_true = False
+                try:
+                    has_provider = (
+                        provider
+                        in registered_metrics[metric_diagnostics.name]["providers"]
+                    )
+                    if not has_provider:
+                        all_true = False
+                except KeyError:
+                    # https://github.com/great-expectations/great_expectations/blob/abd8f68a162eaf9c33839d2c412d8ba84f5d725b/great_expectations/expectations/core/expect_table_row_count_to_equal_other_table.py#L174-L181
+                    # expect_table_row_count_to_equal_other_table does tricky things and replaces
+                    # registered metric "table.row_count" with "table.row_count.self" and "table.row_count.other"
+                    if "table.row_count" in metric_diagnostics.name:
+                        continue
 
             execution_engines[provider] = all_true
 
@@ -1447,6 +1455,8 @@ class Expectation(metaclass=MetaExpectation):
             "contributors": [],
             "requirements": [],
             "library_metadata_passed_checks": False,
+            "has_full_test_suite": False,
+            "manually_reviewed_code": False,
         }
 
         if hasattr(self, "library_metadata"):
@@ -1457,7 +1467,19 @@ class Expectation(metaclass=MetaExpectation):
                 [key in keys for key in {"tags", "contributors"}]
             )
             has_no_forbidden_keys = all(
-                [key in {"tags", "contributors", "package"} for key in keys]
+                [
+                    key
+                    in {
+                        "tags",
+                        "contributors",
+                        "requirements",
+                        "package",
+                        "maturity",
+                        "has_full_test_suite",
+                        "manually_reviewed_code",
+                    }
+                    for key in keys
+                ]
             )
             if has_all_required_keys and has_no_forbidden_keys:
                 augmented_library_metadata["library_metadata_passed_checks"] = True
@@ -1488,6 +1510,24 @@ class Expectation(metaclass=MetaExpectation):
             ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
                 execution_engines
             )
+        )
+
+        beta_checks.append(
+            ExpectationDiagnostics._check_input_validation(self, examples)
+        )
+        beta_checks.append(ExpectationDiagnostics._check_renderer_methods(self))
+        beta_checks.append(
+            ExpectationDiagnostics._check_core_logic_for_all_applicable_execution_engines(
+                execution_engines
+            )
+        )
+
+        production_checks.append(ExpectationDiagnostics._check_linting(self))
+        production_checks.append(
+            ExpectationDiagnostics._check_full_test_suite(library_metadata)
+        )
+        production_checks.append(
+            ExpectationDiagnostics._check_manual_code_review(library_metadata)
         )
 
         return ExpectationDiagnosticMaturityMessages(

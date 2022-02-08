@@ -41,6 +41,12 @@ Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration:
     ✔ "Expect values in this column to equal the number three."
  ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Has core logic and passes tests on at least one Execution Engine
+ ✔ Has basic input validation and type checking
+   Has all three statement Renderers: descriptive, prescriptive, diagnostic
+ ✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
+ ✔ Passes all linting checks
+   Has a full suite of tests, as determined by project code standards
+   Has passed a manual review by a code owner for code standards and style guides
 """
     )
 
@@ -59,5 +65,11 @@ Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration:
    Has a docstring, including a one-line short description
  ✔ Has at least one positive and negative example case, and all test cases pass
  ✔ Has core logic and passes tests on at least one Execution Engine
+ ✔ Has basic input validation and type checking
+   Has all three statement Renderers: descriptive, prescriptive, diagnostic
+ ✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
+ ✔ Passes all linting checks
+   Has a full suite of tests, as determined by project code standards
+   Has passed a manual review by a code owner for code standards and style guides
 """
     )
