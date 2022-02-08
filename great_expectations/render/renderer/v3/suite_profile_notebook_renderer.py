@@ -178,7 +178,7 @@ You can find more information about [how to configure this profiler, including a
 
     def _add_profiler_cell(self):
         self.add_code_cell(
-            code=f"""\
+            code="""\
 profiler = UserConfigurableProfiler(
     profile_dataset=validator,
     excluded_expectations=None,
