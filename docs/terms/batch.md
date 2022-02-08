@@ -70,3 +70,22 @@ You do not generally need to access the metadata that Great Expectations uses to
 Batches are designed to be "MECE" -- mutually exclusive and collectively exhaustive partitions of Data Assets. However, in many cases the same *underlying data* could be present in multiple batches, for example if an analyst runs an analysis against an entire table of data each day, with only a fraction of new records being added.
 
 Consequently, the best way to understand what "makes a batch a batch" is the act of attending to it. The batch is the fundamental unit that Great Expectations will validate and about which it will collect metrics.
+
+
+
+## NOTES (Temporary)
+:::caution API note
+
+As part of the new modular expectations API in Great Expectations, Validation Operators are evolving into
+Checkpoints. At some point in the future Validation Operators will be fully deprecated.
+:::
+
+The `batch.validate()` method evaluates one Batch of data against one Expectation Suite and returns a dictionary of
+Validation Results. This is sufficient when you explore your data and get to know Great Expectations. When deploying
+Great Expectations in a real data pipeline, you will typically discover additional needs:
+
+* Validating a group of Batches that are logically related (for example, a Checkpoint for all staging tables).
+* Validating a Batch against several Expectation Suites (for example, run three suites to protect a machine learning
+  model `churn.critical`, `churn.warning`, `churn.drift`).
+* Doing something with the Validation Results (for example, saving them for later review, sending notifications in case
+  of failures, etc.).

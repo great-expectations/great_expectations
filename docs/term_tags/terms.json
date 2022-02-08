@@ -117,12 +117,12 @@
   "validation": {
     "term": "Validation",
     "definition": "The act of applying an Expectation Suite to a Batch.",
-    "url": "terms/validation"
+    "url": "guides/validation/validate_data_overview"
   },
-  "validation_action": {
-    "term": "Validation Action",
-    "definition": "A Python class with a run method that takes the result of validating a Batch against an Expectation Suite and does something with it",
-    "url": "terms/validation_action"
+  "action": {
+    "term": "Action",
+    "definition": "A Python class with a run method that takes a Validation Result and does something with it",
+    "url": "terms/action"
   },
   "validation_operator": {
     "term": "Validation Operator",
@@ -131,7 +131,7 @@
   },
   "validation_result": {
     "term": "Validation Result",
-    "definition": "Generated when data is Validated against an Expectation Suite.",
+    "definition": "Generated when data is Validated against an Expectation or Expectation Suite.",
     "url": "terms/validation_result"
   },
   "validation_result_store": {
