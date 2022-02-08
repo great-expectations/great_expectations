@@ -34,6 +34,10 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
 
         self._column_name_suffixes = column_name_suffixes
 
+    @property
+    def column_name_suffixes(self) -> Optional[List[str]]:
+        return self._column_name_suffixes
+
     def _get_domains(
         self,
         variables: Optional[ParameterContainer] = None,
@@ -87,7 +91,3 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         ]
 
         return domains
-
-    @property
-    def column_name_suffixes(self) -> Optional[List[str]]:
-        return self._column_name_suffixes

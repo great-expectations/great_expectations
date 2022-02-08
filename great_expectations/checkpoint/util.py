@@ -14,8 +14,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     get_batch_request_as_dict,
 )
-from great_expectations.core.util import nested_update, safe_deep_copy
-from great_expectations.util import filter_properties_dict
+from great_expectations.core.util import nested_update
 
 logger = logging.getLogger(__name__)
 
@@ -285,14 +284,6 @@ def get_substituted_batch_request(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )
 
-    # noinspection PyUnresolvedReferences
-    filter_properties_dict(
-        properties=effective_batch_request,
-        keep_fields=batch_request_class.field_names,
-        clean_nulls=False,
-        inplace=True,
-    )
-
     return batch_request_class(**effective_batch_request)
 
 
@@ -390,16 +381,9 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
     if runtime_kwargs.get("batch_request") is not None:
         batch_request = dest_config.get("batch_request") or {}
         batch_request_from_runtime_kwargs = runtime_kwargs["batch_request"]
-        batch_request_from_runtime_kwargs = safe_deep_copy(
-            data=batch_request_from_runtime_kwargs
+        batch_request_from_runtime_kwargs = get_batch_request_as_dict(
+            batch_request=batch_request_from_runtime_kwargs
         )
-        if isinstance(
-            batch_request_from_runtime_kwargs, (BatchRequest, RuntimeBatchRequest)
-        ):
-            # noinspection PyUnresolvedReferences
-            batch_request_from_runtime_kwargs = (
-                batch_request_from_runtime_kwargs.to_dict()
-            )
         updated_batch_request = nested_update(
             batch_request,
             batch_request_from_runtime_kwargs,
@@ -478,16 +462,6 @@ def get_updated_action_list(
                 base_action_list_dict.pop(other_action_name)
 
     return list(base_action_list_dict.values())
-
-
-def batch_request_contains_batch_data(
-    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
-) -> bool:
-    return (
-        batch_request is not None
-        and batch_request.get("runtime_parameters") is not None
-        and batch_request["runtime_parameters"].get("batch_data") is not None
-    )
 
 
 def batch_request_in_validations_contains_batch_data(
