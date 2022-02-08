@@ -60,6 +60,26 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         self._enforce_numeric_metric = enforce_numeric_metric
         self._replace_nan_with_zero = replace_nan_with_zero
 
+    @property
+    def metric_name(self) -> str:
+        return self._metric_name
+
+    @property
+    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
+        return self._metric_domain_kwargs
+
+    @property
+    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
+        return self._metric_value_kwargs
+
+    @property
+    def enforce_numeric_metric(self) -> Union[str, bool]:
+        return self._enforce_numeric_metric
+
+    @property
+    def replace_nan_with_zero(self) -> Union[str, bool]:
+        return self._replace_nan_with_zero
+
     def _build_parameters(
         self,
         parameter_container: ParameterContainer,
