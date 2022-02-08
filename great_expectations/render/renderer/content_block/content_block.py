@@ -43,7 +43,7 @@ class ContentBlockRenderer(Renderer):
             "exception_list_content_block", False
         )
 
-        data_docs_exception_message = f"""\
+        data_docs_exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
