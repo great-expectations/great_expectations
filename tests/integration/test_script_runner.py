@@ -727,7 +727,6 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
         print("test_name: " + integration_test_fixture.name)
         print("workdir" + workdir)
         print("base_dir" + base_dir)
-        print("test_context_dir" + test_context_dir)
         # Test Data
         data_dir = integration_test_fixture.data_dir
         if data_dir:
@@ -776,6 +775,8 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
         spec = importlib.util.spec_from_loader("mymodule", loader)
         mymodule = importlib.util.module_from_spec(spec)
         loader.exec_module(mymodule)
+    except:
+        raise
     finally:
         os.chdir(workdir)
 
