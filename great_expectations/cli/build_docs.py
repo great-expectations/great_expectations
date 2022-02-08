@@ -10,8 +10,8 @@ def build_docs(
     context: DataContext,
     usage_stats_event: str,
     site_names: Optional[List[str]] = None,
-    view: Optional[bool] = True,
-    assume_yes: Optional[bool] = False,
+    view: bool = True,
+    assume_yes: bool = False,
 ):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")

@@ -1,10 +1,9 @@
 import logging
-import os
 from typing import List, Optional
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector import (
+from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import list_gcs_keys
@@ -153,10 +152,15 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         return path_list
 
     def _get_full_file_path(
-        self,
-        path: str,
-        data_asset_name: Optional[str] = None,
+        self, path: str, data_asset_name: Optional[str] = None
     ) -> str:
         # data_asset_name isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return f"gs://{os.path.join(self._bucket_or_name, path)}"
+        template_arguments: dict = {
+            "bucket_or_name": self._bucket_or_name,
+            "path": path,
+        }
+        return self.execution_engine.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            template_arguments=template_arguments,
+        )

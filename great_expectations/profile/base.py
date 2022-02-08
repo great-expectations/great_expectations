@@ -50,7 +50,9 @@ class OrderedProfilerCardinality(OrderedEnum):
     UNIQUE = 7
 
     @classmethod
-    def get_basic_column_cardinality(cls, num_unique=0, pct_unique=0):
+    def get_basic_column_cardinality(
+        cls, num_unique=0, pct_unique=0
+    ) -> "OrderedProfilerCardinality":  # noqa: F821
         """
         Takes the number and percentage of unique values in a column and returns the column cardinality.
         If you are unexpectedly returning a cardinality of "None", ensure that you are passing in values for both
@@ -122,6 +124,14 @@ class ProfilerTypeMapping:
         "uint16",
         "uint32",
         "uint64",
+        "Int8Dtype",
+        "Int16Dtype",
+        "Int32Dtype",
+        "Int64Dtype",
+        "UInt8Dtype",
+        "UInt16Dtype",
+        "UInt32Dtype",
+        "UInt64Dtype",
         "INT",
         "INTEGER",
         "INT64",
@@ -142,6 +152,7 @@ class ProfilerTypeMapping:
         "NUMERIC",
         "FloatType",
         "DoubleType",
+        "float",
         "float_",
         "float16",
         "float32",
@@ -231,14 +242,14 @@ profiler_data_types_with_mapping = {
     "UNKNOWN": ["unknown"],
 }
 
-profiler_semantic_types = {
-    "DATETIME",
-    "NUMERIC",
-    "STRING",
-    "VALUE_SET",
-    "BOOLEAN",
-    "OTHER",
-}
+
+class ProfilerSemanticTypes(Enum):
+    DATETIME = "DATETIME"
+    NUMERIC = "NUMERIC"
+    STRING = "STRING"
+    VALUE_SET = "VALUE_SET"
+    BOOLEAN = "BOOLEAN"
+    OTHER = "OTHER"
 
 
 class Profiler(metaclass=abc.ABCMeta):

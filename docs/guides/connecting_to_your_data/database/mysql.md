@@ -72,7 +72,7 @@ Put your connection string in this template:
 ```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L19-L33
 ```
 Run this code to test your configuration.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L44
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L42
 ```
 
 </TabItem>

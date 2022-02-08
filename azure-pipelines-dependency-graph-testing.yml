@@ -1,0 +1,444 @@
+# This file is responsible for configuring the `dependency_graph` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+#
+# The pipeline is run under the following conditions:
+#   - On the develop branch whenever a commit is made to an open PR
+#
+# `dependency_graph` runs a subset of test suite, aiming to only test what's relevant to attain coverage over a given set of changes.
+# The pipeline aims to balance both performance and safety to improve the developer experience but is innately less thorough than `great_expectations`.
+#
+# Note that `dependency_graph` makes heavy use of dgtest (https://github.com/superconductive/dgtest)
+
+trigger:
+  branches:
+    include:
+    - pre_pr-* # Can be used to test both `great_expectations` and `dependency_graph` pipelines
+    - develop
+    exclude:
+    - main
+
+resources:
+  containers:
+  - container: postgres
+    image: postgres:11
+    ports:
+    - 5432:5432
+    env:
+      POSTGRES_DB: "test_ci"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+  - container: mysql
+    image: mysql:8.0.20
+    ports:
+      - 3306:3306
+    env:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: test_ci
+  - container: mssql
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    env:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
+      MSSQL_DB: test_ci
+      MSSQL_PID: Developer
+    ports:
+      - 1433:1433
+
+variables:
+  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+
+stages:
+  - stage: scope_check
+    pool:
+      vmImage: 'ubuntu-20.04'
+    jobs:
+      - job: changes
+        steps:
+          - task: ChangedFiles@1
+            name: CheckChanges
+            inputs:
+              verbose: true
+              rules: |
+                [ContribChanged]
+                contrib/**
+
+                [ExperimentalChanged]
+                contrib/experimental/**
+
+                [DocsChanged]
+                docs/**
+                tests/integration/docusaurus/**
+                tests/integration/fixtures/**
+                tests/test_sets/**
+
+                [GEChanged]
+                great_expectations/**
+                tests/**
+                /*.txt
+                /*.yml
+
+  - stage: lint
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: lint
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: 3.7
+            displayName: 'Use Python 3.7'
+
+          - script: |
+              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==22.1.0 pyupgrade==2.7.2
+              EXIT_STATUS=0
+              isort . --check-only --skip docs/ || EXIT_STATUS=$?
+              black --check --exclude docs/ . || EXIT_STATUS=$?
+              flake8 great_expectations/core || EXIT_STATUS=$?
+              pyupgrade --py3-plus || EXIT_STATUS=$?
+              exit $EXIT_STATUS
+
+  - stage: required
+    dependsOn: [scope_check, lint]
+    pool:
+      vmImage: 'ubuntu-18.04'
+
+    jobs:
+      - job: compatibility_matrix
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        variables:
+          GE_pytest_opts: '--no-sqlalchemy --no-spark'
+        strategy:
+          matrix:
+            Python36-Pandas023:
+              python.version: '3.6'
+              numpy.version: '1.14.1'
+              pandas.version: '0.23.4'
+              scipy.version: '0.19.0'
+              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+            Python37-Pandas025:
+              python.version: '3.7'
+              numpy.version: '1.14.1'
+              pandas.version: '0.25.3'
+              # numpy 1.20 and pandas 0.25.3 do not coexist happily
+              scipy.version: '0.19.0'
+              GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+            Python38-PandasLatest:
+              python.version: '3.8'
+              numpy.version: 'latest'
+              pandas.version: 'latest'
+              scipy.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - bash: pip install numpy
+            condition: eq(variables['scipy.version'], 'numpy')
+            displayName: 'Install numpy latest'
+
+          - bash: pip install pandas
+            condition: eq(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas latest'
+
+          - bash: pip install scipy
+            condition: eq(variables['scipy.version'], 'latest')
+            displayName: 'Install scipy latest'
+
+          - bash: pip install pandas==$(pandas.version)
+            condition: ne(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas - $(pandas.version)'
+
+          - script: |
+              pip install $(GE_pytest_pip_opts)
+              pip install  --requirement requirements.txt
+              # Consider fragmenting *all* integration tests into separate folder and run
+              pip install  .
+            displayName: 'Install dependencies'
+
+          - script: |
+              # Install dependencies
+              pip install pytest pytest-cov pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
+
+              # Run dgtest
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+
+            displayName: 'dgtest'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+      - job: comprehensive
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+
+        services:
+          postgres: postgres
+
+        variables:
+          GE_pytest_opts: ''
+
+        strategy:
+          matrix:
+            Python36:
+              python.version: '3.6'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+            Python37:
+              python.version: '3.7'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+            Python38:
+              python.version: '3.8'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+            Python39:
+              python.version: '3.9'
+              pandas.version: 'latest'
+              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
+
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - script: |
+              sudo apt-get install -y pandoc
+              pip install pypandoc
+            displayName: 'Install pandoc'
+
+          - bash: pip install pandas
+            condition: eq(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas latest'
+
+          - bash: pip install pandas==$(pandas.version)
+            condition: ne(variables['pandas.version'], 'latest')
+            displayName: 'Install pandas - $(pandas.version)'
+
+          - script: |
+              pip install --requirement requirements.txt
+              echo "about to run pip install $(GE_pytest_pip_opts)"
+              pip install $(GE_pytest_pip_opts)
+              pip install  .
+            displayName: 'Install dependencies'
+
+          - script: |
+              # Install dependencies
+              pip install pytest pytest-cov pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
+
+              # Run dgtest
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+
+            displayName: 'dgtest'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+  - stage: usage_stats_integration
+    dependsOn: [scope_check, lint]
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: test_usage_stats_messages
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==20.2.4
+            displayName: 'Update pip'
+
+          - script: |
+              pip install --requirement requirements-dev-base.txt
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
+          - script: |
+              pip install pytest pytest-azurepipelines
+              pytest --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+
+            displayName: 'pytest'
+
+  - stage: db_integration
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    dependsOn: [scope_check, lint]
+
+    jobs:
+      - job: mysql
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+
+        services:
+          mysql: mysql
+
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - script: |
+              printf 'Waiting for MySQL database to accept connections'
+              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+                printf '.'
+                sleep 1;
+              done;
+            displayName: Wait for database to initialise
+
+          - script: |
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+            displayName: 'Configure mysql'
+
+          - script: |
+              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              # Install dependencies
+              pip install --requirement requirements.txt
+              pip install pytest pytest-cov pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
+
+              # Run dgtest
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+                --mysql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+
+            displayName: 'dgtest'
+
+      - job: mssql
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+
+        services:
+          mssql: mssql
+
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - script: |
+              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+
+          - script: |
+              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              # Install dependencies
+              pip install pytest pytest-cov pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
+
+              # Run dgtest
+              dgtest run great_expectations --ignore 'tests/cli' --ignore 'tests/integration/usage_statistics' \
+                --mssql --no-postgresql --no-spark --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+
+            displayName: 'dgtest'
+
+  - stage: cli_integration
+    dependsOn: [scope_check, lint, usage_stats_integration, required, db_integration]
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: test_cli
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+
+        services:
+          postgres: postgres
+
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - script: |
+              sudo apt-get install -y pandoc
+              pip install pypandoc
+            displayName: 'Install pandoc'
+
+          - script: |
+              pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          - script: |
+              # Install dependencies
+              pip install pytest pytest-azurepipelines
+              git clone https://github.com/superconductive/dgtest.git
+              pip install -e dgtest
+
+              # Run dgtest
+              dgtest run great_expectations --filter 'tests/cli' --aws-integration -v
+
+            displayName: 'dgtest'

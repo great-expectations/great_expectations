@@ -2,7 +2,7 @@ import datetime
 import logging
 import uuid
 import warnings
-from collections import Callable
+from collections.abc import Callable
 from functools import partial
 from io import BytesIO
 

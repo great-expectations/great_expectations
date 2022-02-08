@@ -1,13 +1,12 @@
 from itertools import zip_longest
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.util import (
+    add_values_with_json_schema_from_list_in_params,
+    render_evaluation_parameter_string,
+)
 
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
@@ -66,7 +65,6 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         "row_condition",
         "condition_parser",
     )
-
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -78,6 +76,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
+    args_keys = ("column_list",)
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -111,6 +110,49 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         return True
 
     @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(configuration.kwargs, ["column_list"])
+
+        if params["column_list"] is None:
+            template_str = "Must have a list of columns in a specific order, but that order is not specified."
+
+        else:
+            template_str = "Must have these columns in this order: "
+            for idx in range(len(params["column_list"]) - 1):
+                template_str += "$column_list_" + str(idx) + ", "
+                params["column_list_" + str(idx)] = params["column_list"][idx]
+
+            last_idx = len(params["column_list"]) - 1
+            template_str += "$column_list_" + str(last_idx)
+            params["column_list_" + str(last_idx)] = params["column_list"][last_idx]
+
+        params_with_json_schema = {
+            "column_list": {
+                "schema": {"type": "array"},
+                "value": params.get("column_list"),
+            },
+        }
+        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
+            params=params,
+            params_with_json_schema=params_with_json_schema,
+            param_key_with_list="column_list",
+        )
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
     @renderer(renderer_type="renderer.prescriptive")
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
@@ -119,7 +161,7 @@ class ExpectTableColumnsToMatchOrderedList(TableExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)

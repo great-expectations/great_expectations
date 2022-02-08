@@ -116,8 +116,8 @@ def taxi_test_file():
         os.path.join(
             "..",
             "test_sets",
-            "taxi_yellow_trip_data_samples",
-            "yellow_trip_data_sample_2018-01.csv",
+            "taxi_yellow_tripdata_samples",
+            "yellow_tripdata_sample_2018-01.csv",
         ),
     )
 
@@ -127,7 +127,7 @@ def taxi_test_file_directory():
     return file_relative_path(
         __file__,
         os.path.join(
-            "..", "test_sets", "taxi_yellow_trip_data_samples", "first_3_files/"
+            "..", "test_sets", "taxi_yellow_tripdata_samples", "first_3_files/"
         ),
     )
 
@@ -1014,14 +1014,45 @@ def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_q
     ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
-    assert len(batch_list) == 1
+    assert len(batch_list[0].head().columns) == 11
+
+
+def test_batch_identifiers_and_batch_identifiers_success_no_temp_table(
+    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
+):
+    # interacting with the database using query
+    test_query: str = "SELECT * FROM table_full__I"
+    batch_identifiers = {
+        "pipeline_stage_name": "core_processing",
+        "airflow_run_id": 1234567890,
+        "custom_key_0": "custom_value_0",
+    }
+
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "TEMP_QUERY_DATA_ASSET",
+        "runtime_parameters": {
+            "query": test_query,
+        },
+        "batch_identifiers": batch_identifiers,
+        "batch_spec_passthrough": {"create_temp_table": False},
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_list[0].head().columns) == 11
 
 
 def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mostly_legal_keys(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     # interacting with the database using query
-    test_query: str = "SELECT * FROM table_full__I;"
+    test_query: str = "SELECT * FROM table_full__I"
     batch_identifiers = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,

@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as ge
+from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
@@ -13,7 +14,10 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 
 
-def test_get_and_save_expectation_suite(tmp_path_factory):
+def test_get_and_save_expectation_suite(
+    tmp_path_factory, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
     directory_name = str(
         tmp_path_factory.mktemp("test_get_and_save_expectation_config")
     )
@@ -56,6 +60,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
+        data_context=context,
         meta={"great_expectations_version": ge.__version__},
     )
 
@@ -63,7 +68,9 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
 
     df.save_expectation_suite(directory_name + "/temp1.json")
     with open(directory_name + "/temp1.json") as infile:
-        loaded_config = expectationSuiteSchema.loads(infile.read())
+        loaded_config_dict: dict = expectationSuiteSchema.loads(infile.read())
+        loaded_config = ExpectationSuite(**loaded_config_dict, data_context=context)
+
     assert output_config == loaded_config
 
     ### Second test set ###
@@ -93,6 +100,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
+        data_context=context,
         meta={"great_expectations_version": ge.__version__},
     )
 
@@ -101,7 +109,9 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         directory_name + "/temp2.json", discard_failed_expectations=False
     )
     with open(directory_name + "/temp2.json") as infile:
-        loaded_suite = expectationSuiteSchema.loads(infile.read())
+        loaded_suite_dict: dict = expectationSuiteSchema.loads(infile.read())
+        loaded_suite = ExpectationSuite(**loaded_suite_dict, data_context=context)
+
     assert output_config == loaded_suite
 
     ### Third test set ###
@@ -131,6 +141,7 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         ],
         expectation_suite_name="default",
         data_asset_type="Dataset",
+        data_context=context,
         meta={"great_expectations_version": ge.__version__},
     )
     assert output_config == df.get_expectation_suite(
@@ -145,7 +156,8 @@ def test_get_and_save_expectation_suite(tmp_path_factory):
         discard_catch_exceptions_kwargs=False,
     )
     with open(directory_name + "/temp3.json") as infile:
-        loaded_suite = expectationSuiteSchema.loads(infile.read())
+        loaded_suite_dict: dict = expectationSuiteSchema.loads(infile.read())
+        loaded_suite = ExpectationSuite(**loaded_suite_dict, data_context=context)
     assert output_config == loaded_suite
 
 
@@ -172,7 +184,7 @@ def test_expectation_meta():
     # This should raise an error because meta isn't serializable.
     with pytest.raises(InvalidExpectationConfigurationError) as exc:
         df.expect_column_values_to_be_increasing(
-            "x", meta={"unserializable_content": np.complex(0, 0)}
+            "x", meta={"unserializable_content": complex(0, 0)}
         )
     assert "which cannot be serialized to json" in exc.value.message
 
@@ -243,16 +255,13 @@ def test_test_column_map_expectation_function():
         is_odd, column="y", result_format="BOOLEAN_ONLY", include_config=False
     ) == ExpectationValidationResult(success=False)
 
-    assert (
-        asset.test_column_map_expectation_function(
-            is_odd,
-            column="y",
-            result_format="BOOLEAN_ONLY",
-            mostly=0.7,
-            include_config=False,
-        )
-        == ExpectationValidationResult(success=True)
-    )
+    assert asset.test_column_map_expectation_function(
+        is_odd,
+        column="y",
+        result_format="BOOLEAN_ONLY",
+        mostly=0.7,
+        include_config=False,
+    ) == ExpectationValidationResult(success=True)
 
 
 def test_test_column_aggregate_expectation_function():
@@ -310,27 +319,21 @@ def test_test_column_aggregate_expectation_function():
         success=True,
     )
 
-    assert (
-        asset.test_column_aggregate_expectation_function(
-            expect_second_value_to_be,
-            "y",
-            value=3,
-            result_format="BOOLEAN_ONLY",
-            include_config=False,
-        )
-        == ExpectationValidationResult(success=False)
-    )
+    assert asset.test_column_aggregate_expectation_function(
+        expect_second_value_to_be,
+        "y",
+        value=3,
+        result_format="BOOLEAN_ONLY",
+        include_config=False,
+    ) == ExpectationValidationResult(success=False)
 
-    assert (
-        asset.test_column_aggregate_expectation_function(
-            expect_second_value_to_be,
-            "y",
-            2,
-            result_format="BOOLEAN_ONLY",
-            include_config=False,
-        )
-        == ExpectationValidationResult(success=True)
-    )
+    assert asset.test_column_aggregate_expectation_function(
+        expect_second_value_to_be,
+        "y",
+        2,
+        result_format="BOOLEAN_ONLY",
+        include_config=False,
+    ) == ExpectationValidationResult(success=True)
 
 
 def test_format_map_output():
@@ -351,18 +354,15 @@ def test_format_map_output():
     unexpected_list = []
     unexpected_index_list = []
 
-    assert (
-        df._format_map_output(
-            "BOOLEAN_ONLY",
-            success,
-            element_count,
-            nonnull_count,
-            len(unexpected_list),
-            unexpected_list,
-            unexpected_index_list,
-        )
-        == {"success": True}
-    )
+    assert df._format_map_output(
+        "BOOLEAN_ONLY",
+        success,
+        element_count,
+        nonnull_count,
+        len(unexpected_list),
+        unexpected_list,
+        unexpected_index_list,
+    ) == {"success": True}
 
     assert df._format_map_output(
         "BASIC",
@@ -447,18 +447,15 @@ def test_format_map_output():
     unexpected_list = []
     unexpected_index_list = []
 
-    assert (
-        df._format_map_output(
-            "BOOLEAN_ONLY",
-            success,
-            element_count,
-            nonnull_count,
-            len(unexpected_list),
-            unexpected_list,
-            unexpected_index_list,
-        )
-        == {"success": True}
-    )
+    assert df._format_map_output(
+        "BOOLEAN_ONLY",
+        success,
+        element_count,
+        nonnull_count,
+        len(unexpected_list),
+        unexpected_list,
+        unexpected_index_list,
+    ) == {"success": True}
 
     assert df._format_map_output(
         "BASIC",
@@ -543,18 +540,15 @@ def test_format_map_output():
     unexpected_list = []
     unexpected_index_list = []
 
-    assert (
-        df._format_map_output(
-            "BOOLEAN_ONLY",
-            success,
-            element_count,
-            nonnull_count,
-            len(unexpected_list),
-            unexpected_list,
-            unexpected_index_list,
-        )
-        == {"success": False}
-    )
+    assert df._format_map_output(
+        "BOOLEAN_ONLY",
+        success,
+        element_count,
+        nonnull_count,
+        len(unexpected_list),
+        unexpected_list,
+        unexpected_index_list,
+    ) == {"success": False}
 
     assert df._format_map_output(
         "BASIC",

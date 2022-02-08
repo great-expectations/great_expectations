@@ -10,6 +10,7 @@ from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.templates import YAMLToString
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
@@ -45,18 +46,10 @@ class SupportedDatabaseBackends(enum.Enum):
 @click.pass_context
 def datasource(ctx):
     """Datasource operations"""
-    directory: str = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context: DataContext = toolkit.load_data_context_with_error_handling(
-        directory=directory,
-        from_cli_upgrade_command=False,
-    )
-    # TODO consider moving this all the way up in to the CLIState constructor
-    ctx.obj.data_context = context
+    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
     usage_stats_prefix = f"cli.datasource.{ctx.invoked_subcommand}"
-    toolkit.send_usage_message(
-        data_context=context,
+    send_usage_message(
+        data_context=ctx.obj.data_context,
         event=f"{usage_stats_prefix}.begin",
         success=True,
     )
@@ -86,7 +79,7 @@ def datasource_new(ctx, name, jupyter):
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
@@ -114,13 +107,21 @@ def delete_datasource(ctx, datasource):
         context.delete_datasource(datasource)
     except ValueError:
         cli_message(f"<red>Datasource {datasource} could not be found.</red>")
-        toolkit.send_usage_message(context, event=usage_event_end, success=False)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=False,
+        )
         sys.exit(1)
     try:
         context.get_datasource(datasource)
     except ValueError:
         cli_message("<green>{}</green>".format("Datasource deleted successfully."))
-        toolkit.send_usage_message(context, event=usage_event_end, success=True)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
+        )
         sys.exit(0)
 
 
@@ -142,12 +143,14 @@ def datasource_list(ctx):
                 }
             )
 
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=True
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
@@ -190,6 +193,8 @@ What data would you like Great Expectations to connect to?
             return None
         selected_database = _prompt_user_for_database_backend()
         helper = _get_sql_yaml_helper_class(selected_database, datasource_name)
+    else:
+        helper = None
 
     helper.send_backend_choice_usage_message(context)
     if not helper.verify_libraries_installed():
@@ -200,14 +205,22 @@ What data would you like Great Expectations to connect to?
         cli_message(
             f"To continue editing this Datasource, run <green>jupyter notebook {notebook_path}</green>"
         )
-        toolkit.send_usage_message(context, event=usage_event_end, success=True)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
+        )
         return None
 
     if notebook_path:
         cli_message(
             """<green>Because you requested to create a new Datasource, we'll open a notebook for you now to complete it!</green>\n\n"""
         )
-        toolkit.send_usage_message(context, event=usage_event_end, success=True)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
+        )
         toolkit.launch_jupyter_notebook(notebook_path)
 
 
@@ -247,7 +260,7 @@ class BaseDatasourceNewYamlHelper:
         raise NotImplementedError
 
     def send_backend_choice_usage_message(self, context: DataContext) -> None:
-        toolkit.send_usage_message(
+        send_usage_message(
             data_context=context,
             event="cli.new_ds_choice",
             event_payload={
@@ -381,6 +394,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         username: str = "YOUR_USERNAME",
         password: str = "YOUR_PASSWORD",
         database: str = "YOUR_DATABASE",
+        schema_name: str = "YOUR_SCHEMA",
     ):
         super().__init__(
             datasource_type=DatasourceTypes.SQL,
@@ -393,6 +407,7 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
         self.username = username
         self.password = password
         self.database = database
+        self.schema_name = schema_name
 
     def credentials_snippet(self) -> str:
         return f'''\
@@ -400,7 +415,8 @@ host = "{self.host}"
 port = "{self.port}"
 username = "{self.username}"
 password = "{self.password}"
-database = "{self.database}"'''
+database = "{self.database}"
+schema_name = "{self.schema_name}"'''
 
     def yaml_snippet(self) -> str:
         yaml_str = '''f"""
@@ -421,7 +437,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
         return yaml_str
 
     def _yaml_innards(self) -> str:
@@ -432,7 +448,8 @@ data_connectors:
     port: '{port}'
     username: {username}
     password: {password}
-    database: {database}"""
+    database: {database}
+    schema_name: {schema_name}"""
 
     def get_notebook_renderer(self, context) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
@@ -479,7 +496,6 @@ class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
             },
             driver="postgresql",
             port=5432,
-            database="postgres",
         )
 
     def verify_libraries_installed(self) -> bool:
@@ -576,10 +592,10 @@ class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
         snippet = f"""\
 host = "{self.host}"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "{self.username}"
-database = ""  # The database name (optional -- leave blank for none)
-schema = ""  # The schema name (optional -- leave blank for none)
-warehouse = ""  # The warehouse name (optional -- leave blank for none)
-role = ""  # The role name (optional -- leave blank for none)"""
+database = ""  # The database name
+schema = ""  # The schema name
+warehouse = ""  # The warehouse name
+role = ""  # The role name"""
 
         if self.auth_method == SnowflakeAuthMethod.USER_AND_PASSWORD:
             snippet += '''
@@ -709,7 +725,7 @@ What are you processing your files with?
 
 def _get_files_helper(
     selection: str, context_root_dir: str, datasource_name: Optional[str] = None
-) -> Union[PandasYamlHelper, SparkYamlHelper,]:
+) -> Union[PandasYamlHelper, SparkYamlHelper]:
     helper_class_by_selection = {
         "1": PandasYamlHelper,
         "2": SparkYamlHelper,

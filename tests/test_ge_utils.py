@@ -1,12 +1,14 @@
 import copy
+import logging
 import os
 
 import pytest
 
 import great_expectations as ge
 from great_expectations.core.util import nested_update
-from great_expectations.dataset.util import check_sql_engine_dialect
 from great_expectations.util import (
+    convert_json_string_to_be_python_compliant,
+    deep_filter_properties_iterable,
     filter_properties_dict,
     get_currently_executing_function_call_arguments,
     hyphen,
@@ -163,8 +165,8 @@ def test_validate_invalid_parameters(
         ge.validate(dataset)
 
 
-def test_gen_directory_tree_str(tmp_path_factory):
-    project_dir = str(tmp_path_factory.mktemp("project_dir"))
+def test_gen_directory_tree_str(tmpdir):
+    project_dir = str(tmpdir.mkdir("project_dir"))
     os.mkdir(os.path.join(project_dir, "BBB"))
     with open(os.path.join(project_dir, "BBB", "bbb.txt"), "w") as f:
         f.write("hello")
@@ -173,13 +175,14 @@ def test_gen_directory_tree_str(tmp_path_factory):
 
     os.mkdir(os.path.join(project_dir, "AAA"))
 
-    print(ge.util.gen_directory_tree_str(project_dir))
+    res = ge.util.gen_directory_tree_str(project_dir)
+    print(res)
 
     # Note: files and directories are sorteds alphabetically, so that this method can be used for testing.
     assert (
-        ge.util.gen_directory_tree_str(project_dir)
+        res
         == """\
-project_dir0/
+project_dir/
     AAA/
     BBB/
         aaa.txt
@@ -245,6 +248,76 @@ def test_linter_leaves_clean_code():
     assert lint_code(code) == "foo = [1, 2, 3]\n"
 
 
+def test_convert_json_string_to_be_python_compliant_null_replacement(caplog):
+    text = """
+    "ge_cloud_id": null,
+    "expectation_context": {"description": null},
+    """
+    expected = """
+    "ge_cloud_id": None,
+    "expectation_context": {"description": None},
+    """
+
+    with caplog.at_level(logging.INFO):
+        res = convert_json_string_to_be_python_compliant(text)
+
+    assert res == expected
+    assert (
+        "Replaced 'ge_cloud_id: null' with 'ge_cloud_id: None' before writing to file"
+        in caplog.text
+    )
+    assert (
+        "Replaced 'description: null' with 'description: None' before writing to file"
+        in caplog.text
+    )
+
+
+def test_convert_json_string_to_be_python_compliant_bool_replacement(caplog):
+    text = """
+    "meta": {},
+    "kwargs": {
+        "column": "input_date",
+        "max_value": "2027-09-03 00:00:00",
+        "min_value": "2015-01-01 00:00:00",
+        "parse_strings_as_datetimes": true,
+        "catch_exceptions": false
+    },
+    """
+    expected = """
+    "meta": {},
+    "kwargs": {
+        "column": "input_date",
+        "max_value": "2027-09-03 00:00:00",
+        "min_value": "2015-01-01 00:00:00",
+        "parse_strings_as_datetimes": True,
+        "catch_exceptions": False
+    },
+    """
+
+    with caplog.at_level(logging.INFO):
+        res = convert_json_string_to_be_python_compliant(text)
+
+    assert res == expected
+    assert (
+        "Replaced '\"parse_strings_as_datetimes\": true' with '\"parse_strings_as_datetimes\": True' before writing to file"
+        in caplog.text
+    )
+    assert (
+        "Replaced '\"catch_exceptions\": false' with '\"catch_exceptions\": False' before writing to file"
+        in caplog.text
+    )
+
+
+def test_convert_json_string_to_be_python_compliant_no_replacement():
+    text = """
+    "kwargs": {"max_value": 10000, "min_value": 10000},
+    "expectation_type": "expect_table_row_count_to_be_between",
+    "meta": {},
+    """
+    res = convert_json_string_to_be_python_compliant(text)
+    assert res == text
+
+
 def test_get_currently_executing_function_call_arguments(a=None, *args, **kwargs):
     if a is None:
         test_get_currently_executing_function_call_arguments(0, 1, 2, 3, b=5)
@@ -281,12 +354,18 @@ def test_filter_properties_dict():
         # noinspection PyUnusedLocal
         d0_end: dict = filter_properties_dict(
             properties=d0_begin,
-            keep_fields=["string"],
-            delete_fields=["integer_zero", "scientific_notation_floating_point_number"],
+            keep_fields={
+                "string",
+            },
+            delete_fields={
+                "integer_zero",
+                "scientific_notation_floating_point_number",
+                "string",
+            },
             clean_falsy=True,
         )
     d0_end: dict = filter_properties_dict(properties=d0_begin, clean_falsy=True)
-    d0_end_expected = copy.deepcopy(d0_begin)
+    d0_end_expected: dict = copy.deepcopy(d0_begin)
     d0_end_expected.pop("null")
     assert d0_end == d0_end_expected
 
@@ -295,7 +374,7 @@ def test_filter_properties_dict():
         properties=d1_begin,
         clean_nulls=False,
     )
-    d1_end_expected = copy.deepcopy(d1_begin)
+    d1_end_expected: dict = d1_begin
     assert d1_end == d1_end_expected
 
     d2_begin: dict = copy.deepcopy(source_dict)
@@ -304,17 +383,19 @@ def test_filter_properties_dict():
         clean_nulls=True,
         clean_falsy=False,
     )
-    d2_end_expected = copy.deepcopy(d2_begin)
+    d2_end_expected: dict = copy.deepcopy(d2_begin)
     d2_end_expected.pop("null")
     assert d2_end == d2_end_expected
 
     d3_begin: dict = copy.deepcopy(source_dict)
     d3_end: dict = filter_properties_dict(
         properties=d3_begin,
-        keep_fields=["null"],
+        keep_fields={
+            "null",
+        },
         clean_falsy=True,
     )
-    d3_end_expected = {"null": None}
+    d3_end_expected: dict = {"null": None}
     assert d3_end == d3_end_expected
 
     d4_begin: dict = copy.deepcopy(source_dict)
@@ -323,7 +404,7 @@ def test_filter_properties_dict():
         clean_falsy=True,
         keep_falsy_numerics=False,
     )
-    d4_end_expected = copy.deepcopy(d4_begin)
+    d4_end_expected: dict = copy.deepcopy(d4_begin)
     d4_end_expected.pop("integer_zero")
     d4_end_expected.pop("null")
     assert d4_end == d4_end_expected
@@ -331,10 +412,13 @@ def test_filter_properties_dict():
     d5_begin: dict = copy.deepcopy(source_dict)
     d5_end: dict = filter_properties_dict(
         properties=d5_begin,
-        keep_fields=["integer_zero", "scientific_notation_floating_point_number"],
+        keep_fields={
+            "integer_zero",
+            "scientific_notation_floating_point_number",
+        },
         clean_falsy=True,
     )
-    d5_end_expected = {
+    d5_end_expected: dict = {
         "integer_zero": 0,
         "scientific_notation_floating_point_number": 9.8e1,
     }
@@ -343,24 +427,139 @@ def test_filter_properties_dict():
     d6_begin: dict = copy.deepcopy(source_dict)
     d6_end: dict = filter_properties_dict(
         properties=d6_begin,
-        delete_fields=["integer_zero", "scientific_notation_floating_point_number"],
+        delete_fields={
+            "integer_zero",
+            "scientific_notation_floating_point_number",
+        },
         clean_falsy=True,
     )
-    d6_end_expected = {"string": "xyz_0", "integer_one": 1}
+    d6_end_expected: dict = {"string": "xyz_0", "integer_one": 1}
     assert d6_end == d6_end_expected
 
     d7_begin: dict = copy.deepcopy(source_dict)
     filter_properties_dict(
         properties=d7_begin,
-        delete_fields=["integer_zero", "scientific_notation_floating_point_number"],
+        delete_fields={
+            "integer_zero",
+            "scientific_notation_floating_point_number",
+        },
         clean_falsy=True,
         inplace=True,
     )
-    d7_end = copy.deepcopy(d7_begin)
-    d7_end_expected = {"string": "xyz_0", "integer_one": 1}
+    d7_end: dict = d7_begin
+    d7_end_expected: dict = {"string": "xyz_0", "integer_one": 1}
     assert d7_end == d7_end_expected
 
 
+def test_deep_filter_properties_iterable():
+    source_dict: dict = {
+        "integer_zero": 0,
+        "null": None,
+        "string": "xyz_0",
+        "integer_one": 1,
+        "scientific_notation_floating_point_number": 9.8e1,
+        "empty_top_level_dictionary": {},
+        "empty_top_level_list": [],
+        "empty_top_level_set": set(),
+        "non_empty_top_level_set": {
+            0,
+            1,
+            2,
+            "a",
+            "b",
+            "c",
+        },
+        "non_empty_top_level_dictionary": {
+            "empty_1st_level_list": [],
+            "empty_1st_level_set": set(),
+            "non_empty_1st_level_set": {
+                "empty_2nd_level_list": [],
+                "non_empty_2nd_level_list": [
+                    0,
+                    1,
+                    2,
+                    "a",
+                    "b",
+                    "c",
+                ],
+                "non_empty_2nd_level_dictionary": {
+                    "integer_zero": 0,
+                    "null": None,
+                    "string": "xyz_0",
+                    "integer_one": 1,
+                    "scientific_notation_floating_point_number": 9.8e1,
+                },
+                "empty_2nd_level_dictionary": {},
+            },
+        },
+    }
+
+    d0_begin: dict = copy.deepcopy(source_dict)
+    deep_filter_properties_iterable(
+        properties=d0_begin,
+        clean_falsy=True,
+        inplace=True,
+    )
+    d0_end: dict = d0_begin
+    d0_end_expected: dict = {
+        "integer_zero": 0,
+        "string": "xyz_0",
+        "integer_one": 1,
+        "scientific_notation_floating_point_number": 98.0,
+        "non_empty_top_level_set": {
+            0,
+            1,
+            2,
+            "a",
+            "b",
+            "c",
+        },
+        "non_empty_top_level_dictionary": {
+            "non_empty_1st_level_set": {
+                "non_empty_2nd_level_list": [0, 1, 2, "a", "b", "c"],
+                "non_empty_2nd_level_dictionary": {
+                    "integer_zero": 0,
+                    "string": "xyz_0",
+                    "integer_one": 1,
+                    "scientific_notation_floating_point_number": 98.0,
+                },
+            }
+        },
+    }
+    assert d0_end == d0_end_expected
+
+    d1_begin: dict = copy.deepcopy(source_dict)
+    d1_end: dict = deep_filter_properties_iterable(
+        properties=d1_begin,
+        clean_falsy=True,
+        keep_falsy_numerics=False,
+    )
+    d1_end_expected: dict = {
+        "string": "xyz_0",
+        "integer_one": 1,
+        "scientific_notation_floating_point_number": 98.0,
+        "non_empty_top_level_set": {
+            0,
+            1,
+            2,
+            "a",
+            "b",
+            "c",
+        },
+        "non_empty_top_level_dictionary": {
+            "non_empty_1st_level_set": {
+                "non_empty_2nd_level_list": [0, 1, 2, "a", "b", "c"],
+                "non_empty_2nd_level_dictionary": {
+                    "string": "xyz_0",
+                    "integer_one": 1,
+                    "scientific_notation_floating_point_number": 98.0,
+                },
+            }
+        },
+    }
+    assert d1_end == d1_end_expected
+
+
 def test_hyphen():
-    input = "suite_validation_result"
-    assert hyphen(input) == "suite-validation-result"
+    txt: str = "suite_validation_result"
+    assert hyphen(txt=txt) == "suite-validation-result"

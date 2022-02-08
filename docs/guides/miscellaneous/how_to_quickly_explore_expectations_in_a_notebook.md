@@ -82,7 +82,7 @@ my_df[my_df.Sex=="male"].head()
 # etc., etc. 
 ```
 
-In addition, `my_df` has access to a wide array of Expectations. You can see the full list [here](../../reference/glossary_of_expectations.md). By convention, every Expectation method name starts with the name `expect_...`, so you can quickly access the full list with tab-based autocomplete:
+In addition, `my_df` has access to a wide array of Expectations. You can see the full list [in the Expectation Gallery](https://greatexpectations.io/expectations). By convention, every Expectation method name starts with the name `expect_...`, so you can quickly access the full list with tab-based autocomplete:
 
 ![image](../images/expectation_autocomplete.gif)
 
@@ -225,4 +225,4 @@ As a general rule,
 
 ## Additional resources
 
-- [Glossary of Expectations](../../reference/glossary_of_expectations.md)
+- [Expectation Gallery](https://greatexpectations.io/expectations)

@@ -21,7 +21,7 @@ Steps
 
 1. **Configure the** ``config_variables.yml`` **file with your Azure Storage credentials**
 
-    We recommend that Azure Storage credentials be stored in the  ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control.  The following lines add Azure Storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](../../setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables.md).
+    We recommend that Azure Storage credentials be stored in the ``config_variables.yml`` file, which is located in the ``uncommitted/`` folder by default, and is not part of source control. The following lines add Azure Storage credentials under the key ``AZURE_STORAGE_CONNECTION_STRING``. Additional options for configuring the ``config_variables.yml`` file or additional environment variables can be found [here](../../setup/configuring_data_contexts/how_to_configure_credentials.md).
 
     ```yaml
     AZURE_STORAGE_CONNECTION_STRING: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
@@ -82,12 +82,12 @@ Steps
     ```
 
 
-5. **Confirm that the new Validations store has been added by running** ``great_expectations --v3-api store list``.
+5. **Confirm that the new Validations store has been added by running** ``great_expectations store list``.
 
     Notice the output contains two Validation stores: the original ``validations_store`` on the local filesystem and the ``validations_AZ_store`` we just configured.  This is ok, since Great Expectations will look for Validations in Azure Blob as long as we set the ``validations_store_name`` variable to ``validations_AZ_store``, and the config for ``validations_store`` can be removed if you would like.
 
     ```bash
-    great_expectations --v3-api store list
+    great_expectations store list
 
      - name: validations_store
        class_name: ValidationsStore

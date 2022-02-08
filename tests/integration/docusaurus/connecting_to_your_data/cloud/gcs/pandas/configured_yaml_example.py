@@ -1,7 +1,9 @@
+from typing import List
+
 from ruamel import yaml
 
 import great_expectations as ge
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest
 
 context = ge.get_context()
 
@@ -15,22 +17,20 @@ data_connectors:
         class_name: ConfiguredAssetGCSDataConnector
         bucket_or_name: <YOUR_GCS_BUCKET_HERE>
         prefix: <BUCKET_PATH_TO_DATA>
-        assets:
-            taxi_data:
         default_regex:
-            pattern: data/taxi_yellow_trip_data_samples/yellow_trip_data_sample_(\\d{{4}})-(\\d{{2}})\\.csv
+            pattern: data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(\\d{{4}})-(\\d{{2}})\\.csv
             group_names:
                 - year
                 - month
+        assets:
+            taxi_data:
 """
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
+datasource_yaml = datasource_yaml.replace("<YOUR_GCS_BUCKET_HERE>", "test_docs_data")
 datasource_yaml = datasource_yaml.replace(
-    "<YOUR_GCS_BUCKET_HERE>", "superconductive-integration-tests"
-)
-datasource_yaml = datasource_yaml.replace(
-    "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_trip_data_samples/"
+    "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
 )
 
 context.test_yaml_config(datasource_yaml)
@@ -65,3 +65,9 @@ assert set(
         "configured_data_connector_name"
     ]
 ) == {"taxi_data"}
+
+batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
+assert len(batch_list) == 3
+
+batch: Batch = batch_list[0]
+assert batch.data.dataframe.shape[0] == 10000

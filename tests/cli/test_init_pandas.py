@@ -103,19 +103,13 @@ def test_cli_init_on_new_project(
         .ge_store_backend_id
         Titanic/
             warning.json
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/
             styles/
                 data_docs_custom_styles.css
             views/
+    profilers/
     uncommitted/
         config_variables.yml
         data_docs/
@@ -651,13 +645,6 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         .ge_store_backend_id
         Titanic/
             warning.json
-    notebooks/
-        pandas/
-            validation_playground.ipynb
-        spark/
-            validation_playground.ipynb
-        sql/
-            validation_playground.ipynb
     plugins/
         custom_data_docs/
             renderers/

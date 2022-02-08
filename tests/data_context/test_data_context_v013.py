@@ -2,7 +2,6 @@ import datetime
 import os
 import re
 
-import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
@@ -11,7 +10,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
-from great_expectations.exceptions import BatchSpecError, ExecutionEngineError
+from great_expectations.exceptions import ExecutionEngineError
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,

@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import List, Optional
 
 try:
@@ -9,10 +8,10 @@ except ImportError:
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.data_connector import (
+from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.util import list_s3_keys
 from great_expectations.execution_engine import ExecutionEngine
 
@@ -44,9 +43,9 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
-        prefix: Optional[str] = "",
-        delimiter: Optional[str] = "/",
-        max_keys: Optional[int] = 1000,
+        prefix: str = "",
+        delimiter: str = "/",
+        max_keys: int = 1000,
         boto3_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
@@ -79,7 +78,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._bucket = bucket
-        self._prefix = os.path.join(prefix, "")
+        self._prefix = self.sanitize_prefix_for_s3(prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 
@@ -92,6 +91,26 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             raise ImportError(
                 "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."
             )
+
+    @staticmethod
+    def sanitize_prefix_for_s3(text: str) -> str:
+        """
+        Takes in a given user-prefix and cleans it to work with file-system traversal methods
+        (i.e. add '/' to the end of a string meant to represent a directory)
+
+        Customized for S3 paths, ignoring the path separator used by the host OS
+        """
+        text = text.strip()
+        if not text:
+            return text
+
+        path_parts = text.split("/")
+        if not path_parts:  # Empty prefix
+            return text
+        elif "." in path_parts[-1]:  # File, not folder
+            return text
+        else:  # Folder, should have trailing /
+            return text.rstrip("/") + "/"
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
         """
@@ -136,11 +155,16 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         ]
         return path_list
 
-    def _get_full_file_path(
-        self,
-        path: str,
-        data_asset_name: Optional[str] = None,
+    def _get_full_file_path_for_asset(
+        self, path: str, asset: Optional[Asset] = None
     ) -> str:
-        # data_asset_name isn't used in this method.
+        # asset isn't used in this method.
         # It's only kept for compatibility with parent methods.
-        return f"s3a://{os.path.join(self._bucket, path)}"
+        template_arguments: dict = {
+            "bucket": self._bucket,
+            "path": path,
+        }
+        return self.execution_engine.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            template_arguments=template_arguments,
+        )

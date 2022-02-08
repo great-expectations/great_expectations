@@ -7,19 +7,17 @@ This guide is organized by nouns (datasource, suite, docs) then verbs (new, list
 
 ## Basics
 
-You can get a list of Great Expectations commands available to you by typing `great_expectations --v3-api --help`.
+You can get a list of Great Expectations commands available to you by typing `great_expectations --help`.
 Each noun command and each verb sub-command has a description, and should help you find the thing you need.
 
-Please note that the V3 (Batch Request) API can be accessed by adding the `--v3-api` flag after `great_expectations`. Please see our how-to guides and use the `--help` flag for more complete descriptions of the new functionality.
-
 :::info [OPTIONAL_TEXT_HERE]
-All Great Expectations commands have help text which you can access by adding `--help` to the end of a command. For example, by running `great_expectations --v3-api suite new --help` you'll see help output for that specific command.
+All Great Expectations commands have help text which you can access by adding `--help` to the end of a command. For example, by running `great_expectations suite new --help` you'll see help output for that specific command.
 :::
 
-By running `great_expectations --v3-api --help`, you will see all top-level commands that are available in the CLI:
+By running `great_expectations --help`, you will see all top-level commands that are available in the CLI:
 
 ```bash
-$ great_expectations --v3-api --help
+$ great_expectations --help
 Usage: great_expectations [OPTIONS] COMMAND [ARGS]...
 
   Welcome to the great_expectations CLI!
@@ -32,8 +30,8 @@ Usage: great_expectations [OPTIONS] COMMAND [ARGS]...
 
 Options:
   --version                Show the version and exit.
-  --v2-api / --v3-api      Default to v2 (Batch Kwargs) API. Use --v3-api for
-                           v3 (Batch Request) API
+  --v3-api / --v2-api      Default to v3 (Batch Request) API. Use --v2-api for
+                           v2 (Batch Kwargs) API
 
   -v, --verbose            Set great_expectations to use verbose output.
   -c, --config TEXT        Path to great_expectations configuration file
@@ -56,7 +54,7 @@ Commands:
 You can further explore available options and commands with the `--help` flag, for example:
 
 ```bash
-$ great_expectations --v3-api datasource --help
+$ great_expectations datasource --help
 Using v3 (Batch Request) API
 Usage: great_expectations datasource [OPTIONS] COMMAND [ARGS]...
 

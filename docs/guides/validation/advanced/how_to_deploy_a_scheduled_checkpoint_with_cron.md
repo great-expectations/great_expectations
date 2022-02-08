@@ -18,7 +18,7 @@ Steps
 1. First, verify that your Checkpoint is runnable via shell:
 
     ```bash
-    great_expectations --v3-api checkpoint run my_checkpoint
+    great_expectations checkpoint run my_checkpoint
     ```
 
 2. Next, to prepare for editing the cron file, you'll need the full path of the project's ``great_expectations`` directory.
@@ -35,7 +35,7 @@ Steps
 5. To run the Checkpoint ``my_checkpoint`` every morning at 0300, add the following line in the text editor that opens:
 
     ```bash
-    0  3  *  *  *    /full/path/to/your/environment/bin/great_expectations --v3-api checkpoint run ratings --directory /full/path/to/my_project/great_expectations/
+    0  3  *  *  *    /full/path/to/your/environment/bin/great_expectations checkpoint run ratings --directory /full/path/to/my_project/great_expectations/
     ```
 
 6. Finally save the text file and exit the text editor.

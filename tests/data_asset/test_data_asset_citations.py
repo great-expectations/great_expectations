@@ -7,7 +7,9 @@ def test_data_asset_citations(pandas_dataset):
     suite = pandas_dataset.get_expectation_suite()
     assert filter_properties_dict(
         properties=suite.meta["citations"][0],
-        delete_fields=["interactive"],
+        delete_fields={
+            "interactive",
+        },
         clean_falsy=True,
     ) == filter_properties_dict(
         properties={

@@ -68,13 +68,14 @@ Recently we introduced a fast-track release process for community contributed Ex
 	* Class declaration (search for `class Expect`)
 	* A call to `run_diagnostic` in the very end of the template (search for ``diagnostics_report = ``). Next section explains the role this code plays.
 	
-	For more style conventions that your code should follow consult our [Style Guide](/docs/contributing/contributing_style)
+
+	For more style conventions that your code should follow consult our [Style Guide](/docs/contributing/style_guides/code_style).
 
 #### 4. Run diagnostics on your Expectation.
 
 Expectations contain a self diagnostic tool that will help you during development. The simplest way to run it is to execute the file as a standalone script. Note: if you prefer, you can also run it within a notebook or IDE.
 
-````python
+````console
 python expect_column_values_to_equal_three.py
 ````
 
@@ -125,7 +126,7 @@ These examples serve a dual purpose:
 
 * help the users of the Expectation understand its logic by providing examples of input data that the Expectation will evaluate as valid and as invalid. When your Expectation is released, its entry in the Expectations Gallery site will render these examples.
 
-* provide test cases that the Great Expectations testing framework can execute automatically
+* provide test cases that the Great Expectations testing framework can execute automatically.
 We will explain the structure of these tests using the example provided in one of the templates that implements `expect_column_values_to_equal_three`:
 
 ````python
@@ -170,7 +171,7 @@ Run `run_diagnostics` again. The newly added examples will appear in the output.
 
 When you define data in your examples, we will mostly guess the type of the columns. Sometimes you need to specify the precise type of the columns for each backend. Then you use schema attribute (on the same level as data and tests in the dictionary):
 
-````console
+````python
 "schemas": {
   "spark": {
     "mostly_threes": "IntegerType",
@@ -241,7 +242,7 @@ If you have never used Python Decorators and don’t know what they are and how 
 
 Find the following code snippet in your Metric Provider class:
 
-````console
+````python
 @column_condition_partial(engine=PandasExecutionPandasExecutionEngineEngine)
 def _pandas(cls, column, **kwargs):
     return column == 3
@@ -261,13 +262,13 @@ Here is how you could modify expect_column_values_to_equal_three to expect_colum
 
 Find the snippet success_keys = ("mostly",) in the class that implements your Expectation. Add your arguments to success_keys
 
-````console
+````python
 success_keys = ("integer", "mostly")
 ````
 Success keys are arguments that determine the values of the Expectation’s metrics and when the Expectation will succeed.
 
 In the class that implements Metric Provider set the variable condition_value_keys to a tuple of your arguments:
-````console
+````python
 condition_value_keys = ("integer",)
 ````
 
@@ -279,7 +280,7 @@ For a map Metric producing a yes/no question answer, you use condition_value_key
 
 * Add named arguments to the methods that compute the Metric for each backend in your Metric Provider class:
 
-````console
+````python
 @column_condition_partial(engine=PandasExecutionEngine)
 def _pandas(cls, column, integer=None, **kwargs):
     return column == integer
@@ -300,7 +301,7 @@ The Expectation declares “column_values.z_score.under_threshold” as its `con
 
 The `ColumnValuesZScore` Metric Provider class that computes this Metric declares an additional metric:
 
-````console
+````python
 function_metric_name = "column_values.z_score"
 ````
 
@@ -323,7 +324,7 @@ Define success_keys of your Expectation
 success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 ````
 
-Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Expectations and Metrics](docs/reference/metrics).
+Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Expectations and Metrics](/docs/reference/metrics).
 
 * `ExpectColumnCustomMedianToBeBetween` class that the template implements declares the list of Metrics it needs computes for producing its result:
 
@@ -393,7 +394,7 @@ Implement this method to compute your Metric.
 
 Find this code snippet in your file and edit tags and contributors:
 
-````console
+````python
 library_metadata = {
     "maturity": "experimental",  # "experimental", "beta", or "production"
     "tags": [  # Tags for this Expectation in the gallery

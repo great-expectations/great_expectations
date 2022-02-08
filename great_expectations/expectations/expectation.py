@@ -1,13 +1,15 @@
 import logging
 import re
 import traceback
+import warnings
 from abc import ABC, ABCMeta, abstractmethod
 from collections import Counter
 from copy import deepcopy
 from inspect import isabstract
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
+from dateutil.parser import parse
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.batch import Batch
@@ -30,24 +32,27 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.util import legacy_method_parameters
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
 )
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-from ..core.util import convert_to_json_serializable, nested_update
+from ..core.util import nested_update
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
+from ..execution_engine.execution_engine import MetricDomainTypes
 from ..render.renderer.renderer import renderer
 from ..render.types import (
     CollapseContent,
+    RenderedAtomicContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
+    renderedAtomicValueSchema,
 )
 from ..render.util import num_to_str
 from ..util import is_parseable_date
-from ..validator.validation_graph import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +135,7 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
-    legacy_method_parameters = legacy_method_parameters
+    args_keys = None
 
     def __init__(self, configuration: Optional[ExpectationConfiguration] = None):
         if configuration is not None:
@@ -157,11 +162,79 @@ class Expectation(metaclass=MetaExpectation):
     def _validate(
         self,
         configuration: ExpectationConfiguration,
-        metrics: Dict,
+        metrics: dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
         raise NotImplementedError
+
+    @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        """
+        Template function that contains the logic that is shared by atomic.prescriptive.summary (GE Cloud) and
+        renderer.prescriptive (OSS GE)
+        """
+        if runtime_configuration is None:
+            runtime_configuration = {}
+
+        styling = runtime_configuration.get("styling")
+
+        template_str = "$expectation_type(**$kwargs)"
+        params = {
+            "expectation_type": configuration.expectation_type,
+            "kwargs": configuration.kwargs,
+        }
+
+        params_with_json_schema = {
+            "expectation_type": {
+                "schema": {"type": "string"},
+                "value": configuration.expectation_type,
+            },
+            "kwargs": {"schema": {"type": "string"}, "value": configuration.kwargs},
+        }
+        return (template_str, params_with_json_schema, styling)
+
+    @classmethod
+    @renderer(renderer_type="atomic.prescriptive.summary")
+    @render_evaluation_parameter_string
+    def _prescriptive_summary(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        (
+            template_str,
+            params_with_json_schema,
+            styling,
+        ) = cls._atomic_prescriptive_template(
+            configuration, result, language, runtime_configuration, **kwargs
+        )
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "template": template_str,
+                "params": params_with_json_schema,
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.prescriptive.summary",
+            value=value_obj,
+            value_type="StringValueType",
+        )
+        return rendered
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -195,6 +268,60 @@ class Expectation(metaclass=MetaExpectation):
                 }
             )
         ]
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.meta_properties")
+    def _diagnostic_meta_properties_renderer(cls, result=None, **kwargs):
+        """
+            Render function used to add custom meta to Data Docs
+            It gets a column set in the `properties_to_render` dictionary within `meta` and adds columns in Data Docs with the values that were set.
+            example:
+            meta = {
+                "properties_to_render": {
+                "Custom Column Header": "custom.value"
+            },
+                "custom": {
+                "value": "1"
+                }
+            }
+        data docs:
+        ----------------------------------------------------------------
+        | status|  Expectation                          | Observed value | Custom Column Header |
+        ----------------------------------------------------------------
+        |       | must be exactly 4 columns             |         4       |          1            |
+
+        Here the custom column will be added in data docs.
+        """
+
+        if result is None:
+            return []
+        custom_property_values = []
+        meta_properties_to_render = result.expectation_config.kwargs.get(
+            "meta_properties_to_render", None
+        )
+        if meta_properties_to_render is not None:
+            for key in sorted(meta_properties_to_render.keys()):
+                meta_property = meta_properties_to_render[key]
+                if meta_property is not None:
+                    try:
+                        # Allow complex structure with . usage
+                        obj = result.expectation_config.meta["attributes"]
+                        keys = meta_property.split(".")
+                        for i in range(0, len(keys)):
+                            # Allow for keys with a . in the string like {"item.key": "1"}
+                            remaining_key = "".join(keys[i:])
+                            if remaining_key in obj:
+                                obj = obj[remaining_key]
+                                break
+                            else:
+                                obj = obj[keys[i]]
+
+                        custom_property_values.append([obj])
+                    except KeyError:
+                        custom_property_values.append(["N/A"])
+                else:
+                    custom_property_values.append(["N/A"])
+        return custom_property_values
 
     @classmethod
     @renderer(renderer_type="renderer.diagnostic.status_icon")
@@ -454,15 +581,7 @@ class Expectation(metaclass=MetaExpectation):
         return unexpected_table_content_block
 
     @classmethod
-    @renderer(renderer_type="renderer.diagnostic.observed_value")
-    def _diagnostic_observed_value_renderer(
-        cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
-        **kwargs,
-    ):
+    def _get_observed_value_from_evr(self, result: ExpectationValidationResult) -> str:
         result_dict = result.result
         if result_dict is None:
             return "--"
@@ -483,6 +602,46 @@ class Expectation(metaclass=MetaExpectation):
             return "--"
 
     @classmethod
+    @renderer(renderer_type="atomic.diagnostic.observed_value")
+    def _atomic_diagnostic_observed_value(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        """
+        Rendering function that is utilized by GE Cloud Front-end
+        """
+        observed_value = cls._get_observed_value_from_evr(result=result)
+        value_obj = renderedAtomicValueSchema.load(
+            {
+                "template": observed_value,
+                "params": {},
+                "schema": {"type": "com.superconductive.rendered.string"},
+            }
+        )
+        rendered = RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=value_obj,
+            value_type="StringValueType",
+        )
+        return rendered
+
+    @classmethod
+    @renderer(renderer_type="renderer.diagnostic.observed_value")
+    def _diagnostic_observed_value_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        return cls._get_observed_value_from_evr(result=result)
+
+    @classmethod
     def get_allowed_config_keys(cls):
         return cls.domain_keys + cls.success_keys + cls.runtime_keys
 
@@ -492,29 +651,39 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
-    ) -> "ExpectationValidationResult":
+    ) -> ExpectationValidationResult:
         if configuration is None:
             configuration = self.configuration
-        provided_metrics = {}
-        requested_metrics = self.get_validation_dependencies(
+
+        validation_dependencies: dict = self.get_validation_dependencies(
             configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
-        )["metrics"]
+        )
+        runtime_configuration["result_format"] = validation_dependencies[
+            "result_format"
+        ]
+        requested_metrics = validation_dependencies["metrics"]
+
+        provided_metrics = {}
         for name, metric_edge_key in requested_metrics.items():
             provided_metrics[name] = metrics[metric_edge_key.id]
 
-        return self._build_evr(
-            self._validate(
-                configuration=configuration,
-                metrics=provided_metrics,
-                runtime_configuration=runtime_configuration,
-                execution_engine=execution_engine,
-            ),
-            configuration,
+        expectation_validation_result: Union[
+            ExpectationValidationResult, dict
+        ] = self._validate(
+            configuration=configuration,
+            metrics=provided_metrics,
+            runtime_configuration=runtime_configuration,
+            execution_engine=execution_engine,
         )
+        evr: ExpectationValidationResult = self._build_evr(
+            raw_response=expectation_validation_result, configuration=configuration
+        )
+        return evr
 
-    def _build_evr(self, raw_response, configuration):
+    @staticmethod
+    def _build_evr(raw_response, configuration) -> ExpectationValidationResult:
         """_build_evr is a lightweight convenience wrapper handling cases where an Expectation implementor
         fails to return an EVR but returns the necessary components in a dictionary."""
         if not isinstance(raw_response, ExpectationValidationResult):
@@ -533,15 +702,16 @@ class Expectation(metaclass=MetaExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ):
+    ) -> dict:
         """Returns the result format and metrics required to validate this Expectation using the provided result format."""
+        runtime_configuration = self.get_runtime_kwargs(
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        result_format: dict = runtime_configuration["result_format"]
+        result_format = parse_result_format(result_format=result_format)
         return {
-            "result_format": parse_result_format(
-                self.get_runtime_kwargs(
-                    configuration=configuration,
-                    runtime_configuration=runtime_configuration,
-                ).get("result_format")
-            ),
+            "result_format": result_format,
             "metrics": {},
         }
 
@@ -582,7 +752,7 @@ class Expectation(metaclass=MetaExpectation):
         self,
         configuration: Optional[ExpectationConfiguration] = None,
         runtime_configuration: dict = None,
-    ):
+    ) -> dict:
         if not configuration:
             configuration = self.configuration
 
@@ -604,6 +774,27 @@ class Expectation(metaclass=MetaExpectation):
 
         return runtime_kwargs
 
+    def get_result_format(
+        self,
+        configuration: ExpectationConfiguration,
+        runtime_configuration: dict = None,
+    ) -> dict:
+        default_result_format: Optional[
+            Union[bool, str]
+        ] = self.default_kwarg_values.get("result_format")
+        configuration_result_format: dict = configuration.kwargs.get(
+            "result_format", default_result_format
+        )
+        result_format: dict
+        if runtime_configuration:
+            result_format = runtime_configuration.get(
+                "result_format",
+                configuration_result_format,
+            )
+        else:
+            result_format = configuration_result_format
+        return result_format
+
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         if configuration is None:
             configuration = self.configuration
@@ -617,7 +808,7 @@ class Expectation(metaclass=MetaExpectation):
 
     def validate(
         self,
-        validator: "Validator",
+        validator: Validator,
         configuration: Optional[ExpectationConfiguration] = None,
         evaluation_parameters=None,
         interactive_evaluation=True,
@@ -625,7 +816,7 @@ class Expectation(metaclass=MetaExpectation):
         runtime_configuration=None,
     ):
         if configuration is None:
-            configuration = self.configuration
+            configuration = deepcopy(self.configuration)
 
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
@@ -644,44 +835,6 @@ class Expectation(metaclass=MetaExpectation):
                 "cannot access configuration: expectation has not yet been configured"
             )
         return self._configuration
-
-    @classmethod
-    def build_configuration(cls, *args, **kwargs):
-        # Combine all arguments into a single new "all_args" dictionary to name positional parameters
-        all_args = dict(zip(cls.validation_kwargs, args))
-        all_args.update(kwargs)
-
-        # Unpack display parameters; remove them from all_args if appropriate
-        if "include_config" in kwargs:
-            include_config = kwargs["include_config"]
-            del all_args["include_config"]
-        else:
-            include_config = cls.default_expectation_args["include_config"]
-
-        if "catch_exceptions" in kwargs:
-            catch_exceptions = kwargs["catch_exceptions"]
-            del all_args["catch_exceptions"]
-        else:
-            catch_exceptions = cls.default_expectation_args["catch_exceptions"]
-
-        if "result_format" in kwargs:
-            result_format = kwargs["result_format"]
-        else:
-            result_format = cls.default_expectation_args["result_format"]
-
-        # Extract the meta object for use as a top-level expectation_config holder
-        if "meta" in kwargs:
-            meta = kwargs["meta"]
-            del all_args["meta"]
-        else:
-            meta = None
-
-        # Construct the expectation_config object
-        return ExpectationConfiguration(
-            expectation_type=cls.expectation_type,
-            kwargs=convert_to_json_serializable(deepcopy(all_args)),
-            meta=meta,
-        )
 
     def run_diagnostics(self, pretty_print=True):
         """
@@ -809,9 +962,10 @@ class Expectation(metaclass=MetaExpectation):
 
         return report_obj
 
+    @staticmethod
     def _add_error_to_diagnostics_report(
-        self, report_obj: Dict, error: Exception, stack_trace: str
-    ) -> Dict:
+        report_obj: Dict, error: Exception, stack_trace: str
+    ) -> dict:
         error_entries = report_obj.get("diagnostics_report")
         if error_entries is None:
             error_entries = []
@@ -826,7 +980,7 @@ class Expectation(metaclass=MetaExpectation):
 
         return report_obj
 
-    def _get_examples(self, return_only_gallery_examples=True) -> List[Dict]:
+    def _get_examples(self, return_only_gallery_examples=True) -> List[dict]:
         """
         Get a list of examples from the object's `examples` member variable.
 
@@ -867,7 +1021,8 @@ class Expectation(metaclass=MetaExpectation):
 
         return docstring, short_description
 
-    def _choose_example(self, examples):
+    @staticmethod
+    def _choose_example(examples):
         example = examples[0]
 
         example_data = example["data"]
@@ -875,8 +1030,8 @@ class Expectation(metaclass=MetaExpectation):
 
         return example_data, example_test
 
+    @staticmethod
     def _instantiate_example_validation_results(
-        self,
         test_batch: Batch,
         expectation_config: ExpectationConfiguration,
     ) -> List[ExpectationValidationResult]:
@@ -887,13 +1042,14 @@ class Expectation(metaclass=MetaExpectation):
 
         return validation_results
 
-    def _get_supported_renderers(self, snake_name: str) -> List[str]:
+    @staticmethod
+    def _get_supported_renderers(snake_name: str) -> List[str]:
         supported_renderers = list(_registered_renderers[snake_name].keys())
         supported_renderers.sort()
         return supported_renderers
 
+    @staticmethod
     def _get_test_results(
-        self,
         snake_name,
         examples,
         execution_engines,
@@ -944,7 +1100,9 @@ class Expectation(metaclass=MetaExpectation):
         elif type(rendered_result) == list:
             sub_result_list = []
             for sub_result in rendered_result:
-                sub_result_list.append(self._get_rendered_result_as_string(sub_result))
+                res = self._get_rendered_result_as_string(sub_result)
+                if res is not None:
+                    sub_result_list.append(res)
 
             return "\n".join(sub_result_list)
 
@@ -960,16 +1118,18 @@ class Expectation(metaclass=MetaExpectation):
         expectation_name: str,
         expectation_config: ExpectationConfiguration,
         validation_result: ExpectationValidationResult,
-        standard_renderers=[
-            "renderer.answer",
-            "renderer.diagnostic.unexpected_statement",
-            "renderer.diagnostic.observed_value",
-            "renderer.diagnostic.status_icon",
-            "renderer.diagnostic.unexpected_table",
-            "renderer.prescriptive",
-            "renderer.question",
-        ],
-    ) -> Dict[str, str]:
+        standard_renderers=None,
+    ) -> Dict[str, Union[Dict[Union[str, Any], Union[Optional[str], Any]], list]]:
+        if standard_renderers is None:
+            standard_renderers = [
+                "renderer.answer",
+                "renderer.diagnostic.unexpected_statement",
+                "renderer.diagnostic.observed_value",
+                "renderer.diagnostic.status_icon",
+                "renderer.diagnostic.unexpected_table",
+                "renderer.prescriptive",
+                "renderer.question",
+            ]
         supported_renderers = self._get_supported_renderers(expectation_name)
 
         standard_renderer_dict = {}
@@ -994,10 +1154,10 @@ class Expectation(metaclass=MetaExpectation):
             "custom": [],
         }
 
+    @staticmethod
     def _get_execution_engine_dict(
-        self,
         upstream_metrics,
-    ) -> Dict:
+    ) -> dict:
         expectation_engines = {}
         for provider in [
             "PandasExecutionEngine",
@@ -1045,6 +1205,7 @@ class TableExpectation(Expectation, ABC):
         "condition_parser",
     )
     metric_dependencies = tuple()
+    domain_type = MetricDomainTypes.TABLE
 
     def get_validation_dependencies(
         self,
@@ -1069,13 +1230,13 @@ class TableExpectation(Expectation, ABC):
 
         return dependencies
 
+    @staticmethod
     def validate_metric_value_between_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        configuration: Optional[ExpectationConfiguration],
     ):
         # Validating that Minimum and Maximum values are of the proper format and type
         min_val = None
         max_val = None
-        parse_strings_as_datetimes = None
 
         if "min_value" in configuration.kwargs:
             min_val = configuration.kwargs["min_value"]
@@ -1083,38 +1244,26 @@ class TableExpectation(Expectation, ABC):
         if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
 
-        if "parse_strings_as_datetimes" in configuration.kwargs:
-            parse_strings_as_datetimes = configuration.kwargs[
-                "parse_strings_as_datetimes"
-            ]
-
         try:
-            # Ensuring Proper interval has been provided
-            if parse_strings_as_datetimes:
-                assert min_val is None or is_parseable_date(
-                    min_val
-                ), "Provided min threshold must be a dateutil-parseable date"
-                assert max_val is None or is_parseable_date(
-                    max_val
-                ), "Provided max threshold must be a dateutil-parseable date"
-            else:
-                assert min_val is None or isinstance(
-                    min_val, (float, int, dict)
-                ), "Provided min threshold must be a number"
-                if isinstance(min_val, dict):
-                    assert (
-                        "$PARAMETER" in min_val
-                    ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key'
+            assert (
+                min_val is None
+                or is_parseable_date(min_val)
+                or isinstance(min_val, (float, int, dict))
+            ), "Provided min threshold must be a datetime (for datetime columns) or number"
+            if isinstance(min_val, dict):
+                assert (
+                    "$PARAMETER" in min_val
+                ), 'Evaluation Parameter dict for min_value kwarg must have "$PARAMETER" key'
 
-                assert max_val is None or isinstance(
-                    max_val, (float, int, dict)
-                ), "Provided max threshold must be a number"
-                if isinstance(max_val, dict):
-                    assert "$PARAMETER" in max_val, (
-                        "Evaluation Parameter dict for max_value "
-                        "kwarg "
-                        'must have "$PARAMETER" key'
-                    )
+            assert (
+                max_val is None
+                or is_parseable_date(max_val)
+                or isinstance(max_val, (float, int, dict))
+            ), "Provided max threshold must be a datetime (for datetime columns) or number"
+            if isinstance(max_val, dict):
+                assert (
+                    "$PARAMETER" in max_val
+                ), 'Evaluation Parameter dict for max_value kwarg must have "$PARAMETER" key'
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
@@ -1136,14 +1285,38 @@ class TableExpectation(Expectation, ABC):
     ):
         metric_value = metrics.get(metric_name)
 
+        if metric_value is None:
+            return {"success": False, "result": {"observed_value": metric_value}}
+
         # Obtaining components needed for validation
         min_value = self.get_success_kwargs(configuration).get("min_value")
         strict_min = self.get_success_kwargs(configuration).get("strict_min")
         max_value = self.get_success_kwargs(configuration).get("max_value")
         strict_max = self.get_success_kwargs(configuration).get("strict_max")
 
-        if metric_value is None:
-            return {"success": False, "result": {"observed_value": metric_value}}
+        parse_strings_as_datetimes = self.get_success_kwargs(configuration).get(
+            "parse_strings_as_datetimes"
+        )
+
+        if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
+
+            if min_value is not None:
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
+
+            if max_value is not None:
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
 
         # Checking if mean lies between thresholds
         if min_value is not None:
@@ -1169,6 +1342,7 @@ class TableExpectation(Expectation, ABC):
 
 class ColumnExpectation(TableExpectation, ABC):
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_type = MetricDomainTypes.COLUMN
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         # Ensuring basic configuration parameters are properly set
@@ -1184,6 +1358,7 @@ class ColumnExpectation(TableExpectation, ABC):
 class ColumnMapExpectation(TableExpectation, ABC):
     map_metric = None
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
+    domain_type = MetricDomainTypes.COLUMN
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
@@ -1271,6 +1446,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
         )
 
         result_format_str = dependencies["result_format"].get("result_format")
+        include_unexpected_rows = dependencies["result_format"].get(
+            "include_unexpected_rows"
+        )
 
         if result_format_str == "BOOLEAN_ONLY":
             return dependencies
@@ -1288,19 +1466,36 @@ class ColumnMapExpectation(TableExpectation, ABC):
             metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
         )
 
+        if include_unexpected_rows:
+            metric_kwargs = get_metric_kwargs(
+                self.map_metric + ".unexpected_rows",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            metric_dependencies[
+                self.map_metric + ".unexpected_rows"
+            ] = MetricConfiguration(
+                metric_name=self.map_metric + ".unexpected_rows",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
+
         if result_format_str in ["BASIC", "SUMMARY"]:
             return dependencies
 
-        metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".unexpected_rows",
-            configuration=configuration,
-            runtime_configuration=runtime_configuration,
-        )
-        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
-            metric_name=self.map_metric + ".unexpected_rows",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-        )
+        if include_unexpected_rows:
+            metric_kwargs = get_metric_kwargs(
+                self.map_metric + ".unexpected_rows",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            metric_dependencies[
+                self.map_metric + ".unexpected_rows"
+            ] = MetricConfiguration(
+                metric_name=self.map_metric + ".unexpected_rows",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
 
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
@@ -1325,17 +1520,11 @@ class ColumnMapExpectation(TableExpectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
+        result_format = self.get_result_format(
+            configuration=configuration, runtime_configuration=runtime_configuration
+        )
+        include_unexpected_rows = result_format.get("include_unexpected_rows")
+
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
@@ -1344,6 +1533,9 @@ class ColumnMapExpectation(TableExpectation, ABC):
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
         unexpected_values = metrics.get(self.map_metric + ".unexpected_values")
         unexpected_index_list = metrics.get(self.map_metric + ".unexpected_index_list")
+        unexpected_rows = None
+        if include_unexpected_rows:
+            unexpected_rows = metrics.get(self.map_metric + ".unexpected_rows")
 
         if total_count is None or null_count is None:
             total_count = nonnull_count = 0
@@ -1366,6 +1558,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
             unexpected_count=unexpected_count,
             unexpected_list=unexpected_values,
             unexpected_index_list=unexpected_index_list,
+            unexpected_rows=unexpected_rows,
         )
 
 
@@ -1379,6 +1572,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         "row_condition",
         "condition_parser",
     )
+    domain_type = MetricDomainTypes.COLUMN_PAIR
     success_keys = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
@@ -1470,6 +1664,9 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         )
 
         result_format_str = dependencies["result_format"].get("result_format")
+        include_unexpected_rows = dependencies["result_format"].get(
+            "include_unexpected_rows"
+        )
 
         if result_format_str == "BOOLEAN_ONLY":
             return dependencies
@@ -1490,16 +1687,19 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         if result_format_str in ["BASIC", "SUMMARY"]:
             return dependencies
 
-        metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".unexpected_rows",
-            configuration=configuration,
-            runtime_configuration=runtime_configuration,
-        )
-        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
-            metric_name=self.map_metric + ".unexpected_rows",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-        )
+        if include_unexpected_rows:
+            metric_kwargs = get_metric_kwargs(
+                self.map_metric + ".unexpected_rows",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            metric_dependencies[
+                self.map_metric + ".unexpected_rows"
+            ] = MetricConfiguration(
+                metric_name=self.map_metric + ".unexpected_rows",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
 
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
@@ -1524,22 +1724,12 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-
+        result_format = self.get_result_format(
+            configuration=configuration, runtime_configuration=runtime_configuration
+        )
         mostly = self.get_success_kwargs().get(
             "mostly", self.default_kwarg_values.get("mostly")
         )
-
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
         unexpected_values = metrics.get(self.map_metric + ".unexpected_values")
@@ -1581,6 +1771,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         "condition_parser",
         "ignore_row_if",
     )
+    domain_type = MetricDomainTypes.MULTICOLUMN
     success_keys = tuple()
     default_kwarg_values = {
         "row_condition": None,
@@ -1663,6 +1854,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         )
 
         result_format_str = dependencies["result_format"].get("result_format")
+        include_unexpected_rows = dependencies["result_format"].get(
+            "include_unexpected_rows"
+        )
 
         if result_format_str == "BOOLEAN_ONLY":
             return dependencies
@@ -1683,16 +1877,19 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         if result_format_str in ["BASIC", "SUMMARY"]:
             return dependencies
 
-        metric_kwargs = get_metric_kwargs(
-            self.map_metric + ".unexpected_rows",
-            configuration=configuration,
-            runtime_configuration=runtime_configuration,
-        )
-        metric_dependencies[self.map_metric + ".unexpected_rows"] = MetricConfiguration(
-            metric_name=self.map_metric + ".unexpected_rows",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-        )
+        if include_unexpected_rows:
+            metric_kwargs = get_metric_kwargs(
+                self.map_metric + ".unexpected_rows",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            metric_dependencies[
+                self.map_metric + ".unexpected_rows"
+            ] = MetricConfiguration(
+                metric_name=self.map_metric + ".unexpected_rows",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            )
 
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
@@ -1717,18 +1914,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        if runtime_configuration:
-            result_format = runtime_configuration.get(
-                "result_format",
-                configuration.kwargs.get(
-                    "result_format", self.default_kwarg_values.get("result_format")
-                ),
-            )
-        else:
-            result_format = configuration.kwargs.get(
-                "result_format", self.default_kwarg_values.get("result_format")
-            )
-
+        result_format = self.get_result_format(
+            configuration=configuration, runtime_configuration=runtime_configuration
+        )
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(self.map_metric + ".unexpected_count")
         unexpected_values = metrics.get(self.map_metric + ".unexpected_values")
@@ -1765,6 +1953,7 @@ def _format_map_output(
     unexpected_count,
     unexpected_list,
     unexpected_index_list,
+    unexpected_rows=None,
 ):
     """Helper function to construct expectation result objects for map_expectations (such as column_map_expectation
     and file_lines_map_expectation).
@@ -1824,10 +2013,18 @@ def _format_map_output(
             "unexpected_percent_nonmissing"
         ] = unexpected_percent_nonmissing
 
+    if result_format["include_unexpected_rows"]:
+        return_obj["result"].update(
+            {
+                "unexpected_rows": unexpected_rows,
+            }
+        )
+
     if result_format["result_format"] == "BASIC":
         return return_obj
 
     # Try to return the most common values, if possible.
+    partial_unexpected_counts = None
     if 0 < result_format.get("partial_unexpected_count"):
         try:
             partial_unexpected_counts = [

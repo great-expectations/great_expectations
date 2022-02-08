@@ -12,7 +12,7 @@ A Profiler makes it possible to quickly create a starting point for generating E
 example, during the `init` flow, Great Expectations uses the `UserConfigurableProfiler` to demonstrate important
 features of Expectations by creating and validating an Expectation Suite that has several different kinds of
 Expectations built from a small sample of data. A Profiler is also critical to generating the Expectation Suites used
-during [profiling](./).
+during profiling.
 
 You can also extend Profilers to capture organizational knowledge about your data. For example, a team might have a
 convention that all columns **named** "id" are primary keys, whereas all columns ending with the
@@ -78,10 +78,10 @@ rules:
         mostly: $variables.mostly_default
 ```
 
-You can see another example config containing multiple rules here: [alice_user_workflow_verbose_profiler_config.yml](https://github.com/great-expectations/great_expectations/blob/develop/tests/rule_based_profiler/alice_user_workflow_verbose_profiler_config.yml)
+You can see another example config containing multiple rules here: [alice_user_workflow_verbose_profiler_config.yml](https://github.com/great-expectations/great_expectations/blob/develop/tests/test_fixtures/rule_based_profiler/alpha/alice_user_workflow_verbose_profiler_config.yml)
 
 This config is used in the below diagram to provide a better sense of how the different parts of the Profiler config fit together. [You can see a larger version of this file here.](https://github.com/great-expectations/great_expectations/blob/develop/docs/guides/images/rule_based_profiler_public_interface_diagram.png)
 ![Rule-Based Profiler Public Interface Diagram](../guides/images/rule_based_profiler_public_interface_diagram.png)
 
 ### Next Steps
-- You can try out a tutorial that walks you through the set-up of a Rule-Based Profiler here: [How to create a new Expectation Suite using Rule Based Profilers](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers)
+- You can try out a tutorial that walks you through the set-up of a Rule-Based Profiler here: [How to create a new Expectation Suite using Rule Based Profilers](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md)

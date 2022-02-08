@@ -3,6 +3,7 @@ from freezegun import freeze_time
 
 from great_expectations.core.util import (
     AzureUrl,
+    DBFSPath,
     GCSUrl,
     S3Url,
     sniff_s3_compression,
@@ -65,41 +66,78 @@ def test_sniff_s3_compression(url, expected):
     assert sniff_s3_compression(S3Url(url)) == expected
 
 
-def test_azure_url():
+def test_azure_pandas_url():
     url = AzureUrl("my_account.blob.core.windows.net/my_container/my_blob")
     assert url.account_name == "my_account"
     assert url.container == "my_container"
     assert url.blob == "my_blob"
 
 
-def test_azure_url_with_https():
+def test_azure_pandas_url_with_https():
     url = AzureUrl("https://my_account.blob.core.windows.net/my_container/my_blob")
     assert url.account_name == "my_account"
     assert url.container == "my_container"
     assert url.blob == "my_blob"
 
 
-def test_azure_url_with_nested_blob():
+def test_azure_pandas_url_with_nested_blob():
     url = AzureUrl("my_account.blob.core.windows.net/my_container/a/b/c/d/e/my_blob")
     assert url.account_name == "my_account"
     assert url.container == "my_container"
     assert url.blob == "a/b/c/d/e/my_blob"
 
 
-def test_azure_url_with_invalid_url():
-    with pytest.raises(AssertionError):
-        AzureUrl("my_bucket/my_blob")
-
-
-def test_azure_url_with_special_chars():
+def test_azure_pandas_url_with_special_chars():
     # Note that `url` conforms with the naming restrictions set by the Azure API
     # Azure naming restrictions: https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata
     url = AzureUrl(
         "my_account.blob.core.windows.net/my-container_1.0/my-blob_`~!@#$%^&*()=+"
     )
     assert url.account_name == "my_account"
+    assert url.account_url == "my_account.blob.core.windows.net"
     assert url.container == "my-container_1.0"
     assert url.blob == "my-blob_`~!@#$%^&*()=+"
+
+
+def test_azure_spark_url():
+    url = AzureUrl("my_container@my_account.blob.core.windows.net/my_blob")
+    assert url.account_name == "my_account"
+    assert url.account_url == "my_account.blob.core.windows.net"
+    assert url.container == "my_container"
+    assert url.blob == "my_blob"
+
+
+def test_azure_spark_url_with_wasbs():
+    url = AzureUrl("wasbs://my_container@my_account.blob.core.windows.net/my_blob")
+    assert url.account_name == "my_account"
+    assert url.account_url == "my_account.blob.core.windows.net"
+    assert url.container == "my_container"
+    assert url.blob == "my_blob"
+
+
+def test_azure_spark_url_with_nested_blob():
+    url = AzureUrl("my_container@my_account.blob.core.windows.net/a/b/c/d/e/my_blob")
+    assert url.account_name == "my_account"
+    assert url.account_url == "my_account.blob.core.windows.net"
+    assert url.container == "my_container"
+    assert url.blob == "a/b/c/d/e/my_blob"
+
+
+def test_azure_spark_url_with_special_chars():
+    # Note that `url` conforms with the naming restrictions set by the Azure API
+    # Azure naming restrictions: https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata
+    url = AzureUrl(
+        "my-container_1.0@my_account.blob.core.windows.net/my-blob_`~!@#$%^&*()=+"
+    )
+    assert url.account_name == "my_account"
+    assert url.account_url == "my_account.blob.core.windows.net"
+    assert url.container == "my-container_1.0"
+    assert url.blob == "my-blob_`~!@#$%^&*()=+"
+
+
+def test_azure_url_with_invalid_url():
+    with pytest.raises(AssertionError):
+        AzureUrl("my_bucket/my_blob")
 
 
 def test_gcs_url():
@@ -126,3 +164,63 @@ def test_gcs_url_with_special_chars():
     url = GCSUrl("gs://my-bucket_1.0/my-blob_`~!@#$%^&*()=+")
     assert url.bucket == "my-bucket_1.0"
     assert url.blob == "my-blob_`~!@#$%^&*()=+"
+
+
+@pytest.mark.parametrize(
+    "input_path,expected_path",
+    [
+        # conversion
+        ("/dbfs/some/path/myfile.csv", "dbfs:/some/path/myfile.csv"),
+        ("/dbfs/myfile.csv", "dbfs:/myfile.csv"),
+        ("/dbfs/myfolder", "dbfs:/myfolder"),
+        ("/dbfs/myfolder/", "dbfs:/myfolder/"),
+        ("/dbfs/my/nested/folder", "dbfs:/my/nested/folder"),
+        ("/dbfs/my/nested/folder/", "dbfs:/my/nested/folder/"),
+        # no conversion
+        ("dbfs:/some/path/myfile.csv", "dbfs:/some/path/myfile.csv"),
+        ("dbfs:/myfile.csv", "dbfs:/myfile.csv"),
+        ("dbfs:/myfolder", "dbfs:/myfolder"),
+        ("dbfs:/myfolder/", "dbfs:/myfolder/"),
+        ("dbfs:/my/nested/folder", "dbfs:/my/nested/folder"),
+        ("dbfs:/my/nested/folder/", "dbfs:/my/nested/folder/"),
+        # trailing slash for root is optional in filesystem case, not in protocol case
+        ("/dbfs/", "dbfs:/"),
+        ("/dbfs", "dbfs:/"),
+        ("dbfs:/", "dbfs:/"),
+        ("dbfs:", "dbfs:/"),
+    ],
+)
+def test_dbfs_path_protocol_conversions(input_path, expected_path):
+
+    observed_path = DBFSPath.convert_to_protocol_version(path=input_path)
+    assert observed_path == expected_path
+
+
+@pytest.mark.parametrize(
+    "input_path,expected_path",
+    [
+        # conversion
+        ("dbfs:/some/path/myfile.csv", "/dbfs/some/path/myfile.csv"),
+        ("dbfs:/myfile.csv", "/dbfs/myfile.csv"),
+        ("dbfs:/myfolder", "/dbfs/myfolder"),
+        ("dbfs:/myfolder/", "/dbfs/myfolder/"),
+        ("dbfs:/my/nested/folder", "/dbfs/my/nested/folder"),
+        ("dbfs:/my/nested/folder/", "/dbfs/my/nested/folder/"),
+        # no conversion
+        ("/dbfs/some/path/myfile.csv", "/dbfs/some/path/myfile.csv"),
+        ("/dbfs/myfile.csv", "/dbfs/myfile.csv"),
+        ("/dbfs/myfolder", "/dbfs/myfolder"),
+        ("/dbfs/myfolder/", "/dbfs/myfolder/"),
+        ("/dbfs/my/nested/folder", "/dbfs/my/nested/folder"),
+        ("/dbfs/my/nested/folder/", "/dbfs/my/nested/folder/"),
+        # trailing slash for root is optional in filesystem case, not in protocol case
+        ("/dbfs/", "/dbfs/"),
+        ("/dbfs", "/dbfs"),
+        ("dbfs:/", "/dbfs/"),
+        ("dbfs:", "/dbfs"),
+    ],
+)
+def test_dbfs_path_file_semantics_conversions(input_path, expected_path):
+
+    observed_path = DBFSPath.convert_to_file_semantics_version(path=input_path)
+    assert observed_path == expected_path

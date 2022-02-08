@@ -74,7 +74,6 @@
           "type_list": [
             "BIGINT",
             "BYTEINT",
-            "DECIMAL",
             "INT",
             "INTEGER",
             "IntegerType",
@@ -1764,7 +1763,6 @@
           "type_list": [
             "BIGINT",
             "BYTEINT",
-            "DECIMAL",
             "INT",
             "INTEGER",
             "IntegerType",
@@ -1989,7 +1987,6 @@
           "type_list": [
             "BIGINT",
             "BYTEINT",
-            "DECIMAL",
             "INT",
             "INTEGER",
             "IntegerType",

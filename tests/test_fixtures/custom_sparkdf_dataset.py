@@ -24,7 +24,7 @@ class CustomSparkDFDataset(SparkDFDataset):
         quantile_value_ranges = quantile_ranges["value_ranges"]
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError(
-                "quntile_values and quantiles must have the same number of elements"
+                "quantile_values and quantiles must have the same number of elements"
             )
 
         quantile_vals = self.get_column_approx_quantiles(

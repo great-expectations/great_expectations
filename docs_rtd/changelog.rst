@@ -8,6 +8,466 @@ Changelog
 develop
 -----------------
 
+0.14.5
+-----------------
+* [FEATURE] Delete profilers from DataContext (#4067)
+* [FEATURE] [BUGFIX] Support nullable int column types (#4044) (thanks @scnerd)
+* [FEATURE] Rule-Based Profiler Configuration and Runtime Arguments Reconciliation Logic (#4111)
+* [BUGFIX] Add default BIGQUERY_TYPES (#4096)
+* [BUGFIX] Pin `pip --upgrade` to a specific version for CI/CD pipeline (#4100)
+* [BUGFIX] Use `pip==20.2.4` for usage statistics stage of CI/CD (#4102)
+* [BUGFIX] Fix shared state issue in renderer test (#4000)
+* [BUGFIX] Missing docstrings on validator expect_ methods (#4062) (#4081)
+* [BUGFIX] Fix s3 path suffix bug on windows (#4042) (thanks @scnerd)
+* [MAINTENANCE] fix typos in changelogs (#4093)
+* [MAINTENANCE] Migration of GCP tests to new project (#4072)
+* [MAINTENANCE] Refactor Validator methods (#4095)
+* [MAINTENANCE] Fix Configuration Schema and Refactor Rule-Based Profiler; Initial Implementation of Reconciliation Logic Between Configuration and Runtime Arguments (#4088)
+* [MAINTENANCE] Minor Cleanup -- remove unnecessary default arguments from dictionary cleaner (#4110)
+
+0.14.4
+-----------------
+* [BUGFIX] Fix typing_extensions requirement to allow for proper build (#4083) (thanks @vojtakopal and @Godoy)
+* [DOCS] data docs action rewrite (#4087)
+* [DOCS] metric store how to rewrite (#4086)
+* [MAINTENANCE] Change `logger.warn` to `logger.warning` to remove deprecation warnings (#4085)
+
+0.14.3
+-----------------
+* [FEATURE] Profiler Store (#3990)
+* [FEATURE] List profilers from DataContext (#4023)
+* [FEATURE] add bigquery json credentials kwargs for sqlalchemy connect (#4039)
+* [FEATURE] Get profilers from DataContext (#4033)
+* [FEATURE] Add RuleBasedProfiler to `test_yaml_config` utility (#4038)
+* [BUGFIX] Checkpoint Configurator fix to allow notebook logging suppression (#4057)
+* [DOCS] Created a page containing our glossary of terms and definitions. (#4056)
+* [DOCS] swap of old uri for new in data docs generated (#4013)
+* [MAINTENANCE] Refactor `test_yaml_config` (#4029)
+* [MAINTENANCE] Additional distinction made between V2 and V3 upgrade script (#4046)
+* [MAINTENANCE] Correcting Checkpoint Configuration and Execution Implementation (#4015)
+* [MAINTENANCE] Update minimum version for SQL Alchemy (#4055)
+* [MAINTENANCE] Refactor RBP constructor to work with **kwargs instantiation pattern through config objects (#4043)
+* [MAINTENANCE] Remove unnecessary metric dependency evaluations and add common table column types metric. (#4063)
+* [MAINTENANCE] Clean up new RBP types, method signatures, and method names for the long term. (#4064)
+* [MAINTENANCE] fixed broken function call in CLI (#4068)
+
+0.14.2
+-----------------
+* [FEATURE] Marshmallow schema for Rule Based Profiler (#3982)
+* [FEATURE] Enable Rule-Based Profile Parameter Access To Collection Typed Values (#3998)
+* [BUGFIX] Docs integration pipeline bugfix  (#3997)
+* [BUGFIX] Enables spark-native null filtering (#4004)
+* [DOCS] Gtm/cta in docs (#3993)
+* [DOCS] Fix incorrect variable name in how_to_configure_an_expectation_store_in_amazon_s3.md (#3971) (thanks @moritzkoerber)
+* [DOCS] update custom docs css to add a subtle border around tabbed content (#4001)
+* [DOCS] Migration Guide now includes example for Spark data (#3996)
+* [DOCS] Revamp Airflow Deployment Pattern (#3963) (thanks @denimalpaca)
+* [DOCS] updating redirects to reflect a moved file (#4007)
+* [DOCS] typo in gcp + bigquery tutorial (#4018)
+* [DOCS] Additional description of Kubernetes Operators in GCP Deployment Guide (#4019)
+* [DOCS] Migration Guide now includes example for Databases (#4005)
+* [DOCS] Update how to instantiate without a yml file (#3995)
+* [MAINTENANCE] Refactor of `test_script_runner.py` to break-up test list (#3987)
+* [MAINTENANCE] Small refactor for tests that allows DB setup to be done from all tests (#4012)
+
+0.14.1
+-----------------
+* [FEATURE] Add pagination/search to CLI batch request listing (#3854)
+* [BUGFIX] Safeguard against using V2 API with V3 Configuration (#3954)
+* [BUGFIX] Bugfix and refactor for `cloud-db-integration` pipeline (#3977)
+* [BUGFIX] Fixes breaking typo in expect_column_values_to_be_json_parseable (#3983)
+* [BUGFIX] Fixes issue where nested columns could not be addressed properly in spark (#3986)
+* [DOCS] How to connect to your data in `mssql` (#3950)
+* [DOCS] MigrationGuide - Adding note on Migrating Expectation Suites (#3959)
+* [DOCS] Incremental Update: The Universal Map's Getting Started Tutorial (#3881)
+* [DOCS] Note about creating backup of Checkpoints (#3968)
+* [DOCS] Connecting to BigQuery Doc line references fix (#3974)
+* [DOCS] Remove RTD snippet about comments/suggestions from Docusaurus docs (#3980)
+* [DOCS] Add howto for the OpenLineage validation operator (#3688) (thanks @rossturk)
+* [DOCS] Updates to README.md (#3964)
+* [DOCS] Update migration guide (#3967)
+* [MAINTENANCE] Refactor docs dependency script (#3952)
+* [MAINTENANCE] Use Effective SQLAlchemy for Reflection Fallback Logic and SQL Metrics (#3958)
+* [MAINTENANCE] Remove outdated scripts (#3953)
+* [MAINTENANCE] Add pytest opt to improve collection time (#3976)
+* [MAINTENANCE] Refactor `render` method in PageRenderer (#3962)
+* [MAINTENANCE] Standardize rule based profiler testing directories organization (#3984)
+* [MAINTENANCE] Metrics Cleanup (#3989)
+* [MAINTENANCE] Refactor `render` method of Content Block Renderer (#3960)
+
+0.14.0
+-----------------
+* [BREAKING] Change Default CLI Flag To V3 (#3943)
+* [FEATURE] Cloud-399/Cloud-519: Add Cloud Notification Action (#3891)
+* [FEATURE] `great_expectations_contrib` CLI tool (#3909)
+* [FEATURE] Update `dependency_graph` pipeline to use `dgtest` CLI (#3912)
+* [FEATURE] Incorporate updated dgtest CLI tool in experimental pipeline (#3927)
+* [FEATURE] Add YAML config option to disable progress bars (#3794)
+* [BUGFIX] Fix internal links to docs that may be rendered incorrectly (#3915)
+* [BUGFIX] Update SlackNotificationAction to send slack_token and slack_channel to send_slack_notification function (#3873) (thanks @Calvo94)
+* [BUGFIX] `CheckDocsDependenciesChanges` to only handle `.py` files (#3936)
+* [BUGFIX] Provide ability to capture schema_name for SQL-based datasources; fix method usage bugs. (#3938)
+* [BUGFIX] Ensure that Jupyter Notebook cells convert JSON strings to Python-compliant syntax (#3939)
+* [BUGFIX] Cloud-519/cloud notification action return type (#3942)
+* [BUGFIX] Fix issue with regex groups in `check_docs_deps` (#3949)
+* [DOCS] Created link checker, fixed broken links (#3930)
+* [DOCS] adding the link checker to the build (#3933)
+* [DOCS] Add name to link checker in build (#3935)
+* [DOCS] GCP Deployment Pattern (#3926)
+* [DOCS] remove v3api flag in documentation (#3944)
+* [DOCS] Make corrections in HOWTO Guides for Getting Data from SQL Sources (#3945)
+* [DOCS] Tiny doc fix (#3948)
+* [MAINTENANCE] Fix breaking change caused by the new version of ruamel.yaml (#3908)
+* [MAINTENANCE] Drop extraneous print statement in self_check/util.py. (#3905)
+* [MAINTENANCE] Raise exceptions on init in cloud mode (#3913)
+* [MAINTENANCE] removing commented requirement (#3920)
+* [MAINTENANCE] Patch for atomic renderer snapshot tests (#3918)
+* [MAINTENANCE] Remove types/expectations.py (#3928)
+* [MAINTENANCE] Tests/test data class serializable dot dict (#3924)
+* [MAINTENANCE] Ensure that concurrency is backwards compatible (#3872)
+* [MAINTENANCE] Fix issue where meta was not recognized as a kwarg (#3852)
+
+0.13.49
+-----------------
+* [FEATURE] PandasExecutionEngine is able to instantiate Google Storage client in Google Cloud Composer (#3896)
+* [BUGFIX] Revert change to ExpectationSuite constructor (#3902)
+* [MAINTENANCE] SQL statements that are of TextClause type expressed as subqueries (#3899)
+
+0.13.48
+-----------------
+* [DOCS] Updates to configuring credentials (#3856)
+* [DOCS] Add docs on creating suites with the UserConfigurableProfiler (#3877)
+* [DOCS] Update how to configure an expectation store in GCS (#3874)
+* [DOCS] Update how to configure a validation result store in GCS (#3887)
+* [DOCS] Update how to host and share data docs on GCS (#3889)
+* [DOCS] Organize metadata store sidebar category by type of store (#3890)
+* [MAINTENANCE] `add_expectation()` in `ExpectationSuite` supports usage statistics for GE.  (#3824)
+* [MAINTENANCE] Clean up Metrics type usage, SQLAlchemyExecutionEngine and SQLAlchemyBatchData implementation, and SQLAlchemy API usage (#3884)
+
+0.13.47
+-----------------
+* [FEATURE] Add support for named groups in data asset regex (#3855)
+* [BUGFIX] Fix issue where dependency graph tester picks up non *.py files and add test file (#3830)
+* [BUGFIX] Ensure proper exit code for dependency graph script (#3839)
+* [BUGFIX] Allows GE to work when installed in a zip file (PEP 273). Fixes issue #3772 (#3798) (thanks @joseignaciorc)
+* [BUGFIX] Update conditional for TextClause isinstance check in SQLAlchemyExecutionEngine (#3844)
+* [BUGFIX] Fix usage stats events (#3857)
+* [BUGFIX] Make ExpectationContext optional and remove when null to ensure backwards compatability (#3859)
+* [BUGFIX] Fix sqlalchemy expect_compound_columns_to_be_unique (#3827) (thanks @harperweaver-dox)
+* [BUGFIX] Ensure proper serialization of SQLAlchemy Legacy Row (#3865)
+* [DOCS] Update migration_guide.md (#3832)
+* [MAINTENANCE] Remove the need for DataContext registry in the instrumentation of the Legacy Profiler profiling method. (#3836)
+* [MAINTENANCE] Remove DataContext registry (#3838)
+* [MAINTENANCE] Refactor cli suite conditionals (#3841)
+* [MAINTENANCE] adding hints to stores in data context (#3849)
+* [MAINTENANCE] Improve usage stats testing (#3858, #3861)
+* [MAINTENANCE] Make checkpoint methods in DataContext pass-through (#3860)
+* [MAINTENANCE] Datasource and ExecutionEngine Anonymizers handle missing module_name (#3867)
+* [MAINTENANCE] Add logging around DatasourceInitializationError in DataContext (#3846)
+* [MAINTENANCE] Use f-string to prevent string concat issue in Evaluation Parameters (#3864)
+* [MAINTENANCE] Test for errors / invalid messages in logs & fix various existing issues (#3875)
+
+0.13.46
+-----------------
+* [FEATURE] Instrument Runtime DataConnector for Usage Statistics: Add "checkpoint.run" Event Schema (#3797)
+* [FEATURE] Add suite creation type field to CLI SUITE "new" and "edit" Usage Statistics events (#3810)
+* [FEATURE] [EXPERIMENTAL] Dependency graph based testing strategy and related pipeline (#3738, #3815, #3818)
+* [FEATURE] BaseDataContext registry (#3812, #3819)
+* [FEATURE] Add usage statistics instrumentation to Legacy UserConfigurableProfiler execution (#3828)
+* [BUGFIX] CheckpointConfig.__deepcopy__() must copy all fields, including the null-valued fields (#3793)
+* [BUGFIX] Fix issue where configuration store didn't allow nesting (#3811)
+* [BUGFIX] Fix Minor Bugs in and Clean Up UserConfigurableProfiler (#3822)
+* [BUGFIX] Ensure proper replacement of nulls in Jupyter Notebooks (#3782)
+* [BUGFIX] Fix issue where configuration store didn't allow nesting (#3811)
+* [DOCS] Clean up TOC (#3783)
+* [DOCS] Update Checkpoint and Actions Reference with testing (#3787)
+* [DOCS] Update How to install Great Expectations locally (#3805)
+* [DOCS] How to install Great Expectations in a hosted environment (#3808)
+* [MAINTENANCE] Make BatchData Serialization More Robust (#3791)
+* [MAINTENANCE] Refactor SiteIndexBuilder.build() (#3789)
+* [MAINTENANCE] Update ref to ge-cla-bot in PR template (#3799)
+* [MAINTENANCE] Anonymizer clean up and refactor (#3801)
+* [MAINTENANCE] Certify the expectation "expect_table_row_count_to_equal_other_table" for V3 API (#3803)
+* [MAINTENANCE] Refactor to enable broader use of event emitting method for usage statistics (#3825)
+* [MAINTENANCE] Clean up temp file after CI/CD run (#3823)
+* [MAINTENANCE] Raising exceptions for misconfigured datasources in cloud mode (#3866)
+
+0.13.45
+-----------------
+* [FEATURE] Feature/render validation metadata (#3397) (thanks @vshind1)
+* [FEATURE] Added expectation expect_column_values_to_not_contain_special_characters() (#2849, #3771) (thanks @jaibirsingh)
+* [FEATURE] Like and regex-based expectations in Athena dialect (#3762) (thanks @josges)
+* [FEATURE] Rename `deep_filter_properties_dict()` to `deep_filter_properties_iterable()`
+* [FEATURE] Extract validation result failures (#3552) (thanks @BenGale93)
+* [BUGFIX] Allow now() eval parameter to be used by itself (#3719)
+* [BUGFIX] Fixing broken logo for legacy RTD docs (#3769)
+* [BUGFIX] Adds version-handling to sqlalchemy make_url imports (#3768)
+* [BUGFIX] Integration test to avoid regression of simple PandasExecutionEngine workflow (#3770)
+* [BUGFIX] Fix copying of CheckpointConfig for substitution and printing purposes (#3759)
+* [BUGFIX] Fix evaluation parameter usage with Query Store (#3763)
+* [BUGFIX] Feature/fix row condition quotes (#3676) (thanks @benoitLebreton-perso)
+* [BUGFIX] Fix incorrect filling out of anonymized event payload (#3780)
+* [BUGFIX] Don't reset_index for conditional expectations (#3667) (thanks @abekfenn)
+* [DOCS] Update expectations gallery link in V3 notebook documentation (#3747)
+* [DOCS] Correct V3 documentation link in V2 notebooks to point to V2 documentation (#3750)
+* [DOCS] How to pass an in-memory DataFrame to a Checkpoint (#3756)
+* [MAINTENANCE] Fix typo in Getting Started Guide (#3749)
+* [MAINTENANCE] Add proper docstring and type hints to Validator (#3767)
+* [MAINTENANCE] Clean up duplicate logging statements about optional `black` dep (#3778)
+
+0.13.44
+-----------------
+* [FEATURE] Add new result_format to include unexpected_row_list (#3346)
+* [FEATURE] Implement "deep_filter_properties_dict()" method (#3703)
+* [FEATURE] Create Constants for GETTING_STARTED Entities (e.g., datasource_name, expectation_suite_name, etc.) (#3712)
+* [FEATURE] Add usage statistics event for DataContext.get_batch_list() method (#3708)
+* [FEATURE] Add data_context.run_checkpoint event to usage statistics (#3721)
+* [FEATURE] Add event_duration to usage statistics events (#3729)
+* [FEATURE] InferredAssetSqlDataConnector's introspection can list external tables in Redshift Spectrum (#3646)
+* [BUGFIX] Using a RuntimeBatchRequest in a Checkpoint with a top-level batch_request instead of validations (#3680)
+* [BUGFIX] Using a RuntimeBatchRequest in a Checkpoint at runtime with Checkpoint.run() (#3713)
+* [BUGFIX] Using a RuntimeBatchRequest in a Checkpoint at runtime with context.run_checkpoint() (#3718)
+* [BUGFIX] Use SQLAlchemy make_url helper where applicable when parsing URLs (#3722)
+* [BUGFIX] Adds check for quantile_ranges to be ordered or unbounded pairs (#3724)
+* [BUGFIX] Updates MST renderer to return JSON-parseable boolean (#3728)
+* [BUGFIX] Removes sqlite suppression for expect_column_quantile_values_to_be_between test definitions (#3735)
+* [BUGFIX] Handle contradictory configurations in checkpoint.yml, checkpoint.run(), and context.run_checkpoint() (#3723)
+* [BUGFIX] fixed a bug where expectation metadata doesn't appear in edit template for table-level expectations (#3129) (thanks @olechiw)
+* [BUGFIX] Added temp_table creation for Teradata in SqlAlchemyBatchData (#3731) (thanks @imamolp)
+* [DOCS] Add Databricks video walkthrough link (#3702, #3704)
+* [DOCS] Update the link to configure a MetricStore (#3711, #3714) (thanks @txblackbird)
+* [DOCS] Updated code example to remove deprecated "File" function (#3632) (thanks @daccorti)
+* [DOCS] Delete how_to_add_a_validation_operator.md as OBE. (#3734)
+* [DOCS] Update broken link in FOOTER.md to point to V3 documentation (#3745)
+* [MAINTENANCE] Improve type hinting (using Optional type) (#3709)
+* [MAINTENANCE] Standardize names for assets that are used in Getting Started Guide (#3706)
+* [MAINTENANCE] Clean up remaining improper usage of Optional type annotation (#3710)
+* [MAINTENANCE] Refinement of Getting Started Guide script (#3715)
+* [MAINTENANCE] cloud-410 - Support for Column Descriptions (#3707)
+* [MAINTENANCE] Types Clean Up in Checkpoint, Batch, and DataContext Classes (#3737)
+* [MAINTENANCE] Remove DeprecationWarning for validator.remove_expectation (#3744)
+
+0.13.43
+-----------------
+* [FEATURE] Enable support for Teradata SQLAlchemy dialect (#3496) (thanks @imamolp)
+* [FEATURE] Dremio connector added (SQLalchemy) (#3624) (thanks @chufe-dremio)
+* [FEATURE] Adds expect_column_values_to_be_string_integers_increasing (#3642)
+* [FEATURE] Enable "column.quantile_values" and "expect_column_quantile_values_to_be_between" for SQLite; add/enable new tests (#3695)
+* [BUGFIX] Allow glob_directive for DBFS Data Connectors (#3673)
+* [BUGFIX] Update black version in pre-commit config (#3674)
+* [BUGFIX] Make sure to add "mostly_pct" value if "mostly" kwarg present (#3661)
+* [BUGFIX] Fix BatchRequest.to_json_dict() to not overwrite original fields; also type usage cleanup in CLI tests (#3683)
+* [BUGFIX] Fix pyfakefs boto / GCS incompatibility (#3694)
+* [BUGFIX] Update prefix attr assignment in cloud-based DataConnector constructors (#3668)
+* [BUGFIX] Update 'list_keys' signature for all cloud-based tuple store child classes (#3669)
+* [BUGFIX] evaluation parameters from different expectation suites dependencies (#3684) (thanks @OmriBromberg)
+* [DOCS] Databricks deployment pattern documentation (#3682)
+* [DOCS] Remove how_to_instantiate_a_data_context_on_databricks_spark_cluster (#3687)
+* [DOCS] Updates to Databricks doc based on friction logging (#3696)
+* [MAINTENANCE] Fix checkpoint anonymization and make BatchRequest.to_json_dict() more robust (#3675)
+* [MAINTENANCE] Update kl_divergence domain_type (#3681)
+* [MAINTENANCE] update filter_properties_dict to use set for inclusions and exclusions (instead of list) (#3698)
+* [MAINTENANCE] Adds CITATION.cff (#3697)
+
+0.13.42
+-----------------
+* [FEATURE] DBFS Data connectors (#3659)
+* [BUGFIX] Fix "null" appearing in notebooks due to incorrect ExpectationConfigurationSchema serialization (#3638)
+* [BUGFIX] Ensure that result_format from saved expectation suite json file takes effect (#3634)
+* [BUGFIX] Allowing user specified run_id to appear in WarningAndFailureExpectationSuitesValidationOperator validation result (#3386) (thanks @wniroshan)
+* [BUGFIX] Update black dependency to ensure passing Azure builds on Python 3.9 (#3664)
+* [BUGFIX] fix Issue #3405 - gcs client init in pandas engine (#3408) (thanks @dz-1)
+* [BUGFIX] Recursion error when passing RuntimeBatchRequest with query into Checkpoint using validations (#3654)
+* [MAINTENANCE] Cloud 388/supported expectations query (#3635)
+* [MAINTENANCE] Proper separation of concerns between specific File Path Data Connectors and corresponding ExecutionEngine objects (#3643)
+* [MAINTENANCE] Enable Docusaurus tests for S3 (#3645)
+* [MAINTENANCE] Formalize Exception Handling Between DataConnector and ExecutionEngine Implementations, and Update DataConnector Configuration Usage in Tests (#3644)
+* [MAINTENANCE] Adds util for handling SADeprecation warning (#3651)
+
+0.13.41
+-----------------
+* [FEATURE] Support median calculation in AWS Athena (#3596) (thanks @persiyanov)
+* [BUGFIX] Be able to use spark execution engine with spark reuse flag (#3541) (thanks @fep2)
+* [DOCS] punctuation how_to_contribute_a_new_expectation_to_great_expectations.md (#3484) (thanks @plain-jane-gray)
+* [DOCS] Update next_steps.md (#3483) (thanks @plain-jane-gray)
+* [DOCS] Update how_to_configure_a_validation_result_store_in_gcs.md (#3482) (thanks @plain-jane-gray)
+* [DOCS] Choosing and configuring DataConnectors (#3533)
+* [DOCS] Remove --no-spark flag from docs tests (#3625)
+* [DOCS] DevRel - docs fixes (#3498)
+* [DOCS] Adding a period (#3627) (thanks @plain-jane-gray)
+* [DOCS] Remove comments that describe Snowflake parameters as optional (#3639)
+* [MAINTENANCE] Update CODEOWNERS (#3604)
+* [MAINTENANCE] Fix logo (#3598)
+* [MAINTENANCE] Add Expectations to docs navbar (#3597)
+* [MAINTENANCE] Remove unused fixtures (#3218)
+* [MAINTENANCE] Remove unnecessary comment (#3608)
+* [MAINTENANCE] Superconductive Warnings hackathon (#3612)
+* [MAINTENANCE] Bring Core Skills Doc for Creating Batch Under Test (#3629)
+* [MAINTENANCE] Refactor and Clean Up Expectations and Metrics Parts of the Codebase (better encapsulation, improved type hints) (#3633)
+
+
+0.13.40
+-----------------
+* [FEATURE] Retrieve data context config through Cloud API endpoint #3586
+* [FEATURE] Update Batch IDs to match name change in paths included in batch_request #3587
+* [FEATURE] V2-to-V3 Upgrade/Migration #3592
+* [FEATURE] table and graph atomic renderers #3595
+* [FEATURE] V2-to-V3 Upgrade/Migration (Sidebar.js update) #3603
+* [DOCS] Fixing broken links and linking to Expectation Gallery #3591
+* [MAINTENANCE] Get TZLocal back to its original version control. #3585
+* [MAINTENANCE] Add tests for datetime evaluation parameters #3601
+* [MAINTENANCE] Removed warning for pandas option display.max_colwidth #3606
+
+0.13.39
+-----------------
+* [FEATURE] Migration of Expectations to Atomic Prescriptive Renderers (#3530, #3537)
+* [FEATURE] Cloud: Editing Expectation Suites programmatically (#3564)
+* [BUGFIX] Fix deprecation warning for importing from collections (#3546) (thanks @shpolina)
+* [BUGFIX] SQLAlchemy version 1.3.24 compatibility in map metric provider (#3507) (thanks @shpolina)
+* [DOCS] Clarify how to configure optional Snowflake parameters in CLI datasource new notebook (#3543)
+* [DOCS] Added breaks to code snippets, reordered guidance (#3514)
+* [DOCS] typo in documentation (#3542) (thanks @DanielEdu)
+* [DOCS] Update how_to_configure_a_new_data_context_with_the_cli.md (#3556) (thanks @plain-jane-gray)
+* [DOCS] Improved installation instructions, included in-line installation instructions to getting started (#3509)
+* [DOCS] Update contributing_style.md (#3521) (thanks @plain-jane-gray)
+* [DOCS] Update contributing_test.md (#3519) (thanks @plain-jane-gray)
+* [DOCS] Revamp style guides (#3554)
+* [DOCS] Update contributing.md (#3523, #3524) (thanks @plain-jane-gray)
+* [DOCS] Simplify getting started (#3555)
+* [DOCS] How to introspect and partition an SQL database (#3465)
+* [DOCS] Update contributing_checklist.md (#3518) (thanks @plain-jane-gray)
+* [DOCS] Removed duplicate prereq, how_to_instantiate_a_data_context_without_a_yml_file.md (#3481) (thanks @plain-jane-gray)
+* [DOCS] fix link to expectation glossary (#3558) (thanks @sephiartlist)
+* [DOCS] Minor Friction (#3574)
+* [MAINTENANCE] Make CLI Check-Config and CLI More Robust (#3562)
+* [MAINTENANCE] tzlocal version fix (#3565)
+
+0.13.38
+-----------------
+* [FEATURE] Atomic Renderer: Initial framework and Prescriptive renderers (#3529)
+* [FEATURE] Atomic Renderer: Diagnostic renderers (#3534)
+* [BUGFIX] runtime_parameters: {batch_data: <park DF} serialization (#3502)
+* [BUGFIX] Custom query in RuntimeBatchRequest for expectations using table.row_count metric (#3508)
+* [BUGFIX] Transpose \n and , in notebook (#3463) (thanks @mccalluc)
+* [BUGFIX] Fix contributor link (#3462) (thanks @mccalluc)
+* [DOCS] How to introspect and partition a files based data store (#3464)
+* [DOCS] fixed duplication of text in code example (#3503)
+* [DOCS] Make content better reflect the document organization. (#3510)
+* [DOCS] Correcting typos and improving the language. (#3513)
+* [DOCS] Better Sections Numbering in Documentation (#3515)
+* [DOCS] Improved wording (#3516)
+* [DOCS] Improved title wording for section heading (#3517)
+* [DOCS] Improve Readability of Documentation Content (#3536)
+* [MAINTENANCE] Content and test script update (#3532)
+* [MAINTENANCE] Provide Deprecation Notice for the "parse_strings_as_datetimes" Expectation Parameter in V3 (#3539)
+
+0.13.37
+-----------------
+* [FEATURE] Implement CompoundColumnsUnique metric for SqlAlchemyExecutionEngine (#3477)
+* [FEATURE] add get_available_data_asset_names_and_types (#3476)
+* [FEATURE] add s3_put_options to TupleS3StoreBackend (#3470) (Thanks @kj-9)
+* [BUGFIX] Fix TupleS3StoreBackend remove_key bug (#3489)
+* [DOCS] Adding Flyte Deployment pattern to docs (#3383)
+* [DOCS] g_e docs branding updates (#3471)
+* [MAINTENANCE] Add type-hints; add utility method for creating temporary DB tables; clean up imports; improve code readability; and add a directory to pre-commit (#3475)
+* [MAINTENANCE] Clean up for a better code readability. (#3493)
+* [MAINTENANCE] Enable SQL for the "expect_compound_columns_to_be_unique" expectation. (#3488)
+* [MAINTENANCE] Fix some typos (#3474) (Thanks @mohamadmansourX)
+* [MAINTENANCE] Support SQLAlchemy version 1.3.24 for compatibility with Airflow (Airflow does not currently support later versions of SQLAlchemy). (#3499)
+* [MAINTENANCE] Update contributing_checklist.md (#3478) (Thanks @plain-jane-gray)
+* [MAINTENANCE] Update how_to_configure_a_validation_result_store_in_gcs.md (#3480) (Thanks @plain-jane-gray)
+* [MAINTENANCE] update implemented_expectations (#3492)
+
+0.13.36
+-----------------
+* [FEATURE] GREAT-3439 extended SlackNotificationsAction for slack app tokens (#3440) (Thanks @psheets)
+* [FEATURE] Implement Integration Test for "Simple SQL Datasource" with Partitioning, Splitting, and Sampling (#3454)
+* [FEATURE] Implement Integration Test for File Path Data Connectors with Partitioning, Splitting, and Sampling (#3452)
+* [BUGFIX] Fix Incorrect Implementation of the "_sample_using_random" Sampling Method in SQLAlchemyExecutionEngine (#3449)
+* [BUGFIX] Handle RuntimeBatchRequest passed to Checkpoint programatically (without yml) (#3448)
+* [DOCS] Fix typo in command to create new checkpoint (#3434) (Thanks @joeltone)
+* [DOCS] How to validate data by running a Checkpoint (#3436)
+* [ENHANCEMENT] cloud-199 - Update Expectation and ExpectationSuite classes for GE Cloud (#3453)
+* [MAINTENANCE] Does not test numpy.float128 when it doesn't exist (#3460)
+* [MAINTENANCE] Remove Unnecessary SQL OR Condition (#3469)
+* [MAINTENANCE] Remove validation playground notebooks (#3467)
+* [MAINTENANCE] clean up type hints, API usage, imports, and coding style (#3444)
+* [MAINTENANCE] comments (#3457)
+
+0.13.35
+-----------------
+* [FEATURE] Create ExpectationValidationGraph class to Maintain Relationship Between Expectation and Metrics and Use it to Associate Exceptions to Expectations (#3433)
+* [BUGFIX] Addresses issue #2993 (#3054) by using configuration when it is available instead of discovering keys (listing keys) in existing sources. (#3377)
+* [BUGFIX] Fix Data asset name rendering (#3431) (Thanks @shpolina)
+* [DOCS] minor fix to syntax highlighting in how_to_contribute_a_new_expectation… (#3413) (Thanks @edjoesu)
+* [DOCS] Fix broken links in how_to_create_a_new_expectation_suite_using_rule_based_profile… (#3410) (Thanks @edjoesu)
+* [ENHANCEMENT] update list_expectation_suite_names and ExpectationSuiteValidationResult payload (#3419)
+* [MAINTENANCE] Clean up Type Hints, JSON-Serialization, ID Generation and Logging in Objects in batch.py Module and its Usage (#3422)
+* [MAINTENANCE] Fix Granularity of Exception Handling in ExecutionEngine.resolve_metrics() and Clean Up Type Hints (#3423)
+* [MAINTENANCE] Fix broken links in how_to_create_a_new_expectation_suite_using_rule_based_profiler (#3441)
+* [MAINTENANCE] Fix issue where BatchRequest object in configuration could cause Checkpoint to fail (#3438)
+* [MAINTENANCE] Insure consistency between implementation of overriding Python __hash__() and internal ID property value (#3432)
+* [MAINTENANCE] Performance improvement refactor for Spark unexpected values (#3368)
+* [MAINTENANCE] Refactor MetricConfiguration out of validation_graph.py to Avoid Future Circular Dependencies in Python (#3425)
+* [MAINTENANCE] Use ExceptionInfo to encapsulate common expectation validation result error information. (#3427)
+
+0.13.34
+-----------------
+* [FEATURE] Configurable multi-threaded checkpoint speedup (#3362) (Thanks @jdimatteo)
+* [BUGFIX] Insure that the "result_format" Expectation Argument is Processed Properly (#3364)
+* [BUGFIX] fix error getting validation result from DataContext (#3359) (Thanks @zachzIAM)
+* [BUGFIX] fixed typo and added CLA links (#3347)
+* [DOCS] Azure Data Connector Documentation for Pandas and Spark. (#3378)
+* [DOCS] Connecting to GCS using Spark (#3375)
+* [DOCS] Docusaurus - Deploying Great Expectations in a hosted environment without file system or CLI (#3361)
+* [DOCS] How to get a batch from configured datasource (#3382)
+* [MAINTENANCE] Add Flyte to README (#3387) (Thanks @samhita-alla)
+* [MAINTENANCE] Adds expect_table_columns_to_match_set (#3329) (Thanks @viniciusdsmello)
+* [MAINTENANCE] Bugfix/skip substitute config variables in ge cloud mode (#3393)
+* [MAINTENANCE] Clean Up ValidationGraph API Usage, Improve Exception Handling for Metrics, Clean Up Type Hints (#3399)
+* [MAINTENANCE] Clean up ValidationGraph API and add Type Hints (#3392)
+* [MAINTENANCE] Enhancement/update _set methods with kwargs (#3391) (Thanks @roblim)
+* [MAINTENANCE] Fix incorrect ToC section name (#3395)
+* [MAINTENANCE] Insure Correct Processing of the catch_exception Flag in Metrics Resolution (#3360)
+* [MAINTENANCE] exempt batch_data from a deep_copy operation on RuntimeBatchRequest (#3388)
+* [MAINTENANCE] [WIP] Enhancement/cloud 169/update checkpoint.run for ge cloud (#3381)
+
+0.13.33
+-----------------
+* [FEATURE] Implement InferredAssetAzureDataConnector with Support for Pandas and Spark Execution Engines (#3372)
+* [FEATURE] Spark connecting to Google Cloud Storage (#3365)
+* [FEATURE] SparkDFExecutionEngine can load data accessed by ConfiguredAssetAzureDataConnector (integration tests are included). (#3345)
+* [FEATURE] [MER-293] GE Cloud Mode for DataContext (#3262) (Thanks @roblim)
+* [BUGFIX] Allow for RuntimeDataConnector to accept custom query while suppressing temp table creation (#3335) (Thanks @NathanFarmer)
+* [BUGFIX] Fix issue where multiple validators reused the same execution engine, causing a conflict in active batch (GE-3168) (#3222) (Thanks @jcampbell)
+* [BUGFIX] Run batch_request dictionary through util function convert_to_json_serializable (#3349) (Thanks @NathanFarmer)
+* [BUGFIX] added casting of numeric value to fix redshift issue #3293 (#3338) (Thanks @sariabod)
+* [DOCS] Docusaurus - How to connect to an MSSQL database (#3353) (Thanks @NathanFarmer)
+* [DOCS] GREAT-195 Docs remove all stubs and links to them (#3363)
+* [MAINTENANCE] Update azure-pipelines-docs-integration.yml for Azure Pipelines
+* [MAINTENANCE] Update implemented_expectations.md (#3351) (Thanks @spencerhardwick)
+* [MAINTENANCE] Updating to reflect current Expectation dev state (#3348) (Thanks @spencerhardwick)
+* [MAINTENANCE] docs: Clean up Docusaurus refs (#3371)
+
+0.13.32
+-----------------
+* [FEATURE] Add Performance Benchmarks Using BigQuery. (Thanks @jdimatteo)
+* [WIP] [FEATURE] add backend args to run_diagnostics (#3257) (Thanks @edjoesu)
+* [BUGFIX] Addresses Issue 2937. (#3236) (Thanks @BenGale93)
+* [BUGFIX] SQL dialect doesn't register for BigQuery for V2 (#3324)
+* [DOCS] "How to connect to data on GCS using Pandas" (#3311)
+* [MAINTENANCE] Add CODEOWNERS with a single check for sidebars.js (#3332)
+* [MAINTENANCE] Fix incorrect DataConnector usage of _get_full_file_path() API method. (#3336)
+* [MAINTENANCE] Make Pandas against S3 and GCS integration tests more robust by asserting on number of batches returned and row counts (#3341)
+* [MAINTENANCE] Make integration tests of Pandas against Azure more robust. (#3339)
+* [MAINTENANCE] Prepare AzureUrl to handle WASBS format (for Spark) (#3340)
+* [MAINTENANCE] Renaming default_batch_identifier in examples #3334
+* [MAINTENANCE] Tests for RuntimeDataConnector at DataContext-level (#3304)
+* [MAINTENANCE] Tests for RuntimeDataConnector at DataContext-level (Spark and Pandas) (#3325)
+* [MAINTENANCE] Tests for RuntimeDataConnector at Datasource-level (Spark and Pandas) (#3318)
+* [MAINTENANCE] Various doc patches (#3326)
+* [MAINTENANCE] clean up imports and method signatures (#3337)
+
 0.13.31
 -----------------
 * [FEATURE] Enable `GCS DataConnector` integration with `PandasExecutionEngine` (#3264)
@@ -172,7 +632,7 @@ develop
 
 0.13.23
 -----------------
-* [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen))
+* [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen)
 * [BUGFIX] fix update data docs as validation action (#3031)
 * [DOCS] Port over "How to configure an Expectation Store in Azure" from RTD to Docusaurus
 * [DOCS] Port over "How to host and share DataDocs on a filesystem" from RTD to Docusaurus (#3018)

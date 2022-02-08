@@ -1,10 +1,21 @@
 import copy
-import json
 import logging
 from typing import Dict, List, Optional, Union
 
-from great_expectations.core.batch import BatchRequest
-from great_expectations.data_context.types.base import CheckpointConfig
+from ruamel.yaml.comments import CommentedMap
+
+from great_expectations.checkpoint.util import (
+    batch_request_in_validations_contains_batch_data,
+    get_validations_with_batch_request_as_dict,
+)
+from great_expectations.core.batch import (
+    batch_request_contains_batch_data,
+    get_batch_request_as_dict,
+)
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    checkpointConfigSchema,
+)
 from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
 
 logger = logging.getLogger(__name__)
@@ -51,10 +62,10 @@ class SimpleCheckpointConfigurator:
         self,
         name: str,
         data_context,
-        site_names: Optional[Union[str, List[str]]] = "all",
+        site_names: Union[None, str, List[str]] = "all",
         slack_webhook: Optional[str] = None,
-        notify_on: Optional[str] = "all",
-        notify_with: Optional[Union[str, List[str]]] = "all",
+        notify_on: str = "all",
+        notify_with: Union[str, List[str]] = "all",
         **kwargs,
     ):
         """
@@ -120,33 +131,47 @@ class SimpleCheckpointConfigurator:
             action_list = self._add_update_data_docs_action(action_list)
         if self.slack_webhook:
             action_list = self._add_slack_action(action_list)
-        checkpoint_config = CheckpointConfig(
-            **{
-                "config_version": 1.0,
-                "name": self.name,
-                "class_name": "Checkpoint",
-                "action_list": action_list,
-                "ge_cloud_id": self.other_kwargs.pop("ge_cloud_id", None),
-            }
-        )
-        if self.other_kwargs:
-            other_config = CheckpointConfig(
-                **{
-                    "config_version": self.other_kwargs.pop("config_version", 1.0)
-                    or 1.0,
-                    **self.other_kwargs,
-                }
+
+        config_kwargs: dict = self.other_kwargs or {}
+
+        # DataFrames shouldn't be saved to CheckpointStore
+        batch_request = config_kwargs.get("batch_request")
+        if batch_request_contains_batch_data(batch_request=batch_request):
+            config_kwargs.pop("batch_request", None)
+        else:
+            config_kwargs["batch_request"] = get_batch_request_as_dict(
+                batch_request=batch_request
             )
-            # Necessary when using RuntimeDataConnector with SimpleCheckpoint
-            if isinstance(other_config.batch_request, BatchRequest):
-                other_config.batch_request = other_config.batch_request.get_json_dict()
-            checkpoint_config.update(other_config=other_config)
+
+        # DataFrames shouldn't be saved to CheckpointStore
+        validations = config_kwargs.get("validations")
+        if batch_request_in_validations_contains_batch_data(validations=validations):
+            config_kwargs.pop("validations", [])
+        else:
+            config_kwargs["validations"] = get_validations_with_batch_request_as_dict(
+                validations=validations
+            )
+
+        specific_config_kwargs_overrides: dict = {
+            "config_version": 1.0,
+            "name": self.name,
+            "class_name": "Checkpoint",
+            "action_list": action_list,
+            "ge_cloud_id": self.other_kwargs.pop("ge_cloud_id", None),
+        }
+        config_kwargs.update(specific_config_kwargs_overrides)
+
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+        checkpoint_config: dict = checkpointConfigSchema.load(
+            CommentedMap(**config_kwargs)
+        )
+        config_kwargs = checkpointConfigSchema.dump(checkpoint_config)
 
         logger.debug(
             f"SimpleCheckpointConfigurator built this CheckpointConfig:"
-            f" {json.dumps(checkpoint_config.to_json_dict(), indent=4)}"
+            f"{checkpoint_config}"
         )
-        return checkpoint_config
+        return CheckpointConfig(**config_kwargs)
 
     @staticmethod
     def _default_action_list() -> List[Dict]:

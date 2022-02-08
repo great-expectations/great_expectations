@@ -9,6 +9,7 @@ from great_expectations.data_context.store import (
     ExpectationsStore,
     HtmlSiteStore,
     MetricStore,
+    ProfilerStore,
     Store,
     ValidationsStore,
 )
@@ -19,6 +20,7 @@ class StoreAnonymizer(Anonymizer):
         super().__init__(salt=salt)
         # ordered bottom up in terms of inheritance order
         self._ge_classes = [
+            ProfilerStore,
             CheckpointStore,
             ValidationsStore,
             ExpectationsStore,

@@ -8,7 +8,6 @@ from unittest import mock
 import boto3
 import pandas as pd
 import pytest
-from botocore.errorfactory import ClientError
 from moto import mock_s3
 
 try:
@@ -28,11 +27,14 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.execution_engine import (
+    ExecutionEngine,
+    MetricDomainTypes,
+)
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
 
@@ -261,9 +263,13 @@ def test_get_domain_records_with_column_pair_domain():
     )
 
     expected_column_pair_df = pd.DataFrame(
-        {"a": [2, 3, 4, 6], "b": [3.0, 4.0, 5.0, 6.0], "c": [2.0, 3.0, 4.0, None]}
+        {
+            "a": [2, 3, 4, 6],
+            "b": [3.0, 4.0, 5.0, 6.0],
+            "c": [2.0, 3.0, 4.0, None],
+        },
+        index=[1, 2, 3, 5],
     )
-
     assert data.equals(
         expected_column_pair_df
     ), "Data does not match after getting full access compute domain"
@@ -280,7 +286,7 @@ def test_get_domain_records_with_column_pair_domain():
     data = data.astype(int)
 
     expected_column_pair_df = pd.DataFrame(
-        {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}
+        {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}, index=[1, 2, 3]
     )
 
     assert data.equals(
@@ -333,7 +339,7 @@ def test_get_domain_records_with_multicolumn_domain():
     data = data.astype(int)
 
     expected_multicolumn_df = pd.DataFrame(
-        {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
+        {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[1, 2, 3, 5]
     )
 
     assert data.equals(
@@ -465,7 +471,7 @@ def test_get_compute_domain_with_column_domain():
 def test_get_compute_domain_with_row_condition():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    expected_df = df[df["b"] > 2].reset_index()
+    expected_df = df[df["b"] > 2]
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -490,7 +496,7 @@ def test_get_compute_domain_with_row_condition():
 def test_get_compute_domain_with_unmeetable_row_condition():
     engine = PandasExecutionEngine()
     df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
-    expected_df = df[df["b"] > 24].reset_index()
+    expected_df = df[df["b"] > 24]
 
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
@@ -609,7 +615,7 @@ def test_get_batch_data(test_df):
         PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec())
 
 
-def test_get_batch_with_split_on_whole_table(test_df):
+def test_get_batch_with_split_on_whole_table_runtime(test_df):
     split_df = PandasExecutionEngine().get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_df, splitter_method="_split_on_whole_table"
@@ -640,32 +646,25 @@ def test_get_batch_with_split_on_whole_table_s3(
     assert df.dataframe.shape == test_df_small.shape
 
 
-def test_get_batch_with_no_s3_configured(batch_with_split_on_whole_table_s3):
-    # if S3 was not configured
-    execution_engine_no_s3 = PandasExecutionEngine()
-    execution_engine_no_s3._s3 = None
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
-        execution_engine_no_s3.get_batch_data(
-            batch_spec=batch_with_split_on_whole_table_s3
-        )
-
-
 def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_connector(
     test_s3_files, test_df_small
 ):
     bucket, _keys = test_s3_files
     expected_df = test_df_small
 
+    execution_engine: ExecutionEngine = PandasExecutionEngine()
+
     my_data_connector = ConfiguredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        bucket=bucket,
+        execution_engine=execution_engine,
+        prefix="",
+        assets={"alpha": {}},
         default_regex={
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        bucket=bucket,
-        prefix="",
-        assets={"alpha": {}},
     )
     batch_def = BatchDefinition(
         datasource_name="FAKE_DATASOURCE_NAME",
@@ -677,7 +676,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
             "splitter_method": "_split_on_whole_table",
         },
     )
-    test_df = PandasExecutionEngine().get_batch_data(
+    test_df = execution_engine.get_batch_data(
         batch_spec=my_data_connector.build_batch_spec(batch_definition=batch_def)
     )
     assert test_df.dataframe.shape == expected_df.shape
@@ -693,8 +692,8 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
             "splitter_method": "_split_on_whole_table",
         },
     )
-    with pytest.raises(ClientError):
-        PandasExecutionEngine().get_batch_data(
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        execution_engine.get_batch_data(
             batch_spec=my_data_connector.build_batch_spec(
                 batch_definition=batch_def_no_key
             )
@@ -719,6 +718,19 @@ def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_parquet")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
     assert df.dataframe.shape == test_df_small.shape
+
+
+def test_get_batch_with_no_s3_configured():
+    batch_spec = S3BatchSpec(
+        path="s3a://i_dont_exist",
+        reader_method="read_csv",
+        splitter_method="_split_on_whole_table",
+    )
+    # if S3 was not configured
+    execution_engine_no_s3 = PandasExecutionEngine()
+
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        execution_engine_no_s3.get_batch_data(batch_spec=batch_spec)
 
 
 def test_get_batch_with_split_on_column_value(test_df):
@@ -1028,9 +1040,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     custom_gcs_options = {"filename": "a/b/c/my_gcs_credentials.json"}
     engine = PandasExecutionEngine(gcs_options=custom_gcs_options)
     assert "gcs_options" in engine.config
-    assert (
-        engine.config.get("gcs_options")["filename"] == "a/b/c/my_gcs_credentials.json"
-    )
+    assert "filename" in engine.config.get("gcs_options")
 
 
 @mock.patch(
@@ -1057,11 +1067,19 @@ def test_get_batch_data_with_gcs_batch_spec(
     assert df.dataframe.shape == (3, 3)
 
 
-def test_get_batch_with_no_gcs_configured(gcs_batch_spec):
-    # if GCS Client was not configured
-    execution_engine_no_gcs = PandasExecutionEngine()
-    execution_engine_no_gcs._gcs = None
+def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monkeypatch):
+    # If PandasExecutionEngine contains no credentials for GCS, we will still instantiate _gcs engine,
+    # but will raise Exception when trying get_batch_data(). The only situation where it would work is if we are running in a Google Cloud container.
+    # TODO : Determine how we can test the scenario where we are running PandasExecutionEngine from within Google Cloud env.
 
-    # Raises error due the connection object not being set
+    monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS", raising=False)
+    with pytest.raises(Exception):
+        PandasExecutionEngine().get_batch_data(batch_spec=gcs_batch_spec)
+
+
+def test_get_batch_with_gcs_misconfigured(gcs_batch_spec):
+    # gcs_batchspec point to data that the ExecutionEngine does not have access to
+    execution_engine_no_gcs = PandasExecutionEngine()
+    # Raises error if batch_spec causes ExecutionEngine error
     with pytest.raises(ge_exceptions.ExecutionEngineError):
         execution_engine_no_gcs.get_batch_data(batch_spec=gcs_batch_spec)

@@ -17,7 +17,6 @@ Great Expectations will create a new directory with the following structure:
     |-- great_expectations.yml
     |-- expectations
     |-- checkpoints
-    |-- notebooks
     |-- plugins
     |-- .gitignore
     |-- uncommitted
@@ -37,7 +36,6 @@ COMPLETE_ONBOARDING_PROMPT = """
 It looks like you have a partially initialized Great Expectations project. Would you like to fix this automatically by adding the following missing files (existing files will not be modified)?
 
    great_expectations
-    |-- notebooks
     |-- plugins
     |-- uncommitted
 """
@@ -53,10 +51,10 @@ READY_FOR_CUSTOMIZATION = """<cyan>Congratulations! You are now ready to customi
 HOW_TO_CUSTOMIZE = f"""\n<cyan>You can customize your configuration in many ways. Here are some examples:</cyan>
 
   <cyan>Use the CLI to:</cyan>
-    - Run `<green>great_expectations --v3-api datasource new</green>` to connect to your data.
-    - Run `<green>great_expectations --v3-api checkpoint new <checkpoint_name></green>` to bundle data with Expectation Suite(s) in a Checkpoint for later re-validation.
-    - Run `<green>great_expectations --v3-api suite --help</green>` to create, edit, list, profile Expectation Suites.
-    - Run `<green>great_expectations --v3-api docs --help</green>` to build and manage Data Docs sites.
+    - Run `<green>great_expectations datasource new</green>` to connect to your data.
+    - Run `<green>great_expectations checkpoint new <checkpoint_name></green>` to bundle data with Expectation Suite(s) in a Checkpoint for later re-validation.
+    - Run `<green>great_expectations suite --help</green>` to create, edit, list, profile Expectation Suites.
+    - Run `<green>great_expectations docs --help</green>` to build and manage Data Docs sites.
 
   <cyan>Edit your configuration in {DataContext.GE_YML} to:</cyan>
     - Move Stores to the cloud

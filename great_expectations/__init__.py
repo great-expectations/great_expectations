@@ -9,7 +9,6 @@ from great_expectations.data_context import DataContext
 from .util import (
     from_pandas,
     get_context,
-    measure_execution_time,
     read_csv,
     read_excel,
     read_feather,

@@ -2,6 +2,7 @@ import click
 
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.util import cli_message, cli_message_dict
+from great_expectations.core.usage_statistics.util import send_usage_message
 
 
 @click.group()
@@ -26,8 +27,11 @@ def store_list(directory):
 
         if len(stores) == 0:
             cli_message("No Stores found")
-            toolkit.send_usage_message(
-                data_context=context, event="cli.store.list", success=True
+            send_usage_message(
+                data_context=context,
+                event="cli.store.list",
+                api_version="v2",
+                success=True,
             )
             return
         elif len(stores) == 1:
@@ -41,11 +45,17 @@ def store_list(directory):
             cli_message("")
             cli_message_dict(store)
 
-        toolkit.send_usage_message(
-            data_context=context, event="cli.store.list", success=True
+        send_usage_message(
+            data_context=context,
+            event="cli.store.list",
+            api_version="v2",
+            success=True,
         )
     except Exception as e:
-        toolkit.send_usage_message(
-            data_context=context, event="cli.store.list", success=False
+        send_usage_message(
+            data_context=context,
+            event="cli.store.list",
+            api_version="v2",
+            success=False,
         )
         raise e

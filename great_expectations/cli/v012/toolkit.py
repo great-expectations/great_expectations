@@ -19,14 +19,13 @@ from great_expectations.cli.v012.util import cli_colorize_string, cli_message
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
-from great_expectations.core.usage_statistics.usage_statistics import (
-    send_usage_message as send_usage_stats_message,
-)
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    RunIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.datasource import Datasource
@@ -207,7 +206,7 @@ Great Expectations will store these expectations in a new Expectation Suite '{:s
         profiler=BasicSuiteBuilderProfiler,
         profiler_configuration=profiler_configuration,
         expectation_suite_name=expectation_suite_name,
-        run_id=run_id,
+        run_id=RunIdentifier(run_name=run_id),
         additional_batch_kwargs=additional_batch_kwargs,
     )
     if not profiling_results["success"]:
@@ -333,7 +332,7 @@ def load_expectation_suite(
     try:
         suite = context.get_expectation_suite(suite_name)
         return suite
-    except ge_exceptions.DataContextError as e:
+    except ge_exceptions.DataContextError:
         exit_with_failure_message_and_stats(
             context,
             usage_event,
@@ -346,7 +345,12 @@ def exit_with_failure_message_and_stats(
     context: DataContext, usage_event: str, message: str
 ) -> None:
     cli_message(message)
-    send_usage_message(context, event=usage_event, success=False)
+    send_usage_message(
+        data_context=context,
+        event=usage_event,
+        api_version="v2",
+        success=False,
+    )
     sys.exit(1)
 
 
@@ -427,7 +431,7 @@ def load_data_context_with_error_handling(
             (
                 increment_version,
                 exception_occurred,
-            ) = upgrade_project_one_version_increment(
+            ) = upgrade_project_up_to_one_version_increment(
                 context_root_dir=directory,
                 ge_config_version=ge_config_version,
                 continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
@@ -501,7 +505,10 @@ def upgrade_project(
 
     # use loop in case multiple upgrades need to take place
     while ge_config_version < CURRENT_GE_CONFIG_VERSION:
-        increment_version, exception_occurred = upgrade_project_one_version_increment(
+        (
+            increment_version,
+            exception_occurred,
+        ) = upgrade_project_up_to_one_version_increment(
             context_root_dir=context_root_dir,
             ge_config_version=ge_config_version,
             continuation_message=EXIT_UPGRADE_CONTINUATION_MESSAGE,
@@ -530,7 +537,7 @@ To learn more about the upgrade process, visit \
     sys.exit(0)
 
 
-def upgrade_project_one_version_increment(
+def upgrade_project_up_to_one_version_increment(
     context_root_dir: str,
     ge_config_version: float,
     continuation_message: str,
@@ -625,20 +632,3 @@ def confirm_proceed_or_exit(
         else:
             return False
     return True
-
-
-def send_usage_message(
-    data_context: DataContext,
-    event: str,
-    event_payload: Optional[dict] = None,
-    success: bool = False,
-):
-    if event_payload is None:
-        event_payload = {}
-    event_payload.update({"api_version": "v2"})
-    send_usage_stats_message(
-        data_context=data_context,
-        event=event,
-        event_payload=event_payload,
-        success=success,
-    )

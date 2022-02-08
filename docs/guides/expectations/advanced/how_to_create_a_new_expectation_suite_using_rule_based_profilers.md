@@ -7,9 +7,9 @@ In this tutorial, you will develop hands-on experience with configuring a Rule-B
 
 <Prerequisites>
 
-- Have a basic understanding of [Metrics in Great Expectations](https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html)
-- Have a basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys)
-- Have read the sections in Core Concepts on [Profilers](../../../reference/profilers) and [Rule-Based Profilers](../../../reference/profilers#rule-based-profilers)
+- Have a basic understanding of [Metrics in Great Expectations](https://docs.greatexpectations.io/docs/reference/metrics)
+- Have a basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations)
+- Have read the sections in Core Concepts on [Profilers](../../../reference/profilers.md) and [Rule-Based Profilers](../../../reference/profilers.md#rule-based-profilers)
 
 </Prerequisites>
 
@@ -18,14 +18,14 @@ In this tutorial, you will develop hands-on experience with configuring a Rule-B
 ### 1. Create a new Great Expectations project
 - Create a new directory, called `taxi_profiling_tutorial`
 - Within this directory, create another directory called `data`
-- Navigate to the top level of `taxi_profiling_tutorial` in a terminal and run `great_expectations --v3-api init`
+- Navigate to the top level of `taxi_profiling_tutorial` in a terminal and run `great_expectations init`
 
 ### 2. Download the data
-- Download [this directory](https://github.com/great-expectations/great_expectations/tree/develop/tests/test_sets/taxi_yellow_trip_data_samples) of yellow taxi trip `csv` files from the Great Expectations GitHub repo. You can use a tool like [DownGit](https://downgit.github.io/) to do so
+- Download [this directory](https://github.com/great-expectations/great_expectations/tree/develop/tests/test_sets/taxi_yellow_tripdata_samples) of yellow taxi trip `csv` files from the Great Expectations GitHub repo. You can use a tool like [DownGit](https://downgit.github.io/) to do so
 - Move the unzipped directory of `csv` files into the `data` directory that you created in Step 1
 
 ### 3. Setting up your Datasource
-- Follow the steps in the [How to connect to data on a filesystem using Pandas](../../../guides/connecting_to_your_data/filesystem/pandas). For the purpose of this tutorial, we will work from a `yaml` to set up your datasource config. When you open up your notebook to create and test and save your datasource config, replace the config docstring with the following docstring:
+- Follow the steps in the [How to connect to data on a filesystem using Pandas](../../../guides/connecting_to_your_data/filesystem/pandas.md). For the purpose of this tutorial, we will work from a `yaml` to set up your datasource config. When you open up your notebook to create and test and save your datasource config, replace the config docstring with the following docstring:
 ```python
 example_yaml = f"""
 name: taxi_pandas

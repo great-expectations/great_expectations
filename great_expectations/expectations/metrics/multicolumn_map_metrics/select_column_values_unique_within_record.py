@@ -62,7 +62,7 @@ metric for wide tables using SQLAlchemy leads to long WHERE clauses for the unde
                 for idx_dest in range(idx_src + 1, num_columns)
             )
         )
-        row_wise_cond = sa.not_(sa.or_(conditions))
+        row_wise_cond = sa.not_(conditions)
         return row_wise_cond
 
     @multicolumn_condition_partial(engine=SparkDFExecutionEngine)

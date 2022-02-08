@@ -1,19 +1,29 @@
+# isort:skip_file
+
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
+from great_expectations.data_context.types.base import (
+    DataConnectorConfig,
+    dataConnectorConfigSchema,
+)
+
 from great_expectations.datasource.data_connector import (
-    ConfiguredAssetAzureDataConnector,
-    ConfiguredAssetFilePathDataConnector,
-    ConfiguredAssetFilesystemDataConnector,
-    ConfiguredAssetGCSDataConnector,
-    ConfiguredAssetS3DataConnector,
-    ConfiguredAssetSqlDataConnector,
     DataConnector,
-    FilePathDataConnector,
-    InferredAssetFilePathDataConnector,
-    InferredAssetFilesystemDataConnector,
-    InferredAssetGCSDataConnector,
-    InferredAssetS3DataConnector,
-    InferredAssetSqlDataConnector,
     RuntimeDataConnector,
+    FilePathDataConnector,
+    ConfiguredAssetFilePathDataConnector,
+    InferredAssetFilePathDataConnector,
+    ConfiguredAssetFilesystemDataConnector,
+    InferredAssetFilesystemDataConnector,
+    ConfiguredAssetS3DataConnector,
+    InferredAssetS3DataConnector,
+    ConfiguredAssetAzureDataConnector,
+    InferredAssetAzureDataConnector,
+    ConfiguredAssetGCSDataConnector,
+    InferredAssetGCSDataConnector,
+    ConfiguredAssetSqlDataConnector,
+    InferredAssetSqlDataConnector,
+    ConfiguredAssetDBFSDataConnector,
+    InferredAssetDBFSDataConnector,
 )
 
 
@@ -24,30 +34,42 @@ class DataConnectorAnonymizer(Anonymizer):
         # This list should contain all DataConnector types. When new DataConnector types
         # are created, please make sure to add ordered bottom up in terms of inheritance order
         self._ge_classes = [
-            InferredAssetGCSDataConnector,
-            InferredAssetS3DataConnector,
-            InferredAssetFilesystemDataConnector,
-            InferredAssetFilePathDataConnector,
+            InferredAssetDBFSDataConnector,
+            ConfiguredAssetDBFSDataConnector,
             InferredAssetSqlDataConnector,
-            ConfiguredAssetGCSDataConnector,
-            ConfiguredAssetS3DataConnector,
-            ConfiguredAssetAzureDataConnector,
-            ConfiguredAssetFilesystemDataConnector,
-            ConfiguredAssetFilePathDataConnector,
             ConfiguredAssetSqlDataConnector,
-            RuntimeDataConnector,
+            InferredAssetGCSDataConnector,
+            ConfiguredAssetGCSDataConnector,
+            InferredAssetAzureDataConnector,
+            ConfiguredAssetAzureDataConnector,
+            InferredAssetS3DataConnector,
+            ConfiguredAssetS3DataConnector,
+            InferredAssetFilesystemDataConnector,
+            ConfiguredAssetFilesystemDataConnector,
+            InferredAssetFilePathDataConnector,
+            ConfiguredAssetFilePathDataConnector,
             FilePathDataConnector,
+            RuntimeDataConnector,
             DataConnector,
         ]
 
     def anonymize_data_connector_info(self, name, config):
-        anonymized_info_dict = {}
-        anonymized_info_dict["anonymized_name"] = self.anonymize(name)
+        anonymized_info_dict = {
+            "anonymized_name": self.anonymize(name),
+        }
+
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+        data_connector_config: DataConnectorConfig = dataConnectorConfigSchema.load(
+            config
+        )
+        data_connector_config_dict: dict = dataConnectorConfigSchema.dump(
+            data_connector_config
+        )
 
         self.anonymize_object_info(
             anonymized_info_dict=anonymized_info_dict,
             ge_classes=self._ge_classes,
-            object_config=config,
+            object_config=data_connector_config_dict,
         )
 
         return anonymized_info_dict

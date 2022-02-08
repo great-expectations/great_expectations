@@ -3,9 +3,9 @@ import pytest
 
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_datasource_schema,
+    anonymized_init_payload_schema,
     anonymized_string_schema,
-    init_payload_schema,
-    usage_statistics_record_schema,
+    anonymized_usage_statistics_record_schema,
 )
 
 
@@ -121,7 +121,7 @@ def test_init_payload_validation():
             }
         ],
     }
-    jsonschema.validate(payload, init_payload_schema)
+    jsonschema.validate(payload, anonymized_init_payload_schema)
 
 
 def test_run_val_op_message():
@@ -137,4 +137,4 @@ def test_run_val_op_message():
         "data_context_instance_id": "4f6deb55-8fbd-4131-9f97-b42b0902eae5",
         "ge_version": "0.9.7+203.ge3a97f44.dirty",
     }
-    jsonschema.validate(message, usage_statistics_record_schema)
+    jsonschema.validate(message, anonymized_usage_statistics_record_schema)

@@ -3,7 +3,6 @@ import logging
 from itertools import chain
 
 import ipywidgets as widgets
-from IPython.display import display
 
 logger = logging.getLogger(__name__)
 
@@ -1019,7 +1018,7 @@ class ExpectationExplorer:
     def generate_parse_strings_as_datetimes_widget_dict(
         self,
         expectation_state,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes: bool = False,
         column=None,
         **expectation_kwargs,
     ):

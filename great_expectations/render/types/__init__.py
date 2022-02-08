@@ -1,8 +1,11 @@
 import json
 from copy import deepcopy
 from string import Template as pTemplate
+from typing import List, Optional
 
+from great_expectations.marshmallow__shade import INCLUDE, Schema, fields, post_load
 from great_expectations.render.exceptions import InvalidRenderedContentError
+from great_expectations.types import DictDot
 
 
 class RenderedContent:
@@ -434,6 +437,7 @@ class RenderedDocumentContent(RenderedContent):
         expectation_suite_name=None,
         batch_kwargs=None,
         batch_spec=None,
+        ge_cloud_id=None,
     ):
         if not isinstance(sections, list) and all(
             [isinstance(section, RenderedSectionContent) for section in sections]
@@ -452,6 +456,7 @@ class RenderedDocumentContent(RenderedContent):
         self.expectation_suite_name = expectation_suite_name
         self.batch_kwargs = batch_kwargs
         self.batch_spec = batch_spec
+        self.ge_cloud_id = ge_cloud_id
 
     def to_json_dict(self):
         d = super().to_json_dict()
@@ -465,6 +470,7 @@ class RenderedDocumentContent(RenderedContent):
         d["expectation_suite_name"] = self.expectation_suite_name
         d["batch_kwargs"] = self.batch_kwargs
         d["batch_spec"] = self.batch_spec
+        d["ge_cloud_id"] = self.ge_cloud_id
         return d
 
 
@@ -490,3 +496,85 @@ class RenderedSectionContent(RenderedContent):
         )
         d["section_name"] = self.section_name
         return d
+
+
+class RenderedAtomicValue(DictDot):
+    def __init__(
+        self,
+        template: Optional[str] = None,
+        params: Optional[dict] = None,
+        schema: Optional[dict] = None,
+        header: Optional["RenderedAtomicValue"] = None,
+        header_row: Optional[List["RenderedAtomicValue"]] = None,
+        table: Optional[List[List["RenderedAtomicValue"]]] = None,
+        graph: Optional[dict] = None,
+    ):
+        # StringValueType
+        self.template: Optional[str] = template
+        self.params: Optional[dict] = params
+        self.schema: Optional[dict] = schema
+
+        # TableType
+        self.header: Optional[RenderedAtomicValue] = header
+        self.header_row: Optional[List[RenderedAtomicValue]] = header_row
+        self.table: Optional[List[List[RenderedAtomicValue]]] = table
+
+        # GraphType
+        self.graph: Optional[RenderedAtomicValue] = graph
+
+
+class RenderedAtomicValueSchema(Schema):
+    class Meta:
+        unknown = INCLUDE
+
+    # for StringType
+    template = fields.String(required=False, allow_none=True)
+    params = fields.Dict(required=False, allow_none=True)
+    schema = fields.Dict(required=False, allow_none=True)
+
+    # for TableType
+    header = fields.Dict(required=False, allow_none=True)
+    header_row = fields.List(fields.Dict, required=False, allow_none=True)
+    table = fields.List(fields.List(fields.Dict, required=False, allow_none=True))
+
+    # for GraphType
+    graph = fields.String(required=False, allow_none=True)
+
+    @post_load
+    def create_value_obj(self, data, **kwargs):
+        return RenderedAtomicValue(**data)
+
+
+class RenderedAtomicContent(RenderedContent):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        value: Optional[RenderedAtomicValue] = None,
+        value_type: Optional[str] = None,
+    ):
+        self.name = name
+        self.value = value
+        self.value_type = value_type
+
+    def to_json_dict(self):
+        d = super().to_json_dict()
+        d["name"] = self.name
+        d["value"] = self.value.__dict__
+        d["value_type"] = self.value_type
+        return d
+
+
+class RenderedAtomicContentSchema(Schema):
+    class Meta:
+        unknown: INCLUDE
+
+    name = fields.String(required=False, allow_none=True)
+    value = fields.Nested(RenderedAtomicValueSchema(), required=True, allow_none=False)
+    value_type = fields.String(required=True, allow_none=False)
+
+    @post_load
+    def make_rendered_atomic_content(self, data, **kwargs):
+        return RenderedAtomicContent(**data)
+
+
+renderedAtomicValueSchema = RenderedAtomicValueSchema()

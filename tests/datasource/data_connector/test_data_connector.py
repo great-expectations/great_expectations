@@ -16,10 +16,7 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
 yaml = YAML()
@@ -35,6 +32,7 @@ def basic_data_connector(tmp_path_factory):
         yaml.load(
             f"""
 class_name: ConfiguredAssetFilesystemDataConnector
+name: my_data_connector
 base_directory: {base_directory}
 datasource_name: FAKE_DATASOURCE
 
@@ -47,7 +45,9 @@ assets:
     my_asset_name: {{}}
 """,
         ),
-        runtime_environment={"name": "my_data_connector"},
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     return basic_data_connector
@@ -62,9 +62,10 @@ def test_basic_instantiation(tmp_path_factory):
     # noinspection PyUnusedLocal
     my_data_connector = ConfiguredAssetFilesystemDataConnector(
         name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE",
+        execution_engine=PandasExecutionEngine(),
         base_directory=base_directory,
         glob_directive="*.csv",
-        datasource_name="FAKE_DATASOURCE",
         default_regex={
             "pattern": "(.*)",
             "group_names": ["file_name"],
@@ -102,9 +103,10 @@ def test__file_object_caching_for_FileDataConnector(tmp_path_factory):
 
     my_data_connector = ConfiguredAssetFilesystemDataConnector(
         name="my_data_connector",
+        datasource_name="FAKE_DATASOURCE",
+        execution_engine=PandasExecutionEngine(),
         base_directory=base_directory,
         glob_directive="*/*/*.csv",
-        datasource_name="FAKE_DATASOURCE",
         default_regex={
             "pattern": "(.*).csv",
             "group_names": ["name"],
@@ -171,21 +173,21 @@ def test__batch_definition_matches_batch_request():
     assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequestBase(
-            datasource_name="A", data_connector_name=None, data_asset_name=None
+            datasource_name="A", data_connector_name="", data_asset_name=""
         ),
     )
 
     assert not batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequestBase(
-            datasource_name="B", data_connector_name=None, data_asset_name=None
+            datasource_name="B", data_connector_name="", data_asset_name=""
         ),
     )
 
     assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequestBase(
-            datasource_name="A", data_connector_name="a", data_asset_name=None
+            datasource_name="A", data_connector_name="a", data_asset_name=""
         ),
     )
 
@@ -218,9 +220,9 @@ def test__batch_definition_matches_batch_request():
     assert batch_definition_matches_batch_request(
         batch_definition=A,
         batch_request=BatchRequestBase(
-            datasource_name=None,
-            data_connector_name=None,
-            data_asset_name=None,
+            datasource_name="",
+            data_connector_name="",
+            data_asset_name="",
             data_connector_query={
                 "batch_filter_parameters": {"id": "A"},
             },

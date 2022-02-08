@@ -1,5 +1,5 @@
+import copy
 import json
-from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
 from great_expectations.core.expectation_validation_result import (
@@ -7,18 +7,15 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    CheckpointConfigSchema,
-)
+from great_expectations.data_context.types.base import Attributes
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.types import DictDot
+from great_expectations.types import SerializableDictDot
 
 
-class CheckpointResult(DictDot):
+class CheckpointResult(SerializableDictDot):
     """
     The run_results property forms the backbone of this type and defines the basic contract for what a checkpoint's
     run method returns. It is a dictionary where the top-level keys are the ValidationResultIdentifiers of
@@ -56,7 +53,7 @@ class CheckpointResult(DictDot):
             ValidationResultIdentifier,
             Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
         ],
-        checkpoint_config: CheckpointConfig,
+        checkpoint_config: Attributes,
         success: Optional[bool] = None,
     ) -> None:
         self._run_id = run_id
@@ -90,7 +87,7 @@ class CheckpointResult(DictDot):
         return self.checkpoint_config.name
 
     @property
-    def checkpoint_config(self) -> CheckpointConfig:
+    def checkpoint_config(self) -> Attributes:
         return self._checkpoint_config
 
     @property
@@ -283,25 +280,35 @@ class CheckpointResult(DictDot):
             }
         return self._validation_statistics
 
-    def to_json_dict(self):
-        return checkpointResultSchema.dump(self)
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_raw_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
     def __repr__(self):
-        return json.dumps(self.to_json_dict(), indent=2)
+        serializeable_dict: dict = self.to_json_dict()
+        return json.dumps(serializeable_dict, indent=2)
 
 
 class CheckpointResultSchema(Schema):
     # JC: I think this needs to be changed to be an instance of a new type called CheckpointResult,
     # which would include the top-level keys run_id, config, name, and a list of results.
     run_id = fields.Nested(RunIdentifierSchema)
-    run_results = fields.Dict()
-    checkpoint_config = fields.Nested(CheckpointConfigSchema)
-    success = fields.Bool()
+    run_results = fields.Dict(required=False, allow_none=True)
+    checkpoint_config = fields.Dict(required=False, allow_none=True)
+    success = fields.Boolean(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @pre_dump
     def prepare_dump(self, data, **kwargs):
-        data = deepcopy(data)
+        data = copy.deepcopy(data)
         data._run_results = convert_to_json_serializable(data.run_results)
         return data
 

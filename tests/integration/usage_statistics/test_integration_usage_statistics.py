@@ -1,9 +1,6 @@
 import copy
 import datetime
-import os
-import signal
 import subprocess
-import time
 import uuid
 
 import boto3

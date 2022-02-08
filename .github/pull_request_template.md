@@ -6,7 +6,7 @@ Changes proposed in this pull request:
 -
 
 
-After submitting your PR, CI checks will run and @tiny-tim-bot will check for your CLA signature.
+After submitting your PR, CI checks will run and @ge-cla-bot will check for your CLA signature.
 
 For a PR with nontrivial changes, we review with both design-centric and code-centric lenses.
 

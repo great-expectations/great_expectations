@@ -137,18 +137,41 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
     group_names: List[str],
 ) -> Optional[Tuple[str, IDDict]]:
     # noinspection PyUnresolvedReferences
-    matches: Optional[re.Match] = re.match(regex_pattern, data_reference)
+    pattern = re.compile(regex_pattern)
+    matches: Optional[re.Match] = pattern.match(data_reference)
     if matches is None:
         return None
-    groups: list = list(matches.groups())
-    batch_identifiers: IDDict = IDDict(dict(zip(group_names, groups)))
+
+    # Check for `(?P<name>)` named group syntax
+    match_dict = matches.groupdict()
+    if match_dict:  # Only named groups will populate this dict
+        batch_identifiers = _determine_batch_identifiers_using_named_groups(
+            match_dict, group_names
+        )
+    else:
+        groups: list = list(matches.groups())
+        batch_identifiers: IDDict = IDDict(dict(zip(group_names, groups)))
 
     # TODO: <Alex>Accommodating "data_asset_name" inside batch_identifiers (e.g., via "group_names") is problematic; we need a better mechanism.</Alex>
     # TODO: <Alex>Update: Approach -- we can differentiate "def map_data_reference_string_to_batch_definition_list_using_regex(()" methods between ConfiguredAssetFilesystemDataConnector and InferredAssetFilesystemDataConnector so that IDDict never needs to include data_asset_name. (ref: https://superconductivedata.slack.com/archives/C01C0BVPL5Q/p1603843413329400?thread_ts=1603842470.326800&cid=C01C0BVPL5Q)</Alex>
-    data_asset_name: str = DEFAULT_DATA_ASSET_NAME
-    if "data_asset_name" in batch_identifiers:
-        data_asset_name = batch_identifiers.pop("data_asset_name")
+    data_asset_name: str = batch_identifiers.pop(
+        "data_asset_name", DEFAULT_DATA_ASSET_NAME
+    )
     return data_asset_name, batch_identifiers
+
+
+def _determine_batch_identifiers_using_named_groups(
+    match_dict: dict, group_names: List[str]
+) -> IDDict:
+    batch_identifiers = IDDict()
+    for key, value in match_dict.items():
+        if key in group_names:
+            batch_identifiers[key] = value
+        else:
+            logger.warning(
+                f"The named group '{key}' must explicitly be stated in group_names to be parsed"
+            )
+    return batch_identifiers
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
@@ -193,7 +216,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
         regex_pattern=regex_pattern,
         group_names=group_names,
     )
-    converted_string = filepath_template.format(**template_arguments)
+    converted_string: str = filepath_template.format(**template_arguments)
 
     return converted_string
 

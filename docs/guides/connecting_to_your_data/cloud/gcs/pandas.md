@@ -28,12 +28,12 @@ This will allow you to validate and explore your data.
 
 Import these necessary packages and modules.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L1-L4
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L3-L6
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L6
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L8
 ```
 
 ### 3. Configure your Datasource
@@ -62,6 +62,8 @@ It is also important to note that GCS `DataConnectors` support various methods o
 Please note that if you use the `filename` or `info` options, you must supply these options to any GE objects that interact with GCS (i.e. `PandasExecutionEngine`). 
 The `gcs_options` dictionary is also responsible for storing any `**kwargs` you wish to pass to the GCS `storage.Client()` connection object (i.e. `project`)
 
+For more details regarding storing credentials for use with Great Expectations see: [How to configure credentials](../../../setup/configuring_data_contexts/how_to_configure_credentials.md)
+
 For more details regarding authentication, please visit the following:
 * [gcloud CLI Tutorial](https://cloud.google.com/storage/docs/reference/libraries)
 * [GCS Python API Docs](https://googleapis.dev/python/storage/latest/index.html)
@@ -89,22 +91,22 @@ Using these example configurations, add in your GCS bucket and path to a directo
     ]}>
   <TabItem value="yaml">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L8-L27
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L10-L28
   ```
 
   Run this code to test your configuration.
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L37
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L39
   ```
   </TabItem>
   <TabItem value="python">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L8-L27
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L10-L29
   ```
 
   Run this code to test your configuration.
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L38
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L40
   ```
   </TabItem>
   </Tabs>
@@ -120,22 +122,22 @@ Using these example configurations, add in your GCS bucket and path to a directo
     ]}>
   <TabItem value="yaml">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py#L8-L25
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py#L10-L27
   ```
 
   Run this code to test your configuration.
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py#L36
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py#L38
   ```
   </TabItem>
   <TabItem value="python">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L8-L25
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L10-L26
   ```
 
-  Run this code to test your configuration.
+  Run this code to test your configuration. 
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L35
+  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L37
   ```
   </TabItem>
   </Tabs>
@@ -165,7 +167,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L40
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py#L42
 ```
 
 </TabItem>
@@ -183,7 +185,7 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
   ]}>
   <TabItem value="runtime_batch_request">
 
-Add the GCS path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
+Add the GCS path to your CSV in the `path` key under `runtime_parameters` in your `RuntimeBatchRequest`.
 
 Please note we support the following format for GCS URL's: `gs://<BUCKET_OR_NAME>/<BLOB>`.
 
@@ -198,7 +200,7 @@ Then load data into the `Validator`.
 
 Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L68-L72
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L74-L78
 ```
 Then load data into the `Validator`.
 ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py#L56-L62

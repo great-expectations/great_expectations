@@ -67,6 +67,10 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column_set",
+        "exact_match",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """
@@ -97,6 +101,55 @@ class ExpectTableColumnsToMatchSet(TableExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
         return True
+
+    @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs, ["column_set", "exact_match"]
+        )
+
+        if params["column_set"] is None:
+            template_str = "Must specify a set or list of columns."
+
+        else:
+            # standardize order of the set for output
+            params["column_list"] = list(params["column_set"])
+
+            column_list_template_str = ", ".join(
+                [f"$column_list_{idx}" for idx in range(len(params["column_list"]))]
+            )
+
+            exact_match_str = "exactly" if params["exact_match"] is True else "at least"
+
+            template_str = f"Must have {exact_match_str} these columns (in any order): {column_list_template_str}"
+
+            for idx in range(len(params["column_list"])):
+                params["column_list_" + str(idx)] = params["column_list"][idx]
+
+        params_with_json_schema = {
+            "column_list": {
+                "schema": {"type": "array"},
+                "value": params.get("column_list"),
+            },
+            "exact_match": {
+                "schema": {"type": "boolean"},
+                "value": params.get("exact_match"),
+            },
+        }
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")

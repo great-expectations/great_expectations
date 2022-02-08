@@ -24,14 +24,14 @@ Here’s an overview of the components of a typical Great Expectations deploymen
   * [Connecting to Data](/docs/tutorials/getting_started/customize_your_deployment#connecting-to-data)
   * [Options for hosting Data Docs](/docs/tutorials/getting_started/customize_your_deployment#options-for-hosting-data-docs)
   * [Additional Checkpoints and Actions](/docs/tutorials/getting_started/customize_your_deployment#additional-checkpoints-and-actions)
+* [How to update Data Docs as a Validation Action](/docs/guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action)
 
 ## Options for storing Great Expectations configuration
 The simplest way to manage your Great Expectations configuration is usually by committing great_expectations/great_expectations.yml to Git. However, it’s not usually a good idea to commit credentials to source control. In some situations, you might need to deploy without access to source control (or maybe even a file system).
 
 Here’s how to handle each of those cases:
 
-* [How to use a YAML file or environment variables to populate credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_yaml_file_or_environment_variables)
-* [How to populate credentials from a secrets store](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials_using_a_secrets_store)
+* [How to configure credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
 * [How to instantiate a Data Context without a yml file](/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file)
 
 ## Options for storing Expectations
@@ -62,7 +62,7 @@ Great Expectations generates and provides notebooks as interactive development e
 ## Deployment Patterns
 
 * [How to instantiate a Data Context on an EMR Spark cluster](/docs/deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster)
-* [How to instantiate a Data Context on Databricks Spark cluster](/docs/deployment_patterns/how_to_instantiate_a_data_context_on_databricks_spark_cluster)
+* [How to use Great Expectations in Databricks](/docs/deployment_patterns/how_to_use_great_expectations_in_databricks)
 
 ## Connecting to Data
 Great Expectations allows you to connect to data in a wide variety of sources, and the list is constantly getting longer. If you have an idea for a source not listed here, please speak up in the public discussion forum.
@@ -78,7 +78,6 @@ Great Expectations allows you to connect to data in a wide variety of sources, a
 * [How to connect to data on a filesystem using Spark](/docs/guides/connecting_to_your_data/filesystem/spark)
 * [How to connect to data on S3 using Spark](/docs/guides/connecting_to_your_data/cloud/s3/spark)
 * [How to connect to data on GCS using Spark](/docs/guides/connecting_to_your_data/cloud/gcs/spark)
-* [How to connect to data on Azure using Spark](/docs/guides/connecting_to_your_data/cloud/azure/spark)
 
 ## Options for hosting Data Docs
 By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure Blob Storage), configured to share a static website.
@@ -91,12 +90,13 @@ By default, Data Docs are stored locally, in an uncommitted directory. This is g
 ## Additional Checkpoints and Actions
 Most teams will want to configure various Checkpoints and Validation Actions as part of their deployment. There are two primary patterns for deploying Checkpoints. Sometimes Checkpoints are executed during data processing (e.g. as a task within Airflow). From this vantage point, they can control program flow. Sometimes Checkpoints are executed against materialized data. Great Expectations supports both patterns. There are also some rare instances where you may want to validate data without using a Checkpoint.
 
-* [How to update Data Docs as a Validation Action](/docs/guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action)
-* [How to store Validation Results as a Validation Action](/docs/guides/validation/validation_actions/how_to_store_validation_results_as_a_validation_action)
 * [How to trigger Slack notifications as a Validation Action](/docs/guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action)
 * [How to trigger Opsgenie notifications as a Validation Action](/docs/guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action)
 * [How to trigger Email as a Validation Action](/docs/guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action)
 * [How to deploy a scheduled Checkpoint with cron](/docs/guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron)
 * [How to implement custom notifications](/docs/guides/validation/advanced/how_to_implement_custom_notifications)
 * [How to validate data without a Checkpoint](/docs/guides/validation/advanced/how_to_validate_data_without_a_checkpoint)
-* [How to run a Checkpoint in Airflow](/docs/deployment_patterns/how_to_run_a_checkpoint_in_airflow)
+* [How to run a Checkpoint in Airflow](/docs/deployment_patterns/how_to_use_great_expectations_with_airflow)
+
+## Not interested in managing your own configuration or infrastructure?
+Learn more about Great Expectations Cloud — our fully managed SaaS offering. Sign up for [our weekly cloud workshop](https://greatexpectations.io/cloud)! You’ll get to see our newest features and apply for our private Alpha program!

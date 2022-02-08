@@ -1,8 +1,5 @@
 from unittest import mock
 
-import pytest
-
-import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.cli.datasource import (
     BigqueryCredentialYamlHelper,
@@ -27,7 +24,8 @@ host = "YOUR_HOST"
 port = "YOUR_PORT"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
-database = "YOUR_DATABASE"'''
+database = "YOUR_DATABASE"
+schema_name = "YOUR_SCHEMA"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
     assert (
         helper.yaml_snippet()
@@ -42,6 +40,7 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
+    schema_name: {schema_name}
 data_connectors:
   default_runtime_data_connector_name:
     class_name: RuntimeDataConnector
@@ -49,7 +48,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
     )
 
     renderer = helper.get_notebook_renderer(empty_data_context)
@@ -63,7 +62,8 @@ host = "YOUR_HOST"
 port = "YOUR_PORT"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
-database = "YOUR_DATABASE"'''
+database = "YOUR_DATABASE"
+schema_name = "YOUR_SCHEMA"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     print(helper.yaml_snippet())
@@ -81,6 +81,7 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
+    schema_name: {schema_name}
     drivername: stuff
 data_connectors:
   default_runtime_data_connector_name:
@@ -89,7 +90,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
     )
 
     renderer = helper.get_notebook_renderer(empty_data_context)
@@ -106,7 +107,8 @@ host = "YOUR_HOST"
 port = "3306"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
-database = "YOUR_DATABASE"'''
+database = "YOUR_DATABASE"
+schema_name = "YOUR_SCHEMA"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
@@ -122,6 +124,7 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
+    schema_name: {schema_name}
     drivername: mysql+pymysql
 data_connectors:
   default_runtime_data_connector_name:
@@ -130,7 +133,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
     )
 
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -163,7 +166,8 @@ host = "YOUR_HOST"
 port = "5432"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
-database = "postgres"'''
+database = "YOUR_DATABASE"
+schema_name = "YOUR_SCHEMA"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
@@ -179,6 +183,7 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
+    schema_name: {schema_name}
     drivername: postgresql
 data_connectors:
   default_runtime_data_connector_name:
@@ -187,7 +192,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -218,7 +223,8 @@ host = "YOUR_HOST"
 port = "5439"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
-database = "YOUR_DATABASE"'''
+database = "YOUR_DATABASE"
+schema_name = "YOUR_SCHEMA"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
     assert (
         helper.yaml_snippet()
@@ -233,6 +239,7 @@ execution_engine:
     username: {username}
     password: {password}
     database: {database}
+    schema_name: {schema_name}
     query:
       sslmode: prefer
     drivername: postgresql+psycopg2
@@ -243,7 +250,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
     )
 
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -281,11 +288,12 @@ def test_SnowflakeCredentialYamlHelper_password_auth(
     expected_credentials_snippet = '''\
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
-database = ""  # The database name (optional -- leave blank for none)
-schema = ""  # The schema name (optional -- leave blank for none)
-warehouse = ""  # The warehouse name (optional -- leave blank for none)
-role = ""  # The role name (optional -- leave blank for none)
+database = ""  # The database name
+schema = ""  # The schema name
+warehouse = ""  # The warehouse name
+role = ""  # The role name
 password = "YOUR_PASSWORD"'''
+
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
@@ -312,7 +320,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -336,10 +344,10 @@ def test_SnowflakeCredentialYamlHelper_sso_auth(
     expected_credentials_snippet = """\
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
-database = ""  # The database name (optional -- leave blank for none)
-schema = ""  # The schema name (optional -- leave blank for none)
-warehouse = ""  # The warehouse name (optional -- leave blank for none)
-role = ""  # The role name (optional -- leave blank for none)
+database = ""  # The database name
+schema = ""  # The schema name
+warehouse = ""  # The warehouse name
+role = ""  # The role name
 authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' used to connect through SSO"""
     assert helper.credentials_snippet() == expected_credentials_snippet
     assert (
@@ -367,7 +375,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -387,12 +395,13 @@ def test_SnowflakeCredentialYamlHelper_key_pair_auth(
     helper.prompt()
     assert helper.auth_method == SnowflakeAuthMethod.KEY_PAIR
 
-    expected_credentials_snippet = """host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
+    expected_credentials_snippet = """\
+host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
-database = ""  # The database name (optional -- leave blank for none)
-schema = ""  # The schema name (optional -- leave blank for none)
-warehouse = ""  # The warehouse name (optional -- leave blank for none)
-role = ""  # The role name (optional -- leave blank for none)
+database = ""  # The database name
+schema = ""  # The schema name
+warehouse = ""  # The warehouse name
+role = ""  # The role name
 private_key_path = "YOUR_KEY_PATH"  # Path to the private key used for authentication
 private_key_passphrase = ""   # Passphrase for the private key used for authentication (optional -- leave blank for none)"""
     assert helper.credentials_snippet() == expected_credentials_snippet
@@ -422,7 +431,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -475,7 +484,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -524,7 +533,7 @@ data_connectors:
       - default_identifier_name
   default_inferred_data_connector_name:
     class_name: InferredAssetSqlDataConnector
-    name: whole_table"""'''
+    include_schema_name: True"""'''
     )
 
     assert helper.verify_libraries_installed() is True

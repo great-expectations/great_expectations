@@ -1,8 +1,0 @@
-{
-  "data_asset_type": null,
-  "expectation_suite_name": "yellow_trip_data_validations",
-  "expectations": [],
-  "meta": {
-    "great_expectations_version": "0.13.17+49.g44630e38f.dirty"
-  }
-}
