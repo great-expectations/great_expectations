@@ -46,15 +46,13 @@ When an Expectation should be evaluated, Great Expectations collects all the Met
 
 ### Past Metrics are available to other Expectations and Data Docs
 
-An Expectation can also expose Metrics, such as the observed value of a useful statistic via an Expectation Validation Result, where <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> -- or other Expectations -- can use them.  This is done through an Action (to which the Expectation's Validation Result has been passed) which will save them to a Metric Store.  The Action in question is the `StoreMetricsAction`.  You can view the implementation of this Action in the `great_expectations/checkpoint/actions.py` file of a Great Expectations deployment, or the [same file in our GitHub.](https://github.com/great-expectations/great_expectations/blob/0312642755f6003c70623e9aa3ceed1020373dac/great_expectations/checkpoint/actions.py#L905)
+An Expectation can also expose Metrics, such as the observed value of a useful statistic via an Expectation Validation Result, where <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> -- or other Expectations -- can use them.  This is done through an Action (to which the Expectation's Validation Result has been passed) which will save them to a Metric Store.  The Action in question is the `StoreMetricsAction`.  You can view the implementation of this Action in [our GitHub.](https://github.com/great-expectations/great_expectations/blob/0312642755f6003c70623e9aa3ceed1020373dac/great_expectations/checkpoint/actions.py#L905)
 
 ## API basics
 
 ### How to access
 
 Validation Results can expose Metrics that are defined by specific Expectations that have been validated, called "Expectation Defined Metrics." To access those values, you address the Metric as a dot-delimited string that identifies the value, such as `expect_column_values_to_be_unique.success`or `expect_column_values_to_be_between.result.unexpected_percent`. These Metrics may be stored in a Metrics Store.
-
-It is important to note that these Metrics are *NOT* available for compute on raw data directly as other Metrics are.
 
 A `metric_kwargs_id` is a string representation of the Metric Kwargs that can be used as a database key. For simple cases, it could be easily readable, such as `column=Age`, but when there are multiple keys and values or complex values, it will most likely be a md5 hash of key/value pairs. It can also be `None` in the case that there are no kwargs required to identify the Metric.
 
