@@ -84,11 +84,23 @@ batches:
       - Titanic.profiled
 """
 
+
+import os
+
+for root, dirs, files in os.walk(".", topdown=False):
+    for name in files:
+        print(os.path.join(root, name))
+    for name in dirs:
+        print(os.path.join(root, name))
+
+print("~~~~~~")
 assert actual_checkpoint_yaml == yaml.safe_load(expected_checkpoint_yaml)
 
+raise Exception
 # override for integration tests
 updated_configuration = actual_checkpoint_yaml
-updated_configuration["batches"][0]["batch_kwargs"]["path"] = "data/Titanic.csv"
+updated_configuration["batches"][0]["batch_kwargs"]["path"] = "./data/Titanic.csv"
+
 
 # run checkpoint
 context.add_checkpoint(**updated_configuration)
