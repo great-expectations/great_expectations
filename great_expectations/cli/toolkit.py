@@ -930,7 +930,7 @@ def load_json_file_into_dict(
     error_message: str
 
     if not filepath:
-        error_message = f"The path to a JSON file was not specified."
+        error_message = "The path to a JSON file was not specified."
         exit_with_failure_message_and_stats(
             data_context=data_context,
             usage_event=usage_event,

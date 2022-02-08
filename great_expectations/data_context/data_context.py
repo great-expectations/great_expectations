@@ -1728,7 +1728,7 @@ class BaseDataContext:
         else:
             raise ge_exceptions.DatasourceError(
                 datasource_name,
-                f"The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
+                "The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
             )
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
@@ -2121,14 +2121,14 @@ class BaseDataContext:
             active_store_names.append(self.checkpoint_store_name)
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
             logger.info(
-                f"Checkpoint store is not configured; omitting it from active stores"
+                "Checkpoint store is not configured; omitting it from active stores"
             )
 
         try:
             active_store_names.append(self.profiler_store_name)
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
             logger.info(
-                f"Profiler store is not configured; omitting it from active stores"
+                "Profiler store is not configured; omitting it from active stores"
             )
 
         return [
@@ -3323,7 +3323,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def list_profilers(self) -> List[str]:
         if self.profiler_store is None:
             raise ge_exceptions.StoreConfigurationError(
-                f"Attempted to list profilers from a Profiler Store, which is not a configured store."
+                "Attempted to list profilers from a Profiler Store, which is not a configured store."
             )
         return profiler_toolkit.list_profilers(
             profiler_store=self.profiler_store,
