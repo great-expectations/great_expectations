@@ -1445,6 +1445,7 @@ class Expectation(metaclass=MetaExpectation):
             "maturity": "CONCEPT_ONLY",
             "tags": [],
             "contributors": [],
+            "requirements": [],
             "library_metadata_passed_checks": False,
         }
 

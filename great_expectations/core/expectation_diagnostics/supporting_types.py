@@ -42,6 +42,7 @@ class AugmentedLibraryMetadata(SerializableDictDot):
     maturity: Maturity
     tags: List[str]
     contributors: List[str]
+    requirements: List[str]
     library_metadata_passed_checks: bool
     package: Optional[Package] = None
 

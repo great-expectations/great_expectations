@@ -43,6 +43,7 @@ def test__get_augmented_library_metadata_on_a_class_with_no_library_metadata_obj
         maturity="CONCEPT_ONLY",
         tags=[],
         contributors=[],
+        requirements=[],
         library_metadata_passed_checks=False,
         package=None,
     )
@@ -56,6 +57,7 @@ def test__get_augmented_library_metadata_on_a_class_with_a_basic_library_metadat
         maturity="EXPERIMENTAL",
         tags=["tag", "other_tag"],
         contributors=["@abegong"],
+        requirements=[],
         library_metadata_passed_checks=True,
         package=None,
     )
@@ -77,6 +79,7 @@ def test__get_augmented_library_metadata_on_a_class_with_a_package_in_its_librar
         maturity="EXPERIMENTAL",
         tags=["tag", "other_tag"],
         contributors=["@abegong"],
+        requirements=[],
         library_metadata_passed_checks=True,
         package="whatsit_expectations",
     )

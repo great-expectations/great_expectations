@@ -33,6 +33,7 @@ def test_expectation_self_check():
             "maturity": "CONCEPT_ONLY",
             "tags": [],
             "contributors": [],
+            "requirements": [],
             "library_metadata_passed_checks": False,
             "package": None,
         },

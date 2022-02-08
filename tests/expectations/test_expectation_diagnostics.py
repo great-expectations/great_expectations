@@ -77,6 +77,7 @@ edr = ExpectationDiagnostics(
                 "flows",
             ],
             "contributors": ["@shinnyshinshin", "@abegong"],
+            "requirements": [],
             "library_metadata_passed_checks": True,
         }
     ),
