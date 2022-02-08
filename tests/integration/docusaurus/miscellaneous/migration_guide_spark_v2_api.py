@@ -96,7 +96,6 @@ for root, dirs, files in os.walk(".", topdown=False):
 print("~~~~~~")
 assert actual_checkpoint_yaml == yaml.safe_load(expected_checkpoint_yaml)
 
-raise Exception
 # override for integration tests
 updated_configuration = actual_checkpoint_yaml
 updated_configuration["batches"][0]["batch_kwargs"]["path"] = "./data/Titanic.csv"
