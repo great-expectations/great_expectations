@@ -360,7 +360,6 @@ module.exports = {
       type: 'category',
       label: 'Reference',
       items: [
-        { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
         {
           type: 'doc',
           label: 'API Reference',
@@ -371,12 +370,40 @@ module.exports = {
           type: 'category',
           label: 'Technical Terms',
           items: [
-            'terms/datasource',
-            'terms/data_context',
+            'terms/action',
+            'terms/checkpoint',
             'terms/data_asset',
+            'terms/data_context',
+            'terms/datasource',            
             'terms/evaluation_parameter',
             'terms/execution_engine',
-            'terms/plugin'
+            'terms/expectation',
+            'terms/expectation_suite',
+            'terms/plugin',
+            'terms/profiler',
+            'terms/supporting_resource',
+            'terms/validation_result'
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Supplemental Documentation',
+          items: [
+            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' },
+            { type: 'doc', id: 'reference/supporting_resources' },
+            {
+              type: 'category',
+              label: 'Expectations',
+              collapsed: true,
+              items: [
+                { type: 'doc', id: 'reference/expectations/conditional_expectations' },
+                { type: 'doc', id: 'reference/expectations/distributional_expectations' },
+                { type: 'doc', id: 'reference/expectations/implemented_expectations' },
+                { type: 'doc', id: 'reference/expectations/standard_arguments' },
+                { type: 'doc', id: 'reference/expectations/result_format' }
+              ]
+            }
           ]
         },
         {
@@ -391,22 +418,8 @@ module.exports = {
             { type: 'doc', id: 'reference/datasources' },
             { type: 'doc', id: 'reference/evaluation_parameters' },
             { type: 'doc', id: 'reference/execution_engine' },
-            {
-              type: 'category',
-              label: 'Expectations',
-              collapsed: true,
-              items: [
-                { type: 'doc', id: 'reference/expectations/expectations' },
-                { type: 'doc', id: 'reference/expectations/conditional_expectations' },
-                { type: 'doc', id: 'reference/expectations/distributional_expectations' },
-                { type: 'doc', id: 'reference/expectations/implemented_expectations' },
-                { type: 'doc', id: 'reference/expectation_suite_operations' }
-              ]
-            },
             { type: 'doc', id: 'reference/metrics' },
             { type: 'doc', id: 'reference/profilers' },
-            { type: 'doc', id: 'reference/expectations/result_format' },
-            { type: 'doc', id: 'reference/expectations/standard_arguments' },
             // { type: 'doc', id: 'reference/stores' },
             { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
             { type: 'doc', id: 'reference/validation' },

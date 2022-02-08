@@ -15,7 +15,7 @@ Plugins extend Great Expectations' components and/or functionality.
 
 ### Features and promises
 
-Python files that are placed in the `plugins` directory in your project (which is created automatically when you initialize your <TechnicalTag relative="../" tag="data_context" text="Data Context" />) can be used to extend Great Expectations.  Modules added there can be referenced in configuration files or imported directly in Python interperters, scripts, or Jupyter Notebooks.  If you contribute a feature to Great Expectations, implementing it as a Plugin will allow you to start using that feature even before it has been merged into the open source Great Expectations code base and included in a new release.
+Python files that are placed in the `plugins` directory in your project (which is created automatically when you initialize your <TechnicalTag relative="../" tag="data_context" text="Data Context" />) can be used to extend Great Expectations.  Modules added there can be referenced in configuration files or imported directly in Python interpreters, scripts, or Jupyter Notebooks.  If you contribute a feature to Great Expectations, implementing it as a Plugin will allow you to start using that feature even before it has been merged into the open source Great Expectations code base and included in a new release.
 
 ### Relationships to other objects
 
