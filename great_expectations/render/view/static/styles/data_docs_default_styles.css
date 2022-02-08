@@ -163,7 +163,7 @@ td .show-scrollbars {
   }
 
   .navbar-brand a {
-    background: url('../../../../static/images/full_logo_dark.png') 0 0 no-repeat;
+    background: url('https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/full_logo_dark.png') 0 0 no-repeat;
     background-size: 228.75px 50px;
     display: inline-block
   }
