@@ -20,6 +20,10 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
+
 try:
     from typing import Literal
 except ImportError:
@@ -1724,7 +1728,7 @@ class BaseDataContext:
         else:
             raise ge_exceptions.DatasourceError(
                 datasource_name,
-                f"The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
+                "The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
             )
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
@@ -2117,14 +2121,14 @@ class BaseDataContext:
             active_store_names.append(self.checkpoint_store_name)
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
             logger.info(
-                f"Checkpoint store is not configured; omitting it from active stores"
+                "Checkpoint store is not configured; omitting it from active stores"
             )
 
         try:
             active_store_names.append(self.profiler_store_name)
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
             logger.info(
-                f"Profiler store is not configured; omitting it from active stores"
+                "Profiler store is not configured; omitting it from active stores"
             )
 
         return [
@@ -3264,6 +3268,35 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs,
         )
 
+    def add_profiler(
+        self,
+        name: str,
+        config_version: float,
+        rules: Dict[str, dict],
+        variables: Optional[dict] = None,
+        ge_cloud_id: Optional[str] = None,
+    ):
+        config_data = {
+            "name": name,
+            "config_version": config_version,
+            "rules": rules,
+            "variables": variables,
+        }
+
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+        validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
+        profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
+
+        config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
+
+        # Chetan - 20220127 - Open to refactor all Profiler CRUD from toolkit to class methods
+        return profiler_toolkit.add_profiler(
+            config=config,
+            data_context=self,
+            profiler_store=self.profiler_store,
+            ge_cloud_id=ge_cloud_id,
+        )
+
     def get_profiler(
         self,
         name: Optional[str] = None,
@@ -3290,7 +3323,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def list_profilers(self) -> List[str]:
         if self.profiler_store is None:
             raise ge_exceptions.StoreConfigurationError(
-                f"Attempted to list profilers from a Profiler Store, which is not a configured store."
+                "Attempted to list profilers from a Profiler Store, which is not a configured store."
             )
         return profiler_toolkit.list_profilers(
             profiler_store=self.profiler_store,
@@ -3676,7 +3709,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         instantiated_class = instantiate_class_from_config(
             config=profiler_config,
             runtime_environment={"data_context": self},
-            config_defaults={"module_name": "great_expectations.rule_based_profiler"},
+            config_defaults={
+                "module_name": "great_expectations.rule_based_profiler",
+                "class_name": "RuleBasedProfiler",
+            },
         )
 
         profiler_anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(

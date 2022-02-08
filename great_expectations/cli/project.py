@@ -102,7 +102,7 @@ upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFI
                     upgrade_overview = cli_colorize_string(upgrade_overview)
                     cli_message(string=upgrade_overview)
                     is_config_ok = False
-                    upgrade_message = f"""The configuration of your great_expectations.yml is outdated.  Please \
+                    upgrade_message = """The configuration of your great_expectations.yml is outdated.  Please \
 consult the V3 API migration guide \
 https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and upgrade your \
 Great Expectations configuration in order to take advantage of the latest capabilities.

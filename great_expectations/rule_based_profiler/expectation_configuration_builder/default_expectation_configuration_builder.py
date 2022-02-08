@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Set
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -17,6 +17,10 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     parameter_name-to-parameter_fully_qualified_parameter_name map (name-value pairs supplied in the kwargs dictionary).
     """
 
+    include_field_names: Set[str] = {
+        "expectation_type",
+    }
+
     def __init__(
         self,
         expectation_type: str,
@@ -26,7 +30,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     ):
         super().__init__(expectation_type=expectation_type)
 
-        self.expectation_kwargs = kwargs
+        self._expectation_kwargs = kwargs
 
         if meta is None:
             meta = {}
@@ -56,7 +60,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                 variables=variables,
                 parameters=parameters,
             )
-            for parameter_name, fully_qualified_parameter_name in self.expectation_kwargs.items()
+            for parameter_name, fully_qualified_parameter_name in self._expectation_kwargs.items()
         }
         meta: Dict[str, Any] = get_parameter_value_and_validate_return_type(
             domain=domain,

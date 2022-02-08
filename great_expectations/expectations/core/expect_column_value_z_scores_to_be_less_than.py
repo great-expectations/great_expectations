@@ -1,9 +1,8 @@
-from typing import Dict, List, Optional, Union
+from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 
 from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
-from ..metrics import ColumnValuesZScore
 
 
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
