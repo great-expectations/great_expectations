@@ -72,7 +72,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Check whether the Expectation has a library_metadata object"""
 
         return ExpectationDiagnosticCheckMessage(
-            message="library_metadata object exists",
+            message="Has a library_metadata object",
             passed=library_metadata.library_metadata_passed_checks,
         )
 
@@ -136,7 +136,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""
 
-        message = "Core logic exists and passes tests on at least one Execution Engine"
+        message = "Has core logic and passes tests on at least one Execution Engine"
         successful_execution_engines = 0
         for k, v in execution_engines.items():
             if v is True:

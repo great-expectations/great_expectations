@@ -245,7 +245,7 @@ def test__check_core_logic_for_at_least_one_execution_engine__with_all_execution
         ),
     ) == ExpectationDiagnosticCheckMessage(
         **{
-            "message": "Core logic exists and passes tests on at least one Execution Engine",
+            "message": "Has core logic and passes tests on at least one Execution Engine",
             "passed": True,
         }
     )
@@ -260,7 +260,7 @@ def test__check_core_logic_for_at_least_one_execution_engine__with_no_execution_
         ),
     ) == ExpectationDiagnosticCheckMessage(
         **{
-            "message": "Core logic exists and passes tests on at least one Execution Engine",
+            "message": "Has core logic and passes tests on at least one Execution Engine",
             "passed": False,
         }
     )
@@ -275,7 +275,7 @@ def test__check_core_logic_for_at_least_one_execution_engine__with_only_pandas()
         ),
     ) == ExpectationDiagnosticCheckMessage(
         **{
-            "message": "Core logic exists and passes tests on at least one Execution Engine",
+            "message": "Has core logic and passes tests on at least one Execution Engine",
             "passed": True,
         }
     )
@@ -290,7 +290,7 @@ def test__check_core_logic_for_at_least_one_execution_engine__with_only_sql():
         ),
     ) == ExpectationDiagnosticCheckMessage(
         **{
-            "message": "Core logic exists and passes tests on at least one Execution Engine",
+            "message": "Has core logic and passes tests on at least one Execution Engine",
             "passed": True,
         }
     )
@@ -305,7 +305,7 @@ def test__check_core_logic_for_at_least_one_execution_engine__with_only_spark():
         ),
     ) == ExpectationDiagnosticCheckMessage(
         **{
-            "message": "Core logic exists and passes tests on at least one Execution Engine",
+            "message": "Has core logic and passes tests on at least one Execution Engine",
             "passed": True,
         }
     )

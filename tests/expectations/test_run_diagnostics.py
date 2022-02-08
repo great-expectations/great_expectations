@@ -118,7 +118,7 @@ def test_expectation_self_check():
             "experimental": [
                 {
                     "doc_url": None,
-                    "message": "library_metadata object exists",
+                    "message": "Has a library_metadata object",
                     "passed": False,
                     "sub_messages": [],
                 },
@@ -136,7 +136,7 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": "Core logic exists and passes tests on at least one Execution Engine",
+                    "message": "Has core logic and passes tests on at least one Execution Engine",
                     "passed": True,
                     "sub_messages": [],
                 },
