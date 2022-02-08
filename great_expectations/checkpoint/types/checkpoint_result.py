@@ -6,16 +6,16 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
-from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import Attributes
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
-from great_expectations.types import DictDot
+from great_expectations.types import SerializableDictDot
 
 
-class CheckpointResult(DictDot):
+class CheckpointResult(SerializableDictDot):
     """
     The run_results property forms the backbone of this type and defines the basic contract for what a checkpoint's
     run method returns. It is a dictionary where the top-level keys are the ValidationResultIdentifiers of
@@ -281,21 +281,16 @@ class CheckpointResult(DictDot):
         return self._validation_statistics
 
     def to_json_dict(self) -> dict:
-        dict_obj: dict = self.to_dict()
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_raw_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
-
-    def __deepcopy__(self, memo):
-        cls = self.__class__
-        result = cls.__new__(cls)
-
-        memo[id(self)] = result
-        for key, value in self.to_dict().items():
-            if value is not None:
-                value_copy = safe_deep_copy(data=value, memo=memo)
-                setattr(result, key, value_copy)
-
-        return result
 
     def __repr__(self):
         serializeable_dict: dict = self.to_json_dict()
