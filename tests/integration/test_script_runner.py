@@ -695,7 +695,7 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
     """
     Prepare and environment and run integration tests from a list of tests.
 
-    Note that the only required parameter for a test in the matrix is
+    N ote that the only required parameter for a test in the matrix is
     `user_flow_script` and that all other parameters are optional.
     """
     workdir = os.getcwd()
@@ -724,11 +724,17 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
                 test_context_dir,
             )
 
+        print("test_name: " + integration_test_fixture.name)
+        print("workdir" + workdir)
+        print("base_dir" + base_dir)
+        print("test_context_dir" + test_context_dir)
         # Test Data
         data_dir = integration_test_fixture.data_dir
         if data_dir:
             source_data_dir = os.path.join(base_dir, data_dir)
             target_data_dir = os.path.join(tmp_path, "data")
+            print("source_data_dir: " + source_data_dir)
+            print("target_data_dir: " + target_data_dir)
             shutil.copytree(
                 source_data_dir,
                 target_data_dir,
@@ -770,7 +776,6 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
         spec = importlib.util.spec_from_loader("mymodule", loader)
         mymodule = importlib.util.module_from_spec(spec)
         loader.exec_module(mymodule)
-
     finally:
         os.chdir(workdir)
 
