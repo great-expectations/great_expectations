@@ -457,14 +457,14 @@ class Checkpoint:
         if pretty_print:
             if not validations_present:
                 print(
-                    f"""Your current Checkpoint configuration has an empty or missing "validations" attribute.  This
+                    """Your current Checkpoint configuration has an empty or missing "validations" attribute.  This
 means you must either update your Checkpoint configuration or provide an appropriate validations
 list programmatically (i.e., when your Checkpoint is run).
                     """
                 )
             if not action_list_present:
                 print(
-                    f"""Your current Checkpoint configuration has an empty or missing "action_list" attribute.  This
+                    """Your current Checkpoint configuration has an empty or missing "action_list" attribute.  This
 means you must provide an appropriate validations list programmatically (i.e., when your Checkpoint
 is run), with each validation having its own defined "action_list" attribute.
                     """

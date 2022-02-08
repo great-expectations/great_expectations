@@ -55,11 +55,11 @@ class JsonSchemaProfiler(Profiler):
             )
         if "type" not in schema.keys():
             raise KeyError(
-                f"This profiler requires a json schema with a top level `type` key"
+                "This profiler requires a json schema with a top level `type` key"
             )
         if schema["type"] != JsonSchemaTypes.OBJECT.value:
             raise TypeError(
-                f"This profiler requires a json schema with a top level `type` of `object`"
+                "This profiler requires a json schema with a top level `type` of `object`"
             )
         validator = jsonschema.validators.validator_for(schema)
         validator.check_schema(schema)
