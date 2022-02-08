@@ -8,7 +8,7 @@ from enum import Enum
 from typing import Any, List, Optional, Type
 
 import pkg_resources
-from ruaml.yaml import YAML
+from ruamel.yaml import YAML
 
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
@@ -81,8 +81,8 @@ class SocialLink(SerializableDictDot):
 @dataclass
 class DomainExpert(SerializableDictDot):
     full_name: str
-    social_links: List[SocialLink]
-    picture: str
+    social_links: Optional[List[SocialLink]] = None
+    picture: Optional[str] = None
 
 
 class Maturity(str, Enum):
@@ -137,22 +137,28 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         with open(path) as f:
             data: dict = yaml.load(f.read())
 
+        if not data:
+            logger.warning(f"{path} is empty so exiting early")
+            return
+
         # Assign general attrs
-        for attr in ("package_name", "info", "description"):
-            self[attr] = data.get("general", {}).get(attr)
+        general = data.get("general")
+        if general:
+            for attr in ("package_name", "icon", "description"):
+                self[attr] = general.get(attr)
 
         # Assign code owners
+        self.code_owners = []
         code_owners = data.get("code_owners")
         if code_owners:
-            self.code_owners = []
             for owner in code_owners:
                 code_owner = GitHubUser(**owner)
                 self.code_owners.append(code_owner)
 
         # Assign domain experts
+        self.domain_experts = []
         domain_experts = data.get("domain_experts")
         if domain_experts:
-            self.domain_experts = []
             for expert in domain_experts:
                 domain_expert = DomainExpert(**expert)
                 self.domain_experts.append(domain_expert)

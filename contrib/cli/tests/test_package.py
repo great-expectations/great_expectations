@@ -5,6 +5,8 @@ import py
 import pytest
 from great_expectations_contrib.package import (
     Dependency,
+    DomainExpert,
+    GitHubUser,
     GreatExpectationsContribPackageManifest,
     Maturity,
     RenderedExpectation,
@@ -95,7 +97,7 @@ ruamel.yaml>=0.16,<0.17.18  # package
     ]
 
 
-def test_update_dependencies_with_invalid_path_exists_early(
+def test_update_dependencies_with_invalid_path_exits_early(
     package: GreatExpectationsContribPackageManifest,
 ):
     package.dependencies = [Dependency(text="my_dep", link="my_link")]
@@ -103,17 +105,52 @@ def test_update_dependencies_with_invalid_path_exists_early(
     assert package.dependencies == []
 
 
-def test_update_attrs_with_diagnostics_does_not_overwrite_static_fields(
-    diagnostics: List[ExpectationDiagnostics],
+def test_update_from_package_info_with_valid_path(
+    tmpdir: py.path.local, package: GreatExpectationsContribPackageManifest
 ):
-    package = GreatExpectationsContribPackageManifest(
-        package_name="my_package",
-        icon="my/icon/path",
-        description="my_description",
-        version="0.1.0",
-    )
-    package_before_update = copy.deepcopy(package)
-    package._update_attrs_with_diagnostics(diagnostics)
+    package_info_file = tmpdir.mkdir("tmp").join("package_info.yml")
+    contents = """
+    """
+    package_info_file.write(contents)
 
-    for attr in ("package_name", "icon", "description", "version"):
-        assert package[attr] == package_before_update[attr]
+    package._update_from_package_info(str(package_info_file))
+
+
+def test_update_from_package_info_with_valid_path_with_missing_keys(
+    tmpdir: py.path.local, package: GreatExpectationsContribPackageManifest
+):
+    code_owners = [GitHubUser("John Doe")]
+    domain_experts = [DomainExpert("Charles Dickens")]
+    package.code_owners = code_owners
+    package.domain_experts = domain_experts
+
+    package_info_file = tmpdir.mkdir("tmp").join("package_info.yml")
+    contents = """
+    # No data in my YAML but this shouldn't raise any errors!
+    """
+    package_info_file.write(contents)
+
+    package._update_from_package_info(str(package_info_file))
+
+    for attr in (
+        "package_name",
+        "icon",
+        "description",
+        "code_owners",
+        "domain_experts",
+    ):
+        assert package[attr] is None
+
+
+def test_update_from_package_info_with_invalid_path_exits_early(
+    package: GreatExpectationsContribPackageManifest,
+):
+    code_owners = [GitHubUser("John Doe")]
+    domain_experts = [DomainExpert("Charles Dickens")]
+    package.code_owners = code_owners
+    package.domain_experts = domain_experts
+
+    package._update_from_package_info("my_fake_path.yml")
+
+    assert package.code_owners == code_owners
+    assert package.domain_experts == domain_experts
