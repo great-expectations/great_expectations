@@ -123,10 +123,13 @@ def test_renders_to_a_useful_str():
 
 @pytest.mark.skip(reason="hmmm. We should be able to make this work by default")
 def test_is_json_serializable():
-    assert MyClassA(
-        foo="a string",
-        bar=1,
-    ).to_json_dict() == {"foo": "a string", "bar": 1}
+    assert (
+        MyClassA(
+            foo="a string",
+            bar=1,
+        ).to_json_dict()
+        == {"foo": "a string", "bar": 1}
+    )
 
 
 def test_missing_keys():
