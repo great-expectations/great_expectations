@@ -88,7 +88,7 @@ assert actual_checkpoint_yaml == yaml.safe_load(expected_checkpoint_yaml)
 
 # override for integration tests
 updated_configuration = actual_checkpoint_yaml
-updated_configuration["batches"][0]["batch_kwargs"]["path"] = "./data/Titanic.csv"
+updated_configuration["batches"][0]["batch_kwargs"]["path"] = "../data/Titanic.csv"
 
 # run checkpoint
 context.add_checkpoint(**updated_configuration)
