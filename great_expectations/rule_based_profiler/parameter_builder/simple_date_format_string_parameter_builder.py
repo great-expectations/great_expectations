@@ -1,11 +1,14 @@
 import logging
-from typing import Iterable, Optional
+from typing import Dict, Iterable, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     ParameterBuilder,
 )
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -21,21 +24,34 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
     def __init__(
         self,
-        *,
-        parameter_id,
-        data_context,
+        name: str,
+        metric_domain_kwargs: Optional[Union[str, dict]] = None,
         threshold: float = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
         additional_candidate_strings: Optional[Iterable[str]] = None,
+        data_context: Optional["DataContext"] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
         """
         Configure this SimpleDateFormatStringParameterBuilder
         Args:
+            name: the name of this parameter -- this is user-specified parameter name (from configuration);
+            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
+            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_strings: a list of candidate date format strings that will REPLACE the default
             additional_candidate_strings: a list of candidate date format strings that will SUPPLEMENT the default
+            data_context: DataContext
+            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
-        super().__init__(parameter_id=parameter_id, data_context=data_context)
+        super().__init__(
+            name=name,
+            data_context=data_context,
+            batch_request=batch_request,
+        )
+
+        self._metric_domain_kwargs = metric_domain_kwargs
+
         self._threshold = threshold
         if candidate_strings is not None:
             self._candidate_strings = candidate_strings
@@ -45,11 +61,39 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         if additional_candidate_strings is not None:
             self._candidate_strings += additional_candidate_strings
 
-    def _build_parameters(self, *, rule_state, validator, batch_ids, **kwargs):
-        """Check the percentage of values matching each string, and return the best fit, or None if no
-        string exceeds the configured threshold."""
-        if batch_ids is None:
-            batch_ids = [validator.active_batch_id]
+    def _build_parameters(
+        self,
+        parameter_container: ParameterContainer,
+        domain: Domain,
+        *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ):
+        """
+        Check the percentage of values matching each string, and return the best fit, or None if no
+        string exceeds the configured threshold.
+
+        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
+        details.
+
+        :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
+        ptional details
+        """
+        validator: Validator = self.get_validator(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        batch_ids: Optional[List[str]] = self.get_batch_ids(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+        if not batch_ids:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
+            )
 
         if len(batch_ids) > 1:
             # By default, the validator will use active batch id (the most recently loaded batch)
@@ -62,15 +106,15 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                     f"currently loaded in the validator."
                 )
 
-        domain = rule_state.active_domain["domain_kwargs"]
         domain.update({"batch_id": batch_ids[0]})
 
-        count = validator.get_metric(
+        nonnull_count = validator.get_metric(
             MetricConfiguration(
                 "column_values.not_null.count",
                 domain,
             )
         )
+
         format_string_success_ratios = dict()
         for fmt_string in self._candidate_strings:
             format_string_success_ratios[fmt_string] = (
@@ -81,7 +125,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                         {"strftime_format": fmt_string},
                     )
                 )
-                / count
+                / nonnull_count
             )
 
         best = None

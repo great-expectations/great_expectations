@@ -73,6 +73,11 @@ rules:
         batch_request: $variables.alice_single_batch_data_batch_request
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
+      # unused parameter my_date_format
+      - name: my_date_format
+        class_name: SimpleDateFormatStringParameterBuilder
+        module_name: great_expectations.rule_based_profiler.parameter_builder
+        batch_request: $variables.alice_single_batch_data_batch_request
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_of_type
         class_name: DefaultExpectationConfigurationBuilder
