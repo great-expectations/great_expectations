@@ -232,21 +232,6 @@ detected.
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        metric_computation_result: MetricComputationResult = self.get_metrics(
-            batch_ids=batch_ids,
-            validator=validator,
-            metric_name=self._metric_name,
-            metric_domain_kwargs=self._metric_domain_kwargs,
-            metric_value_kwargs=self._metric_value_kwargs,
-            enforce_numeric_metric=self._enforce_numeric_metric,
-            replace_nan_with_zero=self._replace_nan_with_zero,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        metric_values: MetricComputationValues = metric_computation_result.metric_values
-        details: MetricComputationDetails = metric_computation_result.details
-
         # Obtain sampling_method directive from rule state (i.e., variables and parameters); from instance variable otherwise.
         sampling_method: str = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -279,6 +264,21 @@ detected.
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
             )
+
+        metric_computation_result: MetricComputationResult = self.get_metrics(
+            batch_ids=batch_ids,
+            validator=validator,
+            metric_name=self._metric_name,
+            metric_domain_kwargs=self._metric_domain_kwargs,
+            metric_value_kwargs=self._metric_value_kwargs,
+            enforce_numeric_metric=self._enforce_numeric_metric,
+            replace_nan_with_zero=self._replace_nan_with_zero,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+        metric_values: MetricComputationValues = metric_computation_result.metric_values
+        details: MetricComputationDetails = metric_computation_result.details
 
         truncate_values: Dict[str, Number] = self._get_truncate_values_using_heuristics(
             metric_values=metric_values,
