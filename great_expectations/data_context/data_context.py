@@ -3341,16 +3341,18 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
         expectation_suite_name: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        include_citation: bool = True,
     ) -> ExpectationSuite:
         return profiler_toolkit.run_profiler(
-            profiler,
-            name,
-            ge_cloud_id,
-            variables,
-            rules,
-            expectation_suite_name,
-            expectation_suite_ge_cloud_id,
+            data_context=self,
+            profiler_store=self.profiler_store,
+            profiler=profiler,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+            variables=variables,
+            rules=rules,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
         )
 
     def test_yaml_config(
