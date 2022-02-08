@@ -723,6 +723,7 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
                 context_source_dir,
                 test_context_dir,
             )
+            print("test_context_dir: " + test_context_dir)
 
         print("test_name: " + integration_test_fixture.name)
         print("workdir" + workdir)
