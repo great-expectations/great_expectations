@@ -35,7 +35,7 @@ Past Metrics can also be accessed by some Expectations through Evaluation Parame
 
 <ValidateHeader/>
 
-<TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> Validate data by running the Expectations in one or more <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" />.  In the process, Metrics will be generated.  These Metrics can be passed to the Actions in the Checkpoint's `action_list` as part of the <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> for the Expectations (depending on the Validation Result's `result_format`), and will be stored in a <TechnicalTag relative="../" tag="metric_store" text="Metric Store" /> if the `StoreMetricsAction` is one of the <TechnicalTag relative="../" tag="validation_action" text="Actions" /> in the Checkpoint's `action_list`.
+<TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> Validate data by running the Expectations in one or more <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" />.  In the process, Metrics will be generated.  These Metrics can be passed to the Actions in the Checkpoint's `action_list` as part of the <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> for the Expectations (depending on the Validation Result's `result_format`), and will be stored in a <TechnicalTag relative="../" tag="metric_store" text="Metric Store" /> if the `StoreMetricsAction` is one of the <TechnicalTag relative="../" tag="action" text="Actions" /> in the Checkpoint's `action_list`.
 
 
 ## Features
