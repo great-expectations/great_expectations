@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import List, Tuple
 
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -15,6 +15,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationRendererDiagnostics,
     ExpectationTestDiagnostics,
 )
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
 
 # from pydantic.dataclasses import dataclass
@@ -51,39 +52,16 @@ class ExpectationDiagnostics(SerializableDictDot):
     metrics: List[ExpectationMetricDiagnostics]
     tests: List[ExpectationTestDiagnostics]
     errors: List[ExpectationErrorDiagnostics]
+    maturity_checklist: ExpectationDiagnosticMaturityMessages
 
-    @property
-    def checklist(self) -> ExpectationDiagnosticMaturityMessages:
-        """Build a list of ExpectationDiagnosticCheckMessages corresponding to the steps for creating a custom expectation.
-
-        By design, this method is a rollup of information already contained within ExpectationDiagnostics.
-        Querying or introspecting the Expectation again should not be necessary.
-        """
-
-        experimental_checks = []
-        experimental_checks.append(self._check_library_metadata(self.library_metadata))
-        experimental_checks.append(self._check_docstring(self.description))
-        experimental_checks.append(self._check_example_cases(self.examples, self.tests))
-        experimental_checks.append(
-            self._check_core_logic_for_at_least_one_execution_engine(
-                self.execution_engines
-            )
-        )
-
-        beta_checks = []
-        production_checks = []
-
-        return ExpectationDiagnosticMaturityMessages(
-            experimental=experimental_checks,
-            beta=beta_checks,
-            production=production_checks,
-        )
+    def to_json_dict(self) -> dict:
+        return convert_to_json_serializable(data=asdict(self))
 
     def generate_checklist(self) -> str:
         """Generates the checklist in CLI-appropriate string format."""
         str_ = self._convert_checks_into_output_message(
             self.description["camel_name"],
-            self.checklist,
+            self.maturity_checklist,
         )
         return str_
 
@@ -94,10 +72,8 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Check whether the Expectation has a library_metadata object"""
 
         return ExpectationDiagnosticCheckMessage(
-            **{
-                "message": "library_metadata object exists",
-                "passed": library_metadata.library_metadata_passed_checks,
-            }
+            message="library_metadata object exists",
+            passed=library_metadata.library_metadata_passed_checks,
         )
 
     @staticmethod
@@ -113,24 +89,20 @@ class ExpectationDiagnostics(SerializableDictDot):
             short_description = None
         if short_description not in {"", "\n", "TODO: Add a docstring here", None}:
             return ExpectationDiagnosticCheckMessage(
-                **{
-                    "message": message,
-                    "sub_messages": [
-                        {
-                            "message": '"' + short_description + '"',
-                            "passed": True,
-                        }
-                    ],
-                    "passed": True,
-                }
+                message=message,
+                sub_messages=[
+                    {
+                        "message": '"' + short_description + '"',
+                        "passed": True,
+                    }
+                ],
+                passed=True,
             )
 
         else:
             return ExpectationDiagnosticCheckMessage(
-                **{
-                    "message": message,
-                    "passed": False,
-                }
+                message=message,
+                passed=False,
             )
 
     @classmethod
@@ -154,10 +126,8 @@ class ExpectationDiagnostics(SerializableDictDot):
         )
         print(positive_case_count, negative_case_count, unexpected_case_count, passed)
         return ExpectationDiagnosticCheckMessage(
-            **{
-                "message": message,
-                "passed": passed,
-            }
+            message=message,
+            passed=passed,
         )
 
     @staticmethod
@@ -174,17 +144,13 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         if successful_execution_engines > 0:
             return ExpectationDiagnosticCheckMessage(
-                **{
-                    "message": message,
-                    "passed": True,
-                }
+                message=message,
+                passed=True,
             )
         else:
             return ExpectationDiagnosticCheckMessage(
-                **{
-                    "message": message,
-                    "passed": False,
-                }
+                message=message,
+                passed=False,
             )
 
     @staticmethod

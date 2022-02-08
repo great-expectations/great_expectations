@@ -85,6 +85,9 @@ def test_cli_init_on_new_project(
     ]
     assert data_source_class == "PandasDataset"
 
+    # Profilers are v014+ specific
+    os.rmdir(os.path.join(project_dir, "great_expectations", "profilers"))
+
     obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))
 
     # Instead of monkey patching guids, just regex out the guids
@@ -612,6 +615,9 @@ def test_cli_init_on_new_project_with_broken_excel_file_try_again_with_different
         "class_name"
     ]
     assert data_source_class == "PandasDataset"
+
+    # Profilers are v014+ specific
+    os.rmdir(os.path.join(project_dir, "great_expectations", "profilers"))
 
     obs_tree = gen_directory_tree_str(os.path.join(project_dir, "great_expectations"))
 

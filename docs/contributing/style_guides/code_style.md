@@ -42,10 +42,14 @@ pyupgrade --py3-plus
 
 * **Avoid abbreviations**, e.g. `column_index` instead of `column_idx`.
 
-* ((Expectation names should reflect their decorators:**
+* **Expectation names should be prefixed to reflect their base classes:**
 
-	* `expect_table_...` for methods decorated directly with `@expectation`
-	* `expect_column_values_...` for `@column_map_expectation`
-	* `expect_column_...` for `@column_aggregate_expectation`
-	* `expect_column_pair_values...` for `@column_pair_map_expectation`
+| Base class                   |  prefix                         |
+|------------------------------|---------------------------------|
+| `Expectation`                |  `expect_...`                   | 
+| `TableExpectation`           |  `expect_table_...`             | 
+| `ColumnMapExpectation`       |  `expect_column_values_...`     | 
+| `ColumnAggregateExpectation` |  `expect_column_...`            | 
+| `ColumnPairMapExpectation`   |  `expect_column_pair_values...` | 
+| `MultiColumnMapExpectation`  |  `expect_multicolumn_values...` | 
 

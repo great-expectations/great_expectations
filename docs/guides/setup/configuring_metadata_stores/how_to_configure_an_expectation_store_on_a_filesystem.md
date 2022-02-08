@@ -126,6 +126,3 @@ Additional Notes
     +        "value": 333
            }
     ```
-
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.

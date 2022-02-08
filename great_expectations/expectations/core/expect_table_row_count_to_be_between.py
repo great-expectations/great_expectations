@@ -1,15 +1,11 @@
 from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
 from ...render.renderer.renderer import renderer
-from ...render.types import (
-    RenderedAtomicContent,
-    RenderedStringTemplateContent,
-    renderedAtomicValueSchema,
-)
+from ...render.types import RenderedStringTemplateContent
 from ...render.util import (
     handle_strict_min_max,
     parse_row_condition_string_pandas_engine,
@@ -73,12 +69,10 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     }
 
     metric_dependencies = ("table.row_count",)
-
     success_keys = (
         "min_value",
         "max_value",
     )
-
     default_kwarg_values = {
         "min_value": None,
         "max_value": None,
@@ -87,6 +81,10 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
+    args_keys = (
+        "min_value",
+        "max_value",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

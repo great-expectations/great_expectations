@@ -1,6 +1,9 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.exceptions.exceptions import (
+    InvalidExpectationConfigurationError,
+)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -9,14 +12,14 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 
 
-class ColumnCustomMax(ColumnMetricProvider):
+class ColumnCustomMax(ColumnAggregateMetricProvider):
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
 
     metric_name = "column.custom_max"
@@ -34,7 +37,7 @@ class ColumnCustomMax(ColumnMetricProvider):
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, _table, _column_name, **kwargs):
         """Spark Max Implementation"""
-        return F.maxcolumn()
+        return F.max(column)
 
 
 class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
@@ -46,7 +49,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
             "data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
             "tests": [
                 {
-                    "title": "positive_test",
+                    "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
@@ -59,7 +62,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
                     "out": {"success": True},
                 },
                 {
-                    "title": "negative_test",
+                    "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
@@ -89,6 +92,53 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         "strict_max": None,
         "mostly": 1,
     }
+
+    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+        """
+        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
+        necessary configuration arguments have been provided for the validation of the expectation.
+        Args:
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
+        Returns:
+            True if the configuration has been validated successfully. Otherwise, raises an exception
+        """
+
+        # Setting up a configuration
+        super().validate_configuration(configuration)
+        if configuration is None:
+            configuration = self.configuration
+
+        min_value = configuration.kwargs["min_value"]
+        max_value = configuration.kwargs["max_value"]
+        strict_min = configuration.kwargs["strict_min"]
+        strict_max = configuration.kwargs["strict_max"]
+
+        # Validating that min_val, max_val, strict_min, and strict_max are of the proper format and type
+        try:
+            assert (
+                min_value is not None or max_value is not None
+            ), "min_value and max_value cannot both be none"
+            assert min_value is None or isinstance(
+                min_value, (float, int)
+            ), "Provided min threshold must be a number"
+            assert max_value is None or isinstance(
+                max_value, (float, int)
+            ), "Provided max threshold must be a number"
+            if min_value and max_value:
+                assert (
+                    min_value <= max_value
+                ), "Provided min threshold must be less than or equal to max threshold"
+            assert strict_min is None or isinstance(
+                strict_min, bool
+            ), "strict_min must be a boolean value"
+            assert strict_max is None or isinstance(
+                strict_max, bool
+            ), "strict_max must be a boolean value"
+        except AssertionError as e:
+            raise InvalidExpectationConfigurationError(str(e))
+
+        return True
 
     def _validate(
         self,
@@ -129,11 +179,25 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
-        "maturity": "experimental",
         "tags": ["flexible max comparisons"],
         "contributors": ["@joegargery"],
     }
 
 
 if __name__ == "__main__":
-    print(ExpectColumnMaxToBeBetweenCustom().generate_diagnostic_checklist())
+    ExpectColumnMaxToBeBetweenCustom().print_diagnostic_checklist()
+
+# Note to users: code below this line is only for integration testing -- ignore!
+
+diagnostics = ExpectColumnMaxToBeBetweenCustom().run_diagnostics()
+
+for check in diagnostics["tests"]:
+    assert check["test_passed"] is True
+    assert check["error_message"] is None
+    assert check["stack_trace"] is None
+
+for check in diagnostics["errors"]:
+    assert check is None
+
+for check in diagnostics["maturity_checklist"]["experimental"]:
+    assert check["passed"] is True

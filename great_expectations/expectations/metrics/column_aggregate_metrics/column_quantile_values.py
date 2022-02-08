@@ -2,33 +2,24 @@ import itertools
 import logging
 import traceback
 from collections.abc import Iterable
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import numpy as np
 
-from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    ExecutionEngine,
-    MetricDomainTypes,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.util import get_approximate_percentile_disc_sql
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
-    sa as sa,
-)
+from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
-from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -191,33 +182,6 @@ class ColumnQuantileValues(ColumnAggregateMetricProvider):
                 "SparkDFDataset requires relative error to be False or to be a float between 0 and 1."
             )
         return df.approxQuantile(column, list(quantiles), allow_relative_error)
-
-    @classmethod
-    def _get_evaluation_dependencies(
-        cls,
-        metric: MetricConfiguration,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None,
-    ):
-        dependencies: dict = super()._get_evaluation_dependencies(
-            metric=metric,
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
-        )
-
-        table_domain_kwargs: dict = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
-        dependencies["table.row_count"] = MetricConfiguration(
-            metric_name="table.row_count",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs=None,
-            metric_dependencies=None,
-        )
-
-        return dependencies
 
 
 def _get_column_quantiles_mssql(

@@ -69,7 +69,6 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
         "strftime_format",
         "mostly",
     )
-
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -78,6 +77,10 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": True,
     }
+    args_keys = (
+        "column",
+        "strftime_format",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)

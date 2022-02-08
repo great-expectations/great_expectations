@@ -15,7 +15,7 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
@@ -23,7 +23,7 @@ from great_expectations.expectations.metrics import (
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnExpectations, the main business logic for calculation will live in this class.
-class ColumnAggregateMatchesSomeCriteria(ColumnMetricProvider):
+class ColumnAggregateMatchesSomeCriteria(ColumnAggregateMetricProvider):
 
     # This is the id string that will be used to reference your Metric.
     metric_name = "METRIC NAME GOES HERE"
@@ -73,7 +73,6 @@ class ExpectColumnAggregateToMatchSomeCriteria(ColumnExpectation):
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "maturity": "concept_only",  # "concept_only", "experimental", "beta", or "production"
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@your_name_here",  # Don't forget to add your github handle here!
@@ -82,4 +81,4 @@ class ExpectColumnAggregateToMatchSomeCriteria(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    print(ExpectColumnAggregateToMatchSomeCriteria().generate_diagnostic_checklist())
+    ExpectColumnAggregateToMatchSomeCriteria().print_diagnostic_checklist()

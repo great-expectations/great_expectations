@@ -26,6 +26,7 @@ class DotDict(dict):
 
     # Cargo-cultishly copied from: https://github.com/spindlelabs/pyes/commit/d2076b385c38d6d00cebfe0df7b0d1ba8df934bc
     def __deepcopy__(self, memo):
+        # noinspection PyArgumentList
         return DotDict(
             [(copy.deepcopy(k, memo), copy.deepcopy(v, memo)) for k, v in self.items()]
         )

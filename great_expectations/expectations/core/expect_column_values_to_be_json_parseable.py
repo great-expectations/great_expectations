@@ -1,21 +1,8 @@
-import json
-from datetime import datetime
-from typing import Dict, List, Optional, Union
-
-import numpy as np
-import pandas as pd
+from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...core.batch import Batch
-from ...data_asset.util import parse_result_format
-from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import (
@@ -83,9 +70,8 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
         "requirements": [],
     }
 
-    map_metric = "column_values.json_parsable"
+    map_metric = "column_values.json_parseable"
     success_keys = ("mostly",)
-
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -94,6 +80,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": True,
     }
+    args_keys = ("column",)
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)

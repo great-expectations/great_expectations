@@ -26,19 +26,18 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             The column name.
         min_value (comparable type or None): The minimum value for a column entry.
         max_value (comparable type or None): The maximum value for a column entry.
-
-    Keyword Args:
         strict_min (boolean):
             If True, values must be strictly larger than min_value, default=False
         strict_max (boolean):
             If True, values must be strictly smaller than max_value, default=False
-         allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
+
+    Keyword Args:
+        allow_cross_type_comparisons (boolean or None) : If True, allow comparisons between types (e.g. integer and\
             string). Otherwise, attempting such comparisons will raise an exception.
         parse_strings_as_datetimes (boolean or None) : If True, parse min_value, max_value, and all non-null column\
             values to datetimes before making comparisons.
         output_strftime_format (str or None): \
             A valid strfime format for datetime output. Only used if parse_strings_as_datetimes=True.
-
         mostly (None or a float between 0 and 1): \
             Return `"success": True` if at least mostly fraction of values match the expectation. \
             For more detail, see :ref:`mostly`.
@@ -110,6 +109,13 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
+    args_keys = (
+        "column",
+        "min_value",
+        "max_value",
+        "strict_min",
+        "strict_max",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

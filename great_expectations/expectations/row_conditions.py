@@ -8,7 +8,6 @@ from pyparsing import (
     Word,
     alphanums,
     alphas,
-    oneOf,
 )
 
 from great_expectations.exceptions import GreatExpectationsError
@@ -64,6 +63,7 @@ def _parse_great_expectations_condition(row_condition: str):
         raise ConditionParserError(f"unable to parse condition: {row_condition}")
 
 
+# noinspection PyUnresolvedReferences
 def parse_condition_to_spark(row_condition: str) -> "pyspark.sql.Column":
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]

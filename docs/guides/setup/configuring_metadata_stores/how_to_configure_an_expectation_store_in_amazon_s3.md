@@ -73,7 +73,7 @@ Steps
 
 5. **Confirm that the new Expectations store has been added by running** ``great_expectations store list``.
 
-    Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_S3_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in the S3 bucket as long as we set the ``expectations_name`` variable to ``expectations_S3_store``.
+    Notice the output contains two Expectation stores: the original ``expectations_store`` on the local filesystem and the ``expectations_S3_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in the S3 bucket as long as we set the ``expectations_store_name`` variable to ``expectations_S3_store``.
 
     ```bash
     great_expectations store list
@@ -104,5 +104,3 @@ Steps
      - exp1
      - exp2
     ```
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.

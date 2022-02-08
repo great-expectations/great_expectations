@@ -1,126 +1,281 @@
 ---
-title: How to create a Custom Column Aggregate Expectation
+title: How to create a Custom Column Map Expectation
 ---
-import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
-Beginning in version 0.13, we have introduced a new API focused on enabling Modular [**Expectations**](../../../reference/expectations/expectations.md). They utilize a class structure that is significantly easier to build than ever before!
+**ColumnMapExpectations** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
-**ColumnMapExpectations** are evaluated for a single column. They ask a yes/no question for every row in that column, then ask what percentage of rows gave a positive answer to that question. If that percentage is high enough, the Expectation considers that data valid.
-
-This guide will walk you through the process of creating your own Modular ColumnExpectations in a few simple steps!
-
-We will be following this **PLACEHOLDER**.
+This guide will walk you through the process of creating a custom ColumnMapExpectation.
 
 <Prerequisites>
 
+- Read the [overview for creating Custom Expectations](overview).
+
 </Prerequisites>
 
-### Steps
+## Steps
 
-#### 1. Plan Metric Dependencies
+### 1. Choose a name for your Expectation
 
-In the new Modular Expectation design, Expectations rely on [**Metrics**](../../../reference/metrics.md) defined by separate MetricProvider Classes, which are then referenced within the Expectation and used for computation. For more on Metric naming conventions, see our guide [here](../../../reference/metrics.md#metrics-naming-conventions).
+First, decide on a name for your own Expectation. By convention, `ColumnMapExpectations` always start with `expect_column_values_`. You can see other naming conventions in the [Expectations section](/docs/contributing/style_guides/code_style#expectations)  of the code Style Guide.
 
-Once you’ve decided on an Expectation to implement, think of the different aggregations, mappings, or metadata you’ll need to validate your data within the Expectation - each of these will be a separate Metric that must be implemented prior to validating your Expectation.
+Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
 
-Fortunately, many Metrics have already been implemented for pre-existing Expectations, so it is possible you will find that the Metric you’d like to implement already exists within the Great Expectations framework and can be readily deployed. If so, you can skip to [Step 3](#3-define-parameters)!
+- `ExpectColumnValuesToEqualThree`
+- `expect_column_values_to_equal_three`
 
-#### 2. Implement your Metric
+### 2. Copy and rename the template file
 
-Expectations rely on Metrics to produce their result. A Metric is any observable property of data (e.g., numeric stats like mean/median/mode of a column, but also richer properties of data, such as histogram). You can read more about the relationship between Expectations and Metrics in our [Core Concepts: Metrics](../../../reference/metrics.md).
+By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-If your Metric does not yet exist within the framework, you will need to implement it yourself in a new class - a task that is quick and simple within the new modular framework. The convention is to implement a new Metric Provider (a class that can compute a metric) that your Expectation depends on in the same file as the Expectation itself.
+You can find the template file for a custom ColumnMapExpectation [here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
-The parent class expects the variable `condition_metric_name` to be set. Change the value of `condition_metric_name` to something that fits your Metric. Follow these two naming conventions:
+```bash
+mv column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_equal_three.py
+```
 
-* The name should start with `column_values.`, because it is a column map Metric
-* The second part of the name (after the `.`) should be in snake_case format
+<details>
+  <summary>Where should I put my Expectation file?</summary>
+  <div>
+    <p>
+        During development, you don't actually need to put the file anywhere in particular. It's self-contained, and can be executed anywhere as long as <code>great_expectations</code> is installed.
+    </p>
+    <p>
+        But to use your new Expectation alongside the other components of Great Expectations, you'll need to make sure the file is in the right place. The right place depends on what you intend to use it for.
+    </p>
+    <p>
+        <ul>
+            <li>If you're building a Custom Expectation for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all plugins in the directory available for use.</li>
+            <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
+        </ul>
+    </p>
+  </div>
+</details>
 
-The parent class of your Metric Provider class is `ColumnMapMetricProvider`. It uses Python Decorators to hide most of the complexity from you, and give you a clear and simple API to implement one method per backend that computes the metric.
-Implement the computation of the metric in your new Metric Provider class for at least one of the three backends ([**Execution Engines**](../../../reference/execution_engine.md)) that Great Expectations supports: Pandas, SQLAlchemy, and Spark.
+### 3. Generate a diagnostic checklist for your Expectation
 
-Here is the implementation of our example metric for Pandas:
+Once you've copied and renamed the template file, you can execute it as follows.
 
-:::caution Under Construction
-:::
+```bash
+python expect_column_values_to_equal_three.py
+```
 
-This means that the method `_pandas` is a metric function that is decorated as a `column_condition_partial`. It will be called with the engine-specific column type. It must return a boolean value for each row of the column. 
-The `engine` argument of `column_condition_partial` is set to `PandasExecutionEngine` to signal to the method in the parent class that this method computes the Metric for the Pandas backend.
+The template file is set up so that this will run the Expectation's `generate_diagnostic_checklist` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
+
+```
+Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
+  ✔ Has a library_metadata object
+    Has a docstring, including a one-line short description
+    Has at least one positive and negative example case, and all test cases pass
+    Has core logic and passes tests on at least one Execution Engine
+    Has basic input validation and type checking
+    Has all three statement Renderers: descriptive, prescriptive, diagnostic
+    Has core logic that passes tests for all applicable Execution Engines
+  ✔ Passes all linting checks
+    Has a robust suite of tests, as determined by a code owner
+    Has passed a manual review by a code owner for code standards and style guides
+```
+
+When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first four steps on the checklist.
+
+### 4. Change the Expectation class name and add a docstring
+
+Let's start by updating your Expectations's name and docstring.
+
+Replace the Expectation class name
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L43-L45
+```
+
+with your real Expectation class name, in upper camel case:
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L25
+```
+
+You can also go ahead and write a new one-line docstring, replacing
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L46
+```
+
+with something like:
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L26
+```
+
+You'll also need to change the class name at the bottom of the file, by replacing this line:
+
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L72
+```
+
+with this one:
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L81
+```
+
+Later, you can go back and write a more thorough docstring.
+
+At this point you can re-run your diagnostic checklist. You should see something like this:
+```
+$ python expect_column_values_to_equal_three.py
+
+Completeness checklist for ExpectColumnValuesToEqualThree:
+  ✔ Has a library_metadata object
+  ✔ Has a docstring, including a one-line short description
+    Has at least one positive and negative example case, and all test cases pass
+    Has core logic and passes tests on at least one Execution Engine
+...
+```
+
+Congratulations! You're one step closer to implementing a Custom Expectation.
+
+### 5. Add example cases
+
+Next, we're going to search for `examples = []` in your file, and replace it with at least two test examples. These examples serve a dual purpose:
+
+1. They provide test fixtures that Great Expectations can execute automatically via pytest.
+
+2. They help users understand the logic of your Expectation by providing tidy examples of paired input and output. If you contribute your Expectation to open source, these examples will appear in the Gallery.
+
+Your examples will look something like this:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L30-L59
+```
+
+Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
+
+* `data`: defines the input data of the example as a table/data frame. In this example the table has one column named `all_threes` and a second column named `some_zeroes`. Both columns have 5 rows. (Note: if you define multiple columns, make sure that they have the same number of rows.)
+* `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
+	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
+	* `include_in_gallery`: This must be set to `True` if you want this test case to be visible in the Gallery as an example.
+	* `in` contains exactly the parameters that you want to pass in to the Expectation. `"in": {"column": "mostly_threes", "mostly": 0.6}` in the example above is equivalent to `expect_column_values_to_equal_three(column=mostly_threes, mostly=0.6)`
+	* `out` is based on the Validation Result returned when executing the Expectation.
+	* `exact_match_out`: if you set `exact_match_out=False`, then you don’t need to include all the elements of the Validation Result object - only the ones that are important to test.
+
+
+Run your Expectation file again. The newly added examples won't pass as tests yet, because the Expectation itself hasn't been implemented yet, but they'll check the box for example cases.
+
+```
+$ python expect_column_values_to_equal_three.py
+
+Completeness checklist for ExpectColumnValuesToEqualThree:
+  ✔ Has a library_metadata object
+  ✔ Has a docstring, including a one-line short description
+  ✔ Has at least one positive and negative example case, and all test cases pass
+    Has core logic and passes tests on at least one Execution Engine
+```
 
 :::note
-If you have never used Python Decorators and don’t know what they are and how they work, no worries - this should not stop you from successfully implementing your Expectation. Decorators allow the parent class to “wrap” your methods, which means to execute some code before and after your method runs. All you need to know is the name of the Decorator to add (with “@”) above your method definition.
+For more information on tests and example cases, <br/>
+see our guide [How to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
-Below lies the full implementation of a map metric class, with implementations for Pandas, SQLAlchemy, and Apache Spark Dialects.
+### 6. Implement your Metric and connect it to your Expectation
 
-:::caution Under Construction
+This is the stage where you implement the actual business logic for your Expectation.   
+To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your Expectation.  
+By the time your Expectation is complete, your Metric will have functions for all three Execution Engines supported by Great Expectations. For now, we're only going to define one.  
+  
+:::note  
+Metrics answer questions about your data posed by your Expectation, <br/> and allow your Expectation to judge whether your data meets ***your*** expectations.  
 :::
 
-#### 3. Define Parameters
+Your Metric function will have the `@column_condition_partial` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate whether values equal 3 using the PandasExecutionEngine.
 
-The structure of a Modular Expectation now exists within its own specialized class. This structure has 3 fundamental components: Metric Dependencies, Configuration Validation, and Expectation Validation. In this step, we will address setting up our parameters.
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L18-L21
+```
 
-In this guide, we're focusing on a `ColumnMapExpectation`, which can define a metric dependency using the `map_metric` property.
+This is all that you need to define for now. The `ColumnMapMetricProvider` and `ColumnMapExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
 
-Add the following attributes to your Expectation class:
-
-* **Map Metric** - The name of the metric necessary. Using this will provide the dependent metric with the same domain kwargs and value kwargs as the Expectation.
-
-* **Success Keys** - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
-
-* **Default Kwarg Values** (Optional) - Default values for success keys and the defined domain, among other values.
-
+<details>
+  <summary>Other parameters</summary>
+  <div>
+    <p>
+        <b>Expectation Success Keys</b> - A tuple consisting of values that must / could be provided by the user and defines how the Expectation evaluates success.
+    </p>
+    <p>
+        <b>Expectation Default Kwarg Values</b> (Optional) - Default values for success keys and the defined domain, among other values.
 An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class):
+    </p>
+    <p>
+        <b>Metric Condition Value Keys</b> (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
+    </p>
+  </div>
+</details>
 
-:::caution Under Construction
-:::
+Next, choose a Metric Identifier for your Metric. By convention, Metric Identifiers for Column Map Expectations start with `column_values.`. The remainder of the Metric Identifier simply describes what the Metric compute, in snake case. For this example, we'll use `column_values.equal_three`.
 
-#### 4. Validate Configuration
+You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-We have almost reached the end of our journey in implementing an Expectation! 
-Now, if we have requested certain parameters from the user, we would like to validate that the user has entered them correctly via a `validate_configuration` method, and raise an error if the Expectation has been incorrectly configured.
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L26
+```
 
-::: Under Construction
-:::
+with
 
-In this method, the user provides a configuration, and we check that certain conditions are satisfied by the configuration. We need to verify that the basic configuration parameters are set:
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L16
+```
 
-::: Under Construction
-:::
+Second, in the Expectation class, replace
 
-And validate optional configuration parameters. For example, **PLACEHOLDER**:
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L54
+```
 
-::: Under Construction
-:::
+with
 
-#### 5. Validate
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L63
+```
 
-In this step, we simply need to validate that the results of our Metric meets our Expectation.
+It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
 
-The validate method is implemented as `_validate`. 
-This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
-and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not:
+Finally, rename the Metric class name itself, using the camel case version of the Metric Identifier, minus any periods.
 
-:::caution Under Construction
-:::
+For example, replace:
 
-You have now implemented your own Custom Expectation! For more information about Expectations and Metrics, please reference the [Core Concepts](../../../reference/core_concepts.md) documentation.
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L23
+```
+
+with 
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L13
+```
+
+Running your diagnostic checklist at this point should return something like this:
+```
+$ python expect_column_values_to_equal_three.py
+
+Completeness checklist for ExpectColumnValuesToEqualThree:
+  ✔ Has a library_metadata object
+  ✔ Has a docstring, including a one-line short description
+  ✔ Has at least one positive and negative example case, and all test cases pass
+  ✔ Has core logic and passes tests on at least one Execution Engine
+...
+```
+
+<div style={{"text-align":"center"}}>  
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>  
+Congratulations!<br/>&#127881; You've just built your first Custom Expectation! &#127881;  
+</b></p>  
+</div>
 
 :::note
-To use a custom Expectation, you need to ensure it has been placed into your `plugins/` directory and imported into the running Python interpreter.
+If you've already built a [Custom Column Aggregate Expectation](how_to_create_custom_column_aggregate_expectations.md),
+you may notice that we didn't implement a `_validate` method here. While we have to explicitly create this functionality for Column Aggregate Expectations,
+Column Map Expectations come with that functionality built in; no extra `_validate` needed!
 :::
 
-## Next Steps
+### 7. Contribution (Optional)
 
-When developing an Expectation, we highly encourage the writing of tests and implementation of renderers to verify that the Expectation works as intended and is providing the best possible results in your Data Docs.
-If you plan on contributing your Custom Expectation into the `contrib` library of Great Expectations, there are certain baseline requirements that must be met with regard to backend implementation, renderer implementation, and testing.
+This guide will leave you with a Custom Expectation sufficient for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
 
-Great Expectations provides templates to get you started on developing Custom Expectations for contribution, including renderers & test cases. The ColumnMapExpectation template can be found [here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py).
+If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-:::caution Under Construction
-Please see the following documentation for more on:
-* Maturity Levels
-* Creating Example Cases & Tests For Custom Expectations
-* Implementing Renderers For Custom Expectations
-* Contributing Expectations To Great Expectations
+```python file=../../../../examples/expectations/column_map_expectation_template.py#L63-L69
+```
+
+would become
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L74-L78
+```
+
+This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
+
+:::note
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
+
+To view the full script used in this page, see it on GitHub:
+- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
 :::

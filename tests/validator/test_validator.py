@@ -151,7 +151,7 @@ def test_populate_dependencies():
                 metric_configuration=metric_configuration,
                 configuration=configuration,
             )
-    assert len(graph.edges) == 17
+    assert len(graph.edges) == 33
 
 
 def test_populate_dependencies_with_incorrect_metric_name():
@@ -1019,6 +1019,29 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
     )
 
 
+def test_validate_expectation(multi_batch_taxi_validator):
+    validator: Validator = multi_batch_taxi_validator
+    expect_column_values_to_be_between_config = validator.validate_expectation(
+        "expect_column_values_to_be_between"
+    )("passenger_count", 0, 5).expectation_config.kwargs
+    assert expect_column_values_to_be_between_config == {
+        "column": "passenger_count",
+        "min_value": 0,
+        "max_value": 5,
+        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+    }
+
+    expect_column_values_to_be_of_type_config = validator.validate_expectation(
+        "expect_column_values_to_be_of_type"
+    )("passenger_count", "int").expectation_config.kwargs
+
+    assert expect_column_values_to_be_of_type_config == {
+        "column": "passenger_count",
+        "type_": "int",
+        "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
+    }
+
+
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 @mock.patch("great_expectations.validator.validation_graph.ValidationGraph")
 @mock.patch("great_expectations.validator.validator.tqdm")
@@ -1055,3 +1078,12 @@ def test_validator_progress_bar_config_disabled(
 
     assert mock_tqdm.called is True
     assert mock_tqdm.call_args[1]["disable"] is True
+
+
+def test_validator_docstrings(multi_batch_taxi_validator):
+    expectation_impl = getattr(
+        multi_batch_taxi_validator, "expect_column_values_to_be_in_set", None
+    )
+    assert expectation_impl.__doc__.startswith(
+        "Expect each column value to be in a given set"
+    )

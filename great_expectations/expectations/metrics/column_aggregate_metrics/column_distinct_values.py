@@ -5,8 +5,6 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
@@ -27,7 +25,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
@@ -39,7 +37,7 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
@@ -90,7 +88,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],
@@ -102,7 +100,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
+        execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
         metrics: Dict[str, Any],

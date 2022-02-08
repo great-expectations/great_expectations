@@ -56,6 +56,7 @@ stages:
             name: CheckDocsDependenciesChanges
 
   - stage: custom_checks
+    dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
@@ -66,6 +67,7 @@ stages:
         name: LinkChecker
 
   - stage: docusaurus_tests
+    dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
@@ -92,28 +94,34 @@ stages:
             pip install --requirement requirements.txt
             pip install .
           displayName: 'Install dependencies'
-
+        - script: |
+            pip install "pyathena[SQLAlchemy]"
+          displayName: 'Install awsathena dependency'
         - task: DownloadSecureFile@1
           name: gcp_authkey
           displayName: 'Download GCS Credentials'
           inputs:
-              secureFile: 'superconductive-service-acct.json'
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
         - task: DownloadSecureFile@1
           name: aws_authkey
           displayName: 'Download AWS Credentials'
           inputs:
-              secureFile: 'aws_config'
+              secureFile: 'aws_config_sandbox'
               retryCount: '2'
-
         - script: |
-            curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-367.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-367.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-367.0.0-linux-x86_64.tar.gz
+            # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
+            curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
             ./google-cloud-sdk/install.sh --usage-reporting=False --path-update=True --quiet --install-python=False
-            ./google-cloud-sdk/bin/gcloud config configurations create superconductive-internal-configurations
-            ./google-cloud-sdk/bin/gcloud config set account sandbox-account-for-azure-tests --project=superconductive-internal --access-token-file=$(gcp_authkey.secureFilePath)
+            # creating new named configuration
+            ./google-cloud-sdk/bin/gcloud config configurations create ge-oss-ci-cd-configurations
+            # setting account config using project and service account info
+            ./google-cloud-sdk/bin/gcloud config set account account-for-azure-tests --project=$(GE_TEST_GCP_PROJECT) --access-token-file=$(gcp_authkey.secureFilePath)
+            # Pass the configured Cloud SDK authentication to gsutil.
             ./google-cloud-sdk/bin/gcloud config set pass_credentials_to_gsutil True
+            # Authorize access to Google Cloud with a service account
             ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$(gcp_authkey.secureFilePath)
-          displayName: 'Install Google Cloud SDK'
+          displayName: 'Install and setup Google Cloud SDK'
 
         - script: |
             sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
@@ -121,7 +129,7 @@ stages:
 
         - script: |
             pip install pytest pytest-azurepipelines
-            pytest -v --docs-tests -m docs --mysql --mssql tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --aws tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
@@ -140,10 +148,12 @@ stages:
             REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
             # AWS credentials
             AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
+            ATHENA_DB_NAME: $(ATHENA_DB_NAME)
+            ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
             # GCP credentials
             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-            GCP_PROJECT: $(GCP_PROJECT)
-            GCP_BIGQUERY_DATASET: $(GCP_BIGQUERY_DATASET)
+            GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+            GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
             # Azure credentials
             AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
             AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)

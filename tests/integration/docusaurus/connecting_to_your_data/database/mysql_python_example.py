@@ -6,9 +6,9 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 CONNECTION_STRING = "mysql+pymysql://root@localhost/test_ci"
 
 # This utility is not for general use. It is only to support testing.
-from util import load_data_into_database
+from tests.test_utils import load_data_into_test_database
 
-load_data_into_database(
+load_data_into_test_database(
     table_name="taxi_data",
     csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=CONNECTION_STRING,
@@ -30,7 +30,7 @@ datasource_config = {
         },
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetSqlDataConnector",
-            "name": "whole_table",
+            "include_schema_name": True,
         },
     },
 }
@@ -48,8 +48,13 @@ batch_request = RuntimeBatchRequest(
     datasource_name="my_mysql_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
-    runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
+    runtime_parameters={"query": "SELECT * from test_ci.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
+    batch_spec_passthrough={
+        "reader_options": {
+            "pool_size": 5
+        }  # NOTE: create_engine arguments may be passed here
+    },
 )
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -66,7 +71,7 @@ assert isinstance(validator, ge.validator.validator.Validator)
 batch_request = BatchRequest(
     datasource_name="my_mysql_datasource",
     data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
+    data_asset_name="test_ci.taxi_data",  # this is the name of the table you want to retrieve
 )
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -80,7 +85,7 @@ print(validator.head())
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_mysql_datasource"]
 assert (
-    "taxi_data"
+    "test_ci.taxi_data"
     in context.get_available_data_asset_names()["my_mysql_datasource"][
         "default_inferred_data_connector_name"
     ]

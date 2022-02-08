@@ -4,10 +4,15 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
-from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    MetricComputationDetails,
+    MetricComputationResult,
+    MetricComputationValues,
     ParameterBuilder,
+)
+from great_expectations.rule_based_profiler.types import (
+    Domain,
     ParameterContainer,
     build_parameter_container,
 )
@@ -52,7 +57,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 
     def __init__(
         self,
-        parameter_name: str,
+        name: str,
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
@@ -65,12 +70,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
-        data_context: Optional[DataContext] = None,
-        batch_request: Optional[Union[str, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
         """
         Args:
-            parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
+            name: the name of this parameter -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
@@ -93,7 +98,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         super().__init__(
-            parameter_name=parameter_name,
+            name=name,
             data_context=data_context,
             batch_request=batch_request,
         )
@@ -140,9 +145,11 @@ detected.
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
         """
-         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
+         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
+         details.
 
-         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
+         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
+         ptional details
 
          The algorithm operates according to the following steps:
          1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument). Note
@@ -180,9 +187,7 @@ detected.
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        metric_computation_result: Dict[
-            str, Union[Union[np.ndarray, List[Union[Any, Number]]], Dict[str, Any]]
-        ] = self.get_metrics(
+        metric_computation_result: MetricComputationResult = self.get_metrics(
             batch_ids=batch_ids,
             validator=validator,
             metric_name=self._metric_name,
@@ -194,10 +199,8 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        metric_values: Union[
-            np.ndarray, List[Union[Any, Number]]
-        ] = metric_computation_result["metric_values"]
-        details: Dict[str, Any] = metric_computation_result["details"]
+        metric_values: MetricComputationValues = metric_computation_result.metric_values
+        details: MetricComputationDetails = metric_computation_result.details
 
         # Obtain sampling_method directive from rule state (i.e., variables and parameters); from instance variable otherwise.
         sampling_method: str = get_parameter_value_and_validate_return_type(
@@ -286,7 +289,7 @@ detected.
             max_value = min(max_value, upper_bound)
 
         parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.parameter_name}": {
+            f"$parameter.{self.name}": {
                 "value": {
                     "min_value": min_value,
                     "max_value": max_value,

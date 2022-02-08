@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import shutil
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -23,6 +24,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfig,
@@ -31,6 +33,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -44,6 +47,7 @@ from great_expectations.datasource import (
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
@@ -56,6 +60,8 @@ from great_expectations.self_check.util import (
 from great_expectations.util import is_library_loadable
 from tests.test_utils import create_files_in_directory
 
+RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 7)
+
 yaml = YAML()
 ###
 #
@@ -66,6 +72,21 @@ yaml = YAML()
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 logger = logging.getLogger(__name__)
+
+
+def skip_if_python_below_minimum_version():
+    """
+    All test fixtures for Rule-Based Profiler must execute this method; for example:
+        ```
+        skip_if_python_below_minimum_version()
+        ```
+    for as long as the support for Python versions less than 3.7 is provided.  In particular, Python-3.6 support for
+    "dataclasses.asdict()" does not handle None values as well as the more recent versions of Python do.
+    """
+    if sys.version_info < RULE_BASED_PROFILER_MIN_PYTHON_VERSION:
+        pytest.skip(
+            "skipping fixture because Python version 3.7 (or greater) is required"
+        )
 
 
 def pytest_configure(config):
@@ -116,9 +137,14 @@ def pytest_addoption(parser):
         help="If set, execute tests against bigquery",
     )
     parser.addoption(
+        "--aws",
+        action="store_true",
+        help="If set, execute tests against AWS resources like S3, RedShift and Athena",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
-        help="If set, run aws integration tests",
+        help="If set, run aws integration tests for usage_statistics",
     )
     parser.addoption(
         "--docs-tests",
@@ -153,6 +179,7 @@ def build_test_backends_list_cfe(metafunc):
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
+    include_aws: bool = metafunc.config.getoption("--aws")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -4992,3 +5019,97 @@ def cloud_data_context_with_datasource_sqlalchemy_engine(
         **config,
     )
     return context
+
+
+@pytest.fixture(scope="function")
+def profiler_name() -> str:
+    skip_if_python_below_minimum_version()
+
+    return "my_first_profiler"
+
+
+@pytest.fixture(scope="function")
+def profiler_store_name() -> str:
+    skip_if_python_below_minimum_version()
+
+    return "profiler_store"
+
+
+@pytest.fixture(scope="function")
+def profiler_config_with_placeholder_args(
+    profiler_name: str,
+) -> RuleBasedProfilerConfig:
+    """
+    This fixture does not correspond to a practical profiler with rules, whose constituent components perform meaningful
+    computations; rather, it uses "placeholder" style attribute values, which is adequate for configuration level tests.
+    """
+    skip_if_python_below_minimum_version()
+
+    return RuleBasedProfilerConfig(
+        name=profiler_name,
+        config_version=1.0,
+        variables={
+            "false_positive_threshold": 1.0e-2,
+        },
+        rules={
+            "rule_1": {
+                "domain_builder": {
+                    "class_name": "TableDomainBuilder",
+                },
+                "parameter_builders": [
+                    {
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_parameter",
+                        "metric_name": "my_metric",
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    },
+                ],
+            },
+        },
+    )
+
+
+@pytest.fixture
+def empty_profiler_store(profiler_store_name: str) -> ProfilerStore:
+    skip_if_python_below_minimum_version()
+
+    return ProfilerStore(profiler_store_name)
+
+
+@pytest.fixture
+def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
+    skip_if_python_below_minimum_version()
+
+    return ConfigurationIdentifier(configuration_key=profiler_name)
+
+
+@pytest.fixture
+def ge_cloud_profiler_id() -> str:
+    skip_if_python_below_minimum_version()
+
+    return "my_ge_cloud_profiler_id"
+
+
+@pytest.fixture
+def ge_cloud_profiler_key(ge_cloud_profiler_id: str) -> GeCloudIdentifier:
+    skip_if_python_below_minimum_version()
+
+    return GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_profiler_id)
+
+
+@pytest.fixture
+def populated_profiler_store(
+    empty_profiler_store: ProfilerStore,
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+    profiler_key: ConfigurationIdentifier,
+) -> ProfilerStore:
+    skip_if_python_below_minimum_version()
+
+    profiler_store = empty_profiler_store
+    profiler_store.set(key=profiler_key, value=profiler_config_with_placeholder_args)
+    return profiler_store

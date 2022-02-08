@@ -29,6 +29,8 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
     Args:
         column (str): \
             The column name.
+        json_schema  (str): \
+            The JSON schema (in string form) to match
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
@@ -87,6 +89,10 @@ class ExpectColumnValuesToMatchJsonSchema(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": True,
     }
+    args_keys = (
+        "column",
+        "json_schema",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)

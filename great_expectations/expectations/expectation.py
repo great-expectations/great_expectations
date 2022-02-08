@@ -33,6 +33,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
     ExecutedExpectationTestCase,
     ExpectationDescriptionDiagnostics,
+    ExpectationDiagnosticMaturityMessages,
     ExpectationErrorDiagnostics,
     ExpectationExecutionEngineDiagnostics,
     ExpectationMetricDiagnostics,
@@ -55,10 +56,7 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.util import (
-    legacy_method_parameters,
-    render_evaluation_parameter_string,
-)
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
@@ -66,7 +64,7 @@ from great_expectations.self_check.util import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-from ..core.util import convert_to_json_serializable, nested_update
+from ..core.util import nested_update
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..execution_engine.execution_engine import MetricDomainTypes
 from ..render.renderer.renderer import renderer
@@ -161,7 +159,7 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
-    legacy_method_parameters = legacy_method_parameters
+    args_keys = None
 
     def __init__(self, configuration: Optional[ExpectationConfiguration] = None):
         if configuration is not None:
@@ -966,6 +964,16 @@ class Expectation(metaclass=MetaExpectation):
             execution_engine_diagnostics=introspected_execution_engines,
         )
 
+        maturity_checklist: ExpectationDiagnosticMaturityMessages = (
+            self._get_maturity_checklist(
+                library_metadata=library_metadata,
+                description=description_diagnostics,
+                examples=examples,
+                tests=test_results,
+                execution_engines=introspected_execution_engines,
+            )
+        )
+
         return ExpectationDiagnostics(
             library_metadata=library_metadata,
             examples=examples,
@@ -975,6 +983,7 @@ class Expectation(metaclass=MetaExpectation):
             metrics=metric_diagnostics_list,
             execution_engines=introspected_execution_engines,
             tests=test_results,
+            maturity_checklist=maturity_checklist,
             errors=[],  #!!!FIXME!!!
         )
 
@@ -1024,6 +1033,7 @@ class Expectation(metaclass=MetaExpectation):
             if len(included_test_cases) > 0:
                 copied_example = deepcopy(example)
                 copied_example["tests"] = included_test_cases
+                copied_example.pop("test_backends", None)
                 included_examples.append(ExpectationTestDataCases(**copied_example))
 
         return included_examples
@@ -1299,6 +1309,7 @@ class Expectation(metaclass=MetaExpectation):
                             configuration=executed_test_case[
                                 "expectation_configuration"
                             ].to_dict(),
+                            ],
                             result=executed_test_case["validation_result"],
                         )
                         rendered_result_str = self._get_rendered_result_as_string(
@@ -1418,6 +1429,38 @@ class Expectation(metaclass=MetaExpectation):
                 augmented_library_metadata["library_metadata_passed_checks"] = True
 
         return AugmentedLibraryMetadata.from_legacy_dict(augmented_library_metadata)
+
+    def _get_maturity_checklist(
+        self,
+        library_metadata: AugmentedLibraryMetadata,
+        description: ExpectationDescriptionDiagnostics,
+        examples: List[ExpectationTestDataCases],
+        tests: List[ExpectationTestDiagnostics],
+        execution_engines: ExpectationExecutionEngineDiagnostics,
+    ) -> ExpectationDiagnosticMaturityMessages:
+        """Generate maturity checklist messages"""
+        experimental_checks = []
+        beta_checks = []
+        production_checks = []
+
+        experimental_checks.append(
+            ExpectationDiagnostics._check_library_metadata(library_metadata)
+        )
+        experimental_checks.append(ExpectationDiagnostics._check_docstring(description))
+        experimental_checks.append(
+            ExpectationDiagnostics._check_example_cases(examples, tests)
+        )
+        experimental_checks.append(
+            ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
+                execution_engines
+            )
+        )
+
+        return ExpectationDiagnosticMaturityMessages(
+            experimental=experimental_checks,
+            beta=beta_checks,
+            production=production_checks,
+        )
 
 
 class TableExpectation(Expectation, ABC):

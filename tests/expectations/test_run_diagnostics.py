@@ -113,6 +113,36 @@ def test_expectation_self_check():
         "metrics": [],
         "tests": [],
         "errors": [],
+        "maturity_checklist": {
+            "beta": [],
+            "experimental": [
+                {
+                    "doc_url": None,
+                    "message": "library_metadata object exists",
+                    "passed": False,
+                    "sub_messages": [],
+                },
+                {
+                    "doc_url": None,
+                    "message": "Has a docstring, including a one-line short description",
+                    "passed": False,
+                    "sub_messages": [],
+                },
+                {
+                    "doc_url": None,
+                    "message": "Has at least one positive and negative example case, and all test cases pass",
+                    "passed": False,
+                    "sub_messages": [],
+                },
+                {
+                    "doc_url": None,
+                    "message": "Core logic exists and passes tests on at least one Execution Engine",
+                    "passed": True,
+                    "sub_messages": [],
+                },
+            ],
+            "production": [],
+        },
     }
 
 
@@ -449,10 +479,24 @@ def test_expectation__get_execution_engine_dict(
     execution_engines = my_expectation._get_execution_engine_dict(
         upstream_metrics=upstream_metrics,
     )
-    assert execution_engines == {
-        "PandasExecutionEngine": True,
-        "SparkDFExecutionEngine": False,
-        "SqlAlchemyExecutionEngine": False,
+    assert isinstance(renderer_diagnostics, list)
+    assert len(renderer_diagnostics) == 10
+    for element in renderer_diagnostics:
+        print(json.dumps(element.to_dict(), indent=2))
+        assert isinstance(element, ExpectationRendererDiagnostics)
+
+    assert len(renderer_diagnostics) == 10
+    assert set([rd.name for rd in renderer_diagnostics]) == {
+        "renderer.diagnostic.observed_value",
+        "renderer.prescriptive",
+        "renderer.diagnostic.meta_properties",
+        "renderer.diagnostic.status_icon",
+        "renderer.diagnostic.unexpected_table",
+        "atomic.diagnostic.observed_value",
+        "atomic.prescriptive.summary",
+        "renderer.answer",
+        "renderer.question",
+        "renderer.diagnostic.unexpected_statement",
     }
 
 

@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import traceback
+from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, run
 from typing import Dict
 
@@ -18,6 +19,9 @@ chandler.setFormatter(
 )
 logger.addHandler(chandler)
 logger.setLevel(logging.DEBUG)
+
+
+expectation_tracebacks = StringIO()
 
 
 def execute_shell_command(command: str) -> int:
@@ -143,10 +147,13 @@ def build_gallery(
             )
             try:
                 diagnostics = impl().run_diagnostics()
-                gallery_info[expectation] = diagnostics
+                gallery_info[expectation] = diagnostics.to_json_dict()
                 built_expectations.add(expectation)
             except Exception:
                 logger.error(f"Failed to run diagnostics for: {expectation}")
+                print(traceback.format_exc())
+                expectation_tracebacks.write(f"\n\n----------------\n{expectation}\n")
+                expectation_tracebacks.write(traceback.format_exc())
     else:
         built_expectations = set(core_expectations)
 
@@ -206,10 +213,15 @@ def build_gallery(
                 )
                 try:
                     diagnostics = impl().run_diagnostics()
-                    gallery_info[expectation] = diagnostics
+                    gallery_info[expectation] = diagnostics.to_json_dict()
                     built_expectations.add(expectation)
                 except Exception:
                     logger.error(f"Failed to run diagnostics for: {expectation}")
+                    print(traceback.format_exc())
+                    expectation_tracebacks.write(
+                        f"\n\n----------------\n{expectation}\n"
+                    )
+                    expectation_tracebacks.write(traceback.format_exc())
 
             logger.info(f"Unloading just-installed for module {expectation_module}")
             for req in just_installed:
@@ -230,5 +242,8 @@ def build_gallery(
 
 if __name__ == "__main__":
     gallery_info = build_gallery(include_core=True, include_contrib_experimental=True)
+    tracebacks = expectation_tracebacks.getvalue()
+    if tracebacks != "":
+        print(tracebacks)
     with open("./expectation_library.json", "w") as outfile:
         json.dump(gallery_info, outfile)

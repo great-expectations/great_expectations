@@ -12,7 +12,7 @@ import uuid
 import warnings
 import webbrowser
 from collections import OrderedDict
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import requests
 from dateutil.parser import parse
@@ -20,8 +20,19 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
+
+try:
+    from typing import Literal
+except ImportError:
+    # Fallback for python < 3.8
+    from typing_extensions import Literal
+
 import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 import great_expectations.exceptions as ge_exceptions
+import great_expectations.rule_based_profiler.toolkit as profiler_toolkit
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.batch import (
@@ -45,6 +56,9 @@ from great_expectations.core.usage_statistics.anonymizers.data_connector_anonymi
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
 )
+from great_expectations.core.usage_statistics.anonymizers.profiler_anonymizer import (
+    ProfilerAnonymizer,
+)
 from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
     StoreAnonymizer,
 )
@@ -61,6 +75,7 @@ from great_expectations.core.util import nested_update
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import ExpectationsStore
+from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.templates import (
     CONFIG_VARIABLES_TEMPLATE,
@@ -101,11 +116,14 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import LegacyDatasource
+from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.exceptions import DataContextError
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
 
@@ -237,6 +255,7 @@ class BaseDataContext:
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.EXPECTATIONS_BASE_DIRECTORY.value,
         DataContextConfigDefaults.PLUGINS_BASE_DIRECTORY.value,
+        DataContextConfigDefaults.PROFILERS_BASE_DIRECTORY.value,
         GE_UNCOMMITTED_DIR,
     ]
     GE_DIR = "great_expectations"
@@ -256,6 +275,7 @@ class BaseDataContext:
         "MetricStore",
         "SqlAlchemyQueryStore",
         "CheckpointStore",
+        "ProfilerStore",
     ]
     TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES = [
         "Datasource",
@@ -277,6 +297,9 @@ class BaseDataContext:
         "Checkpoint",
         "SimpleCheckpoint",
     ]
+    TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES = [
+        "RuleBasedProfiler",
+    ]
     ALL_TEST_YAML_CONFIG_DIAGNOSTIC_INFO_TYPES = [
         "__substitution_error__",
         "__yaml_parse_error__",
@@ -288,6 +311,7 @@ class BaseDataContext:
         + TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES
         + TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES
         + TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES
+        + TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES
     )
 
     _data_context = None
@@ -455,7 +479,7 @@ class BaseDataContext:
                     datasource_name=datasource_name
                 )
             except ge_exceptions.DatasourceInitializationError as e:
-                logger.warn(f"Cannot initialize datasource {datasource_name}: {e}")
+                logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GE can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
@@ -881,7 +905,42 @@ class BaseDataContext:
             )
 
     @property
-    def expectations_store_name(self):
+    def profiler_store_name(self) -> str:
+        try:
+            return self.project_config_with_variables_substituted.profiler_store_name
+        except AttributeError:
+            if profiler_toolkit.default_profilers_exist(
+                directory_path=self.root_directory
+            ):
+                return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
+            if self.root_directory:
+                error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
+            else:
+                error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create a `profilers` directory in your Great Expectations project " f"directory.\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
+            raise ge_exceptions.InvalidTopLevelConfigKeyError(error_message)
+
+    @property
+    def profiler_store(self) -> ProfilerStore:
+        profiler_store_name: str = self.profiler_store_name
+        try:
+            return self.stores[profiler_store_name]
+        except KeyError:
+            if profiler_toolkit.default_profilers_exist(
+                directory_path=self.root_directory
+            ):
+                logger.warning(
+                    f'Profiler store named "{profiler_store_name}" is not a configured store, so will try to use default Profiler store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Profiler Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
+                )
+                return self._build_store_from_config(
+                    profiler_store_name,
+                    DataContextConfigDefaults.DEFAULT_STORES.value[profiler_store_name],
+                )
+            raise ge_exceptions.StoreConfigurationError(
+                f'Attempted to access the Profiler store named "{profiler_store_name}", which is not a configured store.'
+            )
+
+    @property
+    def expectations_store_name(self) -> Optional[str]:
         return self.project_config_with_variables_substituted.expectations_store_name
 
     @property
@@ -1837,7 +1896,7 @@ class BaseDataContext:
         )
 
     def _instantiate_datasource_from_config_and_update_project_config(
-        self, name: str, config: Union[CommentedMap, dict], initialize: bool = True
+        self, name: str, config: dict, initialize: bool = True
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
@@ -1846,7 +1905,7 @@ class BaseDataContext:
         datasource_config = self.project_config_with_variables_substituted.datasources[
             name
         ]
-        config: dict = dict(datasourceConfigSchema.dump(datasource_config))
+        config = dict(datasourceConfigSchema.dump(datasource_config))
         datasource: Optional[Union[LegacyDatasource, BaseDatasource]]
         if initialize:
             try:
@@ -2050,16 +2109,27 @@ class BaseDataContext:
             validations_store_name,
             evaluation_parameter_store_name,
             checkpoint_store_name
+            profiler_store_name
         """
         active_store_names: List[str] = [
             self.expectations_store_name,
             self.validations_store_name,
             self.evaluation_parameter_store_name,
         ]
+
         try:
             active_store_names.append(self.checkpoint_store_name)
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
-            pass
+            logger.info(
+                f"Checkpoint store is not configured; omitting it from active stores"
+            )
+
+        try:
+            active_store_names.append(self.profiler_store_name)
+        except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
+            logger.info(
+                f"Profiler store is not configured; omitting it from active stores"
+            )
 
         return [
             store for store in self.list_stores() if store["name"] in active_store_names
@@ -3059,7 +3129,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_request: Optional[dict] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -3138,7 +3208,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, dict]] = None,
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -3179,7 +3249,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return checkpoint_toolkit.run_checkpoint(
             data_context=self,
             checkpoint_store=self.checkpoint_store,
-            ge_cloud_mode=self.ge_cloud_mode,
             checkpoint_name=checkpoint_name,
             template_name=template_name,
             run_name_template=run_name_template,
@@ -3199,6 +3268,68 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs,
         )
 
+    def add_profiler(
+        self,
+        name: str,
+        config_version: float,
+        rules: Dict[str, dict],
+        variables: Optional[dict] = None,
+        ge_cloud_id: Optional[str] = None,
+    ):
+        config_data = {
+            "name": name,
+            "config_version": config_version,
+            "rules": rules,
+            "variables": variables,
+        }
+
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+        validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
+        profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
+
+        config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
+
+        # Chetan - 20220127 - Open to refactor all Profiler CRUD from toolkit to class methods
+        return profiler_toolkit.add_profiler(
+            config=config,
+            data_context=self,
+            profiler_store=self.profiler_store,
+            ge_cloud_id=ge_cloud_id,
+        )
+
+    def get_profiler(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> RuleBasedProfiler:
+        return profiler_toolkit.get_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
+    def delete_profiler(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
+        profiler_toolkit.delete_profiler(
+            profiler_store=self.profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
+    def list_profilers(self) -> List[str]:
+        if self.profiler_store is None:
+            raise ge_exceptions.StoreConfigurationError(
+                f"Attempted to list profilers from a Profiler Store, which is not a configured store."
+            )
+        return profiler_toolkit.list_profilers(
+            profiler_store=self.profiler_store,
+            ge_cloud_mode=self.ge_cloud_mode,
+        )
+
     def test_yaml_config(
         self,
         yaml_config: str,
@@ -3206,7 +3337,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         class_name: Optional[str] = None,
         runtime_environment: Optional[dict] = None,
         pretty_print: bool = True,
-        return_mode: str = "instantiated_class",
+        return_mode: Union[
+            Literal["instantiated_class"], Literal["report_object"]
+        ] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):
         """Convenience method for testing yaml configs
@@ -3250,6 +3383,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         The returned object is determined by return_mode.
         """
+        if return_mode not in ["instantiated_class", "report_object"]:
+            raise ValueError(f"Unknown return_mode: {return_mode}.")
+
         if runtime_environment is None:
             runtime_environment = {}
 
@@ -3259,14 +3395,114 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         }
 
         usage_stats_event_name: str = "data_context.test_yaml_config"
+
+        config = self._test_yaml_config_prepare_config(
+            yaml_config, runtime_environment, usage_stats_event_name
+        )
+
+        if "class_name" in config:
+            class_name = config["class_name"]
+
+        instantiated_class: Any = None
         usage_stats_event_payload: Dict[str, Union[str, List[str]]] = {}
 
         if pretty_print:
             print("Attempting to instantiate class from config...")
+        try:
+            if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._test_instantiation_of_store_from_yaml_config(
+                    name, class_name, config
+                )
+            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._test_instantiation_of_datasource_from_yaml_config(
+                    name, class_name, config
+                )
+            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_CHECKPOINT_TYPES:
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._test_instantiation_of_checkpoint_from_yaml_config(
+                    name, class_name, config
+                )
+            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._test_instantiation_of_data_connector_from_yaml_config(
+                    name, class_name, config, runtime_environment
+                )
+            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_PROFILER_TYPES:
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._test_instantiation_of_profiler_from_yaml_config(
+                    name, class_name, config
+                )
+            else:
+                (
+                    instantiated_class,
+                    usage_stats_event_payload,
+                ) = self._test_instantiation_of_misc_class_from_yaml_config(
+                    name, config, runtime_environment, usage_stats_event_payload
+                )
 
-        if return_mode not in ["instantiated_class", "report_object"]:
-            raise ValueError(f"Unknown return_mode: {return_mode}.")
+            send_usage_message(
+                data_context=self,
+                event=usage_stats_event_name,
+                event_payload=usage_stats_event_payload,
+                success=True,
+            )
+            if pretty_print:
+                print(
+                    f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}\n"
+                )
 
+            report_object: dict = instantiated_class.self_check(
+                pretty_print=pretty_print
+            )
+
+            if return_mode == "instantiated_class":
+                return instantiated_class
+
+            return report_object
+
+        except Exception as e:
+            if class_name is None:
+                usage_stats_event_payload[
+                    "diagnostic_info"
+                ] = usage_stats_event_payload.get("diagnostic_info", []) + [
+                    "__class_name_not_provided__"
+                ]
+            elif (
+                usage_stats_event_payload.get("parent_class") is None
+                and class_name in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
+            ):
+                # add parent_class if it doesn't exist and class_name is one of our supported core GE types
+                usage_stats_event_payload["parent_class"] = class_name
+            send_usage_message(
+                data_context=self,
+                event=usage_stats_event_name,
+                event_payload=usage_stats_event_payload,
+                success=False,
+            )
+            if shorten_tracebacks:
+                traceback.print_exc(limit=1)
+            else:
+                raise e
+
+    def _test_yaml_config_prepare_config(
+        self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
+    ) -> CommentedMap:
+        """
+        Performs variable substitution and conversion from YAML to CommentedMap.
+        See `test_yaml_config` for more details.
+        """
         try:
             substituted_config_variables: Union[
                 DataContextConfig, dict
@@ -3301,9 +3537,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         try:
             config: CommentedMap = yaml.load(config_str_with_substituted_variables)
-
-            if "class_name" in config:
-                class_name = config["class_name"]
+            return config
 
         except Exception as e:
             usage_stats_event_payload: dict = {
@@ -3317,290 +3551,294 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             )
             raise e
 
-        instantiated_class: Any = None
+    def _test_instantiation_of_store_from_yaml_config(
+        self, name: Optional[str], class_name: str, config: CommentedMap
+    ) -> Tuple[Store, dict]:
+        """
+        Helper to create store instance and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
+        print(f"\tInstantiating as a Store, since class_name is {class_name}")
+        store_name: str = name or config.get("name") or "my_temp_store"
+        instantiated_class = cast(
+            Store,
+            self._build_store_from_config(
+                store_name=store_name,
+                store_config=config,
+            ),
+        )
+        store_name = instantiated_class.store_name or store_name
+        self._project_config["stores"][store_name] = config
 
-        try:
-            if class_name in self.TEST_YAML_CONFIG_SUPPORTED_STORE_TYPES:
-                print(f"\tInstantiating as a Store, since class_name is {class_name}")
-                store_name: str = name or config.get("name") or "my_temp_store"
-                instantiated_class = cast(
-                    Store,
-                    self._build_store_from_config(
-                        store_name=store_name,
-                        store_config=config,
-                    ),
+        store_anonymizer = StoreAnonymizer(self.data_context_id)
+        usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+            store_name=store_name, store_obj=instantiated_class
+        )
+        return instantiated_class, usage_stats_event_payload
+
+    def _test_instantiation_of_datasource_from_yaml_config(
+        self, name: Optional[str], class_name: str, config: CommentedMap
+    ) -> Tuple[Datasource, dict]:
+        """
+        Helper to create datasource instance and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
+        print(f"\tInstantiating as a Datasource, since class_name is {class_name}")
+        datasource_name: str = name or config.get("name") or "my_temp_datasource"
+        instantiated_class = cast(
+            Datasource,
+            self._instantiate_datasource_from_config_and_update_project_config(
+                name=datasource_name,
+                config=config,
+                initialize=True,
+            ),
+        )
+
+        datasource_anonymizer = DatasourceAnonymizer(self.data_context_id)
+
+        if class_name == "SimpleSqlalchemyDatasource":
+            # Use the raw config here, defaults will be added in the anonymizer
+            usage_stats_event_payload = (
+                datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+                    name=datasource_name, config=config
                 )
-                store_name = instantiated_class.store_name or store_name
-                self._project_config["stores"][store_name] = config
+            )
+        else:
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            datasource_config = datasourceConfigSchema.load(instantiated_class.config)
+            full_datasource_config = datasourceConfigSchema.dump(datasource_config)
+            usage_stats_event_payload = datasource_anonymizer.anonymize_datasource_info(
+                name=datasource_name, config=full_datasource_config
+            )
+        return instantiated_class, usage_stats_event_payload
 
-                store_anonymizer = StoreAnonymizer(self.data_context_id)
-                usage_stats_event_payload = store_anonymizer.anonymize_store_info(
-                    store_name=store_name, store_obj=instantiated_class
+    def _test_instantiation_of_checkpoint_from_yaml_config(
+        self, name: Optional[str], class_name: str, config: CommentedMap
+    ) -> Tuple[Checkpoint, dict]:
+        """
+        Helper to create checkpoint instance and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
+        print(f"\tInstantiating as a {class_name}, since class_name is {class_name}")
+
+        checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
+
+        checkpoint_config: Union[CheckpointConfig, dict]
+
+        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)
+        checkpoint_config = checkpoint_config.to_json_dict()
+        checkpoint_config.update({"name": checkpoint_name})
+
+        checkpoint_class_args: dict = {
+            key: value
+            for key, value in checkpoint_config.items()
+            if key not in ["module_name", "class_name"]
+        }
+
+        if class_name == "Checkpoint":
+            instantiated_class = Checkpoint(data_context=self, **checkpoint_class_args)
+        elif class_name == "SimpleCheckpoint":
+            instantiated_class = SimpleCheckpoint(
+                data_context=self, **checkpoint_class_args
+            )
+        else:
+            raise ValueError(f'Unknown Checkpoint class_name: "{class_name}".')
+
+        checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
+            self.data_context_id
+        )
+
+        usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
+            name=checkpoint_name, config=checkpoint_config
+        )
+
+        return instantiated_class, usage_stats_event_payload
+
+    def _test_instantiation_of_data_connector_from_yaml_config(
+        self,
+        name: Optional[str],
+        class_name: str,
+        config: CommentedMap,
+        runtime_environment: dict,
+    ) -> Tuple[DataConnector, dict]:
+        """
+        Helper to create data connector instance and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
+        print(f"\tInstantiating as a DataConnector, since class_name is {class_name}")
+        data_connector_name: str = (
+            name or config.get("name") or "my_temp_data_connector"
+        )
+        instantiated_class = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                **runtime_environment,
+                **{
+                    "root_directory": self.root_directory,
+                },
+            },
+            config_defaults={},
+        )
+
+        data_connector_anonymizer = DataConnectorAnonymizer(self.data_context_id)
+
+        usage_stats_event_payload = (
+            data_connector_anonymizer.anonymize_data_connector_info(
+                name=data_connector_name, config=config
+            )
+        )
+        return instantiated_class, usage_stats_event_payload
+
+    def _test_instantiation_of_profiler_from_yaml_config(
+        self, name: Optional[str], class_name: str, config: CommentedMap
+    ) -> Tuple[RuleBasedProfiler, dict]:
+        """
+        Helper to create profiler instance and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
+        print(f"\tInstantiating as a {class_name}, since class_name is {class_name}")
+
+        profiler_name: str = name or config.get("name") or "my_temp_profiler"
+
+        profiler_config: Union[
+            RuleBasedProfilerConfig, dict
+        ] = RuleBasedProfilerConfig.from_commented_map(commented_map=config)
+        profiler_config = profiler_config.to_json_dict()
+        profiler_config.update({"name": profiler_name})
+
+        instantiated_class = instantiate_class_from_config(
+            config=profiler_config,
+            runtime_environment={"data_context": self},
+            config_defaults={
+                "module_name": "great_expectations.rule_based_profiler",
+                "class_name": "RuleBasedProfiler",
+            },
+        )
+
+        profiler_anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(
+            self.data_context_id
+        )
+
+        usage_stats_event_payload: dict = profiler_anonymizer.anonymize_profiler_info(
+            name=profiler_name, config=profiler_config
+        )
+
+        return instantiated_class, usage_stats_event_payload
+
+    def _test_instantiation_of_misc_class_from_yaml_config(
+        self,
+        name: Optional[str],
+        config: CommentedMap,
+        runtime_environment: dict,
+        usage_stats_event_payload: dict,
+    ) -> Tuple[Any, dict]:
+        """
+        Catch-all to cover all classes not covered in other `_test_instantiation` methods.
+        Attempts to match config to the relevant class/parent and update usage stats payload.
+        See `test_yaml_config` for more details.
+        """
+        print(
+            "\tNo matching class found. Attempting to instantiate class from the raw config..."
+        )
+        instantiated_class = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                **runtime_environment,
+                **{
+                    "root_directory": self.root_directory,
+                },
+            },
+            config_defaults={},
+        )
+
+        # If a subclass of a supported type, find the parent class and anonymize
+        store_anonymizer: StoreAnonymizer = StoreAnonymizer(self.data_context_id)
+        datasource_anonymizer: DatasourceAnonymizer = DatasourceAnonymizer(
+            self.data_context_id
+        )
+        checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
+            self.data_context_id
+        )
+        data_connector_anonymizer: DataConnectorAnonymizer = DataConnectorAnonymizer(
+            self.data_context_id
+        )
+        if (
+            store_anonymizer.is_parent_class_recognized(store_obj=instantiated_class)
+            is not None
+        ):
+            store_name: str = name or config.get("name") or "my_temp_store"
+            store_name = instantiated_class.store_name or store_name
+            usage_stats_event_payload = store_anonymizer.anonymize_store_info(
+                store_name=store_name, store_obj=instantiated_class
+            )
+        elif (
+            datasource_anonymizer.is_parent_class_recognized(config=config) is not None
+        ):
+            datasource_name: str = name or config.get("name") or "my_temp_datasource"
+            if datasource_anonymizer.is_parent_class_recognized_v3_api(config=config):
+                # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+                datasource_config = datasourceConfigSchema.load(
+                    instantiated_class.config
                 )
-
-            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATASOURCE_TYPES:
-                print(
-                    f"\tInstantiating as a Datasource, since class_name is {class_name}"
-                )
-                datasource_name: str = (
-                    name or config.get("name") or "my_temp_datasource"
-                )
-                instantiated_class = cast(
-                    Datasource,
-                    self._instantiate_datasource_from_config_and_update_project_config(
-                        name=datasource_name,
-                        config=config,
-                        initialize=True,
-                    ),
-                )
-
-                datasource_anonymizer = DatasourceAnonymizer(self.data_context_id)
-
-                if class_name == "SimpleSqlalchemyDatasource":
-                    # Use the raw config here, defaults will be added in the anonymizer
-                    usage_stats_event_payload = (
-                        datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
-                            name=datasource_name, config=config
-                        )
-                    )
-                else:
-                    # Roundtrip through schema validator to add missing fields
-                    datasource_config = datasourceConfigSchema.load(
-                        instantiated_class.config
-                    )
-                    full_datasource_config = datasourceConfigSchema.dump(
-                        datasource_config
-                    )
-                    usage_stats_event_payload = (
-                        datasource_anonymizer.anonymize_datasource_info(
-                            name=datasource_name, config=full_datasource_config
-                        )
-                    )
-
-            elif class_name in ["Checkpoint", "SimpleCheckpoint"]:
-                print(
-                    f"\tInstantiating as a {class_name}, since class_name is {class_name}"
-                )
-
-                checkpoint_name: str = (
-                    name or config.get("name") or "my_temp_checkpoint"
-                )
-
-                checkpoint_config: Union[CheckpointConfig, dict]
-
-                checkpoint_config = CheckpointConfig.from_commented_map(
-                    commented_map=config
-                )
-                checkpoint_config = checkpoint_config.to_json_dict()
-                checkpoint_config.update({"name": checkpoint_name})
-
-                if class_name == "Checkpoint":
-                    instantiated_class = Checkpoint(
-                        data_context=self, **checkpoint_config
-                    )
-                elif class_name == "SimpleCheckpoint":
-                    instantiated_class = SimpleCheckpoint(
-                        data_context=self, **checkpoint_config
-                    )
-
-                checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
-                    self.data_context_id
-                )
-
-                usage_stats_event_payload = (
-                    checkpoint_anonymizer.anonymize_checkpoint_info(
-                        name=checkpoint_name, config=checkpoint_config
-                    )
-                )
-
-            elif class_name in self.TEST_YAML_CONFIG_SUPPORTED_DATA_CONNECTOR_TYPES:
-                print(
-                    f"\tInstantiating as a DataConnector, since class_name is {class_name}"
-                )
-                data_connector_name: str = (
-                    name or config.get("name") or "my_temp_data_connector"
-                )
-                instantiated_class = instantiate_class_from_config(
-                    config=config,
-                    runtime_environment={
-                        **runtime_environment,
-                        **{
-                            "root_directory": self.root_directory,
-                        },
-                    },
-                    config_defaults={},
-                )
-
-                data_connector_anonymizer = DataConnectorAnonymizer(
-                    self.data_context_id
-                )
-
-                usage_stats_event_payload = (
-                    data_connector_anonymizer.anonymize_data_connector_info(
-                        name=data_connector_name, config=config
-                    )
-                )
-
+                full_datasource_config = datasourceConfigSchema.dump(datasource_config)
             else:
-                print(
-                    "\tNo matching class found. Attempting to instantiate class from the raw config..."
-                )
-                instantiated_class = instantiate_class_from_config(
-                    config=config,
-                    runtime_environment={
-                        **runtime_environment,
-                        **{
-                            "root_directory": self.root_directory,
-                        },
-                    },
-                    config_defaults={},
-                )
-
-                # If a subclass of a supported type, find the parent class and anonymize
-                store_anonymizer: StoreAnonymizer = StoreAnonymizer(
-                    self.data_context_id
-                )
-                datasource_anonymizer: DatasourceAnonymizer = DatasourceAnonymizer(
-                    self.data_context_id
-                )
-                checkpoint_anonymizer: CheckpointAnonymizer = CheckpointAnonymizer(
-                    self.data_context_id
-                )
-                data_connector_anonymizer: DataConnectorAnonymizer = (
-                    DataConnectorAnonymizer(self.data_context_id)
-                )
-                if (
-                    store_anonymizer.is_parent_class_recognized(
-                        store_obj=instantiated_class
-                    )
-                    is not None
-                ):
-                    store_name: str = name or config.get("name") or "my_temp_store"
-                    store_name = instantiated_class.store_name or store_name
-                    usage_stats_event_payload = store_anonymizer.anonymize_store_info(
-                        store_name=store_name, store_obj=instantiated_class
-                    )
-                elif (
-                    datasource_anonymizer.is_parent_class_recognized(config=config)
-                    is not None
-                ):
-                    datasource_name: str = (
-                        name or config.get("name") or "my_temp_datasource"
-                    )
-                    if datasource_anonymizer.is_parent_class_recognized_v3_api(
-                        config=config
-                    ):
-                        # Roundtrip through schema validator to add missing fields
-                        datasource_config = datasourceConfigSchema.load(
-                            instantiated_class.config
-                        )
-                        full_datasource_config = datasourceConfigSchema.dump(
-                            datasource_config
-                        )
-                    else:
-                        # for v2 api
-                        full_datasource_config = config
-                    parent_class_name = (
-                        datasource_anonymizer.is_parent_class_recognized(config=config)
-                    )
-                    if parent_class_name == "SimpleSqlalchemyDatasource":
-                        # Use the raw config here, defaults will be added in the anonymizer
-                        usage_stats_event_payload = datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
-                            name=datasource_name, config=config
-                        )
-                    else:
-                        usage_stats_event_payload = (
-                            datasource_anonymizer.anonymize_datasource_info(
-                                name=datasource_name, config=full_datasource_config
-                            )
-                        )
-
-                elif (
-                    checkpoint_anonymizer.is_parent_class_recognized(config=config)
-                    is not None
-                ):
-                    checkpoint_name: str = (
-                        name or config.get("name") or "my_temp_checkpoint"
-                    )
-                    # Roundtrip through schema validator to add missing fields
-                    checkpoint_config: Union[CheckpointConfig, dict]
-                    checkpoint_config = CheckpointConfig.from_commented_map(
-                        commented_map=config
-                    )
-                    checkpoint_config = checkpoint_config.to_json_dict()
-                    checkpoint_config.update({"name": checkpoint_name})
-                    usage_stats_event_payload = (
-                        checkpoint_anonymizer.anonymize_checkpoint_info(
-                            name=checkpoint_name, config=checkpoint_config
-                        )
-                    )
-
-                elif (
-                    data_connector_anonymizer.is_parent_class_recognized(config=config)
-                    is not None
-                ):
-                    data_connector_name: str = (
-                        name or config.get("name") or "my_temp_data_connector"
-                    )
-                    usage_stats_event_payload = (
-                        data_connector_anonymizer.anonymize_data_connector_info(
-                            name=data_connector_name, config=config
-                        )
-                    )
-
-                else:
-                    # If class_name is not a supported type or subclass of a supported type,
-                    # mark it as custom with no additional information since we can't anonymize
-                    usage_stats_event_payload[
-                        "diagnostic_info"
-                    ] = usage_stats_event_payload.get("diagnostic_info", []) + [
-                        "__custom_subclass_not_core_ge__"
-                    ]
-
-            send_usage_message(
-                data_context=self,
-                event=usage_stats_event_name,
-                event_payload=usage_stats_event_payload,
-                success=True,
+                # for v2 api
+                full_datasource_config = config
+            parent_class_name = datasource_anonymizer.is_parent_class_recognized(
+                config=config
             )
-            if pretty_print:
-                print(
-                    f"\tSuccessfully instantiated {instantiated_class.__class__.__name__}"
+            if parent_class_name == "SimpleSqlalchemyDatasource":
+                # Use the raw config here, defaults will be added in the anonymizer
+                usage_stats_event_payload = (
+                    datasource_anonymizer.anonymize_simple_sqlalchemy_datasource(
+                        name=datasource_name, config=config
+                    )
                 )
-                print()
-
-            report_object: dict = instantiated_class.self_check(
-                pretty_print=pretty_print
-            )
-
-            if return_mode == "instantiated_class":
-                return instantiated_class
-
-            return report_object
-
-        except Exception as e:
-            if class_name is None:
-                usage_stats_event_payload[
-                    "diagnostic_info"
-                ] = usage_stats_event_payload.get("diagnostic_info", []) + [
-                    "__class_name_not_provided__"
-                ]
-            elif (
-                usage_stats_event_payload.get("parent_class") is None
-                and class_name in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
-            ):
-                # add parent_class if it doesn't exist and class_name is one of our supported core GE types
-                usage_stats_event_payload["parent_class"] = class_name
-            send_usage_message(
-                data_context=self,
-                event=usage_stats_event_name,
-                event_payload=usage_stats_event_payload,
-                success=False,
-            )
-            if shorten_tracebacks:
-                traceback.print_exc(limit=1)
             else:
-                raise e
+                usage_stats_event_payload = (
+                    datasource_anonymizer.anonymize_datasource_info(
+                        name=datasource_name, config=full_datasource_config
+                    )
+                )
+
+        elif (
+            checkpoint_anonymizer.is_parent_class_recognized(config=config) is not None
+        ):
+            checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            checkpoint_config: Union[CheckpointConfig, dict]
+            checkpoint_config = CheckpointConfig.from_commented_map(
+                commented_map=config
+            )
+            checkpoint_config = checkpoint_config.to_json_dict()
+            checkpoint_config.update({"name": checkpoint_name})
+            usage_stats_event_payload = checkpoint_anonymizer.anonymize_checkpoint_info(
+                name=checkpoint_name, config=checkpoint_config
+            )
+
+        elif (
+            data_connector_anonymizer.is_parent_class_recognized(config=config)
+            is not None
+        ):
+            data_connector_name: str = (
+                name or config.get("name") or "my_temp_data_connector"
+            )
+            usage_stats_event_payload = (
+                data_connector_anonymizer.anonymize_data_connector_info(
+                    name=data_connector_name, config=config
+                )
+            )
+
+        else:
+            # If class_name is not a supported type or subclass of a supported type,
+            # mark it as custom with no additional information since we can't anonymize
+            usage_stats_event_payload[
+                "diagnostic_info"
+            ] = usage_stats_event_payload.get("diagnostic_info", []) + [
+                "__custom_subclass_not_core_ge__"
+            ]
+
+        return instantiated_class, usage_stats_event_payload
 
 
 class DataContext(BaseDataContext):

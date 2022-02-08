@@ -84,6 +84,3 @@ Steps
 5. **Confirm that the Validations store has been correctly configured**
 
     Run a [Checkpoint](../../../tutorials/getting_started/validate_your_data.md) to store results in the new Validations store on in your new location then visualize the results by re-building [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md).
-
-
-If it would be useful to you, please comment with a +1 and feel free to add any suggestions or questions below.  Also, please reach out to us on [Slack](https://greatexpectations.io/slack) if you would like to learn more, or have any questions.

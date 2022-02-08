@@ -1,14 +1,9 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
 
-import numpy as np
-import pandas as pd
-
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.util import render_evaluation_parameter_string
 
-from ...data_asset.util import parse_result_format
 from ...render.renderer.renderer import renderer
 from ...render.types import RenderedStringTemplateContent
 from ...render.util import (
@@ -64,9 +59,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
     }
 
     metric_dependencies = ("table.row_count",)
-
     success_keys = ("value",)
-
     default_kwarg_values = {
         "value": None,
         "result_format": "BASIC",
@@ -74,6 +67,7 @@ class ExpectTableRowCountToEqual(TableExpectation):
         "catch_exceptions": False,
         "meta": None,
     }
+    args_keys = ("value",)
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

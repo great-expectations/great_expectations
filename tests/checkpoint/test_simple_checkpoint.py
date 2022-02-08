@@ -1,6 +1,4 @@
 import os
-from unittest import mock
-from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -14,9 +12,8 @@ from great_expectations.checkpoint.checkpoint import (
     SimpleCheckpoint,
 )
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import deep_filter_properties_iterable
 
 
 @pytest.fixture
@@ -141,18 +138,17 @@ def test_simple_checkpoint_default_properties_with_no_optional_arguments(
     checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_minimal_simple_checkpoint"
     )
-    checkpoint_config = checkpoint_from_store.config
-    assert checkpoint_config.name == "my_minimal_simple_checkpoint"
-    assert checkpoint_config.action_list == [
+    checkpoint_config = checkpoint_from_store.get_config()
+    assert checkpoint_config["name"] == "my_minimal_simple_checkpoint"
+    assert checkpoint_config["action_list"] == [
         store_validation_result_action,
         store_eval_parameter_action,
         update_data_docs_action,
     ]
-    assert checkpoint_config.config_version == 1.0
-    assert checkpoint_config.class_name == "Checkpoint"
-    assert checkpoint_config.evaluation_parameters == {}
-    assert checkpoint_config.runtime_configuration == {}
-    assert checkpoint_config.validations == []
+    assert checkpoint_config["config_version"] == 1.0
+    assert checkpoint_config["evaluation_parameters"] == {}
+    assert checkpoint_config["runtime_configuration"] == {}
+    assert checkpoint_config["validations"] == []
 
 
 def test_simple_checkpoint_raises_error_on_invalid_slack_webhook(
@@ -187,9 +183,9 @@ def test_simple_checkpoint_has_slack_action_with_defaults_when_slack_webhook_is_
     checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_slack"
     )
-    checkpoint_config = checkpoint_from_store.config
-    assert checkpoint_config.name == "my_simple_checkpoint_with_slack"
-    assert checkpoint_config.action_list == expected
+    checkpoint_config = checkpoint_from_store.get_config()
+    assert checkpoint_config["name"] == "my_simple_checkpoint_with_slack"
+    assert checkpoint_config["action_list"] == expected
 
 
 def test_simple_checkpoint_raises_error_on_invalid_notify_on(
@@ -254,8 +250,8 @@ def test_simple_checkpoint_notify_with_all_has_data_docs_action_with_none_specif
     checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_slack_and_notify_with_all"
     )
-    checkpoint_config = checkpoint_from_store.config
-    assert slack_notification_action in checkpoint_config.action_list
+    checkpoint_config = checkpoint_from_store.get_config()
+    assert slack_notification_action in checkpoint_config["action_list"]
 
 
 def test_simple_checkpoint_has_slack_action_with_notify_adjustments_slack_webhook_is_present(
@@ -370,8 +366,8 @@ def test_simple_checkpoint_has_update_data_docs_action_that_should_update_select
     checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_site_names"
     )
-    checkpoint_config = checkpoint_from_store.config
-    assert checkpoint_config.action_list == [
+    checkpoint_config = checkpoint_from_store.get_config()
+    assert checkpoint_config["action_list"] == [
         store_validation_result_action,
         store_eval_parameter_action,
         update_data_docs_action,
@@ -388,7 +384,7 @@ def test_simple_checkpoint_has_no_update_data_docs_action_when_site_names_is_non
     assert "local_site" in empty_data_context.get_site_names()
 
     checkpoint_config = SimpleCheckpointConfigurator(
-        "foo", empty_data_context, site_names=None
+        name="foo", data_context=empty_data_context, site_names=None
     ).build()
     assert checkpoint_config.action_list == [
         store_validation_result_action,
@@ -413,10 +409,11 @@ def test_simple_checkpoint_persisted_to_store(
         **initial_checkpoint_config.to_json_dict()
     )
     assert context_with_data_source_and_empty_suite.list_checkpoints() == ["foo"]
-    checkpoint = context_with_data_source_and_empty_suite.get_checkpoint("foo")
+    checkpoint = context_with_data_source_and_empty_suite.get_checkpoint(name="foo")
     assert isinstance(checkpoint, Checkpoint)
-    assert isinstance(checkpoint.config, CheckpointConfig)
-    assert checkpoint.config.to_json_dict() == {
+    assert isinstance(checkpoint.get_config(), dict)
+    checkpoint_config: dict = CheckpointConfig(**checkpoint.get_config()).to_json_dict()
+    assert checkpoint_config == {
         "action_list": [
             {
                 "action": {"class_name": "StoreValidationResultAction"},
@@ -427,7 +424,7 @@ def test_simple_checkpoint_persisted_to_store(
                 "name": "store_evaluation_params",
             },
         ],
-        "batch_request": None,
+        "batch_request": {},
         "class_name": "Checkpoint",
         "config_version": 1.0,
         "evaluation_parameters": {},
@@ -483,8 +480,6 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
-        "module_name": "great_expectations.checkpoint",
-        "class_name": "Checkpoint",
         "template_name": None,
         "run_name_template": None,
         "expectation_suite_name": None,
@@ -532,14 +527,18 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
     assert len(result.list_validation_results()) == 1
     assert result.success
 
-    substituted_runtime_config: CheckpointConfig = (
+    substituted_runtime_config: dict = (
         simple_checkpoint_defaults.get_substituted_config(
             runtime_kwargs=expected_runtime_kwargs
         )
     )
-    assert filter_properties_dict(
-        properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
-    ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
+    assert deep_filter_properties_iterable(
+        properties=substituted_runtime_config,
+        clean_falsy=True,
+    ) == deep_filter_properties_iterable(
+        properties=expected_runtime_kwargs,
+        clean_falsy=True,
+    )
 
 
 def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_persisting_checkpoint(
@@ -551,8 +550,6 @@ def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
-        "module_name": "great_expectations.checkpoint",
-        "class_name": "Checkpoint",
         "template_name": None,
         "run_name_template": None,
         "expectation_suite_name": None,
@@ -610,14 +607,18 @@ def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_
     assert len(result.list_validation_results()) == 1
     assert result.success
 
-    substituted_runtime_config: CheckpointConfig = (
+    substituted_runtime_config: dict = (
         simple_checkpoint_defaults.get_substituted_config(
             runtime_kwargs=expected_runtime_kwargs
         )
     )
-    assert filter_properties_dict(
-        properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
-    ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
+    assert deep_filter_properties_iterable(
+        properties=substituted_runtime_config,
+        clean_falsy=True,
+    ) == deep_filter_properties_iterable(
+        properties=expected_runtime_kwargs,
+        clean_falsy=True,
+    )
 
 
 def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_persisting_checkpoint(
@@ -629,8 +630,6 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
-        "module_name": "great_expectations.checkpoint",
-        "class_name": "Checkpoint",
         "template_name": None,
         "run_name_template": None,
         "expectation_suite_name": None,
@@ -694,16 +693,21 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_
     assert len(result.list_validation_results()) == 1
     assert result.success
 
-    substituted_runtime_config: CheckpointConfig = (
+    substituted_runtime_config: dict = (
         simple_checkpoint_defaults.get_substituted_config(
             runtime_kwargs=expected_runtime_kwargs
         )
     )
-    assert filter_properties_dict(
-        properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
-    ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
+    assert deep_filter_properties_iterable(
+        properties=substituted_runtime_config,
+        clean_falsy=True,
+    ) == deep_filter_properties_iterable(
+        properties=expected_runtime_kwargs,
+        clean_falsy=True,
+    )
 
 
+# noinspection PyUnusedLocal
 def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     simple_checkpoint_defaults,
@@ -712,12 +716,11 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
 ):
     monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
     monkeypatch.setenv("MY_PARAM", "1")
+    monkeypatch.setenv("VAR", "test")
 
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
-        "module_name": "great_expectations.checkpoint",
-        "class_name": "Checkpoint",
         "template_name": "my_simple_template_checkpoint",
         "run_name_template": "my_runtime_run_name_template",
         "expectation_suite_name": "my_runtime_suite",
@@ -807,14 +810,18 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     assert len(result.list_validation_results()) == 1
     assert result.success
 
-    substituted_runtime_config: CheckpointConfig = (
+    substituted_runtime_config: dict = (
         simple_checkpoint_defaults.get_substituted_config(
             runtime_kwargs=expected_runtime_kwargs
         )
     )
-    assert filter_properties_dict(
-        properties=substituted_runtime_config.to_json_dict(), clean_falsy=True
-    ) == filter_properties_dict(properties=expected_runtime_kwargs, clean_falsy=True)
+    assert deep_filter_properties_iterable(
+        properties=substituted_runtime_config,
+        clean_falsy=True,
+    ) == deep_filter_properties_iterable(
+        properties=expected_runtime_kwargs,
+        clean_falsy=True,
+    )
 
 
 def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_checkpoint_loaded_from_store(
@@ -921,7 +928,13 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     assert len(context.list_expectation_suites()) == 2
 
     # persist to store
-    context.add_checkpoint(**simple_checkpoint_defaults.config.to_json_dict())
+    checkpoint_class_args: dict = dict(
+        **{
+            "class_name": "SimpleCheckpoint",
+        },
+        **simple_checkpoint_defaults.get_config()
+    )
+    context.add_checkpoint(**checkpoint_class_args)
     checkpoint_name = simple_checkpoint_defaults.name
     assert context.list_checkpoints() == [checkpoint_name]
     # reload from store
@@ -958,17 +971,18 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
     checkpoint = SimpleCheckpoint(
         name="my_checkpoint", data_context=context, batch_request=runtime_batch_request
     )
-    checkpoint_config = checkpoint.config
+    checkpoint_config: dict = checkpoint.get_config()
 
-    assert isinstance(checkpoint_config, CheckpointConfig)
-    assert checkpoint_config.name == "my_checkpoint"
-    assert checkpoint_config.action_list == [
+    assert isinstance(checkpoint_config, dict)
+    assert checkpoint_config["name"] == "my_checkpoint"
+    assert checkpoint_config["action_list"] == [
         store_validation_result_action,
         store_eval_parameter_action,
         update_data_docs_action,
     ]
-    assert filter_properties_dict(
-        properties=checkpoint_config.batch_request, clean_falsy=True
+    assert deep_filter_properties_iterable(
+        properties=checkpoint_config["batch_request"].to_json_dict(),
+        clean_falsy=True,
     ) == {
         "batch_identifiers": {"pipeline_stage_name": "first"},
         "data_asset_name": "users",
@@ -976,11 +990,10 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
         "datasource_name": "my_datasource",
         "runtime_parameters": {"query": "SELECT * FROM taxi_data"},
     }
-    assert checkpoint_config.config_version == 1.0
-    assert checkpoint_config.class_name == "Checkpoint"
-    assert checkpoint_config.evaluation_parameters == {}
-    assert checkpoint_config.runtime_configuration == {}
-    assert checkpoint_config.validations == []
+    assert checkpoint_config["config_version"] == 1.0
+    assert checkpoint_config["evaluation_parameters"] == {}
+    assert checkpoint_config["runtime_configuration"] == {}
+    assert checkpoint_config["validations"] == []
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_batch_data_in_validations_pandas(
@@ -1036,7 +1049,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_batch_data_in_validations_spark(
@@ -1094,7 +1107,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_query_in_validations(
@@ -1151,7 +1164,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_multiple_runtime_batch_request_query_in_validations(
@@ -1224,7 +1237,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_raise_error_when_run_when_missing_batch_request_and_validations(
@@ -1325,7 +1338,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_pandas(
@@ -1381,7 +1394,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_spark(
@@ -1439,7 +1452,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_pandas(
@@ -1503,7 +1516,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_spark(
@@ -1568,7 +1581,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_checkpoint_run(
@@ -1624,7 +1637,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_pandas(
@@ -1679,7 +1692,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_spark(
@@ -1735,7 +1748,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_query_in_checkpoint_run(
@@ -1791,7 +1804,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_checkpoint_run_pandas(
@@ -1846,7 +1859,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_checkpoint_run_spark(
@@ -1902,7 +1915,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     results = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_checkpoint_run_pandas(
@@ -1967,7 +1980,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_spark(
@@ -2033,7 +2046,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_checkpoint_run_pandas(
@@ -2098,7 +2111,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_checkpoint_run_spark(
@@ -2164,7 +2177,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_context_run_checkpoint(
@@ -2189,7 +2202,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = {
+    checkpoint_config_dict: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -2217,14 +2230,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     }
 
-    context.add_checkpoint(**checkpoint)
+    context.add_checkpoint(**checkpoint_config_dict)
 
     results = context.run_checkpoint(
         checkpoint_name="my_checkpoint", batch_request=batch_request
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_context_run_checkpoint_pandas(
@@ -2283,7 +2296,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_context_run_checkpoint_spark(
@@ -2343,7 +2356,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_query_in_context_run_checkpoint(
@@ -2403,7 +2416,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_context_run_checkpoint_pandas(
@@ -2462,7 +2475,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_context_run_checkpoint_spark(
@@ -2522,7 +2535,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_context_run_checkpoint_pandas(
@@ -2589,7 +2602,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_spark(
@@ -2657,7 +2670,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_context_run_checkpoint_pandas(
@@ -2724,7 +2737,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_context_run_checkpoint_spark(
@@ -2792,7 +2805,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"] == True
+    assert results["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_data(
@@ -3008,7 +3021,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     )
 
     results = checkpoint.run(batch_request=runtime_batch_request)
-    assert results["success"] == True
+    assert results["success"]
     assert (
         list(results.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
@@ -3205,7 +3218,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     results = context.run_checkpoint(
         checkpoint_name="my_checkpoint", batch_request=runtime_batch_request
     )
-    assert results["success"] == True
+    assert results["success"]
     assert (
         list(results.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
@@ -3436,6 +3449,6 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_validations_into_checkpo
 
     with pytest.raises(
         ge_exceptions.InvalidConfigError,
-        match='batch_data found in validations at index 0 cannot be saved to CheckpointStore "checkpoint_store"',
+        match='batch_data found in validations cannot be saved to CheckpointStore "checkpoint_store"',
     ):
         context.add_checkpoint(**checkpoint_config)

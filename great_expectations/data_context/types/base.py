@@ -4,7 +4,7 @@ import itertools
 import json
 import logging
 import uuid
-from typing import Any, Dict, List, MutableMapping, Optional, Tuple, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Union
 from uuid import UUID
 
 from ruamel.yaml import YAML
@@ -12,14 +12,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import (
-    BatchRequest,
-    delete_runtime_parameters_batch_data_references_from_config,
-    get_batch_request_dict,
-    get_runtime_parameters_batch_data_references_from_config,
-    restore_runtime_parameters_batch_data_references_into_config,
-)
-from great_expectations.core.util import convert_to_json_serializable, nested_update
+from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -27,11 +20,14 @@ from great_expectations.marshmallow__shade import (
     fields,
     post_dump,
     post_load,
+    pre_dump,
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.types.base import SerializableDotDict
 from great_expectations.types.configurations import ClassConfigSchema
+from great_expectations.util import deep_filter_properties_iterable
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
@@ -58,7 +54,7 @@ def object_to_yaml_str(obj):
 class BaseYamlConfig(SerializableDictDot):
     _config_schema_class = None
 
-    def __init__(self, commented_map: CommentedMap = None):
+    def __init__(self, commented_map: Optional[CommentedMap] = None):
         if commented_map is None:
             commented_map = CommentedMap()
         self._commented_map = commented_map
@@ -113,7 +109,16 @@ class BaseYamlConfig(SerializableDictDot):
         """
         :returns a YAML string containing the project configuration
         """
-        return object_to_yaml_str(self.commented_map)
+        return object_to_yaml_str(obj=self.commented_map)
+
+    def to_raw_dict(self) -> dict:
+        """
+        :returns a raw dict containing the project configuration
+        """
+        key: str
+        commented_map: CommentedMap = self.commented_map
+        # return {key: commented_map[key] for key in commented_map}
+        return {key: self[key] for key in commented_map}
 
     def to_json_dict(self) -> dict:
         """
@@ -633,6 +638,7 @@ class ExecutionEngineConfig(DictDot):
         boto3_options=None,
         azure_options=None,
         gcs_options=None,
+        credentials_info=None,
         **kwargs,
     ):
         self._class_name = class_name
@@ -653,6 +659,8 @@ class ExecutionEngineConfig(DictDot):
             self.azure_options = azure_options
         if gcs_options is not None:
             self.gcs_options = gcs_options
+        if credentials_info is not None:
+            self.credentials_info = credentials_info
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -690,6 +698,9 @@ class ExecutionEngineConfigSchema(Schema):
     caching = fields.Boolean(required=False, allow_none=True)
     batch_spec_defaults = fields.Dict(required=False, allow_none=True)
     force_reuse_spark_context = fields.Boolean(required=False, allow_none=True)
+    # BigQuery Service Account Credentials
+    # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
+    credentials_info = fields.Dict(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @validates_schema
@@ -738,6 +749,7 @@ class DatasourceConfig(DictDot):
         boto3_options=None,
         azure_options=None,
         gcs_options=None,
+        credentials_info=None,
         reader_method=None,
         reader_options=None,
         limit=None,
@@ -786,6 +798,8 @@ class DatasourceConfig(DictDot):
             self.azure_options = azure_options
         if gcs_options is not None:
             self.gcs_options = gcs_options
+        if credentials_info is not None:
+            self.credentials_info = credentials_info
         if reader_method is not None:
             self.reader_method = reader_method
         if reader_options is not None:
@@ -844,6 +858,9 @@ class DatasourceConfigSchema(Schema):
     gcs_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
+    # BigQuery Service Account Credentials
+    # https://googleapis.dev/python/sqlalchemy-bigquery/latest/README.html#connection-string-parameters
+    credentials_info = fields.Dict(required=False, allow_none=True)
     reader_method = fields.String(required=False, allow_none=True)
     reader_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
@@ -1184,6 +1201,7 @@ class DataContextConfigSchema(Schema):
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()
     checkpoint_store_name = fields.Str(required=False, allow_none=True)
+    profiler_store_name = fields.Str(required=False, allow_none=True)
     plugins_directory = fields.Str(allow_none=True)
     validation_operators = fields.Dict(
         keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
@@ -1329,11 +1347,19 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         "evaluation_parameters/"
     )
+
+    # Checkpoints
     DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"
     CHECKPOINTS_BASE_DIRECTORY = "checkpoints"
     DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         f"{CHECKPOINTS_BASE_DIRECTORY}/"
     )
+
+    # Profilers
+    DEFAULT_PROFILER_STORE_NAME = "profiler_store"
+    PROFILERS_BASE_DIRECTORY = "profilers"
+    DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{PROFILERS_BASE_DIRECTORY}/"
+
     DEFAULT_DATA_DOCS_SITE_NAME = "local_site"
     DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
     PLUGINS_BASE_DIRECTORY = "plugins"
@@ -1383,6 +1409,14 @@ class DataContextConfigDefaults(enum.Enum):
                 "base_directory": DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME,
             },
         },
+        DEFAULT_PROFILER_STORE_NAME: {
+            "class_name": "ProfilerStore",
+            "store_backend": {
+                "class_name": "TupleFilesystemStoreBackend",
+                "suppress_store_backend_id": True,
+                "base_directory": DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME,
+            },
+        },
     }
     DEFAULT_DATA_DOCS_SITES = {
         DEFAULT_DATA_DOCS_SITE_NAME: {
@@ -1416,6 +1450,7 @@ class BaseStoreBackendDefaults(DictDot):
         validations_store_name: str = DataContextConfigDefaults.DEFAULT_VALIDATIONS_STORE_NAME.value,
         evaluation_parameter_store_name: str = DataContextConfigDefaults.DEFAULT_EVALUATION_PARAMETER_STORE_NAME.value,
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
+        profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
         validation_operators: dict = None,
         stores: dict = None,
@@ -1425,6 +1460,7 @@ class BaseStoreBackendDefaults(DictDot):
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
+        self.profiler_store_name = profiler_store_name
         self.validation_operators = validation_operators
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
@@ -1446,14 +1482,17 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         validations_store_bucket_name: Overrides default_bucket_name if supplied
         data_docs_bucket_name: Overrides default_bucket_name if supplied
         checkpoint_store_bucket_name: Overrides default_bucket_name if supplied
+        profiler_store_bucket_name: Overrides default_bucket_name if supplied
         expectations_store_prefix: Overrides default if supplied
         validations_store_prefix: Overrides default if supplied
         data_docs_prefix: Overrides default if supplied
         checkpoint_store_prefix: Overrides default if supplied
+        profiler_store_prefix: Overrides default if supplied
         expectations_store_name: Overrides default if supplied
         validations_store_name: Overrides default if supplied
         evaluation_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
+        profiler_store_name: Overrides default if supplied
     """
 
     def __init__(
@@ -1463,14 +1502,17 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         validations_store_bucket_name: Optional[str] = None,
         data_docs_bucket_name: Optional[str] = None,
         checkpoint_store_bucket_name: Optional[str] = None,
+        profiler_store_bucket_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
         validations_store_prefix: str = "validations",
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
+        profiler_store_prefix: str = "profilers",
         expectations_store_name: str = "expectations_S3_store",
         validations_store_name: str = "validations_S3_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
         checkpoint_store_name: str = "checkpoint_S3_store",
+        profiler_store_name: str = "profiler_S3_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1484,12 +1526,15 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
             data_docs_bucket_name = default_bucket_name
         if checkpoint_store_bucket_name is None:
             checkpoint_store_bucket_name = default_bucket_name
+        if profiler_store_bucket_name is None:
+            profiler_store_bucket_name = default_bucket_name
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
+        self.profiler_store_name = profiler_store_name
         self.stores = {
             expectations_store_name: {
                 "class_name": "ExpectationsStore",
@@ -1514,6 +1559,14 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
                     "class_name": "TupleS3StoreBackend",
                     "bucket": checkpoint_store_bucket_name,
                     "prefix": checkpoint_store_prefix,
+                },
+            },
+            profiler_store_name: {
+                "class_name": "ProfilerStore",
+                "store_backend": {
+                    "class_name": "TupleS3StoreBackend",
+                    "bucket": profiler_store_bucket_name,
+                    "prefix": profiler_store_prefix,
                 },
             },
         }
@@ -1564,6 +1617,9 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             self.stores[self.checkpoint_store_name]["store_backend"][
                 "root_directory"
             ] = root_directory
+            self.stores[self.profiler_store_name]["store_backend"][
+                "root_directory"
+            ] = root_directory
             self.data_docs_sites[self.data_docs_site_name]["store_backend"][
                 "root_directory"
             ] = root_directory
@@ -1604,6 +1660,12 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
                     "class_name": "InMemoryStoreBackend",
                 },
             },
+            self.profiler_store_name: {
+                "class_name": "ProfilerStore",
+                "store_backend": {
+                    "class_name": "InMemoryStoreBackend",
+                },
+            },
         }
         self.data_docs_sites = {}
 
@@ -1618,18 +1680,22 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         validations_store_bucket_name: Overrides default_bucket_name if supplied
         data_docs_bucket_name: Overrides default_bucket_name if supplied
         checkpoint_store_bucket_name: Overrides default_bucket_name if supplied
+        profiler_store_bucket_name: Overrides default_bucket_name if supplied
         expectations_store_project_name: Overrides default_project_name if supplied
         validations_store_project_name: Overrides default_project_name if supplied
         data_docs_project_name: Overrides default_project_name if supplied
         checkpoint_store_project_name: Overrides default_project_name if supplied
+        profiler_store_project_name: Overrides default_project_name if supplied
         expectations_store_prefix: Overrides default if supplied
         validations_store_prefix: Overrides default if supplied
         data_docs_prefix: Overrides default if supplied
         checkpoint_store_prefix: Overrides default if supplied
+        profiler_store_prefix: Overrides default if supplied
         expectations_store_name: Overrides default if supplied
         validations_store_name: Overrides default if supplied
         evaluation_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
+        profiler_store_name: Overrides default if supplied
     """
 
     def __init__(
@@ -1640,18 +1706,22 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
         validations_store_bucket_name: Optional[str] = None,
         data_docs_bucket_name: Optional[str] = None,
         checkpoint_store_bucket_name: Optional[str] = None,
+        profiler_store_bucket_name: Optional[str] = None,
         expectations_store_project_name: Optional[str] = None,
         validations_store_project_name: Optional[str] = None,
         data_docs_project_name: Optional[str] = None,
         checkpoint_store_project_name: Optional[str] = None,
+        profiler_store_project_name: Optional[str] = None,
         expectations_store_prefix: str = "expectations",
         validations_store_prefix: str = "validations",
         data_docs_prefix: str = "data_docs",
         checkpoint_store_prefix: str = "checkpoints",
+        profiler_store_prefix: str = "profilers",
         expectations_store_name: str = "expectations_GCS_store",
         validations_store_name: str = "validations_GCS_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
         checkpoint_store_name: str = "checkpoint_GCS_store",
+        profiler_store_name: str = "profiler_GCS_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1665,6 +1735,8 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
             data_docs_bucket_name = default_bucket_name
         if checkpoint_store_bucket_name is None:
             checkpoint_store_bucket_name = default_bucket_name
+        if profiler_store_bucket_name is None:
+            profiler_store_bucket_name = default_bucket_name
 
         # Use default_project_name if separate store projects are not provided
         if expectations_store_project_name is None:
@@ -1675,12 +1747,15 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
             data_docs_project_name = default_project_name
         if checkpoint_store_project_name is None:
             checkpoint_store_project_name = default_project_name
+        if profiler_store_project_name is None:
+            profiler_store_project_name = default_project_name
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
+        self.profiler_store_name = profiler_store_name
         self.stores = {
             expectations_store_name: {
                 "class_name": "ExpectationsStore",
@@ -1710,6 +1785,15 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
                     "prefix": checkpoint_store_prefix,
                 },
             },
+            profiler_store_name: {
+                "class_name": "ProfilerStore",
+                "store_backend": {
+                    "class_name": "TupleGCSStoreBackend",
+                    "project": profiler_store_project_name,
+                    "bucket": profiler_store_bucket_name,
+                    "prefix": profiler_store_prefix,
+                },
+            },
         }
         self.data_docs_sites = {
             "gcs_site": {
@@ -1736,10 +1820,12 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         expectations_store_credentials: Overrides default_credentials if supplied
         validations_store_credentials: Overrides default_credentials if supplied
         checkpoint_store_credentials: Overrides default_credentials if supplied
+        profiler_store_credentials: Overrides default_credentials if supplied
         expectations_store_name: Overrides default if supplied
         validations_store_name: Overrides default if supplied
         evaluation_parameter_store_name: Overrides default if supplied
         checkpoint_store_name: Overrides default if supplied
+        profiler_store_name: Overrides default if supplied
     """
 
     def __init__(
@@ -1748,10 +1834,12 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         expectations_store_credentials: Optional[Dict] = None,
         validations_store_credentials: Optional[Dict] = None,
         checkpoint_store_credentials: Optional[Dict] = None,
+        profiler_store_credentials: Optional[Dict] = None,
         expectations_store_name: str = "expectations_database_store",
         validations_store_name: str = "validations_database_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
         checkpoint_store_name: str = "checkpoint_database_store",
+        profiler_store_name: str = "profiler_database_store",
     ):
         # Initialize base defaults
         super().__init__()
@@ -1763,12 +1851,15 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
             validations_store_credentials = default_credentials
         if checkpoint_store_credentials is None:
             checkpoint_store_credentials = default_credentials
+        if profiler_store_credentials is None:
+            profiler_store_credentials = default_credentials
 
         # Overwrite defaults
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         self.checkpoint_store_name = checkpoint_store_name
+        self.profiler_store_name = profiler_store_name
 
         self.stores = {
             expectations_store_name: {
@@ -1793,6 +1884,13 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                     "credentials": checkpoint_store_credentials,
                 },
             },
+            profiler_store_name: {
+                "class_name": "ProfilerStore",
+                "store_backend": {
+                    "class_name": "DatabaseStoreBackend",
+                    "credentials": profiler_store_credentials,
+                },
+            },
         }
 
 
@@ -1813,6 +1911,7 @@ class DataContextConfig(BaseYamlConfig):
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
         checkpoint_store_name: Optional[str] = None,
+        profiler_store_name: Optional[str] = None,
         plugins_directory: Optional[str] = None,
         validation_operators=None,
         stores: Optional[Dict] = None,
@@ -1846,6 +1945,8 @@ class DataContextConfig(BaseYamlConfig):
                 data_docs_sites = store_backend_defaults.data_docs_sites
             if checkpoint_store_name is None:
                 checkpoint_store_name = store_backend_defaults.checkpoint_store_name
+            if profiler_store_name is None:
+                profiler_store_name = store_backend_defaults.profiler_store_name
 
         self._config_version = config_version
         if datasources is None:
@@ -1856,6 +1957,8 @@ class DataContextConfig(BaseYamlConfig):
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
         if checkpoint_store_name is not None:
             self.checkpoint_store_name = checkpoint_store_name
+        if profiler_store_name is not None:
+            self.profiler_store_name = profiler_store_name
         self.plugins_directory = plugins_directory
         if validation_operators is not None:
             self.validation_operators = validation_operators
@@ -1927,6 +2030,8 @@ class CheckpointConfigSchema(Schema):
         "slack_webhook",
         "notify_on",
         "notify_with",
+        "validation_operator_name",
+        "batches",
     ]
 
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
@@ -1938,7 +2043,9 @@ class CheckpointConfigSchema(Schema):
         allow_none=True,
     )
     template_name = fields.String(required=False, allow_none=True)
-    module_name = fields.String(required=False, missing="great_expectations.checkpoint")
+    module_name = fields.String(
+        required=False, allow_none=True, missing="great_expectations.checkpoint"
+    )
     class_name = fields.Str(required=False, allow_none=True)
     run_name_template = fields.String(required=False, allow_none=True)
     expectation_suite_name = fields.String(required=False, allow_none=True)
@@ -1995,6 +2102,15 @@ class CheckpointConfigSchema(Schema):
                 )
 
     # noinspection PyUnusedLocal
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        data = copy.deepcopy(data)
+        for key, value in data.items():
+            data[key] = convert_to_json_serializable(data=value)
+
+        return data
+
+    # noinspection PyUnusedLocal
     @post_dump
     def remove_keys_if_none(self, data, **kwargs):
         data = copy.deepcopy(data)
@@ -2003,19 +2119,13 @@ class CheckpointConfigSchema(Schema):
                 data.pop(key)
         return data
 
-    def dump(self, obj: Any, *, many: Optional[bool] = None) -> dict:
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=obj)
-        delete_runtime_parameters_batch_data_references_from_config(config=obj)
-        data: dict = super().dump(obj=obj, many=many)
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=obj, batch_data_references=batch_data_references
-        )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=data, batch_data_references=batch_data_references
-        )
-        return data
+
+class Attributes(SerializableDotDict):
+    def to_dict(self) -> dict:
+        return dict(self)
+
+    def to_json_dict(self) -> dict:
+        return convert_to_json_serializable(data=self.to_dict())
 
 
 class CheckpointConfig(BaseYamlConfig):
@@ -2031,7 +2141,7 @@ class CheckpointConfig(BaseYamlConfig):
         class_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[dict, BatchRequest]] = None,
+        batch_request: Optional[dict] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -2056,16 +2166,12 @@ class CheckpointConfig(BaseYamlConfig):
             if batches is not None and isinstance(batches, list):
                 self.batches = batches
         else:
-            batch_request, validations = get_batch_request_dict(
-                batch_request, validations
-            )
-
             class_name = class_name or "Checkpoint"
             self._template_name = template_name
             self._run_name_template = run_name_template
             self._expectation_suite_name = expectation_suite_name
             self._expectation_suite_ge_cloud_id = expectation_suite_ge_cloud_id
-            self._batch_request = batch_request
+            self._batch_request = batch_request or {}
             self._action_list = action_list or []
             self._evaluation_parameters = evaluation_parameters or {}
             self._runtime_configuration = runtime_configuration or {}
@@ -2082,132 +2188,6 @@ class CheckpointConfig(BaseYamlConfig):
         self._class_name = class_name
 
         super().__init__(commented_map=commented_map)
-
-    def update(
-        self,
-        other_config: Optional["CheckpointConfig"] = None,
-        runtime_kwargs: Optional[dict] = None,
-    ):
-        assert other_config is not None or runtime_kwargs is not None, (
-            "other_config and runtime_kwargs cannot both " "be None"
-        )
-
-        if other_config is not None:
-            # replace
-            if other_config.name is not None:
-                self.name = other_config.name
-            if other_config.module_name is not None:
-                self.module_name = other_config.module_name
-            if other_config.class_name is not None:
-                self.class_name = other_config.class_name
-            if other_config.run_name_template is not None:
-                self.run_name_template = other_config.run_name_template
-            if other_config.expectation_suite_name is not None:
-                self.expectation_suite_name = other_config.expectation_suite_name
-            if other_config.expectation_suite_ge_cloud_id is not None:
-                self.expectation_suite_ge_cloud_id = (
-                    other_config.expectation_suite_ge_cloud_id
-                )
-            # update
-            if other_config.batch_request is not None:
-                if getattr(self, "batch_request", None) is None:
-                    batch_request = {}
-                else:
-                    batch_request = self.batch_request
-
-                other_batch_request = other_config.batch_request
-
-                updated_batch_request = nested_update(
-                    batch_request,
-                    other_batch_request,
-                )
-                self._batch_request = updated_batch_request
-            if other_config.action_list is not None:
-                self.action_list = self.get_updated_action_list(
-                    base_action_list=self.action_list,
-                    other_action_list=other_config.action_list,
-                )
-            if other_config.evaluation_parameters is not None:
-                nested_update(
-                    self.evaluation_parameters,
-                    other_config.evaluation_parameters,
-                )
-            if other_config.runtime_configuration is not None:
-                nested_update(
-                    self.runtime_configuration,
-                    other_config.runtime_configuration,
-                )
-            if other_config.validations is not None:
-                self.validations.extend(
-                    filter(
-                        lambda v: v not in self.validations, other_config.validations
-                    )
-                )
-            if other_config.profilers is not None:
-                self.profilers.extend(other_config.profilers)
-
-        if runtime_kwargs is not None and any(runtime_kwargs.values()):
-            # replace
-            if runtime_kwargs.get("template_name") is not None:
-                self.template_name = runtime_kwargs.get("template_name")
-            if runtime_kwargs.get("run_name_template") is not None:
-                self.run_name_template = runtime_kwargs.get("run_name_template")
-            if runtime_kwargs.get("expectation_suite_name") is not None:
-                self.expectation_suite_name = runtime_kwargs.get(
-                    "expectation_suite_name"
-                )
-            if runtime_kwargs.get("expectation_suite_ge_cloud_id") is not None:
-                self.expectation_suite_ge_cloud_id = runtime_kwargs.get(
-                    "expectation_suite_ge_cloud_id"
-                )
-            # update
-            if runtime_kwargs.get("batch_request") is not None:
-                batch_request = self.batch_request or {}
-                runtime_batch_request = runtime_kwargs.get("batch_request")
-                if runtime_batch_request is not None:
-                    runtime_batch_request = self._safe_copy_batch_request(
-                        batch_request=runtime_batch_request
-                    )
-                    if not isinstance(runtime_batch_request, dict):
-                        # noinspection PyUnresolvedReferences
-                        runtime_batch_request = runtime_batch_request.to_dict()
-
-                    delete_runtime_parameters_batch_data_references_from_config(
-                        config=batch_request
-                    )
-
-                    batch_request = nested_update(batch_request, runtime_batch_request)
-
-                self._batch_request = batch_request
-
-            if runtime_kwargs.get("action_list") is not None:
-                self.action_list = self.get_updated_action_list(
-                    base_action_list=self.action_list,
-                    other_action_list=runtime_kwargs.get("action_list"),
-                )
-
-            if runtime_kwargs.get("evaluation_parameters") is not None:
-                nested_update(
-                    self.evaluation_parameters,
-                    runtime_kwargs.get("evaluation_parameters"),
-                )
-
-            if runtime_kwargs.get("runtime_configuration") is not None:
-                nested_update(
-                    self.runtime_configuration,
-                    runtime_kwargs.get("runtime_configuration"),
-                )
-
-            if runtime_kwargs.get("validations") is not None:
-                self.validations.extend(
-                    filter(
-                        lambda v: v not in self.validations,
-                        runtime_kwargs.get("validations"),
-                    )
-                )
-
-            if runtime_kwargs.get("profilers") is not None:
-                self.profilers.extend(runtime_kwargs.get("profilers"))
 
     # TODO: <Alex>ALEX (we still need the next two properties)</Alex>
     @classmethod
@@ -2338,36 +2318,6 @@ class CheckpointConfig(BaseYamlConfig):
     def notify_with(self) -> str:
         return self._notify_with
 
-    @classmethod
-    def get_updated_action_list(
-        cls,
-        base_action_list: list,
-        other_action_list: list,
-    ) -> List[dict]:
-        base_action_list_dict = {action["name"]: action for action in base_action_list}
-
-        for other_action in other_action_list:
-            other_action_name = other_action["name"]
-            if other_action_name in base_action_list_dict:
-                if other_action["action"]:
-                    nested_update(
-                        base_action_list_dict[other_action_name],
-                        other_action,
-                        dedup=True,
-                    )
-                else:
-                    base_action_list_dict.pop(other_action_name)
-            else:
-                base_action_list_dict[other_action_name] = other_action
-
-        for other_action in other_action_list:
-            other_action_name = other_action["name"]
-            if other_action_name in base_action_list_dict:
-                if not other_action["action"]:
-                    base_action_list_dict.pop(other_action_name)
-
-        return list(base_action_list_dict.values())
-
     @property
     def evaluation_parameters(self) -> dict:
         return self._evaluation_parameters
@@ -2385,69 +2335,23 @@ class CheckpointConfig(BaseYamlConfig):
         self._runtime_configuration = value
 
     def __deepcopy__(self, memo):
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
-        delete_runtime_parameters_batch_data_references_from_config(config=self)
-
         cls = self.__class__
         result = cls.__new__(cls)
-        result._commented_map = CommentedMap()
 
         memo[id(self)] = result
-        for key, value in self.to_json_dict().items():
-            # noinspection PyArgumentList
-            value_copy = copy.deepcopy(value, memo)
+        for key, value in self.to_dict().items():
+            value_copy = safe_deep_copy(data=value, memo=memo)
             setattr(result, key, value_copy)
-
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=self, batch_data_references=batch_data_references
-        )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=result, batch_data_references=batch_data_references
-        )
 
         return result
 
     def __repr__(self) -> str:
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(config=self)
-        delete_runtime_parameters_batch_data_references_from_config(config=self)
-        config: dict = self.to_json_dict()
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=self, batch_data_references=batch_data_references
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
         )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=config,
-            batch_data_references=batch_data_references,
-            replace_value_with_type_string=True,
-        )
-        return json.dumps(config, indent=2)
-
-    @staticmethod
-    def _safe_copy_batch_request(
-        batch_request: Optional[Union[DictDot, dict]]
-    ) -> Optional[Union[DictDot, dict]]:
-        if batch_request is None:
-            return None
-
-        batch_data_references: Tuple[
-            Optional[Any], Optional[List[Any]]
-        ] = get_runtime_parameters_batch_data_references_from_config(
-            config=batch_request
-        )
-        delete_runtime_parameters_batch_data_references_from_config(
-            config=batch_request
-        )
-        result = copy.deepcopy(batch_request)
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=batch_request, batch_data_references=batch_data_references
-        )
-        restore_runtime_parameters_batch_data_references_into_config(
-            config=result, batch_data_references=batch_data_references
-        )
-        return result
+        return json.dumps(json_dict, indent=2)
 
 
 class CheckpointValidationConfig(DictDot):

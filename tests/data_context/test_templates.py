@@ -49,6 +49,13 @@ stores:
       suppress_store_backend_id: true
       base_directory: checkpoints/
 
+  profiler_store:
+    class_name: ProfilerStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      suppress_store_backend_id: true
+      base_directory: profilers/
+
 expectations_store_name: expectations_store
 validations_store_name: validations_store
 evaluation_parameter_store_name: evaluation_parameter_store

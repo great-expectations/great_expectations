@@ -94,6 +94,10 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": True,
     }
+    args_keys = (
+        "column",
+        "regex_list",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)

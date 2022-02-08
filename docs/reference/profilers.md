@@ -78,7 +78,7 @@ rules:
         mostly: $variables.mostly_default
 ```
 
-You can see another example config containing multiple rules here: [alice_user_workflow_verbose_profiler_config.yml](https://github.com/great-expectations/great_expectations/blob/develop/tests/rule_based_profiler/alice_user_workflow_verbose_profiler_config.yml)
+You can see another example config containing multiple rules here: [alice_user_workflow_verbose_profiler_config.yml](https://github.com/great-expectations/great_expectations/blob/develop/tests/test_fixtures/rule_based_profiler/alpha/alice_user_workflow_verbose_profiler_config.yml)
 
 This config is used in the below diagram to provide a better sense of how the different parts of the Profiler config fit together. [You can see a larger version of this file here.](https://github.com/great-expectations/great_expectations/blob/develop/docs/guides/images/rule_based_profiler_public_interface_diagram.png)
 ![Rule-Based Profiler Public Interface Diagram](../guides/images/rule_based_profiler_public_interface_diagram.png)

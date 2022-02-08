@@ -107,8 +107,11 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         "mostly",
         "parse_strings_as_datetimes",
     )
-
     default_kwarg_values = {"value_set": None, "parse_strings_as_datetimes": False}
+    args_keys = (
+        "column",
+        "value_set",
+    )
 
     @classmethod
     def _atomic_prescriptive_template(
