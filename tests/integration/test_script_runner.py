@@ -655,12 +655,7 @@ aws_integration_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         user_flow_script="tests/integration/db/awsathena.py",
         extra_backend_dependencies=BackendDependencies.AWS,
-        other_files=(
-            (
-                "tests/integration/db/utils.py",
-                "utils.py",
-            ),
-        ),
+        util_script="tests/test_utils.py",
     )
 ]
 

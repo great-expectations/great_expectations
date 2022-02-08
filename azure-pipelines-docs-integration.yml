@@ -110,6 +110,8 @@ stages:
               secureFile: 'aws_config_sandbox'
               retryCount: '2'
         - script: |
+            # install google cloud storage dependency
+            pip install google-cloud-bigquery-storage
             # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
             curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
             ./google-cloud-sdk/install.sh --usage-reporting=False --path-update=True --quiet --install-python=False
