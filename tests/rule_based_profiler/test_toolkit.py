@@ -20,6 +20,14 @@ from great_expectations.rule_based_profiler.toolkit import (
 )
 
 
+def test_run_profiler_with_too_many_args_raises_error():
+    pass
+
+
+def test_run_profiler_creates_expectation_suite():
+    pass
+
+
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_get_profiler_with_too_many_args_raises_error(
     mock_data_context: mock.MagicMock,

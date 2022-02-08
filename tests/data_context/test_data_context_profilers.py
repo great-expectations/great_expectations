@@ -47,3 +47,7 @@ def test_add_profiler_with_invalid_config_raises_error(
         empty_data_context.add_profiler(**args)
 
     assert "config_version" in str(e.value)
+
+
+def test_run_profiler_emits_proper_usage_stats():
+    pass
