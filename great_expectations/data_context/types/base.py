@@ -1182,17 +1182,26 @@ class GeCloudConfig(DictDot):
         if not (bool(account_id) ^ bool(organization_id)):
             raise ValueError("Must provide either (and only) account_id or organization_id.")
         if account_id is not None:
-            logger.warning('The "account_id" argument has been renamed "organization_id" and will be deprecated.')
+            logger.warning('The "account_id" argument has been renamed "organization_id" and will be deprecated in '
+                           'the next major release.')
 
         self.base_url = base_url
         self.organization_id = organization_id or account_id
         self.access_token = access_token
+
+    # TODO: remove property when account_id is deprecated
+    @property
+    def account_id(self):
+        logger.warning('The "account_id" attribute has been renamed to "organization_id" and will be deprecated in '
+                       'the next major release.')
+        return self.organization_id
 
     def to_json_dict(self):
         return {
             "base_url": self.base_url,
             "organization_id": self.organization_id,
             "access_token": self.access_token,
+            "account_id": self.account_id  # TODO: remove when account_id is deprecated
         }
 
 
