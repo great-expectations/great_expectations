@@ -6,7 +6,7 @@ class_name: LegacyCheckpoint
 validation_operator_name: action_list_operator
 batches:
   - batch_kwargs:
-      path: ../../data/Titanic.csv
+      path: ../../../data/Titanic.csv
       datasource: my_datasource
       data_asset_name: Titanic.csv
       reader_options:
