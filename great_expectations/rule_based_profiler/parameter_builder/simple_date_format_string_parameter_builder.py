@@ -135,4 +135,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best = fmt_string
                 best_ratio = ratio
 
+        print("stop here")
+
         return {"parameters": best, "details": {"success_ratio": best_ratio}}
