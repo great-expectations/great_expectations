@@ -148,17 +148,17 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
                 self[attr] = general.get(attr)
 
         # Assign code owners
-        self.code_owners = []
         code_owners = data.get("code_owners")
         if code_owners:
+            self.code_owners = []
             for owner in code_owners:
                 code_owner = GitHubUser(**owner)
                 self.code_owners.append(code_owner)
 
         # Assign domain experts
-        self.domain_experts = []
         domain_experts = data.get("domain_experts")
         if domain_experts:
+            self.domain_experts = []
             for expert in domain_experts:
                 domain_expert = DomainExpert(**expert)
                 self.domain_experts.append(domain_expert)
@@ -193,7 +193,6 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
     def _update_dependencies(self, path: str) -> None:
         if not os.path.exists(path):
             logger.warning(f"Could not find requirements file {path}")
-            self.dependencies = []
             return
 
         with open(path) as f:

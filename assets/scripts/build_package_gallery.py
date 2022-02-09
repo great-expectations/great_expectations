@@ -1,3 +1,8 @@
+# Purpose: Aggregate all contrib packages into a single JSON file to populate the gallery
+#
+# The generated file is sent to S3 through our CI/CD to be rendered on the frontend.
+
+
 import json
 import logging
 import os
@@ -35,7 +40,7 @@ def gather_all_contrib_package_paths() -> List[str]:
 
 
 def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
-    """Takes a list of relatie paths to contrib packages and collects dictionaries to represent package state.
+    """Takes a list of relative paths to contrib packages and collects dictionaries to represent package state.
 
     Args:
         package_paths: A list of relative paths point to contrib packages
@@ -85,5 +90,5 @@ def write_results_to_disk(path: str, package_manifests: List[dict]) -> None:
 
 if __name__ == "__main__":
     package_paths = gather_all_contrib_package_paths()
-    package_manifests = gather_all_package_manifests(package_paths)
-    write_results_to_disk("./package_manifests.json", package_manifests)
+    payload = gather_all_package_manifests(package_paths)
+    write_results_to_disk("./package_manifests.json", payload)
