@@ -654,7 +654,7 @@ class RuleBasedProfilerBase:
 
     @property
     def rules(self) -> List[Rule]:
-        return list(self.get_rules_as_dict().values())
+        return self._rules
 
     @rules.setter
     def rules(self, value: List[Rule]):
