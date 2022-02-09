@@ -69,7 +69,13 @@ Commands:
   new     Add a new Datasource to the data context.
 ```
 
-An existing data context can be provided with the variable `GE_HOME`.
+An existing data context can be provided with the variable `GE_HOME`, for example:
+
+```bash
+export GE_HOME="${HOME}/ge_dir_1"
+great_expectations datasource list
+```
+
 
 ## Shell autocompletion for the CLI
 
