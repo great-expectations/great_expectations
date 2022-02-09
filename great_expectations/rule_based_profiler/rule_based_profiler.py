@@ -618,7 +618,26 @@ class RuleBasedProfilerBase:
         return {rule.name: rule for rule in self._rules}
 
     def self_check(self, pretty_print=True) -> dict:
-        raise NotImplementedError
+        """
+        Necessary to enable integration with `DataContext.test_yaml_config`
+        Args:
+            pretty_print: flag to turn on verbose output
+        Returns:
+            Dictionary that contains RuleBasedProfiler state
+        """
+        # Provide visibility into parameters that RuleBasedProfiler was instantiated with.
+        report_object: dict = {"config": self._citation}
+
+        if pretty_print:
+            print(f"\nRuleBasedProfiler class name: {self.name}")
+
+            if not self._variables:
+                print(
+                    'Your current RuleBasedProfiler configuration has an empty "variables" attribute. \
+                    Please ensure you populate it if you\'d like to reference values in your "rules" attribute.'
+                )
+
+        return report_object
 
     @property
     def name(self) -> str:
@@ -749,25 +768,3 @@ class RuleBasedProfiler(RuleBasedProfilerBase):
             profiler_config=profiler_config,
             data_context=data_context,
         )
-
-    def self_check(self, pretty_print=True) -> dict:
-        """
-        Necessary to enable integration with `DataContext.test_yaml_config`
-        Args:
-            pretty_print: flag to turn on verbose output
-        Returns:
-            Dictionary that contains RuleBasedProfiler state
-        """
-        # Provide visibility into parameters that RuleBasedProfiler was instantiated with.
-        report_object: dict = {"config": self._citation}
-
-        if pretty_print:
-            print(f"\nRuleBasedProfiler class name: {self.name}")
-
-            if not self._variables:
-                print(
-                    'Your current RuleBasedProfiler configuration has an empty "variables" attribute. \
-                    Please ensure you populate it if you\'d like to reference values in your "rules" attribute.'
-                )
-
-        return report_object
