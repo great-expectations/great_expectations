@@ -117,7 +117,7 @@ def test_common_usage_stats_are_sent_no_mocking(
     context.test_yaml_config(yaml_config=datasource_yaml)
     expected_events: List[str] = ["data_context.test_yaml_config"]
 
-    context.add_datasource(**yaml.safe_load(datasource_yaml))
+    context.add_datasource(**yaml.load(datasource_yaml))
     expected_events.append("data_context.add_datasource")
 
     df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
@@ -157,7 +157,7 @@ def test_common_usage_stats_are_sent_no_mocking(
     expected_events.append("data_context.test_yaml_config")
 
     # Note: add_checkpoint is not instrumented as of 20211215
-    context.add_checkpoint(**yaml.load(checkpoint_yaml))
+    context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
 
     context.run_checkpoint(
         checkpoint_name="my_checkpoint",
