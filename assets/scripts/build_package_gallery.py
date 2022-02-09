@@ -1,6 +1,6 @@
 # Purpose: Aggregate all contrib packages into a single JSON file to populate the gallery
 #
-# The generated file is sent to S3 through our CI/CD to be rendered on the frontend.
+# The generated file is sent to S3 through our CI/CD to be rendered on the front-end.
 
 
 import json

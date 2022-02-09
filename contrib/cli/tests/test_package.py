@@ -99,9 +99,13 @@ ruamel.yaml>=0.16,<0.17.18  # package
 def test_update_dependencies_with_invalid_path_exits_early(
     package: GreatExpectationsContribPackageManifest,
 ):
-    package.dependencies = [Dependency(text="my_dep", link="my_link")]
+    dependencies = [Dependency(text="my_dep", link="my_link")]
+    package.dependencies = dependencies
+
     package._update_dependencies("my_fake_path.txt")
-    assert package.dependencies == []
+
+    # Unchanged attrs since file state is invalid
+    assert package.dependencies == dependencies
 
 
 def test_update_from_package_info_with_valid_path(
@@ -125,20 +129,14 @@ def test_update_from_package_info_with_valid_path_with_missing_keys(
 
     package_info_file = tmpdir.mkdir("tmp").join("package_info.yml")
     contents = """
-    # No data in my YAML but this shouldn't raise any errors!
     """
     package_info_file.write(contents)
 
     package._update_from_package_info(str(package_info_file))
 
-    for attr in (
-        "package_name",
-        "icon",
-        "description",
-        "code_owners",
-        "domain_experts",
-    ):
-        assert package[attr] is None
+    # Unchanged attrs since file state is invalid
+    assert package.code_owners == code_owners
+    assert package.domain_experts == domain_experts
 
 
 def test_update_from_package_info_with_invalid_path_exits_early(
@@ -151,5 +149,6 @@ def test_update_from_package_info_with_invalid_path_exits_early(
 
     package._update_from_package_info("my_fake_path.yml")
 
+    # Unchanged attrs since file state is invalid
     assert package.code_owners == code_owners
     assert package.domain_experts == domain_experts
