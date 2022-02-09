@@ -123,4 +123,4 @@ rules:
           notes:
             format: markdown
             content:
-              - "### This expectation confirms that the pickup_datetime is of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+              - "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"

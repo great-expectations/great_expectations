@@ -354,7 +354,7 @@ def alice_columnar_table_single_batch(empty_data_context):
                             "notes": {
                                 "format": "markdown",
                                 "content": [
-                                    "### This expectation confirms that the event_ts is of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                                    "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                                 ],
                             }
                         },
@@ -1185,7 +1185,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "notes": {
                         "format": "markdown",
                         "content": [
-                            "### This expectation confirms that the pickup_datetime is of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                            "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
                     }
                 },
@@ -1205,7 +1205,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "notes": {
                         "format": "markdown",
                         "content": [
-                            "### This expectation confirms that the pickup_datetime is of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                            "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                         ],
                     }
                 },
