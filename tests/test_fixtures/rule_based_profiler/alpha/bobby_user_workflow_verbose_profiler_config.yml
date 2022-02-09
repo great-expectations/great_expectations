@@ -88,7 +88,7 @@ rules:
           profiler_details: $parameter.max_range.details
   my_rule_for_timestamps:
     domain_builder:
-      class_name: SimpleSemanticTypeColumnDomainBuilder
+      class_name: SimpleColumnSuffixDomainBuilder
       # BatchRequest yielding exactly one batch (March, 2019 trip data)
       batch_request:
         datasource_name: taxi_pandas
@@ -96,8 +96,8 @@ rules:
         data_asset_name: my_reports
         data_connector_query:
           index: -1
-      semantic_types:
-        - datetime
+      column_name_suffixes:
+        - _datetime
     parameter_builders:
       - name: my_date_format
         class_name: SimpleDateFormatStringParameterBuilder
@@ -105,7 +105,7 @@ rules:
         batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         # Note this parameter builder computes parameters only on the provided domain:
         metric_domain_kwargs:
-          column: tpep_pickup_datetime
+          column: pickup_datetime
         candidate_strings:
           - "%Y-%m-%d %H:%M:%S"
           - "%y-%m-%d"
@@ -123,4 +123,4 @@ rules:
           notes:
             format: markdown
             content:
-              - "### This expectation confirms that the tpep_pickup_datetime is of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+              - "### This expectation confirms that the pickup_datetime is of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"

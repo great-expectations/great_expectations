@@ -4,7 +4,6 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
-    MetricComputationResult,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
@@ -105,28 +104,32 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        nonnull_count: MetricComputationResult = self.get_metrics(
-            batch_ids=batch_ids,
-            validator=validator,
-            metric_name="column_values.nonnull.count",
-            metric_domain_kwargs=self._metric_domain_kwargs,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        ).metric_values[0]
-
-        format_string_success_ratios = dict()
-        for fmt_string in self._candidate_strings:
-            match_strftime_unexpected_count = self.get_metrics(
+        nonnull_count = sum(
+            self.get_metrics(
                 batch_ids=batch_ids,
                 validator=validator,
-                metric_name="column_values.match_strftime_format.unexpected_count",
+                metric_name="column_values.nonnull.count",
                 metric_domain_kwargs=self._metric_domain_kwargs,
-                metric_value_kwargs={"strftime_format": fmt_string},
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
-            ).metric_values[0]
+            ).metric_values
+        )
+
+        format_string_success_ratios = dict()
+        for fmt_string in self._candidate_strings:
+            match_strftime_unexpected_count = sum(
+                self.get_metrics(
+                    batch_ids=batch_ids,
+                    validator=validator,
+                    metric_name="column_values.match_strftime_format.unexpected_count",
+                    metric_domain_kwargs=self._metric_domain_kwargs,
+                    metric_value_kwargs={"strftime_format": fmt_string},
+                    domain=domain,
+                    variables=variables,
+                    parameters=parameters,
+                ).metric_values
+            )
 
             format_string_success_ratios[fmt_string] = (
                 nonnull_count - match_strftime_unexpected_count
