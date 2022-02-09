@@ -24,7 +24,7 @@ You can use Evaluation Parameters to configure Expectations to use dynamic value
 
 ### Relationship to other objects
 
-Evaluation Parameters are used in Expectations when Validating data.  <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> use <TechnicalTag relative="../" tag="validation_action" text="Actions" /> to store Evaluation Parameters in the <TechnicalTag relative="../" tag="evaluation_parameter_store" text="Evaluation Parameter Store" />.
+Evaluation Parameters are used in Expectations when Validating data.  <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> use <TechnicalTag relative="../" tag="action" text="Actions" /> to store Evaluation Parameters in the <TechnicalTag relative="../" tag="evaluation_parameter_store" text="Evaluation Parameter Store" />.
 
 ## Use cases
 
