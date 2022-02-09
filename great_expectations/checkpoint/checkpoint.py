@@ -130,7 +130,6 @@ class Checkpoint:
 
         if isinstance(source, dict):
             if not isinstance(source, Attributes):
-                deep_filter_properties_iterable(properties=source, inplace=True)
                 source = Attributes(source)
 
             key: str
@@ -513,7 +512,7 @@ is run), with each validation having its own defined "action_list" attribute.
             )
 
         if format == "dict":
-            return config_kwargs
+            return dict(**config_kwargs)
 
         if format in ["str", "dir", "repr"]:
             json_dict: dict = convert_to_json_serializable(data=config_kwargs)
