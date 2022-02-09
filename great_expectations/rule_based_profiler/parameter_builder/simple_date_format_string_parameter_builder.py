@@ -64,12 +64,12 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         self._threshold = threshold
         if candidate_strings is not None:
-            self._candidate_strings = candidate_strings
+            self._candidate_strings = set(candidate_strings)
         else:
             self._candidate_strings = self.CANDIDATE_STRINGS
 
         if additional_candidate_strings is not None:
-            self._candidate_strings.add(additional_candidate_strings)
+            self._candidate_strings.update(additional_candidate_strings)
 
     def _build_parameters(
         self,
@@ -104,17 +104,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
-
-        if len(batch_ids) > 1:
-            # By default, the validator will use active batch id (the most recently loaded batch)
-            logger.warning(
-                f"Rule {self.parameter_id} received {len(batch_ids)} batches but can only process one."
-            )
-            if batch_ids[0] not in validator.execution_engine.loaded_batch_data_ids:
-                raise ge_exceptions.ProfilerExecutionError(
-                    f"Parameter Builder {self.parameter_id} cannot build parameters because batch {batch_ids[0]} is not "
-                    f"currently loaded in the validator."
-                )
 
         nonnull_count: MetricComputationResult = self.get_metrics(
             batch_ids=batch_ids,
