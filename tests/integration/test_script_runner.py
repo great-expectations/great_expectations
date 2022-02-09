@@ -148,14 +148,12 @@ local_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/dataconnector_docs",
     ),
-    # Chetan - 20220125 - Commenting out RBP-specific test due to the feature and related doc undergoing significant changes as part of development.
-    #                     Both the doc and test will be rewritten after the feature is complete - only then should this be reenabled.
-    # IntegrationTextFixture(
-    #     name= "rule_base_profiler_multi_batch_example",
-    #     data_context_dir= "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-    #     data_dir= "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     user_flow_script= "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
-    # ),
+    IntegrationTextFixture(
+        name="rule_base_profiler_multi_batch_example",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
+    ),
     IntegrationTextFixture(
         name="databricks_deployment_patterns_file_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py",

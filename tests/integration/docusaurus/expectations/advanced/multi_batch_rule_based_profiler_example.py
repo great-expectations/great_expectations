@@ -7,6 +7,9 @@ profiler_config = """
 # This profiler is meant to be used on the NYC taxi data (yellow_tripdata_sample_<YEAR>-<MONTH>.csv)
 # located in tests/test_sets/taxi_yellow_tripdata_samples/
 
+name: My Profiler
+config_version: 1.0
+
 variables:
   false_positive_rate: 0.01
   mostly: 1.0
@@ -16,7 +19,7 @@ rules:
     domain_builder:
         class_name: TableDomainBuilder
     parameter_builders:
-      - parameter_name: row_count_range
+      - name: row_count_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request:
             datasource_name: taxi_pandas
@@ -52,7 +55,7 @@ rules:
         data_connector_query:
           index: -1
     parameter_builders:
-      - parameter_name: min_range
+      - name: min_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request:
             datasource_name: taxi_pandas
@@ -64,7 +67,7 @@ rules:
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
-      - parameter_name: max_range
+      - name: max_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
         batch_request:
             datasource_name: taxi_pandas
