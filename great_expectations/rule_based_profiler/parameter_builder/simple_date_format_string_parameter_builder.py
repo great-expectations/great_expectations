@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -23,7 +23,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     has the lowest unexpected_count ratio.
     """
 
-    CANDIDATE_STRINGS = {
+    CANDIDATE_STRINGS: Set[str] = {
         "%Y-%m-%d",
         "%m-%d-%Y",
         "%y-%m-%d",
@@ -101,7 +101,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        nonnull_count = sum(
+        nonnull_count: int = sum(
             self.get_metrics(
                 batch_ids=batch_ids,
                 validator=validator,
@@ -113,9 +113,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             ).metric_values
         )
 
-        format_string_success_ratios = dict()
+        format_string_success_ratios: dict = {}
         for fmt_string in self._candidate_strings:
-            match_strftime_unexpected_count = sum(
+            match_strftime_unexpected_count: int = sum(
                 self.get_metrics(
                     batch_ids=batch_ids,
                     validator=validator,
