@@ -4904,7 +4904,7 @@ def ge_cloud_base_url():
 
 
 @pytest.fixture
-def ge_cloud_account_id():
+def ge_cloud_organization_id():
     return "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
 
 
@@ -4914,17 +4914,17 @@ def ge_cloud_access_token():
 
 
 @pytest.fixture
-def ge_cloud_config(ge_cloud_base_url, ge_cloud_account_id, ge_cloud_access_token):
+def ge_cloud_config(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token):
     return GeCloudConfig(
         base_url=ge_cloud_base_url,
-        account_id=ge_cloud_account_id,
+        organization_id=ge_cloud_organization_id,
         access_token=ge_cloud_access_token,
     )
 
 
 @pytest.fixture(scope="function")
 def empty_ge_cloud_data_context_config(
-    ge_cloud_base_url, ge_cloud_account_id, ge_cloud_access_token
+    ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token
 ):
     config_yaml_str = f"""
 stores:
@@ -4939,7 +4939,7 @@ stores:
       ge_cloud_resource_type: expectation_suite
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
-        account_id: {ge_cloud_account_id}
+        organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
   default_validations_store:
@@ -4950,7 +4950,7 @@ stores:
       ge_cloud_resource_type: suite_validation_result
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
-        account_id: {ge_cloud_account_id}
+        organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
   default_checkpoint_store:
@@ -4961,7 +4961,7 @@ stores:
       ge_cloud_resource_type: contract
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
-        account_id: {ge_cloud_account_id}
+        organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
 evaluation_parameter_store_name: default_evaluation_parameter_store
