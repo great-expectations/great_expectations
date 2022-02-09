@@ -75,7 +75,7 @@ try:
         context.GE_UNCOMMITTED_DIR, "config_variables.yml"
     )
     assert (
-        yaml.load(config_variables_file_path)["config_variables_file_path"]
+        yaml.safe_load(config_variables_file_path)["config_variables_file_path"]
         == context_config_variables_relative_file_path
     )
     context_config_variables_file_path = os.path.join(
@@ -85,7 +85,7 @@ try:
         f.write(config_variables_yaml)
 
     # add datsources now that variables are configured
-    datasources = yaml.load(datasources_yaml)
+    datasources = yaml.safe_load(datasources_yaml)
     my_postgres_db = context.add_datasource(
         name="my_postgres_db", **datasources["datasources"]["my_postgres_db"]
     )

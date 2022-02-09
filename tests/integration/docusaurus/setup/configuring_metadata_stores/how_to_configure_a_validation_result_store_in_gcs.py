@@ -34,7 +34,7 @@ data_connectors:
         - data_asset_name
       pattern: (.*)\.csv
 """
-datasource = context.add_datasource(**yaml.load(datasource_config))
+datasource = context.add_datasource(**yaml.safe_load(datasource_config))
 
 expectation_suite_name = "my_expectation_suite"
 context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
@@ -51,7 +51,7 @@ validations:
       data_asset_name: yellow_tripdata_sample_2019-01
     expectation_suite_name: {expectation_suite_name}
 """
-context.add_checkpoint(**yaml.load(checkpoint_config))
+context.add_checkpoint(**yaml.safe_load(checkpoint_config))
 
 # run the checkpoint twice to create two validations
 context.run_checkpoint(checkpoint_name=checkpoint_name)
@@ -62,7 +62,7 @@ great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.load(f)
+    great_expectations_yaml = yaml.safe_load(f)
 
 stores = great_expectations_yaml["stores"]
 pop_stores = ["checkpoint_store", "evaluation_parameter_store", "expectations_store"]
@@ -86,7 +86,7 @@ stores:
 validations_store_name: validations_store
 """
 
-assert actual_existing_validations_store == yaml.load(
+assert actual_existing_validations_store == yaml.safe_load(
     expected_existing_validations_store_yaml
 )
 
@@ -104,7 +104,7 @@ validations_store_name: validations_GCS_store
 """
 
 # replace example code with integration test configuration
-configured_validations_store = yaml.load(configured_validations_store_yaml)
+configured_validations_store = yaml.safe_load(configured_validations_store_yaml)
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "project"
 ] = gcp_project
@@ -135,7 +135,7 @@ context.add_store(
     store_config=configured_validations_store["stores"]["validations_GCS_store"],
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.load(f)
+    great_expectations_yaml = yaml.safe_load(f)
 great_expectations_yaml["validations_store_name"] = "validations_GCS_store"
 great_expectations_yaml["stores"]["validations_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"

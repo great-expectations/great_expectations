@@ -163,8 +163,8 @@ great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.load(f)
-great_expectations_yaml["data_docs_sites"] = yaml.load(data_docs_site_yaml)[
+    great_expectations_yaml = yaml.safe_load(f)
+great_expectations_yaml["data_docs_sites"] = yaml.safe_load(data_docs_site_yaml)[
     "data_docs_sites"
 ]
 with open(great_expectations_yaml_file_path, "w") as f:
