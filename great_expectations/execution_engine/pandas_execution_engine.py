@@ -381,10 +381,13 @@ Please check your config."""
                 "reader_method": "read_csv",
                 "reader_options": {"compression": "gzip"},
             }
+        elif path.endswith(".sas7bdat") or path.endswith(".xpt"):
+            return {"reader_method": "read_sas"}
 
-        raise ge_exceptions.ExecutionEngineError(
-            f'Unable to determine reader method from path: "{path}".'
-        )
+        else:
+            raise ge_exceptions.ExecutionEngineError(
+                f'Unable to determine reader method from path: "{path}".'
+            )
 
     def _get_reader_fn(self, reader_method=None, path=None):
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the

@@ -1102,6 +1102,7 @@ We could not determine the format of the file. What is it?
     2. Parquet
     3. Excel
     4. JSON
+    5. SAS
 """
 
     reader_method_file_extensions = {
@@ -1109,6 +1110,7 @@ We could not determine the format of the file. What is it?
         "2": "parquet",
         "3": "xlsx",
         "4": "json",
+        "5": "sas",
     }
 
     data_asset_name = None
@@ -1201,7 +1203,7 @@ We could not determine the format of the file. What is it?
 
                 option_selection = click.prompt(
                     msg_prompt_file_type,
-                    type=click.Choice(["1", "2", "3", "4"]),
+                    type=click.Choice(["1", "2", "3", "4", "5"]),
                     show_choices=False,
                 )
 
