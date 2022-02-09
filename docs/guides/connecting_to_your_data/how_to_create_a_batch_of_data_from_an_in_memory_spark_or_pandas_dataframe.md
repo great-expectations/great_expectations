@@ -46,7 +46,7 @@ You can read more about the core classes that make Great Expectations run in our
      Load an on-disk Data Context (ie. from a `great_expectations.yml` configuration) via the `get_context()` command:
 
      ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py#L11
-     ``
+     ```
 
     If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.), load an in-code Data Context using these instructions: [How to instantiate a Data Context without a yml file](../../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
 
