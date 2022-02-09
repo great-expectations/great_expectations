@@ -4,7 +4,7 @@ import itertools
 import json
 import logging
 import uuid
-from typing import Any, Dict, List, MutableMapping, Optional, Union
+from typing import Any, Dict, List, MutableMapping, Optional, Set, Union
 from uuid import UUID
 
 from ruamel.yaml import YAML
@@ -12,7 +12,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.marshmallow__shade import (
     INCLUDE,
     Schema,
@@ -24,7 +24,7 @@ from great_expectations.marshmallow__shade import (
     validates_schema,
 )
 from great_expectations.marshmallow__shade.validate import OneOf
-from great_expectations.types import DictDot, SerializableDictDot
+from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.base import SerializableDotDict
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
@@ -33,6 +33,7 @@ yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 CURRENT_GE_CONFIG_VERSION = 3
 FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
@@ -53,6 +54,10 @@ def object_to_yaml_str(obj):
 
 class BaseYamlConfig(SerializableDictDot):
     _config_schema_class = None
+
+    exclude_field_names: Set[str] = {
+        "commented_map",
+    }
 
     def __init__(self, commented_map: Optional[CommentedMap] = None):
         if commented_map is None:
@@ -110,15 +115,6 @@ class BaseYamlConfig(SerializableDictDot):
         :returns a YAML string containing the project configuration
         """
         return object_to_yaml_str(obj=self.commented_map)
-
-    def to_raw_dict(self) -> dict:
-        """
-        :returns a raw dict containing the project configuration
-        """
-        key: str
-        commented_map: CommentedMap = self.commented_map
-        # return {key: commented_map[key] for key in commented_map}
-        return {key: self[key] for key in commented_map}
 
     def to_json_dict(self) -> dict:
         """
@@ -564,7 +560,7 @@ continue.
             azure_options = data["azure_options"]
             if not (("conn_str" in azure_options) ^ ("account_url" in azure_options)):
                 raise ge_exceptions.InvalidConfigError(
-                    f"""Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
+                    """Your current configuration is either missing methods of authentication or is using too many for the Azure type of data connector.
                     You must only select one between `conn_str` or `account_url`. Please update your configuration to continue.
                     """
                 )
@@ -590,7 +586,7 @@ continue.
             gcs_options = data["gcs_options"]
             if "filename" in gcs_options and "info" in gcs_options:
                 raise ge_exceptions.InvalidConfigError(
-                    f"""Your current configuration can only use a single method of authentication for the GCS type of data connector.
+                    """Your current configuration can only use a single method of authentication for the GCS type of data connector.
                     You must only select one between `filename` (from_service_account_file) and `info` (from_service_account_info). Please update your configuration to continue.
                     """
                 )
@@ -1464,11 +1460,13 @@ class BaseStoreBackendDefaults(DictDot):
         self.validation_operators = validation_operators
         if stores is None:
             stores = copy.deepcopy(DataContextConfigDefaults.DEFAULT_STORES.value)
+
         self.stores = stores
         if data_docs_sites is None:
             data_docs_sites = copy.deepcopy(
                 DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITES.value
             )
+
         self.data_docs_sites = data_docs_sites
         self.data_docs_site_name = data_docs_site_name
 
@@ -2088,7 +2086,7 @@ class CheckpointConfigSchema(Schema):
             "name" in data or "validation_operator_name" in data or "batches" in data
         ):
             raise ge_exceptions.InvalidConfigError(
-                f"""Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
+                """Your current Checkpoint configuration is incomplete.  Please update your Checkpoint configuration to
                 continue.
                 """
             )
@@ -2096,7 +2094,7 @@ class CheckpointConfigSchema(Schema):
         if data.get("config_version"):
             if "name" not in data:
                 raise ge_exceptions.InvalidConfigError(
-                    f"""Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
+                    """Your Checkpoint configuration requires the "name" field.  Please update your current Checkpoint
                     configuration to continue.
                     """
                 )
@@ -2117,6 +2115,7 @@ class CheckpointConfigSchema(Schema):
         for key in self.REMOVE_KEYS_IF_NONE:
             if key in data and data[key] is None:
                 data.pop(key)
+
         return data
 
 
@@ -2162,9 +2161,9 @@ class CheckpointConfig(BaseYamlConfig):
         self._config_version = config_version
         if self.config_version is None:
             class_name = class_name or "LegacyCheckpoint"
-            self.validation_operator_name = validation_operator_name
+            self._validation_operator_name = validation_operator_name
             if batches is not None and isinstance(batches, list):
-                self.batches = batches
+                self._batches = batches
         else:
             class_name = class_name or "Checkpoint"
             self._template_name = template_name
@@ -2197,6 +2196,22 @@ class CheckpointConfig(BaseYamlConfig):
     @classmethod
     def get_schema_class(cls):
         return CheckpointConfigSchema
+
+    @property
+    def validation_operator_name(self) -> str:
+        return self._validation_operator_name
+
+    @validation_operator_name.setter
+    def validation_operator_name(self, value: str):
+        self._validation_operator_name = value
+
+    @property
+    def batches(self) -> List[dict]:
+        return self._batches
+
+    @batches.setter
+    def batches(self, value: List[dict]):
+        self._batches = value
 
     @property
     def ge_cloud_id(self) -> Optional[Union[UUID, str]]:
@@ -2306,17 +2321,33 @@ class CheckpointConfig(BaseYamlConfig):
     def site_names(self) -> List[str]:
         return self._site_names
 
+    @site_names.setter
+    def site_names(self, value: List[str]):
+        self._site_names = value
+
     @property
     def slack_webhook(self) -> str:
         return self._slack_webhook
+
+    @slack_webhook.setter
+    def slack_webhook(self, value: str):
+        self._slack_webhook = value
 
     @property
     def notify_on(self) -> str:
         return self._notify_on
 
+    @notify_on.setter
+    def notify_on(self, value: str):
+        self._notify_on = value
+
     @property
     def notify_with(self) -> str:
         return self._notify_with
+
+    @notify_with.setter
+    def notify_with(self, value: str):
+        self._notify_with = value
 
     @property
     def evaluation_parameters(self) -> dict:
@@ -2339,19 +2370,42 @@ class CheckpointConfig(BaseYamlConfig):
         result = cls.__new__(cls)
 
         memo[id(self)] = result
-        for key, value in self.to_dict().items():
-            value_copy = safe_deep_copy(data=value, memo=memo)
-            setattr(result, key, value_copy)
+
+        attributes_to_copy = set(CheckpointConfigSchema().fields.keys())
+        for key in attributes_to_copy:
+            try:
+                value = self[key]
+                value_copy = safe_deep_copy(data=value, memo=memo)
+                setattr(result, key, value_copy)
+            except AttributeError:
+                pass
 
         return result
 
     def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
             inplace=True,
         )
         return json.dumps(json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
 
 
 class CheckpointValidationConfig(DictDot):

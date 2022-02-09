@@ -212,6 +212,14 @@ def test_reader_fn():
     fn = engine._get_reader_fn(path="myfile.xlsx")
     assert "<function read_excel" in str(fn)
 
+    # Testing that can recognize basic sas7bdat file
+    fn_read_sas7bdat = engine._get_reader_fn(path="myfile.sas7bdat")
+    assert "<function read_sas" in str(fn_read_sas7bdat)
+
+    # Testing that can recognize basic SAS xpt file
+    fn_read_xpt = engine._get_reader_fn(path="myfile.xpt")
+    assert "<function read_sas" in str(fn_read_xpt)
+
     # Ensuring that other way around works as well - reader_method should always override path
     fn_new = engine._get_reader_fn(reader_method="read_csv")
     assert "<function" in str(fn_new)
