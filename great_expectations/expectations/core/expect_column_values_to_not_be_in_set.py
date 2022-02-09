@@ -100,7 +100,6 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         "mostly",
         "parse_strings_as_datetimes",
     )
-
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -110,6 +109,10 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "value_set",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         super().validate_configuration(configuration)

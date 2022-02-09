@@ -10,7 +10,7 @@ Within the table of contents, each section has specific role to play. Broadly sp
 
 * **Getting Started with Great Expectations** help users and contributors get started quickly. Along the way they orient new users to concepts that will be important to know later.
 
-* **How-to guides** help users accomplish specific goals that go beyond the generic tutorials. Article titles within this section always start with “How to”: “How to create custom Expectations”. They often reference specific tools or infrastructure: “How to validate Expectations from within a notebook”, “How to build Data Docs in S3.” For additional information, please see [How to write a how-to-guide](../../guides/miscellaneous/how_to_write_a_how_to_guide).
+* **How-to guides** help users accomplish specific goals that go beyond the generic tutorials. Article titles within this section always start with “How to”: “How to create custom Expectations”. They often reference specific tools or infrastructure: “How to validate Expectations from within a notebook”, “How to build Data Docs in S3.” For additional information, please see [How to write a how-to-guide](../../guides/miscellaneous/how_to_write_a_how_to_guide.md).
 
 * **Deployment patterns** explains how to deploy Great Expectations alongside other data tools.
 

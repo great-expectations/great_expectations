@@ -87,7 +87,7 @@ def test_upgrade_helper_intervention_on_cli_command(
         in stdout
     )
     assert (
-        "Ok, exiting now. To upgrade at a later time, use the following command: [36mgreat_expectations --v3-api project "
+        "Ok, exiting now. To upgrade at a later time, use the following command: [36mgreat_expectations project "
         "upgrade[0m" in stdout
     )
     assert (

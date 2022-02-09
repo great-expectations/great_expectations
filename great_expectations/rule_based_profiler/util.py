@@ -6,10 +6,9 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
-from great_expectations.core.batch import Batch, BatchRequest
-from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.rule_based_profiler.types import (
+    Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
@@ -21,8 +20,8 @@ NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 def get_validator(
     purpose: str,
     *,
-    data_context: Optional[DataContext] = None,
-    batch_request: Optional[Union[BatchRequest, dict, str]] = None,
+    data_context: Optional["DataContext"] = None,  # noqa: F821
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -54,8 +53,8 @@ def get_validator(
 
 
 def get_batch_ids(
-    data_context: Optional[DataContext] = None,
-    batch_request: Optional[Union[BatchRequest, dict, str]] = None,
+    data_context: Optional["DataContext"] = None,  # noqa: F821
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -79,7 +78,7 @@ def get_batch_ids(
 
 
 def build_batch_request(
-    batch_request: Optional[Union[dict, str]] = None,
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -141,6 +140,7 @@ def get_parameter_value_and_validate_return_type(
     """
     if isinstance(parameter_reference, dict):
         parameter_reference = dict(copy.deepcopy(parameter_reference))
+
     parameter_reference = get_parameter_value(
         domain=domain,
         parameter_reference=parameter_reference,
@@ -154,6 +154,7 @@ def get_parameter_value_and_validate_return_type(
 (value of type "{str(type(parameter_reference))}" was encountered).
 """
             )
+
     return parameter_reference
 
 
@@ -191,6 +192,7 @@ def get_parameter_value(
                     variables=variables,
                     parameters=parameters,
                 )
+
     return parameter_reference
 
 

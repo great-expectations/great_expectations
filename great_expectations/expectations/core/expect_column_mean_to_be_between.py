@@ -97,6 +97,13 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "min_value",
+        "max_value",
+        "strict_min",
+        "strict_max",
+    )
 
     kwargs_json_schema_base_properties = {
         "result_format": {

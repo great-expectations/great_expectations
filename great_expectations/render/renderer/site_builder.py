@@ -484,7 +484,7 @@ class DefaultSiteSectionBuilder:
                         viewable_content,
                     )
             except Exception as e:
-                exception_message = f"""\
+                exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:
@@ -673,8 +673,7 @@ class DefaultSiteIndexBuilder:
         """
         create_expectations = CallToActionButton(
             "How to Create Expectations",
-            # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations.html",
+            "https://docs.greatexpectations.io/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data",
         )
         see_glossary = CallToActionButton(
             "See More Kinds of Expectations",
@@ -682,16 +681,15 @@ class DefaultSiteIndexBuilder:
         )
         validation_playground = CallToActionButton(
             "How to Validate Data",
-            # TODO update this link to a proper tutorial
-            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation.html",
+            "https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint",
         )
         customize_data_docs = CallToActionButton(
             "How to Customize Data Docs",
-            "https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#data-docs",
+            "https://docs.greatexpectations.io/docs/reference/data_docs#customizing-html-documentation",
         )
         team_site = CallToActionButton(
             "How to Set Up a Team Site",
-            "https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs.html",
+            "https://docs.greatexpectations.io/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem",
         )
         # TODO gallery does not yet exist
         # gallery = CallToActionButton(
@@ -757,7 +755,7 @@ class DefaultSiteIndexBuilder:
                 show_how_to_buttons=self.show_how_to_buttons,
             )
         except Exception as e:
-            exception_message = f"""\
+            exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:

@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, cast
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -12,7 +12,10 @@ from great_expectations.datasource.data_connector.data_connector import DataConn
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 
 try:
     import sqlalchemy as sa
@@ -81,7 +84,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                 table_name=table_name, **data_asset_config["splitter_kwargs"]
             )
 
-            rows = self._execution_engine.engine.execute(split_query).fetchall()
+            sqlalchemy_execution_engine: SqlAlchemyExecutionEngine = cast(
+                SqlAlchemyExecutionEngine, self._execution_engine
+            )
+            rows = sqlalchemy_execution_engine.engine.execute(split_query).fetchall()
 
             # Zip up split parameters with column names
             column_names = self._get_column_names_from_splitter_kwargs(
@@ -148,7 +154,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         batch_definition_list: List[BatchDefinition] = []
         try:
             sub_cache = self._data_references_cache[batch_request.data_asset_name]
-        except KeyError as e:
+        except KeyError:
             raise KeyError(
                 f"data_asset_name {batch_request.data_asset_name} is not recognized."
             )

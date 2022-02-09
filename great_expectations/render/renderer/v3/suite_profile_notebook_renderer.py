@@ -27,7 +27,6 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
 
         deep_filter_properties_iterable(
             properties=batch_request,
-            keep_falsy_numerics=True,
             inplace=True,
         )
         batch_request = standardize_batch_request_display_ordering(
@@ -179,7 +178,7 @@ You can find more information about [how to configure this profiler, including a
 
     def _add_profiler_cell(self):
         self.add_code_cell(
-            code=f"""\
+            code="""\
 profiler = UserConfigurableProfiler(
     profile_dataset=validator,
     excluded_expectations=None,

@@ -4,9 +4,7 @@ from typing import List, Optional
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.data_connector.file_path_data_connector import (
-    FilePathDataConnector,
-)
+from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
 
 try:
     import boto3
@@ -79,7 +77,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         )
 
         self._bucket = bucket
-        self._prefix = FilePathDataConnector.sanitize_prefix(prefix)
+        self._prefix = ConfiguredAssetS3DataConnector.sanitize_prefix_for_s3(prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 

@@ -3,7 +3,7 @@ import os
 import shutil
 import subprocess
 import unittest
-from typing import List, Optional
+from typing import List, Optional, Union
 from unittest import mock
 
 import nbformat
@@ -36,6 +36,7 @@ yaml.default_flow_style = False
 logger = logging.getLogger(__name__)
 
 
+# TODO: <Alex>ALEX -- This belongs in tests/conftest.py</Alex>
 @pytest.fixture
 def titanic_data_context_with_sql_datasource(
     sa,
@@ -73,7 +74,7 @@ introspection:
     try:
         # noinspection PyUnusedLocal
         my_sql_datasource: Optional[
-            SimpleSqlalchemyDatasource, LegacyDatasource
+            Union[SimpleSqlalchemyDatasource, LegacyDatasource]
         ] = context.add_datasource(
             "test_sqlite_db_datasource", **yaml.load(datasource_config)
         )
@@ -83,6 +84,7 @@ introspection:
     return context
 
 
+# TODO: <Alex>ALEX -- This belongs in tests/conftest.py</Alex>
 @pytest.fixture
 def titanic_data_context_with_spark_datasource(
     tmp_path_factory,
@@ -820,7 +822,7 @@ module_name: great_expectations.checkpoint
 class_name: Checkpoint
 run_name_template: '%Y%m%d-%H%M%S-my-run-name-template'
 expectation_suite_name:
-batch_request:
+batch_request: {}
 action_list:
   - name: store_validation_result
     action:
@@ -1092,13 +1094,13 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -1291,13 +1293,13 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -1519,13 +1521,13 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -1733,13 +1735,13 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -1948,13 +1950,13 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -2176,13 +2178,13 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -2379,13 +2381,13 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -2585,13 +2587,13 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -2806,14 +2808,14 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          catch_exceptions: False
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      catch_exceptions: False
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -3006,14 +3008,14 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          catch_exceptions: False
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      catch_exceptions: False
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -3213,14 +3215,14 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          catch_exceptions: False
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      catch_exceptions: False
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -3610,13 +3612,13 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -3734,13 +3736,13 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(
@@ -3855,14 +3857,14 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
             - name: update_data_docs
               action:
                 class_name: UpdateDataDocsAction
-        evaluation_parameters:
-          param1: "$MY_PARAM"
-          param2: 1 + "$OLD_PARAM"
-        runtime_configuration:
-          catch_exceptions: False
-          result_format:
-            result_format: BASIC
-            partial_unexpected_count: 20
+    evaluation_parameters:
+      param1: "$MY_PARAM"
+      param2: 1 + "$OLD_PARAM"
+    runtime_configuration:
+      catch_exceptions: False
+      result_format:
+        result_format: BASIC
+        partial_unexpected_count: 20
     """
     config: dict = dict(yaml.load(checkpoint_yaml_config))
     _write_checkpoint_dict_to_file(

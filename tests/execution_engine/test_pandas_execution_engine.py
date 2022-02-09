@@ -8,7 +8,6 @@ from unittest import mock
 import boto3
 import pandas as pd
 import pytest
-from botocore.errorfactory import ClientError
 from moto import mock_s3
 
 try:
@@ -212,6 +211,14 @@ def test_reader_fn():
     # Testing that can recognize basic excel file
     fn = engine._get_reader_fn(path="myfile.xlsx")
     assert "<function read_excel" in str(fn)
+
+    # Testing that can recognize basic sas7bdat file
+    fn_read_sas7bdat = engine._get_reader_fn(path="myfile.sas7bdat")
+    assert "<function read_sas" in str(fn_read_sas7bdat)
+
+    # Testing that can recognize basic SAS xpt file
+    fn_read_xpt = engine._get_reader_fn(path="myfile.xpt")
+    assert "<function read_sas" in str(fn_read_xpt)
 
     # Ensuring that other way around works as well - reader_method should always override path
     fn_new = engine._get_reader_fn(reader_method="read_csv")
@@ -647,16 +654,6 @@ def test_get_batch_with_split_on_whole_table_s3(
     assert df.dataframe.shape == test_df_small.shape
 
 
-def test_get_batch_with_no_s3_configured(batch_with_split_on_whole_table_s3):
-    # if S3 was not configured
-    execution_engine_no_s3 = PandasExecutionEngine()
-    execution_engine_no_s3._s3 = None
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
-        execution_engine_no_s3.get_batch_data(
-            batch_spec=batch_with_split_on_whole_table_s3
-        )
-
-
 def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_connector(
     test_s3_files, test_df_small
 ):
@@ -703,7 +700,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
             "splitter_method": "_split_on_whole_table",
         },
     )
-    with pytest.raises(ClientError):
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
         execution_engine.get_batch_data(
             batch_spec=my_data_connector.build_batch_spec(
                 batch_definition=batch_def_no_key
@@ -729,6 +726,19 @@ def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_parquet")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
     assert df.dataframe.shape == test_df_small.shape
+
+
+def test_get_batch_with_no_s3_configured():
+    batch_spec = S3BatchSpec(
+        path="s3a://i_dont_exist",
+        reader_method="read_csv",
+        splitter_method="_split_on_whole_table",
+    )
+    # if S3 was not configured
+    execution_engine_no_s3 = PandasExecutionEngine()
+
+    with pytest.raises(ge_exceptions.ExecutionEngineError):
+        execution_engine_no_s3.get_batch_data(batch_spec=batch_spec)
 
 
 def test_get_batch_with_split_on_column_value(test_df):
@@ -1038,7 +1048,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     custom_gcs_options = {"filename": "a/b/c/my_gcs_credentials.json"}
     engine = PandasExecutionEngine(gcs_options=custom_gcs_options)
     assert "gcs_options" in engine.config
-    assert "filename" not in engine.config.get("gcs_options")
+    assert "filename" in engine.config.get("gcs_options")
 
 
 @mock.patch(
@@ -1065,11 +1075,19 @@ def test_get_batch_data_with_gcs_batch_spec(
     assert df.dataframe.shape == (3, 3)
 
 
-def test_get_batch_with_no_gcs_configured(gcs_batch_spec):
-    # if GCS Client was not configured
-    execution_engine_no_gcs = PandasExecutionEngine()
-    execution_engine_no_gcs._gcs = None
+def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monkeypatch):
+    # If PandasExecutionEngine contains no credentials for GCS, we will still instantiate _gcs engine,
+    # but will raise Exception when trying get_batch_data(). The only situation where it would work is if we are running in a Google Cloud container.
+    # TODO : Determine how we can test the scenario where we are running PandasExecutionEngine from within Google Cloud env.
 
-    # Raises error due the connection object not being set
+    monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS", raising=False)
+    with pytest.raises(Exception):
+        PandasExecutionEngine().get_batch_data(batch_spec=gcs_batch_spec)
+
+
+def test_get_batch_with_gcs_misconfigured(gcs_batch_spec):
+    # gcs_batchspec point to data that the ExecutionEngine does not have access to
+    execution_engine_no_gcs = PandasExecutionEngine()
+    # Raises error if batch_spec causes ExecutionEngine error
     with pytest.raises(ge_exceptions.ExecutionEngineError):
         execution_engine_no_gcs.get_batch_data(batch_spec=gcs_batch_spec)

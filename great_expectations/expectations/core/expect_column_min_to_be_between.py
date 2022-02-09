@@ -105,6 +105,13 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
         "parse_strings_as_datetimes": False,
     }
+    args_keys = (
+        "column",
+        "min_value",
+        "max_value",
+        "strict_min",
+        "strict_max",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """

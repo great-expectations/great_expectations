@@ -263,7 +263,7 @@ In our case, changing `pattern` to `yellow_tripdata_(.*)\.csv` will fix our prob
 
 Here’s a similar example, but this time two Data Assets are mixed together in one folder.
 
-**Note**: For an equivalent configuration using `InferredAssetFileSystemDataConnector`, please see Example 2 in  [How to configure an InferredAssetDataConnector](./how_to_configure_an_inferredassetdataconnector).
+**Note**: For an equivalent configuration using `InferredAssetFileSystemDataConnector`, please see Example 2 in  [How to configure an InferredAssetDataConnector](./how_to_configure_an_inferredassetdataconnector.md).
 
 ```
 <MY DIRECTORY>/yellow_tripdata_2019-01.csv

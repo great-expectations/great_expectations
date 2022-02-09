@@ -1,13 +1,9 @@
-import json
 import logging
 import random
 import uuid
 from typing import Dict
 
-from great_expectations.data_context.store import (
-    ConfigurationStore,
-    GeCloudStoreBackend,
-)
+from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -57,8 +53,7 @@ class CheckpointStore(ConfigurationStore):
             print(f"Attempting to add a new test key {test_key} to Checkpoint store...")
         self.set(key=test_key, value=test_checkpoint_configuration)
         if pretty_print:
-            print(f"\tTest key {test_key} successfully added to Checkpoint store.")
-            print()
+            print(f"\tTest key {test_key} successfully added to Checkpoint store.\n")
 
         if pretty_print:
             print(

@@ -105,17 +105,17 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         try:
             for checkpoint_name in sorted(self.data_context.list_checkpoints()):
                 checkpoint = self.data_context.get_checkpoint(name=checkpoint_name)
-                if checkpoint.config.config_version is None:
+                if checkpoint.config_version is None:
                     legacy_checkpoints.append(checkpoint)
 
             self.upgrade_checklist["manual"]["checkpoints"] = {
-                checkpoint.name: checkpoint.config.to_json_dict()
+                checkpoint.name: checkpoint.get_config()
                 for checkpoint in legacy_checkpoints
             }
 
             if len(self.upgrade_checklist["manual"]["checkpoints"]) == 0:
                 self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
-        except ge_exceptions.InvalidTopLevelConfigKeyError as e:
+        except ge_exceptions.InvalidTopLevelConfigKeyError:
             self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
 
     # noinspection SpellCheckingInspection
@@ -175,7 +175,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
             and not self.upgrade_log["skipped_checkpoint_store_upgrade"]
         )
 
-        upgrade_overview = f"""\
+        upgrade_overview = """\
 <cyan>\
 ++====================================++
 || UpgradeHelperV13: Upgrade Overview ||
@@ -185,7 +185,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 """
         if increment_version:
             upgrade_overview += (
-                f"""\
+                """\
 UpgradeHelperV13 will upgrade your project to be compatible with Great Expectations V3 API.
 """
                 + self._upgrade_overview_common_content(
@@ -203,12 +203,12 @@ more about the automated upgrade process:
 """
             )
             if confirmation_required:
-                upgrade_overview += f"""\
+                upgrade_overview += """\
 
 Would you like to proceed with the project upgrade?\
 """
         else:
-            upgrade_overview += f"""\
+            upgrade_overview += """\
 Your project needs to be upgraded in order to be compatible with Great Expectations V3 API.
 """ + self._upgrade_overview_common_content(
                 manual_steps_required=manual_steps_required
@@ -375,7 +375,7 @@ No manual upgrade steps are required.
     def _generate_upgrade_report(self):
         upgrade_log_path = self._save_upgrade_log()
         increment_version = self.upgrade_log["update_version"]
-        upgrade_report = f"""\
+        upgrade_report = """\
 <cyan>\
 ++================++
 || Upgrade Report ||

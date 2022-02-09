@@ -48,7 +48,7 @@ test_python = context.test_yaml_config(
 
 # CLI
 datasource_cli = """
-great_expectations --v3-api datasource new
+great_expectations datasource new
 """
 
 # NOTE: The following code is only for testing and can be ignored by users.

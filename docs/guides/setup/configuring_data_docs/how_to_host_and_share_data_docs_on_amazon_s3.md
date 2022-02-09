@@ -95,10 +95,10 @@ data_docs_sites:
 
 5. **Test that your configuration is correct by building the site.**
 
-  Use the following CLI command: ``great_expectations --v3-api docs build --site-name s3_site``. If successful, the CLI will open your newly built S3 Data Docs site and provide the URL, which you can share as desired. Note that the URL will only be viewable by users with IP addresses appearing in the above policy.
+  Use the following CLI command: ``great_expectations docs build --site-name s3_site``. If successful, the CLI will open your newly built S3 Data Docs site and provide the URL, which you can share as desired. Note that the URL will only be viewable by users with IP addresses appearing in the above policy.
 
   ```bash
-  > great_expectations --v3-api docs build --site-name s3_site
+  > great_expectations docs build --site-name s3_site
 
   The following Data Docs sites will be built:
 

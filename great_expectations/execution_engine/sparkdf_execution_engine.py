@@ -592,15 +592,7 @@ Please check your config."""
     def add_column_row_condition(
         self, domain_kwargs, column_name=None, filter_null=True, filter_nan=False
     ):
-        if filter_nan is False:
-            return super().add_column_row_condition(
-                domain_kwargs=domain_kwargs,
-                column_name=column_name,
-                filter_null=filter_null,
-                filter_nan=filter_nan,
-            )
-
-        # We explicitly handle filter_nan for spark using a spark-native condition
+        # We explicitly handle filter_nan & filter_null for spark using a spark-native condition
         if "row_condition" in domain_kwargs and domain_kwargs["row_condition"]:
             raise GreatExpectationsError(
                 "ExecutionEngine does not support updating existing row_conditions."
@@ -774,7 +766,7 @@ Please check your config."""
         """Split on the hashed value of the named column"""
         try:
             getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
@@ -842,7 +834,7 @@ Please check your config."""
     ):
         try:
             getattr(hashlib, str(hash_function_name))
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.

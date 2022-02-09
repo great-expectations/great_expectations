@@ -775,6 +775,50 @@ def read_pickle(
         )
 
 
+def read_sas(
+    filename,
+    class_name="PandasDataset",
+    module_name="great_expectations.dataset",
+    dataset_class=None,
+    expectation_suite=None,
+    profiler=None,
+    *args,
+    **kwargs,
+):
+    """Read a file using Pandas read_sas and return a great_expectations dataset.
+
+    Args:
+        filename (string): path to file to read
+        class_name (str): class to which to convert resulting Pandas df
+        module_name (str): dataset module from which to try to dynamically load the relevant module
+        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
+            if not specified, try to load the class named via the class_name and module_name parameters
+        expectation_suite (string): path to great_expectations expectation suite file
+        profiler (Profiler class): profiler to use when creating the dataset (default is None)
+
+    Returns:
+        great_expectations dataset
+    """
+    import pandas as pd
+
+    df = pd.read_sas(filename, *args, **kwargs)
+    if dataset_class is not None:
+        return _convert_to_dataset_class(
+            df=df,
+            dataset_class=dataset_class,
+            expectation_suite=expectation_suite,
+            profiler=profiler,
+        )
+    else:
+        return _load_and_convert_to_dataset_class(
+            df=df,
+            class_name=class_name,
+            module_name=module_name,
+            expectation_suite=expectation_suite,
+            profiler=profiler,
+        )
+
+
 def validate(
     data_asset,
     expectation_suite=None,
@@ -946,12 +990,25 @@ def lint_code(code: str) -> str:
         return code
 
 
-def convert_nulls_to_None(code: str) -> str:
-    """
-    Substitute instances of 'null' with 'None' in string representations of Python dictionaries.
+def convert_json_string_to_be_python_compliant(code: str) -> str:
+    """Cleans JSON-formatted string to adhere to Python syntax
 
-    Designed to provide security when serializing GE objects and writing them to Jupyter Notebooks.
+    Substitute instances of 'null' with 'None' in string representations of Python dictionaries.
+    Additionally, substitutes instances of 'true' or 'false' with their Python equivalents.
+
+    Args:
+        code: JSON string to update
+
+    Returns:
+        Clean, Python-compliant string
+
     """
+    code = _convert_nulls_to_None(code)
+    code = _convert_json_bools_to_python_bools(code)
+    return code
+
+
+def _convert_nulls_to_None(code: str) -> str:
     pattern = r'"([a-zA-Z0-9_]+)": null'
     result = re.findall(pattern, code)
     for match in result:
@@ -959,6 +1016,18 @@ def convert_nulls_to_None(code: str) -> str:
         logger.info(
             f"Replaced '{match}: null' with '{match}: None' before writing to file"
         )
+    return code
+
+
+def _convert_json_bools_to_python_bools(code: str) -> str:
+    pattern = r'"([a-zA-Z0-9_]+)": (true|false)'
+    result = re.findall(pattern, code)
+    for match in result:
+        identifier, boolean = match
+        curr = f'"{identifier}": {boolean}'
+        updated = f'"{identifier}": {boolean.title()}'  # true -> True | false -> False
+        code = code.replace(curr, updated)
+        logger.info(f"Replaced '{curr}' with '{updated}' before writing to file")
     return code
 
 
@@ -986,9 +1055,15 @@ def filter_properties_dict(
     Returns:
         The (possibly) filtered properties dictionary (or None if no entries remain after filtering is performed)
     """
-    if keep_fields and delete_fields:
+    if keep_fields is None:
+        keep_fields = set()
+
+    if delete_fields is None:
+        delete_fields = set()
+
+    if keep_fields & delete_fields:
         raise ValueError(
-            "Only one of keep_fields and delete_fields filtering directives can be specified."
+            "Common keys between sets of keep_fields and delete_fields filtering directives are illegal."
         )
 
     if clean_falsy:
@@ -1072,7 +1147,7 @@ def filter_properties_dict(
 
 
 def deep_filter_properties_iterable(
-    properties: Optional[Union[dict, list, set]] = None,
+    properties: Optional[Union[dict, list, set, tuple]] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
@@ -1107,7 +1182,7 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
-    elif isinstance(properties, (list, set)):
+    elif isinstance(properties, (list, set, tuple)):
         if not inplace:
             properties = copy.deepcopy(properties)
 

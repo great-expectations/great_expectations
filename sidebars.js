@@ -3,17 +3,31 @@ module.exports = {
     'intro',
     {
       type: 'category',
-      label: 'Getting Started',
+      label: 'Getting Started (A Tutorial)',
       items: [
-        'tutorials/getting_started/intro',
-        'tutorials/getting_started/initialize_a_data_context',
-        'tutorials/getting_started/connect_to_data',
-        'tutorials/getting_started/create_your_first_expectations',
-        'tutorials/getting_started/check_out_data_docs',
-        'tutorials/getting_started/validate_your_data',
-        'tutorials/getting_started/customize_your_deployment'
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_overview', label: 'Overview' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_setup', label: '1. Setup' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_connect_to_data', label: '2. Connect to Data' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_create_expectations', label: '3. Create Expectations' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_validate_data', label: '4. Validate Data' },
+        { type: 'doc', id: 'tutorials/getting_started/tutorial_review', label: 'Review and next steps' }
+        // { type: 'doc', id: 'tutorials/getting_started/check_out_data_docs', label: 'Viewing your Results' },
+        // { type: 'doc', id: 'tutorials/getting_started/customize_your_deployment', label: 'Next Steps: Customizing for your Deployment' }
       ]
     },
+    // {
+    //   type: 'category',
+    //   label: 'Getting Started',
+    //   items: [
+    //     'tutorials/getting_started/intro',
+    //     'tutorials/getting_started/initialize_a_data_context',
+    //     'tutorials/getting_started/connect_to_data',
+    //     'tutorials/getting_started/create_your_first_expectations',
+    //     'tutorials/getting_started/check_out_data_docs',
+    //     'tutorials/getting_started/validate_your_data',
+    //     'tutorials/getting_started/customize_your_deployment'
+    //   ]
+    // },
     {
       type: 'category',
       label: 'How to Guides',
@@ -126,7 +140,7 @@ module.exports = {
               items: [
                 'guides/connecting_to_your_data/database/athena',
                 'guides/connecting_to_your_data/database/bigquery',
-                // 'guides/connecting_to_your_data/database/mssql',
+                'guides/connecting_to_your_data/database/mssql',
                 'guides/connecting_to_your_data/database/mysql',
                 'guides/connecting_to_your_data/database/postgres',
                 'guides/connecting_to_your_data/database/redshift',
@@ -250,6 +264,7 @@ module.exports = {
               items: [
                 // 'guides/validation/validation_actions/how_to_store_validation_results_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action',
+                'guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action'
@@ -288,8 +303,9 @@ module.exports = {
       items: [
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
         'deployment_patterns/how_to_use_great_expectations_in_databricks',
+        'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
-        'deployment_patterns/how_to_run_a_checkpoint_in_airflow',
+        'deployment_patterns/how_to_use_great_expectations_with_airflow',
         'deployment_patterns/how_to_use_great_expectations_in_flyte'
         // {
         // type: 'category',
@@ -333,7 +349,8 @@ module.exports = {
         { type: 'doc', id: 'reference/dividing_data_assets_into_batches' },
         { type: 'doc', id: 'reference/validation' },
         { type: 'doc', id: 'reference/anonymous_usage_statistics' },
-        { type: 'doc', id: 'reference/supporting_resources' }
+        { type: 'doc', id: 'reference/supporting_resources' },
+        { type: 'doc', id: 'glossary' }
       ]
     },
     {

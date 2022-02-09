@@ -8,7 +8,7 @@ This style guide will be enforced for all incoming PRs. However, certain legacy 
 
 ### The CLI
 
-The [CLI](../../guides/miscellaneous/how_to_use_the_great_expectations_cli) has some conventions of its own.
+The [CLI](../../guides/miscellaneous/how_to_use_the_great_expectations_cli.md) has some conventions of its own.
 
 * The CLI never writes to disk without asking first.
 * Questions are always phrased as conversational sentences.

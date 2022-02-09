@@ -46,6 +46,10 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = (
+        "column",
+        "value_set",
+    )
 
     def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
         """Validating that user has inputted a value set and that configuration has been initialized"""
@@ -227,8 +231,8 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
 
         if parse_strings_as_datetimes:
             warnings.warn(
-                f"""The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
-            future release.  Please update code accordingly. 
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+            future release.  Please update code accordingly.
             """,
                 DeprecationWarning,
             )

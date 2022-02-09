@@ -7,7 +7,16 @@ from typing import List, Optional, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core.batch import BatchRequest, get_batch_request_dict
+from great_expectations.checkpoint.util import (
+    batch_request_in_validations_contains_batch_data,
+    get_validations_with_batch_request_as_dict,
+)
+from great_expectations.core.batch import (
+    BatchRequest,
+    RuntimeBatchRequest,
+    batch_request_contains_batch_data,
+    get_batch_request_as_dict,
+)
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -20,7 +29,10 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.marshmallow__shade import ValidationError
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    filter_properties_dict,
+)
 
 
 def list_checkpoints(
@@ -45,7 +57,7 @@ def add_checkpoint(
     class_name: Optional[str] = None,
     run_name_template: Optional[str] = None,
     expectation_suite_name: Optional[str] = None,
-    batch_request: Optional[Union[BatchRequest, dict]] = None,
+    batch_request: Optional[dict] = None,
     action_list: Optional[List[dict]] = None,
     evaluation_parameters: Optional[dict] = None,
     runtime_configuration: Optional[dict] = None,
@@ -62,10 +74,22 @@ def add_checkpoint(
     ge_cloud_id: Optional[str] = None,
     expectation_suite_ge_cloud_id: Optional[str] = None,
 ) -> Union[Checkpoint, LegacyCheckpoint]:
-
-    batch_request, validations = get_batch_request_dict(batch_request, validations)
-
     checkpoint_config: Union[CheckpointConfig, dict]
+
+    # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
+    batch_request = get_batch_request_as_dict(batch_request=batch_request)
+    validations = get_validations_with_batch_request_as_dict(validations=validations)
+
+    # DataFrames shouldn't be saved to CheckpointStore
+    if batch_request_contains_batch_data(batch_request=batch_request):
+        raise ge_exceptions.InvalidConfigError(
+            f'batch_data found in batch_request cannot be saved to CheckpointStore "{checkpoint_store_name}"'
+        )
+
+    if batch_request_in_validations_contains_batch_data(validations=validations):
+        raise ge_exceptions.InvalidConfigError(
+            f'batch_data found in validations cannot be saved to CheckpointStore "{checkpoint_store_name}"'
+        )
 
     checkpoint_config = {
         "name": name,
@@ -93,31 +117,11 @@ def add_checkpoint(
         "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
     }
 
-    # DataFrames shouldn't be saved to CheckpointStore
-    if checkpoint_config.get("validations") is not None:
-        for idx, val in enumerate(checkpoint_config["validations"]):
-            if (
-                val.get("batch_request") is not None
-                and val["batch_request"].get("runtime_parameters") is not None
-                and val["batch_request"]["runtime_parameters"].get("batch_data")
-                is not None
-            ):
-                raise ge_exceptions.InvalidConfigError(
-                    f'batch_data found in validations at index {idx} cannot be saved to CheckpointStore "{checkpoint_store_name}"'
-                )
-    elif (
-        checkpoint_config.get("batch_request") is not None
-        and checkpoint_config["batch_request"].get("runtime_parameters") is not None
-        and checkpoint_config["batch_request"]["runtime_parameters"].get("batch_data")
-        is not None
-    ):
-        raise ge_exceptions.InvalidConfigError(
-            f'batch_data found in batch_request cannot be saved to CheckpointStore "{checkpoint_store_name}"'
-        )
-
-    checkpoint_config = filter_properties_dict(
-        properties=checkpoint_config, clean_falsy=True
+    checkpoint_config = deep_filter_properties_iterable(
+        properties=checkpoint_config,
+        clean_falsy=True,
     )
+
     new_checkpoint: Union[
         Checkpoint, SimpleCheckpoint, LegacyCheckpoint
     ] = instantiate_class_from_config(
@@ -126,7 +130,7 @@ def add_checkpoint(
             "data_context": data_context,
         },
         config_defaults={
-            "module_name": "great_expectations.checkpoint.checkpoint",
+            "module_name": "great_expectations.checkpoint",
         },
     )
 
@@ -139,11 +143,13 @@ def add_checkpoint(
             configuration_key=name,
         )
 
-    checkpoint_config = CheckpointConfig(**new_checkpoint.config.to_json_dict())
+    checkpoint_config = CheckpointConfig(**new_checkpoint.get_config())
+
     checkpoint_ref = checkpoint_store.set(key=key, value=checkpoint_config)
     if isinstance(checkpoint_ref, GeCloudIdAwareRef):
         ge_cloud_id = checkpoint_ref.ge_cloud_id
-        new_checkpoint.config.ge_cloud_id = uuid.UUID(ge_cloud_id)
+        new_checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)
+
     return new_checkpoint
 
 
@@ -198,9 +204,12 @@ def get_checkpoint(
             )
 
     config: dict = checkpoint_config.to_json_dict()
+
     if name:
         config.update({"name": name})
+
     config = filter_properties_dict(properties=config, clean_falsy=True)
+
     checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
         config=config,
         runtime_environment={
@@ -239,12 +248,11 @@ def delete_checkpoint(
 def run_checkpoint(
     data_context: "DataContext",  # noqa: F821
     checkpoint_store: CheckpointStore,
-    ge_cloud_mode: bool,
     checkpoint_name: Optional[str] = None,
     template_name: Optional[str] = None,
     run_name_template: Optional[str] = None,
     expectation_suite_name: Optional[str] = None,
-    batch_request: Optional[Union[BatchRequest, dict]] = None,
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     action_list: Optional[List[dict]] = None,
     evaluation_parameters: Optional[dict] = None,
     runtime_configuration: Optional[dict] = None,
@@ -263,7 +271,6 @@ def run_checkpoint(
     Args:
         data_context: DataContext for Checkpoint class instantiation purposes
         checkpoint_store: CheckpointStore for managing Checkpoint configurations
-        ge_cloud_mode: Whether or not Great Expectations is operating in the cloud mode
         checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
         template_name: The name of a Checkpoint template to retrieve from the CheckpointStore
         run_name_template: The template to use for run_name
@@ -285,18 +292,17 @@ def run_checkpoint(
     Returns:
         CheckpointResult
     """
-    # TODO mark experimental
-    batch_request, validations = get_batch_request_dict(batch_request, validations)
     checkpoint: Union[Checkpoint, SimpleCheckpoint, LegacyCheckpoint] = get_checkpoint(
         data_context=data_context,
         checkpoint_store=checkpoint_store,
         name=checkpoint_name,
         ge_cloud_id=ge_cloud_id,
     )
-    checkpoint_config_from_store: dict = checkpoint.config.to_json_dict()
+    checkpoint_config_from_store: dict = checkpoint.get_config()
 
     if (
         "runtime_configuration" in checkpoint_config_from_store
+        and checkpoint_config_from_store["runtime_configuration"]
         and "result_format" in checkpoint_config_from_store["runtime_configuration"]
     ):
         result_format = result_format or checkpoint_config_from_store[
@@ -305,6 +311,9 @@ def run_checkpoint(
 
     if result_format is None:
         result_format = {"result_format": "SUMMARY"}
+
+    batch_request = get_batch_request_as_dict(batch_request=batch_request)
+    validations = get_validations_with_batch_request_as_dict(validations=validations)
 
     checkpoint_config_from_call_args: dict = {
         "template_name": template_name,
@@ -329,46 +338,13 @@ def run_checkpoint(
         if key in checkpoint_config_from_call_args
     }
     checkpoint_config.update(checkpoint_config_from_call_args)
-    if not ge_cloud_mode:
-        batch_data_list = []
-        batch_data = None
-        if checkpoint_config.get("validations") is not None:
-            for val in checkpoint_config["validations"]:
-                if (
-                    val.get("batch_request") is not None
-                    and val["batch_request"].get("runtime_parameters") is not None
-                    and val["batch_request"]["runtime_parameters"].get("batch_data")
-                    is not None
-                ):
-                    batch_data_list.append(
-                        val["batch_request"]["runtime_parameters"].pop("batch_data")
-                    )
-        elif (
-            checkpoint_config.get("batch_request") is not None
-            and checkpoint_config["batch_request"].get("runtime_parameters") is not None
-            and checkpoint_config["batch_request"]["runtime_parameters"].get(
-                "batch_data"
-            )
-            is not None
-        ):
-            batch_data = checkpoint_config["batch_request"]["runtime_parameters"].pop(
-                "batch_data"
-            )
-        checkpoint_config = filter_properties_dict(
-            properties=checkpoint_config, clean_falsy=True
-        )
-        if len(batch_data_list) > 0:
-            for idx, val in enumerate(checkpoint_config.get("validations")):
-                if batch_data_list[idx] is not None:
-                    val["batch_request"]["runtime_parameters"][
-                        "batch_data"
-                    ] = batch_data_list[idx]
-        elif batch_data is not None:
-            checkpoint_config["batch_request"]["runtime_parameters"][
-                "batch_data"
-            ] = batch_data
 
     checkpoint_run_arguments: dict = dict(**checkpoint_config, **kwargs)
+    filter_properties_dict(
+        properties=checkpoint_run_arguments,
+        clean_falsy=True,
+        inplace=True,
+    )
 
     return checkpoint.run(**checkpoint_run_arguments)
 

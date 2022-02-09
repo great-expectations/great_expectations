@@ -53,12 +53,12 @@ For detailed installation instructions, see [How to install Great Expectations l
 
 In Great Expectations, your Data Context manages your project configuration, so let’s go and create a Data Context for our tutorial project!
 
-When you installed Great Expectations, you also installed the Great Expectations command line interface (CLI). It provides helpful utilities for deploying and configuring Data Contexts, plus a few other convenience methods. Note that since we’re using the V3 (Batch Request) API in this tutorial, all CLI commands will use the `--v3-api` flag.
+When you installed Great Expectations, you also installed the Great Expectations command line interface (CLI). It provides helpful utilities for deploying and configuring Data Contexts, plus a few other convenience methods.
 
 To initialize your Great Expectations deployment for the project, run this command in the terminal from the `ge_tutorials/` directory:
 
 ```console
-great_expectations --v3-api init
+great_expectations init
 ```
 You should see this:
 ```console

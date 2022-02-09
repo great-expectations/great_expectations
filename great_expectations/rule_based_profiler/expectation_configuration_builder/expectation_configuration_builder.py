@@ -2,11 +2,20 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
+from great_expectations.rule_based_profiler.types import (
+    Builder,
+    Domain,
+    ParameterContainer,
+)
 
 
-class ExpectationConfigurationBuilder(ABC):
+class ExpectationConfigurationBuilder(Builder, ABC):
+    def __init__(
+        self,
+        expectation_type: str,
+    ):
+        self._expectation_type = expectation_type
+
     def build_expectation_configuration(
         self,
         domain: Domain,
@@ -25,3 +34,7 @@ class ExpectationConfigurationBuilder(ABC):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> ExpectationConfiguration:
         pass
+
+    @property
+    def expectation_type(self) -> str:
+        return self._expectation_type

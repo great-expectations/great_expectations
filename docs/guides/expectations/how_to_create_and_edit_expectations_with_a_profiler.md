@@ -34,7 +34,7 @@ Thus, the intention is for this Expectation Suite to be edited and updated to be
 :::note
 You can access this same functionality from the Great Expectations CLI by running
 ```console
-great_expectations --v3-api suite new --profile
+great_expectations suite new --profile
 ```
 
 If you go that route, you can follow along in the resulting Jupyter Notebook instead of using this guide.
@@ -54,7 +54,7 @@ context = DataContext(
 )
 ```
 
-Alternatively, [you can instantiate a Data Context without a .yml file](../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file)
+Alternatively, [you can instantiate a Data Context without a .yml file](../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
 
 
 ### 2. Set your expectation_suite_name and create your Batch Request 

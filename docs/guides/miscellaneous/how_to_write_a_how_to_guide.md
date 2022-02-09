@@ -128,7 +128,7 @@ Once a draft of your guide is written, you can see it rendered on a `localhost` 
 
 ## Steps
 
-1. Ensure that your dev environment is set up according to the guide on [Setting up your dev environment](../../contributing/contributing_setup)
+1. Ensure that your dev environment is set up according to the guide on [Setting up your dev environment](/docs/contributing/contributing_setup)
 
 2. Copy the How-to guide template file to the appropriate subdirectory of `docs/guides/`, and rename it.
 
@@ -136,16 +136,16 @@ Once a draft of your guide is written, you can see it rendered on a `localhost` 
 
 4. Decide whether you’re writing a code-heavy or process-heavy guide, and adjust your formatting appropriately.
 
-5. Fill out the Prerequisites info box (see [How-to guide template file](./how_to_template)). The header of the info box says: “This how-to guide assumes you have already:”. Place each prerequisite under its own bullet and phrase it using the style in the template: “done something” (e.g. "Configured a Datasource").
+5. Fill out the Prerequisites info box (see [How-to guide template file](/docs/guides/miscellaneous/how_to_template)). The header of the info box says: “This how-to guide assumes you have already:”. Place each prerequisite under its own bullet and phrase it using the style in the template: “done something” (e.g. "Configured a Datasource").
 
 6. Fill in the Steps section, making sure to include bash, yml, and code snippets as appropriate.
     - These will typically be included in a separate file that is in the `great_expectations/test/integrations` folder and can be referenced in the how-to-doc. For additional details, please see the "Structure of a How-to-guide" section below.  
 
 7. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
 
-8. Scan your article to make sure it follows the [Style guide](../../contributing/style_guides/docs_style). If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
+8. Scan your article to make sure it follows the [Style guide](/docs/contributing/style_guides/docs_style). If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
 
-9. Locally run integration tests for any code that was included as part of the guide. Also see our guide on [Testing](../../contributing/contributing_test)
+9. Locally run integration tests for any code that was included as part of the guide. Also see our guide on [Testing](/docs/contributing/contributing_test)
 
 10. Submit your PR! If there are any additional integrations that need to be run, then please add this to your PR message.
 

@@ -1,4 +1,3 @@
-import inspect
 import logging
 import os
 import re
@@ -8,7 +7,6 @@ from zipfile import ZipFile, is_zipfile
 
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
     SiteSectionIdentifier,
     ValidationResultIdentifier,
 )
@@ -478,3 +476,11 @@ class HtmlSiteStore:
     @property
     def config(self) -> dict:
         return self._config
+
+    def self_check(self, pretty_print: bool = True) -> dict:
+        report_object = self._config
+
+        # Chetan - 20200126 - The actual pretty printing and self check mechanism is
+        # open to implement. This is simply added to adhere to `test_test_yaml_config_supported_types_have_self_check`
+
+        return report_object

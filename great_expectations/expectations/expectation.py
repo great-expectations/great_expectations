@@ -32,10 +32,7 @@ from great_expectations.expectations.registry import (
     register_expectation,
     register_renderer,
 )
-from great_expectations.expectations.util import (
-    legacy_method_parameters,
-    render_evaluation_parameter_string,
-)
+from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.self_check.util import (
     evaluate_json_test_cfe,
     generate_expectation_tests,
@@ -43,7 +40,7 @@ from great_expectations.self_check.util import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-from ..core.util import convert_to_json_serializable, nested_update
+from ..core.util import nested_update
 from ..execution_engine import ExecutionEngine, PandasExecutionEngine
 from ..execution_engine.execution_engine import MetricDomainTypes
 from ..render.renderer.renderer import renderer
@@ -138,7 +135,7 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions": False,
         "result_format": "BASIC",
     }
-    legacy_method_parameters = legacy_method_parameters
+    args_keys = None
 
     def __init__(self, configuration: Optional[ExpectationConfiguration] = None):
         if configuration is not None:
@@ -838,44 +835,6 @@ class Expectation(metaclass=MetaExpectation):
                 "cannot access configuration: expectation has not yet been configured"
             )
         return self._configuration
-
-    @classmethod
-    def build_configuration(cls, *args, **kwargs):
-        # Combine all arguments into a single new "all_args" dictionary to name positional parameters
-        all_args = dict(zip(cls.validation_kwargs, args))
-        all_args.update(kwargs)
-
-        # Unpack display parameters; remove them from all_args if appropriate
-        if "include_config" in kwargs:
-            include_config = kwargs["include_config"]
-            del all_args["include_config"]
-        else:
-            include_config = cls.default_expectation_args["include_config"]
-
-        if "catch_exceptions" in kwargs:
-            catch_exceptions = kwargs["catch_exceptions"]
-            del all_args["catch_exceptions"]
-        else:
-            catch_exceptions = cls.default_expectation_args["catch_exceptions"]
-
-        if "result_format" in kwargs:
-            result_format = kwargs["result_format"]
-        else:
-            result_format = cls.default_expectation_args["result_format"]
-
-        # Extract the meta object for use as a top-level expectation_config holder
-        if "meta" in kwargs:
-            meta = kwargs["meta"]
-            del all_args["meta"]
-        else:
-            meta = None
-
-        # Construct the expectation_config object
-        return ExpectationConfiguration(
-            expectation_type=cls.expectation_type,
-            kwargs=convert_to_json_serializable(deepcopy(all_args)),
-            meta=meta,
-        )
 
     def run_diagnostics(self, pretty_print=True):
         """

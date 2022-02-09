@@ -15,7 +15,7 @@ All `ColumnMapExpectations` also have the following argument:
 * [mostly](#mostly): A special argument that allows for _fuzzy_ validation based on some percentage (available for all `column_map_expectations`)
 
 ## `result_format`
-See [Result format](./result_format) for more information.
+See [Result format](./result_format.md) for more information.
 
 ## `include_config`
 

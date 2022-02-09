@@ -11,7 +11,7 @@ This guide will help you run a Great Expectations in [Flyte](https://flyte.org/)
 
 - [Set up a working deployment of Great Expectations](../tutorials/getting_started/intro.md)
 - [Created an Expectation Suite](../tutorials/getting_started/create_your_first_expectations.md)
-- [Connecting to Data](../tutorials/getting_started/connect_to_data)
+- [Connecting to Data](../tutorials/getting_started/connect_to_data.md)
 - Flyte [Getting Started Guide](https://docs.flyte.org/en/latest/getting_started.html) 
 
 </Prerequisites>

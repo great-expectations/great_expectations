@@ -295,7 +295,7 @@ For more information on `batches` and `batch_identifiers`, please refer to the [
 Here’s a similar example, but this time two Data Assets are mixed together in one folder.
 
 **Note**: For an equivalent configuration using `ConfiguredAssetFilesSystemDataconnector`, please see Example 2
-in [How to configure a ConfiguredAssetDataConnector](./how_to_configure_a_configuredassetdataconnector).
+in [How to configure a ConfiguredAssetDataConnector](./how_to_configure_a_configuredassetdataconnector.md).
 
 ```
 <MY DIRECTORY>/yellow_tripdata_2019-01.csv

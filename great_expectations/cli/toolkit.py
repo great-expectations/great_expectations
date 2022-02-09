@@ -26,15 +26,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.datasource import BaseDatasource
 from great_expectations.validator.validator import Validator
 
-try:
-    from termcolor import colored
-except ImportError:
-    pass
-
-
 EXIT_UPGRADE_CONTINUATION_MESSAGE = (
     "\nOk, exiting now. To upgrade at a later time, use the following command: "
-    "<cyan>great_expectations --v3-api project upgrade</cyan>\n\nTo learn more about the upgrade "
+    "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade "
     "process, visit "
     "<cyan>https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api"
     "</cyan>.\n"
@@ -877,8 +871,8 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
         filename: Optional[str]
         directory: Optional[str]
         if config_file_location_path.is_file():
-            filename = fr"{str(config_file_location_path.name)}"
-            directory = fr"{str(config_file_location_path.parent)}"
+            filename = rf"{str(config_file_location_path.name)}"
+            directory = rf"{str(config_file_location_path.parent)}"
         elif config_file_location_path.is_dir():
             filename = None
             directory = config_file_location
@@ -936,7 +930,7 @@ def load_json_file_into_dict(
     error_message: str
 
     if not filepath:
-        error_message = f"The path to a JSON file was not specified."
+        error_message = "The path to a JSON file was not specified."
         exit_with_failure_message_and_stats(
             data_context=data_context,
             usage_event=usage_event,

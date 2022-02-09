@@ -1021,7 +1021,7 @@ def test_batch_identifiers_and_batch_identifiers_success_no_temp_table(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     # interacting with the database using query
-    test_query: str = "SELECT * FROM table_full__I;"
+    test_query: str = "SELECT * FROM table_full__I"
     batch_identifiers = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,
@@ -1052,7 +1052,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mo
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
     # interacting with the database using query
-    test_query: str = "SELECT * FROM table_full__I;"
+    test_query: str = "SELECT * FROM table_full__I"
     batch_identifiers = {
         "pipeline_stage_name": "core_processing",
         "airflow_run_id": 1234567890,

@@ -49,7 +49,7 @@ class ExpectationSuite(SerializableDictDot):
     def __init__(
         self,
         expectation_suite_name,
-        data_context,
+        data_context=None,
         expectations=None,
         evaluation_parameters=None,
         data_asset_type=None,
@@ -187,11 +187,12 @@ class ExpectationSuite(SerializableDictDot):
 
         memo[id(self)] = result
 
-        attributes_to_copy = list(ExpectationSuiteSchema().fields.keys())
+        attributes_to_copy = set(ExpectationSuiteSchema().fields.keys())
         for key in attributes_to_copy:
             setattr(result, key, deepcopy(getattr(self, key)))
 
         setattr(result, "_data_context", self._data_context)
+
         return result
 
     def to_json_dict(self):
@@ -590,11 +591,12 @@ class ExpectationSuite(SerializableDictDot):
     def send_usage_event(self, success: bool):
         usage_stats_event_name: str = "expectation_suite.add_expectation"
         usage_stats_event_payload: dict = {}
-        self._data_context.send_usage_message(
-            event=usage_stats_event_name,
-            event_payload=usage_stats_event_payload,
-            success=success,
-        )
+        if self._data_context is not None:
+            self._data_context.send_usage_message(
+                event=usage_stats_event_name,
+                event_payload=usage_stats_event_payload,
+                success=success,
+            )
 
     def add_expectation(
         self,
