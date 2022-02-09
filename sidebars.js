@@ -376,6 +376,7 @@ module.exports = {
             'terms/data_asset',
             'terms/checkpoint',
             'terms/execution_engine',
+            'terms/metric',
             'terms/plugin',
             'terms/profiler',
             'terms/expectation',
