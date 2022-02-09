@@ -3810,7 +3810,26 @@ def data_context_custom_notebooks(tmp_path_factory):
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
     """
-    project_path = str(tmp_path_factory.mktemp("data_context"))
+    ge_yml_fixture = "great_expectations_custom_notebooks.yml"
+    context_path = _create_custom_notebooks_context(tmp_path_factory, ge_yml_fixture)
+
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_custom_notebooks_defaults(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    ge_yml_fixture = "great_expectations_custom_notebooks_defaults.yml"
+    context_path = _create_custom_notebooks_context(tmp_path_factory, ge_yml_fixture)
+
+    return ge.data_context.DataContext(context_path)
+
+
+def _create_custom_notebooks_context(path, ge_yml_name):
+    project_path = str(path.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
@@ -3819,7 +3838,7 @@ def data_context_custom_notebooks(tmp_path_factory):
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_custom_notebooks.yml"),
+        os.path.join(fixture_dir, ge_yml_name),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     shutil.copy(
@@ -3829,10 +3848,8 @@ def data_context_custom_notebooks(tmp_path_factory):
         ),
         os.path.join(asset_config_path, "my_dag_node", "default.json"),
     )
-
     os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
-
-    return ge.data_context.DataContext(context_path)
+    return context_path
 
 
 @pytest.fixture

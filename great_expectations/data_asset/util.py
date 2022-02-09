@@ -8,13 +8,8 @@ from functools import wraps
 import numpy as np
 import pandas as pd
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-    ExpectationValidationResult,
-)
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.types import SerializableDictDot, SerializableDotDict
 
 
 def parse_result_format(result_format):
@@ -99,15 +94,7 @@ def recursively_convert_to_json_serializable(test_obj):
 
     """
     # If it's one of our types, we pass
-    if isinstance(
-        test_obj,
-        (
-            ExpectationConfiguration,
-            ExpectationSuite,
-            ExpectationValidationResult,
-            ExpectationSuiteValidationResult,
-        ),
-    ):
+    if isinstance(test_obj, (SerializableDictDot, SerializableDotDict)):
         return test_obj
 
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
