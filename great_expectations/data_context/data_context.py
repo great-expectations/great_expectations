@@ -3331,11 +3331,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         )
 
     @usage_statistics_enabled_method(
-        event_name="data_context.run_profiler",
+        event_name="data_context.run_profiler_with_dynamic_arguments",
     )
-    def run_profiler(
+    def run_profiler_with_dynamic_arguments(
         self,
-        profiler: Optional[RuleBasedProfiler] = None,
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
         variables: Optional[dict] = None,
@@ -3346,7 +3345,6 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         return profiler_toolkit.run_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
-            profiler=profiler,
             name=name,
             ge_cloud_id=ge_cloud_id,
             variables=variables,

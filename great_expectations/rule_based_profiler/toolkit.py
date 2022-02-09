@@ -23,7 +23,6 @@ from great_expectations.util import filter_properties_dict
 def run_profiler(
     data_context: "DataContext",  # noqa: F821
     profiler_store: ProfilerStore,
-    profiler: Optional[RuleBasedProfiler] = None,
     name: Optional[str] = None,
     ge_cloud_id: Optional[str] = None,
     variables: Optional[dict] = None,
@@ -31,21 +30,13 @@ def run_profiler(
     expectation_suite_name: Optional[str] = None,
     include_citation: bool = True,
 ) -> ExpectationSuite:
-    """
-    TODO(cdkini): Write docstring!
-    """
-    if profiler:
-        if name or ge_cloud_id:
-            raise ge_exceptions.ProfilerError(
-                "Amibiguous arguments provided; you may either pass a RuleBasedProfiler or retrieve one from your ProfilerStore with a name/ge_cloud_id"
-            )
-    else:
-        profiler = get_profiler(
-            data_context=data_context,
-            profiler_store=profiler_store,
-            name=name,
-            ge_cloud_id=ge_cloud_id,
-        )
+
+    profiler: RuleBasedProfiler = get_profiler(
+        data_context=data_context,
+        profiler_store=profiler_store,
+        name=name,
+        ge_cloud_id=ge_cloud_id,
+    )
 
     result: ExpectationSuite = profiler.run(
         variables=variables,
@@ -53,6 +44,7 @@ def run_profiler(
         expectation_suite_name=expectation_suite_name,
         include_citation=include_citation,
     )
+
     return result
 
 
