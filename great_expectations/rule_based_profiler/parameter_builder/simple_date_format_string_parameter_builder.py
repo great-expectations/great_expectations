@@ -82,9 +82,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold.
 
-        Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
-        details.
-
         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
         ptional details
         """
@@ -135,16 +132,16 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 nonnull_count - match_strftime_unexpected_count
             ) / nonnull_count
 
-        best = None
+        best_fmt_string = None
         best_ratio = 0
         for fmt_string, ratio in format_string_success_ratios.items():
             if ratio > best_ratio and ratio >= self._threshold:
-                best = fmt_string
+                best_fmt_string = fmt_string
                 best_ratio = ratio
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.name}": {
-                "value": best,
+                "value": best_fmt_string,
                 "details": {"success_ratio": best_ratio},
             },
         }
