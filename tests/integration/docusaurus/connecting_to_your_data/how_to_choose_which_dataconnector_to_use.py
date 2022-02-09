@@ -5,7 +5,7 @@ import great_expectations as ge
 context = ge.get_context()
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -53,7 +53,7 @@ datasource_config = {
                     "year",
                     "month",
                 ],
-                "pattern": "(.*)/.*(\d{4})-(\d{2})\.csv",
+                "pattern": r"(.*)/.*(\d{4})-(\d{2})\.csv",
             },
         },
     },
@@ -87,7 +87,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
-datasource_yaml = """
+datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
 module_name: great_expectations.datasource
@@ -110,7 +110,7 @@ data_connectors:
         pattern: (\d{4})-(\d{2})\.csv
         group_names:
           - year
-          - month        
+          - month
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -137,12 +137,12 @@ datasource_config = {
             "assets": {
                 "yellow_tripdata": {
                     "base_directory": "yellow_tripdata/",
-                    "pattern": "yellow_tripdata_(\d{4})-(\d{2})\.csv",
+                    "pattern": r"yellow_tripdata_(\d{4})-(\d{2})\.csv",
                     "group_names": ["year", "month"],
                 },
                 "green_tripdata": {
                     "base_directory": "green_tripdata/",
-                    "pattern": "(\d{4})-(\d{2})\.csv",
+                    "pattern": r"(\d{4})-(\d{2})\.csv",
                     "group_names": ["year", "month"],
                 },
             },
