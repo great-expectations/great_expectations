@@ -43,7 +43,7 @@ data_connectors:
     include_schema_name: true
 """
 context.test_yaml_config(datasource_yaml)
-context.add_datasource(**yaml.safe_load(datasource_yaml))
+context.add_datasource(**yaml.load(datasource_yaml))
 
 # clean db
 clean_athena_db(connection_string, ATHENA_DB_NAME, "taxitable")

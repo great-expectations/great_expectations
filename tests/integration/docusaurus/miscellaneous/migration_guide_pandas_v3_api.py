@@ -11,7 +11,7 @@ great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
+    great_expectations_yaml = yaml.load(f)
 
 actual_datasource = great_expectations_yaml["datasources"]
 
@@ -39,10 +39,10 @@ expected_existing_datasource_yaml = r"""
         module_name: great_expectations.datasource.data_connector
 """
 
-assert actual_datasource == yaml.safe_load(expected_existing_datasource_yaml)
+assert actual_datasource == yaml.load(expected_existing_datasource_yaml)
 
 # Please note this override is only to provide good UX for docs and tests.
-updated_configuration = yaml.safe_load(expected_existing_datasource_yaml)
+updated_configuration = yaml.load(expected_existing_datasource_yaml)
 updated_configuration["my_datasource"]["data_connectors"][
     "default_inferred_data_connector_name"
 ]["base_directory"] = "../data/"
@@ -54,7 +54,7 @@ checkpoint_yaml_file_path = os.path.join(
     context.root_directory, "checkpoints/test_v3_checkpoint.yml"
 )
 with open(checkpoint_yaml_file_path) as f:
-    actual_checkpoint_yaml = yaml.safe_load(f)
+    actual_checkpoint_yaml = yaml.load(f)
 
 expected_checkpoint_yaml = """
 name: test_v3_checkpoint
@@ -91,7 +91,7 @@ ge_cloud_id:
 expectation_suite_ge_cloud_id:
 """
 
-assert actual_checkpoint_yaml == yaml.safe_load(expected_checkpoint_yaml)
+assert actual_checkpoint_yaml == yaml.load(expected_checkpoint_yaml)
 
 # run checkpoint
 context.add_checkpoint(**actual_checkpoint_yaml)

@@ -21,7 +21,7 @@ great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
+    great_expectations_yaml = yaml.load(f)
 
 stores = great_expectations_yaml["stores"]
 pop_stores = ["checkpoint_store", "evaluation_parameter_store", "validations_store"]
@@ -45,7 +45,7 @@ stores:
 expectations_store_name: expectations_store
 """
 
-assert actual_existing_expectations_store == yaml.safe_load(
+assert actual_existing_expectations_store == yaml.load(
     expected_existing_expectations_store_yaml
 )
 
@@ -64,7 +64,7 @@ expectations_store_name: expectations_GCS_store
 """
 
 # replace example code with integration test configuration
-configured_expectations_store = yaml.safe_load(configured_expectations_store_yaml)
+configured_expectations_store = yaml.load(configured_expectations_store_yaml)
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "project"
 ] = gcp_project
@@ -81,7 +81,7 @@ context.add_store(
     store_config=configured_expectations_store["stores"]["expectations_GCS_store"],
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
+    great_expectations_yaml = yaml.load(f)
 great_expectations_yaml["expectations_store_name"] = "expectations_GCS_store"
 great_expectations_yaml["stores"]["expectations_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"
@@ -96,7 +96,7 @@ great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
+    great_expectations_yaml = yaml.load(f)
 
 stores = great_expectations_yaml["stores"]
 # popping the rest out so taht we can do the comparison. They aren't going anywhere dont worry
@@ -125,7 +125,7 @@ stores:
 
 validations_store_name: validations_store
 """
-assert actual_existing_validations_store == yaml.safe_load(
+assert actual_existing_validations_store == yaml.load(
     expected_existing_validations_store_yaml
 )
 
@@ -144,7 +144,7 @@ validations_store_name: validations_GCS_store
 """
 
 # replace example code with integration test configuration
-configured_validations_store = yaml.safe_load(configured_validations_store_yaml)
+configured_validations_store = yaml.load(configured_validations_store_yaml)
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "project"
 ] = gcp_project
@@ -161,7 +161,7 @@ context.add_store(
     store_config=configured_validations_store["stores"]["validations_GCS_store"],
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
+    great_expectations_yaml = yaml.load(f)
 great_expectations_yaml["validations_store_name"] = "validations_GCS_store"
 great_expectations_yaml["stores"]["validations_GCS_store"]["store_backend"].pop(
     "suppress_store_backend_id"
@@ -199,8 +199,8 @@ great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
-great_expectations_yaml["data_docs_sites"] = yaml.safe_load(data_docs_site_yaml)[
+    great_expectations_yaml = yaml.load(f)
+great_expectations_yaml["data_docs_sites"] = yaml.load(data_docs_site_yaml)[
     "data_docs_sites"
 ]
 with open(great_expectations_yaml_file_path, "w") as f:
@@ -235,7 +235,7 @@ datasource_yaml = datasource_yaml.replace(
 )
 
 context.test_yaml_config(datasource_yaml)
-context.add_datasource(**yaml.safe_load(datasource_yaml))
+context.add_datasource(**yaml.load(datasource_yaml))
 
 # adding datasource
 batch_request = BatchRequest(
@@ -296,7 +296,7 @@ checkpoint_config = checkpoint_config.replace(
     "<YOUR_DATA_ASSET_NAME>",
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
 )
-context.add_checkpoint(**yaml.safe_load(checkpoint_config))
+context.add_checkpoint(**yaml.load(checkpoint_config))
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
 )

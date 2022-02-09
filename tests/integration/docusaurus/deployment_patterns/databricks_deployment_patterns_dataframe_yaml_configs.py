@@ -81,7 +81,7 @@ data_connectors:
 
 context.test_yaml_config(my_spark_datasource_config)
 
-context.add_datasource(**yaml.safe_load(my_spark_datasource_config))
+context.add_datasource(**yaml.load(my_spark_datasource_config))
 
 batch_request = RuntimeBatchRequest(
     datasource_name="insert_your_datasource_name_here",
@@ -149,7 +149,7 @@ run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 
 my_checkpoint = context.test_yaml_config(my_checkpoint_config)
 
-context.add_checkpoint(**yaml.safe_load(my_checkpoint_config))
+context.add_checkpoint(**yaml.load(my_checkpoint_config))
 
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,

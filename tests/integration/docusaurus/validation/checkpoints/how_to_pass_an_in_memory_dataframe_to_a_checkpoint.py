@@ -20,7 +20,7 @@ data_connectors:
     batch_identifiers:
       - default_identifier_name
 """
-context.add_datasource(**yaml.safe_load(datasource_yaml))
+context.add_datasource(**yaml.load(datasource_yaml))
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
@@ -69,7 +69,7 @@ validations:
       data_asset_name: taxi_data
     expectation_suite_name: my_expectation_suite
 """
-context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
+context.add_checkpoint(**yaml.load(checkpoint_yaml))
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
 
@@ -121,7 +121,7 @@ config_version: 1
 class_name: SimpleCheckpoint
 expectation_suite_name: my_expectation_suite
 """
-context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
+context.add_checkpoint(**yaml.load(checkpoint_yaml))
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
 
