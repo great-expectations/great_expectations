@@ -268,39 +268,6 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-  - stage: usage_stats_integration
-    dependsOn: [scope_check, lint, test_cli, required, db_integration]
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-      - job: test_usage_stats_messages
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        variables:
-          python.version: '3.8'
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip==20.2.4
-            displayName: 'Update pip'
-
-          - script: |
-              pip install --requirement requirements-dev-base.txt
-              pip install --requirement requirements.txt
-              pip install .
-            displayName: 'Install dependencies'
-
-          # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
-          - script: |
-              pip install pytest pytest-azurepipelines
-              pytest --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
-
-            displayName: 'pytest'
-
   - stage: db_integration
     pool:
       vmImage: 'ubuntu-latest'
@@ -442,3 +409,36 @@ stages:
               dgtest run great_expectations --filter 'tests/cli' --aws-integration -v
 
             displayName: 'dgtest'
+
+  - stage: usage_stats_integration
+    dependsOn: [scope_check, lint, required, db_integration, test_cli]
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: test_usage_stats_messages
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==20.2.4
+            displayName: 'Update pip'
+
+          - script: |
+              pip install --requirement requirements-dev-base.txt
+              pip install --requirement requirements.txt
+              pip install .
+            displayName: 'Install dependencies'
+
+          # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
+          - script: |
+              pip install pytest pytest-azurepipelines
+              pytest --no-spark --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+
+            displayName: 'pytest'
