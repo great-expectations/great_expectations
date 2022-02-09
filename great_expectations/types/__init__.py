@@ -195,7 +195,7 @@ class DictDot:
             )
         )
         public_fields: Set[str] = {key for key in self.keys() if key[0] != "_"}
-        property_names: Set[str] = public_fields.union(private_fields)
+        property_names: Set[str] = public_fields | private_fields
 
         keys_for_exclusion: list = []
 
