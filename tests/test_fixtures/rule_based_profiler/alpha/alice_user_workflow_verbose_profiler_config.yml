@@ -77,7 +77,9 @@ rules:
       - name: my_date_format
         class_name: SimpleDateFormatStringParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
+        additional_candidate_strings: "YYYY-mm-DD HH:MM:SS"
         batch_request: $variables.alice_single_batch_data_batch_request
+        metric_domain_kwargs: $domain.domain_kwargs
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_of_type
         class_name: DefaultExpectationConfigurationBuilder

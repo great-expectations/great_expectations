@@ -4,10 +4,10 @@ from typing import Dict, Iterable, List, Optional, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    MetricComputationResult,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
-from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     """
     Detects the domain date format from a set of candidate date format strings by computing the
     column_values.match_strftime_format.unexpected_count metric for each candidate format and returning the format that
-    matches most often.
+    has the lowest unexpected_count ratio.
     """
 
     CANDIDATE_STRINGS = {"YYYY-MM-DD", "MM-DD-YYYY", "YY-MM-DD", "YYYY-mm-DDTHH:MM:SSS"}
@@ -59,7 +59,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             self._candidate_strings = self.CANDIDATE_STRINGS
 
         if additional_candidate_strings is not None:
-            self._candidate_strings += additional_candidate_strings
+            self._candidate_strings.add(additional_candidate_strings)
 
     def _build_parameters(
         self,
@@ -106,27 +106,32 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                     f"currently loaded in the validator."
                 )
 
-        domain.update({"batch_id": batch_ids[0]})
-
-        nonnull_count = validator.get_metric(
-            MetricConfiguration(
-                "column_values.not_null.count",
-                domain,
-            )
-        )
+        nonnull_count: MetricComputationResult = self.get_metrics(
+            batch_ids=batch_ids,
+            validator=validator,
+            metric_name="column_values.nonnull.count",
+            metric_domain_kwargs=self._metric_domain_kwargs,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        ).metric_values[0]
 
         format_string_success_ratios = dict()
         for fmt_string in self._candidate_strings:
+            match_strftime_unexpected_count = self.get_metrics(
+                batch_ids=batch_ids,
+                validator=validator,
+                metric_name="column_values.match_strftime_format.unexpected_count",
+                metric_domain_kwargs=self._metric_domain_kwargs,
+                metric_value_kwargs={"strftime_format": fmt_string},
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            ).metric_values[0]
+
             format_string_success_ratios[fmt_string] = (
-                validator.get_metric(
-                    MetricConfiguration(
-                        "column_values.match_strftime_format.unexpected_count",
-                        domain,
-                        {"strftime_format": fmt_string},
-                    )
-                )
-                / nonnull_count
-            )
+                nonnull_count - match_strftime_unexpected_count
+            ) / nonnull_count
 
         best = None
         best_ratio = 0
@@ -134,7 +139,5 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             if ratio > best_ratio and ratio >= self._threshold:
                 best = fmt_string
                 best_ratio = ratio
-
-        print("stop here")
 
         return {"parameters": best, "details": {"success_ratio": best_ratio}}

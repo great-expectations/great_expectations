@@ -306,3 +306,43 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
             "test_configuration_bootstrap_sampling_method"
         ]["expect_table_row_count_to_be_between_max_value_mean_value"]
     )
+
+
+def test_alice_profiler_user_workflow_single_batch_simple_date_format_string_parameter_builder(
+    alice_columnar_table_single_batch_context,
+    alice_columnar_table_single_batch,
+):
+    # Load data context
+    data_context: DataContext = alice_columnar_table_single_batch_context
+
+    # Load profiler configs & loop (run tests for each one)
+    yaml_config: str = alice_columnar_table_single_batch["profiler_config"]
+
+    # Instantiate Profiler
+    profiler_config: CommentedMap = yaml.load(yaml_config)
+
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
+
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        **serialized_config,
+        data_context=data_context,
+    )
+
+    expectation_suite: ExpectationSuite = profiler.run(
+        expectation_suite_name=alice_columnar_table_single_batch[
+            "expected_expectation_suite_name"
+        ],
+        include_citation=True,
+    )
+
+    assert (
+        expectation_suite
+        == alice_columnar_table_single_batch["expected_expectation_suite"]
+    )
