@@ -72,7 +72,7 @@ Commands:
 An existing data context can be provided with the variable `GE_HOME`, for example:
 
 ```bash
-export GE_HOME="${HOME}/ge_dir_1"
+export GE_HOME="${HOME}/ge_dir_1/great_expectations"
 great_expectations datasource list
 ```
 
