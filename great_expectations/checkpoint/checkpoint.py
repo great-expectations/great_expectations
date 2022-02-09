@@ -3,7 +3,7 @@ import datetime
 import json
 import logging
 import os
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from ruamel.yaml.comments import CommentedMap
@@ -120,7 +120,25 @@ class Checkpoint:
             "batches": batches,
         } or {}
 
-        self._config_kwargs = Attributes(config_kwargs)
+        self._config_kwargs = config_kwargs
+
+    def _convert_dictionaries_to_attributes(
+        self, source: Optional[Any] = None
+    ) -> Optional[Union[Any, "Attributes"]]:
+        if source is None:
+            return None
+
+        if isinstance(source, dict):
+            if not isinstance(source, Attributes):
+                deep_filter_properties_iterable(properties=source, inplace=True)
+                source = Attributes(source)
+
+            key: str
+            value: Any
+            for key, value in source.items():
+                source[key] = self._convert_dictionaries_to_attributes(source=value)
+
+        return source
 
     # TODO: Add eval param processing using new TBD parser syntax and updated EvaluationParameterParser and
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
@@ -225,7 +243,7 @@ class Checkpoint:
                     run_id=run_id,
                 )
 
-            run_results = {}
+            run_results: dict = {}
             for async_validation_operator_result in async_validation_operator_results:
                 run_results.update(
                     async_validation_operator_result.result().run_results
@@ -512,7 +530,10 @@ is run), with each validation having its own defined "action_list" attribute.
 
     @property
     def config_kwargs(self) -> Attributes:
-        return self._config_kwargs
+        config_kwargs: Attributes = self._convert_dictionaries_to_attributes(
+            source=self._config_kwargs
+        )
+        return config_kwargs
 
     @property
     def name(self) -> str:
