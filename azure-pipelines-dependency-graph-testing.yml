@@ -411,7 +411,7 @@ stages:
             displayName: 'dgtest'
 
   - stage: usage_stats_integration
-    dependsOn: [scope_check, lint, required, db_integration, test_cli]
+    dependsOn: [scope_check, lint, required, db_integration, cli_integration]
     pool:
       vmImage: 'ubuntu-latest'
 
