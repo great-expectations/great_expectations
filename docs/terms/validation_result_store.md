@@ -12,3 +12,6 @@ A Validation Result Store is a connector to store and retrieve information about
 
 NOTES: Everything under here is temporary, for use in writing the detailed page.
 ----------
+
+
+- **Validation Result Stores** can be used to store and retrieve Validation Results and associated metadata.  The process of storing this information is typically executed by an Action in a Checkpoint's `action_list`.  Metrics found in the Validation Results stored in Validation Result Stores can also be accessed as Evaluation Parameters when defining Expectations.

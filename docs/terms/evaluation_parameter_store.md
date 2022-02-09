@@ -12,3 +12,5 @@ An Evaluation Parameter Store is a connector to store and retrieve information a
 
 NOTES: Everything under here is temporary, for use in writing the detailed page.
 ----------
+
+- **Evaluation Parameter Stores**, also known as **Metric Stores**, are an alternative way to store Metrics without the accompanying Validation Results.  The process of storing information in an Evaluation Parameter Store is also typically executed bby an Action in a Checkpoint's `action_list`.  Metrics stored in Evaluation Parameter Stores are also available as Evaluation Parameters when defining Expectations.

@@ -13,3 +13,5 @@ An Expectation Store is a connector to store and retrieve information about coll
 NOTES: Everything under here is temporary, for use in writing the detailed page.
 ----------
 A Store for Expectation Suites.
+
+- **Expectation Stores** can be used to store and retrieve Expectation Suites.  This means that Expectation Stores may also come into play when working with Checkpoints and Validators, which can take Expectation Suites as input (rather than having a set Expectation Suite pre-defined in their configuration).

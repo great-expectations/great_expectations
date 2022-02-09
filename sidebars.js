@@ -382,6 +382,18 @@ module.exports = {
             'terms/expectation',
             'terms/expectation_suite',
             'terms/plugin',
+            {
+              type: 'category',
+              label: 'Stores',
+              items: [
+                'terms/store',
+                'terms/checkpoint_store',
+                'terms/expectation_store',
+                'terms/validation_result_store',
+                'terms/evaluation_parameter_store',
+                { type: 'doc', label: 'Metric Store', id: 'terms/evaluation_parameter_store' }
+              ]
+            },
             'terms/supporting_resource',
             'terms/validation_result'
           ]
