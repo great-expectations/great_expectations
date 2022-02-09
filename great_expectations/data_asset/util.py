@@ -93,8 +93,7 @@ def recursively_convert_to_json_serializable(test_obj):
         test_obj may also be converted in place.
 
     """
-    # If it's one of our types, we use our own conversion; this can move to full schema
-    # once nesting goes all the way down
+    # If it's one of our types, we pass
     if isinstance(test_obj, (SerializableDictDot, SerializableDotDict)):
         return test_obj
 
