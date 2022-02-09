@@ -23,12 +23,12 @@ and [How to create Custom Column Map Expectations](../creating_custom_expectatio
 
 ## Steps
 
-### 1. Decide which dialects you want to support
+### 1. Specify your backends and dialects
 
 While SQLAlchemy is able to provide a common interface to a variety of SQL dialects, some functions may not work in a particular dialect, or in some cases they may return different values. 
 To avoid surprises, it can be helpful to determine beforehand what backends and dialects you plan to support, and test them along the way. 
 
-Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for.  Add entries corresponding to the functionality you want to add: 
+Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. Add entries corresponding to the functionality you want to add: 
     
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L106-L119
 ```
@@ -95,7 +95,7 @@ The most direct way of implementing a metric is by computing its value by constr
 
 Our `engine` will reflect the backend we're implementing (`SqlAlchemyExecutionEngine`), while our `fn_type` and `domain_type` are unique to the type of Expectation we're implementing.
 
-These decorators enable a higher-complexity workflow, allowing you to explicitly structure your queries and make intermediate queries to you database. 
+These decorators enable a higher-complexity workflow, allowing you to explicitly structure your queries and make intermediate queries to your database. 
 While this approach can result in extra roundtrips to your database, it can also unlock advanced functionality for your Custom Expectations.
 
 For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to implement the `@metric_value` decorator, 
@@ -127,7 +127,6 @@ giving us the flexibility to not have write that targeted code ourselves!
 </TabItem>
 </Tabs>
 
-
 ### 3. Verifying our implementation
 
 If you now run your file, `print_diagnostic_checklist` will attempt to execute your example cases using this new backend.
@@ -152,7 +151,6 @@ you should see the following in your Diagnostic Checklist:
 Congratulations!<br/>&#127881; You've successfully implemented SQLAlchemy support for a Custom Expectation! &#127881;
 </b></p>
 </div>
-
 
 ### 4. Contribution (Optional)
 
