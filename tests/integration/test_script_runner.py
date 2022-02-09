@@ -12,6 +12,7 @@ from great_expectations.data_context.util import file_relative_path
 
 
 class BackendDependencies(enum.Enum):
+    AWS = "AWS"
     BIGQUERY = "BIGQUERY"
     GCS = "GCS"
     MYSQL = "MYSQL"
@@ -107,28 +108,16 @@ local_tests = [
         "data_dir": "tests/test_sets/dataconnector_docs",
     },
     {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/dataconnector_docs",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-        "data_dir": "tests/test_sets/dataconnector_docs",
-    },
-    {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/dataconnector_docs",
     },
-    # Chetan - 20220125 - Commenting out RBP-specific test due to the feature and related doc undergoing significant changes as part of development.
-    #                     Both the doc and test will be rewritten after the feature is complete - only then should this be reenabled.
-    # {
-    #     "name": "rule_base_profiler_multi_batch_example",
-    #     "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-    #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
-    # },
+    {
+        "name": "rule_base_profiler_multi_batch_example",
+        "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        "user_flow_script": "tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
+    },
     {
         "user_flow_script": "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
@@ -158,10 +147,6 @@ local_tests = [
         "user_flow_script": "tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    },
-    {
-        "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
-        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     },
     {
         "user_flow_script": "tests/integration/docusaurus/miscellaneous/migration_guide_pandas_v3_api.py",
@@ -270,6 +255,11 @@ dockerized_db_tests = [
         "data_context_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/",
         "data_dir": "tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
         "util_script": "tests/test_utils.py",
+        "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
         "extra_backend_dependencies": BackendDependencies.POSTGRESQL,
     },
 ]
@@ -430,10 +420,24 @@ cloud_s3_tests = [
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "extra_backend_dependencies": BackendDependencies.AWS,
     },
     {
         "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py",
         "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "extra_backend_dependencies": BackendDependencies.AWS,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/dataconnector_docs",
+        "extra_backend_dependencies": BackendDependencies.AWS,
+    },
+    {
+        "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "data_dir": "tests/test_sets/dataconnector_docs",
+        "extra_backend_dependencies": BackendDependencies.AWS,
     },
     # TODO: <Alex>ALEX -- uncomment all S3 tests once S3 testing in Azure Pipelines is re-enabled and items for specific tests below are addressed.</Alex>
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
@@ -441,35 +445,37 @@ cloud_s3_tests = [
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/configured_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "extra_backend_dependencies": BackendDependencies.AWS,
     # },
     # TODO: <Alex>ALEX -- Implement S3 Configured Python Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once S3 Configured Python Example is implemented.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/configured_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+    #     "extra_backend_dependencies": BackendDependencies.AWS,
     # },
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and S3 Configured YAML Example is implemented.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/configured_yaml_example.py",
-    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    #     "extra_backend_dependencies": [BackendDependencies.SPARK, BackendDependencies.AWS],
     # },
     # TODO: <Alex>ALEX -- Implement S3 Configured Python Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and S3 Configured Python Example is implemented.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/configured_python_example.py",
-    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    #     "extra_backend_dependencies": [BackendDependencies.SPARK, BackendDependencies.AWS],
     # },
     # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    #     "extra_backend_dependencies": [BackendDependencies.SPARK, BackendDependencies.AWS],
     # },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
-    #     "extra_backend_dependencies": BackendDependencies.SPARK,
+    #     "extra_backend_dependencies": [BackendDependencies.SPARK, BackendDependencies.AWS],
     # },
 ]
 
@@ -479,14 +485,14 @@ cloud_redshift_tests = [
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    #     "extra_backend_dependencies": [BackendDependencies.AWS, BackendDependencies.REDSHIFT],
     #     "util_script": "tests/test_utils.py",
     # },
     # {
     #     "user_flow_script": "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
     #     "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
     #     "data_dir": "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     "extra_backend_dependencies": BackendDependencies.REDSHIFT,
+    #     "extra_backend_dependencies": [BackendDependencies.AWS, BackendDependencies.REDSHIFT],
     #     "util_script": "tests/test_utils.py",
     # },
 ]
@@ -501,7 +507,7 @@ docs_test_matrix += cloud_azure_tests
 docs_test_matrix += cloud_s3_tests
 docs_test_matrix += cloud_redshift_tests
 
-integration_test_matrix = [
+pandas_integration_tests = [
     {
         "name": "pandas_one_multi_batch_request_one_validator",
         "data_context_dir": "tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
@@ -541,6 +547,26 @@ integration_test_matrix = [
         ),
     },
 ]
+aws_integration_tests = [
+    {
+        "name": "awsathena_test",
+        "data_context_dir": "tests/integration/fixtures/no_datasources/great_expectations",
+        "user_flow_script": "tests/integration/db/awsathena.py",
+        "extra_backend_dependencies": BackendDependencies.AWS,
+        "other_files": (
+            (
+                "tests/integration/db/utils.py",
+                "utils.py",
+            ),
+        ),
+    }
+]
+
+# populate integration_test_matrix with sub-lists
+integration_test_matrix = []
+
+integration_test_matrix += aws_integration_tests
+integration_test_matrix += pandas_integration_tests
 
 
 def idfn(test_configuration):
@@ -586,8 +612,10 @@ def _execute_integration_test(test_configuration, tmp_path):
         )
         os.chdir(tmp_path)
         # Ensure GE is installed in our environment
-        ge_requirement = test_configuration.get("ge_requirement", "great_expectations")
-        execute_shell_command(f"pip install {ge_requirement}")
+        if "ge_requirement" in test_configuration:
+            execute_shell_command(f"pip install {ge_requirement}")
+        else:
+            execute_shell_command("pip install .")
 
         #
         # Build test state
@@ -627,7 +655,8 @@ def _execute_integration_test(test_configuration, tmp_path):
                 source_file = os.path.join(base_dir, file_paths[0])
                 dest_file = os.path.join(tmp_path, file_paths[1])
                 dest_dir = os.path.dirname(dest_file)
-                os.makedirs(dest_dir)
+                if not os.path.exists(dest_dir):
+                    os.makedirs(dest_dir)
                 shutil.copyfile(src=source_file, dst=dest_file)
 
         # UAT Script
@@ -700,6 +729,8 @@ def _check_for_skipped_tests(pytest_args, test_configuration) -> None:
         pytest.skip("Skipping bigquery tests")
     elif dependencies == BackendDependencies.GCS and not pytest_args.bigquery:
         pytest.skip("Skipping GCS tests")
+    elif dependencies == BackendDependencies.AWS and not pytest_args.aws:
+        pytest.skip("Skipping AWS tests")
     elif dependencies == BackendDependencies.REDSHIFT and pytest_args.no_sqlalchemy:
         pytest.skip("Skipping redshift tests")
     elif dependencies == BackendDependencies.SPARK and pytest_args.no_spark:

@@ -26,12 +26,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.datasource import BaseDatasource
 from great_expectations.validator.validator import Validator
 
-try:
-    from termcolor import colored
-except ImportError:
-    pass
-
-
 EXIT_UPGRADE_CONTINUATION_MESSAGE = (
     "\nOk, exiting now. To upgrade at a later time, use the following command: "
     "<cyan>great_expectations project upgrade</cyan>\n\nTo learn more about the upgrade "
@@ -936,7 +930,7 @@ def load_json_file_into_dict(
     error_message: str
 
     if not filepath:
-        error_message = f"The path to a JSON file was not specified."
+        error_message = "The path to a JSON file was not specified."
         exit_with_failure_message_and_stats(
             data_context=data_context,
             usage_event=usage_event,
