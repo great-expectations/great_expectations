@@ -102,14 +102,14 @@ Assumes --interactive flag.
 )
 @click.pass_context
 def suite_new(
-    ctx,
-    expectation_suite,
-    interactive_flag,
-    manual_flag,
-    profile,
-    batch_request,
-    no_jupyter,
-):
+    ctx: click.Context,
+    expectation_suite: Optional[str],
+    interactive_flag: bool,
+    manual_flag: bool,
+    profile: bool,
+    batch_request: Optional[str],
+    no_jupyter: bool,
+) -> None:
     """
     Create a new Expectation Suite.
     Edit in jupyter notebooks, or skip with the --no-jupyter flag.
@@ -192,7 +192,7 @@ def _process_suite_new_flags_and_prompt(
 
 def _suite_new_workflow(
     context: DataContext,
-    expectation_suite_name: str,
+    expectation_suite_name: Optional[str],
     interactive_mode: CLISuiteInteractiveFlagCombinations,
     profile: bool,
     no_jupyter: bool,
