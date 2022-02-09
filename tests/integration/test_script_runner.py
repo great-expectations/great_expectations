@@ -1,6 +1,7 @@
 import enum
 import importlib.machinery
 import importlib.util
+import logging
 import os
 import shutil
 import sys
@@ -11,6 +12,8 @@ import pytest
 
 from assets.scripts.build_gallery import execute_shell_command
 from great_expectations.data_context.util import file_relative_path
+
+logger = logging.getLogger(__name__)
 
 
 class BackendDependencies(enum.Enum):
@@ -28,12 +31,23 @@ class BackendDependencies(enum.Enum):
 
 
 @dataclass
-class IntegrationTextFixture:
-    """
-    Prepare and environment and run integration tests from a list of tests.
+class IntegrationTestFixture:
+    """IntegrationTestFixture
 
-    Note that the only required parameter for a test in the matrix is
-    `user_flow_script` and `name` and that all other parameters are optional.
+    Configurations for integration tests are defined as IntegrationTestFixture dataclass objects.
+
+    Individual tests can also be run by setting the '-k' flag and referencing the name of test, like the following example:
+    pytest -v --docs-tests -m integration -k "test_docs[migration_guide_spark_v2_api]" tests/integration/test_script_runner.py
+
+    Args:
+        name (str): Name for integration test. Individual tests can be run by using the -k option and specifying the name of the test.
+        user_flow_script (str): Required script for integration test.
+        data_context_dir Optional[str]: Path of great_expectations/ that is used in the test.
+        data_dir Optional[str]: Folder that contains data used in the test.
+        extra_backend_dependencies Optional[BackendDependencies]: Optional flag allows you to tie an individual test with a BackendDependency. Allows for tests to be run / disabled using cli flags (like --aws which enables AWS integration tests).
+        other_files Optional[Tuple[Tuple[str, str]]]: other files (like credential information) to copy into the test environment.
+        util_script Optional[str]: Path of optional util script that is used in test script (for loading test_specific methods like load_data_into_test_database())
+        ge_requirement Optional[str]: allows you to set a specific version of GE to install. Default is current version of GE that is contained in the base directory (pip install .)
     """
 
     name: str
@@ -42,179 +56,179 @@ class IntegrationTextFixture:
     data_dir: Optional[str] = None
     extra_backend_dependencies: Optional[BackendDependencies] = None
     other_files: Optional[Tuple[Tuple[str, str]]] = None
-    ge_requirement: Optional[str] = None
     util_script: Optional[str] = None
+    ge_requirement: Optional[str] = None
 
 
 # to be populated by the smaller lists below
-docs_test_matrix: List[IntegrationTextFixture] = []
+docs_test_matrix: List[IntegrationTestFixture] = []
 
 local_tests = [
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="getting_started",
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         user_flow_script="tests/integration/docusaurus/tutorials/getting-started/getting_started.py",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_get_a_batch_of_data_from_a_configured_datasource",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.py",
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="connecting_to_your_data_pandas_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="connecting_to_your_data_pandas_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_introspect_and_partition_your_data_yaml_gradual",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_introspect_and_partition_your_data_yaml_complete",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="in_memory_pandas_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="in_memory_pandas_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="docusaurus_template_script_example",
         user_flow_script="tests/integration/docusaurus/template/script_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="in_memory_spark_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="in_memory_spark_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="filesystem_spark_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="filesystem_spark_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_choose_which_dataconnector_to_use",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/dataconnector_docs",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_configure_a_runtimedataconnector",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/dataconnector_docs",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="rule_base_profiler_multi_batch_example",
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="databricks_deployment_patterns_file_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="databricks_deployment_patterns_file_python_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="databricks_deployment_patterns_file_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="databricks_deployment_patterns_file_python_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="checkpoints_and_actions_core_concepts",
         user_flow_script="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_pass_an_in_memory_dataframe_to_a_checkpoint",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_configure_credentials",
         user_flow_script="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="migration_guide_pandas_v3_api",
         user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_pandas_v3_api.py",
         data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/",
         data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="migration_guide_pandas_v2_api",
         user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_pandas_v2_api.py",
         data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/",
         data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="migration_guide_spark_v3_api",
         user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_spark_v3_api.py",
         data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/",
         data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="migration_guide_spark_v2_api",
         user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_spark_v2_api.py",
         data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/",
@@ -225,7 +239,7 @@ local_tests = [
 
 
 dockerized_db_tests = [
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="postgres_yaml_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/postgres_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -233,7 +247,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="postgres_python_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -241,7 +255,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="sqlite_yaml_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -249,7 +263,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="sqlite_python_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -257,7 +271,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="introspect_and_partition_yaml_example_gradual",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -265,7 +279,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="introspect_and_partition_yaml_example_complete",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -273,7 +287,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="mssql_yaml_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/mssql_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -281,7 +295,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.MSSQL,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="mssql_python_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/mssql_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -289,7 +303,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.MSSQL,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="mysql_yaml_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -297,7 +311,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.MYSQL,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="mysql_python_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -305,7 +319,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.MYSQL,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="migration_guide_postgresql_v3_api",
         user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_postgresql_v3_api.py",
         data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/",
@@ -313,7 +327,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="migration_guide_postgresql_v2_api",
         user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_postgresql_v2_api.py",
         data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/",
@@ -321,7 +335,7 @@ dockerized_db_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_configure_credentials",
         user_flow_script="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -332,7 +346,7 @@ dockerized_db_tests = [
 
 # CLOUD
 cloud_snowflake_tests = [
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="snowflake_python_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -340,7 +354,7 @@ cloud_snowflake_tests = [
         extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
         util_script="tests/test_utils.py",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="snowflake_yaml_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -351,51 +365,51 @@ cloud_snowflake_tests = [
 ]
 
 cloud_gcp_tests = [
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="gcp_deployment_patterns_file_gcs_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         extra_backend_dependencies=BackendDependencies.GCS,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_configure_an_expectation_store_in_gcs",
         user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         extra_backend_dependencies=BackendDependencies.GCS,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_host_and_share_data_docs_on_gcs",
         user_flow_script="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.GCS,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_configure_a_validation_result_store_in_gcs",
         user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.GCS,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="gcs_pandas_configured_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         extra_backend_dependencies=BackendDependencies.GCS,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="gcs_pandas_configured_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         extra_backend_dependencies=BackendDependencies.GCS,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="gcs_pandas_inferred_and_runtime_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         extra_backend_dependencies=BackendDependencies.GCS,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="gcs_pandas_inferred_and_runtime_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -403,7 +417,7 @@ cloud_gcp_tests = [
     ),
     # TODO: <Alex>ALEX -- Implement GCS Configured YAML Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and GCS Configured YAML Example is implemented.</Alex>
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "gcs_spark_configured_yaml",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/configured_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
@@ -411,20 +425,20 @@ cloud_gcp_tests = [
     # ),
     # TODO: <Alex>ALEX -- Implement GCS Configured Python Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and GCS Configured Python Example is implemented.</Alex>
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "gcs_spark_configured_python",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/configured_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     extra_backend_dependencies= BackendDependencies.GCS,
     # ),
     # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "gcs_spark_inferred_and_runtime_yaml",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     extra_backend_dependencies= BackendDependencies.GCS,
     # ),
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "gcs_spark_inferred_and_runtime_python",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
@@ -433,7 +447,7 @@ cloud_gcp_tests = [
 ]
 
 cloud_bigquery_tests = [
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="bigquery_yaml_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -441,7 +455,7 @@ cloud_bigquery_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.BIGQUERY,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="bigquery_python_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -449,7 +463,7 @@ cloud_bigquery_tests = [
         util_script="tests/test_utils.py",
         extra_backend_dependencies=BackendDependencies.BIGQUERY,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="gcp_deployment_patterns_file_bigquery_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -458,43 +472,43 @@ cloud_bigquery_tests = [
 ]
 
 cloud_azure_tests = [
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="azure_pandas_configured_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="azure_pandas_configured_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="azure_pandas_inferred_and_runtime_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="azure_pandas_inferred_and_runtime_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
     # TODO: <Alex>ALEX -- uncomment next four (4) tests once Spark in Azure Pipelines is enabled.</Alex>
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "azure_spark_configured_yaml",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     # ),
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "azure_spark_configured_python",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     # ),
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "azure_spark_inferred_and_runtime_yaml",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     # ),
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "azure_spark_inferred_and_runtime_python",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
@@ -502,26 +516,26 @@ cloud_azure_tests = [
 ]
 
 cloud_s3_tests = [
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="s3_pandas_inferred_and_runtime_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         extra_backend_dependencies=BackendDependencies.AWS,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="s3_pandas_inferred_and_runtime_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         extra_backend_dependencies=BackendDependencies.AWS,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_configure_an_inferredassetdataconnector",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/dataconnector_docs",
         extra_backend_dependencies=BackendDependencies.AWS,
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="how_to_configure_a_configuredassetdataconnector",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -531,7 +545,7 @@ cloud_s3_tests = [
     # TODO: <Alex>ALEX -- uncomment all S3 tests once S3 testing in Azure Pipelines is re-enabled and items for specific tests below are addressed.</Alex>
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once S3 Configured YAML Example is implemented.</Alex>
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "s3_pandas_configured_yaml_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/configured_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
@@ -539,7 +553,7 @@ cloud_s3_tests = [
     # ),
     # TODO: <Alex>ALEX -- Implement S3 Configured Python Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once S3 Configured Python Example is implemented.</Alex>
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "s3_pandas_configured_python_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/configured_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
@@ -547,26 +561,26 @@ cloud_s3_tests = [
     # ),
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and S3 Configured YAML Example is implemented.</Alex>
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "s3_spark_configured_yaml_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/configured_yaml_example.py",
     #     extra_backend_dependencies= [BackendDependencies.SPARK, BackendDependencies.AWS],
     # ),
     # TODO: <Alex>ALEX -- Implement S3 Configured Python Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and S3 Configured Python Example is implemented.</Alex>
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "s3_spark_configured_python_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/configured_python_example.py",
     #     extra_backend_dependencies= [BackendDependencies.SPARK, BackendDependencies.AWS],
     # ),
     # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "s3_spark_inferred_and_runtime_yaml_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     extra_backend_dependencies= [BackendDependencies.SPARK, BackendDependencies.AWS],
     # ),
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "s3_spark_inferred_and_runtime_python_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
@@ -576,7 +590,7 @@ cloud_s3_tests = [
 
 cloud_redshift_tests = [
     # TODO: <Alex>ALEX: Rename test modules to include "configured" and "inferred_and_runtime" suffixes in names.</Alex>
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "azure_python_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
@@ -584,7 +598,7 @@ cloud_redshift_tests = [
     #     extra_backend_dependencies= [BackendDependencies.AWS, BackendDependencies.REDSHIFT],
     #     util_script= "tests/test_utils.py",
     # ),
-    # IntegrationTextFixture(
+    # IntegrationTestFixture(
     #     name = "azure_yaml_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
@@ -606,31 +620,31 @@ docs_test_matrix += cloud_redshift_tests
 docs_test_matrix += dockerized_db_tests
 
 pandas_integration_tests = [
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="pandas_one_multi_batch_request_one_validator",
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/one_multi_batch_request_one_validator.py",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="pandas_two_batch_requests_two_validators",
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/two_batch_requests_two_validators.py",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="pandas_multiple_batch_requests_one_validator_multiple_steps",
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_multiple_steps.py",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="pandas_multiple_batch_requests_one_validator_one_step",
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/fixtures/yellow_tripdata_pandas_fixture/multiple_batch_requests_one_validator_one_step.py",
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="pandas_execution_engine_with_gcp_installed",
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
@@ -642,13 +656,13 @@ pandas_integration_tests = [
             ),
         ),
     ),
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="build_data_docs",
         user_flow_script="tests/integration/common_workflows/simple_build_data_docs.py",
     ),
 ]
 aws_integration_tests = [
-    IntegrationTextFixture(
+    IntegrationTestFixture(
         name="awsathena_test",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         user_flow_script="tests/integration/db/awsathena.py",
@@ -710,8 +724,6 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
 
         #
         # Build test state
-        #
-
         # DataContext
         data_context_dir = integration_test_fixture.data_context_dir
         if data_context_dir:
@@ -721,18 +733,12 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
                 context_source_dir,
                 test_context_dir,
             )
-            print("test_context_dir: " + test_context_dir)
 
-        print("test_name: " + integration_test_fixture.name)
-        print("workdir" + workdir)
-        print("base_dir" + base_dir)
         # Test Data
         data_dir = integration_test_fixture.data_dir
         if data_dir:
             source_data_dir = os.path.join(base_dir, data_dir)
             target_data_dir = os.path.join(tmp_path, "data")
-            print("source_data_dir: " + source_data_dir)
-            print("target_data_dir: " + target_data_dir)
             shutil.copytree(
                 source_data_dir,
                 target_data_dir,
@@ -761,7 +767,6 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
         script_path = os.path.join(tmp_path, "test_script.py")
         shutil.copyfile(script_source, script_path)
 
-        # Util Script WILL : THERE MAY BE A BETTER WAY TO DO THIS
         util_script = integration_test_fixture.util_script
         if util_script:
             script_source = os.path.join(base_dir, util_script)
@@ -769,13 +774,13 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
             util_script_path = os.path.join(tmp_path, "tests/test_utils.py")
             shutil.copyfile(script_source, util_script_path)
 
-        # Run script as module
-        loader = importlib.machinery.SourceFileLoader("mymodule", script_path)
-        spec = importlib.util.spec_from_loader("mymodule", loader)
-        mymodule = importlib.util.module_from_spec(spec)
-        loader.exec_module(mymodule)
-    except:
-        raise
+        # Run script as module, using python's importlib machinery (https://docs.python.org/3/library/importlib.htm)
+        loader = importlib.machinery.SourceFileLoader("test_script_module", script_path)
+        spec = importlib.util.spec_from_loader("test_script_module", loader)
+        test_script_module = importlib.util.module_from_spec(spec)
+        loader.exec_module(test_script_module)
+    except Exception as e:
+        logger.error(str(e))
     finally:
         os.chdir(workdir)
 
