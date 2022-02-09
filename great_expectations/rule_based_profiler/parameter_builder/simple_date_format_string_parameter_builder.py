@@ -24,7 +24,13 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     has the lowest unexpected_count ratio.
     """
 
-    CANDIDATE_STRINGS = {"%Y-%m-%d", "%m-%d-%Y", "%y-%m-%d", "%Y-%m-%dT%z"}
+    CANDIDATE_STRINGS = {
+        "%Y-%m-%d",
+        "%m-%d-%Y",
+        "%y-%m-%d",
+        "%Y-%m-%dT%z",
+        "%Y-%m-%d %H:%M:%S",
+    }
 
     def __init__(
         self,
