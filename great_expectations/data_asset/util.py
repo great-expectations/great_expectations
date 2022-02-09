@@ -96,7 +96,7 @@ def recursively_convert_to_json_serializable(test_obj):
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
     if isinstance(test_obj, (SerializableDictDot, SerializableDotDict)):
-        return test_obj.to_json_dict()
+        return test_obj
 
     # Validate that all aruguments are of approved types, coerce if it's easy, else exception
     # print(type(test_obj), test_obj)

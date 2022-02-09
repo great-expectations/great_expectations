@@ -291,8 +291,8 @@ class CheckpointResult(SerializableDictDot):
         """
         serializeable_dict: dict = {
             "run_id": self.run_id.to_json_dict(),
-            "run_results": recursively_convert_to_json_serializable(
-                test_obj=self.run_results
+            "run_results": convert_to_json_serializable(
+                data=recursively_convert_to_json_serializable(test_obj=self.run_results)
             ),
             "checkpoint_config": self.checkpoint_config.to_json_dict(),
             "success": convert_to_json_serializable(data=self.success),
