@@ -4049,7 +4049,7 @@ class DataContext(BaseDataContext):
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None
+        ge_cloud_organization_id: Optional[str] = None,
     ):
         ge_cloud_base_url = (
             ge_cloud_base_url
@@ -4063,18 +4063,22 @@ class DataContext(BaseDataContext):
 
         # TODO: remove if/else block when ge_cloud_account_id is deprecated.
         if ge_cloud_account_id is not None:
-            logger.warning('The "ge_cloud_account_id" argument has been renamed "ge_cloud_organization_id" and will be '
-                           'deprecated in the next major release.')
+            logger.warning(
+                'The "ge_cloud_account_id" argument has been renamed "ge_cloud_organization_id" and will be '
+                "deprecated in the next major release."
+            )
         else:
             ge_cloud_account_id = super()._get_global_config_value(
                 environment_variable="GE_CLOUD_ACCOUNT_ID",
                 conf_file_section="ge_cloud_config",
                 conf_file_option="account_id",
             )
-            logger.warning('If you have an environment variable named "GE_CLOUD_ACCOUNT_ID", please rename it to '
-                           '"GE_CLOUD_ORGANIZATION_ID". If you have a global config file with an "account_id" '
-                           'option, please rename it to "organization_id". "GE_CLOUD_ACCOUNT_ID" and "account_id" '
-                           'will be deprecated in the next major release.')
+            logger.warning(
+                'If you have an environment variable named "GE_CLOUD_ACCOUNT_ID", please rename it to '
+                '"GE_CLOUD_ORGANIZATION_ID". If you have a global config file with an "account_id" '
+                'option, please rename it to "organization_id". "GE_CLOUD_ACCOUNT_ID" and "account_id" '
+                "will be deprecated in the next major release."
+            )
 
         if ge_cloud_organization_id is None:
             ge_cloud_organization_id = super()._get_global_config_value(
@@ -4104,7 +4108,7 @@ class DataContext(BaseDataContext):
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None
+        ge_cloud_organization_id: Optional[str] = None,
     ):
         """
         Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
