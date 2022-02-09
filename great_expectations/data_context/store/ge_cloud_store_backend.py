@@ -63,10 +63,8 @@ class GeCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
         # TOTO: remove when account_id is deprecated
         if ge_cloud_credentials.get("account_id"):
-            logger.warning(
-                'The "account_id" ge_cloud_credentials key has been renamed to "organization_id" and will '
-                "be deprecated in the next major release."
-            )
+            logger.warning('The "account_id" ge_cloud_credentials key has been renamed to "organization_id" and will '
+                           'be deprecated in the next major release.')
             ge_cloud_credentials["organization_id"] = ge_cloud_credentials["account_id"]
             ge_cloud_credentials.pop("account_id")
         self._ge_cloud_credentials = ge_cloud_credentials
