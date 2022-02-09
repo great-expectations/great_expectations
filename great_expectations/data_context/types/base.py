@@ -1003,7 +1003,7 @@ class NotebookConfig(DictDot):
         self,
         class_name,
         module_name,
-        custom_templates_module,
+        custom_templates_module=None,
         header_markdown=None,
         footer_markdown=None,
         table_expectations_header_markdown=None,
@@ -1045,7 +1045,7 @@ class NotebookConfigSchema(Schema):
     module_name = fields.String(
         missing="great_expectations.render.renderer.suite_edit_notebook_renderer"
     )
-    custom_templates_module = fields.String()
+    custom_templates_module = fields.String(allow_none=True)
 
     header_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
     footer_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
