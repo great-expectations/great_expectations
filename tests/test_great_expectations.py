@@ -1119,6 +1119,15 @@ class TestIO(unittest.TestCase):
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
+    def test_read_sas(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_sas(
+            script_path + "/test_sets/Titanic.sas7bdat",
+            encoding="latin-1",
+        )
+        assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
+        assert isinstance(df, PandasDataset)
+
 
 if __name__ == "__main__":
     unittest.main()
