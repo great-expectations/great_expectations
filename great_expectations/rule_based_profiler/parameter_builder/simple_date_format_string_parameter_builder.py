@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -7,7 +7,11 @@ from great_expectations.rule_based_profiler.parameter_builder.parameter_builder 
     MetricComputationResult,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.types import (
+    Domain,
+    ParameterContainer,
+    build_parameter_container,
+)
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -20,7 +24,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     has the lowest unexpected_count ratio.
     """
 
-    CANDIDATE_STRINGS = {"YYYY-MM-DD", "MM-DD-YYYY", "YY-MM-DD", "YYYY-mm-DDTHH:MM:SSS"}
+    CANDIDATE_STRINGS = {"%Y-%m-%d", "%m-%d-%Y", "%y-%m-%d", "%Y-%m-%dT%z"}
 
     def __init__(
         self,
@@ -140,4 +144,13 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 best = fmt_string
                 best_ratio = ratio
 
-        return {"parameters": best, "details": {"success_ratio": best_ratio}}
+        parameter_values: Dict[str, Any] = {
+            f"$parameter.{self.name}": {
+                "value": best,
+                "details": {"success_ratio": best_ratio},
+            },
+        }
+
+        build_parameter_container(
+            parameter_container=parameter_container, parameter_values=parameter_values
+        )

@@ -251,6 +251,7 @@ def alice_columnar_table_single_batch(empty_data_context):
     event_ts_column_data: Dict[str, str] = {
         "column_name": "event_ts",
         "observed_max_time_str": "2004-10-19 11:05:20",
+        "observed_strftime_format": "%Y-%m-%d %H:%M:%S",
     }
 
     my_rule_for_timestamps_column_data: List[Dict[str, str]] = [
@@ -332,6 +333,28 @@ def alice_columnar_table_single_batch(empty_data_context):
                                 "format": "markdown",
                                 "content": [
                                     "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
+                                ],
+                            }
+                        },
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_match_strftime_format",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "strftime_format": {
+                                "value": event_ts_column_data[
+                                    "observed_strftime_format"
+                                ],  # Pin to event_ts column
+                                "details": {"success_ratio": 1.0},
+                            },
+                        },
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that the event_ts is of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                                 ],
                             }
                         },

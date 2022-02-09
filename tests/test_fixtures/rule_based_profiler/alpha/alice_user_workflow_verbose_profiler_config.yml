@@ -12,6 +12,7 @@ variables:
   timestamp_type: TIMESTAMP
   max_user_id: 999999999999
   min_timestamp: 2004-10-19 10:23:54
+  strftime_format: "%Y-%m-%d %H:%M:%S"
 rules:
   my_rule_for_user_ids:
     domain_builder: # If placing custom class into the general plugins directory works, remove module_name from config.
@@ -73,13 +74,14 @@ rules:
         batch_request: $variables.alice_single_batch_data_batch_request
         metric_name: column.min
         metric_domain_kwargs: $domain.domain_kwargs
-      # unused parameter my_date_format
       - name: my_date_format
         class_name: SimpleDateFormatStringParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
-        additional_candidate_strings: "YYYY-mm-DD HH:MM:SS"
+        additional_candidate_strings: $variables.strftime_format
         batch_request: $variables.alice_single_batch_data_batch_request
-        metric_domain_kwargs: $domain.domain_kwargs
+        # Note this parameter builder computes parameters only on the provided domain:
+        metric_domain_kwargs:
+          column: event_ts
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_of_type
         class_name: DefaultExpectationConfigurationBuilder
@@ -118,3 +120,13 @@ rules:
             format: markdown
             content:
               - "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
+      - expectation_type: expect_column_values_to_match_strftime_format
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        strftime_format: $parameter.my_date_format
+        meta:
+          notes:
+            format: markdown
+            content:
+              - "### This expectation confirms that the event_ts is of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
