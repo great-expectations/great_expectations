@@ -1,4 +1,5 @@
 import os
+from typing import Union
 
 import pandas as pd
 import pytest
@@ -11,7 +12,7 @@ from great_expectations.checkpoint.checkpoint import (
     CheckpointResult,
     SimpleCheckpoint,
 )
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -239,7 +240,7 @@ def test_simple_checkpoint_notify_with_all_has_data_docs_action_with_none_specif
     intentionally hiding this from users of SimpleCheckpoint by having a default
     of "all" that sets the configuration appropriately.
     """
-    checkpoint_config = SimpleCheckpointConfigurator(
+    checkpoint_config: Union[CheckpointConfig, dict] = SimpleCheckpointConfigurator(
         "foo", empty_data_context, slack_webhook=webhook, notify_with="all"
     ).build()
 
@@ -247,7 +248,7 @@ def test_simple_checkpoint_notify_with_all_has_data_docs_action_with_none_specif
     slack_notification_action["action"]["notify_with"] = None
     assert slack_notification_action in checkpoint_config.action_list
 
-    checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
+    checkpoint_from_store: Checkpoint = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_slack_and_notify_with_all"
     )
     checkpoint_config = checkpoint_from_store.get_config()
