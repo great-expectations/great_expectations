@@ -14,6 +14,7 @@ from assets.scripts.build_gallery import execute_shell_command
 from great_expectations.data_context.util import file_relative_path
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class BackendDependencies(enum.Enum):
@@ -40,14 +41,13 @@ class IntegrationTestFixture:
     pytest -v --docs-tests -m integration -k "test_docs[migration_guide_spark_v2_api]" tests/integration/test_script_runner.py
 
     Args:
-        name (str): Name for integration test. Individual tests can be run by using the -k option and specifying the name of the test.
-        user_flow_script (str): Required script for integration test.
-        data_context_dir Optional[str]: Path of great_expectations/ that is used in the test.
-        data_dir Optional[str]: Folder that contains data used in the test.
-        extra_backend_dependencies Optional[BackendDependencies]: Optional flag allows you to tie an individual test with a BackendDependency. Allows for tests to be run / disabled using cli flags (like --aws which enables AWS integration tests).
-        other_files Optional[Tuple[Tuple[str, str]]]: other files (like credential information) to copy into the test environment.
-        util_script Optional[str]: Path of optional util script that is used in test script (for loading test_specific methods like load_data_into_test_database())
-        ge_requirement Optional[str]: allows you to set a specific version of GE to install. Default is current version of GE that is contained in the base directory (pip install .)
+        name: Name for integration test. Individual tests can be run by using the -k option and specifying the name of the test.
+        user_flow_script: Required script for integration test.
+        data_context_dir: Path of great_expectations/ that is used in the test.
+        data_dir: Folder that contains data used in the test.
+        extra_backend_dependencies: Optional flag allows you to tie an individual test with a BackendDependency. Allows for tests to be run / disabled using cli flags (like --aws which enables AWS integration tests).
+        other_files: other files (like credential information) to copy into the test environment. These are presented as Tuple(path_to_source_file, path_to_target_file), where path_to_target_file is relative to the test_script.py file in our test environment
+        util_script: Path of optional util script that is used in test script (for loading test_specific methods like load_data_into_test_database())
     """
 
     name: str
@@ -57,7 +57,6 @@ class IntegrationTestFixture:
     extra_backend_dependencies: Optional[BackendDependencies] = None
     other_files: Optional[Tuple[Tuple[str, str]]] = None
     util_script: Optional[str] = None
-    ge_requirement: Optional[str] = None
 
 
 # to be populated by the smaller lists below
@@ -707,7 +706,7 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
     """
     Prepare and environment and run integration tests from a list of tests.
 
-    N ote that the only required parameter for a test in the matrix is
+    Note that the only required parameter for a test in the matrix is
     `user_flow_script` and that all other parameters are optional.
     """
     workdir = os.getcwd()
@@ -715,12 +714,7 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
         base_dir = file_relative_path(__file__, "../../")
         os.chdir(tmp_path)
         # Ensure GE is installed in our environment
-        if integration_test_fixture.ge_requirement:
-            execute_shell_command(
-                f"pip install {integration_test_fixture.ge_requirement}"
-            )
-        else:
-            execute_shell_command("pip install .")
+        execute_shell_command("pip install .")
 
         #
         # Build test state
@@ -750,7 +744,6 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
         other_files = integration_test_fixture.other_files
         if other_files:
             for file_paths in other_files:
-                # check to see if these work
                 source_file = os.path.join(base_dir, file_paths[0])
                 dest_file = os.path.join(tmp_path, file_paths[1])
                 dest_dir = os.path.dirname(dest_file)
