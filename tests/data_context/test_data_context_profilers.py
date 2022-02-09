@@ -4,6 +4,7 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context import DataContext
+from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
@@ -49,5 +50,32 @@ def test_add_profiler_with_invalid_config_raises_error(
     assert "config_version" in str(e.value)
 
 
-def test_run_profiler_emits_proper_usage_stats():
-    pass
+@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_run_profiler_with_dynamic_arguments_emits_proper_usage_stats(
+    mock_emit: mock.MagicMock,
+    mock_profiler_run: mock.MagicMock,
+    empty_data_context_stats_enabled: DataContext,
+    populated_profiler_store: ProfilerStore,
+    profiler_name: str,
+):
+    with mock.patch(
+        "great_expectations.data_context.DataContext.profiler_store"
+    ) as mock_profiler_store:
+        mock_profiler_store.__get__ = mock.Mock(return_value=populated_profiler_store)
+        empty_data_context_stats_enabled.run_profiler_with_dynamic_arguments(
+            name=profiler_name
+        )
+
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.run_profiler_with_dynamic_arguments",
+                "success": True,
+            }
+        )
+    ]

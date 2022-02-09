@@ -17,15 +17,61 @@ from great_expectations.rule_based_profiler.toolkit import (
     delete_profiler,
     get_profiler,
     list_profilers,
+    run_profiler,
 )
 
 
-def test_run_profiler_with_too_many_args_raises_error():
-    pass
+@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_run_profiler_without_dynamic_args(
+    mock_data_context: mock.MagicMock,
+    mock_profiler_run: mock.MagicMock,
+    populated_profiler_store: ProfilerStore,
+    profiler_name: str,
+):
+    run_profiler(
+        data_context=mock_data_context,
+        profiler_store=populated_profiler_store,
+        name=profiler_name,
+    )
+
+    assert mock_profiler_run.called
+    assert mock_profiler_run.call_args == mock.call(
+        variables=None, rules=None, expectation_suite_name=None, include_citation=True
+    )
 
 
-def test_run_profiler_creates_expectation_suite():
-    pass
+@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_run_profiler_with_dynamic_args(
+    mock_data_context: mock.MagicMock,
+    mock_profiler_run: mock.MagicMock,
+    populated_profiler_store: ProfilerStore,
+    profiler_name: str,
+):
+    # Dynamic arguments used to override the profiler's attributes
+    variables = {"foo": "bar"}
+    rules = {"baz": "qux"}
+    expectation_suite_name = "my_expectation_suite_name"
+    include_citation = False
+
+    run_profiler(
+        data_context=mock_data_context,
+        profiler_store=populated_profiler_store,
+        name=profiler_name,
+        variables=variables,
+        rules=rules,
+        expectation_suite_name=expectation_suite_name,
+        include_citation=include_citation,
+    )
+
+    assert mock_profiler_run.called
+    assert mock_profiler_run.call_args == mock.call(
+        variables=variables,
+        rules=rules,
+        expectation_suite_name=expectation_suite_name,
+        include_citation=include_citation,
+    )
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
