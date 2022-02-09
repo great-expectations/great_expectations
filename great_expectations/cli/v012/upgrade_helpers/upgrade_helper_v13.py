@@ -121,7 +121,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
         )
 
     def get_upgrade_overview(self):
-        upgrade_overview = f"""\
+        upgrade_overview = """\
 <cyan>\
 ++=====================================================++
 || UpgradeHelperV13: Upgrade Overview (V2-API Version) ||
@@ -219,7 +219,7 @@ Would you like to proceed with the project upgrade?\
     def _generate_upgrade_report(self):
         upgrade_log_path = self._save_upgrade_log()
         increment_version = self.upgrade_log["update_version"]
-        upgrade_report = f"""\
+        upgrade_report = """\
 <cyan>\
 ++================++
 || Upgrade Report ||

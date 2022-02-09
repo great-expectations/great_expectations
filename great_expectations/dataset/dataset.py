@@ -101,7 +101,7 @@ class MetaDataset(DataAsset):
             row_condition=None,
             condition_parser=None,
             *args,
-            **kwargs
+            **kwargs,
         ):
             if result_format is None:
                 result_format = self.default_expectation_args["result_format"]
@@ -3523,7 +3523,9 @@ class Dataset(MetaDataset):
                     try:
                         min_value = parse(min_value)
                     except (ValueError, TypeError) as e:
-                        pass
+                        logger.debug(
+                            f"Something went wrong when parsing 'min_value': {e}"
+                        )
 
                 if strict_min:
                     above_min = column_min > min_value
@@ -3537,7 +3539,9 @@ class Dataset(MetaDataset):
                     try:
                         max_value = parse(max_value)
                     except (ValueError, TypeError) as e:
-                        pass
+                        logger.debug(
+                            f"Something went wrong when parsing 'max_value': {e}"
+                        )
 
                 if strict_max:
                     below_max = column_min < max_value
@@ -3654,7 +3658,9 @@ class Dataset(MetaDataset):
                     try:
                         min_value = parse(min_value)
                     except (ValueError, TypeError) as e:
-                        pass
+                        logger.debug(
+                            f"Something went wrong when parsing 'min_value': {e}"
+                        )
 
                 if strict_min:
                     above_min = column_max > min_value
@@ -3668,7 +3674,9 @@ class Dataset(MetaDataset):
                     try:
                         max_value = parse(max_value)
                     except (ValueError, TypeError) as e:
-                        pass
+                        logger.debug(
+                            f"Something went wrong when parsing 'max_value': {e}"
+                        )
 
                 if strict_max:
                     below_max = column_max < max_value

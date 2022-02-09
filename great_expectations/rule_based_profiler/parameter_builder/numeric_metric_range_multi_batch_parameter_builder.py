@@ -123,18 +123,63 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 "lower_bound": None,
                 "upper_bound": None,
             }
-        truncate_values_keys: set = set(truncate_values.keys())
-        if (
-            not truncate_values_keys
-            <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
-        ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""Unrecognized truncate_values key(s) in {self.__class__.__name__}:
+        else:
+            if not isinstance(truncate_values, str):
+                truncate_values_keys: set = set(truncate_values.keys())
+                if (
+                    not truncate_values_keys
+                    <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
+                ):
+                    raise ge_exceptions.ProfilerExecutionError(
+                        message=f"""Unrecognized truncate_values key(s) in {self.__class__.__name__}:
 "{str(truncate_values_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS)}" \
 detected.
 """
-            )
+                    )
+
         self._truncate_values = truncate_values
+
+    @property
+    def metric_name(self) -> str:
+        return self._metric_name
+
+    @property
+    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
+        return self._metric_domain_kwargs
+
+    @property
+    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
+        return self._metric_value_kwargs
+
+    @property
+    def sampling_method(self) -> str:
+        return self._sampling_method
+
+    @property
+    def enforce_numeric_metric(self) -> Union[str, bool]:
+        return self._enforce_numeric_metric
+
+    @property
+    def replace_nan_with_zero(self) -> Union[str, bool]:
+        return self._replace_nan_with_zero
+
+    @property
+    def false_positive_rate(self) -> Union[str, float]:
+        return self._false_positive_rate
+
+    @property
+    def num_bootstrap_samples(self) -> Optional[Union[str, int]]:
+        return self._num_bootstrap_samples
+
+    @property
+    def round_decimals(self) -> Optional[Union[str, int]]:
+        return self._round_decimals
+
+    @property
+    def truncate_values(
+        self,
+    ) -> Optional[Union[str, Dict[str, Union[Optional[int], Optional[float]]]]]:
+        return self._truncate_values
 
     def _build_parameters(
         self,
@@ -187,21 +232,6 @@ detected.
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        metric_computation_result: MetricComputationResult = self.get_metrics(
-            batch_ids=batch_ids,
-            validator=validator,
-            metric_name=self._metric_name,
-            metric_domain_kwargs=self._metric_domain_kwargs,
-            metric_value_kwargs=self._metric_value_kwargs,
-            enforce_numeric_metric=self._enforce_numeric_metric,
-            replace_nan_with_zero=self._replace_nan_with_zero,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        metric_values: MetricComputationValues = metric_computation_result.metric_values
-        details: MetricComputationDetails = metric_computation_result.details
-
         # Obtain sampling_method directive from rule state (i.e., variables and parameters); from instance variable otherwise.
         sampling_method: str = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -234,6 +264,21 @@ detected.
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
             )
+
+        metric_computation_result: MetricComputationResult = self.get_metrics(
+            batch_ids=batch_ids,
+            validator=validator,
+            metric_name=self._metric_name,
+            metric_domain_kwargs=self._metric_domain_kwargs,
+            metric_value_kwargs=self._metric_value_kwargs,
+            enforce_numeric_metric=self._enforce_numeric_metric,
+            replace_nan_with_zero=self._replace_nan_with_zero,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+        metric_values: MetricComputationValues = metric_computation_result.metric_values
+        details: MetricComputationDetails = metric_computation_result.details
 
         truncate_values: Dict[str, Number] = self._get_truncate_values_using_heuristics(
             metric_values=metric_values,
