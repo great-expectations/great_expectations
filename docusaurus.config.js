@@ -20,12 +20,12 @@ module.exports = {
   themeConfig: {
     algolia: {
       // If Algolia did not provide you any appId, use 'BH4D9OD16A'
-      appId: 'RA3RRQUBO1',
+      appId: 'B4HD9FJQCB',
 
       // Public API key: it is safe to commit it
-      apiKey: '6ca7609789d2503c8ce189e5575c4936',
+      apiKey: '16dae2c1fabc515311cada8ace06060a',
 
-      indexName: 'greatexpectations_trial_doc_try3',
+      indexName: 'docs-greatexpectations',
 
       // Optional: see doc section below
       // contextualSearch: true,
