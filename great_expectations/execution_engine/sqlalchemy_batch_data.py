@@ -238,7 +238,12 @@ class SqlAlchemyBatchData(BatchData):
             stmt = (querymod[0] + "into {temp_table_name} from" + querymod[1]).format(
                 temp_table_name=temp_table_name
             )
+        # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()
+        # Similar message may be needed in the future for Trino backend.
         elif self.sql_engine_dialect.name.lower() == "awsathena":
+            logger.warning(
+                f"GE has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
+            )
             stmt = "CREATE TABLE {temp_table_name} AS {query}".format(
                 temp_table_name=temp_table_name, query=query
             )
