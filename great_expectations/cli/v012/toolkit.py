@@ -332,7 +332,7 @@ def load_expectation_suite(
     try:
         suite = context.get_expectation_suite(suite_name)
         return suite
-    except ge_exceptions.DataContextError as e:
+    except ge_exceptions.DataContextError:
         exit_with_failure_message_and_stats(
             context,
             usage_event,

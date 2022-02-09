@@ -90,15 +90,15 @@ def test_has_items():
     assert items == [("foo", "a string"), ("bar", 1)]
 
 
-def test_has_to_dict():
-    "the .to_dict method works"
+def test_has_to_raw_dict():
+    "the .to_raw_dict method works"
     my_A = MyClassA(
         **{
             "foo": "a string",
             "bar": 1,
         }
     )
-    assert my_A.to_dict() == {
+    assert my_A.to_raw_dict() == {
         "foo": "a string",
         "bar": 1,
     }
@@ -322,8 +322,8 @@ def test_can_be_nested():
     assert my_C["beta_var"] == MyEnum("x")
 
 
-def test_to_dict_works_recursively():
-    "the .to_dict method works recursively on both DotDicts and Enums"
+def test_to_raw_dict_works_recursively():
+    "the .to_raw_dict method works recursively on both DotDicts and Enums"
 
     my_C = MyClassC(
         alpha_var=20,
@@ -371,7 +371,7 @@ def test_to_dict_works_recursively():
         ),
     )
 
-    C_dict = my_C.to_dict()
+    C_dict = my_C.to_raw_dict()
 
     # Make sure it's a dictionary, not a DictDot
     assert type(C_dict) == dict
