@@ -379,6 +379,7 @@ module.exports = {
             'terms/execution_engine',
             'terms/expectation',
             'terms/expectation_suite',
+            'terms/metric',
             'terms/plugin',
             'terms/profiler',
             'terms/supporting_resource',
