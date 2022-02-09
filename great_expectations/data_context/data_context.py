@@ -3330,6 +3330,29 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ge_cloud_mode=self.ge_cloud_mode,
         )
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.run_profiler_with_dynamic_arguments",
+    )
+    def run_profiler_with_dynamic_arguments(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        variables: Optional[dict] = None,
+        rules: Optional[dict] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> ExpectationSuite:
+        return profiler_toolkit.run_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+            variables=variables,
+            rules=rules,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
+
     def test_yaml_config(
         self,
         yaml_config: str,

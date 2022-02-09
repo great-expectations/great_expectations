@@ -7,6 +7,7 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     batch_request_contains_batch_data,
 )
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.types.resource_identifiers import (
@@ -17,6 +18,34 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.util import filter_properties_dict
+
+
+def run_profiler(
+    data_context: "DataContext",  # noqa: F821
+    profiler_store: ProfilerStore,
+    name: Optional[str] = None,
+    ge_cloud_id: Optional[str] = None,
+    variables: Optional[dict] = None,
+    rules: Optional[dict] = None,
+    expectation_suite_name: Optional[str] = None,
+    include_citation: bool = True,
+) -> ExpectationSuite:
+
+    profiler: RuleBasedProfiler = get_profiler(
+        data_context=data_context,
+        profiler_store=profiler_store,
+        name=name,
+        ge_cloud_id=ge_cloud_id,
+    )
+
+    result: ExpectationSuite = profiler.run(
+        variables=variables,
+        rules=rules,
+        expectation_suite_name=expectation_suite_name,
+        include_citation=include_citation,
+    )
+
+    return result
 
 
 def add_profiler(
