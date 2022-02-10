@@ -75,7 +75,7 @@ def test_simple_date_format_parameter_builder_alice(
 
     date_format_string_parameter: SimpleDateFormatStringParameterBuilder = (
         SimpleDateFormatStringParameterBuilder(
-            name="my_simple_date_format_string_parameter_builder",
+            name="my_date_format",
             metric_domain_kwargs=metric_domain_kwargs,
             data_context=data_context,
             batch_request=batch_request,
@@ -99,15 +99,17 @@ def test_simple_date_format_parameter_builder_alice(
 
     assert len(parameter_container.parameter_nodes) == 1
 
-    fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_simple_date_format_string_parameter_builder"
-    )
-    expected_value: str = "%Y-%m-%d %H:%M:%S"
+    fully_qualified_parameter_name_for_value: str = "$parameter.my_date_format"
+    expected_value: dict = {
+        "details": {"success_ratio": 1.0},
+        "value": "%Y-%m-%d %H:%M:%S",
+    }
 
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
             domain=domain,
+            parameters={domain.id: parameter_container},
         )
         == expected_value
     )
@@ -163,12 +165,16 @@ def test_simple_date_format_parameter_builder_bobby(
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_simple_date_format_string_parameter_builder"
     )
-    expected_value: str = "%Y-%m-%d %H:%M:%S"
+    expected_value: dict = {
+        "details": {"success_ratio": 1.0},
+        "value": "%Y-%m-%d %H:%M:%S",
+    }
 
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
             domain=domain,
+            parameters={domain.id: parameter_container},
         )
         == expected_value
     )
