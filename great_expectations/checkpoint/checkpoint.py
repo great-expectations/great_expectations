@@ -34,10 +34,7 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
-from great_expectations.util import (
-    deep_filter_properties_iterable,
-    filter_properties_dict,
-)
+from great_expectations.util import filter_properties_dict
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
@@ -57,6 +54,11 @@ class ConfigurationPresentationFormat(Enum):
 
 
 class CheckpointBase:
+    """
+    CheckpointBase class is initialized from CheckpointConfig typed object and contains all functionality
+    in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
+    """
+
     def __init__(
         self,
         checkpoint_config: CheckpointConfig,
@@ -460,17 +462,6 @@ is run), with each validation having its own defined "action_list" attribute.
             ConfigurationPresentationFormat.REPRESENTATION,
         ]:
             return str(self.checkpoint_config)
-            # TODO: <Alex>ALEX</Alex>
-            # json_dict: dict = self.checkpoint_config.to_json_dict()
-            # if clean_falsy:
-            #     deep_filter_properties_iterable(
-            #         properties=json_dict,
-            #         clean_falsy=True,
-            #         inplace=True,
-            #     )
-            #
-            # return json.dumps(json_dict, indent=2)
-            # TODO: <Alex>ALEX</Alex>
 
         if format == ConfigurationPresentationFormat.YAML:
             return self.checkpoint_config.to_yaml_str()
