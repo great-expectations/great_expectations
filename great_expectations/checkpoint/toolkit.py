@@ -143,7 +143,7 @@ def add_checkpoint(
             configuration_key=name,
         )
 
-    checkpoint_config = CheckpointConfig(**new_checkpoint.get_config())
+    checkpoint_config = new_checkpoint.get_config()
 
     checkpoint_ref = checkpoint_store.set(key=key, value=checkpoint_config)
     if isinstance(checkpoint_ref, GeCloudIdAwareRef):
@@ -298,16 +298,17 @@ def run_checkpoint(
         name=checkpoint_name,
         ge_cloud_id=ge_cloud_id,
     )
-    checkpoint_config_from_store: dict = checkpoint.get_config()
+    checkpoint_config_from_store: CheckpointConfig = checkpoint.get_config()
 
     if (
         "runtime_configuration" in checkpoint_config_from_store
-        and checkpoint_config_from_store["runtime_configuration"]
-        and "result_format" in checkpoint_config_from_store["runtime_configuration"]
+        and checkpoint_config_from_store.runtime_configuration
+        and "result_format" in checkpoint_config_from_store.runtime_configuration
     ):
-        result_format = result_format or checkpoint_config_from_store[
-            "runtime_configuration"
-        ].pop("result_format")
+        result_format = (
+            result_format
+            or checkpoint_config_from_store.runtime_configuration.get("result_format")
+        )
 
     if result_format is None:
         result_format = {"result_format": "SUMMARY"}

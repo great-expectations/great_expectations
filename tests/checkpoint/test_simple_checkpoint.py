@@ -10,6 +10,7 @@ from great_expectations.checkpoint import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.checkpoint import (
     Checkpoint,
     CheckpointResult,
+    LegacyCheckpoint,
     SimpleCheckpoint,
 )
 from great_expectations.core.batch import RuntimeBatchRequest
@@ -139,7 +140,7 @@ def test_simple_checkpoint_default_properties_with_no_optional_arguments(
     checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_minimal_simple_checkpoint"
     )
-    checkpoint_config = checkpoint_from_store.get_config()
+    checkpoint_config = checkpoint_from_store.get_config(mode="dict")
     assert checkpoint_config["name"] == "my_minimal_simple_checkpoint"
     assert checkpoint_config["action_list"] == [
         store_validation_result_action,
@@ -184,7 +185,7 @@ def test_simple_checkpoint_has_slack_action_with_defaults_when_slack_webhook_is_
     checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_slack"
     )
-    checkpoint_config = checkpoint_from_store.get_config()
+    checkpoint_config = checkpoint_from_store.get_config(mode="dict")
     assert checkpoint_config["name"] == "my_simple_checkpoint_with_slack"
     assert checkpoint_config["action_list"] == expected
 
@@ -251,7 +252,7 @@ def test_simple_checkpoint_notify_with_all_has_data_docs_action_with_none_specif
     checkpoint_from_store: Checkpoint = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_slack_and_notify_with_all"
     )
-    checkpoint_config = checkpoint_from_store.get_config()
+    checkpoint_config = checkpoint_from_store.get_config(mode="dict")
     assert slack_notification_action in checkpoint_config["action_list"]
 
 
@@ -367,7 +368,7 @@ def test_simple_checkpoint_has_update_data_docs_action_that_should_update_select
     checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_site_names"
     )
-    checkpoint_config = checkpoint_from_store.get_config()
+    checkpoint_config = checkpoint_from_store.get_config(mode="dict")
     assert checkpoint_config["action_list"] == [
         store_validation_result_action,
         store_eval_parameter_action,
@@ -410,10 +411,12 @@ def test_simple_checkpoint_persisted_to_store(
         **initial_checkpoint_config.to_json_dict()
     )
     assert context_with_data_source_and_empty_suite.list_checkpoints() == ["foo"]
-    checkpoint = context_with_data_source_and_empty_suite.get_checkpoint(name="foo")
+    checkpoint: SimpleCheckpoint = (
+        context_with_data_source_and_empty_suite.get_checkpoint(name="foo")
+    )
     assert isinstance(checkpoint, Checkpoint)
-    assert isinstance(checkpoint.get_config(), dict)
-    checkpoint_config: dict = CheckpointConfig(**checkpoint.get_config()).to_json_dict()
+    assert isinstance(checkpoint.get_config(mode="dict"), dict)
+    checkpoint_config: dict = checkpoint.get_config(mode="json_dict")
     assert checkpoint_config == {
         "action_list": [
             {
@@ -434,14 +437,18 @@ def test_simple_checkpoint_persisted_to_store(
         "ge_cloud_id": None,
         "module_name": "great_expectations.checkpoint",
         "name": "foo",
+        "notify_on": None,
+        "notify_with": None,
         "profilers": [],
         "run_name_template": None,
         "runtime_configuration": {},
+        "site_names": None,
+        "slack_webhook": None,
         "template_name": None,
         "validations": [],
     }
-    results = checkpoint.run(validations=[one_validation])
-    assert results.success
+    result = checkpoint.run(validations=[one_validation])
+    assert result.success
 
 
 def test_simple_checkpoint_defaults_run_and_no_run_params_raises_checkpoint_error(
@@ -481,6 +488,8 @@ def test_simple_checkpoint_runtime_kwargs_processing_site_names_only_without_per
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
+        "class_name": "Checkpoint",
+        "module_name": "great_expectations.checkpoint",
         "template_name": None,
         "run_name_template": None,
         "expectation_suite_name": None,
@@ -551,6 +560,8 @@ def test_simple_checkpoint_runtime_kwargs_processing_slack_webhook_only_without_
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
+        "class_name": "Checkpoint",
+        "module_name": "great_expectations.checkpoint",
         "template_name": None,
         "run_name_template": None,
         "expectation_suite_name": None,
@@ -631,6 +642,8 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_special_kwargs_without_
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
+        "class_name": "Checkpoint",
+        "module_name": "great_expectations.checkpoint",
         "template_name": None,
         "run_name_template": None,
         "expectation_suite_name": None,
@@ -722,6 +735,8 @@ def test_simple_checkpoint_runtime_kwargs_processing_all_kwargs(
     expected_runtime_kwargs: dict = {
         "name": "foo",
         "config_version": 1.0,
+        "class_name": "Checkpoint",
+        "module_name": "great_expectations.checkpoint",
         "template_name": "my_simple_template_checkpoint",
         "run_name_template": "my_runtime_run_name_template",
         "expectation_suite_name": "my_runtime_suite",
@@ -840,13 +855,12 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_chec
     assert context.list_checkpoints() == [checkpoint_name]
 
     del checkpoint_config
-    checkpoint = context.get_checkpoint(checkpoint_name)
+    checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
+        checkpoint_name
+    )
     assert isinstance(checkpoint, Checkpoint)
 
-    result = checkpoint.run(
-        run_name="bar",
-        validations=[one_validation],
-    )
+    result = checkpoint.run(run_name="bar", validations=[one_validation])
     assert isinstance(result, CheckpointResult)
     assert result.run_id.run_name == "bar"
     assert result.list_expectation_suite_names() == ["one"]
@@ -929,22 +943,18 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     assert len(context.list_expectation_suites()) == 2
 
     # persist to store
-    checkpoint_class_args: dict = dict(
-        **{
-            "class_name": "SimpleCheckpoint",
-        },
-        **simple_checkpoint_defaults.get_config()
+    checkpoint_class_args: dict = simple_checkpoint_defaults.get_config(
+        mode="json_dict"
     )
     context.add_checkpoint(**checkpoint_class_args)
     checkpoint_name = simple_checkpoint_defaults.name
     assert context.list_checkpoints() == [checkpoint_name]
     # reload from store
     del simple_checkpoint_defaults
-    checkpoint = context.get_checkpoint(checkpoint_name)
-    result = checkpoint.run(
-        run_name="bar",
-        validations=two_validations,
+    checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
+        checkpoint_name
     )
+    result = checkpoint.run(run_name="bar", validations=two_validations)
     assert isinstance(result, CheckpointResult)
     assert result.run_id.run_name == "bar"
     assert sorted(result.list_expectation_suite_names()) == sorted(["one", "two"])
@@ -969,10 +979,10 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
         },  # not actually run, but used to test configuration
     )
 
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint", data_context=context, batch_request=runtime_batch_request
     )
-    checkpoint_config: dict = checkpoint.get_config()
+    checkpoint_config: dict = checkpoint.get_config(mode="json_dict")
 
     assert isinstance(checkpoint_config, dict)
     assert checkpoint_config["name"] == "my_checkpoint"
@@ -982,7 +992,7 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
         update_data_docs_action,
     ]
     assert deep_filter_properties_iterable(
-        properties=checkpoint_config["batch_request"].to_json_dict(),
+        properties=checkpoint_config["batch_request"],
         clean_falsy=True,
     ) == {
         "batch_identifiers": {"pipeline_stage_name": "first"},
@@ -1018,7 +1028,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1044,13 +1054,12 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-        validations=[{"batch_request": batch_request}],
     )
 
-    results = checkpoint.run()
+    result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_batch_data_in_validations_spark(
@@ -1075,7 +1084,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1103,12 +1112,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run(
-        validations=[{"batch_request": batch_request}],
-    )
+    result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_query_in_validations(
@@ -1133,7 +1140,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1162,10 +1169,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         validations=[{"batch_request": batch_request}],
     )
 
-    results = checkpoint.run()
+    result = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_multiple_runtime_batch_request_query_in_validations(
@@ -1203,7 +1210,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1235,10 +1242,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run()
+    result = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_raise_error_when_run_when_missing_batch_request_and_validations(
@@ -1250,7 +1257,7 @@ def test_simple_checkpoint_raise_error_when_run_when_missing_batch_request_and_v
     context.create_expectation_suite("my_expectation_suite")
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1307,7 +1314,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1336,10 +1343,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         batch_request=batch_request,
     )
 
-    results = checkpoint.run()
+    result = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_pandas(
@@ -1363,7 +1370,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1389,13 +1396,12 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-        batch_request=batch_request,
     )
 
-    results = checkpoint.run()
+    result = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_spark(
@@ -1421,7 +1427,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1447,13 +1453,12 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
                 },
             },
         ],
-        batch_request=batch_request,
     )
 
-    results = checkpoint.run()
+    result = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_pandas(
@@ -1485,7 +1490,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add simple checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1514,10 +1519,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         batch_request=batch_request,
     )
 
-    results = checkpoint.run()
+    result = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_spark(
@@ -1550,7 +1555,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1579,10 +1584,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         batch_request=batch_request,
     )
 
-    results = checkpoint.run()
+    result = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_checkpoint_run(
@@ -1607,7 +1612,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1635,10 +1640,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run(batch_request=batch_request)
+    result = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_pandas(
@@ -1662,7 +1667,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1690,10 +1695,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run(batch_request=batch_request)
+    result = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_spark(
@@ -1718,7 +1723,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1746,10 +1751,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run(batch_request=batch_request)
+    result = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_query_in_checkpoint_run(
@@ -1774,7 +1779,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1802,10 +1807,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run(validations=[{"batch_request": batch_request}])
+    result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_checkpoint_run_pandas(
@@ -1829,7 +1834,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1857,10 +1862,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run(validations=[{"batch_request": batch_request}])
+    result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_checkpoint_run_spark(
@@ -1885,7 +1890,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1913,10 +1918,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run(validations=[{"batch_request": batch_request}])
+    result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_checkpoint_run_pandas(
@@ -1948,7 +1953,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add simple checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -1976,12 +1981,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run(
-        batch_request=batch_request,
-    )
+    result = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_spark(
@@ -2014,7 +2017,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -2042,12 +2045,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run(
-        batch_request=batch_request,
-    )
+    result = checkpoint.run(batch_request=batch_request)
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_checkpoint_run_pandas(
@@ -2079,7 +2080,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add simple checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -2107,12 +2108,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run(
-        validations=[{"batch_request": batch_request}],
-    )
+    result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_checkpoint_run_spark(
@@ -2145,7 +2144,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -2173,12 +2172,10 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     )
 
-    results = checkpoint.run(
-        validations=[{"batch_request": batch_request}],
-    )
+    result = checkpoint.run(validations=[{"batch_request": batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_context_run_checkpoint(
@@ -2233,12 +2230,12 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 
     context.add_checkpoint(**checkpoint_config_dict)
 
-    results = context.run_checkpoint(
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint", batch_request=batch_request
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_context_run_checkpoint_pandas(
@@ -2262,7 +2259,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -2290,14 +2287,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     }
 
-    context.add_checkpoint(**checkpoint)
+    context.add_checkpoint(**checkpoint_config)
 
-    results = context.run_checkpoint(
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint", batch_request=batch_request
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_context_run_checkpoint_spark(
@@ -2322,7 +2319,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -2350,14 +2347,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     }
 
-    context.add_checkpoint(**checkpoint)
+    context.add_checkpoint(**checkpoint_config)
 
-    results = context.run_checkpoint(
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint", batch_request=batch_request
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_query_in_context_run_checkpoint(
@@ -2382,7 +2379,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -2410,14 +2407,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     }
 
-    context.add_checkpoint(**checkpoint)
+    context.add_checkpoint(**checkpoint_config)
 
-    results = context.run_checkpoint(
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint", validations=[{"batch_request": batch_request}]
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_context_run_checkpoint_pandas(
@@ -2441,7 +2438,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -2469,14 +2466,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     }
 
-    context.add_checkpoint(**checkpoint)
+    context.add_checkpoint(**checkpoint_config)
 
-    results = context.run_checkpoint(
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint", validations=[{"batch_request": batch_request}]
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_context_run_checkpoint_spark(
@@ -2501,7 +2498,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -2529,14 +2526,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     }
 
-    context.add_checkpoint(**checkpoint)
+    context.add_checkpoint(**checkpoint_config)
 
-    results = context.run_checkpoint(
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint", validations=[{"batch_request": batch_request}]
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_context_run_checkpoint_pandas(
@@ -2568,7 +2565,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -2596,14 +2593,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     }
 
-    context.add_checkpoint(**checkpoint)
+    context.add_checkpoint(**checkpoint_config)
 
-    results = context.run_checkpoint(
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint", batch_request=batch_request
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_spark(
@@ -2636,7 +2633,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -2664,14 +2661,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     }
 
-    context.add_checkpoint(**checkpoint)
+    context.add_checkpoint(**checkpoint_config)
 
-    results = context.run_checkpoint(
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint", batch_request=batch_request
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_context_run_checkpoint_pandas(
@@ -2703,7 +2700,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -2731,14 +2728,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     }
 
-    context.add_checkpoint(**checkpoint)
+    context.add_checkpoint(**checkpoint_config)
 
-    results = context.run_checkpoint(
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint", validations=[{"batch_request": batch_request}]
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_context_run_checkpoint_spark(
@@ -2771,7 +2768,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # add checkpoint config
-    checkpoint = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -2799,14 +2796,14 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         ],
     }
 
-    context.add_checkpoint(**checkpoint)
+    context.add_checkpoint(**checkpoint_config)
 
-    results = context.run_checkpoint(
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint", validations=[{"batch_request": batch_request}]
     )
 
     assert len(context.validations_store.list_keys()) == 1
-    assert results["success"]
+    assert result["success"]
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_data(
@@ -2830,7 +2827,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_printable_validation_resu
     )
 
     # add checkpoint config
-    checkpoint = SimpleCheckpoint(
+    checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint",
         data_context=context,
         config_version=1,
@@ -2856,12 +2853,11 @@ def test_simple_checkpoint_instantiates_and_produces_a_printable_validation_resu
                 },
             },
         ],
-        batch_request=batch_request,
     )
 
-    results = checkpoint.run()
+    result = checkpoint.run(batch_request=batch_request)
 
-    assert type(repr(results)) == str
+    assert type(repr(result)) == str
 
 
 def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_contradictory_batch_request_in_checkpoint_yml_and_checkpoint_run(
@@ -2878,9 +2874,11 @@ def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_
     # create expectation suite
     context.create_expectation_suite("my_expectation_suite")
 
+    runtime_batch_request: RuntimeBatchRequest
+
     # RuntimeBatchRequest with a path
     # Using typed object instead of dictionary, expected by "add_checkpoint()", on purpose to insure that checks work.
-    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
+    runtime_batch_request = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -2920,14 +2918,16 @@ def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_
                 },
             },
         ],
-        "batch_request": batch_request,
+        "batch_request": runtime_batch_request,
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint = context.get_checkpoint(name="my_checkpoint")
+    checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
+        name="my_checkpoint"
+    )
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
+    runtime_batch_request = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -2959,6 +2959,8 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
         "data_connector_name": "my_basic_data_connector",
         "data_asset_name": "Titanic_1911",
     }
+
+    # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
@@ -3003,33 +3005,35 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint = context.get_checkpoint(name="my_checkpoint")
+    checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
+        name="my_checkpoint"
+    )
 
-    results = checkpoint.run()
-    assert results["success"] == False
+    result = checkpoint.run()
+    assert result["success"] == False
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
         ]
         == 1
     )
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "successful_expectations"
         ]
         == 0
     )
 
-    results = checkpoint.run(batch_request=runtime_batch_request)
-    assert results["success"]
+    result = checkpoint.run(batch_request=runtime_batch_request)
+    assert result["success"]
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
         ]
         == 1
     )
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "successful_expectations"
         ]
         == 1
@@ -3048,6 +3052,8 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
         "data_connector_name": "my_basic_data_connector",
         "data_asset_name": "Titanic_1911",
     }
+
+    # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
@@ -3092,47 +3098,49 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     }
 
     context.add_checkpoint(**checkpoint_config)
-    checkpoint = context.get_checkpoint(name="my_checkpoint")
+    checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
+        name="my_checkpoint"
+    )
 
-    results = checkpoint.run()
-    assert results["success"] == False
-    assert len(results.run_results.values()) == 1
+    result = checkpoint.run()
+    assert result["success"] == False
+    assert len(result.run_results.values()) == 1
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
         ]
         == 1
     )
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "successful_expectations"
         ]
         == 0
     )
 
-    results = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
-    assert results["success"] == False
-    assert len(results.run_results.values()) == 2
+    result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
+    assert result["success"] == False
+    assert len(result.run_results.values()) == 2
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
         ]
         == 1
     )
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "successful_expectations"
         ]
         == 0
     )
     assert (
-        list(results.run_results.values())[1]["validation_result"]["statistics"][
+        list(result.run_results.values())[1]["validation_result"]["statistics"][
             "evaluated_expectations"
         ]
         == 1
     )
     assert (
-        list(results.run_results.values())[1]["validation_result"]["statistics"][
+        list(result.run_results.values())[1]["validation_result"]["statistics"][
             "successful_expectations"
         ]
         == 1
@@ -3151,6 +3159,8 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
         "data_connector_name": "my_basic_data_connector",
         "data_asset_name": "Titanic_1911",
     }
+
+    # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
@@ -3196,33 +3206,33 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
 
     context.add_checkpoint(**checkpoint_config)
 
-    results = context.run_checkpoint(checkpoint_name="my_checkpoint")
-    assert results["success"] == False
+    result = context.run_checkpoint(checkpoint_name="my_checkpoint")
+    assert result["success"] == False
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
         ]
         == 1
     )
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "successful_expectations"
         ]
         == 0
     )
 
-    results = context.run_checkpoint(
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint", batch_request=runtime_batch_request
     )
-    assert results["success"]
+    assert result["success"]
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
         ]
         == 1
     )
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "successful_expectations"
         ]
         == 1
@@ -3241,6 +3251,8 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
         "data_connector_name": "my_basic_data_connector",
         "data_asset_name": "Titanic_1911",
     }
+
+    # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
@@ -3286,48 +3298,48 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
 
     context.add_checkpoint(**checkpoint_config)
 
-    results = context.run_checkpoint(checkpoint_name="my_checkpoint")
-    assert results["success"] == False
-    assert len(results.run_results.values()) == 1
+    result = context.run_checkpoint(checkpoint_name="my_checkpoint")
+    assert result["success"] == False
+    assert len(result.run_results.values()) == 1
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
         ]
         == 1
     )
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "successful_expectations"
         ]
         == 0
     )
 
-    results = context.run_checkpoint(
+    result = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
         validations=[{"batch_request": runtime_batch_request}],
     )
-    assert results["success"] == False
-    assert len(results.run_results.values()) == 2
+    assert result["success"] == False
+    assert len(result.run_results.values()) == 2
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "evaluated_expectations"
         ]
         == 1
     )
     assert (
-        list(results.run_results.values())[0]["validation_result"]["statistics"][
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
             "successful_expectations"
         ]
         == 0
     )
     assert (
-        list(results.run_results.values())[1]["validation_result"]["statistics"][
+        list(result.run_results.values())[1]["validation_result"]["statistics"][
             "evaluated_expectations"
         ]
         == 1
     )
     assert (
-        list(results.run_results.values())[1]["validation_result"]["statistics"][
+        list(result.run_results.values())[1]["validation_result"]["statistics"][
             "successful_expectations"
         ]
         == 1
