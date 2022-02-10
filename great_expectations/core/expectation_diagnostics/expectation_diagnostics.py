@@ -184,35 +184,12 @@ class ExpectationDiagnostics(SerializableDictDot):
         negative_cases: int = 0
 
         for test_data_cases in examples:
-            try:
-                for test in test_data_cases["tests"]:
-                    if test["output"]["success"] is True:
-                        positive_cases += 1
-                    elif test["output"]["success"] is False:
-                        negative_cases += 1
-            except:
-                # If there's no "success" key, should it count for negative_cases?
-                pass
-
-                # Some examples of test["output"] with no key success
-                # {'traceback_substring': 'numeric'}
-                #   - expect_column_mean_to_be_between
-                # {}
-                #   - expect_column_min_to_be_between
-                #   - expect_column_sum_to_be_between
-                #   - expect_column_value_lengths_to_be_between
-                #   - expect_column_values_to_be_between
-                #   - expect_column_values_to_not_be_in_set
-                #   - expect_table_column_count_to_be_between
-                # {'traceback_substring': "must be 'python' or 'pandas'"}
-                #   - expect_column_value_lengths_to_equal
-                # {'traceback_substring': 'Values passed to expect_column_values_to_be_dateutil_parseable must be of type string.'}
-                #   - expect_column_values_to_be_dateutil_parseable
-                # {'traceback_substring': 'condition_parser is required'}
-                #   - expect_column_values_to_be_in_set
-                # {'traceback_substring': 'Values passed to expect_column_values_to_match_strftime_format must be of type string'}
-                #   - expect_column_values_to_match_strftime_format
-
+            for test in test_data_cases["tests"]:
+                success = test["output"].get("success")
+                if success is True:
+                    positive_cases += 1
+                elif success is False:
+                    negative_cases += 1
         return positive_cases, negative_cases
 
     @staticmethod
@@ -267,24 +244,25 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check that the validate_configuration method returns True"""
         passed = False
+        sub_messages = []
         try:
             first_test = examples[0]["tests"][0]
         except IndexError:
-            # No examples, so can't get kwargs for ExpectationConfiguration
-            pass
+            sub_messages.append({
+                "message": "No example found to get kwargs for ExpectationConfiguration",
+                "passed": False,
+            })
         else:
             expectation_config = ExpectationConfiguration(
                 expectation_type=expectation_instance.expectation_type,
                 kwargs=first_test.input,
             )
-            try:
-                passed = expectation_instance.validate_configuration(expectation_config)
-            except:
-                passed = False
+            passed = expectation_instance.validate_configuration(expectation_config)
 
         return ExpectationDiagnosticCheckMessage(
             message="Has basic input validation and type checking",
             passed=passed,
+            sub_messages=sub_messages,
         )
 
     @staticmethod

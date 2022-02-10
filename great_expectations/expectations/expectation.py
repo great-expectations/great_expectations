@@ -1467,7 +1467,7 @@ class Expectation(metaclass=MetaExpectation):
                 [key in keys for key in {"tags", "contributors"}]
             )
             has_no_forbidden_keys = all(
-                [
+                (
                     key
                     in {
                         "tags",
@@ -1479,7 +1479,7 @@ class Expectation(metaclass=MetaExpectation):
                         "manually_reviewed_code",
                     }
                     for key in keys
-                ]
+                )
             )
             if has_all_required_keys and has_no_forbidden_keys:
                 augmented_library_metadata["library_metadata_passed_checks"] = True
