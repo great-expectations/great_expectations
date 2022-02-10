@@ -308,7 +308,7 @@ def test_basic_checkpoint_config_validation(
     )
     assert (
         filter_properties_dict(
-            properties=checkpoint.get_config(),
+            properties=checkpoint.get_config(mode="dict"),
             clean_falsy=True,
         )
         == expected_checkpoint_config
@@ -327,7 +327,7 @@ def test_basic_checkpoint_config_validation(
     )
     assert (
         filter_properties_dict(
-            properties=checkpoint.get_config(),
+            properties=checkpoint.get_config(mode="dict"),
             clean_falsy=True,
         )
         == expected_checkpoint_config
@@ -505,7 +505,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         name="my_fancy_checkpoint",
     )
     assert filter_properties_dict(
-        properties=checkpoint.get_config(),
+        properties=checkpoint.get_config(mode="dict"),
         clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
@@ -660,7 +660,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
         name="my_fancy_checkpoint",
     )
     assert filter_properties_dict(
-        properties=checkpoint.get_config(),
+        properties=checkpoint.get_config(mode="dict"),
         clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
@@ -758,7 +758,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
         name="airflow_checkpoint",
     )
     assert filter_properties_dict(
-        properties=checkpoint.get_config(),
+        properties=checkpoint.get_config(mode="dict"),
         clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
@@ -1027,7 +1027,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
         name="airflow_users_node_3",
     )
     assert filter_properties_dict(
-        properties=checkpoint.get_config(),
+        properties=checkpoint.get_config(mode="dict"),
         clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
@@ -1126,7 +1126,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         name="my_base_checkpoint",
     )
     assert filter_properties_dict(
-        properties=checkpoint.get_config(),
+        properties=checkpoint.get_config(mode="dict"),
         clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,
@@ -1242,7 +1242,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         name="my_fancy_checkpoint",
     )
     assert filter_properties_dict(
-        properties=checkpoint.get_config(),
+        properties=checkpoint.get_config(mode="dict"),
         clean_falsy=True,
     ) == filter_properties_dict(
         properties=expected_checkpoint_config,

@@ -1982,17 +1982,16 @@ class BaseDataContext:
         if mode == "typed":
             return config
 
-        elif mode == "commented_map":
+        if mode == "commented_map":
             return config.commented_map
 
-        elif mode == "dict":
+        if mode == "dict":
             return config.to_json_dict()
 
-        elif mode == "yaml":
+        if mode == "yaml":
             return config.to_yaml_str()
 
-        else:
-            raise ValueError(f"Unknown config mode {mode}")
+        raise ValueError(f"Unknown config mode {mode}")
 
     def _build_datasource_from_config(
         self, name: str, config: Union[dict, DatasourceConfig]

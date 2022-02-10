@@ -3,8 +3,7 @@ import datetime
 import json
 import logging
 import os
-from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
@@ -42,15 +41,6 @@ from great_expectations.validation_operators.types.validation_operator_result im
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
-
-class ConfigurationPresentationFormat(Enum):
-    DICTIONARY = "dict"
-    JSON_DICTIONARY = "json_dict"
-    STRING = "str"
-    DIRECTIONS = "dir"
-    REPRESENTATION = "repr"
-    YAML = "yaml"
 
 
 class CheckpointBase:
@@ -196,9 +186,7 @@ class CheckpointBase:
         if runtime_kwargs is None:
             runtime_kwargs = {}
 
-        config_kwargs: dict = self.get_config(
-            format=ConfigurationPresentationFormat.JSON_DICTIONARY
-        )
+        config_kwargs: dict = self.get_config(mode="json_dict")
 
         template_name: Optional[str] = runtime_kwargs.get("template_name")
         if template_name:
@@ -431,11 +419,19 @@ is run), with each validation having its own defined "action_list" attribute.
     # noinspection PyShadowingBuiltins
     def get_config(
         self,
-        format: ConfigurationPresentationFormat = ConfigurationPresentationFormat.DICTIONARY,
+        mode: str = "typed",
         clean_falsy: bool = False,
-    ) -> Union[dict, str]:
-        if format == ConfigurationPresentationFormat.DICTIONARY:
-            config_kwargs: dict = self.checkpoint_config.to_dict()
+    ) -> Union[CheckpointConfig, dict, str]:
+        config: CheckpointConfig = self.checkpoint_config
+
+        if mode == "typed":
+            return config
+
+        if mode == "commented_map":
+            return config.commented_map
+
+        if mode == "dict":
+            config_kwargs: dict = config.to_dict()
             if clean_falsy:
                 filter_properties_dict(
                     properties=config_kwargs,
@@ -445,8 +441,8 @@ is run), with each validation having its own defined "action_list" attribute.
 
             return config_kwargs
 
-        if format == ConfigurationPresentationFormat.JSON_DICTIONARY:
-            config_kwargs: dict = self.checkpoint_config.to_json_dict()
+        if mode == "json_dict":
+            config_kwargs: dict = config.to_json_dict()
             if clean_falsy:
                 filter_properties_dict(
                     properties=config_kwargs,
@@ -456,21 +452,18 @@ is run), with each validation having its own defined "action_list" attribute.
 
             return config_kwargs
 
-        if format in [
-            ConfigurationPresentationFormat.STRING,
-            ConfigurationPresentationFormat.DIRECTIONS,
-            ConfigurationPresentationFormat.REPRESENTATION,
-        ]:
-            return str(self.checkpoint_config)
+        if mode == "yaml":
+            return config.to_yaml_str()
 
-        if format == ConfigurationPresentationFormat.YAML:
-            return self.checkpoint_config.to_yaml_str()
-
-        raise ValueError(f"Unknown format {format} in LegacyCheckpoint.get_config.")
+        raise ValueError(f'Unknown mode {mode} in "CheckpointBase.get_config()".')
 
     @property
     def checkpoint_config(self) -> CheckpointConfig:
         return self._checkpoint_config
+
+    @checkpoint_config.setter
+    def checkpoint_config(self, value: CheckpointConfig):
+        self._checkpoint_config = value
 
     @property
     def name(self) -> Optional[str]:
@@ -512,7 +505,7 @@ is run), with each validation having its own defined "action_list" attribute.
         return self._data_context
 
     def __repr__(self) -> str:
-        return self.get_config(format=ConfigurationPresentationFormat.REPRESENTATION)
+        return str(self.get_config())
 
 
 class Checkpoint(CheckpointBase):
