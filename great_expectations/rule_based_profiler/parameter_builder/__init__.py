@@ -5,3 +5,4 @@ from .metric_multi_batch_parameter_builder import (  # isort:skip
 from .numeric_metric_range_multi_batch_parameter_builder import (  # isort:skip
     NumericMetricRangeMultiBatchParameterBuilder,
 )
+from .regex_pattern_string_parameter_builder import RegexPatternStringParameterBuilder
