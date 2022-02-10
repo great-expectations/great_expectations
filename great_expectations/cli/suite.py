@@ -80,9 +80,12 @@ def suite(ctx):
     "--profile",
     "-p",
     "profiler_name",
+    is_flag=False,
+    flag_value="",
     default=None,
-    help="""Generate a starting expectation suite automatically so you can refine it further. Requires the name of an existing profiler. Assumes --interactive
-flag.
+    help="""Generate a starting expectation suite automatically so you can refine it further.
+    Takes in an optional name; if provided, a profiler of that name will be retrieved from your Data Context.
+    Assumes --interactive flag.
 """,
 )
 @click.option(
@@ -117,6 +120,7 @@ def suite_new(
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
+    # Only set to true if `--profile` or `--profile <PROFILER_NAME>`
     profile: bool = profiler_name is not None
 
     interactive_mode, profile = _process_suite_new_flags_and_prompt(
@@ -760,6 +764,7 @@ def _suite_edit_workflow(
             renderer = SuiteProfileNotebookRenderer(
                 context=context,
                 expectation_suite_name=expectation_suite_name,
+                profiler_name=profiler_name,
                 batch_request=batch_request,
             )
             renderer.render_to_disk(notebook_file_path=notebook_path)
