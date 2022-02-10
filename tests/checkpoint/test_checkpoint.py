@@ -1,5 +1,6 @@
 import logging
 import os
+import pickle
 import unittest
 from typing import List, Union
 from unittest import mock
@@ -4831,7 +4832,7 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_validations_into_check
     context.create_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
-    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
+    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "default_runtime_data_connector_name",
@@ -4868,7 +4869,7 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_validations_into_check
                 },
             },
         ],
-        "validations": [{"batch_request": batch_request}],
+        "validations": [{"batch_request": runtime_batch_request}],
     }
 
     with pytest.raises(
@@ -4876,3 +4877,52 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_validations_into_check
         match='batch_data found in validations cannot be saved to CheckpointStore "checkpoint_store"',
     ):
         context.add_checkpoint(**checkpoint_config)
+
+
+def test_newstyle_checkpoint_result_can_be_pickled(
+    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
+    sa,
+):
+    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": [
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        "batch_request": batch_request,
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+
+    result: CheckpointResult = checkpoint.run()
+    assert isinstance(pickle.dumps(result), bytes)

@@ -4,7 +4,7 @@ import json
 import logging
 import os
 from enum import Enum
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
@@ -175,7 +175,7 @@ class CheckpointBase:
                     run_id=run_id,
                 )
 
-            run_results = {}
+            run_results: dict = {}
             for async_validation_operator_result in async_validation_operator_results:
                 run_results.update(
                     async_validation_operator_result.result().run_results
@@ -459,15 +459,18 @@ is run), with each validation having its own defined "action_list" attribute.
             ConfigurationPresentationFormat.DIRECTIONS,
             ConfigurationPresentationFormat.REPRESENTATION,
         ]:
-            json_dict: dict = self.checkpoint_config.to_json_dict()
-            if clean_falsy:
-                deep_filter_properties_iterable(
-                    properties=json_dict,
-                    clean_falsy=True,
-                    inplace=True,
-                )
-
-            return json.dumps(json_dict, indent=2)
+            return str(self.checkpoint_config)
+            # TODO: <Alex>ALEX</Alex>
+            # json_dict: dict = self.checkpoint_config.to_json_dict()
+            # if clean_falsy:
+            #     deep_filter_properties_iterable(
+            #         properties=json_dict,
+            #         clean_falsy=True,
+            #         inplace=True,
+            #     )
+            #
+            # return json.dumps(json_dict, indent=2)
+            # TODO: <Alex>ALEX</Alex>
 
         if format == ConfigurationPresentationFormat.YAML:
             return self.checkpoint_config.to_yaml_str()
