@@ -121,9 +121,7 @@ except ImportError:
         # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
         # fix isn't present, add this "dialect" attribute here:
         if not hasattr(sqla_bigquery, "dialect"):
-            sqla_bigquery.dialect = (
-                sqla_bigquery.BigQueryDialect
-            )
+            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
 
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
@@ -138,9 +136,7 @@ except ImportError:
             )
             from collections import namedtuple
 
-            BigQueryTypes = namedtuple(
-                "BigQueryTypes", sorted(sqla_bigquery._type_map)
-            )
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
             bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
     except (ImportError, AttributeError):
         bigquery_types_tuple = None
@@ -608,9 +604,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 module_name="sqlalchemy_redshift.dialect"
             )
         elif dialect_name == "bigquery":
-            self.dialect = import_library_module(
-                module_name=_BIGQUERY_MODULE_NAME
-            )
+            self.dialect = import_library_module(module_name=_BIGQUERY_MODULE_NAME)
         elif dialect_name == "awsathena":
             self.dialect = import_library_module(
                 module_name="pyathena.sqlalchemy_athena"
@@ -2107,9 +2101,7 @@ WHERE
 
         try:
             # Bigquery
-            if isinstance(
-                self.sql_engine_dialect, sqla_bigquery.BigQueryDialect
-            ):
+            if isinstance(self.sql_engine_dialect, sqla_bigquery.BigQueryDialect):
                 if positive:
                     return sa.func.REGEXP_CONTAINS(sa.column(column), literal(regex))
                 else:

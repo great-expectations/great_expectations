@@ -104,9 +104,7 @@ try:
     import sqlalchemy_bigquery.sqlalchemy_bigquery as sqla_bigquery
     import sqlalchemy_bigquery.sqlalchemy_bigquery as BigQueryDialect
 
-    sqlalchemy.dialects.registry.register(
-        "bigquery", _BIGQUERY_MODULE_NAME, "dialect"
-    )
+    sqlalchemy.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     bigquery_types_tuple = None
     BIGQUERY_TYPES = {
         "INTEGER": sqla_bigquery.INTEGER,
@@ -137,9 +135,7 @@ except ImportError:
         # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
         # fix isn't present, add this "dialect" attribute here:
         if not hasattr(sqla_bigquery, "dialect"):
-            sqla_bigquery.dialect = (
-                sqla_bigquery.BigQueryDialect
-            )
+            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
 
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
@@ -170,9 +166,7 @@ except ImportError:
             )
             from collections import namedtuple
 
-            BigQueryTypes = namedtuple(
-                "BigQueryTypes", sorted(sqla_bigquery._type_map)
-            )
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
             bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
             BIGQUERY_TYPES = {}
 
