@@ -14,6 +14,7 @@ from great_expectations.checkpoint.checkpoint import (
     SimpleCheckpoint,
 )
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -140,7 +141,7 @@ def test_simple_checkpoint_default_properties_with_no_optional_arguments(
     checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_minimal_simple_checkpoint"
     )
-    checkpoint_config = checkpoint_from_store.get_config(mode="dict")
+    checkpoint_config = checkpoint_from_store.get_config(mode=ConfigOutputModes.DICT)
     assert checkpoint_config["name"] == "my_minimal_simple_checkpoint"
     assert checkpoint_config["action_list"] == [
         store_validation_result_action,
@@ -185,7 +186,7 @@ def test_simple_checkpoint_has_slack_action_with_defaults_when_slack_webhook_is_
     checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_slack"
     )
-    checkpoint_config = checkpoint_from_store.get_config(mode="dict")
+    checkpoint_config = checkpoint_from_store.get_config(mode=ConfigOutputModes.DICT)
     assert checkpoint_config["name"] == "my_simple_checkpoint_with_slack"
     assert checkpoint_config["action_list"] == expected
 
@@ -252,7 +253,7 @@ def test_simple_checkpoint_notify_with_all_has_data_docs_action_with_none_specif
     checkpoint_from_store: Checkpoint = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_slack_and_notify_with_all"
     )
-    checkpoint_config = checkpoint_from_store.get_config(mode="dict")
+    checkpoint_config = checkpoint_from_store.get_config(mode=ConfigOutputModes.DICT)
     assert slack_notification_action in checkpoint_config["action_list"]
 
 
@@ -368,7 +369,7 @@ def test_simple_checkpoint_has_update_data_docs_action_that_should_update_select
     checkpoint_from_store = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates.get_checkpoint(
         "my_simple_checkpoint_with_site_names"
     )
-    checkpoint_config = checkpoint_from_store.get_config(mode="dict")
+    checkpoint_config = checkpoint_from_store.get_config(mode=ConfigOutputModes.DICT)
     assert checkpoint_config["action_list"] == [
         store_validation_result_action,
         store_eval_parameter_action,
@@ -415,8 +416,10 @@ def test_simple_checkpoint_persisted_to_store(
         context_with_data_source_and_empty_suite.get_checkpoint(name="foo")
     )
     assert isinstance(checkpoint, Checkpoint)
-    assert isinstance(checkpoint.get_config(mode="dict"), dict)
-    checkpoint_config: dict = checkpoint.get_config(mode="json_dict", clean_nulls=False)
+    assert isinstance(checkpoint.get_config(mode=ConfigOutputModes.DICT), dict)
+    checkpoint_config: dict = checkpoint.get_config(
+        mode=ConfigOutputModes.JSON_DICT, clean_nulls=False
+    )
     assert checkpoint_config == {
         "action_list": [
             {
@@ -944,7 +947,7 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
 
     # persist to store
     checkpoint_class_args: dict = simple_checkpoint_defaults.get_config(
-        mode="json_dict"
+        mode=ConfigOutputModes.JSON_DICT
     )
     context.add_checkpoint(**checkpoint_class_args)
     checkpoint_name = simple_checkpoint_defaults.name
@@ -982,7 +985,7 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
     checkpoint: SimpleCheckpoint = SimpleCheckpoint(
         name="my_checkpoint", data_context=context, batch_request=runtime_batch_request
     )
-    checkpoint_config: dict = checkpoint.get_config(mode="json_dict")
+    checkpoint_config: dict = checkpoint.get_config(mode=ConfigOutputModes.JSON_DICT)
 
     assert isinstance(checkpoint_config, dict)
     assert checkpoint_config["name"] == "my_checkpoint"

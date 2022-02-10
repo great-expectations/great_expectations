@@ -24,7 +24,7 @@ from great_expectations.core.batch import (
     batch_request_contains_batch_data,
     get_batch_request_as_dict,
 )
-from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
 from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
     usage_statistics_enabled_method,
@@ -186,7 +186,7 @@ class BaseCheckpoint(ConfigPeer):
         if runtime_kwargs is None:
             runtime_kwargs = {}
 
-        config_kwargs: dict = self.get_config(mode="json_dict")
+        config_kwargs: dict = self.get_config(mode=ConfigOutputModes.JSON_DICT)
 
         template_name: Optional[str] = runtime_kwargs.get("template_name")
         if template_name:

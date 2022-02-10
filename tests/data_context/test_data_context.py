@@ -12,6 +12,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
@@ -1432,7 +1433,7 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     context = empty_context_with_checkpoint
     obs = context.get_checkpoint("my_checkpoint")
     assert isinstance(obs, Checkpoint)
-    config = obs.get_config(mode="json_dict")
+    config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
     assert isinstance(config, dict)
     assert config == {
         "name": "my_checkpoint",
@@ -1893,9 +1894,12 @@ expectation_suite_ge_cloud_id:
         checkpoint_from_disk = cf.read()
 
     assert checkpoint_from_disk == expected_checkpoint_yaml
-    assert checkpoint_from_yaml.get_config(mode="yaml") == expected_checkpoint_yaml
+    assert (
+        checkpoint_from_yaml.get_config(mode=ConfigOutputModes.YAML)
+        == expected_checkpoint_yaml
+    )
     assert deep_filter_properties_iterable(
-        properties=checkpoint_from_yaml.get_config(mode="dict"),
+        properties=checkpoint_from_yaml.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
     ) == deep_filter_properties_iterable(
         properties=dict(yaml.load(expected_checkpoint_yaml)),
@@ -1903,9 +1907,12 @@ expectation_suite_ge_cloud_id:
     )
 
     checkpoint_from_store = context.get_checkpoint(name=checkpoint_name)
-    assert checkpoint_from_store.get_config(mode="yaml") == expected_checkpoint_yaml
+    assert (
+        checkpoint_from_store.get_config(mode=ConfigOutputModes.YAML)
+        == expected_checkpoint_yaml
+    )
     assert deep_filter_properties_iterable(
-        properties=checkpoint_from_store.get_config(mode="dict"),
+        properties=checkpoint_from_store.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
     ) == deep_filter_properties_iterable(
         properties=dict(yaml.load(expected_checkpoint_yaml)),
@@ -1938,7 +1945,9 @@ expectation_suite_ge_cloud_id:
     )
 
     assert checkpoint_from_yaml.name == checkpoint_name
-    assert checkpoint_from_yaml.get_config(mode="json_dict", clean_falsy=True) == {
+    assert checkpoint_from_yaml.get_config(
+        mode=ConfigOutputModes.JSON_DICT, clean_falsy=True
+    ) == {
         "name": "my_new_checkpoint",
         "config_version": 1.0,
         "class_name": "Checkpoint",

@@ -1,11 +1,23 @@
 import logging
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Union
 
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
+
+
+class ConfigOutputModes(Enum):
+    TYPED = "typed"
+    COMMENTED_MAP = "commented_map"
+    YAML = "yaml"
+    DICT = "dict"
+    JSON_DICT = "json_dict"
+
+
+ConfigOutputModeType = Union[ConfigOutputModes, str]
 
 
 class ConfigPeer(ABC):
@@ -25,23 +37,26 @@ class ConfigPeer(ABC):
 
     def get_config(
         self,
-        mode: str = "typed",
+        mode: ConfigOutputModeType = ConfigOutputModes.TYPED,
         **kwargs,
     ) -> Union[BaseYamlConfig, dict, str]:
+        if isinstance(mode, str):
+            mode = ConfigOutputModes[mode]
+
         config: BaseYamlConfig = self.config
 
-        if mode == "typed":
+        if mode == ConfigOutputModes.TYPED:
             return config
 
-        if mode == "commented_map":
+        if mode == ConfigOutputModes.COMMENTED_MAP:
             return config.commented_map
 
-        if mode == "yaml":
+        if mode == ConfigOutputModes.YAML:
             return config.to_yaml_str()
 
-        if mode == "dict":
+        if mode == ConfigOutputModes.DICT:
             config_kwargs: dict = config.to_dict()
-        elif mode == "json_dict":
+        elif mode == ConfigOutputModes.JSON_DICT:
             config_kwargs: dict = config.to_json_dict()
         else:
             raise ValueError(f'Unknown mode {mode} in "BaseCheckpoint.get_config()".')
