@@ -124,7 +124,10 @@ from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfil
 from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.util import verify_dynamic_loading_support
+from great_expectations.util import (
+    filter_properties_dict,
+    verify_dynamic_loading_support,
+)
 from great_expectations.validator.validator import BridgeValidator, Validator
 
 try:
@@ -1979,17 +1982,16 @@ class BaseDataContext:
         if mode == "typed":
             return config
 
-        elif mode == "commented_map":
+        if mode == "commented_map":
             return config.commented_map
 
-        elif mode == "dict":
+        if mode == "dict":
             return config.to_json_dict()
 
-        elif mode == "yaml":
+        if mode == "yaml":
             return config.to_yaml_str()
 
-        else:
-            raise ValueError(f"Unknown config mode {mode}")
+        raise ValueError(f"Unknown config mode {mode}")
 
     def _build_datasource_from_config(
         self, name: str, config: Union[dict, DatasourceConfig]
@@ -3652,11 +3654,11 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         checkpoint_config = checkpoint_config.to_json_dict()
         checkpoint_config.update({"name": checkpoint_name})
 
-        checkpoint_class_args: dict = {
-            key: value
-            for key, value in checkpoint_config.items()
-            if key not in ["module_name", "class_name"]
-        }
+        checkpoint_class_args: dict = filter_properties_dict(
+            properties=checkpoint_config,
+            delete_fields={"class_name", "module_name"},
+            clean_falsy=True,
+        )
 
         if class_name == "Checkpoint":
             instantiated_class = Checkpoint(data_context=self, **checkpoint_class_args)
