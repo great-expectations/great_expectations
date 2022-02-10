@@ -48,7 +48,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 The following cell creates a Great Expectations folder in the filesystem
 which will hold all of the forthcoming project configurations. Note that if this folder already exists, Great Expectations gracefully allows us to continue.
 
-```jupyter
+```python
 !great_expectations --yes --v3-api init
 ```
 
@@ -75,17 +75,18 @@ df = pd.DataFrame({'products': products, 'quantities': quantities, 'dates': date
 df.show()
 ```
 
-:::warning
-insert dataframe below
-:::
+![dataframe](images/dataframe.png)
 
 ### 4. Define Expectations
 
-Expectations can be defined directly on a Pandas DataFrame using `ge.from_pandas(df)`. We're defining three Expectations on our DataFrame:
+Expectations can be defined directly on a Pandas DataFrame using `ge.from_pandas(df)`. 
+We're defining three Expectations on our DataFrame:
 
 1. The `products` column must contain unique values
 2. The `quantities` column cannot contain null values
 3. The `dates` column must have dates between January 1st and January 8th
+
+These Expectations together form an Expectation Suite that will be validated against our data.
 
 :::tip
 Replace the sample Expectations below with those that relate to your data.
@@ -140,3 +141,73 @@ context.save_expectation_suite(expectation_suite_name='my_expectation_suite', ex
 ```
 
 ### 6. Setting up a Batch and Checkpoint
+
+In order to populate the documentation ([Data Docs](../reference/data_docs.md)) for our tests, 
+we need to set up at least one [Batch](../reference/datasources.md#batches) and a [Checkpoint](../reference/checkpoints_and_actions.md). 
+
+A Batch is a pairing of data and metadata to be validated. A Checkpoint is a bundle of at least:
+- One Batch (the data to be validated)
+- One Expectation Suite (our Expectations for that data)
+- One [Action](../reference/checkpoints_and_actions.md#validation-actions) (saving our validation results, rebuilding Data Docs, sending a Slack notification, etc.)
+
+In the cell below, one Batch is constructed from our DataFrame with a [RuntimeBatchRequest](../reference/datasources.md#runtimedataconnector-and-runtimebatchrequest). 
+
+We then create a Checkpoint, and pass in our `batch_request`. 
+
+When execute this code, our Expectation Suite is run against our data, validating whether that data meets our 
+Expectation or not. The results are then persisted temporarily until we build our Data Docs.
+
+```python
+batch_request = RuntimeBatchRequest(
+   datasource_name="my_datasource",
+   data_connector_name="default_runtime_data_connector_name",
+   data_asset_name="df",
+   runtime_parameters={"batch_data": df}, 
+   batch_identifiers={"default_identifier_name": "df"},
+)
+ 
+checkpoint_config = {
+   "name": "my_checkpoint",
+   "config_version": 1,
+   "class_name": "SimpleCheckpoint",
+   "expectation_suite_name": "my_expectation_suite"
+}
+ 
+context.add_checkpoint(**checkpoint_config);
+ 
+results = context.run_checkpoint(
+   checkpoint_name="my_checkpoint",
+   validations = [
+       {"batch_request": batch_request}
+   ],
+   run_id="my_run_id",
+)
+```
+
+### 7. Build the documentation
+
+Our Data Docs can now be generated and served (thanks to [Deepnote Tunneling](https://docs.deepnote.com/environment/incoming-connections)!) by running the next cell.
+
+```python
+context.build_data_docs();
+ 
+# Uncomment this line to serve up the documentation
+#!python -m http.server 8080 --directory great_expectations/uncommitted/data_docs/local_site
+```
+
+When served, the Data Docs site provides the details of each [Validation](../reference/validation.md) we've run and Expectation Suite we've created.
+
+For example, the following image shows a run where three Expectations where validated against our DataFrame and two of them failed.
+
+![data-docs](images/data-docs.png)
+
+<div style={{"text-align":"center"}}>
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
+Congratulations!<br/>&#127881; You've successfully deployed Great Expectaions on Deepnote! &#127881;
+</b></p>
+</div>
+
+## Summary
+
+Deepnote integrates perfectly with Great Expectations, allowing documentation to be hosted and notebooks to be scheduled. Please visit [Deepnote](https://deepnote.com/) 
+to learn more about how to bring tools, teams, and workflows together.
