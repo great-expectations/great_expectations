@@ -56,7 +56,7 @@ class ColumnValuesConfidenceToBeGreaterThanOrEqualToThreshold(ColumnMapMetricPro
 
 class ExpectColumnValuesToBeGreaterThanOrEqualToThreshold(ColumnMapExpectation):
     """
-    This function builds upon the custom column map expectations of Great Expectations. This function asks the question a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.
+    This function builds upon the custom column map expectations of Great Expectations. This function asks a yes/no question of each row in the user-specified column; namely, does the confidence threshold provided by the DataProfiler model exceed the user-specified threshold.
     
     Args: 
         column (str): The column name that you want to check.
