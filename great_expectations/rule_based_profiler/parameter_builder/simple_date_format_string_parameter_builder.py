@@ -68,7 +68,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         if candidate_strings is not None:
             self._candidate_strings = set(candidate_strings)
         else:
-            self._candidate_strings = self.CANDIDATE_STRINGS
+            self._candidate_strings = (
+                SimpleDateFormatStringParameterBuilder.CANDIDATE_STRINGS
+            )
 
     def _build_parameters(
         self,
