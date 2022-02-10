@@ -22,25 +22,27 @@ Here are some of the notable benefits:
 - Data Docs can be [hosted publicly on Deepnote](https://docs.deepnote.com/environment/incoming-connections) (no need to host them yourself)
 - [Deepnote scheduling](https://docs.deepnote.com/features/scheduling) allows you to experience Great Expectations as part of a pipeline
 
-These make Deepnote one of the easiest and fastest ways to get started with Great Expectations.
+These benefits make Deepnote one of the easiest and fastest ways to get started with Great Expectations.
 
 ## Steps
 
 ### 1. Begin by importing Great Expectations
 
-Since Great Expectations can be listed in Deepnote's `requirements.txt`, it will be installed automatically. You can read more about package installing [here](https://docs.deepnote.com/environment/python-requirements). 
+Since Great Expectations can be listed in Deepnote's `requirements.txt`, it will be installed automatically. You can read more about package installation [here](https://docs.deepnote.com/environment/python-requirements). 
 This lets us import the required libraries right away.
 
 ```python
 import pandas as pd
 import numpy as np
 import great_expectations as ge
-from great_expectations.data_context.types.base import DataContextConfig, DatasourceConfig, FilesystemStoreBackendDefaults
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    DatasourceConfig,
+    FilesystemStoreBackendDefaults,
+)
 from great_expectations.data_context import BaseDataContext
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import RuntimeBatchRequest
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning)
 ```
 
 ### 2. Initialize Great Expectations
@@ -63,14 +65,27 @@ Replace the randomly created DataFrame below with your own datasource.
 
 ```python
 import pandas as pd
-products = np.random.choice(['camera', 'phone', 'computer', 'speaker', 'TV',
-                             'cable', 'movie', 'guitar', 'printer'], size=5)
+
+products = np.random.choice(
+    [
+        "camera",
+        "phone",
+        "computer",
+        "speaker",
+        "TV",
+        "cable",
+        "movie",
+        "guitar",
+        "printer",
+    ],
+    size=5,
+)
 
 quantities = np.random.choice(list(range(10)) + [None], size=5)
 
 dates = np.random.choice(pd.date_range(start="2020-12-30", end="2021-01-08"), size=5)
 
-df = pd.DataFrame({'products': products, 'quantities': quantities, 'dates': dates})
+df = pd.DataFrame({"products": products, "quantities": quantities, "dates": dates})
 
 df.show()
 ```
@@ -91,21 +106,25 @@ These Expectations together form an Expectation Suite that will be validated aga
 :::tip
 Replace the sample Expectations below with those that relate to your data.
 
-You can see all the Expectations available in the [gallery here](https://greatexpectations.io/expectations).
+You can see all the Expectations available in the [gallery](https://greatexpectations.io/expectations).
 :::
 
 ```python
 df = ge.from_pandas(df)
 
-df.expect_column_values_to_be_unique('products'); # ~30% chance of passing
-df.expect_column_values_to_not_be_null('quantities'); # ~60% chance of passing
-df.expect_column_values_to_be_between('dates', '2021-01-01', '2021-01-08',
-                                       parse_strings_as_datetimes=True); # ~60% chance of passing
+df.expect_column_values_to_be_unique("products")
+# ~30% chance of passing
+df.expect_column_values_to_not_be_null("quantities")
+# ~60% chance of passing
+df.expect_column_values_to_be_between(
+    "dates", "2021-01-01", "2021-01-08", parse_strings_as_datetimes=True
+);
+# ~60% chance of passing
 ```
 
 ### 5. Set project configurations
 
-Before we can validate our expectations against our data, we need to tell Great Expectations mroe about our project's configuration. 
+Before we can validate our expectations against our data, we need to tell Great Expectations more about our project's configuration. 
 Great Expectations keeps track of many configurations with a [Data Context](../reference/data_context.md). 
 These configurations are used to manage aspects of your project behind the scenes.
 
@@ -117,27 +136,32 @@ To learn more, visit the [Great Expectations docs](https://docs.greatexpectation
 
 ```python
 data_context_config = DataContextConfig(
-   datasources={
-       "my_datasource": DatasourceConfig(
-           class_name="Datasource",
-           module_name="great_expectations.datasource",
-           execution_engine={
-               "class_name": "PandasExecutionEngine",
-               "module_name": "great_expectations.execution_engine"
-           },
-           data_connectors={
-               "default_runtime_data_connector_name": {
-                   "class_name": "RuntimeDataConnector",
-                   "batch_identifiers": ["default_identifier_name"],
-               }
-           }
-       )
-   },
-   store_backend_defaults=FilesystemStoreBackendDefaults(root_directory="/work/great_expectations"),
+    datasources={
+        "my_datasource": DatasourceConfig(
+            class_name="Datasource",
+            module_name="great_expectations.datasource",
+            execution_engine={
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            data_connectors={
+                "default_runtime_data_connector_name": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": ["default_identifier_name"],
+                }
+            },
+        )
+    },
+    store_backend_defaults=FilesystemStoreBackendDefaults(
+        root_directory="/work/great_expectations"
+    ),
 )
- 
+
 context = BaseDataContext(project_config=data_context_config)
-context.save_expectation_suite(expectation_suite_name='my_expectation_suite', expectation_suite=df.get_expectation_suite(discard_failed_expectations=False));
+context.save_expectation_suite(
+    expectation_suite_name="my_expectation_suite",
+    expectation_suite=df.get_expectation_suite(discard_failed_expectations=False),
+);
 ```
 
 ### 6. Setting up a Batch and Checkpoint
@@ -154,33 +178,31 @@ In the cell below, one Batch is constructed from our DataFrame with a [RuntimeBa
 
 We then create a Checkpoint, and pass in our `batch_request`. 
 
-When execute this code, our Expectation Suite is run against our data, validating whether that data meets our 
-Expectation or not. The results are then persisted temporarily until we build our Data Docs.
+When we execute this code, our Expectation Suite is run against our data, validating whether that data meets our 
+Expectations or not. The results are then persisted temporarily until we build our Data Docs.
 
 ```python
 batch_request = RuntimeBatchRequest(
-   datasource_name="my_datasource",
-   data_connector_name="default_runtime_data_connector_name",
-   data_asset_name="df",
-   runtime_parameters={"batch_data": df}, 
-   batch_identifiers={"default_identifier_name": "df"},
+    datasource_name="my_datasource",
+    data_connector_name="default_runtime_data_connector_name",
+    data_asset_name="df",
+    runtime_parameters={"batch_data": df},
+    batch_identifiers={"default_identifier_name": "df"},
 )
- 
+
 checkpoint_config = {
-   "name": "my_checkpoint",
-   "config_version": 1,
-   "class_name": "SimpleCheckpoint",
-   "expectation_suite_name": "my_expectation_suite"
+    "name": "my_checkpoint",
+    "config_version": 1,
+    "class_name": "SimpleCheckpoint",
+    "expectation_suite_name": "my_expectation_suite",
 }
- 
-context.add_checkpoint(**checkpoint_config);
- 
+
+context.add_checkpoint(**checkpoint_config)
+
 results = context.run_checkpoint(
-   checkpoint_name="my_checkpoint",
-   validations = [
-       {"batch_request": batch_request}
-   ],
-   run_id="my_run_id",
+    checkpoint_name="my_checkpoint",
+    validations=[{"batch_request": batch_request}],
+    run_id="my_run_id",
 )
 ```
 
@@ -197,13 +219,13 @@ context.build_data_docs();
 
 When served, the Data Docs site provides the details of each [Validation](../reference/validation.md) we've run and Expectation Suite we've created.
 
-For example, the following image shows a run where three Expectations where validated against our DataFrame and two of them failed.
+For example, the following image shows a run where three Expectations were validated against our DataFrame and two of them failed.
 
 <img src="images/data-docs.png" />
 
 <div style={{"text-align":"center"}}>
 <p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
-Congratulations!<br/>&#127881; You've successfully deployed Great Expectaions on Deepnote! &#127881;
+Congratulations!<br/>&#127881; You've successfully deployed Great Expectations on Deepnote! &#127881;
 </b></p>
 </div>
 
