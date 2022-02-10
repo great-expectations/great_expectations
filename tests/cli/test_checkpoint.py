@@ -2209,17 +2209,17 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     expected_events: List[unittest.mock._Call] = [
         mock.call(
             {
+                "event": "data_context.save_expectation_suite",
                 "event_payload": {
                     "anonymized_expectation_suite_name": "35af1ba156bfe672f8845cb60554b138",
                 },
-                "event": "data_context.save_expectation_suite",
                 "success": True,
             }
         ),
         mock.call(
             {
-                "event_payload": {},
                 "event": "data_context.__init__",
+                "event_payload": {},
                 "success": True,
             }
         ),

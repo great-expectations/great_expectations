@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from unittest import mock
 
 import pytest
@@ -122,7 +122,7 @@ def test_suite_demo_deprecation_message(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_notebook_opens_jupyter(
-    mock_webbroser,
+    mock_webbrowser,
     mock_subprocess,
     mock_emit,
     caplog,
@@ -184,7 +184,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
     assert call_args[1] == "notebook"
     assert expected_notebook_path in call_args[2]
 
-    assert mock_webbroser.call_count == 0
+    assert mock_webbrowser.call_count == 0
 
     assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
@@ -236,7 +236,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook_opens_jupyter(
-    mock_webbroser,
+    mock_webbrowser,
     mock_subprocess,
     mock_emit,
     caplog,
@@ -298,7 +298,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     assert call_args[1] == "notebook"
     assert expected_notebook_path in call_args[2]
 
-    assert mock_webbroser.call_count == 0
+    assert mock_webbrowser.call_count == 0
 
     assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
@@ -350,7 +350,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_opens_jupyter(
-    mock_webbroser,
+    mock_webbrowser,
     mock_subprocess,
     mock_emit,
     caplog,
@@ -410,7 +410,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
     assert call_args[1] == "notebook"
     assert expected_notebook_path in call_args[2]
 
-    assert mock_webbroser.call_count == 0
+    assert mock_webbrowser.call_count == 0
 
     assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
@@ -462,7 +462,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_jupyter(
-    mock_webbroser,
+    mock_webbrowser,
     mock_subprocess,
     mock_emit,
     caplog,
@@ -522,7 +522,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
 
     assert mock_subprocess.call_count == 0
 
-    assert mock_webbroser.call_count == 0
+    assert mock_webbrowser.call_count == 0
 
     assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
@@ -574,7 +574,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error(
-    mock_webbroser,
+    mock_webbrowser,
     mock_subprocess,
     mock_emit,
     caplog,
@@ -607,7 +607,7 @@ nonexistent_file.json --no-jupyter
 
     assert mock_subprocess.call_count == 0
 
-    assert mock_webbroser.call_count == 0
+    assert mock_webbrowser.call_count == 0
 
     assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
@@ -653,7 +653,7 @@ nonexistent_file.json --no-jupyter
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
-    mock_webbroser,
+    mock_webbrowser,
     mock_subprocess,
     mock_emit,
     caplog,
@@ -692,7 +692,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
 
     assert mock_subprocess.call_count == 0
 
-    assert mock_webbroser.call_count == 0
+    assert mock_webbrowser.call_count == 0
 
     assert mock_emit.call_count == 4
     assert mock_emit.call_args_list == [
@@ -738,7 +738,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_runs_notebook_no_jupyter(
-    mock_webbroser,
+    mock_webbrowser,
     mock_subprocess,
     mock_emit,
     caplog,
@@ -838,7 +838,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
 
     assert mock_subprocess.call_count == 0
 
-    assert mock_webbroser.call_count == 0
+    assert mock_webbrowser.call_count == 0
 
     assert mock_emit.call_count == 5
     assert mock_emit.call_args_list == [
@@ -2157,7 +2157,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_interactive_batch_request_without_datasource_json_file_raises_helpful_error(
-    mock_webbroser,
+    mock_webbrowser,
     mock_subprocess,
     mock_emit,
     caplog,
@@ -2215,7 +2215,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
 
     assert mock_subprocess.call_count == 0
 
-    assert mock_webbroser.call_count == 0
+    assert mock_webbrowser.call_count == 0
 
     assert mock_emit.call_count == 3
     assert mock_emit.call_args_list == [
@@ -3004,7 +3004,7 @@ def test_suite_new_profile_on_existing_suite_raises_error(
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_profile_runs_notebook_no_jupyter(
-    mock_webbroser,
+    mock_webbrowser,
     mock_subprocess,
     mock_emit,
     caplog,
@@ -3175,7 +3175,7 @@ suite = profiler.build_suite()"""
 
     assert mock_subprocess.call_count == 0
 
-    assert mock_webbroser.call_count == 0
+    assert mock_webbrowser.call_count == 0
 
     assert mock_emit.call_count == 6
     assert mock_emit.call_args_list == [
@@ -3249,7 +3249,7 @@ suite = profiler.build_suite()"""
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_new_profile_runs_notebook_opens_jupyter(
-    mock_webbroser,
+    mock_webbrowser,
     mock_subprocess,
     mock_emit,
     caplog,
@@ -3420,7 +3420,7 @@ suite = profiler.build_suite()"""
     assert call_args[1] == "notebook"
     assert expected_notebook_path in call_args[2]
 
-    assert mock_webbroser.call_count == 0
+    assert mock_webbrowser.call_count == 0
 
     assert mock_emit.call_count == 6
     assert mock_emit.call_args_list == [
@@ -3794,7 +3794,9 @@ def test__process_suite_new_flags_and_prompt(
     if not error_expected:
         if prompt_input is not None:
             mock_prompt.side_effect = [prompt_input]
-        processed_flags: dict = _process_suite_new_flags_and_prompt(
+        processed_flags: Tuple[
+            CLISuiteInteractiveFlagCombinations, bool
+        ] = _process_suite_new_flags_and_prompt(
             context=context,
             usage_event_end=usage_event_end,
             interactive_flag=interactive_flag,
@@ -3802,10 +3804,10 @@ def test__process_suite_new_flags_and_prompt(
             profile=profile_flag,
             batch_request=batch_request_flag,
         )
-        assert processed_flags == {
-            "interactive_mode": return_interactive,
-            "profile": return_profile,
-        }
+        assert processed_flags == (
+            return_interactive,
+            return_profile,
+        )
         # Note - in this method on happy path no usage stats message is sent. Other messages are sent during the full
         #  CLI suite new flow of creating a notebook etc.
         assert mock_emit.call_count == 0
