@@ -172,6 +172,7 @@ class ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrEqualtoThreshold
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
+        "requirements": ["dataprofiler", "tensorflow", "scikit-learn", "numpy"],
         "maturity": "experimental",  # "concept_only", "experimental", "beta", or "production"
         "tags": ["dataprofiler"],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
