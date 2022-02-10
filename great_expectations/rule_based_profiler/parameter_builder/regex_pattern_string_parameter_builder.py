@@ -33,7 +33,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         threshold: float = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
-        additional_candidate_strings: Optional[Iterable[str]] = None,
         data_context: Optional["DataContext"] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):

@@ -1144,6 +1144,27 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
+    my_column_regex_rule_expectation_configurations_oneshot_sampling_method: List[
+        ExpectationConfiguration
+    ] = [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_regex",
+                "kwargs": {
+                    "column": "pickup_datetime",
+                },
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                        ],
+                    }
+                },
+            }
+        ),
+    ]
+
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(
@@ -1152,7 +1173,9 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     expectation_configurations.extend(
         my_column_ranges_rule_expectation_configurations_oneshot_sampling_method
     )
-
+    expectation_configurations.extend(
+        my_column_regex_rule_expectation_configurations_oneshot_sampling_method
+    )
     expectation_suite_name_oneshot_sampling_method: str = (
         "bobby_columnar_table_multi_batch_oneshot_sampling_method"
     )
