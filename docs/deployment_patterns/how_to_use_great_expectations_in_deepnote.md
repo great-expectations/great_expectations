@@ -87,7 +87,7 @@ Expectations can be defined directly on a Pandas DataFrame using `ge.from_pandas
 2. The `quantities` column cannot contain null values
 3. The `dates` column must have dates between January 1st and January 8th
 
-:::note
+:::tip
 Replace the sample Expectations below with those that relate to your data.
 
 You can see all the Expectations available in the [gallery here](https://greatexpectations.io/expectations).
@@ -108,7 +108,7 @@ Before we can validate our expectations against our data, we need to tell Great 
 Great Expectations keeps track of many configurations with a [Data Context](../reference/data_context.md). 
 These configurations are used to manage aspects of your project behind the scenes.
 
-:::note
+:::info
 There's a lot going on here, but for the sake of this guide we don't need to worry about the full details.
 
 To learn more, visit the [Great Expectations docs](https://docs.greatexpectations.io/docs/).
