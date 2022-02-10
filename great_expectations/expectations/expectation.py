@@ -1254,11 +1254,11 @@ class Expectation(metaclass=MetaExpectation):
     ):
         """This is a placeholder method to adapt the typed objects used to build ExpectationDiagnostics with the untyped dictionaries used in generate_expectation_tests"""
         retrofitted_examples = []
-        for test_data_cases in test_data_cases:
-            retro_test_data_case = test_data_cases.to_dict()
+        for test_data_case in test_data_cases:
+            retro_test_data_case = test_data_case.to_dict()
 
             retro_test_cases = []
-            for test_case in test_data_cases.tests:
+            for test_case in test_data_case.tests:
                 retro_test_case = test_case.to_dict()
                 retro_test_case["in"] = retro_test_case["input"]
                 retro_test_case["out"] = retro_test_case["output"]
