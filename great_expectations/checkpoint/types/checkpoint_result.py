@@ -7,7 +7,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.types.base import Attributes
+from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -53,7 +53,7 @@ class CheckpointResult(SerializableDictDot):
             ValidationResultIdentifier,
             Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
         ],
-        checkpoint_config: Attributes,
+        checkpoint_config: CheckpointConfig,
         success: Optional[bool] = None,
     ) -> None:
         self._run_id = run_id
@@ -87,7 +87,7 @@ class CheckpointResult(SerializableDictDot):
         return self.checkpoint_config.name
 
     @property
-    def checkpoint_config(self) -> Attributes:
+    def checkpoint_config(self) -> CheckpointConfig:
         return self._checkpoint_config
 
     @property

@@ -25,7 +25,6 @@ from great_expectations.marshmallow__shade import (
 )
 from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
-from great_expectations.types.base import SerializableDotDict
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -2119,14 +2118,6 @@ class CheckpointConfigSchema(Schema):
         return data
 
 
-class Attributes(SerializableDotDict):
-    def to_dict(self) -> dict:
-        return dict(self)
-
-    def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=self.to_dict())
-
-
 class CheckpointConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = CheckpointConfigSchema
@@ -2381,6 +2372,18 @@ class CheckpointConfig(BaseYamlConfig):
                 pass
 
         return result
+
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
 
     def __repr__(self) -> str:
         """

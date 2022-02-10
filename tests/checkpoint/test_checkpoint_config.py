@@ -68,6 +68,11 @@ def test_checkpoint_config_repr(checkpoint):
         == """{
   "name": "my_checkpoint",
   "config_version": 1.0,
+  "template_name": null,
+  "module_name": "great_expectations.checkpoint",
+  "class_name": "Checkpoint",
+  "run_name_template": null,
+  "expectation_suite_name": null,
   "batch_request": {},
   "action_list": [
     {
@@ -92,7 +97,6 @@ def test_checkpoint_config_repr(checkpoint):
   ],
   "evaluation_parameters": {},
   "runtime_configuration": {},
-  "profilers": [],
   "validations": [
     {
       "batch_request": {
@@ -102,7 +106,10 @@ def test_checkpoint_config_repr(checkpoint):
       },
       "expectation_suite_name": "test_suite"
     }
-  ]
+  ],
+  "profilers": [],
+  "ge_cloud_id": null,
+  "expectation_suite_ge_cloud_id": null
 }"""
     )
 
@@ -146,6 +153,8 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
         == """{
   "name": "my_checkpoint",
   "config_version": 1.0,
+  "module_name": "great_expectations.checkpoint",
+  "class_name": "Checkpoint",
   "batch_request": {
     "runtime_parameters": {
       "batch_data": [
@@ -186,7 +195,6 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
   ],
   "evaluation_parameters": {},
   "runtime_configuration": {},
-  "profilers": [],
   "validations": [
     {
       "batch_request": {
@@ -232,6 +240,7 @@ def test_checkpoint_config_repr_after_substitution(checkpoint):
         }
       ]
     }
-  ]
+  ],
+  "profilers": []
 }"""
     )
