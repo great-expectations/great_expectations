@@ -20,21 +20,24 @@ A Store is a connector to store and retrieve information about metadata in Great
 
 ### Features and promises
 
-Great Expectations supports a variety of Stores for different purposes, but the most common Stores are Expectation Stores, Validations Stores, Checkpoint Stores, and Evaluation Parameter Stores (or Metric Stores).  Each of these Stores is tailored to a specific type of information.
+Great Expectations supports a variety of Stores for different purposes, but the most common Stores are Expectation Stores, Validations Stores, Checkpoint Stores, and Evaluation Parameter Stores (or Metric Stores).  Data Docs Stores can also be configured for Data Doc Sites.  Each of these Stores is tailored to a specific type of information.
 
 - [**Expectation Store:**](./expectation_store.md) a connector to store and retrieve information about collections of verifiable assertions about data.  These are Stores for Expectation Suites.
 - [**Validation Result Store:**](./validation_result_store.md) a connector to store and retrieve information about objects generated when data is Validated against an Expectation Suite.
 - [**Checkpoint Store:**](./checkpoint_store.md) a connector to store and retrieve information about means for validating data in a production deployment of Great Expectations.
 - [**Evaluation Parameter Store:**](./evaluation_parameter_store.md) a connector to store and retrieve information about parameters used during Validation of an Expectation which reference simple expressions or previously generated Metrics.  These are also known as [**Metric Stores**](./evaluation_parameter_store.md).
+- [**Data Docs Store:**](./data_docs_store.md) a connector to store and retrieve information pertaining to Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.
 
 
 ### Relationship to other objects
 
 Each type of Store is designed to interact with a specific subset of information, and thus interacts with a specific subset of objects in Great Expectations.  However, all Stores can be listed and modified through your Data Context.  For further information on how a given type of Store relates to other objects, please see the corresponding Store type's technical term page:
+
 - Expectation Store technical term page: Relationship to other objects
 - Checkpoint Store technical term page: Relationship to other objects
 - Validation Result Store technical term page: Relationship to other objects
 - Evaluation Parameter Store (or Metric Store) technical term page: Relationship to other objects
+- Data Docs Store technical term page: Relationship to other objects
 
 ## Use cases
 
@@ -64,11 +67,13 @@ Stores provide an API for Great Expectations to perform the retrieval and storag
 
 ### How to access
 
-You can find a list of all of your Stores in your `great_expectations.yml` file.  Alternatively, from the root folder of your Data Context you can retrieve a list of Stores with a CLI command:
+You can find a list of almost all of your Stores in your `great_expectations.yml` file under the `stores` key.  Alternatively, from the root folder of your Data Context you can retrieve a list of Stores with a CLI command:
 
 ```markdown title="Console command"
 great_expectations store list
 ```
+
+Data Docs Stores are the one exception to the above.  They are instead configured under the `data_docs_sites` key in the `great_expectations.yml` file.  Each entry under `data_docs_sites` will have a `store_backend` key.  The information under `store_backend` will correspond to the Data Doc Store used by that site. Data Doc Stores are not listed by the `great_expectations store list` command.
 
 ### Configuration
 

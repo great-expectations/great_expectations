@@ -16,7 +16,7 @@ A Checkpoint Store is a connector to store and retrieve information about means 
 
 ### Features and promises
 
-The Checkpoint store manages storage and retrieval of Checkpoint configurations for the Data Context.  Checkpoint configurations can be added through the Data Context's `add_checkpoint()` method and retrieved with its `get_checkpoint` method. A configured Checkpoint Store is not required in order to work with Great Expectations, however a local configuration for a Checkpoint Store will be added automatically to `great_expectations.yml` when you store a Checkpoint configuration for the first time.
+The Checkpoint Store manages storage and retrieval of Checkpoint configurations for the Data Context.  Checkpoint configurations can be added through the Data Context's `add_checkpoint()` method and retrieved with its `get_checkpoint` method. A configured Checkpoint Store is not required in order to work with Great Expectations, however a local configuration for a Checkpoint Store will be added automatically to `great_expectations.yml` when you store a Checkpoint configuration for the first time.
 
 Generally speaking, while working with Great Expectations to Validate data you will not need to interact with a Checkpoint Store directly outside configuring the Store.  Instead, your Data Context will use the Checkpoint Store to store and retrieve Checkpoints behind the scenes, and the objects you will directly work with will be those Checkpoints.
 

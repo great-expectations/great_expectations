@@ -388,6 +388,7 @@ module.exports = {
               items: [
                 'terms/store',
                 'terms/checkpoint_store',
+                'terms/data_docs_store',
                 'terms/expectation_store',
                 'terms/validation_result_store',
                 'terms/evaluation_parameter_store',
