@@ -5,9 +5,9 @@ from typing import Any, Callable, Dict, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
-from great_expectations.core.util import convert_to_json_serializable, safe_deep_copy
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
-from great_expectations.types import SerializableDictDot
+from great_expectations.types import SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -158,8 +158,6 @@ class BatchRequestBase(SerializableDictDot):
     validation (described above plus additional attribute validation) so as to formally validate user specified fields.
     """
 
-    field_names: Set[str] = set()
-
     def __init__(
         self,
         datasource_name: str,
@@ -180,22 +178,6 @@ class BatchRequestBase(SerializableDictDot):
         self._runtime_parameters = runtime_parameters
         self._batch_identifiers = batch_identifiers
         self._batch_spec_passthrough = batch_spec_passthrough
-
-    @property
-    def runtime_parameters(self) -> dict:
-        return self._runtime_parameters
-
-    @runtime_parameters.setter
-    def runtime_parameters(self, value: dict):
-        self._runtime_parameters = value
-
-    @property
-    def batch_identifiers(self) -> dict:
-        return self._batch_identifiers
-
-    @batch_identifiers.setter
-    def batch_identifiers(self, value: dict):
-        self._batch_identifiers = value
 
     @property
     def datasource_name(self) -> str:
@@ -238,6 +220,22 @@ class BatchRequestBase(SerializableDictDot):
         self._limit = value
 
     @property
+    def runtime_parameters(self) -> dict:
+        return self._runtime_parameters
+
+    @runtime_parameters.setter
+    def runtime_parameters(self, value: dict):
+        self._runtime_parameters = value
+
+    @property
+    def batch_identifiers(self) -> dict:
+        return self._batch_identifiers
+
+    @batch_identifiers.setter
+    def batch_identifiers(self, value: dict):
+        self._batch_identifiers = value
+
+    @property
     def batch_spec_passthrough(self) -> dict:
         return self._batch_spec_passthrough
 
@@ -250,42 +248,29 @@ class BatchRequestBase(SerializableDictDot):
         return IDDict(self.to_json_dict()).to_id()
 
     def to_dict(self) -> dict:
-        dict_obj: dict = {}
-
-        field_name: str
-        field_value: Any
-        for field_name in self.field_names:
-            if hasattr(self, f"_{field_name}"):
-                field_value = getattr(self, field_name)
-                dict_obj[field_name] = field_value
-
-        dict_obj = standardize_batch_request_display_ordering(batch_request=dict_obj)
-
-        return dict_obj
+        return standardize_batch_request_display_ordering(
+            batch_request=super().to_dict()
+        )
 
     def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
         dict_obj: dict = self.to_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
-
-    def __repr__(self) -> str:
-        json_dict: dict = self.to_json_dict()
-        deep_filter_properties_iterable(
-            properties=json_dict,
-            keep_falsy_numerics=True,
-            inplace=True,
-        )
-        return json.dumps(json_dict, indent=2)
-
-    def __str__(self) -> str:
-        return self.__repr__()
 
     def __deepcopy__(self, memo):
         cls = self.__class__
         result = cls.__new__(cls)
 
         memo[id(self)] = result
-        for key, value in self.to_dict().items():
+
+        for key, value in self.to_raw_dict().items():
             value_copy = safe_deep_copy(data=value, memo=memo)
             setattr(result, key, value_copy)
 
@@ -295,7 +280,33 @@ class BatchRequestBase(SerializableDictDot):
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
+
         return self.id == other.id
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
+        )
+        return json.dumps(json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
 
     @staticmethod
     def _validate_init_parameters(
@@ -345,7 +356,7 @@ class BatchRequest(BatchRequestBase):
     limit: refers to the number of batches requested (not rows per batch)
     """
 
-    field_names: Set[str] = {
+    include_field_names: Set[str] = {
         "datasource_name",
         "data_connector_name",
         "data_asset_name",
@@ -381,7 +392,7 @@ class BatchRequest(BatchRequestBase):
 
 
 class RuntimeBatchRequest(BatchRequestBase):
-    field_names: Set[str] = {
+    include_field_names: Set[str] = {
         "datasource_name",
         "data_connector_name",
         "data_asset_name",
@@ -567,7 +578,6 @@ class Batch(SerializableDictDot):
         json_dict: dict = self.to_dict()
         deep_filter_properties_iterable(
             properties=json_dict["batch_request"],
-            keep_falsy_numerics=True,
             inplace=True,
         )
         return json_dict
@@ -593,6 +603,16 @@ class Batch(SerializableDictDot):
             {"n_rows": n_rows, "fetch_all": fetch_all},
         )
         return self._data.execution_engine.resolve_metrics((metric,))[metric.id]
+
+
+def batch_request_contains_batch_data(
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+) -> bool:
+    return (
+        batch_request is not None
+        and batch_request.get("runtime_parameters") is not None
+        and batch_request["runtime_parameters"].get("batch_data") is not None
+    )
 
 
 def get_batch_request_as_dict(
@@ -790,7 +810,6 @@ def get_batch_request_from_acceptable_arguments(
 
     deep_filter_properties_iterable(
         properties=batch_request_as_dict,
-        keep_falsy_numerics=True,
         inplace=True,
     )
 

@@ -1,12 +1,11 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Set
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.rule_based_profiler.domain_builder import Domain
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -17,6 +16,10 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     Class which creates ExpectationConfiguration out of a given Expectation type and
     parameter_name-to-parameter_fully_qualified_parameter_name map (name-value pairs supplied in the kwargs dictionary).
     """
+
+    include_field_names: Set[str] = {
+        "expectation_type",
+    }
 
     def __init__(
         self,

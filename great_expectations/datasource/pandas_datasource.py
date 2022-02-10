@@ -282,6 +282,8 @@ class PandasDatasource(LegacyDatasource):
                 "reader_method": "read_csv",
                 "reader_options": {"compression": "gzip"},
             }
+        elif path.endswith(".sas7bdat") or path.endswith(".xpt"):
+            return {"reader_method": "read_sas"}
 
         raise BatchKwargsError(
             "Unable to determine reader method from path: %s" % path, {"path": path}

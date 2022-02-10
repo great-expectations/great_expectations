@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import shutil
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
@@ -32,6 +33,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -58,6 +60,8 @@ from great_expectations.self_check.util import (
 from great_expectations.util import is_library_loadable
 from tests.test_utils import create_files_in_directory
 
+RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 7)
+
 yaml = YAML()
 ###
 #
@@ -68,6 +72,21 @@ yaml = YAML()
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 logger = logging.getLogger(__name__)
+
+
+def skip_if_python_below_minimum_version():
+    """
+    All test fixtures for Rule-Based Profiler must execute this method; for example:
+        ```
+        skip_if_python_below_minimum_version()
+        ```
+    for as long as the support for Python versions less than 3.7 is provided.  In particular, Python-3.6 support for
+    "dataclasses.asdict()" does not handle None values as well as the more recent versions of Python do.
+    """
+    if sys.version_info < RULE_BASED_PROFILER_MIN_PYTHON_VERSION:
+        pytest.skip(
+            "skipping fixture because Python version 3.7 (or greater) is required"
+        )
 
 
 def pytest_configure(config):
@@ -118,9 +137,14 @@ def pytest_addoption(parser):
         help="If set, execute tests against bigquery",
     )
     parser.addoption(
+        "--aws",
+        action="store_true",
+        help="If set, execute tests against AWS resources like S3, RedShift and Athena",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
-        help="If set, run aws integration tests",
+        help="If set, run aws integration tests for usage_statistics",
     )
     parser.addoption(
         "--docs-tests",
@@ -155,6 +179,7 @@ def build_test_backends_list_cfe(metafunc):
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
+    include_aws: bool = metafunc.config.getoption("--aws")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -3785,7 +3810,26 @@ def data_context_custom_notebooks(tmp_path_factory):
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
     """
-    project_path = str(tmp_path_factory.mktemp("data_context"))
+    ge_yml_fixture = "great_expectations_custom_notebooks.yml"
+    context_path = _create_custom_notebooks_context(tmp_path_factory, ge_yml_fixture)
+
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_custom_notebooks_defaults(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    ge_yml_fixture = "great_expectations_custom_notebooks_defaults.yml"
+    context_path = _create_custom_notebooks_context(tmp_path_factory, ge_yml_fixture)
+
+    return ge.data_context.DataContext(context_path)
+
+
+def _create_custom_notebooks_context(path, ge_yml_name):
+    project_path = str(path.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
@@ -3794,7 +3838,7 @@ def data_context_custom_notebooks(tmp_path_factory):
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_custom_notebooks.yml"),
+        os.path.join(fixture_dir, ge_yml_name),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     shutil.copy(
@@ -3804,10 +3848,8 @@ def data_context_custom_notebooks(tmp_path_factory):
         ),
         os.path.join(asset_config_path, "my_dag_node", "default.json"),
     )
-
     os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
-
-    return ge.data_context.DataContext(context_path)
+    return context_path
 
 
 @pytest.fixture
@@ -4862,7 +4904,7 @@ def ge_cloud_base_url():
 
 
 @pytest.fixture
-def ge_cloud_account_id():
+def ge_cloud_organization_id():
     return "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
 
 
@@ -4872,17 +4914,17 @@ def ge_cloud_access_token():
 
 
 @pytest.fixture
-def ge_cloud_config(ge_cloud_base_url, ge_cloud_account_id, ge_cloud_access_token):
+def ge_cloud_config(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token):
     return GeCloudConfig(
         base_url=ge_cloud_base_url,
-        account_id=ge_cloud_account_id,
+        organization_id=ge_cloud_organization_id,
         access_token=ge_cloud_access_token,
     )
 
 
 @pytest.fixture(scope="function")
 def empty_ge_cloud_data_context_config(
-    ge_cloud_base_url, ge_cloud_account_id, ge_cloud_access_token
+    ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token
 ):
     config_yaml_str = f"""
 stores:
@@ -4897,7 +4939,7 @@ stores:
       ge_cloud_resource_type: expectation_suite
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
-        account_id: {ge_cloud_account_id}
+        organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
   default_validations_store:
@@ -4908,7 +4950,7 @@ stores:
       ge_cloud_resource_type: suite_validation_result
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
-        account_id: {ge_cloud_account_id}
+        organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
   default_checkpoint_store:
@@ -4919,7 +4961,7 @@ stores:
       ge_cloud_resource_type: contract
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
-        account_id: {ge_cloud_account_id}
+        organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
 evaluation_parameter_store_name: default_evaluation_parameter_store
@@ -4998,21 +5040,34 @@ def cloud_data_context_with_datasource_sqlalchemy_engine(
 
 @pytest.fixture(scope="function")
 def profiler_name() -> str:
+    skip_if_python_below_minimum_version()
+
     return "my_first_profiler"
 
 
 @pytest.fixture(scope="function")
 def profiler_store_name() -> str:
+    skip_if_python_below_minimum_version()
+
     return "profiler_store"
 
 
 @pytest.fixture(scope="function")
-def profiler_config(profiler_name: str) -> RuleBasedProfilerConfig:
+def profiler_config_with_placeholder_args(
+    profiler_name: str,
+) -> RuleBasedProfilerConfig:
+    """
+    This fixture does not correspond to a practical profiler with rules, whose constituent components perform meaningful
+    computations; rather, it uses "placeholder" style attribute values, which is adequate for configuration level tests.
+    """
+    skip_if_python_below_minimum_version()
+
     return RuleBasedProfilerConfig(
         name=profiler_name,
-        class_name="RuleBasedProfiler",
-        module_name="great_expectations.rule_based_profiler",
         config_version=1.0,
+        variables={
+            "false_positive_threshold": 1.0e-2,
+        },
         rules={
             "rule_1": {
                 "domain_builder": {
@@ -5031,27 +5086,47 @@ def profiler_config(profiler_name: str) -> RuleBasedProfilerConfig:
                         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     },
                 ],
-            }
+            },
         },
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def empty_profiler_store(profiler_store_name: str) -> ProfilerStore:
+    skip_if_python_below_minimum_version()
+
     return ProfilerStore(profiler_store_name)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
+    skip_if_python_below_minimum_version()
+
     return ConfigurationIdentifier(configuration_key=profiler_name)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
+def ge_cloud_profiler_id() -> str:
+    skip_if_python_below_minimum_version()
+
+    return "my_ge_cloud_profiler_id"
+
+
+@pytest.fixture
+def ge_cloud_profiler_key(ge_cloud_profiler_id: str) -> GeCloudIdentifier:
+    skip_if_python_below_minimum_version()
+
+    return GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_profiler_id)
+
+
+@pytest.fixture
 def populated_profiler_store(
     empty_profiler_store: ProfilerStore,
-    profiler_config: RuleBasedProfilerConfig,
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
     profiler_key: ConfigurationIdentifier,
 ) -> ProfilerStore:
+    skip_if_python_below_minimum_version()
+
     profiler_store = empty_profiler_store
-    profiler_store.set(key=profiler_key, value=profiler_config)
+    profiler_store.set(key=profiler_key, value=profiler_config_with_placeholder_args)
     return profiler_store

@@ -2,8 +2,8 @@ from typing import Iterable, List, Optional, Union
 
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import Domain, DomainBuilder
-from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
+from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -33,6 +33,10 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
             column_name_suffixes = []
 
         self._column_name_suffixes = column_name_suffixes
+
+    @property
+    def column_name_suffixes(self) -> Optional[List[str]]:
+        return self._column_name_suffixes
 
     def _get_domains(
         self,
@@ -87,7 +91,3 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         ]
 
         return domains
-
-    @property
-    def column_name_suffixes(self) -> Optional[List[str]]:
-        return self._column_name_suffixes

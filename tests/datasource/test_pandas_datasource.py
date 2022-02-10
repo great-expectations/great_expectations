@@ -432,7 +432,8 @@ def test_pandas_datasource_processes_dataset_options(
 
 
 @pytest.mark.parametrize(
-    "reader_fn", [pd.read_csv, pd.read_excel, pd.read_parquet, pd.read_pickle]
+    "reader_fn",
+    [pd.read_csv, pd.read_excel, pd.read_parquet, pd.read_pickle, pd.read_sas],
 )
 def test_infer_default_options_partial_functions(reader_fn):
     datasource = PandasDatasource()

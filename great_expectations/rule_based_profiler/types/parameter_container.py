@@ -15,10 +15,10 @@ from pyparsing import (
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.domain_builder import Domain
+from great_expectations.rule_based_profiler.types import Domain
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import deep_filter_properties_iterable
 
 FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
 
@@ -169,6 +169,7 @@ class ParameterContainer(SerializableDictDot):
     ):
         if self.parameter_nodes is None:
             self.parameter_nodes = {}
+
         self.parameter_nodes[parameter_name_root] = parameter_node
 
     def get_parameter_node(self, parameter_name_root: str) -> Optional[ParameterNode]:
@@ -189,8 +190,9 @@ class ParameterContainer(SerializableDictDot):
 
         if isinstance(source, dict):
             if not isinstance(source, ParameterNode):
-                filter_properties_dict(properties=source, inplace=True)
+                deep_filter_properties_iterable(properties=source, inplace=True)
                 source = ParameterNode(source)
+
             key: str
             value: Any
             for key, value in source.items():
@@ -289,6 +291,7 @@ def build_parameter_container(
             parameter_container.set_parameter_node(
                 parameter_name_root=parameter_name_root, parameter_node=parameter_node
             )
+
         _build_parameter_node_tree_for_one_parameter(
             parameter_node=parameter_node,
             parameter_name_as_list=fully_qualified_parameter_name_as_list,
@@ -315,6 +318,7 @@ def _build_parameter_node_tree_for_one_parameter(
     if len(parameter_name_as_list) > 1:
         if parameter_name_part not in parameter_node:
             parameter_node[parameter_name_part] = ParameterNode({})
+
         _build_parameter_node_tree_for_one_parameter(
             parameter_node=parameter_node[parameter_name_part],
             parameter_name_as_list=parameter_name_as_list[1:],

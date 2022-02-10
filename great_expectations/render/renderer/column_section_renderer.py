@@ -3,18 +3,12 @@ import logging
 import re
 import traceback
 
-import altair as alt
-import pandas as pd
-
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (
-    ExpectColumnKlDivergenceToBeLessThan,
-)
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render.renderer.content_block import (
     ExceptionListContentBlockRenderer,
@@ -22,13 +16,11 @@ from great_expectations.render.renderer.content_block import (
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
     RenderedBulletListContent,
-    RenderedGraphContent,
     RenderedHeaderContent,
     RenderedSectionContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
     TextContent,
-    ValueListContent,
 )
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
@@ -115,7 +107,7 @@ class ProfilingResultsColumnSectionRenderer(ColumnSectionRenderer):
                         getattr(self, content_block_function_name)(evrs)
                     )
             except Exception as e:
-                exception_message = f"""\
+                exception_message = """\
 An unexpected Exception occurred during data docs rendering.  Because of this error, certain parts of data docs will \
 not be rendered properly and/or may not appear altogether.  Please use the trace, included in this message, to \
 diagnose and repair the underlying issue.  Detailed information follows:

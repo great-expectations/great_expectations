@@ -20,6 +20,10 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
+
 try:
     from typing import Literal
 except ImportError:
@@ -599,9 +603,9 @@ class BaseDataContext:
             UUID to use as the data_context_id
         """
 
-        # if in ge_cloud_mode, use ge_cloud_account_id
+        # if in ge_cloud_mode, use ge_cloud_organization_id
         if self.ge_cloud_mode:
-            return self.ge_cloud_config.account_id
+            return self.ge_cloud_config.organization_id
         # Choose the id of the currently-configured expectations store, if it is a persistent store
         expectations_store = self._stores[
             self.project_config_with_variables_substituted.expectations_store_name
@@ -1724,7 +1728,7 @@ class BaseDataContext:
         else:
             raise ge_exceptions.DatasourceError(
                 datasource_name,
-                f"The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
+                "The given datasource could not be retrieved from the DataContext; please confirm that your configuration is accurate.",
             )
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
@@ -2117,14 +2121,14 @@ class BaseDataContext:
             active_store_names.append(self.checkpoint_store_name)
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
             logger.info(
-                f"Checkpoint store is not configured; omitting it from active stores"
+                "Checkpoint store is not configured; omitting it from active stores"
             )
 
         try:
             active_store_names.append(self.profiler_store_name)
         except (AttributeError, ge_exceptions.InvalidTopLevelConfigKeyError):
             logger.info(
-                f"Profiler store is not configured; omitting it from active stores"
+                "Profiler store is not configured; omitting it from active stores"
             )
 
         return [
@@ -3264,6 +3268,35 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             **kwargs,
         )
 
+    def add_profiler(
+        self,
+        name: str,
+        config_version: float,
+        rules: Dict[str, dict],
+        variables: Optional[dict] = None,
+        ge_cloud_id: Optional[str] = None,
+    ):
+        config_data = {
+            "name": name,
+            "config_version": config_version,
+            "rules": rules,
+            "variables": variables,
+        }
+
+        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+        validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
+        profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
+
+        config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
+
+        # Chetan - 20220127 - Open to refactor all Profiler CRUD from toolkit to class methods
+        return profiler_toolkit.add_profiler(
+            config=config,
+            data_context=self,
+            profiler_store=self.profiler_store,
+            ge_cloud_id=ge_cloud_id,
+        )
+
     def get_profiler(
         self,
         name: Optional[str] = None,
@@ -3290,11 +3323,34 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def list_profilers(self) -> List[str]:
         if self.profiler_store is None:
             raise ge_exceptions.StoreConfigurationError(
-                f"Attempted to list profilers from a Profiler Store, which is not a configured store."
+                "Attempted to list profilers from a Profiler Store, which is not a configured store."
             )
         return profiler_toolkit.list_profilers(
             profiler_store=self.profiler_store,
             ge_cloud_mode=self.ge_cloud_mode,
+        )
+
+    @usage_statistics_enabled_method(
+        event_name="data_context.run_profiler_with_dynamic_arguments",
+    )
+    def run_profiler_with_dynamic_arguments(
+        self,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        variables: Optional[dict] = None,
+        rules: Optional[dict] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> ExpectationSuite:
+        return profiler_toolkit.run_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+            variables=variables,
+            rules=rules,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
         )
 
     def test_yaml_config(
@@ -3571,7 +3627,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
                 )
             )
         else:
-            # Roundtrip through schema validator to add missing fields
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             datasource_config = datasourceConfigSchema.load(instantiated_class.config)
             full_datasource_config = datasourceConfigSchema.dump(datasource_config)
             usage_stats_event_payload = datasource_anonymizer.anonymize_datasource_info(
@@ -3676,7 +3732,10 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         instantiated_class = instantiate_class_from_config(
             config=profiler_config,
             runtime_environment={"data_context": self},
-            config_defaults={"module_name": "great_expectations.rule_based_profiler"},
+            config_defaults={
+                "module_name": "great_expectations.rule_based_profiler",
+                "class_name": "RuleBasedProfiler",
+            },
         )
 
         profiler_anonymizer: ProfilerAnonymizer = ProfilerAnonymizer(
@@ -3740,7 +3799,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         ):
             datasource_name: str = name or config.get("name") or "my_temp_datasource"
             if datasource_anonymizer.is_parent_class_recognized_v3_api(config=config):
-                # Roundtrip through schema validator to add missing fields
+                # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
                 datasource_config = datasourceConfigSchema.load(
                     instantiated_class.config
                 )
@@ -3769,7 +3828,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             checkpoint_anonymizer.is_parent_class_recognized(config=config) is not None
         ):
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
-            # Roundtrip through schema validator to add missing fields
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             checkpoint_config: Union[CheckpointConfig, dict]
             checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config
@@ -3983,12 +4042,14 @@ class DataContext(BaseDataContext):
         )
         shutil.copyfile(styles_template, styles_destination_path)
 
+    # TODO: deprecate ge_cloud_account_id
     @classmethod
     def _get_ge_cloud_config_dict(
         cls,
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
     ):
         ge_cloud_base_url = (
             ge_cloud_base_url
@@ -3999,11 +4060,34 @@ class DataContext(BaseDataContext):
             )
             or "https://app.greatexpectations.io/"
         )
-        ge_cloud_account_id = ge_cloud_account_id or super()._get_global_config_value(
-            environment_variable="GE_CLOUD_ACCOUNT_ID",
-            conf_file_section="ge_cloud_config",
-            conf_file_option="account_id",
-        )
+
+        # TODO: remove if/else block when ge_cloud_account_id is deprecated.
+        if ge_cloud_account_id is not None:
+            logger.warning(
+                'The "ge_cloud_account_id" argument has been renamed "ge_cloud_organization_id" and will be '
+                "deprecated in the next major release."
+            )
+        else:
+            ge_cloud_account_id = super()._get_global_config_value(
+                environment_variable="GE_CLOUD_ACCOUNT_ID",
+                conf_file_section="ge_cloud_config",
+                conf_file_option="account_id",
+            )
+            logger.warning(
+                'If you have an environment variable named "GE_CLOUD_ACCOUNT_ID", please rename it to '
+                '"GE_CLOUD_ORGANIZATION_ID". If you have a global config file with an "account_id" '
+                'option, please rename it to "organization_id". "GE_CLOUD_ACCOUNT_ID" and "account_id" '
+                "will be deprecated in the next major release."
+            )
+
+        if ge_cloud_organization_id is None:
+            ge_cloud_organization_id = super()._get_global_config_value(
+                environment_variable="GE_CLOUD_ORGANIZATION_ID",
+                conf_file_section="ge_cloud_config",
+                conf_file_option="organization_id",
+            )
+
+        ge_cloud_organization_id = ge_cloud_organization_id or ge_cloud_account_id
         ge_cloud_access_token = (
             ge_cloud_access_token
             or super()._get_global_config_value(
@@ -4014,15 +4098,17 @@ class DataContext(BaseDataContext):
         )
         return {
             "base_url": ge_cloud_base_url,
-            "account_id": ge_cloud_account_id,
+            "organization_id": ge_cloud_organization_id,
             "access_token": ge_cloud_access_token,
         }
 
+    # TODO: deprecate ge_cloud_ascount_id
     def get_ge_cloud_config(
         self,
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
     ):
         """
         Build a GeCloudConfig object. Config attributes are collected from any combination of args passed in at
@@ -4032,6 +4118,7 @@ class DataContext(BaseDataContext):
             ge_cloud_base_url=ge_cloud_base_url,
             ge_cloud_account_id=ge_cloud_account_id,
             ge_cloud_access_token=ge_cloud_access_token,
+            ge_cloud_organization_id=ge_cloud_organization_id,
         )
 
         missing_keys = []
@@ -4050,6 +4137,7 @@ class DataContext(BaseDataContext):
 
         return GeCloudConfig(**ge_cloud_config_dict)
 
+    # TODO: deprecate ge_cloud_account_id
     def __init__(
         self,
         context_root_dir: Optional[str] = None,
@@ -4058,6 +4146,7 @@ class DataContext(BaseDataContext):
         ge_cloud_base_url: Optional[str] = None,
         ge_cloud_account_id: Optional[str] = None,
         ge_cloud_access_token: Optional[str] = None,
+        ge_cloud_organization_id: Optional[str] = None,
     ):
         self._ge_cloud_mode = ge_cloud_mode
         self._ge_cloud_config = None
@@ -4068,6 +4157,7 @@ class DataContext(BaseDataContext):
                 ge_cloud_base_url=ge_cloud_base_url,
                 ge_cloud_account_id=ge_cloud_account_id,
                 ge_cloud_access_token=ge_cloud_access_token,
+                ge_cloud_organization_id=ge_cloud_organization_id,
             )
             self._ge_cloud_config = ge_cloud_config
             # in ge_cloud_mode, if not provided, set context_root_dir to cwd
@@ -4118,7 +4208,7 @@ class DataContext(BaseDataContext):
         """
         ge_cloud_url = (
             self.ge_cloud_config.base_url
-            + f"/accounts/{self.ge_cloud_config.account_id}/data-context-configuration"
+            + f"/organizations/{self.ge_cloud_config.organization_id}/data-context-configuration"
         )
         auth_headers = {
             "Content-Type": "application/vnd.api+json",
@@ -4128,7 +4218,7 @@ class DataContext(BaseDataContext):
         response = requests.get(ge_cloud_url, headers=auth_headers)
         if response.status_code != 200:
             raise ge_exceptions.GeCloudError(
-                f"Bad request made to GE Cloud; {response.json().get('message')}"
+                f"Bad request made to GE Cloud; {response.text}"
             )
         config = response.json()
         return DataContextConfig(**config)

@@ -3,7 +3,7 @@ import datetime
 import json
 import logging
 import os
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from uuid import UUID
 
 from ruamel.yaml.comments import CommentedMap
@@ -120,7 +120,24 @@ class Checkpoint:
             "batches": batches,
         } or {}
 
-        self._config_kwargs = Attributes(config_kwargs)
+        self._config_kwargs = config_kwargs
+
+    def _convert_dictionaries_to_attributes(
+        self, source: Optional[Any] = None
+    ) -> Optional[Union[Any, "Attributes"]]:
+        if source is None:
+            return None
+
+        if isinstance(source, dict):
+            if not isinstance(source, Attributes):
+                source = Attributes(source)
+
+            key: str
+            value: Any
+            for key, value in source.items():
+                source[key] = self._convert_dictionaries_to_attributes(source=value)
+
+        return source
 
     # TODO: Add eval param processing using new TBD parser syntax and updated EvaluationParameterParser and
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
@@ -225,7 +242,7 @@ class Checkpoint:
                     run_id=run_id,
                 )
 
-            run_results = {}
+            run_results: dict = {}
             for async_validation_operator_result in async_validation_operator_results:
                 run_results.update(
                     async_validation_operator_result.result().run_results
@@ -457,14 +474,14 @@ class Checkpoint:
         if pretty_print:
             if not validations_present:
                 print(
-                    f"""Your current Checkpoint configuration has an empty or missing "validations" attribute.  This
+                    """Your current Checkpoint configuration has an empty or missing "validations" attribute.  This
 means you must either update your Checkpoint configuration or provide an appropriate validations
 list programmatically (i.e., when your Checkpoint is run).
                     """
                 )
             if not action_list_present:
                 print(
-                    f"""Your current Checkpoint configuration has an empty or missing "action_list" attribute.  This
+                    """Your current Checkpoint configuration has an empty or missing "action_list" attribute.  This
 means you must provide an appropriate validations list programmatically (i.e., when your Checkpoint
 is run), with each validation having its own defined "action_list" attribute.
                     """
@@ -491,18 +508,16 @@ is run), with each validation having its own defined "action_list" attribute.
             filter_properties_dict(
                 properties=config_kwargs,
                 clean_falsy=True,
-                keep_falsy_numerics=True,
                 inplace=True,
             )
 
         if format == "dict":
-            return config_kwargs
+            return dict(**config_kwargs)
 
         if format in ["str", "dir", "repr"]:
             json_dict: dict = convert_to_json_serializable(data=config_kwargs)
             deep_filter_properties_iterable(
                 properties=json_dict,
-                keep_falsy_numerics=True,
                 inplace=True,
             )
             return json.dumps(json_dict, indent=2)
@@ -514,7 +529,10 @@ is run), with each validation having its own defined "action_list" attribute.
 
     @property
     def config_kwargs(self) -> Attributes:
-        return self._config_kwargs
+        config_kwargs: Attributes = self._convert_dictionaries_to_attributes(
+            source=self._config_kwargs
+        )
+        return config_kwargs
 
     @property
     def name(self) -> str:
@@ -544,7 +562,6 @@ is run), with each validation having its own defined "action_list" attribute.
         json_dict: dict = convert_to_json_serializable(data=self.get_config())
         deep_filter_properties_iterable(
             properties=json_dict,
-            keep_falsy_numerics=True,
             inplace=True,
         )
         return json.dumps(json_dict, indent=2)
