@@ -101,8 +101,8 @@ def test_simple_date_format_parameter_builder_alice(
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_date_format"
     expected_value: dict = {
-        "details": {"success_ratio": 1.0},
         "value": "%Y-%m-%d %H:%M:%S",
+        "details": {"success_ratio": 1.0},
     }
 
     assert (
@@ -166,8 +166,8 @@ def test_simple_date_format_parameter_builder_bobby(
         "$parameter.my_simple_date_format_string_parameter_builder"
     )
     expected_value: dict = {
-        "details": {"success_ratio": 1.0},
         "value": "%Y-%m-%d %H:%M:%S",
+        "details": {"success_ratio": 1.0},
     }
 
     assert (
