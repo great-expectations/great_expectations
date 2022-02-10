@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 import nbformat
 
@@ -18,6 +18,7 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
         self,
         context: DataContext,
         expectation_suite_name: str,
+        profiler_name: Optional[str],
         batch_request: Union[str, Dict[str, Union[str, int, Dict[str, Any]]]],
     ):
         super().__init__(context=context)
@@ -33,14 +34,16 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
             batch_request=batch_request
         )
 
-        self.batch_request = batch_request
+        self._batch_request = batch_request
 
-        self.validator = context.get_validator(
+        self._validator = context.get_validator(
             batch_request=BatchRequest(**batch_request),
             expectation_suite_name=expectation_suite_name,
         )
 
-        self.expectation_suite_name = self.validator.expectation_suite_name
+        self._profiler_name = profiler_name
+
+        self._expectation_suite_name = self._validator.expectation_suite_name
 
     # noinspection PyMethodOverriding
     def add_header(self) -> None:
@@ -48,7 +51,7 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
             markdown=f"""# Initialize a new Expectation Suite by profiling a batch of your data.
 This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns and other factors that you care about and letting a profiler write some candidate expectations for you to adjust.
 
-**Expectation Suite Name**: `{self.expectation_suite_name}`
+**Expectation Suite Name**: `{self._expectation_suite_name}`
 """
         )
         self.add_code_cell(
@@ -66,9 +69,9 @@ from great_expectations.exceptions import DataContextError
 
 context = ge.data_context.DataContext()
 
-batch_request = {self.batch_request}
+batch_request = {self._batch_request}
 
-expectation_suite_name = "{self.expectation_suite_name}"
+expectation_suite_name = "{self._expectation_suite_name}"
 
 validator = context.get_validator(
     batch_request=BatchRequest(**batch_request),
@@ -85,7 +88,7 @@ validator.head(n_rows=5, fetch_all=False)
         column_names: List[str]
         column_name: str
         column_names = [
-            f'    "{column_name}",\n' for column_name in self.validator.columns()
+            f'    "{column_name}",\n' for column_name in self._validator.columns()
         ]
         code: str = f'ignored_columns = [\n{"".join(column_names)}]'
         self.add_code_cell(code=code, lint=True)
@@ -128,7 +131,7 @@ context.open_data_docs(resource_identifier=validation_result_identifier)
             markdown=f"""## Next steps
 After you review this initial Expectation Suite in Data Docs you
 should edit this suite to make finer grained adjustments to the expectations.
-This can be done by running `great_expectations suite edit {self.expectation_suite_name}`."""
+This can be done by running `great_expectations suite edit {self._expectation_suite_name}`."""
         )
 
     # noinspection PyMethodOverriding
