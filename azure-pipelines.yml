@@ -17,14 +17,6 @@ schedules:
     - main
   always: false # Will only trigger if the state of the codebase has changed sinced the last scheduled run
 
-trigger:
-  branches:
-    include:
-    - pre_pr-* # Can be used to test both `great_expectations` and `dependency_graph` pipelines
-    - main
-    exclude:
-    - develop
-
 resources:
   containers:
   - container: postgres
