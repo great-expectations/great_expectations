@@ -64,7 +64,11 @@ Your file structure should look something like this:
 .
 ├── LICENSE
 ├── README.md
-├── <MY_PACKAGE>
+├── assets
+├── package_info.yml
+├── requirements.txt
+├── setup.py
+├── tests
 │   ├── __init__.py
 │   ├── expectations
 │   │   └── __init__.py
@@ -72,9 +76,7 @@ Your file structure should look something like this:
 │   │   └── __init__.py
 │   └── profilers
 │       └── __init__.py
-├── requirements.txt
-├── setup.py
-└── tests
+└── <YOUR_PACKAGE_SOURCE_CODE>
     ├── __init__.py
     ├── expectations
     │   └── __init__.py
@@ -94,6 +96,9 @@ Now that your package has been initialized, it's time to get coding!
 You'll want to capture any dependencies in your `requirements.txt`, validate your code
 in `tests`, detail your package's capabilities in `README.md`, and update any relevant 
 publishing details in `setup.py`. 
+
+If you'd like to update your package's metadata or assign code owners/domain experts,
+please follow the instructions in `package_info.yml`.
 
 As you iterate on your work, you can check your progress using:
 
