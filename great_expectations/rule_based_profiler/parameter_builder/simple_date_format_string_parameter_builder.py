@@ -4,6 +4,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    MetricComputationResult,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
