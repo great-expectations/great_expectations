@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, Union
+from typing import List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -21,6 +21,10 @@ class DomainBuilder(Builder, ABC):
     """
     A DomainBuilder provides methods to get domains based on one or more batches of data.
     """
+
+    exclude_field_names: Set[str] = {
+        "data_context",
+    }
 
     def __init__(
         self,

@@ -462,12 +462,11 @@ class Validator:
         else:
             catch_exceptions = False
 
-        graph: ValidationGraph
-        expectation_validation_graphs: List[ExpectationValidationGraph] = []
-        exception_info: ExceptionInfo
-        processed_configurations: List[ExpectationConfiguration] = []
-        # noinspection SpellCheckingInspection
+        evrs: List[ExpectationValidationResult]
 
+        expectation_validation_graphs: List[ExpectationValidationGraph] = []
+
+        processed_configurations: List[ExpectationConfiguration] = []
         (
             evrs,
             processed_configurations,
@@ -479,12 +478,14 @@ class Validator:
             runtime_configuration=runtime_configuration,
         )
 
-        graph = self._generate_suite_level_graph_from_expectation_level_sub_graphs(
-            expectation_validation_graphs=expectation_validation_graphs
-        )
-
         if metrics is None:
             metrics = {}
+
+        graph: ValidationGraph = (
+            self._generate_suite_level_graph_from_expectation_level_sub_graphs(
+                expectation_validation_graphs=expectation_validation_graphs
+            )
+        )
 
         try:
             (
@@ -498,12 +499,11 @@ class Validator:
                 evrs=evrs,
                 processed_configurations=processed_configurations,
             )
-
         except Exception as err:
             # If a general Exception occurs during the execution of "Validator.resolve_validation_graph()", then all
             # expectations in the suite are impacted, because it is impossible to attribute the failure to a metric.
             if catch_exceptions:
-                exception_traceback = traceback.format_exc()
+                exception_traceback: str = traceback.format_exc()
                 evrs = self._catch_exceptions_in_failing_expectation_validations(
                     exception_traceback=exception_traceback,
                     exception=err,
@@ -514,6 +514,8 @@ class Validator:
             else:
                 raise err
 
+        configuration: ExpectationConfiguration
+        result: ExpectationValidationResult
         for configuration in processed_configurations:
             try:
                 result = configuration.metrics_validate(
@@ -524,7 +526,7 @@ class Validator:
                 evrs.append(result)
             except Exception as err:
                 if catch_exceptions:
-                    exception_traceback = traceback.format_exc()
+                    exception_traceback: str = traceback.format_exc()
                     evrs = self._catch_exceptions_in_failing_expectation_validations(
                         exception_traceback=exception_traceback,
                         exception=err,
@@ -546,8 +548,11 @@ class Validator:
     ) -> Tuple[List[ExpectationValidationResult], List[ExpectationConfiguration]]:
         # While evaluating expectation configurations, create sub-graph for every metric dependency and incorporate
         # these sub-graphs under corresponding expectation-level sub-graph (state of ExpectationValidationGraph object).
-
         evrs: List[ExpectationValidationResult] = []
+        configuration: ExpectationConfiguration
+        evaluated_config: ExpectationConfiguration
+        metric_configuration: MetricConfiguration
+        graph: ValidationGraph
         for configuration in expectation_configurations:
             # Validating
             try:
@@ -561,9 +566,11 @@ class Validator:
             evaluated_config.kwargs.update({"batch_id": self.active_batch_id})
 
             expectation_impl = get_expectation_impl(evaluated_config.expectation_type)
-            validation_dependencies = expectation_impl().get_validation_dependencies(
-                evaluated_config, self._execution_engine, runtime_configuration
-            )["metrics"]
+            validation_dependencies: dict = (
+                expectation_impl().get_validation_dependencies(
+                    evaluated_config, self._execution_engine, runtime_configuration
+                )["metrics"]
+            )
 
             try:
                 expectation_validation_graph: ExpectationValidationGraph = (
@@ -583,13 +590,13 @@ class Validator:
                 processed_configurations.append(evaluated_config)
             except Exception as err:
                 if catch_exceptions:
-                    exception_traceback = traceback.format_exc()
-                    exception_message = str(err)
-                    exception_info = ExceptionInfo(
+                    exception_traceback: str = traceback.format_exc()
+                    exception_message: str = str(err)
+                    exception_info: ExceptionInfo = ExceptionInfo(
                         exception_traceback=exception_traceback,
                         exception_message=exception_message,
                     )
-                    result = ExpectationValidationResult(
+                    result: ExpectationValidationResult = ExpectationValidationResult(
                         success=False,
                         exception_info=exception_info,
                         expectation_config=evaluated_config,
@@ -614,7 +621,7 @@ class Validator:
                 ]
             )
         )
-        validation_graph = ValidationGraph(edges=edges)
+        validation_graph: ValidationGraph = ValidationGraph(edges=edges)
         return validation_graph
 
     def _resolve_suite_level_graph_and_process_metric_evaluation_errors(
@@ -664,9 +671,9 @@ class Validator:
 
         return evrs, processed_configurations
 
+    @staticmethod
     def _catch_exceptions_in_failing_expectation_validations(
-        self,
-        exception_traceback: traceback.TracebackException,
+        exception_traceback: str,
         exception: Exception,
         failing_expectation_configurations: List[ExpectationConfiguration],
         evrs: List[ExpectationValidationResult],
@@ -682,12 +689,14 @@ class Validator:
         Returns:
             List of ExpectationValidationResult objects with unsuccessful ExpectationValidationResult objects appended
         """
-        exception_message = str(exception)
-        exception_info = ExceptionInfo(
+        exception_message: str = str(exception)
+        exception_info: ExceptionInfo = ExceptionInfo(
             exception_traceback=exception_traceback,
             exception_message=exception_message,
         )
 
+        configuration: ExpectationConfiguration
+        result: ExpectationValidationResult
         for configuration in failing_expectation_configurations:
             result = ExpectationValidationResult(
                 success=False,
@@ -1529,7 +1538,7 @@ set as active.
             )
 
             self._data_context = validation_data_context
-        except Exception as e:
+        except Exception:
             if getattr(data_context, "_usage_statistics_handler", None):
                 # noinspection PyProtectedMember
                 handler = data_context._usage_statistics_handler

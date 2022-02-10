@@ -192,6 +192,7 @@ class ParameterContainer(SerializableDictDot):
             if not isinstance(source, ParameterNode):
                 deep_filter_properties_iterable(properties=source, inplace=True)
                 source = ParameterNode(source)
+
             key: str
             value: Any
             for key, value in source.items():

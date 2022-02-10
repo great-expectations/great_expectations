@@ -43,6 +43,14 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
 
         self._semantic_types = semantic_types
 
+    @property
+    def semantic_types(
+        self,
+    ) -> Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ]:
+        return self._semantic_types
+
     def _get_domains(
         self,
         variables: Optional[ParameterContainer] = None,
@@ -199,14 +207,6 @@ information.  Please ensure that the specified column name refers to exactly one
         )
 
         return inferred_semantic_column_type
-
-    @property
-    def semantic_types(
-        self,
-    ) -> Optional[
-        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-    ]:
-        return self._semantic_types
 
 
 def _parse_semantic_domain_type_argument(
