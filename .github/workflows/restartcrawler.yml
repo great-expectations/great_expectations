@@ -1,0 +1,18 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Restart Crawler
+
+on:
+  push:
+    branches: [ develop ]
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: curl -H 'Content-Type:application/json' -X POST --user aea7fe4f-74c4-44ed-9fe1-43044c4b2f20:8fd2d3b5d2f347cf703ea3fceb8c9d02 'https://crawler.algolia.com/api/1/crawlers/3ba40ab3-93f5-444b-930c-29fee09903e5/reindex'
