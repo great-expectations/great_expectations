@@ -188,12 +188,14 @@ class DictDot:
 
         # Gather private fields:
         # By Python convention, properties of non-trivial length, prefixed by underscore ("_") character, are private.
-        property_names: Set[str] = set(
+        private_fields: Set[str] = set(
             filter(
                 lambda name: len(name) > 1,
                 [key[1:] for key in self.keys() if key[0] == "_"],
             )
         )
+        public_fields: Set[str] = {key for key in self.keys() if key[0] != "_"}
+        property_names: Set[str] = public_fields | private_fields
 
         keys_for_exclusion: list = []
 
