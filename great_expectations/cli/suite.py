@@ -745,23 +745,22 @@ def _suite_edit_workflow(
         notebook_name: str = f"edit_{expectation_suite_name}.ipynb"
         notebook_path: str = _get_notebook_path(context, notebook_name)
 
-        # LOOK HERE!
+        renderer: SuiteProfileNotebookRenderer
         if profile:
             if not assume_yes:
                 toolkit.prompt_profile_to_create_a_suite(
                     data_context=context, expectation_suite_name=expectation_suite_name
                 )
 
-            renderer: SuiteProfileNotebookRenderer = SuiteProfileNotebookRenderer(
+            renderer = SuiteProfileNotebookRenderer(
                 context=context,
                 expectation_suite_name=expectation_suite_name,
                 batch_request=batch_request,
             )
             renderer.render_to_disk(notebook_file_path=notebook_path)
         else:
-            SuiteEditNotebookRenderer.from_data_context(
-                data_context=context
-            ).render_to_disk(
+            renderer = SuiteEditNotebookRenderer.from_data_context(data_context=context)
+            renderer.render_to_disk(
                 suite=suite,
                 notebook_file_path=notebook_path,
                 batch_request=batch_request,

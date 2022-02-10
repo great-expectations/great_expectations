@@ -43,7 +43,7 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
         self.expectation_suite_name = self.validator.expectation_suite_name
 
     # noinspection PyMethodOverriding
-    def add_header(self):
+    def add_header(self) -> None:
         self.add_markdown_cell(
             markdown=f"""# Initialize a new Expectation Suite by profiling a batch of your data.
 This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns and other factors that you care about and letting a profiler write some candidate expectations for you to adjust.
@@ -81,7 +81,7 @@ validator.head(n_rows=5, fetch_all=False)
             lint=True,
         )
 
-    def _add_available_columns_list(self):
+    def _add_available_columns_list(self) -> None:
         column_names: List[str]
         column_name: str
         column_names = [
@@ -167,7 +167,7 @@ You can find more information about [how to configure this profiler, including a
         return self._notebook
 
     # noinspection PyMethodOverriding
-    def render_to_disk(self, notebook_file_path: str):
+    def render_to_disk(self, notebook_file_path: str) -> None:
         """
         Render a notebook to disk from an expectation suite.
         """
@@ -176,8 +176,7 @@ You can find more information about [how to configure this profiler, including a
             notebook=self._notebook, notebook_file_path=notebook_file_path
         )
 
-    # This needs to be modified
-    def _add_profiler_cell(self):
+    def _add_profiler_cell(self) -> None:
         self.add_code_cell(
             code="""\
 profiler = UserConfigurableProfiler(
