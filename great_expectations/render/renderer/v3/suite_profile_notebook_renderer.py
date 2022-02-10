@@ -35,15 +35,114 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
         )
 
         self._batch_request = batch_request
-
         self._validator = context.get_validator(
             batch_request=BatchRequest(**batch_request),
             expectation_suite_name=expectation_suite_name,
         )
 
         self._profiler_name = profiler_name
-
         self._expectation_suite_name = self._validator.expectation_suite_name
+
+    # noinspection PyMethodOverriding
+    def render(self) -> nbformat.NotebookNode:
+        self._notebook = nbformat.v4.new_notebook()
+
+        if self._profiler_name is None:
+            self._render_user_configurable_profiler_setup()
+        else:
+            self._render_rule_based_profiler_setup()
+
+        return self._notebook
+
+    def _render_user_configurable_profiler_setup(self):
+        self.add_header()
+        self.add_markdown_cell(
+            markdown="""# Select columns
+
+Select the columns on which you would like to set expectations and those which you would like to ignore.
+
+Great Expectations will choose which expectations might make sense for a column based on the **data type** and **cardinality** of the data in each selected column.
+
+Simply comment out columns that are important and should be included. You can select multiple lines and
+use a jupyter keyboard shortcut to toggle each line: **Linux/Windows**:
+`Ctrl-/`, **macOS**: `Cmd-/`"""
+        )
+        self._add_available_columns_list()
+        self.add_markdown_cell(
+            markdown="""# Run the data profiler
+
+The suites generated here are **not meant to be production suites** -- they are **a starting point to build upon**.
+
+**To get to a production-grade suite, you will definitely want to [edit this
+suite](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html?utm_source=notebook&utm_medium=profile_based_expectations)
+after this initial step gets you started on the path towards what you want.**
+
+This is highly configurable depending on your goals.
+You can ignore columns or exclude certain expectations, specify a threshold for creating value set expectations, or even specify semantic types for a given column.
+You can find more information about [how to configure this profiler, including a list of the expectations that it uses, here.](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_user_configurable_profiler.html)
+
+"""
+        )
+        self.add_code_cell(
+            code="""\
+profiler = UserConfigurableProfiler(
+    profile_dataset=validator,
+    excluded_expectations=None,
+    ignored_columns=ignored_columns,
+    not_null_only=False,
+    primary_or_compound_key=False,
+    semantic_types_dict=None,
+    table_expectations_only=False,
+    value_set_threshold="MANY",
+)
+suite = profiler.build_suite()""",
+            lint=True,
+        )
+        self.add_footer()
+
+    def _render_rule_based_profiler_setup(self):
+        self.add_header()
+        self.add_markdown_cell(
+            markdown="""# Run the data profiler
+
+The suites generated here are **not meant to be production suites** -- they are **a starting point to build upon**.
+
+**To get to a production-grade suite, you will definitely want to [edit this
+suite](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html?utm_source=notebook&utm_medium=profile_based_expectations)
+after this initial step gets you started on the path towards what you want.**
+
+This is highly configurable depending on your goals.
+You can ignore columns or exclude certain expectations, specify a threshold for creating value set expectations, or even specify semantic types for a given column.
+You can find more information about [how to configure this profiler, including a list of the expectations that it uses, here.](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_user_configurable_profiler.html)
+
+"""
+        )
+        self.add_code_cell(
+            code=f"""\
+suite = context.run_profiler_with_dynamic_arguments(name="{self._profiler_name}")
+""",
+            lint=True,
+        )
+        self.add_footer()
+
+    def _add_available_columns_list(self) -> None:
+        column_names: List[str]
+        column_name: str
+        column_names = [
+            f'    "{column_name}",\n' for column_name in self._validator.columns()
+        ]
+        code: str = f'ignored_columns = [\n{"".join(column_names)}]'
+        self.add_code_cell(code=code, lint=True)
+
+    # noinspection PyMethodOverriding
+    def render_to_disk(self, notebook_file_path: str) -> None:
+        """
+        Render a notebook to disk from an expectation suite.
+        """
+        self.render()
+        self.write_notebook_to_disk(
+            notebook=self._notebook, notebook_file_path=notebook_file_path
+        )
 
     # noinspection PyMethodOverriding
     def add_header(self) -> None:
@@ -84,15 +183,6 @@ validator.head(n_rows=5, fetch_all=False)
             lint=True,
         )
 
-    def _add_available_columns_list(self) -> None:
-        column_names: List[str]
-        column_name: str
-        column_names = [
-            f'    "{column_name}",\n' for column_name in self._validator.columns()
-        ]
-        code: str = f'ignored_columns = [\n{"".join(column_names)}]'
-        self.add_code_cell(code=code, lint=True)
-
     def add_footer(self):
         self.add_markdown_cell(
             markdown="""# Save & review your new Expectation Suite
@@ -132,66 +222,4 @@ context.open_data_docs(resource_identifier=validation_result_identifier)
 After you review this initial Expectation Suite in Data Docs you
 should edit this suite to make finer grained adjustments to the expectations.
 This can be done by running `great_expectations suite edit {self._expectation_suite_name}`."""
-        )
-
-    # noinspection PyMethodOverriding
-    def render(self) -> nbformat.NotebookNode:
-        self._notebook = nbformat.v4.new_notebook()
-        self.add_header()
-        self.add_markdown_cell(
-            markdown="""# Select columns
-
-Select the columns on which you would like to set expectations and those which you would like to ignore.
-
-Great Expectations will choose which expectations might make sense for a column based on the **data type** and **cardinality** of the data in each selected column.
-
-Simply comment out columns that are important and should be included. You can select multiple lines and
-use a jupyter keyboard shortcut to toggle each line: **Linux/Windows**:
-`Ctrl-/`, **macOS**: `Cmd-/`"""
-        )
-        self._add_available_columns_list()
-        self.add_markdown_cell(
-            markdown="""# Run the data profiler
-
-The suites generated here are **not meant to be production suites** -- they are **a starting point to build upon**.
-
-**To get to a production-grade suite, you will definitely want to [edit this
-suite](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html?utm_source=notebook&utm_medium=profile_based_expectations)
-after this initial step gets you started on the path towards what you want.**
-
-This is highly configurable depending on your goals.
-You can ignore columns or exclude certain expectations, specify a threshold for creating value set expectations, or even specify semantic types for a given column.
-You can find more information about [how to configure this profiler, including a list of the expectations that it uses, here.](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_user_configurable_profiler.html)
-
-"""
-        )
-        self._add_profiler_cell()
-        self.add_footer()
-        return self._notebook
-
-    # noinspection PyMethodOverriding
-    def render_to_disk(self, notebook_file_path: str) -> None:
-        """
-        Render a notebook to disk from an expectation suite.
-        """
-        self.render()
-        self.write_notebook_to_disk(
-            notebook=self._notebook, notebook_file_path=notebook_file_path
-        )
-
-    def _add_profiler_cell(self) -> None:
-        self.add_code_cell(
-            code="""\
-profiler = UserConfigurableProfiler(
-    profile_dataset=validator,
-    excluded_expectations=None,
-    ignored_columns=ignored_columns,
-    not_null_only=False,
-    primary_or_compound_key=False,
-    semantic_types_dict=None,
-    table_expectations_only=False,
-    value_set_threshold="MANY",
-)
-suite = profiler.build_suite()""",
-            lint=True,
         )
