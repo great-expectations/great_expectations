@@ -76,7 +76,7 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
         elif isinstance(domain_kwargs, dict):
             domain_kwargs = DomainKwargs(domain_kwargs)
 
-        domain_kwargs_dot_dict: SerializableDotDict = (
+        domain_kwargs_dot_dict: DomainKwargs = (
             self._convert_dictionaries_to_domain_kwargs(source=domain_kwargs)
         )
 
@@ -135,6 +135,7 @@ Cannot instantiate Domain (domain_type "{str(domain_type)}" of type "{str(type(d
             if not isinstance(source, Domain):
                 deep_filter_properties_iterable(properties=source, inplace=True)
                 source = DomainKwargs(source)
+
             key: str
             value: Any
             for key, value in source.items():

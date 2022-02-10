@@ -1003,7 +1003,7 @@ class NotebookConfig(DictDot):
         self,
         class_name,
         module_name,
-        custom_templates_module,
+        custom_templates_module=None,
         header_markdown=None,
         footer_markdown=None,
         table_expectations_header_markdown=None,
@@ -1045,7 +1045,7 @@ class NotebookConfigSchema(Schema):
     module_name = fields.String(
         missing="great_expectations.render.renderer.suite_edit_notebook_renderer"
     )
-    custom_templates_module = fields.String()
+    custom_templates_module = fields.String(allow_none=True)
 
     header_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
     footer_markdown = fields.Nested(NotebookTemplateConfigSchema, allow_none=True)
@@ -1169,16 +1169,47 @@ class ConcurrencyConfigSchema(Schema):
 
 
 class GeCloudConfig(DictDot):
-    def __init__(self, base_url: str, account_id: str, access_token: str):
+    # TODO: deprecate account_id arg
+    def __init__(
+        self,
+        base_url: str,
+        account_id: str = None,
+        access_token: str = None,
+        organization_id: str = None,
+    ):
+        # access_token was given a default value to maintain arg position of account_id
+        if access_token is None:
+            raise ValueError("Access token cannot be None.")
+        # exclusive or
+        if not (bool(account_id) ^ bool(organization_id)):
+            raise ValueError(
+                "Must provide either (and only) account_id or organization_id."
+            )
+        if account_id is not None:
+            logger.warning(
+                'The "account_id" argument has been renamed "organization_id" and will be deprecated in '
+                "the next major release."
+            )
+
         self.base_url = base_url
-        self.account_id = account_id
+        self.organization_id = organization_id or account_id
         self.access_token = access_token
+
+    # TODO: remove property when account_id is deprecated
+    @property
+    def account_id(self):
+        logger.warning(
+            'The "account_id" attribute has been renamed to "organization_id" and will be deprecated in '
+            "the next major release."
+        )
+        return self.organization_id
 
     def to_json_dict(self):
         return {
             "base_url": self.base_url,
-            "account_id": self.account_id,
+            "organization_id": self.organization_id,
             "access_token": self.access_token,
+            "account_id": self.account_id,  # TODO: remove when account_id is deprecated
         }
 
 
