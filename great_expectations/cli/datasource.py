@@ -652,11 +652,17 @@ class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
 connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
 
     def verify_libraries_installed(self) -> bool:
-        return verify_library_dependent_modules(
+        pybigquery_ok = verify_library_dependent_modules(
             python_import_name="pybigquery.sqlalchemy_bigquery",
             pip_library_name="pybigquery",
             module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
         )
+        sqlalchemy_bigquery_ok = verify_library_dependent_modules(
+            python_import_name="sqlalchemy_bigquery.sqlalchemy_bigquery",
+            pip_library_name="sqlalchemy_bigquery",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+        return pybigquery_ok or sqlalchemy_bigquery_ok
 
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"
