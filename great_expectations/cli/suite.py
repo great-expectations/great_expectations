@@ -79,10 +79,9 @@ def suite(ctx):
 @click.option(
     "--profile",
     "-p",
-    "profiler_name",
     is_flag=True,
     default=False,
-    help="""Generate a starting expectation suite automatically so you can refine it further. Requires an existing profiler name. Assumes --interactive
+    help="""Generate a starting expectation suite automatically so you can refine it further. Assumes --interactive
 flag.
 """,
 )
@@ -107,7 +106,7 @@ def suite_new(
     expectation_suite: Optional[str],
     interactive_flag: bool,
     manual_flag: bool,
-    profiler_name: Optional[str],
+    profile: bool,
     batch_request: Optional[str],
     no_jupyter: bool,
 ) -> None:
@@ -117,8 +116,6 @@ def suite_new(
     """
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
-
-    profile: bool = profiler_name is None
 
     interactive_mode, profile = _process_suite_new_flags_and_prompt(
         context=context,
