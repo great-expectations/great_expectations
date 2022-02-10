@@ -112,14 +112,16 @@ You can see all the Expectations available in the [gallery](https://greatexpecta
 ```python
 df = ge.from_pandas(df)
 
-df.expect_column_values_to_be_unique("products")
 # ~30% chance of passing
-df.expect_column_values_to_not_be_null("quantities")
+df.expect_column_values_to_be_unique("products") # ~30% chance of passing
+
+# ~60% chance of passing
+df.expect_column_values_to_not_be_null("quantities") # ~60% chance of passing
+
 # ~60% chance of passing
 df.expect_column_values_to_be_between(
-    "dates", "2021-01-01", "2021-01-08", parse_strings_as_datetimes=True
+    "dates", "2021-01-01", "2021-01-8", parse_strings_as_datetimes=True
 );
-# ~60% chance of passing
 ```
 
 ### 5. Set project configurations
