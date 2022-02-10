@@ -25,7 +25,6 @@ from great_expectations.marshmallow__shade import (
 )
 from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
-from great_expectations.types.base import SerializableDotDict
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -1169,16 +1168,47 @@ class ConcurrencyConfigSchema(Schema):
 
 
 class GeCloudConfig(DictDot):
-    def __init__(self, base_url: str, account_id: str, access_token: str):
+    # TODO: deprecate account_id arg
+    def __init__(
+        self,
+        base_url: str,
+        account_id: str = None,
+        access_token: str = None,
+        organization_id: str = None,
+    ):
+        # access_token was given a default value to maintain arg position of account_id
+        if access_token is None:
+            raise ValueError("Access token cannot be None.")
+        # exclusive or
+        if not (bool(account_id) ^ bool(organization_id)):
+            raise ValueError(
+                "Must provide either (and only) account_id or organization_id."
+            )
+        if account_id is not None:
+            logger.warning(
+                'The "account_id" argument has been renamed "organization_id" and will be deprecated in '
+                "the next major release."
+            )
+
         self.base_url = base_url
-        self.account_id = account_id
+        self.organization_id = organization_id or account_id
         self.access_token = access_token
+
+    # TODO: remove property when account_id is deprecated
+    @property
+    def account_id(self):
+        logger.warning(
+            'The "account_id" attribute has been renamed to "organization_id" and will be deprecated in '
+            "the next major release."
+        )
+        return self.organization_id
 
     def to_json_dict(self):
         return {
             "base_url": self.base_url,
-            "account_id": self.account_id,
+            "organization_id": self.organization_id,
             "access_token": self.access_token,
+            "account_id": self.account_id,  # TODO: remove when account_id is deprecated
         }
 
 
@@ -2119,14 +2149,6 @@ class CheckpointConfigSchema(Schema):
         return data
 
 
-class Attributes(SerializableDotDict):
-    def to_dict(self) -> dict:
-        return dict(self)
-
-    def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=self.to_dict())
-
-
 class CheckpointConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = CheckpointConfigSchema
@@ -2382,6 +2404,18 @@ class CheckpointConfig(BaseYamlConfig):
 
         return result
 
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -2395,7 +2429,13 @@ class CheckpointConfig(BaseYamlConfig):
             properties=json_dict,
             inplace=True,
         )
-        return json.dumps(json_dict, indent=2)
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
 
     def __str__(self) -> str:
         """
