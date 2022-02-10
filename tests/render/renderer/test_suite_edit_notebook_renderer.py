@@ -1513,3 +1513,9 @@ def test_notebook_execution_with_custom_notebooks(
         obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
+
+
+def test_load_renderer_with_custom_notebooks_defaults(
+    data_context_custom_notebooks_defaults,
+):
+    SuiteEditNotebookRenderer.from_data_context(data_context_custom_notebooks_defaults)
