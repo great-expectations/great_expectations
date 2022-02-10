@@ -20,7 +20,7 @@ repos:
     hooks:
       - id: black
         exclude: docs/.*|tests/.*.fixture|.*.ge_store_backend_id
-  - repo: https://gitlab.com/pycqa/flake8
+  - repo: https://github.com/PyCQA/flake8
     rev: 3.8.3
     hooks:
       - id: flake8
