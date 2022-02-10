@@ -1436,7 +1436,6 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     assert isinstance(config, dict)
     assert config == {
         "name": "my_checkpoint",
-        "config_version": None,
         "class_name": "LegacyCheckpoint",
         "module_name": "great_expectations.checkpoint",
         "batches": [

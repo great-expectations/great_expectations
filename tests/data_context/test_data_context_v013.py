@@ -9,7 +9,10 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    dataContextConfigSchema,
+)
 from great_expectations.exceptions import ExecutionEngineError
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -175,9 +178,9 @@ def test_get_config(empty_data_context):
         context.get_config(mode="foobar")
 
     print(context.get_config(mode="yaml"))
-    print(context.get_config("dict").keys())
+    print(context.get_config(mode="dict").keys())
 
-    assert set(context.get_config("dict").keys()) == {
+    assert set(context.get_config(mode="dict").keys()) == {
         "config_version",
         "datasources",
         "config_variables_file_path",
@@ -189,7 +192,6 @@ def test_get_config(empty_data_context):
         "checkpoint_store_name",
         "data_docs_sites",
         "anonymous_usage_statistics",
-        "notebooks",
     }
 
 
@@ -480,6 +482,11 @@ def test_in_memory_data_context_configuration(
             ],
         }
     }
+
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    project_config_dict = dataContextConfigSchema.dump(project_config_dict)
+    project_config_dict = dataContextConfigSchema.load(project_config_dict)
+
     project_config: DataContextConfig = DataContextConfig(**project_config_dict)
     data_context = BaseDataContext(
         project_config=project_config,

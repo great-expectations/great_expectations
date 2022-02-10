@@ -416,7 +416,7 @@ def test_simple_checkpoint_persisted_to_store(
     )
     assert isinstance(checkpoint, Checkpoint)
     assert isinstance(checkpoint.get_config(mode="dict"), dict)
-    checkpoint_config: dict = checkpoint.get_config(mode="json_dict")
+    checkpoint_config: dict = checkpoint.get_config(mode="json_dict", clean_nulls=False)
     assert checkpoint_config == {
         "action_list": [
             {
