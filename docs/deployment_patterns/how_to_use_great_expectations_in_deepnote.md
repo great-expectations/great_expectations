@@ -48,7 +48,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 The following cell creates a Great Expectations folder in the filesystem
 which will hold all of the forthcoming project configurations. Note that if this folder already exists, Great Expectations gracefully allows us to continue.
 
-```python
+```bash
 !great_expectations --yes --v3-api init
 ```
 
@@ -75,7 +75,7 @@ df = pd.DataFrame({'products': products, 'quantities': quantities, 'dates': date
 df.show()
 ```
 
-![dataframe](images/dataframe.png)
+<img src="images/dataframe.png" />
 
 ### 4. Define Expectations
 
@@ -199,7 +199,7 @@ When served, the Data Docs site provides the details of each [Validation](../ref
 
 For example, the following image shows a run where three Expectations where validated against our DataFrame and two of them failed.
 
-![data-docs](images/data-docs.png)
+<img src="images/data-docs.png" />
 
 <div style={{"text-align":"center"}}>
 <p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
