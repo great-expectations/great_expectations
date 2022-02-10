@@ -7,6 +7,7 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Allow overwriting the class for Custom Notebook Templates (#2619) (thanks @luke321321)
 
 0.14.5
 -----------------

@@ -170,7 +170,7 @@ def ge_cloud_runtime_base_url():
 
 
 @pytest.fixture
-def ge_cloud_runtime_account_id():
+def ge_cloud_runtime_organization_id():
     return "a8a35168-68d5-4366-90ae-00647463d37e"
 
 
