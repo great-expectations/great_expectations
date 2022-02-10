@@ -3370,7 +3370,7 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_batch_request_into_check
     )
 
     # add checkpoint config
-    checkpoint_config = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,
@@ -3427,7 +3427,7 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_validations_into_checkpo
     )
 
     # add checkpoint config
-    checkpoint_config = {
+    checkpoint_config: dict = {
         "class_name": "SimpleCheckpoint",
         "name": "my_checkpoint",
         "config_version": 1,

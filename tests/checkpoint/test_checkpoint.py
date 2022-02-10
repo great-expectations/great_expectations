@@ -1278,13 +1278,13 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     base_directory = rad_datasource["batch_kwargs_generators"]["subdir_reader"][
         "base_directory"
     ]
-    batch_kwargs = {
+    batch_kwargs: dict = {
         "path": base_directory + "/f1.csv",
         "datasource": "rad_datasource",
         "reader_method": "read_csv",
     }
 
-    checkpoint_config_dict = {
+    checkpoint_config_dict: dict = {
         "name": "my_checkpoint",
         "validation_operator_name": "action_list_operator",
         "batches": [
