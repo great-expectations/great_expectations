@@ -10,6 +10,7 @@ from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
+from great_expectations.checkpoint.checkpoint import ConfigurationPresentationFormat
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -1436,13 +1437,9 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     assert isinstance(config, dict)
     assert config == {
         "name": "my_checkpoint",
-        "template_name": None,
         "config_version": None,
-        "run_name_template": None,
-        "batch_request": {},
-        "expectation_suite_name": None,
-        "validations": [],
-        "action_list": [],
+        "class_name": "LegacyCheckpoint",
+        "module_name": "great_expectations.checkpoint",
         "batches": [
             {
                 "batch_kwargs": {
@@ -1461,11 +1458,6 @@ def test_get_checkpoint(empty_context_with_checkpoint):
             },
         ],
         "validation_operator_name": "action_list_operator",
-        "evaluation_parameters": {},
-        "profilers": [],
-        "runtime_configuration": {},
-        "ge_cloud_id": None,
-        "expectation_suite_ge_cloud_id": None,
     }
 
 
@@ -1903,28 +1895,28 @@ expectation_suite_ge_cloud_id:
         checkpoint_from_disk = cf.read()
 
     assert checkpoint_from_disk == expected_checkpoint_yaml
+    assert (
+        checkpoint_from_yaml.get_config(format=ConfigurationPresentationFormat.YAML)
+        == expected_checkpoint_yaml
+    )
     assert deep_filter_properties_iterable(
         properties=checkpoint_from_yaml.get_config(),
         clean_falsy=True,
     ) == deep_filter_properties_iterable(
-        properties={
-            key: value
-            for key, value in dict(yaml.load(expected_checkpoint_yaml)).items()
-            if key not in ["module_name", "class_name"]
-        },
+        properties=dict(yaml.load(expected_checkpoint_yaml)),
         clean_falsy=True,
     )
 
     checkpoint_from_store = context.get_checkpoint(name=checkpoint_name)
+    assert (
+        checkpoint_from_store.get_config(format=ConfigurationPresentationFormat.YAML)
+        == expected_checkpoint_yaml
+    )
     assert deep_filter_properties_iterable(
         properties=checkpoint_from_store.get_config(),
         clean_falsy=True,
     ) == deep_filter_properties_iterable(
-        properties={
-            key: value
-            for key, value in dict(yaml.load(expected_checkpoint_yaml)).items()
-            if key not in ["module_name", "class_name"]
-        },
+        properties=dict(yaml.load(expected_checkpoint_yaml)),
         clean_falsy=True,
     )
 
@@ -1957,6 +1949,8 @@ expectation_suite_ge_cloud_id:
     assert checkpoint_from_yaml.get_config(clean_falsy=True) == {
         "name": "my_new_checkpoint",
         "config_version": 1.0,
+        "class_name": "Checkpoint",
+        "module_name": "great_expectations.checkpoint",
         "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
         "action_list": [
             {
