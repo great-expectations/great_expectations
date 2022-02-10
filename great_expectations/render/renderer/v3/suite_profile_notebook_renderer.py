@@ -176,6 +176,7 @@ You can find more information about [how to configure this profiler, including a
             notebook=self._notebook, notebook_file_path=notebook_file_path
         )
 
+    # This needs to be modified
     def _add_profiler_cell(self):
         self.add_code_cell(
             code="""\
