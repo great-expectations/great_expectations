@@ -1,35 +1,40 @@
 ---
-title: How to add text renderers for custom Expectations
+title: How to add Statement Renderers for Custom Expectations
 ---
-import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+
+import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-
-:::warning
-This guide only applies to Great Expectations versions 0.13 and above, which make use of the new modular Expectation architecture. If you have implemented a custom Expectation but have not yet migrated it using the new modular patterns, you can still use this guide to implement custom renderers for your Expectation.
-:::
 
 This guide will help you implement renderers for your custom Expectations, allowing you to control how your custom Expectations are displayed in Data Docs. Implementing renderers as part of your custom Expectations is not strictly required - if not provided, Great Expectations will render your Expectation using a basic default renderer:
 
 ![Expectation rendered using default renderer](../../../images/expectation_fallback.png)
 
-
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-- Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- Implemented a [custom Expectation](../../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
-- Set up a [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md) site.
-- Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md) containing your custom Expectation.
-    
+ - Created a [Custom Expectation](../creating_custom_expectations/overview.md)
+
 </Prerequisites>
 
+:::warning
 See also this [complete custom expectation with renderer example](https://github.com/superconductive/ge_tutorials/tree/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/custom_column_max_example.py).
+:::
 
-Steps
------
+Renderers allow you to control how your Custom Expectations are displayed in your [Data Docs](../../../reference/data_docs.md).
 
-1. **First, decide which renderer types you need to implement.**
+This guide will walk you through the process of adding Statement Renderers to the Custom Expectation built in the guide for [how to create a Custom Column Aggregate Expectation](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
+
+## Steps
+
+### 1. Decide which renderer type to implement
+
+There are three basic types of Statement Renderers:
+
+- `renderer.prescriptive` renders a human-readable form of your Custom Expectation
+- `renderer.diagnostic` renders diagnostic information about the results of your Custom Expectation
+- `renderer.descriptive` renders 
+
+- **First, decide which renderer types you need to implement.**
 
   Use the following annotated Validation Result as a guide (most major renderer types represented):
 
@@ -49,7 +54,7 @@ Steps
 
   The method should have the following signature, which is shared across renderers:
 
-  ```python
+```python
   @classmethod
   @renderer(renderer_type="renderer.prescriptive")
   @render_evaluation_parameter_string
@@ -64,7 +69,7 @@ Steps
                   RenderedGraphContent, Any]]:
       assert configuration or result, "Must provide renderers either a configuration or result."
       ...
-    ```
+```
 
   In general, renderers receive as input either an ExpectationConfiguration (for prescriptive renderers) or an ExpectationValidationResult (for diagnostic renderers) and return a list of rendered elements. The examples below illustrate different ways you might render your expectation - from simple strings to graphs.
 
