@@ -1,63 +1,49 @@
 ---
-title: How to add SQLAlchemy support for custom Metrics 
+title: How to add SQLAlchemy support for Custom Expectations
 ---
-import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-:::warning
-This guide only applies to Great Expectations versions 0.13 and above, which make use of the new modular Expectation architecture. If you have implemented a custom Expectation but have not yet migrated it using the new modular patterns, you can still use this guide to implement custom renderers for your Expectation.
-:::
-
-This guide will help you implement native SQLAlchemy support for your custom Metric. 
+This guide will help you implement native SQLAlchemy support for your [Custom Expectation](../creating_custom_expectations/overview.md). 
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/intro.md)
-- Configured a [Data Context](../../../tutorials/getting_started/initialize_a_data_context.md).
-- Implemented a [custom Expectation](../../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
-    
+ - Created a [Custom Expectation](../creating_custom_expectations/overview.md)
+
 </Prerequisites>
 
-Steps
------
+Great Expectations supports a number of [Execution Engines](../../../reference/execution_engine.md), including a SQLAlchemy Execution Engine. 
+These Execution Engines provide the computing resources used to calculate the [Metrics](../../../reference/metrics.md) defined in the Metric class of your Custom Expectation.
 
-1. **Decide which execution engines and dialects you want to implement and enable tests for them**
+If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Execution Engines that it supports.
 
-While SQLAlchemy is able to provide a common interface to a variety of SQL dialects, some functions may not work in a particular dialect, or in some cases they may return different values. To avoid surprises, it's helpful to determine beforehand what backends and dialects you plan to support, and test them along the way. 
+We will add SQLAlchemy support for the Custom Expectations implemented in [How to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
+and [How to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
 
-Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. (If not specified, Great Expectations will attempt to determine the implemented backends automatically, but wll only run SQLAlchemy tests against sqlite.) Add entries corresponding to the functionality you want to add: 
+## Steps
+
+### 1. Specify your backends and dialects
+
+While SQLAlchemy is able to provide a common interface to a variety of SQL dialects, some functions may not work in a particular dialect, or in some cases they may return different values. 
+To avoid surprises, it can be helpful to determine beforehand what backends and dialects you plan to support, and test them along the way. 
+
+Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. Add entries corresponding to the functionality you want to add: 
     
-````python
-examples = [
-        {
-            "data": {
-            ....
-            },
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["mysql", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
-                },
-            ],
-        },
-    ]
-````
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L106-L119
+```
 
-2. **Implement the SQLAlchemy logic for your Expectation.**
+:::note
+You may have noticed that specifying `test_backends` isn't required for successfully testing your Custom Expectation.
 
-Great Expectations provides a variety of ways to implement an Expectation in SQLAlchemy. Some of the most common ones include: 
+If not specified, Great Expectations will attempt to determine the implemented backends automatically, but wll only run SQLAlchemy tests against sqlite.
+:::
+
+### 2. Implement the SQLAlchemy logic for your Custom Expectation
+
+Great Expectations provides a variety of ways to implement an Expectation in SQLAlchemy. Two of the most common include: 
 1.  Defining a partial function that takes a SQLAlchemy column as input
 2.  Directly executing queries using SQLAlchemy objects to determine the value of your Expectation's metric directly 
-3.  Using an existing metric that is already defined for SQLAlchemy. 
 
 <Tabs
   groupId="metric-type"
@@ -65,104 +51,120 @@ Great Expectations provides a variety of ways to implement an Expectation in SQL
   values={[
   {label: 'Partial Function', value:'partialfunction'},
   {label: 'Query Execution', value:'queryexecution'},
-  {label: 'Existing Metric', value:'existingmetric'},
   ]}>
 
 <TabItem value="partialfunction">
 
-Great Expectations allows for much of the SQLAlchemy logic for executing queries be abstracted away by specifying metric behavior as a partial function. To do this, use one of the decorators @column_aggregate_partial (for column aggregate expectation) , @column_condition_partial (for column map expectations),  @column_pair_condition_partial (for column pair map metrics), or @multicolumn_condition_partial for multicolumn map metrics. The decorated method takes in an SQLAlchemy `Column` object and will either return a `sqlalchemy.sql.functions.Function` or a `ColumnOperator` that Great Expectations will use to generate the appropriate SQL queries. 
-    
-For example, the `ColumnValuesEqualThree` metric can be defined as: 
+Great Expectations allows for much of the SQLAlchemy logic for executing queries be abstracted away by specifying metric behavior as a partial function. 
+To do this, we use one of the `@column_*_partial` decorators:
+- `@column_aggregate_partial` for Column Aggregate Expectations
+- `@column_condition_partial` for Column Map Expectations
+- `@column_pair_condition_partial` for Column Pair Map Expectations
+- `@multicolumn_condition_partial` for Multicolumn Map Expectations
 
-````python
-@column_condition_partial(engine=SqlAlchemyExecutionEngine)
-def _sqlalchemy(cls, column, value_set, **kwargs):
-    return column.in_([3])
-````
-    
+These decorators expect an appropriate `engine=` argument. In this case, we'll pass our `SqlAlchemyExecutionEngine`. 
+The decorated method takes in an SQLAlchemy `Column` object and will either return a `sqlalchemy.sql.functions.Function` or a `sqlalchemy.sql.expression.ColumnOperator` that Great Expectations will use to generate the appropriate SQL queries. 
+  
+For our Custom Column Map Expectation `ExpectColumnValuesToEqualThree`, we're going to leverage SQLAlchemy's `in_` ColumnOperator and the `@column_condition_partial` decorator.
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L71-L73
+```
+
+<details>
+<summary>Getting <code>func</code>-y?</summary>
+We can also take advantage of SQLAlchemy's <code>func</code> special object instance. 
+<br/>
+<code>func</code> allows us to pass common generic functions which SQLAlchemy will compile appropriately for the targeted dialect, 
+giving us the flexibility to not have write that targeted code ourselves! 
+<br/><br/>
+Here's an example from <a href="https://greatexpectations.io/expectations/expect_column_sum_to_be_between">ExpectColumnSumToBeBetween</a>:
+
+```python file=../../../../great_expectations/expectations/metrics/column_aggregate_metrics/column_sum.py#L21-L23
+```
+</details>
+
+
 </TabItem>
 <TabItem value="queryexecution">
 
-The most direct way of implementing a metric is by computing its value from provided SQLAlchemy objects. 
-    
-````python
-@metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
-def _sqlalchemy(
-    cls,
-    execution_engine: "SqlAlchemyExecutionEngine",
-    metric_domain_kwargs: Dict,
-    metric_value_kwargs: Dict,
-    metrics: Dict[Tuple, Any],
-    runtime_configuration: Dict,
-):
-    (
-        selectable,
-        compute_domain_kwargs,
-        accessor_domain_kwargs,
-    ) = execution_engine.get_compute_domain(
-        metric_domain_kwargs, MetricDomainTypes.COLUMN
-    )
-    
-    column_name = accessor_domain_kwargs["column"]
-    column = sa.column(column_name)
-    sqlalchemy_engine = execution_engine.engine
-    dialect = sqlalchemy_engine.dialect
-````
-    
-Here `sqlalchemy_engine` is a SQLAlchemy `Engine` object, whose `execute` method executes arbitrary SQL. The keyword arguments To define the `ColumnValuesEqualThree` metric we could 
-````python
-    query = sa.select(column.in_([3])).select_from(selectable)
-    result = sqlalchemy_engine.execute(simple_query).fetchall()
-````
+The most direct way of implementing a metric is by computing its value by constructing or directly executing querys using objects provided by the `@metric_*` decorators:
+- `@metric_value` for Column Aggregate Expectations
+  - Expects an appropriate `engine`, `metric_fn_type`, and `domain_type`
+- `@metric_partial` for all Map Expectations
+  - Expects an appropriate `engine`, `partial_fn_type`, and `domain_type`
 
-</TabItem> 
-<TabItem value="existingmetric">
+Our `engine` will reflect the backend we're implementing (`SqlAlchemyExecutionEngine`), while our `fn_type` and `domain_type` are unique to the type of Expectation we're implementing.
 
-When using the value of an existing metric, the method signature is the same as when defining a metric value. 
-````python 
-    @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
-        cls,
-        execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
-        runtime_configuration: Dict,
-    ):
-````    
-    
-The `metrics` argument that the method is called with will be populated with your metric's dependencies, resolved by calling the `_get_evaluation_dependencies` class method. Suppose we wanted to implement a version of the `ColumnValuesEqualThree` expectation using the `column.value_counts` metric, which is already implemented for the SQLAlchemy execution engine. We would then modify `_get_evaluation_dependencies`: 
-    
-````python 
-    @classmethod
-    def _get_evaluation_dependencies(
-        cls,
-        metric: MetricConfiguration,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None,
-    ):
+These decorators enable a higher-complexity workflow, allowing you to explicitly structure your queries and make intermediate queries to your database. 
+While this approach can result in extra roundtrips to your database, it can also unlock advanced functionality for your Custom Expectations.
 
-        dependencies = super()._get_evaluation_dependencies(
-            metric=metric,
-            configuration=configuration,
-            execution_engine=execution_engine,
-            runtime_configuration=runtime_configuration,
-        )
+For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to implement the `@metric_value` decorator, 
+specifying the type of value we're computing (`AGGREGATE_VALUE`) and the domain over which we're computing (`COLUMN`):
 
-        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-            dependencies["column.value_counts"] = MetricConfiguration(
-                metric_name="column.value_counts",
-                metric_domain_kwargs=metric.metric_domain_kwargs,
-            )
-        return dependencies    
-````
-Then within the _sqlchemy function, we would add: 
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L35-L39
+```
 
-````python
-    column_value_counts = metrics.get("column.value_counts")
-    return(all(column_value_counts.index==3))
-````
+The decorated method takes in a valid [Execution Engine](../../../reference/execution_engine.md) and relevant `kwargs`,
+and will return a computed value.
 
+To do this, we need to access our Compute Domain directly:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L40-L58
+```
+
+This allows us to build a query and use our Execution Engine to execute that query against our data to return the actual value we're looking for, instead of returning a query to find that value:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L60-L63
+```
+
+<details>
+<summary>Getting <code>func</code>-y?</summary>
+While this approach allows for highly complex queries, here we're taking advantage of SQLAlchemy's <code>func</code> special object instance. 
+<br/>
+<code>func</code> allows us to pass common generic functions which SQLAlchemy will compile appropriately for the targeted dialect, 
+giving us the flexibility to not have write that targeted code ourselves!
+</details>
 </TabItem>
-</Tabs> 
+</Tabs>
+
+### 3. Verifying our implementation
+
+If you now run your file, `print_diagnostic_checklist` will attempt to execute your example cases using this new backend.
+
+If your implementation is correctly defined, and the rest of the core logic in your Custom Expectation is already complete,
+you will see the following in your Diagnostic Checklist:
+
+```console
+✔ Has at least one positive and negative example case, and all test cases pass
+```
+
+If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../creating_custom_expectations/overview.md) 
+and the Spark backend covered in [How to add Spark support for Custom Expectations](how_to_add_spark_support_for_an_expectation.md), 
+you should see the following in your Diagnostic Checklist:
+
+```console
+✔ Has core logic that passes tests for all applicable Execution Engines
+```
+
+<div style={{"text-align":"center"}}>
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
+Congratulations!<br/>&#127881; You've successfully implemented SQLAlchemy support for a Custom Expectation! &#127881;
+</b></p>
+</div>
+
+### 4. Contribution (Optional)
+
+This guide will leave you with core functionality sufficient for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+
+If you're interested in having your contribution accepted at a Beta level, your Custom Expectation will need to support SQLAlchemy, Spark, and Pandas.
+
+For full acceptance into the Great Expectations codebase at a Production level, we require that your Custom Expectation meets our code standards, including linting, test coverage, and style. 
+If you believe your Custom Expectation is otherwise ready for contribution at a Production level, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pull-requests), and we will work with you to ensure your Custom Expectation meets these standards.
+
+:::note
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
+
+To view the full scripts used in this page, see them on GitHub:
+- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
+- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
+:::

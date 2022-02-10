@@ -91,7 +91,7 @@ Replace the Expectation class name
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L43
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L71
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
@@ -99,7 +99,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L44
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L72
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
@@ -107,7 +107,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L188
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L230
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -135,7 +135,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L47-L79
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L75-L105
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -178,7 +178,7 @@ Metrics answer questions about your data posed by your Expectation, <br/> and al
 
 Your Metric function will have the `@column_aggregate_value` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate the max of a column using the PandasExecutionEngine.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L27-L30
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L30-L33
 ```
 
 This is all that you need to define for now. 
@@ -210,7 +210,7 @@ You'll need to substitute this metric into two places in the code. First, in the
 
 with
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L25
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L28
 ```
 
 Second, in the Expectation class, replace
@@ -220,7 +220,7 @@ Second, in the Expectation class, replace
 
 with
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L82
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L124
 ```
 
 It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
@@ -234,7 +234,7 @@ For example, replace:
 
 with 
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L22
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L25
 ```
 
 ### 7. Validate
@@ -252,7 +252,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate` method to validate the results of our `column.custom_max` Metric against our success keys:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L143-L178
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L185-L220
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -284,7 +284,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L181-L184
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L223-L226
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
