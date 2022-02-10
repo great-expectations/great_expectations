@@ -1,25 +1,13 @@
-name: Docker Image CI
+name: Alogolia Indexer
 
 on:
- push:
-    branches:
-      - develop
-
+  push:
+    branches: [ develop ]
+    
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Get the content of algolia.json as config
-      id: algolia_config
-      run: echo "::set-output name=config::$(cat ${{ github.workspace }}/algoliaconfig.json | jq -r tostring)"
-
-    - name: Push indices to Algolia
-      uses: signcl/docsearch-scraper-action@master
-      env:
-        APPLICATION_ID: 'RA3RRQUBO1'
-        API_KEY: '5fc4b9cbb86b1510fd966ce24afb13a4'
-        CONFIG: ${{ github.workspace }}/algoliaconfig.json
+      - name: Run a one-line script
+        run: curl -H 'Content-Type:application/json' -X POST --user aea7fe4f-74c4-44ed-9fe1-43044c4b2f20:8fd2d3b5d2f347cf703ea3fceb8c9d02 'https://crawler.algolia.com/api/1/crawlers/3ba40ab3-93f5-444b-930c-29fee09903e5/reindex'
