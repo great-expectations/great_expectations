@@ -6,7 +6,11 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.rule_based_profiler.parameter_builder import (
     SimpleDateFormatStringParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.types import (
+    Domain,
+    ParameterContainer,
+    get_parameter_value_by_fully_qualified_parameter_name,
+)
 
 
 def test_simple_date_format_parameter_builder_instantiation():
@@ -94,12 +98,19 @@ def test_simple_date_format_parameter_builder_alice(
     )
 
     assert len(parameter_container.parameter_nodes) == 1
-    assert parameter_container.parameter_nodes[
-        "parameter"
-    ].parameter.my_simple_date_format_string_parameter_builder == {
-        "value": "%Y-%m-%d %H:%M:%S",
-        "details": {"success_ratio": 1.0},
-    }
+
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_simple_date_format_string_parameter_builder"
+    )
+    expected_value: str = "%Y-%m-%d %H:%M:%S"
+
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            domain=domain,
+        )
+        == expected_value
+    )
 
 
 def test_simple_date_format_parameter_builder_bobby(
@@ -148,9 +159,16 @@ def test_simple_date_format_parameter_builder_bobby(
     )
 
     assert len(parameter_container.parameter_nodes) == 1
-    assert parameter_container.parameter_nodes[
-        "parameter"
-    ].parameter.my_simple_date_format_string_parameter_builder == {
-        "value": "%Y-%m-%d %H:%M:%S",
-        "details": {"success_ratio": 1.0},
-    }
+
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_simple_date_format_string_parameter_builder"
+    )
+    expected_value: str = "%Y-%m-%d %H:%M:%S"
+
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            domain=domain,
+        )
+        == expected_value
+    )

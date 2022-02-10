@@ -117,15 +117,24 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         format_string_success_ratios: dict = {}
         for fmt_string in self._candidate_strings:
+            if self._metric_value_kwargs:
+                match_strftime_metric_value_kwargs: dict = (
+                    {
+                        **self._metric_value_kwargs,
+                        **{"strftime_format": fmt_string},
+                    },
+                )
+            else:
+                match_strftime_metric_value_kwargs: dict = {
+                    "strftime_format": fmt_string
+                }
+
             match_strftime_metrics: MetricComputationResult = self.get_metrics(
                 batch_ids=batch_ids,
                 validator=validator,
                 metric_name="column_values.match_strftime_format.unexpected_count",
                 metric_domain_kwargs=self._metric_domain_kwargs,
-                metric_value_kwargs={
-                    **self._metric_value_kwargs,
-                    **{"strftime_format": fmt_string},
-                },
+                metric_value_kwargs=match_strftime_metric_value_kwargs,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
