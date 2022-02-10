@@ -537,6 +537,7 @@ def suite_edit(
         context=context,
         expectation_suite_name=expectation_suite,
         profile=False,
+        profiler_name=None,
         usage_event=usage_event_end,
         interactive_mode=interactive_mode,
         no_jupyter=no_jupyter,
