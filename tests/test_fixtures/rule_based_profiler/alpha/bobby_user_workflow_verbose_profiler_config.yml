@@ -109,9 +109,6 @@ rules:
         candidate_strings:
           - "%Y-%m-%d %H:%M:%S"
           - "%y-%m-%d"
-        additional_candidate_strings:
-          - "%Y-%m-%dT%z"
-          - "%m-%d-%Y"
         threshold: 0.9
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_match_strftime_format

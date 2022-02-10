@@ -35,9 +35,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
+        metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: float = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
-        additional_candidate_strings: Optional[Iterable[str]] = None,
         data_context: Optional["DataContext"] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
@@ -47,9 +47,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             name: the name of this parameter -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            metric_domain_kwargs: used in MetricConfiguration
+            metric_value_kwargs: used in MetricConfiguration
             threshold: the ratio of values that must match a format string for it to be accepted
-            candidate_strings: a list of candidate date format strings that will REPLACE the default
-            additional_candidate_strings: a list of candidate date format strings that will SUPPLEMENT the default
+            candidate_strings: a list of candidate date format strings that will replace the default
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
@@ -60,15 +61,13 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         )
 
         self._metric_domain_kwargs = metric_domain_kwargs
+        self._metric_value_kwargs = metric_value_kwargs
 
         self._threshold = threshold
         if candidate_strings is not None:
             self._candidate_strings = set(candidate_strings)
         else:
             self._candidate_strings = self.CANDIDATE_STRINGS
-
-        if additional_candidate_strings is not None:
-            self._candidate_strings.update(additional_candidate_strings)
 
     def _build_parameters(
         self,
@@ -101,39 +100,39 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        nonnull_count: int = sum(
-            self.get_metrics(
-                batch_ids=batch_ids,
-                validator=validator,
-                metric_name="column_values.nonnull.count",
-                metric_domain_kwargs=self._metric_domain_kwargs,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            ).metric_values
+        nonnull_metrics: MetricComputationResult = self.get_metrics(
+            batch_ids=batch_ids,
+            validator=validator,
+            metric_name="column_values.nonnull.count",
+            metric_domain_kwargs=self._metric_domain_kwargs,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
         )
+        nonnull_count: int = sum(nonnull_metrics.metric_values)
 
         format_string_success_ratios: dict = {}
         for fmt_string in self._candidate_strings:
+            match_strftime_metrics: MetricComputationResult = self.get_metrics(
+                batch_ids=batch_ids,
+                validator=validator,
+                metric_name="column_values.match_strftime_format.unexpected_count",
+                metric_domain_kwargs=self._metric_domain_kwargs,
+                metric_value_kwargs={"strftime_format": fmt_string},
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
             match_strftime_unexpected_count: int = sum(
-                self.get_metrics(
-                    batch_ids=batch_ids,
-                    validator=validator,
-                    metric_name="column_values.match_strftime_format.unexpected_count",
-                    metric_domain_kwargs=self._metric_domain_kwargs,
-                    metric_value_kwargs={"strftime_format": fmt_string},
-                    domain=domain,
-                    variables=variables,
-                    parameters=parameters,
-                ).metric_values
+                match_strftime_metrics.metric_values
             )
 
             format_string_success_ratios[fmt_string] = (
                 nonnull_count - match_strftime_unexpected_count
             ) / nonnull_count
 
-        best_fmt_string = None
-        best_ratio = 0
+        best_fmt_string: Optional[str] = None
+        best_ratio: int = 0
         for fmt_string, ratio in format_string_success_ratios.items():
             if ratio > best_ratio and ratio >= self._threshold:
                 best_fmt_string = fmt_string
