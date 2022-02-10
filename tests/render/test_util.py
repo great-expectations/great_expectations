@@ -255,7 +255,7 @@ def load_notebook_from_path(
 def find_code_in_notebook(
     nb: NotebookNode,
     search_string: str,
-) -> Optional[Dict[int, dict]]:
+) -> Dict[int, dict]:
     if (
         nb is None
         or not nb
@@ -263,7 +263,7 @@ def find_code_in_notebook(
         or not nb["cells"]
         or len(nb["cells"]) == 0
     ):
-        return None
+        return {}
 
     idx: int
     cell: dict
@@ -277,7 +277,7 @@ def find_code_in_notebook(
     ]
 
     if len(indices) == 0:
-        return None
+        return {}
 
     cells_of_interest_dict: Dict[int, dict] = {
         idx: copy.deepcopy(nb["cells"][idx]) for idx in indices
