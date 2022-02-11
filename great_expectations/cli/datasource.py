@@ -648,7 +648,7 @@ class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
     def credentials_snippet(self) -> str:
         return '''\
 # The SQLAlchemy url/connection string for the BigQuery connection
-# (reference: https://github.com/mxmzdlv/pybigquery#connection-string-parameters)"""
+# (reference: https://github.com/googleapis/python-bigquery-sqlalchemy#connection-string-parameters)"""
 connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
 
     def verify_libraries_installed(self) -> bool:
