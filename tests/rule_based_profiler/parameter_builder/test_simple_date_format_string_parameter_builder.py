@@ -11,6 +11,11 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
+from tests.integration.profiling.rule_based_profilers.conftest import (
+    alice_columnar_table_single_batch,
+    alice_columnar_table_single_batch_context,
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+)
 
 
 def test_simple_date_format_parameter_builder_instantiation():
