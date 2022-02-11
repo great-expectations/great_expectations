@@ -59,9 +59,9 @@ class CheckpointRunAnonymizer(Anonymizer):
         name: Optional[str] = kwargs.get("name")
         anonymized_name: Optional[str] = self.anonymize(name)
 
-        config_version: Optional[Number, str] = kwargs.get("config_version")
+        config_version: Optional[Union[Number, str]] = kwargs.get("config_version")
         if config_version is None:
-            config_version = 1
+            config_version = 1.0
 
         template_name: Optional[str] = kwargs.get("template_name")
         anonymized_template_name: Optional[str] = self.anonymize(template_name)
