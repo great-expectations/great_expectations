@@ -629,7 +629,7 @@ def test_cloud_notification_action(
     )
     expected_ge_cloud_url = urljoin(
         cloud_action.data_context.ge_cloud_config.base_url,
-        f"/accounts/{cloud_action.data_context.ge_cloud_config.account_id}/contracts/"
+        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/contracts/"
         f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
     )
     expected_headers = {
@@ -662,7 +662,7 @@ def test_cloud_notification_action_bad_response(
     )
     expected_ge_cloud_url = urljoin(
         cloud_action.data_context.ge_cloud_config.base_url,
-        f"/accounts/{cloud_action.data_context.ge_cloud_config.account_id}/contracts/"
+        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/contracts/"
         f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
     )
     expected_headers = {
@@ -671,7 +671,7 @@ def test_cloud_notification_action_bad_response(
     }
     expected_result = {
         "cloud_notification_result": "Cloud Notification request at "
-        "https://app.test.greatexpectations.io/accounts/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/contracts/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/suite-validation-results/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/notification-actions "
+        "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/contracts/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/suite-validation-results/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/notification-actions "
         "returned error 418: test_text"
     }
 

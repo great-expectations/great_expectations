@@ -86,7 +86,7 @@ rules:
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.max_range.details
-  rule_for_regex:
+  my_rule_for_timestamps:
     domain_builder:
       class_name: SimpleColumnSuffixDomainBuilder
       # BatchRequest yielding exactly one batch (March, 2019 trip data)
@@ -99,23 +99,25 @@ rules:
       column_name_suffixes:
         - _datetime
     parameter_builders:
-      - name: my_regex_format
-        class_name: RegexPatternStringParameterBuilder
+      - name: my_date_format
+        class_name: SimpleDateFormatStringParameterBuilder
         module_name: great_expectations.rule_based_profiler.parameter_builder
         batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         # Note this parameter builder computes parameters only on the provided domain:
         metric_domain_kwargs:
           column: pickup_datetime
         candidate_strings:
-          - r".*"
+          - "%Y-%m-%d %H:%M:%S"
+          - "%y-%m-%d"
         threshold: 0.9
     expectation_configuration_builders:
-      - expectation_type: expect_column_values_to_match_regex
+      - expectation_type: expect_column_values_to_match_strftime_format
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        strftime_format: $parameter.my_regex_format
+        strftime_format: $parameter.my_date_format
         meta:
           notes:
             format: markdown
             content:
+              - "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"

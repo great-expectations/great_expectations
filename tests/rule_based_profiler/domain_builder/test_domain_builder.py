@@ -14,8 +14,12 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     build_parameter_container_for_variables,
 )
+from tests.integration.profiling.rule_based_profilers.conftest import (
+    alice_columnar_table_single_batch,
+    alice_columnar_table_single_batch_context,
+)
 
-yaml = YAML()
+yaml = YAML(typ="safe")
 
 
 # noinspection PyPep8Naming
