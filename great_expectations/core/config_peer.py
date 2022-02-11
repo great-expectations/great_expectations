@@ -41,7 +41,7 @@ class ConfigPeer(ABC):
         **kwargs,
     ) -> Union[BaseYamlConfig, dict, str]:
         if isinstance(mode, str):
-            mode = ConfigOutputModes[mode]
+            mode = ConfigOutputModes(mode.lower())
 
         config: BaseYamlConfig = self.config
 
