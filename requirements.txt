@@ -4,7 +4,7 @@
 # Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
 
 altair>=4.0.0,<5  # package
-Click>=8.0.0  # package
+Click>=7.1.2  # package
 importlib-metadata>=1.7.0 # package (included in Python 3.8 by default.)
 ipywidgets>=7.5.1  # package
 jinja2>=2.10  # package
