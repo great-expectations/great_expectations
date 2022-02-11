@@ -1079,7 +1079,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
             __file__,
             os.path.join(
                 "..",
-                "integration",
+                "..",
                 "fixtures",
                 "yellow_tripdata_pandas_fixture",
                 "great_expectations",
