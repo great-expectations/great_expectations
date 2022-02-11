@@ -3,6 +3,7 @@ import uuid
 from typing import Any, Dict, List, Optional
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
@@ -49,9 +50,9 @@ def _validate_builder_override_config(builder_config: dict):
         )
 
 
-class RuleBasedProfilerBase:
+class BaseRuleBasedProfiler(ConfigPeer):
     """
-    RuleBasedProfilerBase class is initialized from RuleBasedProfilerConfig typed object and contains all functionality
+    BaseRuleBasedProfiler class is initialized from RuleBasedProfilerConfig typed object and contains all functionality
     in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
     """
 
@@ -68,7 +69,7 @@ class RuleBasedProfilerBase:
         These will be used to define profiler computation patterns.
 
         Args:
-            profiler_config: RuleBasedProfilerConfig -- formal typed object containing configuration (immutable)
+            profiler_config: RuleBasedProfilerConfig -- formal typed object containing configuration
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         name: str = profiler_config.name
@@ -78,6 +79,8 @@ class RuleBasedProfilerBase:
 
         self._name = name
         self._config_version = config_version
+
+        self._profiler_config = profiler_config
 
         if variables is None:
             variables = {}
@@ -640,6 +643,10 @@ class RuleBasedProfilerBase:
         return report_object
 
     @property
+    def config(self) -> RuleBasedProfilerConfig:
+        return self._profiler_config
+
+    @property
     def name(self) -> str:
         return self._name
 
@@ -661,7 +668,7 @@ class RuleBasedProfilerBase:
         self._rules = value
 
 
-class RuleBasedProfiler(RuleBasedProfilerBase):
+class RuleBasedProfiler(BaseRuleBasedProfiler):
     """
     RuleBasedProfiler object serves to profile, or automatically evaluate a set of rules, upon a given
     batch / multiple batches of data.
