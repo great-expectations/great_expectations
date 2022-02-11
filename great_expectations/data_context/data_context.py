@@ -3355,6 +3355,19 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             include_citation=include_citation,
         )
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.run_profiler_on_data",
+    )
+    def run_profiler_on_data(
+        self,
+        name: Optional[str] = None,
+        batch_request: Optional[Union[dict, BatchRequest, RuntimeBatchRequest]] = None,
+    ) -> ExpectationSuite:
+        if isinstance(batch_request, dict):
+            batch_request = get_batch_request_from_acceptable_arguments(**batch_request)
+
+        # TODO(cdkini): Figure out what happens next!
+
     def test_yaml_config(
         self,
         yaml_config: str,
