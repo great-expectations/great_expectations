@@ -16,7 +16,7 @@ rules:
   my_rule_for_user_ids:
     domain_builder: # If placing custom class into the general plugins directory works, remove module_name from config.
       class_name: MyCustomSemanticTypeColumnDomainBuilder
-      module_name: tests.test_fixtures.rule_based_profiler.alpha.plugins
+      module_name: tests.test_fixtures.rule_based_profiler.plugins
       batch_request: $variables.alice_single_batch_data_batch_request
       semantic_types:
         - user_id

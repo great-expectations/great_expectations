@@ -1,4 +1,8 @@
 from great_expectations.core import ExpectationSuite
+from tests.integration.profiling.rule_based_profilers.conftest import (
+    alice_columnar_table_single_batch,
+    bobby_columnar_table_multi_batch,
+)
 
 
 def test_alice_fixture_generation(
@@ -21,7 +25,6 @@ def test_alice_fixture_generation(
         )
         == 18
     )
-
 
 def test_bobby_fixture_generation(
     bobby_columnar_table_multi_batch,
