@@ -2,7 +2,8 @@ from typing import List
 
 import py
 import pytest
-from great_expectations_contrib.package import (
+
+from contrib.cli.great_expectations_contrib.package import (
     Dependency,
     DomainExpert,
     GitHubUser,
@@ -10,7 +11,6 @@ from great_expectations_contrib.package import (
     Maturity,
     RenderedExpectation,
 )
-
 from great_expectations.core.expectation_diagnostics.expectation_diagnostics import (
     ExpectationDiagnostics,
 )
