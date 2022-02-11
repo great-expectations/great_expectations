@@ -121,7 +121,7 @@ def suite_new(
     usage_event_end: str = ctx.obj.usage_event_end
 
     # Only set to true if `--profile` or `--profile <PROFILER_NAME>`
-    profile: bool = profiler_name is not None
+    profile: bool = _determine_profile(profiler_name)
 
     interactive_mode, profile = _process_suite_new_flags_and_prompt(
         context=context,
@@ -142,6 +142,18 @@ def suite_new(
         usage_event=usage_event_end,
         batch_request=batch_request,
     )
+
+
+def _determine_profile(profiler_name: Optional[str]) -> bool:
+    profile: bool = profiler_name is not None
+    if profile:
+        if profiler_name:
+            msg = "Since you supplied a profiler name, utilizing the RuleBasedProfiler"
+        else:
+            msg = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
+        cli_message(string=f"<yellow>{msg}</yellow>")
+
+    return profile
 
 
 def _process_suite_new_flags_and_prompt(
