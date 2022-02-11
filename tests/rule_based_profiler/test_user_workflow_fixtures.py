@@ -26,6 +26,7 @@ def test_alice_fixture_generation(
         == 21
     )
 
+
 def test_bobby_fixture_generation(
     bobby_columnar_table_multi_batch,
 ):
