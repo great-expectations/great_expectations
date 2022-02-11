@@ -34,7 +34,7 @@ class ConfigPeer(ABC):
     any form of serialization (YAML, JSON, SQL Database Tables, Pickle, etc.) will apply as peers, independent of the
     configuration classes themselves.  Hence, as part of this change, ConfigPeer will cease being the superclass of
     business objects (such as BaseDataContext, BaseCheckpoint, and BaseRuleBasedProfiler).  Instead, every persitable
-    business object will contain a referencing to its corresponding peer class, supporting the ConfigPeer interfaces.
+    business object will contain a reference to its corresponding peer class, supporting the ConfigPeer interfaces.
     """
 
     @property
