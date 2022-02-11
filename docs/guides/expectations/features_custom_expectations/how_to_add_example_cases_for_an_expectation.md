@@ -154,7 +154,7 @@ Congratulations!<br/>&#127881; You've successfully created example cases & tests
 
 ### 5. Contribution (Optional)
 
-This guide will leave you with test coverage sufficient for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.  
+This guide will leave you with test coverage sufficient for [contribution](../../../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.  
 
 If you're interested in having your contribution accepted at a Beta level, these tests will need to pass for all supported backends (Pandas, Spark, & SQLAlchemy).
 

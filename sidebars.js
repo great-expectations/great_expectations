@@ -233,13 +233,6 @@ module.exports = {
                 //'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
               ]
             },
-            //{
-            //  type: 'category',
-            //  label: 'Contributing',
-            //  items: [
-            //    'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
-            //  ]
-            //},
             {
               type: 'category',
               label: 'Advanced',
@@ -388,6 +381,7 @@ module.exports = {
         { type: 'doc', id: 'contributing/contributing_maturity' },
         { type: 'doc', id: 'contributing/contributing_misc' },
         { type: 'doc', id: 'contributing/contributing_package'},
+        { type: 'doc', id: 'contributing/how_to_contribute_a_custom_expectation_to_great_expectations'},
         {
           type: 'category',
           label: 'Style guides',

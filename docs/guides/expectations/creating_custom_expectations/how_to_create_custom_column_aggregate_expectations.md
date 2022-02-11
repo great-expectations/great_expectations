@@ -275,7 +275,7 @@ Congratulations!<br/>&#127881; You've just built your first Custom Expectation! 
 
 ### 8. Contribution (Optional)
 
-This guide will leave you with a Custom Expectation sufficient for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+This guide will leave you with a Custom Expectation sufficient for [contribution](../../../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
