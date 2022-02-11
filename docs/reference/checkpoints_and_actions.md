@@ -113,7 +113,7 @@ hierarchy of the Checkpoint configuration (at the top level and/or as part of th
 runtime batch_request can contain batch_data, only a database query.  This is because batch_data is used to specify
 dataframes (Pandas, Spark), which are not serializable (while database queries are plain text, which is serialiable).
 
-The proper mechnism for specifying non-serializable parameters is to pass them dynamically to the Checkpoint run()
+The proper mechanism for specifying non-serializable parameters is to pass them dynamically to the Checkpoint run()
 method.  Hence, in a typical scenario, one would instantiate the Checkpoint class with serializable parameters only,
 while specifying any non-serializable parameters, commonly dataframes, as arguments to the Checkpoint run() method.
 :::
