@@ -19,10 +19,13 @@ To streamline the process of contributing a package to Great Expectations, we've
 abstract away some of the complexity and help you adhere to our codebases' best practices. Please 
 utilize the tool during your development to ensure that your package meets all of the necessary requirements.
 
-To install the tool, use the following commands:
+To install the tool, first ensure that you are in the root of the `great_expectations` codebase:
 ```bash
-# Ensure you are in the root of the `great_expectations/` codebase
 cd contrib/cli
+```
+
+Next, use pip to install the CLI tool:
+```bash
 pip install -e great_expectations_contrib
 ```
 
