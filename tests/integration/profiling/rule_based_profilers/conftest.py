@@ -1000,6 +1000,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
         __file__,
         os.path.join(
             "..",
+            "..",
+            "..",
             "test_fixtures",
             "rule_based_profiler",
             "bobster_user_workflow_verbose_profiler_config.yml",
@@ -1091,6 +1093,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     base_directory: str = file_relative_path(
         __file__,
         os.path.join(
+            "..",
+            "..",
             "..",
             "test_sets",
             "taxi_yellow_tripdata_samples",
