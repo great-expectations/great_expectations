@@ -1,5 +1,6 @@
 import os
 from typing import Set
+from unittest import mock
 
 from great_expectations import DataContext
 
@@ -13,8 +14,11 @@ from great_expectations.core import (
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
+from great_expectations.render.renderer.v3.suite_profile_notebook_renderer import (
+    SuiteProfileNotebookRenderer,
+)
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
-from tests.render.test_util import run_notebook
+from tests.render.test_util import find_code_in_notebook, run_notebook
 
 
 def test_notebook_execution_with_pandas_backend(
@@ -213,3 +217,105 @@ def test_notebook_execution_with_pandas_backend(
     }
     assert columns_with_expectations == set()
     assert expectations_from_suite == expected_expectations
+
+
+@mock.patch("great_expectations.data_context.DataContext")
+def test_suite_notebook_renderer_render_user_configurable_profiler_configuration(
+    mock_data_context: mock.MagicMock,
+):
+    renderer = SuiteProfileNotebookRenderer(
+        context=mock_data_context,
+        expectation_suite_name="my_expectation_suite",
+        profiler_name="",  # No name should signal that UserConfigurableProfiler is necessary
+        batch_request={
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_basic_data_connector",
+            "data_asset_name": "Titanic_1912",
+        },
+    )
+    notebook = renderer.render()
+
+    snippets = [
+        # Imports
+        """import datetime
+
+import pandas as pd
+
+import great_expectations as ge
+import great_expectations.jupyter_ux
+from great_expectations.core.batch import BatchRequest
+from great_expectations.profile.user_configurable_profiler import (
+    UserConfigurableProfiler,
+)
+from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.exceptions import DataContextError""",
+        # Batch request
+        """batch_request = {
+    "datasource_name": "my_datasource",
+    "data_connector_name": "my_basic_data_connector",
+    "data_asset_name": "Titanic_1912",
+}""",
+        # Profiler instantiation/usage
+        """profiler = UserConfigurableProfiler(
+    profile_dataset=validator,
+    excluded_expectations=None,
+    ignored_columns=ignored_columns,
+    not_null_only=False,
+    primary_or_compound_key=False,
+    semantic_types_dict=None,
+    table_expectations_only=False,
+    value_set_threshold="MANY",
+)
+suite = profiler.build_suite()""",
+    ]
+
+    for snippet in snippets:
+        assert find_code_in_notebook(
+            notebook, snippet
+        ), f"Could not find snippet in Notebook: {snippet}"
+
+
+@mock.patch("great_expectations.data_context.DataContext")
+def test_suite_notebook_renderer_render_rule_based_profiler_configuration(
+    mock_data_context: mock.MagicMock,
+):
+    renderer = SuiteProfileNotebookRenderer(
+        context=mock_data_context,
+        expectation_suite_name="my_expectation_suite",
+        profiler_name="my_profiler",  # Name should signal that RBP from context's profile store is necessary
+        batch_request={
+            "datasource_name": "my_datasource",
+            "data_connector_name": "my_basic_data_connector",
+            "data_asset_name": "Titanic_1912",
+        },
+    )
+    notebook = renderer.render()
+
+    snippets = [
+        # Imports
+        """import datetime
+
+import pandas as pd
+
+import great_expectations as ge
+import great_expectations.jupyter_ux
+from great_expectations.core.batch import BatchRequest
+from great_expectations.checkpoint import SimpleCheckpoint
+from great_expectations.exceptions import DataContextError""",
+        # Batch request
+        """batch_request = {
+    "datasource_name": "my_datasource",
+    "data_connector_name": "my_basic_data_connector",
+    "data_asset_name": "Titanic_1912",
+}""",
+        # Profiler instantiation/usage
+        """suite = context.run_profiler_with_dynamic_arguments(
+    name="my_profiler",
+    expectation_suite_name=expectation_suite_name,
+)""",
+    ]
+
+    for snippet in snippets:
+        assert find_code_in_notebook(
+            notebook, snippet
+        ), f"Could not find snippet in Notebook: {snippet}"
