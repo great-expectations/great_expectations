@@ -9,6 +9,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config.base import (
+    RuleBasedProfilerConfig,
     domainBuilderConfigSchema,
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
@@ -49,115 +50,38 @@ def _validate_builder_override_config(builder_config: dict):
         )
 
 
-class RuleBasedProfiler:
+class RuleBasedProfilerBase:
     """
-    RuleBasedProfiler object serves to profile, or automatically evaluate a set of rules, upon a given
-    batch / multiple batches of data.
-
-    --ge-feature-maturity-info--
-
-        id: rule_based_profiler_overall
-        title: Rule-Based Profiler
-        icon:
-        short_description: Configuration Driven Profiler
-        description: Use YAML to configure a flexible Profiler engine, which will then generate an ExpectationSuite for a data set
-        how_to_guide_url:
-        maturity: Experimental
-        maturity_details:
-            api_stability: Low (instantiation of Profiler and the signature of the run() method will change)
-            implementation_completeness: Moderate (some augmentation and/or growth in capabilities is to be expected)
-            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
-            integration_infrastructure_test_coverage: N/A -> TBD
-            documentation_completeness: Moderate
-            bug_risk: Low/Moderate
-            expectation_completeness: Moderate
-
-        id: domain_builders
-        title: Domain Builders
-        icon:
-        short_description: Configurable Domain builders for generating lists of ExpectationConfiguration objects
-        description: Use YAML to build domains for ExpectationConfiguration generator (table, column, semantic types, etc.)
-        how_to_guide_url:
-        maturity: Experimental
-        maturity_details:
-            api_stability: Moderate
-            implementation_completeness: Moderate (additional DomainBuilder classes will be developed)
-            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
-            integration_infrastructure_test_coverage: N/A -> TBD
-            documentation_completeness: Moderate
-            bug_risk: Low/Moderate
-            expectation_completeness: Moderate
-
-        id: parameter_builders
-        title: Parameter Builders
-        icon:
-        short_description: Configurable Parameter builders for generating parameters to be used by ExpectationConfigurationBuilder classes for generating lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments), corresponding to the Domain built by a DomainBuilder class
-        description: Use YAML to configure single and multi batch based parameter computation modules for the use by ExpectationConfigurationBuilder classes
-        how_to_guide_url:
-        maturity: Experimental
-        maturity_details:
-            api_stability: Moderate
-            implementation_completeness: Moderate (additional ParameterBuilder classes will be developed)
-            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
-            integration_infrastructure_test_coverage: N/A -> TBD
-            documentation_completeness: Moderate
-            bug_risk: Low/Moderate
-            expectation_completeness: Moderate
-
-        id: expectation_configuration_builders
-        title: ExpectationConfiguration Builders
-        icon:
-        short_description: Configurable ExpectationConfigurationBuilder classes for generating lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments), corresponding to the Domain built by a DomainBuilder class and using parameters, computed by ParameterBuilder classes
-        description: Use YAML to configure ExpectationConfigurationBuilder classes, which emit lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments)
-        how_to_guide_url:
-        maturity: Experimental
-        maturity_details:
-            api_stability: Moderate
-            implementation_completeness: Moderate (additional ExpectationConfigurationBuilder classes might be developed)
-            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
-            integration_infrastructure_test_coverage: N/A -> TBD
-            documentation_completeness: Moderate
-            bug_risk: Low/Moderate
-            expectation_completeness: Moderate
-
-    --ge-feature-maturity-info--
+    RuleBasedProfilerBase class is initialized from RuleBasedProfilerConfig typed object and contains all functionality
+    in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
     """
 
     def __init__(
         self,
-        name: str,
-        config_version: float,
-        variables: Optional[Dict[str, Any]] = None,
-        rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        profiler_config: RuleBasedProfilerConfig,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
-        Create a new Profiler using configured rules.
+        Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
+
         For a rule or an item in a rule configuration, instantiates the following if
         available: a domain builder, a parameter builder, and a configuration builder.
         These will be used to define profiler computation patterns.
 
         Args:
-            name: The name of the RBP instance
-            config_version: The version of the RBP (currently only 1.0 is supported)
-            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
-            expectation_configuration_builders configuration components
-            variables: Any variables to be substituted within the rules
+            profiler_config: RuleBasedProfilerConfig -- formal typed object containing configuration (immutable)
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
+        name: str = profiler_config.name
+        config_version: float = profiler_config.config_version
+        variables: Optional[Dict[str, Any]] = profiler_config.variables
+        rules: Optional[Dict[str, Dict[str, Any]]] = profiler_config.rules
+
         self._name = name
         self._config_version = config_version
 
         if variables is None:
             variables = {}
-
-        # Convert variables argument to ParameterContainer
-        _variables: ParameterContainer = build_parameter_container_for_variables(
-            variables_configs=variables
-        )
-        self._variables = _variables
-
-        self._data_context = data_context
 
         # Necessary to annotate ExpectationSuite during `run()`
         self._citation = {
@@ -166,6 +90,14 @@ class RuleBasedProfiler:
             "variables": variables,
             "rules": rules,
         }
+
+        # Convert variables argument to ParameterContainer
+        _variables: ParameterContainer = build_parameter_container_for_variables(
+            variables_configs=variables
+        )
+        self._variables = _variables
+
+        self._data_context = data_context
 
         self._rules = self._init_profiler_rules(rules=rules)
 
@@ -407,7 +339,7 @@ class RuleBasedProfiler:
         if rules is None:
             rules = {}
 
-        effective_rules: Dict[str, Rule] = self._get_rules_as_dict()
+        effective_rules: Dict[str, Rule] = self.get_rules_as_dict()
 
         rule_name: str
         rule_config: dict
@@ -682,7 +614,7 @@ class RuleBasedProfiler:
 
         return list(effective_expectation_configuration_builder_configs.values())
 
-    def _get_rules_as_dict(self) -> Dict[str, Rule]:
+    def get_rules_as_dict(self) -> Dict[str, Rule]:
         rule: Rule
         return {rule.name: rule for rule in self._rules}
 
@@ -723,8 +655,117 @@ class RuleBasedProfiler:
 
     @property
     def rules(self) -> List[Rule]:
-        return list(self._get_rules_as_dict().values())
+        return self._rules
 
     @rules.setter
     def rules(self, value: List[Rule]):
         self._rules = value
+
+
+class RuleBasedProfiler(RuleBasedProfilerBase):
+    """
+    RuleBasedProfiler object serves to profile, or automatically evaluate a set of rules, upon a given
+    batch / multiple batches of data.
+
+    --ge-feature-maturity-info--
+
+        id: rule_based_profiler_overall
+        title: Rule-Based Profiler
+        icon:
+        short_description: Configuration Driven Profiler
+        description: Use YAML to configure a flexible Profiler engine, which will then generate an ExpectationSuite for a data set
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Low (instantiation of Profiler and the signature of the run() method will change)
+            implementation_completeness: Moderate (some augmentation and/or growth in capabilities is to be expected)
+            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
+            integration_infrastructure_test_coverage: N/A -> TBD
+            documentation_completeness: Moderate
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
+
+        id: domain_builders
+        title: Domain Builders
+        icon:
+        short_description: Configurable Domain builders for generating lists of ExpectationConfiguration objects
+        description: Use YAML to build domains for ExpectationConfiguration generator (table, column, semantic types, etc.)
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Moderate
+            implementation_completeness: Moderate (additional DomainBuilder classes will be developed)
+            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
+            integration_infrastructure_test_coverage: N/A -> TBD
+            documentation_completeness: Moderate
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
+
+        id: parameter_builders
+        title: Parameter Builders
+        icon:
+        short_description: Configurable Parameter builders for generating parameters to be used by ExpectationConfigurationBuilder classes for generating lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments), corresponding to the Domain built by a DomainBuilder class
+        description: Use YAML to configure single and multi batch based parameter computation modules for the use by ExpectationConfigurationBuilder classes
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Moderate
+            implementation_completeness: Moderate (additional ParameterBuilder classes will be developed)
+            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
+            integration_infrastructure_test_coverage: N/A -> TBD
+            documentation_completeness: Moderate
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
+
+        id: expectation_configuration_builders
+        title: ExpectationConfiguration Builders
+        icon:
+        short_description: Configurable ExpectationConfigurationBuilder classes for generating lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments), corresponding to the Domain built by a DomainBuilder class and using parameters, computed by ParameterBuilder classes
+        description: Use YAML to configure ExpectationConfigurationBuilder classes, which emit lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments)
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Moderate
+            implementation_completeness: Moderate (additional ExpectationConfigurationBuilder classes might be developed)
+            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
+            integration_infrastructure_test_coverage: N/A -> TBD
+            documentation_completeness: Moderate
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
+
+    --ge-feature-maturity-info--
+    """
+
+    def __init__(
+        self,
+        name: str,
+        config_version: float,
+        variables: Optional[Dict[str, Any]] = None,
+        rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
+    ):
+        """
+        Create a new Profiler using configured rules.
+        For a rule or an item in a rule configuration, instantiates the following if
+        available: a domain builder, a parameter builder, and a configuration builder.
+        These will be used to define profiler computation patterns.
+
+        Args:
+            name: The name of the RBP instance
+            config_version: The version of the RBP (currently only 1.0 is supported)
+            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
+            expectation_configuration_builders configuration components
+            variables: Any variables to be substituted within the rules
+            data_context: DataContext object that defines a full runtime environment (data access, etc.)
+        """
+        profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+            name=name,
+            config_version=config_version,
+            variables=variables,
+            rules=rules,
+        )
+
+        super().__init__(
+            profiler_config=profiler_config,
+            data_context=data_context,
+        )
