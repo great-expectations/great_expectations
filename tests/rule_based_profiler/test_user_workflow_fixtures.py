@@ -23,7 +23,7 @@ def test_alice_fixture_generation(
         len(
             alice_columnar_table_single_batch["expected_expectation_suite"].expectations
         )
-        == 18
+        == 21
     )
 
 def test_bobby_fixture_generation(
@@ -44,5 +44,5 @@ def test_bobby_fixture_generation(
                 "test_configuration_oneshot_sampling_method"
             ]["expected_expectation_suite"].expectations
         )
-        == 31
+        == 33
     )
