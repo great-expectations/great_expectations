@@ -69,7 +69,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         These will be used to define profiler computation patterns.
 
         Args:
-            profiler_config: RuleBasedProfilerConfig -- formal typed object containing configuration (immutable)
+            profiler_config: RuleBasedProfilerConfig -- formal typed object containing configuration
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
         name: str = profiler_config.name

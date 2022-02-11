@@ -918,22 +918,22 @@ class AnonymizedUsageStatisticsConfig(DictDot):
         self._usage_statistics_url = usage_statistics_url
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return self._enabled
 
     @enabled.setter
-    def enabled(self, enabled):
+    def enabled(self, enabled) -> None:
         if not isinstance(enabled, bool):
             raise ValueError("usage statistics enabled property must be boolean")
 
         self._enabled = enabled
 
     @property
-    def data_context_id(self):
+    def data_context_id(self) -> str:
         return self._data_context_id
 
     @data_context_id.setter
-    def data_context_id(self, data_context_id):
+    def data_context_id(self, data_context_id) -> None:
         try:
             uuid.UUID(data_context_id)
         except ValueError:
@@ -945,19 +945,19 @@ class AnonymizedUsageStatisticsConfig(DictDot):
         self._explicit_id = True
 
     @property
-    def explicit_id(self):
+    def explicit_id(self) -> bool:
         return self._explicit_id
 
     @property
-    def explicit_url(self):
+    def explicit_url(self) -> bool:
         return self._explicit_url
 
     @property
-    def usage_statistics_url(self):
+    def usage_statistics_url(self) -> str:
         return self._usage_statistics_url
 
     @usage_statistics_url.setter
-    def usage_statistics_url(self, usage_statistics_url):
+    def usage_statistics_url(self, usage_statistics_url) -> None:
         self._usage_statistics_url = usage_statistics_url
         self._explicit_url = True
 

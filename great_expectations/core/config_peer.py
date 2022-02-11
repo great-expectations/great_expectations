@@ -22,12 +22,11 @@ ConfigOutputModeType = Union[ConfigOutputModes, str]
 
 class ConfigPeer(ABC):
     """
-    A ConfigPeer is an object, whose subclasses can be instantiated using the "instantiate_class_from_config()" method
-    (located in "great_expectations/util.py").  Its immediate descendant subclass must use a subclass of
-    "BaseYamlConfig" as an argument to its constructor, and the subsequent descentants must use only primitive types as
-    their constructor arguments, whereever keys correspond to the keys of the "BaseYamlConfig" immutable configuration
-    object counterpart. The name, "ConfigPeer", denotes the fact that every immediate descendant subclass must have an
-    immutable, Marshmallow Schema validated, configuration class as its peer.
+    A ConfigPeer is an object, whose subclasses can be instantiated using instantiate_class_from_config() (located in
+    great_expectations/util.py).  Its immediate descendant subclass must use a subclass of BaseYamlConfig as an argument
+    to its constructor, and the subsequent descentants must use only primitive types as their constructor arguments,
+    whereever keys correspond to the keys of the "BaseYamlConfig" configuration object counterpart. The name ConfigPeer
+    means: Every immediate descendant subclass must have Marshmallow Schema validated configuration class as its peer.
     """
 
     @property
