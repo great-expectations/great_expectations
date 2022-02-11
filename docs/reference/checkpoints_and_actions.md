@@ -108,14 +108,14 @@ redefined.
 :::caution API note
 
 If the use case calls for instantiating the Checkpoint explicitly, then it is crucial to ensure that only serializable
-values are passed as arguments to the constructor.  Specifically, if batch_request is specified at any level of the
+values are passed as arguments to the constructor.  Specifically, if `batch_request` is specified at any level of the
 hierarchy of the Checkpoint configuration (at the top level and/or as part of the validators list structure), then no
-runtime batch_request can contain batch_data, only a database query.  This is because batch_data is used to specify
-dataframes (Pandas, Spark), which are not serializable (while database queries are plain text, which is serialiable).
+runtime `batch_request` can contain `batch_data`, only a database query.  This is because `batch_data` is used to specify
+dataframes (Pandas, Spark), which are not serializable (while database queries are plain text, which is serializable).
 
-The proper mechanism for specifying non-serializable parameters is to pass them dynamically to the Checkpoint run()
+The proper mechanism for specifying non-serializable parameters is to pass them dynamically to the Checkpoint `run()`
 method.  Hence, in a typical scenario, one would instantiate the Checkpoint class with serializable parameters only,
-while specifying any non-serializable parameters, commonly dataframes, as arguments to the Checkpoint run() method.
+while specifying any non-serializable parameters, commonly dataframes, as arguments to the Checkpoint `run()` method.
 :::
 
 ## SimpleCheckpoint class
