@@ -148,7 +148,7 @@ you will see the following in your Diagnostic Checklist:
 ```
 
 If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../creating_custom_expectations/overview.md) 
-and the SQLAlchemy backend covered in [How to add SQLAlchemy support for Custom Expectations](how_to_add_sqlalchemy_support_for_an_expectation.md), 
+and the SQLAlchemy backend covered in [How to add SQLAlchemy support for Custom Expectations](./how_to_add_sqlalchemy_support_for_an_expectation.md), 
 you should see the following in your Diagnostic Checklist:
 
 ```console
