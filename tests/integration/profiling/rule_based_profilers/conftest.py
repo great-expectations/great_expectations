@@ -822,6 +822,48 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
+    my_column_regex_rule_expectation_configurations_oneshot_sampling_method: List[
+        ExpectationConfiguration
+    ] = [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_regex",
+                "kwargs": {
+                    "column": "VendorID",
+                },
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
+                        ],
+                    }
+                },
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_regex",
+                "meta": {"notes": {"format": "markdown", "content": None}},
+                "kwargs": {"column": "RatecodeID"},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_regex",
+                "meta": {"notes": {"format": "markdown", "content": None}},
+                "kwargs": {"column": "PULocationID"},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_regex",
+                "meta": {"notes": {"format": "markdown", "content": None}},
+                "kwargs": {"column": "DOLocationID"},
+            }
+        ),
+    ]
+
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(
@@ -833,7 +875,9 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     expectation_configurations.extend(
         my_column_timestamps_rule_expectation_configurations_oneshot_sampling_method
     )
-
+    expectation_configurations.extend(
+        my_column_regex_rule_expectation_configurations_oneshot_sampling_method
+    )
     expectation_suite_name_oneshot_sampling_method: str = (
         "bobby_columnar_table_multi_batch_oneshot_sampling_method"
     )

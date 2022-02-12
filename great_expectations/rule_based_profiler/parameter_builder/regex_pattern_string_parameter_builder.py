@@ -4,6 +4,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Union
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    MetricComputationResult,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
@@ -24,20 +25,34 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     """
 
     CANDIDATE_STRINGS: Set[str] = {
-        r"*.",
+        r"^\d{1}$",
+        r"^\d{2}$",
+        r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
     }
 
     def __init__(
         self,
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
+        metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: float = 1.0,
         candidate_strings: Optional[Iterable[str]] = None,
         data_context: Optional["DataContext"] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
+        """
+        Configure this RegexPatternStringParameterBuilder
+        Args:
+            name: the name of this parameter -- this is user-specified parameter name (from configuration);
+            it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
+            and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            threshold: the ratio of values that must match a format string for it to be accepted
+            candidate_strings: a list of candidate date format strings that will REPLACE the default
+            additional_candidate_strings: a list of candidate date format strings that will SUPPLEMENT the default
+            data_context: DataContext
+            batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
+        """
 
-        # TODO Add doc string here
         super().__init__(
             name=name,
             data_context=data_context,
@@ -45,12 +60,15 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         )
 
         self._metric_domain_kwargs = metric_domain_kwargs
+        self._metric_value_kwargs = metric_value_kwargs
 
         self._threshold = threshold
         if candidate_strings is not None:
             self._candidate_strings = set(candidate_strings)
         else:
-            self._candidate_strings = self.CANDIDATE_STRINGS
+            self._candidate_strings = (
+                RegexPatternStringParameterBuilder.CANDIDATE_STRINGS
+            )
 
     def _build_parameters(
         self,
@@ -78,39 +96,47 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        nonnull_count: int = sum(
-            self.get_metrics(
+        nonnull_metrics: MetricComputationResult = self.get_metrics(
+            batch_ids=batch_ids,
+            validator=validator,
+            metric_name="column_values.nonnull.count",
+            metric_domain_kwargs=self._metric_domain_kwargs,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+        nonnull_count: int = sum(nonnull_metrics.metric_values)
+
+        regex_string_success_ratios: dict = {}
+        for regex_string in self._candidate_strings:
+            if self._metric_value_kwargs:
+                match_regex_metric_value_kwargs: dict = (
+                    {
+                        **self._metric_value_kwargs,
+                        **{"regex": regex_string},
+                    },
+                )
+            else:
+                match_regex_metric_value_kwargs: dict = {"regex": regex_string}
+
+            match_regex_metrics: MetricComputationResult = self.get_metrics(
                 batch_ids=batch_ids,
                 validator=validator,
-                metric_name="column_values.nonnull.count",
+                metric_name="column_values.match_regex.unexpected_count",
                 metric_domain_kwargs=self._metric_domain_kwargs,
+                metric_value_kwargs=match_regex_metric_value_kwargs,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
             )
-        )
-
-        regex_string_success_ratios: dict = {}
-        for regex_string in self._candidate_strings:
-            match_regex_unexpected_count: int = sum(
-                self.get_metrics(
-                    batch_ids=batch_ids,
-                    validator=validator,
-                    metric_name="column_values.match_regex.unexpected_count",
-                    metric_domain_kwargs=self._metric_domain_kwargs,
-                    metric_value_kwargs={"regex": regex_string},
-                    domain=domain,
-                    variables=variables,
-                    parameters=parameters,
-                ).metric_values
-            )
+            match_regex_unexpected_count: int = sum(match_regex_metrics.metric_values)
 
             regex_string_success_ratios[regex_string] = (
                 nonnull_count - match_regex_unexpected_count
             ) / nonnull_count
 
-        best_regex_string = None
-        best_ratio = 0.0
+        best_regex_string: Optional[str] = None
+        best_ratio: int = 0
         for regex_string, ratio in regex_string_success_ratios.items():
             if ratio > best_ratio and ratio >= self._threshold:
                 best_regex_string = regex_string
@@ -120,7 +146,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             f"$parameter.{self.name}": {
                 "value": best_regex_string,
                 "details": {"success_ratio": best_ratio},
-            }
+            },
         }
 
         build_parameter_container(

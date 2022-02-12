@@ -27,7 +27,6 @@ class ColumnDomainBuilder(DomainBuilder):
                 metric_dependencies=None,
             )
         )
-        # is this just going to be none? should it be?
         column_name: str
         domains: List[Domain] = [
             Domain(
