@@ -28,9 +28,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 # TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
-MetricComputationValues = Union[
-    Union[Any, Number, np.ndarray, List[Union[Any, Number]]]
-]
+MetricComputationValues = np.ndarray
 MetricComputationDetails = Dict[str, Any]
 MetricComputationResult = make_dataclass(
     "MetricComputationResult", ["metric_values", "details"]
@@ -233,6 +231,7 @@ class ParameterBuilder(Builder, ABC):
             metric_value = validator.get_metric(
                 metric=MetricConfiguration(**metric_configuration_arguments)
             )
+
             if enforce_numeric_metric:
                 if not is_numeric(value=metric_value):
                     raise ge_exceptions.ProfilerExecutionError(
@@ -240,18 +239,20 @@ class ParameterBuilder(Builder, ABC):
 (value of type "{str(type(metric_value))}" was computed).
 """
                     )
+
                 if np.isnan(metric_value):
                     if not replace_nan_with_zero:
                         raise ValueError(
                             f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
 """
                         )
+
                     metric_value = 0.0
 
             metric_values.append(metric_value)
 
         return MetricComputationResult(
-            metric_values=metric_values,
+            metric_values=np.array(metric_values),
             details={
                 "metric_configuration": {
                     "metric_name": metric_name,

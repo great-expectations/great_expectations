@@ -296,8 +296,6 @@ detected.
             parameters=parameters,
         )
 
-        metric_values = np.array(metric_values, dtype=np.float64)
-
         lower_quantile: Union[Number, float]
         upper_quantile: Union[Number, float]
 
@@ -366,6 +364,7 @@ detected.
             variables=variables,
             parameters=parameters,
         )
+
         n_resamples: int
         if num_bootstrap_samples is None:
             n_resamples = DEFAULT_BOOTSTRAP_NUM_RESAMPLES
@@ -380,7 +379,7 @@ detected.
 
     def _get_truncate_values_using_heuristics(
         self,
-        metric_values: Union[np.ndarray, List[Number]],
+        metric_values: MetricComputationValues,
         domain: Domain,
         *,
         variables: Optional[ParameterContainer] = None,
@@ -396,6 +395,7 @@ detected.
             variables=variables,
             parameters=parameters,
         )
+
         distribution_boundary: Optional[Union[int, float]]
         if not all(
             [
@@ -414,14 +414,11 @@ detected.
 
         lower_bound: Optional[Number] = truncate_values.get("lower_bound")
         upper_bound: Optional[Number] = truncate_values.get("upper_bound")
-        metric_value: Union[Number, np.float64]
-        if lower_bound is None and all(
-            [metric_value > NP_EPSILON for metric_value in metric_values]
-        ):
+
+        if lower_bound is None and np.all(np.greater(metric_values, NP_EPSILON)):
             lower_bound = 0.0
-        if upper_bound is None and all(
-            [metric_value < (-NP_EPSILON) for metric_value in metric_values]
-        ):
+
+        if upper_bound is None and np.all(np.less(metric_values, (-NP_EPSILON))):
             upper_bound = 0.0
 
         return {
@@ -431,7 +428,7 @@ detected.
 
     def _get_round_decimals_using_heuristics(
         self,
-        metric_values: Union[np.ndarray, List[Number]],
+        metric_values: MetricComputationValues,
         domain: Domain,
         *,
         variables: Optional[ParameterContainer] = None,
@@ -449,19 +446,15 @@ detected.
         )
         if round_decimals is None:
             round_decimals = MAX_DECIMALS
-        elif not isinstance(round_decimals, int) or (round_decimals < 0):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
+        else:
+            if not isinstance(round_decimals, int) or (round_decimals < 0):
+                raise ge_exceptions.ProfilerExecutionError(
+                    message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
 positive integer, or must be omitted (or set to None).
 """
-            )
-        metric_value: Number
-        if all(
-            [
-                np.issubdtype(type(metric_value), np.integer)
-                for metric_value in metric_values
-            ]
-        ):
+                )
+
+        if np.issubdtype(metric_values.dtype, np.integer):
             round_decimals = 0
 
         return round_decimals
