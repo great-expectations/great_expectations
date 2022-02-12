@@ -349,7 +349,7 @@ stages:
             displayName: 'pytest'
 
   - stage: cli_integration
-    dependsOn: [lint, usage_stats_integration, required, db_integration]
+    dependsOn: [lint]
     pool:
       vmImage: 'ubuntu-latest'
 

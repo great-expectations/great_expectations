@@ -507,15 +507,18 @@ def get_batch_list_usage_statistics(data_context, *args, **kwargs):
 
 # noinspection PyUnusedLocal
 def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
+    data_context_id: Optional[str] = None
     try:
         data_context_id = checkpoint.data_context.data_context_id
     except AttributeError:
         data_context_id = None
-    anonymizer = _anonymizers.get(data_context_id, None)
+
+    anonymizer: Anonymizer = _anonymizers.get(data_context_id, None)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
-    payload = {}
+
+    payload: dict = {}
 
     if checkpoint._usage_statistics_handler:
         # noinspection PyBroadException
@@ -523,8 +526,6 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
             checkpoint_run_anonymizer: CheckpointRunAnonymizer = (
                 checkpoint._usage_statistics_handler._checkpoint_run_anonymizer
             )
-
-            checkpoint_config: dict = copy.deepcopy(checkpoint.get_config())
 
             resolved_runtime_kwargs: dict = (
                 checkpoint_run_anonymizer.resolve_config_using_acceptable_arguments(
@@ -535,8 +536,6 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
             payload = checkpoint_run_anonymizer.anonymize_checkpoint_run(
                 *(checkpoint,), **resolved_runtime_kwargs
             )
-
-            checkpoint._config_kwargs = checkpoint_config
         except Exception as e:
             logger.debug(
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
