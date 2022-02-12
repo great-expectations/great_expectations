@@ -1,11 +1,31 @@
 import json
+from typing import Callable, Dict, Optional
 
-from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import ColumnMapExpectation
+from numpy import array
+
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
+from great_expectations.execution_engine.execution_engine import (
+    ExecutionEngine,
+    MetricDomainTypes,
+    MetricPartialFunctionTypes,
+)
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    ExpectationConfiguration,
+)
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
+    column_function_partial,
+    metric_partial,
+    metric_value,
 )
+from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 # This class defines a Metric to support your Expectation.
@@ -20,6 +40,69 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
     def _pandas(cls, column, **kwargs):
         return column == 3
 
+    @metric_partial(
+        engine=SparkDFExecutionEngine,
+        partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
+        domain_type=MetricDomainTypes.COLUMN,
+    )
+    def _spark(
+        cls,
+        execution_engine: SparkDFExecutionEngine,
+        metric_domain_kwargs,
+        metric_value_kwargs,
+        metrics,
+        runtime_configuration,
+    ):
+        (
+            selectable,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
+
+        column_name = accessor_domain_kwargs["column"]
+        column = F.col(column_name)
+
+        query = F.when(column == 3, F.lit(False)).otherwise(F.lit(True))
+
+        return (query, compute_domain_kwargs, accessor_domain_kwargs)
+
+    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(cls, column, **kwargs):
+        return column.in_([3])
+
+    @classmethod
+    def _get_evaluation_dependencies(
+        cls,
+        metric: MetricConfiguration,
+        configuration: Optional[ExpectationConfiguration] = None,
+        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: Optional[Dict] = None,
+    ):
+        """Returns a dictionary of given metric names and their corresponding configuration, specifying the metric
+        types and their respective domains"""
+        dependencies: Dict = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+
+        table_domain_kwargs: Dict = {
+            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
+        }
+        dependencies["table.column_types"] = MetricConfiguration(
+            metric_name="table.column_types",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs={
+                "include_nested": True,
+            },
+            metric_dependencies=None,
+        )
+
+        return dependencies
+
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
@@ -31,7 +114,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         {
             "data": {
                 "all_threes": [3, 3, 3, 3, 3],
-                "some_zeroes": [3, 3, 3, 0, None],
+                "some_zeroes": [3, 3, 3, 0, 0],
             },
             "tests": [
                 {
@@ -50,9 +133,21 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
                     "in": {"column": "some_zeroes", "mostly": 0.8},
                     "out": {
                         "success": False,
-                        "unexpected_index_list": [3],
-                        "unexpected_list": [0],
                     },
+                },
+            ],
+            "test_backends": [
+                {
+                    "backend": "pandas",
+                    "dialects": None,
+                },
+                {
+                    "backend": "sqlalchemy",
+                    "dialects": ["sqlite", "postgresql"],
+                },
+                {
+                    "backend": "spark",
+                    "dialects": None,
                 },
             ],
         }
