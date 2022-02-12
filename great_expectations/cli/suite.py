@@ -79,10 +79,13 @@ def suite(ctx):
 @click.option(
     "--profile",
     "-p",
-    is_flag=True,
-    default=False,
-    help="""Generate a starting expectation suite automatically so you can refine it further. Assumes --interactive
-flag.
+    "profiler_name",
+    is_flag=False,
+    flag_value="",
+    default=None,
+    help="""Generate a starting expectation suite automatically so you can refine it further.
+    Takes in an optional name; if provided, a profiler of that name will be retrieved from your Data Context.
+    Assumes --interactive flag.
 """,
 )
 @click.option(
@@ -106,7 +109,7 @@ def suite_new(
     expectation_suite: Optional[str],
     interactive_flag: bool,
     manual_flag: bool,
-    profile: bool,
+    profiler_name: Optional[str],
     batch_request: Optional[str],
     no_jupyter: bool,
 ) -> None:
@@ -116,6 +119,9 @@ def suite_new(
     """
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    # Only set to true if `--profile` or `--profile <PROFILER_NAME>`
+    profile: bool = _determine_profile(profiler_name)
 
     interactive_mode, profile = _process_suite_new_flags_and_prompt(
         context=context,
@@ -131,10 +137,23 @@ def suite_new(
         expectation_suite_name=expectation_suite,
         interactive_mode=interactive_mode,
         profile=profile,
+        profiler_name=profiler_name,
         no_jupyter=no_jupyter,
         usage_event=usage_event_end,
         batch_request=batch_request,
     )
+
+
+def _determine_profile(profiler_name: Optional[str]) -> bool:
+    profile: bool = profiler_name is not None
+    if profile:
+        if profiler_name:
+            msg = "Since you supplied a profiler name, utilizing the RuleBasedProfiler"
+        else:
+            msg = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
+        cli_message(string=f"<yellow>{msg}</yellow>")
+
+    return profile
 
 
 def _process_suite_new_flags_and_prompt(
@@ -156,8 +175,7 @@ def _process_suite_new_flags_and_prompt(
         batch_request: --batch-request from the `suite new` CLI command
 
     Returns:
-        Dictionary with keys of processed parameters and boolean values e.g.
-        {"interactive": True, "profile": False}
+        Tuple with keys of processed parameters and boolean values
     """
 
     interactive_mode: Optional[CLISuiteInteractiveFlagCombinations]
@@ -190,6 +208,7 @@ def _suite_new_workflow(
     expectation_suite_name: Optional[str],
     interactive_mode: CLISuiteInteractiveFlagCombinations,
     profile: bool,
+    profiler_name: Optional[str],
     no_jupyter: bool,
     usage_event: str,
     batch_request: Optional[
@@ -263,6 +282,7 @@ def _suite_new_workflow(
             context=context,
             expectation_suite_name=expectation_suite_name,
             profile=profile,
+            profiler_name=profiler_name,
             usage_event=usage_event,
             interactive_mode=interactive_mode,
             no_jupyter=no_jupyter,
@@ -529,6 +549,7 @@ def suite_edit(
         context=context,
         expectation_suite_name=expectation_suite,
         profile=False,
+        profiler_name=None,
         usage_event=usage_event_end,
         interactive_mode=interactive_mode,
         no_jupyter=no_jupyter,
@@ -668,6 +689,7 @@ def _suite_edit_workflow(
     context: DataContext,
     expectation_suite_name: str,
     profile: bool,
+    profiler_name: Optional[str],
     usage_event: str,
     interactive_mode: CLISuiteInteractiveFlagCombinations,
     no_jupyter: bool,
@@ -755,6 +777,7 @@ def _suite_edit_workflow(
             renderer = SuiteProfileNotebookRenderer(
                 context=context,
                 expectation_suite_name=expectation_suite_name,
+                profiler_name=profiler_name,
                 batch_request=batch_request,
             )
             renderer.render_to_disk(notebook_file_path=notebook_path)

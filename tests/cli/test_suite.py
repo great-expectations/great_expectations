@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 from unittest import mock
 
 import pytest
@@ -3486,6 +3486,260 @@ suite = profiler.build_suite()"""
         my_caplog=caplog,
         click_result=result,
     )
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
+    mock_webbrowser: mock.MagicMock,
+    mock_subprocess: mock.MagicMock,
+    mock_emit: mock.MagicMock,
+    monkeypatch: Any,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled: DataContext,
+):
+    """
+    We call the "suite new --profile" command with a named profiler argument
+
+    The command should create a new notebook
+    """
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+
+    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    with open(batch_request_file_path, "w") as json_file:
+        json.dump(batch_request, json_file)
+
+    mock_emit.reset_mock()
+
+    profiler_name: str = "my_profiler"
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
+    result: Result = runner.invoke(
+        cli,
+        [
+            "--v3-api",
+            "suite",
+            "new",
+            "--expectation-suite",
+            f"{expectation_suite_name}",
+            "--interactive",
+            "--batch-request",
+            f"{batch_request_file_path}",
+            "--profile",
+            f"{profiler_name}",
+            "--no-jupyter",
+        ],
+        input="\n",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "Select a datasource" not in stdout
+    assert (
+        "Opening a notebook for you now to edit your expectation suite!" not in stdout
+    )
+    assert (
+        "If you wish to avoid this you can add the `--no-jupyter` flag." not in stdout
+    )
+
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
+    assert os.path.isfile(expected_suite_path)
+
+    expected_notebook_path: str = os.path.join(
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
+    )
+    assert os.path.isfile(expected_notebook_path)
+
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
+    batch_request_string: str = (
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
+    )
+    batch_request_string = rf"batch_request = {batch_request_string}"
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=batch_request_string,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=suite_identifier)",
+    )
+    assert not cells_of_interest_dict
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    profiler_code_cell: str = f"""\
+suite = context.run_profiler_with_dynamic_arguments(
+    name="{profiler_name}",
+    expectation_suite_name=expectation_suite_name,
+)
+"""
+    profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=profiler_code_cell,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
+    mock_webbrowser: mock.MagicMock,
+    mock_subprocess: mock.MagicMock,
+    mock_emit: mock.MagicMock,
+    monkeypatch: Any,
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled: DataContext,
+):
+    """
+    We call the "suite new --profile" command with a named profiler argument
+
+    The command should create a new notebook and open it in Jupyter
+    """
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    project_dir: str = context.root_directory
+    uncommitted_dir: str = os.path.join(project_dir, "uncommitted")
+
+    expectation_suite_name: str = "test_suite_name"
+
+    batch_request: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+
+    batch_request_file_path: str = os.path.join(uncommitted_dir, f"batch_request.json")
+    with open(batch_request_file_path, "w") as json_file:
+        json.dump(batch_request, json_file)
+
+    mock_emit.reset_mock()
+
+    profiler_name: str = "my_profiler"
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
+    result: Result = runner.invoke(
+        cli,
+        [
+            "--v3-api",
+            "suite",
+            "new",
+            "--expectation-suite",
+            f"{expectation_suite_name}",
+            "--interactive",
+            "--batch-request",
+            f"{batch_request_file_path}",
+            "--profile",
+            f"{profiler_name}",
+        ],
+        input="\n",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    stdout: str = result.stdout
+    assert "Select a datasource" not in stdout
+    assert "Opening a notebook for you now to edit your expectation suite!" in stdout
+    assert "If you wish to avoid this you can add the `--no-jupyter` flag." in stdout
+
+    expected_suite_path: str = os.path.join(
+        project_dir, "expectations", f"{expectation_suite_name}.json"
+    )
+    assert os.path.isfile(expected_suite_path)
+
+    expected_notebook_path: str = os.path.join(
+        uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
+    )
+    assert os.path.isfile(expected_notebook_path)
+
+    batch_request_obj: BatchRequest = BatchRequest(**batch_request)
+    batch_request = deep_filter_properties_iterable(
+        properties=batch_request_obj.to_json_dict(),
+    )
+    batch_request = standardize_batch_request_display_ordering(
+        batch_request=batch_request
+    )
+    batch_request_string: str = (
+        str(batch_request)
+        .replace("{", "{\n    ")
+        .replace(", ", ",\n    ")
+        .replace("}", ",\n}")
+        .replace("'", '"')
+    )
+    batch_request_string = rf"batch_request = {batch_request_string}"
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=batch_request_string,
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=suite_identifier)",
+    )
+    assert not cells_of_interest_dict
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string="context.open_data_docs(resource_identifier=validation_result_identifier)",
+    )
+    assert len(cells_of_interest_dict) == 1
+
+    profiler_code_cell: str = f"""\
+suite = context.run_profiler_with_dynamic_arguments(
+    name="{profiler_name}",
+    expectation_suite_name=expectation_suite_name,
+)
+"""
+    profiler_code_cell = lint_code(code=profiler_code_cell).rstrip("\n")
+
+    cells_of_interest_dict: Dict[int, dict] = find_code_in_notebook(
+        nb=load_notebook_from_path(notebook_path=expected_notebook_path),
+        search_string=profiler_code_cell,
+    )
+    assert len(cells_of_interest_dict) == 1
 
 
 @pytest.fixture
