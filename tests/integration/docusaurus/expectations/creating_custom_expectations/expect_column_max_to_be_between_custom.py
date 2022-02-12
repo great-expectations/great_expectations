@@ -13,8 +13,11 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
+    MetricDomainTypes,
+    MetricFunctionTypes,
     column_aggregate_partial,
     column_aggregate_value,
+    metric_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 
@@ -29,10 +32,35 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
         """Pandas Max Implementation"""
         return column.max()
 
-    @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column, **kwargs):
-        """SqlAlchemy Max Implementation"""
-        return sa.func.max(column)
+    @metric_value(
+        engine=SqlAlchemyExecutionEngine,
+        metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
+        domain_type=MetricDomainTypes.COLUMN,
+    )
+    def _sqlalchemy(
+        cls,
+        execution_engine: SqlAlchemyExecutionEngine,
+        metric_domain_kwargs,
+        metric_value_kwargs,
+        metrics,
+        runtime_configuration,
+    ):
+        (
+            selectable,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
+
+        column_name = accessor_domain_kwargs["column"]
+        column = sa.column(column_name)
+        sqlalchemy_engine = execution_engine.engine
+
+        query = sa.select(sa.func.max(column)).select_from(selectable)
+        result = sqlalchemy_engine.execute(query).fetchone()
+
+        return result[0]
 
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, _table, _column_name, **kwargs):
@@ -73,6 +101,20 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
                         "strict_max": True,
                     },
                     "out": {"success": False},
+                },
+            ],
+            "test_backends": [
+                {
+                    "backend": "pandas",
+                    "dialects": None,
+                },
+                {
+                    "backend": "sqlalchemy",
+                    "dialects": ["sqlite", "postgresql"],
+                },
+                {
+                    "backend": "spark",
+                    "dialects": None,
                 },
             ],
         }

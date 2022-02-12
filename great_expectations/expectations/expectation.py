@@ -1,4 +1,7 @@
+import glob
+import json
 import logging
+import os
 import re
 import traceback
 import warnings
@@ -83,6 +86,15 @@ logger = logging.getLogger(__name__)
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")
+
+
+_TEST_DEFS_DIR = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "..",
+    "tests",
+    "test_definitions",
+)
 
 
 def camel_to_snake(name):
@@ -1000,19 +1012,39 @@ class Expectation(metaclass=MetaExpectation):
 
         return checklist
 
+    def _get_examples_from_json(self):
+        """Only meant to be called by self._get_examples"""
+        results = []
+        found = glob.glob(
+            os.path.join(_TEST_DEFS_DIR, "**", f"{self.expectation_type}.json"),
+            recursive=True,
+        )
+        if found:
+            with open(found[0], "r") as fp:
+                data = json.load(fp)
+            results = data["datasets"]
+        return results
+
     def _get_examples(
         self, return_only_gallery_examples: bool = True
     ) -> List[ExpectationTestDataCases]:
         """
         Get a list of examples from the object's `examples` member variable.
 
+        For core expectations, the examples are found in tests/test_definitions/
+
         :param return_only_gallery_examples: if True, include only test examples where `include_in_gallery` is true
         :return: list of examples or [], if no examples exist
         """
+        is_core_expectation = False
         try:
+            # Currently, only community contrib expectations have an examples attribute
             all_examples = self.examples
         except AttributeError:
-            return []
+            all_examples = self._get_examples_from_json()
+            is_core_expectation = True
+            if all_examples == []:
+                return []
 
         included_examples = []
         for example in all_examples:
@@ -1022,6 +1054,7 @@ class Expectation(metaclass=MetaExpectation):
                 if (
                     test.get("include_in_gallery") == True
                     or return_only_gallery_examples == False
+                    or is_core_expectation == True
                 ):
                     copied_test = deepcopy(test)
                     included_test_cases.append(
@@ -1034,6 +1067,8 @@ class Expectation(metaclass=MetaExpectation):
                 copied_example = deepcopy(example)
                 copied_example["tests"] = included_test_cases
                 copied_example.pop("test_backends", None)
+                copied_example.pop("_notes", None)
+                copied_example.pop("only_for", None)
                 included_examples.append(ExpectationTestDataCases(**copied_example))
 
         return included_examples
@@ -1367,11 +1402,19 @@ class Expectation(metaclass=MetaExpectation):
         for provider in execution_engine_names:
             all_true = True
             for metric_diagnostics in metric_diagnostics_list:
-                has_provider = (
-                    provider in registered_metrics[metric_diagnostics.name]["providers"]
-                )
-                if not has_provider:
-                    all_true = False
+                try:
+                    has_provider = (
+                        provider
+                        in registered_metrics[metric_diagnostics.name]["providers"]
+                    )
+                    if not has_provider:
+                        all_true = False
+                except KeyError:
+                    # https://github.com/great-expectations/great_expectations/blob/abd8f68a162eaf9c33839d2c412d8ba84f5d725b/great_expectations/expectations/core/expect_table_row_count_to_equal_other_table.py#L174-L181
+                    # expect_table_row_count_to_equal_other_table does tricky things and replaces
+                    # registered metric "table.row_count" with "table.row_count.self" and "table.row_count.other"
+                    if "table.row_count" in metric_diagnostics.name:
+                        continue
 
             execution_engines[provider] = all_true
 
@@ -1412,7 +1455,10 @@ class Expectation(metaclass=MetaExpectation):
             "maturity": "CONCEPT_ONLY",
             "tags": [],
             "contributors": [],
+            "requirements": [],
             "library_metadata_passed_checks": False,
+            "has_full_test_suite": False,
+            "manually_reviewed_code": False,
         }
 
         if hasattr(self, "library_metadata"):
@@ -1423,7 +1469,19 @@ class Expectation(metaclass=MetaExpectation):
                 [key in keys for key in {"maturity", "tags", "contributors"}]
             )
             has_no_forbidden_keys = all(
-                [key in {"maturity", "tags", "contributors", "package"} for key in keys]
+                (
+                    key
+                    in {
+                        "maturity",
+                        "tags",
+                        "contributors",
+                        "requirements",
+                        "package",
+                        "has_full_test_suite",
+                        "manually_reviewed_code",
+                    }
+                    for key in keys
+                )
             )
             if has_all_required_keys and has_no_forbidden_keys:
                 augmented_library_metadata["library_metadata_passed_checks"] = True
@@ -1454,6 +1512,24 @@ class Expectation(metaclass=MetaExpectation):
             ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
                 execution_engines
             )
+        )
+
+        beta_checks.append(
+            ExpectationDiagnostics._check_input_validation(self, examples)
+        )
+        beta_checks.append(ExpectationDiagnostics._check_renderer_methods(self))
+        beta_checks.append(
+            ExpectationDiagnostics._check_core_logic_for_all_applicable_execution_engines(
+                execution_engines
+            )
+        )
+
+        production_checks.append(ExpectationDiagnostics._check_linting(self))
+        production_checks.append(
+            ExpectationDiagnostics._check_full_test_suite(library_metadata)
+        )
+        production_checks.append(
+            ExpectationDiagnostics._check_manual_code_review(library_metadata)
         )
 
         return ExpectationDiagnosticMaturityMessages(

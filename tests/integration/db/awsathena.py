@@ -1,11 +1,11 @@
 import os
 
 from ruamel import yaml
-from utils import check_athena_table_count, clean_athena_db
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest
 from great_expectations.exceptions import DataContextError
+from tests.test_utils import check_athena_table_count, clean_athena_db
 
 ATHENA_DB_NAME = os.getenv("ATHENA_DB_NAME")
 if not ATHENA_DB_NAME:

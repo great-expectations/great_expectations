@@ -387,6 +387,7 @@ module.exports = {
         { type: 'doc', id: 'contributing/contributing_test' },
         { type: 'doc', id: 'contributing/contributing_maturity' },
         { type: 'doc', id: 'contributing/contributing_misc' },
+        { type: 'doc', id: 'contributing/contributing_package'},
         {
           type: 'category',
           label: 'Style guides',

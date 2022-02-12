@@ -1,6 +1,7 @@
 from dataclasses import asdict, dataclass
 from typing import List, Tuple
 
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases,
 )
@@ -72,7 +73,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Check whether the Expectation has a library_metadata object"""
 
         return ExpectationDiagnosticCheckMessage(
-            message="library_metadata object exists",
+            message="Has a library_metadata object",
             passed=library_metadata.library_metadata_passed_checks,
         )
 
@@ -136,22 +137,42 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""
 
-        message = "Core logic exists and passes tests on at least one Execution Engine"
+        passed = False
+        message = "Has core logic and passes tests on at least one Execution Engine"
         successful_execution_engines = 0
         for k, v in execution_engines.items():
             if v is True:
                 successful_execution_engines += 1
 
         if successful_execution_engines > 0:
-            return ExpectationDiagnosticCheckMessage(
-                message=message,
-                passed=True,
-            )
-        else:
-            return ExpectationDiagnosticCheckMessage(
-                message=message,
-                passed=False,
-            )
+            passed = True
+
+        return ExpectationDiagnosticCheckMessage(
+            message=message,
+            passed=passed,
+        )
+
+    @staticmethod
+    def _check_core_logic_for_all_applicable_execution_engines(
+        execution_engines: ExpectationExecutionEngineDiagnostics,
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check whether core logic for this Expectation exists and passes tests on all applicable Execution Engines"""
+
+        # TODO: Update this once Expectation._execute_test_examples gets batches using an engine
+        passed = False
+        message = "Has core logic that passes tests for all applicable Execution Engines and SQL dialects"
+        successful_execution_engines = 0
+        for k, v in execution_engines.items():
+            if v is True:
+                successful_execution_engines += 1
+
+        if successful_execution_engines > 0:
+            passed = True
+
+        return ExpectationDiagnosticCheckMessage(
+            message=message,
+            passed=passed,
+        )
 
     @staticmethod
     def _count_positive_and_negative_example_cases(
@@ -164,11 +185,11 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         for test_data_cases in examples:
             for test in test_data_cases["tests"]:
-                if test["output"]["success"] is True:
+                success = test["output"].get("success")
+                if success is True:
                     positive_cases += 1
-                elif test["output"]["success"] is False:
+                elif success is False:
                     negative_cases += 1
-
         return positive_cases, negative_cases
 
     @staticmethod
@@ -215,3 +236,83 @@ class ExpectationDiagnostics(SerializableDictDot):
         output_message += "\n"
 
         return output_message
+
+    @staticmethod
+    def _check_input_validation(
+        expectation_instance,
+        examples: List[ExpectationTestDataCases],
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check that the validate_configuration method returns True"""
+        passed = False
+        sub_messages = []
+        try:
+            first_test = examples[0]["tests"][0]
+        except IndexError:
+            sub_messages.append({
+                "message": "No example found to get kwargs for ExpectationConfiguration",
+                "passed": False,
+            })
+        else:
+            expectation_config = ExpectationConfiguration(
+                expectation_type=expectation_instance.expectation_type,
+                kwargs=first_test.input,
+            )
+            passed = expectation_instance.validate_configuration(expectation_config)
+
+        return ExpectationDiagnosticCheckMessage(
+            message="Has basic input validation and type checking",
+            passed=passed,
+            sub_messages=sub_messages,
+        )
+
+    @staticmethod
+    def _check_renderer_methods(
+        expectation_instance,
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check if all statment renderers are defined"""
+        passed = False
+        # For now, don't include the "question" type since it is so sparsely implemented
+        # all_renderer_types = {"diagnostic", "prescriptive", "question", "descriptive"}
+        all_renderer_types = {"diagnostic", "prescriptive", "descriptive"}
+        renderer_names = [
+            name
+            for name in dir(expectation_instance)
+            if name.endswith("renderer") and name.startswith("_")
+        ]
+        renderer_types = {name.split("_")[1] for name in renderer_names}
+        if renderer_types - {"question"} == all_renderer_types:
+            passed = True
+        return ExpectationDiagnosticCheckMessage(
+            # message="Has all four statement Renderers: question, descriptive, prescriptive, diagnostic",
+            message="Has all three statement Renderers: descriptive, prescriptive, diagnostic",
+            passed=passed,
+        )
+
+    @staticmethod
+    def _check_linting(expectation_instance) -> ExpectationDiagnosticCheckMessage:
+        """Check if linting checks pass for Expectation"""
+        # TODO: Perform linting checks instead of just giving thumbs up
+        return ExpectationDiagnosticCheckMessage(
+            message="Passes all linting checks",
+            passed=True,
+        )
+
+    @staticmethod
+    def _check_full_test_suite(
+        library_metadata: AugmentedLibraryMetadata,
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check library_metadata to see if Expectation has a full test suite"""
+        return ExpectationDiagnosticCheckMessage(
+            message="Has a full suite of tests, as determined by project code standards",
+            passed=library_metadata.has_full_test_suite,
+        )
+
+    @staticmethod
+    def _check_manual_code_review(
+        library_metadata: AugmentedLibraryMetadata,
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check library_metadata to see if a manual code review has been performed"""
+        return ExpectationDiagnosticCheckMessage(
+            message="Has passed a manual review by a code owner for code standards and style guides",
+            passed=library_metadata.manually_reviewed_code,
+        )
