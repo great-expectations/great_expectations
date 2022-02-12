@@ -153,3 +153,4 @@ rules:
           notes:
             format: markdown
             content:
+              - "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"

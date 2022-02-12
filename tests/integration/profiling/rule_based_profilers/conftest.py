@@ -846,6 +846,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_match_regex",
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {"column": "RatecodeID"},
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
+                        ],
+                    }
+                },
             }
         ),
         ExpectationConfiguration(
@@ -853,6 +861,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_match_regex",
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {"column": "PULocationID"},
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
+                        ],
+                    }
+                },
             }
         ),
         ExpectationConfiguration(
@@ -860,6 +876,14 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_match_regex",
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {"column": "DOLocationID"},
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
+                        ],
+                    }
+                },
             }
         ),
     ]
