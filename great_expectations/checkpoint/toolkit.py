@@ -227,7 +227,7 @@ def delete_checkpoint(
     checkpoint_store: CheckpointStore,
     name: Optional[str] = None,
     ge_cloud_id: Optional[str] = None,
-):
+) -> None:
     assert bool(name) ^ bool(ge_cloud_id), "Must provide either name or ge_cloud_id."
 
     if ge_cloud_id:
