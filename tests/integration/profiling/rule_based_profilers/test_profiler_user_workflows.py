@@ -222,6 +222,7 @@ def test_bobby_profiler_user_workflow_multi_batch_row_count_range_rule_and_colum
         ]["expectation_suite_name"],
         include_citation=True,
     )
+
     assert (
         expectation_suite
         == bobby_columnar_table_multi_batch[

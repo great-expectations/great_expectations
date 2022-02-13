@@ -27,6 +27,7 @@ class ColumnDomainBuilder(DomainBuilder):
                 metric_dependencies=None,
             )
         )
+
         column_name: str
         domains: List[Domain] = [
             Domain(

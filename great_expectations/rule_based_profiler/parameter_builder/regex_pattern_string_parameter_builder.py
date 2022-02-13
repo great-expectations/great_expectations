@@ -58,11 +58,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             data_context=data_context,
             batch_request=batch_request,
         )
-        print(metric_value_kwargs)
-        print("metric value kwargs")
-
-        print(metric_domain_kwargs)
-        print("metric metric_domain_kwargs kwargs")
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
 
@@ -143,8 +138,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
                 nonnull_count - match_regex_unexpected_count
             ) / nonnull_count
 
-        print(regex_string_success_ratios)
-        print("~~~~~~~~~~~~")
         best_regex_string: Optional[str] = None
         best_ratio: int = 0
         for regex_string, ratio in regex_string_success_ratios.items():
@@ -157,9 +150,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
                 "details": {"success_ratio": best_ratio},
             },
         }
-        print(parameter_values)
-        print("parameter-values")
-
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )
