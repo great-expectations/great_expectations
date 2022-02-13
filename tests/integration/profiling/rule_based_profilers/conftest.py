@@ -830,7 +830,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "expectation_type": "expect_column_values_to_match_regex",
                 "kwargs": {
                     "column": "VendorID",
-                    "regex": {"value": "\\d{1}$", "details": {"success_ratio": 1.0}},
+                    "regex": {"value": r"^\d{1}$", "details": {"success_ratio": 1.0}},
                 },
                 "meta": {
                     "notes": {
@@ -848,7 +848,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "RatecodeID",
-                    "regex": {"value": "\\d{1}$", "details": {"success_ratio": 1.0}},
+                    "regex": {"value": r"^\d{1}$", "details": {"success_ratio": 1.0}},
                 },
                 "meta": {
                     "notes": {
@@ -866,7 +866,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "PULocationID",
-                    "regex": {"value": "\\d{1}$", "details": {"success_ratio": 1.0}},
+                    "regex": {"value": r"^\d{1}$", "details": {"success_ratio": 1.0}},
                 },
                 "meta": {
                     "notes": {
@@ -884,7 +884,7 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                 "meta": {"notes": {"format": "markdown", "content": None}},
                 "kwargs": {
                     "column": "DOLocationID",
-                    "regex": {"value": "\\d{1}$", "details": {"success_ratio": 1.0}},
+                    "regex": {"value": r"^\d{1}$", "details": {"success_ratio": 1.0}},
                 },
                 "meta": {
                     "notes": {
