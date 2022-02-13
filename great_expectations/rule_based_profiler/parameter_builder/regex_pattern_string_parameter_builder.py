@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -25,9 +25,9 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     """
 
     CANDIDATE_STRINGS: Set[str] = {
-        r"^\d{1}$",
-        r"^\d{2}$",
-        r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
+        r"\d{1}$",
+        r"\d{2}$",
+        r"\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
     }
 
     def __init__(
@@ -58,7 +58,11 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             data_context=data_context,
             batch_request=batch_request,
         )
+        print(metric_value_kwargs)
+        print("metric value kwargs")
 
+        print(metric_domain_kwargs)
+        print("metric metric_domain_kwargs kwargs")
         self._metric_domain_kwargs = metric_domain_kwargs
         self._metric_value_kwargs = metric_value_kwargs
 
@@ -110,44 +114,51 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         regex_string_success_ratios: dict = {}
         for regex_string in self._candidate_strings:
             if self._metric_value_kwargs:
-                match_regex_metric_value_kwargs: dict = (
+                match_regex_metric_value_kwargs: Tuple[dict] = (
                     {
                         **self._metric_value_kwargs,
                         **{"regex": regex_string},
                     },
                 )
+
             else:
                 match_regex_metric_value_kwargs: dict = {"regex": regex_string}
-
-            match_regex_metrics: MetricComputationResult = self.get_metrics(
-                batch_ids=batch_ids,
-                validator=validator,
-                metric_name="column_values.match_regex.unexpected_count",
-                metric_domain_kwargs=self._metric_domain_kwargs,
-                metric_value_kwargs=match_regex_metric_value_kwargs,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
+            try:
+                match_regex_metrics: MetricComputationResult = self.get_metrics(
+                    batch_ids=batch_ids,
+                    validator=validator,
+                    metric_name="column_values.match_regex.unexpected_count",
+                    metric_domain_kwargs=self._metric_domain_kwargs,
+                    metric_value_kwargs=match_regex_metric_value_kwargs,
+                    domain=domain,
+                    variables=variables,
+                    parameters=parameters,
+                )
+            except KeyError as e:
+                raise ge_exceptions.ProfilerConfigurationError(
+                    "Unable to find configured Metric %s" % str(e)
+                )
             match_regex_unexpected_count: int = sum(match_regex_metrics.metric_values)
-
             regex_string_success_ratios[regex_string] = (
                 nonnull_count - match_regex_unexpected_count
             ) / nonnull_count
 
+        print(regex_string_success_ratios)
+        print("~~~~~~~~~~~~")
         best_regex_string: Optional[str] = None
         best_ratio: int = 0
         for regex_string, ratio in regex_string_success_ratios.items():
             if ratio > best_ratio and ratio >= self._threshold:
                 best_regex_string = regex_string
                 best_ratio = ratio
-
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.name}": {
                 "value": best_regex_string,
                 "details": {"success_ratio": best_ratio},
             },
         }
+        print(parameter_values)
+        print("parameter-values")
 
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
