@@ -874,7 +874,7 @@ class BaseDataContext(ConfigPeer):
         try:
             return self.project_config_with_variables_substituted.checkpoint_store_name
         except AttributeError:
-            if checkpoint_toolkit.default_checkpoints_exist(
+            if DataContext._default_checkpoints_exist(
                 directory_path=self.root_directory
             ):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
@@ -890,7 +890,7 @@ class BaseDataContext(ConfigPeer):
         try:
             return self.stores[checkpoint_store_name]
         except KeyError:
-            if checkpoint_toolkit.default_checkpoints_exist(
+            if DataContext._default_checkpoints_exist(
                 directory_path=self.root_directory
             ):
                 logger.warning(
@@ -905,6 +905,17 @@ class BaseDataContext(ConfigPeer):
             raise ge_exceptions.StoreConfigurationError(
                 f'Attempted to access the Checkpoint store named "{checkpoint_store_name}", which is not a configured store.'
             )
+
+    @staticmethod
+    def _default_checkpoints_exist(directory_path: str) -> bool:
+        if not directory_path:
+            return False
+
+        checkpoints_directory_path: str = os.path.join(
+            directory_path,
+            DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
+        )
+        return os.path.isdir(checkpoints_directory_path)
 
     @property
     def profiler_store_name(self) -> str:

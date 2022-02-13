@@ -348,14 +348,3 @@ def run_checkpoint(
     )
 
     return checkpoint.run(**checkpoint_run_arguments)
-
-
-def default_checkpoints_exist(directory_path: str) -> bool:
-    if not directory_path:
-        return False
-
-    checkpoints_directory_path: str = os.path.join(
-        directory_path,
-        DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
-    )
-    return os.path.isdir(checkpoints_directory_path)
