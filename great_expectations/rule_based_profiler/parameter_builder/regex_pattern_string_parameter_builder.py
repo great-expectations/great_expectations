@@ -118,21 +118,18 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
             else:
                 match_regex_metric_value_kwargs: dict = {"regex": regex_string}
-            try:
-                match_regex_metrics: MetricComputationResult = self.get_metrics(
-                    batch_ids=batch_ids,
-                    validator=validator,
-                    metric_name="column_values.match_regex.unexpected_count",
-                    metric_domain_kwargs=self._metric_domain_kwargs,
-                    metric_value_kwargs=match_regex_metric_value_kwargs,
-                    domain=domain,
-                    variables=variables,
-                    parameters=parameters,
-                )
-            except KeyError as e:
-                raise ge_exceptions.ProfilerConfigurationError(
-                    "Unable to find configured Metric %s" % str(e)
-                )
+
+            match_regex_metrics: MetricComputationResult = self.get_metrics(
+                batch_ids=batch_ids,
+                validator=validator,
+                metric_name="column_values.match_regex.unexpected_count",
+                metric_domain_kwargs=self._metric_domain_kwargs,
+                metric_value_kwargs=match_regex_metric_value_kwargs,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
+
             match_regex_unexpected_count: int = sum(match_regex_metrics.metric_values)
             regex_string_success_ratios[regex_string] = (
                 nonnull_count - match_regex_unexpected_count
