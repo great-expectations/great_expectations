@@ -25,9 +25,9 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     """
 
     CANDIDATE_STRINGS: Set[str] = {
-        r"\d{1}$",
-        r"\d{2}$",
-        r"\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
+        r"^\d{1}$",
+        r"^\d{2}$",
+        r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
     }
 
     def __init__(

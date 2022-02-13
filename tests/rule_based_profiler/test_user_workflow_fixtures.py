@@ -45,5 +45,5 @@ def test_bobby_fixture_generation(
                 "test_configuration_oneshot_sampling_method"
             ]["expected_expectation_suite"].expectations
         )
-        == 33
+        == 37
     )
