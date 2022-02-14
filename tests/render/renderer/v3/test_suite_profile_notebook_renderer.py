@@ -312,7 +312,9 @@ from great_expectations.exceptions import DataContextError""",
         """suite = context.run_profiler_with_dynamic_arguments(
     name="my_profiler",
     expectation_suite_name=expectation_suite_name,
-)""",
+)
+
+validator.expectation_suite = suite""",
     ]
 
     for snippet in snippets:
