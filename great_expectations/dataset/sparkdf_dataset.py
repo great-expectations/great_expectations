@@ -15,8 +15,9 @@ from dateutil.parser import parse
 
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
-from great_expectations.dataset import Dataset
-from great_expectations.dataset.pandas_dataset import PandasDataset
+
+from .dataset import Dataset
+from .pandas_dataset import PandasDataset
 
 logger = logging.getLogger(__name__)
 
