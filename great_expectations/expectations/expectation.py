@@ -20,11 +20,14 @@ from great_expectations.core.expectation_configuration import (
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
     InvalidExpectationKwargsError,
 )
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
@@ -33,26 +36,22 @@ from great_expectations.expectations.registry import (
     register_renderer,
 )
 from great_expectations.expectations.util import render_evaluation_parameter_string
-from great_expectations.self_check.util import (
-    evaluate_json_test_cfe,
-    generate_expectation_tests,
-)
-from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import Validator
-
-from ..core.util import nested_update
-from ..execution_engine import ExecutionEngine, PandasExecutionEngine
-from ..execution_engine.execution_engine import MetricDomainTypes
-from ..render.renderer.renderer import renderer
-from ..render.types import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import (
     CollapseContent,
     RenderedAtomicContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
     renderedAtomicValueSchema,
 )
-from ..render.util import num_to_str
-from ..util import is_parseable_date
+from great_expectations.render.util import num_to_str
+from great_expectations.self_check.util import (
+    evaluate_json_test_cfe,
+    generate_expectation_tests,
+)
+from great_expectations.util import is_parseable_date
+from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
