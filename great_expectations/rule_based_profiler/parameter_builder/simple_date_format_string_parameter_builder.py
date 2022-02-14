@@ -208,6 +208,8 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
+        fmt_string: str
+        ratio: float
         for fmt_string, ratio in format_string_success_ratios.items():
             if ratio > best_ratio and ratio >= threshold:
                 best_fmt_string = fmt_string
