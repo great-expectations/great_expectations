@@ -10,6 +10,10 @@ from ruamel.yaml import YAML
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.data_context import BaseDataContext
+from great_expectations.util import (
+    get_currently_executing_function,
+    get_currently_executing_function_call_arguments,
+)
 from integrations.databricks.dlt_expectation import (
     DLTExpectation,
     DLTExpectationFactory,
@@ -83,10 +87,35 @@ def expect(
     Run a single expectation on a Delta Live Table
     Please provide either a dlt_expectation_condition OR a ge_expectation_configuration, not both.
     """
+    currently_executing_function = get_currently_executing_function()
+    print(
+        "get_currently_executing_function() in dlt_expectations.expect",
+        currently_executing_function,
+    )
+    currently_executing_function_call_arguments = (
+        get_currently_executing_function_call_arguments()
+    )
+    print(
+        "get_currently_executing_function_call_arguments() in dlt_expectations.expect",
+        currently_executing_function_call_arguments,
+    )
 
     def decorator_expect(func):
         @functools.wraps(func)
         def wrapper_expect(*args, **kwargs):
+
+            currently_executing_function = get_currently_executing_function()
+            print(
+                "get_currently_executing_function() in dlt_expectations.wrapper_expect",
+                currently_executing_function,
+            )
+            currently_executing_function_call_arguments = (
+                get_currently_executing_function_call_arguments()
+            )
+            print(
+                "get_currently_executing_function_call_arguments() in dlt_expectations.wrapper_expect",
+                currently_executing_function_call_arguments,
+            )
 
             dlt = _get_dlt_library(dlt_library=dlt_library)
 

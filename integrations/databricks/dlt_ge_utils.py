@@ -11,6 +11,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context import BaseDataContext
 
 
+# TODO: Move this method to a better location e.g. inside dlt_expectations module
 def run_ge_checkpoint_on_dataframe_from_suite(
     data_context: BaseDataContext,
     df: Union[pd.DataFrame, pyspark.sql.DataFrame],
