@@ -105,7 +105,7 @@ module.exports = {
           items: [
             {
               label: 'Getting Started',
-              to: 'docs/'
+              to: 'docs/tutorials/getting_started/tutorial_overview'
             }
           ]
         },
