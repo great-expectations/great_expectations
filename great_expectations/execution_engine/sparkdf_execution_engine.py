@@ -766,7 +766,7 @@ Please check your config."""
         """Split on the hashed value of the named column"""
         try:
             getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
@@ -834,7 +834,7 @@ Please check your config."""
     ):
         try:
             getattr(hashlib, str(hash_function_name))
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.

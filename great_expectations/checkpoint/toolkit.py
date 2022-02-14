@@ -8,13 +8,13 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
-    batch_request_contains_batch_data,
     batch_request_in_validations_contains_batch_data,
     get_validations_with_batch_request_as_dict,
 )
 from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
+    batch_request_contains_batch_data,
     get_batch_request_as_dict,
 )
 from great_expectations.data_context.store import CheckpointStore
@@ -76,6 +76,21 @@ def add_checkpoint(
 ) -> Union[Checkpoint, LegacyCheckpoint]:
     checkpoint_config: Union[CheckpointConfig, dict]
 
+    # These checks protect against typed objects (BatchRequest and/or RuntimeBatchRequest) encountered in arguments.
+    batch_request = get_batch_request_as_dict(batch_request=batch_request)
+    validations = get_validations_with_batch_request_as_dict(validations=validations)
+
+    # DataFrames shouldn't be saved to CheckpointStore
+    if batch_request_contains_batch_data(batch_request=batch_request):
+        raise ge_exceptions.InvalidConfigError(
+            f'batch_data found in batch_request cannot be saved to CheckpointStore "{checkpoint_store_name}"'
+        )
+
+    if batch_request_in_validations_contains_batch_data(validations=validations):
+        raise ge_exceptions.InvalidConfigError(
+            f'batch_data found in validations cannot be saved to CheckpointStore "{checkpoint_store_name}"'
+        )
+
     checkpoint_config = {
         "name": name,
         "config_version": config_version,
@@ -102,21 +117,11 @@ def add_checkpoint(
         "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
     }
 
-    # DataFrames shouldn't be saved to CheckpointStore
-    if batch_request_contains_batch_data(batch_request=batch_request):
-        raise ge_exceptions.InvalidConfigError(
-            f'batch_data found in batch_request cannot be saved to CheckpointStore "{checkpoint_store_name}"'
-        )
-
-    if batch_request_in_validations_contains_batch_data(validations=validations):
-        raise ge_exceptions.InvalidConfigError(
-            f'batch_data found in validations cannot be saved to CheckpointStore "{checkpoint_store_name}"'
-        )
-
     checkpoint_config = deep_filter_properties_iterable(
         properties=checkpoint_config,
         clean_falsy=True,
     )
+
     new_checkpoint: Union[
         Checkpoint, SimpleCheckpoint, LegacyCheckpoint
     ] = instantiate_class_from_config(
@@ -138,7 +143,7 @@ def add_checkpoint(
             configuration_key=name,
         )
 
-    checkpoint_config = CheckpointConfig(**new_checkpoint.get_config())
+    checkpoint_config = new_checkpoint.get_config()
 
     checkpoint_ref = checkpoint_store.set(key=key, value=checkpoint_config)
     if isinstance(checkpoint_ref, GeCloudIdAwareRef):
@@ -199,9 +204,12 @@ def get_checkpoint(
             )
 
     config: dict = checkpoint_config.to_json_dict()
+
     if name:
         config.update({"name": name})
+
     config = filter_properties_dict(properties=config, clean_falsy=True)
+
     checkpoint: Union[Checkpoint, LegacyCheckpoint] = instantiate_class_from_config(
         config=config,
         runtime_environment={
@@ -290,16 +298,17 @@ def run_checkpoint(
         name=checkpoint_name,
         ge_cloud_id=ge_cloud_id,
     )
-    checkpoint_config_from_store: dict = checkpoint.get_config()
+    checkpoint_config_from_store: CheckpointConfig = checkpoint.get_config()
 
     if (
         "runtime_configuration" in checkpoint_config_from_store
-        and checkpoint_config_from_store["runtime_configuration"]
-        and "result_format" in checkpoint_config_from_store["runtime_configuration"]
+        and checkpoint_config_from_store.runtime_configuration
+        and "result_format" in checkpoint_config_from_store.runtime_configuration
     ):
-        result_format = result_format or checkpoint_config_from_store[
-            "runtime_configuration"
-        ].pop("result_format")
+        result_format = (
+            result_format
+            or checkpoint_config_from_store.runtime_configuration.get("result_format")
+        )
 
     if result_format is None:
         result_format = {"result_format": "SUMMARY"}

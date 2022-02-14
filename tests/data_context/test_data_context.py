@@ -12,6 +12,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
+from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import (
@@ -225,20 +226,23 @@ def test_compile_evaluation_parameter_dependencies(
         == {}
     )
     data_context_parameterized_expectation_suite._compile_evaluation_parameter_dependencies()
-    assert data_context_parameterized_expectation_suite._evaluation_parameter_dependencies == {
-        "source_diabetes_data.default": [
-            {
-                "metric_kwargs_id": {
-                    "column=patient_nbr": [
-                        "expect_column_unique_value_count_to_be_between.result.observed_value"
-                    ]
+    assert (
+        data_context_parameterized_expectation_suite._evaluation_parameter_dependencies
+        == {
+            "source_diabetes_data.default": [
+                {
+                    "metric_kwargs_id": {
+                        "column=patient_nbr": [
+                            "expect_column_unique_value_count_to_be_between.result.observed_value"
+                        ]
+                    }
                 }
-            }
-        ],
-        "source_patient_data.default": [
-            "expect_table_row_count_to_equal.result.observed_value"
-        ],
-    }
+            ],
+            "source_patient_data.default": [
+                "expect_table_row_count_to_equal.result.observed_value"
+            ],
+        }
+    )
 
 
 def test_list_datasources(data_context_parameterized_expectation_suite):
@@ -1429,17 +1433,12 @@ def test_get_checkpoint(empty_context_with_checkpoint):
     context = empty_context_with_checkpoint
     obs = context.get_checkpoint("my_checkpoint")
     assert isinstance(obs, Checkpoint)
-    config = obs.get_config()
+    config = obs.get_config(mode=ConfigOutputModes.JSON_DICT)
     assert isinstance(config, dict)
     assert config == {
         "name": "my_checkpoint",
-        "template_name": None,
-        "config_version": None,
-        "run_name_template": None,
-        "batch_request": {},
-        "expectation_suite_name": None,
-        "validations": [],
-        "action_list": [],
+        "class_name": "LegacyCheckpoint",
+        "module_name": "great_expectations.checkpoint",
         "batches": [
             {
                 "batch_kwargs": {
@@ -1458,11 +1457,6 @@ def test_get_checkpoint(empty_context_with_checkpoint):
             },
         ],
         "validation_operator_name": "action_list_operator",
-        "evaluation_parameters": {},
-        "profilers": [],
-        "runtime_configuration": {},
-        "ge_cloud_id": None,
-        "expectation_suite_ge_cloud_id": None,
     }
 
 
@@ -1900,28 +1894,28 @@ expectation_suite_ge_cloud_id:
         checkpoint_from_disk = cf.read()
 
     assert checkpoint_from_disk == expected_checkpoint_yaml
+    assert (
+        checkpoint_from_yaml.get_config(mode=ConfigOutputModes.YAML)
+        == expected_checkpoint_yaml
+    )
     assert deep_filter_properties_iterable(
-        properties=checkpoint_from_yaml.get_config(),
+        properties=checkpoint_from_yaml.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
     ) == deep_filter_properties_iterable(
-        properties={
-            key: value
-            for key, value in dict(yaml.load(expected_checkpoint_yaml)).items()
-            if key not in ["module_name", "class_name"]
-        },
+        properties=dict(yaml.load(expected_checkpoint_yaml)),
         clean_falsy=True,
     )
 
     checkpoint_from_store = context.get_checkpoint(name=checkpoint_name)
+    assert (
+        checkpoint_from_store.get_config(mode=ConfigOutputModes.YAML)
+        == expected_checkpoint_yaml
+    )
     assert deep_filter_properties_iterable(
-        properties=checkpoint_from_store.get_config(),
+        properties=checkpoint_from_store.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
     ) == deep_filter_properties_iterable(
-        properties={
-            key: value
-            for key, value in dict(yaml.load(expected_checkpoint_yaml)).items()
-            if key not in ["module_name", "class_name"]
-        },
+        properties=dict(yaml.load(expected_checkpoint_yaml)),
         clean_falsy=True,
     )
 
@@ -1951,9 +1945,13 @@ expectation_suite_ge_cloud_id:
     )
 
     assert checkpoint_from_yaml.name == checkpoint_name
-    assert checkpoint_from_yaml.get_config(clean_falsy=True) == {
+    assert checkpoint_from_yaml.get_config(
+        mode=ConfigOutputModes.JSON_DICT, clean_falsy=True
+    ) == {
         "name": "my_new_checkpoint",
         "config_version": 1.0,
+        "class_name": "Checkpoint",
+        "module_name": "great_expectations.checkpoint",
         "run_name_template": "%Y%m%d-%H%M%S-my-run-name-template",
         "action_list": [
             {

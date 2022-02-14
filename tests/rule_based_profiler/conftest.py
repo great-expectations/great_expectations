@@ -1,7 +1,6 @@
 import datetime
 import os
 import shutil
-import sys
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -18,6 +17,9 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler import RuleBasedProfiler
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
@@ -27,9 +29,6 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     ParameterNode,
-)
-from great_expectations.rule_based_profiler.types.base import (
-    ruleBasedProfilerConfigSchema,
 )
 from tests.conftest import skip_if_python_below_minimum_version
 
@@ -115,7 +114,7 @@ def multibatch_generic_csv_generator_context(monkeypatch, empty_data_context):
     datasource_name = "generic_csv_generator"
     data_connector_name = "daily_data_connector"
     asset_name = "daily_data_asset"
-    datasource_config = fr"""
+    datasource_config = rf"""
 class_name: Datasource
 module_name: great_expectations.datasource
 execution_engine:
@@ -251,6 +250,7 @@ def alice_columnar_table_single_batch(empty_data_context):
     event_ts_column_data: Dict[str, str] = {
         "column_name": "event_ts",
         "observed_max_time_str": "2004-10-19 11:05:20",
+        "observed_strftime_format": "%Y-%m-%d %H:%M:%S",
     }
 
     my_rule_for_timestamps_column_data: List[Dict[str, str]] = [
@@ -332,6 +332,28 @@ def alice_columnar_table_single_batch(empty_data_context):
                                 "format": "markdown",
                                 "content": [
                                     "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
+                                ],
+                            }
+                        },
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_match_strftime_format",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "strftime_format": {
+                                "value": event_ts_column_data[
+                                    "observed_strftime_format"
+                                ],  # Pin to event_ts column
+                                "details": {"success_ratio": 1.0},
+                            },
+                        },
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
                                 ],
                             }
                         },
@@ -420,7 +442,7 @@ def alice_columnar_table_single_batch_context(
     datasource_name: str = "alice_columnar_table_single_batch_datasource"
     data_connector_name: str = "alice_columnar_table_single_batch_data_connector"
     data_asset_name: str = "alice_columnar_table_single_batch_data_asset"
-    datasource_config: str = fr"""
+    datasource_config: str = rf"""
 class_name: Datasource
 module_name: great_expectations.datasource
 execution_engine:
@@ -486,13 +508,13 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     Bobby has multiple tables of columnar data called user_events (DataAsset) that he wants to check periodically as new
     data is added.
 
-      - He knows what some of the columns are of the acconting/financial/account type.
+      - He knows what some of the columns are of the accounting/financial/account type.
 
     He wants to use a configurable profiler to generate a description (ExpectationSuite) about tables so that he can:
 
         1. monitor the average number of rows in the tables
 
-        2. use it to validate min/max boundaries of all columns are of the acconting/financial/account type and set up
+        2. use it to validate min/max boundaries of all columns are of the accounting/financial/account type and set up
            alerts for when things change
 
         3. have a place to add his domain knowledge of the data (that can also be validated against new data)
@@ -1145,6 +1167,51 @@ def bobby_columnar_table_multi_batch(empty_data_context):
         ),
     ]
 
+    my_column_timestamps_rule_expectation_configurations_oneshot_sampling_method: List[
+        ExpectationConfiguration
+    ] = [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_strftime_format",
+                "kwargs": {
+                    "column": "pickup_datetime",
+                    "strftime_format": {
+                        "value": "%Y-%m-%d %H:%M:%S",
+                        "details": {"success_ratio": 1.0},
+                    },
+                },
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                        ],
+                    }
+                },
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_strftime_format",
+                "kwargs": {
+                    "column": "dropoff_datetime",
+                    "strftime_format": {
+                        "value": "%Y-%m-%d %H:%M:%S",
+                        "details": {"success_ratio": 1.0},
+                    },
+                },
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                        ],
+                    }
+                },
+            }
+        ),
+    ]
+
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(
@@ -1152,6 +1219,9 @@ def bobby_columnar_table_multi_batch(empty_data_context):
     )
     expectation_configurations.extend(
         my_column_ranges_rule_expectation_configurations_oneshot_sampling_method
+    )
+    expectation_configurations.extend(
+        my_column_timestamps_rule_expectation_configurations_oneshot_sampling_method
     )
 
     expectation_suite_name_oneshot_sampling_method: str = (

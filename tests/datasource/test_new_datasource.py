@@ -824,7 +824,7 @@ x,y
 
     my_datasource: Datasource = instantiate_class_from_config(
         yaml.load(
-            fr"""
+            rf"""
 class_name: Datasource
 
 execution_engine:
