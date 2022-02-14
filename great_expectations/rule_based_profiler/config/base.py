@@ -99,7 +99,7 @@ class DomainBuilderConfig(DictDot):
         self.batch_request = batch_request
         for k, v in kwargs.items():
             setattr(self, k, v)
-            logger.warning(
+            logger.debug(
                 "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
             )
 
@@ -138,7 +138,7 @@ class ParameterBuilderConfig(DictDot):
         self.batch_request = batch_request
         for k, v in kwargs.items():
             setattr(self, k, v)
-            logger.warning(
+            logger.debug(
                 "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
             )
 
@@ -176,7 +176,7 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         self.module_name = module_name
         for k, v in kwargs.items():
             setattr(self, k, v)
-            logger.warning(
+            logger.debug(
                 "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
             )
 

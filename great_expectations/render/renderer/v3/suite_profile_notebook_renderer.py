@@ -213,6 +213,8 @@ suite = context.run_profiler_with_dynamic_arguments(
     name="{self._profiler_name}",
     expectation_suite_name=expectation_suite_name,
 )
+
+validator.expectation_suite = suite
 """,
             lint=True,
         )
