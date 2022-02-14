@@ -7,7 +7,40 @@ Changelog
 
 develop
 -----------------
-* [BUGFIX] Allow overwriting the class for Custom Notebook Templates (#2619) (thanks @luke321321)
+
+0.14.6
+-----------------
+* [FEATURE] Create profiler from DataContext (#4070)
+* [FEATURE] Add read_sas function (#3972) (thanks @andyjessen)
+* [FEATURE] Run profiler from DataContext (#4141)
+* [FEATURE] Instantiate Rule-Based Profiler Using Typed Configuration Object (#4150)
+* [FEATURE] Provide ability to instantiate Checkpoint using CheckpointConfig typed object (#4166)
+* [FEATURE] Misc cleanup around CLI `suite` command and related utilities (#4158)
+* [FEATURE] Add scheduled runs for primary Azure pipeline (#4117)
+* [FEATURE] Promote dependency graph test strategy to production (#4124)
+* [BUGFIX] minor updates to test definition json files (#4123)
+* [BUGFIX] Fix typo for metric name in expect_column_values_to_be_edtf_parseable (#4140)
+* [BUGFIX] Ensure that CheckpointResult object can be pickled (#4157)
+* [BUGFIX] Custom notebook templates (#2619) (thanks @luke321321)
+* [BUGFIX] Include public fields in property_names (#4159)
+* [DOCS] Reenable docs-under-test for RuleBasedProfiler (#4149)
+* [DOCS] Provided details for using GE_HOME in commandline. (#4164)
+* [MAINTENANCE] Return Rule-Based Profiler base.py to its dedicated config subdirectory (#4125)
+* [MAINTENANCE] enable filter properties dict to handle both inclusion and exclusion lists  (#4127)
+* [MAINTENANCE] Remove unused Great Expectations imports (#4135)
+* [MAINTENANCE] Update trigger for scheduled Azure runs (#4134)
+* [MAINTENANCE] Maintenance/upgrade black (#4136)
+* [MAINTENANCE] Alter `great_expectations` pipeline trigger to be more consistent (#4138)
+* [MAINTENANCE] Remove remaining unused imports (#4137)
+* [MAINTENANCE] Remove `class_name` as mandatory field from `RuleBasedProfiler` (#4139)
+* [MAINTENANCE] Ensure `AWSAthena` does not create temporary table as part of processing Batch by default, which is currently not supported (#4103)
+* [MAINTENANCE] Remove unused `Exception as e` instances (#4143)
+* [MAINTENANCE] Standardize DictDot Method Behaviors Formally for Consistent Usage Patterns in Subclasses (#4131)
+* [MAINTENANCE] Remove unused f-strings (#4142)
+* [MAINTENANCE] Minor Validator code clean up -- for better code clarity (#4147)
+* [MAINTENANCE] Refactoring of `test_script_runner.py`. Integration and Docs tests (#4145)
+* [MAINTENANCE] Remove `compatability` stage from `dependency-graph` pipeline (#4161)
+* [MAINTENANCE] CLOUD-618: GE Cloud "account" to "organization" rename (#4146)
 
 0.14.5
 -----------------
@@ -1386,7 +1419,7 @@ varundunga!)
 
 0.10.8
 -----------------
-* added support for overriding the default jupyter command via a GE_JUPYTER_COMMAND environment variable (#1347) @nehiljain
+* added support for overriding the default jupyter command via a GE_JUPYTER_CMD environment variable (#1347) @nehiljain
 * Bugfix for checkpoint missing template (#1379)
 
 0.10.7
