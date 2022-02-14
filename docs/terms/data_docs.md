@@ -58,7 +58,7 @@ There are multiple use cases for displaying information in your Data Docs.  Thre
    data looks like, and one or more Expectation Suites that encode what is expected from the data to be considered
    valid.
 
-To support these (and possibly other) use cases Great Expectations has a concept of "data documentation site". Multiple sites can be configured inside a project, each suitable for a particular data documentation use case.
+To support these (and possibly other) use cases Great Expectations has a concept of a "data documentation site". Multiple sites can be configured inside a project, each suitable for a particular data documentation use case.
 
 ### Customization
 
@@ -74,7 +74,7 @@ Data Docs are rendered as HTML files.  As such, you can open them with any brows
 
 If your Data Docs have not yet been rendered, you can create them from your Data Context.
 
-From the root folder of your Data Context, you can build your Data Docs with the CLI command:
+From the root folder of your project (where you initialized your Data Context), you can build your Data Docs with the CLI command:
 
 ```bash title="Terminal command"
 great_expectations docs build
@@ -93,8 +93,8 @@ Data Docs sites are configured under the `data_docs_sites` key in your deploymen
 
 - which <TechnicalTag relative="../" tag="datasource" text="Datasources" /> to document (by default, all)
 - whether to include Expectations, validations and profiling results sections
-- where the Expectations and validations should be read from (filesystem, S3, or GCS)
-- where the HTML files should be written (filesystem, S3, or GCS)
+- where the Expectations and validations should be read from (filesystem, S3, Azure, or GCS)
+- where the HTML files should be written (filesystem, S3, Azure, or GCS)
 - which <TechnicalTag relative="../" tag="renderer" text="Renderer" /> and view class should be used to render each section
 
 For more information, please see our guides for [how to host and share Data Docs in specific environments](../guides/setup/index.md#data-docs).
