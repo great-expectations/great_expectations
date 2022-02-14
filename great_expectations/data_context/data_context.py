@@ -20,6 +20,7 @@ from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import DuplicateKeyError
 
+from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
@@ -32,7 +33,6 @@ except ImportError:
 
 import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 import great_expectations.exceptions as ge_exceptions
-import great_expectations.rule_based_profiler.toolkit as profiler_toolkit
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.batch import (
@@ -143,7 +143,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 
-class BaseDataContext:
+class BaseDataContext(ConfigPeer):
     """
         This class implements most of the functionality of DataContext, with a few exceptions.
 
@@ -385,9 +385,7 @@ class BaseDataContext:
         self._data_context_id = self._construct_data_context_id()
 
         # Override the project_config data_context_id if an expectations_store was already set up
-        self._project_config.anonymous_usage_statistics.data_context_id = (
-            self._data_context_id
-        )
+        self.config.anonymous_usage_statistics.data_context_id = self._data_context_id
         self._initialize_usage_statistics(
             self.project_config_with_variables_substituted.anonymous_usage_statistics
         )
@@ -406,12 +404,12 @@ class BaseDataContext:
         # NOTE - 20210112 - Alex Sherstinsky - Validation Operators are planned to be deprecated.
         if (
             "validation_operators" in self.get_config().commented_map
-            and self._project_config.validation_operators
+            and self.config.validation_operators
         ):
             for (
                 validation_operator_name,
                 validation_operator_config,
-            ) in self._project_config.validation_operators.items():
+            ) in self.config.validation_operators.items():
                 self.add_validation_operator(
                     validation_operator_name,
                     validation_operator_config,
@@ -501,7 +499,7 @@ class BaseDataContext:
             logger.info(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
-            self._project_config.anonymous_usage_statistics.enabled = False
+            self.config.anonymous_usage_statistics.enabled = False
 
         # check for global data_context_id
         global_data_context_id = self._get_global_config_value(
@@ -517,7 +515,7 @@ class BaseDataContext:
                 logger.info(
                     "data_context_id is defined globally. Applying override to project_config."
                 )
-                self._project_config.anonymous_usage_statistics.data_context_id = (
+                self.config.anonymous_usage_statistics.data_context_id = (
                     global_data_context_id
                 )
             else:
@@ -536,7 +534,7 @@ class BaseDataContext:
                 logger.info(
                     "usage_statistics_url is defined globally. Applying override to project_config."
                 )
-                self._project_config.anonymous_usage_statistics.usage_statistics_url = (
+                self.config.anonymous_usage_statistics.usage_statistics_url = (
                     global_usage_statistics_url
                 )
             else:
@@ -649,7 +647,7 @@ class BaseDataContext:
             store (Store)
         """
 
-        self._project_config["stores"][store_name] = store_config
+        self.config["stores"][store_name] = store_config
         return self._build_store_from_config(store_name, store_config)
 
     def add_validation_operator(
@@ -665,7 +663,7 @@ class BaseDataContext:
             validation_operator (ValidationOperator)
         """
 
-        self._project_config["validation_operators"][
+        self.config["validation_operators"][
             validation_operator_name
         ] = validation_operator_config
         config = self.project_config_with_variables_substituted.validation_operators[
@@ -912,9 +910,7 @@ class BaseDataContext:
         try:
             return self.project_config_with_variables_substituted.profiler_store_name
         except AttributeError:
-            if profiler_toolkit.default_profilers_exist(
-                directory_path=self.root_directory
-            ):
+            if DataContext._default_profilers_exist(directory_path=self.root_directory):
                 return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
             if self.root_directory:
                 error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
@@ -928,9 +924,7 @@ class BaseDataContext:
         try:
             return self.stores[profiler_store_name]
         except KeyError:
-            if profiler_toolkit.default_profilers_exist(
-                directory_path=self.root_directory
-            ):
+            if DataContext._default_profilers_exist(directory_path=self.root_directory):
                 logger.warning(
                     f'Profiler store named "{profiler_store_name}" is not a configured store, so will try to use default Profiler store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Profiler Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
                 )
@@ -941,6 +935,17 @@ class BaseDataContext:
             raise ge_exceptions.StoreConfigurationError(
                 f'Attempted to access the Profiler store named "{profiler_store_name}", which is not a configured store.'
             )
+
+    @staticmethod
+    def _default_profilers_exist(directory_path: Optional[str]) -> bool:
+        if not directory_path:
+            return False
+
+        profiler_directory_path: str = os.path.join(
+            directory_path,
+            DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
+        )
+        return os.path.isdir(profiler_directory_path)
 
     @property
     def expectations_store_name(self) -> Optional[str]:
@@ -971,6 +976,10 @@ class BaseDataContext:
         # Note Abe 20121114 : We should probably cache config_variables instead of loading them from disk every time.
         return dict(self._load_config_variables_file())
 
+    @property
+    def config(self) -> DataContextConfig:
+        return self._project_config
+
     #####
     #
     # Internal helper methods
@@ -984,7 +993,9 @@ class BaseDataContext:
         """
         if self.ge_cloud_mode:
             return {}
-        config_variables_file_path = self.get_config().config_variables_file_path
+        config_variables_file_path = cast(
+            DataContextConfig, self.get_config()
+        ).config_variables_file_path
         if config_variables_file_path:
             try:
                 # If the user specifies the config variable path with an environment variable, we want to substitute it
@@ -1016,7 +1027,7 @@ class BaseDataContext:
         be optional in GE Cloud mode).
         """
         if not config:
-            config = self._project_config
+            config = self.config
 
         substituted_config_variables = substitute_all_config_variables(
             self.config_variables,
@@ -1118,7 +1129,9 @@ class BaseDataContext:
             skip_if_substitution_variable=skip_if_substitution_variable,
         )
         config_variables[config_variable_name] = value
-        config_variables_filepath = self.get_config().config_variables_file_path
+        config_variables_filepath = cast(
+            DataContextConfig, self.get_config()
+        ).config_variables_file_path
         if not config_variables_filepath:
             raise ge_exceptions.InvalidConfigError(
                 "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
@@ -1157,7 +1170,7 @@ class BaseDataContext:
                 # remove key until we have a delete method on project_config
                 # self.project_config_with_variables_substituted.datasources[
                 # datasource_name].remove()
-                del self._project_config["datasources"][datasource_name]
+                del self.config["datasources"][datasource_name]
                 del self._cached_datasources[datasource_name]
             else:
                 raise ValueError(f"Datasource {datasource_name} not found")
@@ -1904,7 +1917,7 @@ class BaseDataContext:
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
-        self._project_config["datasources"][name] = datasource_config
+        self.config["datasources"][name] = datasource_config
         datasource_config = self.project_config_with_variables_substituted.datasources[
             name
         ]
@@ -1918,7 +1931,7 @@ class BaseDataContext:
                 self._cached_datasources[name] = datasource
             except ge_exceptions.DatasourceInitializationError as e:
                 # Do not keep configuration that could not be instantiated.
-                del self._project_config["datasources"][name]
+                del self.config["datasources"][name]
                 raise e
         else:
             datasource = None
@@ -1973,25 +1986,6 @@ class BaseDataContext:
 
     def set_config(self, project_config: DataContextConfig):
         self._project_config = project_config
-
-    def get_config(
-        self, mode="typed"
-    ) -> Union[DataContextConfig, CommentedMap, dict, str]:
-        config: DataContextConfig = self._project_config
-
-        if mode == "typed":
-            return config
-
-        if mode == "commented_map":
-            return config.commented_map
-
-        if mode == "dict":
-            return config.to_json_dict()
-
-        if mode == "yaml":
-            return config.to_yaml_str()
-
-        raise ValueError(f"Unknown config mode {mode}")
 
     def _build_datasource_from_config(
         self, name: str, config: Union[dict, DatasourceConfig]
@@ -3291,8 +3285,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
 
-        # Chetan - 20220127 - Open to refactor all Profiler CRUD from toolkit to class methods
-        return profiler_toolkit.add_profiler(
+        return RuleBasedProfiler.add_profiler(
             config=config,
             data_context=self,
             profiler_store=self.profiler_store,
@@ -3304,7 +3297,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
-        return profiler_toolkit.get_profiler(
+        return RuleBasedProfiler.get_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
             name=name,
@@ -3316,7 +3309,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
-        profiler_toolkit.delete_profiler(
+        RuleBasedProfiler.delete_profiler(
             profiler_store=self.profiler_store,
             name=name,
             ge_cloud_id=ge_cloud_id,
@@ -3327,7 +3320,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             raise ge_exceptions.StoreConfigurationError(
                 "Attempted to list profilers from a Profiler Store, which is not a configured store."
             )
-        return profiler_toolkit.list_profilers(
+        return RuleBasedProfiler.list_profilers(
             profiler_store=self.profiler_store,
             ge_cloud_mode=self.ge_cloud_mode,
         )
@@ -3344,7 +3337,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
-        return profiler_toolkit.run_profiler(
+        return RuleBasedProfiler.run_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
             name=name,
@@ -3593,7 +3586,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             ),
         )
         store_name = instantiated_class.store_name or store_name
-        self._project_config["stores"][store_name] = config
+        self.config["stores"][store_name] = config
 
         store_anonymizer = StoreAnonymizer(self.data_context_id)
         usage_stats_event_payload = store_anonymizer.anonymize_store_info(
@@ -4193,7 +4186,7 @@ class DataContext(BaseDataContext):
         project_config_dict = dataContextConfigSchema.dump(project_config)
         if (
             project_config.anonymous_usage_statistics.explicit_id is False
-            or project_config_dict != dataContextConfigSchema.dump(self._project_config)
+            or project_config_dict != dataContextConfigSchema.dump(self.config)
         ):
             self._save_project_config()
 
@@ -4277,7 +4270,7 @@ class DataContext(BaseDataContext):
 
         config_filepath = os.path.join(self.root_directory, self.GE_YML)
         with open(config_filepath, "w") as outfile:
-            self._project_config.to_yaml(outfile)
+            self.config.to_yaml(outfile)
 
     def add_store(self, store_name, store_config):
         logger.debug("Starting DataContext.add_store for store %s" % store_name)
