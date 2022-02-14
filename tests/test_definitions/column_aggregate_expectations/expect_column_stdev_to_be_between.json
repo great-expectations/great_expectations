@@ -10,6 +10,7 @@
     "tests" : [
       {
         "title": "basic_positive_test",
+        "suppress_test_for": ["sqlite"],
         "exact_match_out": false,
         "tolerance": 0.000000000001,
         "in": {
@@ -24,6 +25,7 @@
       },
       {
         "title": "vacuously_true",
+        "suppress_test_for": ["sqlite"],
         "exact_match_out": false,
         "tolerance": 0.000000000001,
         "in": {
@@ -46,10 +48,11 @@
         "success": true,
         "observed_value": 1.1547005383792517
       },
-      "suppress_test_for": ["spark"]
+      "suppress_test_for": ["spark", "sqlite"]
     },
       {
         "title": "basic_negative_test",
+        "suppress_test_for": ["sqlite"],
         "exact_match_out": false,
         "tolerance": 0.000000000001,
         "in": {
@@ -63,6 +66,7 @@
         }
       },{
         "title": "positive_zero_stdev_exact_min_and_max",
+        "suppress_test_for": ["sqlite"],
         "exact_match_out": false,
         "in": {
           "column": "zero",
@@ -75,6 +79,7 @@
         }
       },{
         "title": "positive_test_null_max_exact_min",
+        "suppress_test_for": ["sqlite"],
         "exact_match_out": false,
         "in": {
           "column": "dist2",
@@ -87,6 +92,7 @@
         }
       },{
         "title": "positive_test_null_min_exact_max",
+        "suppress_test_for": ["sqlite"],
         "exact_match_out": false,
         "in": {
           "column": "dist2",
@@ -99,6 +105,7 @@
         }
       },{
         "title": "negative_test_null_max",
+        "suppress_test_for": ["sqlite"],
         "exact_match_out": false,
         "in": {
           "column": "dist2",
@@ -111,6 +118,7 @@
         }
       },{
         "title": "negative_test_null_min",
+        "suppress_test_for": ["sqlite"],
         "exact_match_out": false,
         "in": {
           "column": "dist2",
@@ -123,6 +131,7 @@
         }
       },{
         "title": "positive_test_missing_value_in_column_complete_result_format",
+        "suppress_test_for": ["sqlite"],
         "exact_match_out": true,
         "in": {
           "column": "missing",
