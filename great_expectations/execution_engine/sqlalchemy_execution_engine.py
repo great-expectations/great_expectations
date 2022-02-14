@@ -3,6 +3,7 @@ import datetime
 import logging
 import traceback
 import warnings
+import random
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -800,7 +801,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "domain_kwargs": compute_domain_kwargs,
                 }
             queries[domain_id]["select"].append(
-                engine_fn.label(metric_to_resolve.metric_name)
+                engine_fn.label(metric_to_resolve.metric_name.join(random.choices(string.ascii_lowercase, k=2)))
             )
             queries[domain_id]["ids"].append(metric_to_resolve.id)
         for query in queries.values():
