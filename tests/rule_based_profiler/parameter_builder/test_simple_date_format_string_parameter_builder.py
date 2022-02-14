@@ -1,3 +1,5 @@
+from typing import Set
+
 import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
@@ -12,7 +14,7 @@ from great_expectations.rule_based_profiler.types import (
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 
-default_candidate_strings: set[str] = {
+default_candidate_strings: Set[str] = {
     "%Y-%m-%d",
     "%Y-%m-%d %H:%M:%S",
     "%m-%d-%Y",

@@ -351,7 +351,6 @@ detected.
         metric_values: np.ndarray,
         false_positive_rate: np.float64,
         domain: Domain,
-        *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> tuple:

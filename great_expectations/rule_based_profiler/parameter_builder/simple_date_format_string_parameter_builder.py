@@ -12,6 +12,9 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     build_parameter_container,
 )
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -114,6 +117,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         self._metric_value_kwargs = metric_value_kwargs
 
         self._threshold = threshold
+
         if candidate_strings is not None:
             self._candidate_strings = set(candidate_strings)
         else:
@@ -197,8 +201,17 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         best_fmt_string: Optional[str] = None
         best_ratio: int = 0
+
+        threshold = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._threshold,
+            expected_return_type=float,
+            variables=variables,
+            parameters=parameters,
+        )
+
         for fmt_string, ratio in format_string_success_ratios.items():
-            if ratio > best_ratio and ratio >= self._threshold:
+            if ratio > best_ratio and ratio >= threshold:
                 best_fmt_string = fmt_string
                 best_ratio = ratio
 
