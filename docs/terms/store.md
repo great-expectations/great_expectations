@@ -25,8 +25,9 @@ Great Expectations supports a variety of Stores for different purposes, but the 
 - [**Expectation Store:**](./expectation_store.md) a connector to store and retrieve information about collections of verifiable assertions about data.  These are Stores for Expectation Suites.
 - [**Validation Result Store:**](./validation_result_store.md) a connector to store and retrieve information about objects generated when data is Validated against an Expectation Suite.
 - [**Checkpoint Store:**](./checkpoint_store.md) a connector to store and retrieve information about means for validating data in a production deployment of Great Expectations.
-- [**Evaluation Parameter Store:**](./evaluation_parameter_store.md) a connector to store and retrieve information about parameters used during Validation of an Expectation which reference simple expressions or previously generated Metrics.  These are also known as [**Metric Stores**](./evaluation_parameter_store.md).
+- [**Evaluation Parameter Store:**](./evaluation_parameter_store.md) a connector to store and retrieve information about parameters used during Validation of an Expectation which reference simple expressions or previously generated Metrics.
 - [**Data Docs Store:**](./data_docs_store.md) a connector to store and retrieve information pertaining to Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.
+- [**Metric Stores:**](./metric_store.md) a connector to store and retrieve information about computed attributes of data, such as the mean of a column.  These differ from the Evaluation Parameter Store in how they are formatted.  The data in a Metrics Store is intended to be used for generating reports and analyzing trends, rather than as Evaluation Parameter values.
 
 
 ### Relationship to other objects
@@ -38,6 +39,7 @@ Each type of Store is designed to interact with a specific subset of information
 - Validation Result Store technical term page: Relationship to other objects
 - Evaluation Parameter Store (or Metric Store) technical term page: Relationship to other objects
 - Data Docs Store technical term page: Relationship to other objects
+- Metric Store technical term page: Relationship to other objects
 
 ## Use cases
 
@@ -79,6 +81,8 @@ Data Docs Stores are the one exception to the above.  They are instead configure
 
 Configuration of your Stores is located in your `great_expectations.yml` file under the `stores` key.  Three stores are required: an Expectation Store, a Validation Result Store, and an Evaluation Parameter Store must always have a valid entry in the `great_expectations.yml` file.  Additional Stores can be configured for uses such as Data Docs and Checkpoints (and a Checkpoint Store configuration entry will automatically be added if one does not exist when you attempt to save a Checkpoint for the first time.)
 
+Note that unlike other Stores, your Data Docs Stores are configured under each individual site under the `data_docs_sites` key in the `great_expectations.yml` file.
+
 ## More details
 
 For more information about a specific type of Store, please see the Store type's technical term definition page:
@@ -86,7 +90,9 @@ For more information about a specific type of Store, please see the Store type's
 - <TechnicalTag relative="../" tag="expectation_store" text="Expectation Store technical term page" />
 - <TechnicalTag relative="../" tag="checkpoint_store" text="Checkpoint Store technical term page" />
 - <TechnicalTag relative="../" tag="validation_result_store" text="Validation Result Store technical term page" />
-- <TechnicalTag relative="../" tag="evaluation_parameter_store" text="Evaluation Parameter Store (or Metric Store) technical term page" />
+- <TechnicalTag relative="../" tag="evaluation_parameter_store" text="Evaluation Parameter Store technical term page" />
+- <TechnicalTag relative="../" tag="data_docs_store" text="Data Docs Store technical term page" />
+- <TechnicalTag relative="../" tag="metric_store" text="Metric Store technical term page" />
 
 
 
