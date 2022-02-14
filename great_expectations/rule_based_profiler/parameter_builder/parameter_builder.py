@@ -1,7 +1,7 @@
 import copy
+import itertools
 from abc import ABC, abstractmethod
 from dataclasses import make_dataclass
-from numbers import Number
 from typing import Any, Dict, List, Optional, Set, Union
 
 import numpy as np
@@ -23,12 +23,10 @@ from great_expectations.rule_based_profiler.util import (
 from great_expectations.rule_based_profiler.util import (
     get_validator as get_validator_from_batch_request,
 )
-from great_expectations.util import is_numeric
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 # TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
-MetricComputationValues = np.ndarray
 MetricComputationDetails = Dict[str, Any]
 MetricComputationResult = make_dataclass(
     "MetricComputationResult", ["metric_values", "details"]
@@ -198,6 +196,61 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
+        metric_values: Union[List[Any], np.ndarray] = []
+
+        metric_value: Union[Any, List[Any]]
+        batch_id: str
+        for batch_id in batch_ids:
+            metric_domain_kwargs["batch_id"] = batch_id
+            metric_configuration_arguments: Dict[str, Any] = {
+                "metric_name": metric_name,
+                "metric_domain_kwargs": metric_domain_kwargs,
+                "metric_value_kwargs": metric_value_kwargs,
+                "metric_dependencies": None,
+            }
+            metric_value = validator.get_metric(
+                metric=MetricConfiguration(**metric_configuration_arguments)
+            )
+            if np.isscalar(metric_value):
+                metric_value = [metric_value]
+
+            metric_values.append(metric_value)
+
+        metric_values = np.array(metric_values)
+
+        self._sanitize_metric_computation(
+            metric_name=metric_name,
+            metric_values=metric_values,
+            enforce_numeric_metric=enforce_numeric_metric,
+            replace_nan_with_zero=replace_nan_with_zero,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        return MetricComputationResult(
+            metric_values=metric_values,
+            details={
+                "metric_configuration": {
+                    "metric_name": metric_name,
+                    "domain_kwargs": domain_kwargs,
+                    "metric_value_kwargs": metric_value_kwargs,
+                    "metric_dependencies": None,
+                },
+                "num_batches": len(metric_values),
+            },
+        )
+
+    def _sanitize_metric_computation(
+        self,
+        metric_name: str,
+        metric_values: np.ndarray,
+        enforce_numeric_metric: Union[str, bool] = False,
+        replace_nan_with_zero: Union[str, bool] = False,
+        domain: Optional[Domain] = None,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -> np.ndarray:
         # Obtain enforce_numeric_metric from rule state (i.e., variables and parameters); from instance variable otherwise.
         enforce_numeric_metric = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -216,50 +269,43 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
-        metric_values: List[Union[Any, Number]] = []
+        metric_value_shape: tuple = metric_values.shape[1:]
 
-        metric_value: Union[Any, Number]
-        batch_id: str
-        for batch_id in batch_ids:
-            metric_domain_kwargs["batch_id"] = batch_id
-            metric_configuration_arguments: Dict[str, Any] = {
-                "metric_name": metric_name,
-                "metric_domain_kwargs": metric_domain_kwargs,
-                "metric_value_kwargs": metric_value_kwargs,
-                "metric_dependencies": None,
-            }
-            metric_value = validator.get_metric(
-                metric=MetricConfiguration(**metric_configuration_arguments)
-            )
+        metric_value_shape_idx: int
+        axes: List[np.ndarray] = [
+            np.indices(dimensions=(metric_value_shape_idx,))[0]
+            for metric_value_shape_idx in metric_value_shape
+        ]
+
+        metric_value_indices: List[tuple]
+        metric_value_indices = list(itertools.product(*tuple(axes)))
+
+        metric_value_vector_indices: List[tuple]
+        metric_value_idx: tuple
+        metric_value_vector_indices = [
+            (slice(None, None, None),) + metric_value_idx
+            for metric_value_idx in metric_value_indices
+        ]
+
+        metric_value_vector: np.ndarray
+        for metric_value_idx in metric_value_vector_indices:
+            metric_value_vector = metric_values[metric_value_idx]
 
             if enforce_numeric_metric:
-                if not is_numeric(value=metric_value):
+                if not np.issubdtype(metric_value_vector.dtype, np.number):
                     raise ge_exceptions.ProfilerExecutionError(
                         message=f"""Applicability of {self.__class__.__name__} is restricted to numeric-valued metrics \
-(value of type "{str(type(metric_value))}" was computed).
+(value of type "{str(metric_value_vector.dtype)}" was computed).
 """
                     )
 
-                if np.isnan(metric_value):
+                if np.any(np.isnan(metric_value_vector)):
                     if not replace_nan_with_zero:
                         raise ValueError(
                             f"""Computation of metric "{metric_name}" resulted in NaN ("not a number") value.
 """
                         )
 
-                    metric_value = 0.0
+                    np.nan_to_num(metric_value_vector, copy=True, nan=0.0)
 
-            metric_values.append(metric_value)
-
-        return MetricComputationResult(
-            metric_values=np.array(metric_values),
-            details={
-                "metric_configuration": {
-                    "metric_name": metric_name,
-                    "domain_kwargs": domain_kwargs,
-                    "metric_value_kwargs": metric_value_kwargs,
-                    "metric_dependencies": None,
-                },
-                "num_batches": len(metric_values),
-            },
-        )
+        return metric_values

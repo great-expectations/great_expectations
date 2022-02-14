@@ -1,6 +1,8 @@
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Set, Union
 
+import numpy as np
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
@@ -103,7 +105,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        nonnull_metrics: MetricComputationResult = self.get_metrics(
+        metric_computation_result: MetricComputationResult
+
+        metric_computation_result = self.get_metrics(
             batch_ids=batch_ids,
             validator=validator,
             metric_name="column_values.nonnull.count",
@@ -113,23 +117,27 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        nonnull_count: int = sum(nonnull_metrics.metric_values)
+        metric_values: np.ndarray = metric_computation_result.metric_values
+        metric_values = metric_values[:, 0]
+
+        nonnull_count: int = sum(metric_values)
 
         format_string_success_ratios: dict = {}
+
+        fmt_string: str
+        match_strftime_metric_value_kwargs: dict
         for fmt_string in self._candidate_strings:
             if self._metric_value_kwargs:
-                match_strftime_metric_value_kwargs: dict = (
-                    {
-                        **self._metric_value_kwargs,
-                        **{"strftime_format": fmt_string},
-                    },
-                )
+                match_strftime_metric_value_kwargs = {
+                    **self._metric_value_kwargs,
+                    **{"strftime_format": fmt_string},
+                }
             else:
-                match_strftime_metric_value_kwargs: dict = {
-                    "strftime_format": fmt_string
+                match_strftime_metric_value_kwargs = {
+                    "strftime_format": fmt_string,
                 }
 
-            match_strftime_metrics: MetricComputationResult = self.get_metrics(
+            metric_computation_result = self.get_metrics(
                 batch_ids=batch_ids,
                 validator=validator,
                 metric_name="column_values.match_strftime_format.unexpected_count",
@@ -139,10 +147,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 variables=variables,
                 parameters=parameters,
             )
-            match_strftime_unexpected_count: int = sum(
-                match_strftime_metrics.metric_values
-            )
+            metric_values: np.ndarray = metric_computation_result.metric_values
+            metric_values = metric_values[:, 0]
 
+            match_strftime_unexpected_count: int = sum(metric_values)
             format_string_success_ratios[fmt_string] = (
                 nonnull_count - match_strftime_unexpected_count
             ) / nonnull_count

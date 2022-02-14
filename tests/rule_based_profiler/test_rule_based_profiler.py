@@ -95,6 +95,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "metric_name": "my_metric",
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
+                    "reduce_scalar_metric": True,
                 },
                 {
                     "name": "my_other_parameter",
@@ -102,6 +103,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "sampling_method": "bootstrap",
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
+                    "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "truncate_values": {},
                 },
@@ -124,6 +126,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "metric_name": "my_metric",
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
+                    "reduce_scalar_metric": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -181,6 +184,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
                     "metric_name": "my_metric",
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
+                    "reduce_scalar_metric": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -222,6 +226,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "metric_name": "my_special_metric",
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
+                    "reduce_scalar_metric": True,
                 },
                 {
                     "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
@@ -230,6 +235,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "metric_name": "my_other_metric",
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": False,
+                    "reduce_scalar_metric": True,
                     "false_positive_rate": 0.025,
                 },
             ],
@@ -246,6 +252,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "metric_name": "my_special_metric",
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
+                    "reduce_scalar_metric": True,
                 },
                 {
                     "name": "my_other_parameter",
@@ -253,6 +260,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "sampling_method": "bootstrap",
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": False,
+                    "reduce_scalar_metric": True,
                     "false_positive_rate": 0.025,
                     "truncate_values": {},
                 },
@@ -313,6 +321,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "metric_name": "my_metric",
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
+                    "reduce_scalar_metric": True,
                 },
             ],
             "expectation_configuration_builders": [
@@ -392,6 +401,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override(
                     "metric_name": "my_metric",
                     "enforce_numeric_metric": False,
                     "replace_nan_with_zero": False,
+                    "reduce_scalar_metric": True,
                 },
                 {
                     "name": "my_other_parameter",
@@ -399,6 +409,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override(
                     "sampling_method": "bootstrap",
                     "enforce_numeric_metric": True,
                     "replace_nan_with_zero": True,
+                    "reduce_scalar_metric": True,
                     "false_positive_rate": 0.05,
                     "truncate_values": {},
                 },
