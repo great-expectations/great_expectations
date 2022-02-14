@@ -87,12 +87,12 @@ Note that unlike other Stores, your Data Docs Stores are configured under each i
 
 For more information about a specific type of Store, please see the Store type's technical term definition page:
 
-- <TechnicalTag relative="../" tag="expectation_store" text="Expectation Store technical term page" />
-- <TechnicalTag relative="../" tag="checkpoint_store" text="Checkpoint Store technical term page" />
-- <TechnicalTag relative="../" tag="validation_result_store" text="Validation Result Store technical term page" />
-- <TechnicalTag relative="../" tag="evaluation_parameter_store" text="Evaluation Parameter Store technical term page" />
-- <TechnicalTag relative="../" tag="data_docs_store" text="Data Docs Store technical term page" />
-- <TechnicalTag relative="../" tag="metric_store" text="Metric Store technical term page" />
+- [Expectation Store technical term page](./expectation_store.md)
+- [Checkpoint Store technical term page](./checkpoint_store.md)
+- [Validation Result Store technical term page](./validation_result_store.md)
+- [Evaluation Parameter Store technical term page](./evaluation_parameter_store.md)
+- [Data Docs Store technical term page](./data_docs_store.md)
+- [Metric Store technical term page](./metric_store.md)
 
 
 
