@@ -170,12 +170,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         format_string_success_ratios: dict = {}
         for fmt_string in self._candidate_strings:
             if self._metric_value_kwargs:
-                match_strftime_metric_value_kwargs: dict = (
-                    {
-                        **self._metric_value_kwargs,
-                        **{"strftime_format": fmt_string},
-                    },
-                )
+                match_strftime_metric_value_kwargs: dict = {
+                    **self._metric_value_kwargs,
+                    **{"strftime_format": fmt_string},
+                }
             else:
                 match_strftime_metric_value_kwargs: dict = {
                     "strftime_format": fmt_string
