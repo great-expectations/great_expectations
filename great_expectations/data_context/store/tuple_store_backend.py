@@ -413,7 +413,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
             raise StoreBackendError(
-                f"""Error: No base_public_path was configured!
+                """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the TupleFilesystemStoreBackend
                 """
             )
@@ -669,7 +669,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
             raise StoreBackendError(
-                f"""Error: No base_public_path was configured!
+                """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the
                 """
             )
@@ -912,7 +912,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
             raise StoreBackendError(
-                f"""Error: No base_public_path was configured!
+                """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the
                 """
             )
@@ -1099,7 +1099,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         if copy_properties.status != "success":
             dest_blob.abort_copy(copy_properties.id)
             raise StoreBackendError(
-                f"Unable to copy blob %s with status %s"
+                "Unable to copy blob %s with status %s"
                 % (source_blob_path, copy_properties.status)
             )
         source_blob.delete_blob()

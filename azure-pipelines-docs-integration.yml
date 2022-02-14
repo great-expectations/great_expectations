@@ -94,7 +94,9 @@ stages:
             pip install --requirement requirements.txt
             pip install .
           displayName: 'Install dependencies'
-
+        - script: |
+            pip install "pyathena[SQLAlchemy]"
+          displayName: 'Install awsathena dependency'
         - task: DownloadSecureFile@1
           name: gcp_authkey
           displayName: 'Download GCS Credentials'
@@ -105,10 +107,11 @@ stages:
           name: aws_authkey
           displayName: 'Download AWS Credentials'
           inputs:
-              secureFile: 'aws_config'
+              secureFile: 'aws_config_sandbox'
               retryCount: '2'
-
         - script: |
+            # install google cloud storage dependency
+            pip install google-cloud-bigquery-storage
             # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
             curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
             ./google-cloud-sdk/install.sh --usage-reporting=False --path-update=True --quiet --install-python=False
@@ -128,7 +131,7 @@ stages:
 
         - script: |
             pip install pytest pytest-azurepipelines
-            pytest -v --docs-tests -m docs --mysql --bigquery --mssql tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --aws tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
@@ -147,6 +150,8 @@ stages:
             REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
             # AWS credentials
             AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
+            ATHENA_DB_NAME: $(ATHENA_DB_NAME)
+            ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
             # GCP credentials
             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
             GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)

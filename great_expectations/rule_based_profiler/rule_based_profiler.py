@@ -1,13 +1,27 @@
+# Test change
 import copy
 import uuid
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import (
+    BatchRequest,
+    RuntimeBatchRequest,
+    batch_request_contains_batch_data,
+)
+from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
+from great_expectations.data_context.store import ProfilerStore
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+    GeCloudIdentifier,
+)
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
+    RuleBasedProfilerConfig,
     domainBuilderConfigSchema,
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
@@ -26,120 +40,63 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     build_parameter_container_for_variables,
 )
-from great_expectations.rule_based_profiler.types.builder import (
-    validate_builder_override_config,
-)
+from great_expectations.util import filter_properties_dict
 
 
-class RuleBasedProfiler:
+def _validate_builder_override_config(builder_config: dict):
     """
-    RuleBasedProfiler object serves to profile, or automatically evaluate a set of rules, upon a given
-    batch / multiple batches of data.
+    In order to insure successful instantiation of custom builder classes using "instantiate_class_from_config()",
+    candidate builder override configurations are required to supply both "class_name" and "module_name" attributes.
 
-    --ge-feature-maturity-info--
+    :param builder_config: candidate builder override configuration
+    :raises: ProfilerConfigurationError
+    """
+    if not all(
+        [
+            isinstance(builder_config, dict),
+            "class_name" in builder_config,
+            "module_name" in builder_config,
+        ]
+    ):
+        raise ge_exceptions.ProfilerConfigurationError(
+            'Both "class_name" and "module_name" must be specified.'
+        )
 
-        id: rule_based_profiler_overall
-        title: Rule-Based Profiler
-        icon:
-        short_description: Configuration Driven Profiler
-        description: Use YAML to configure a flexible Profiler engine, which will then generate an ExpectationSuite for a data set
-        how_to_guide_url:
-        maturity: Experimental
-        maturity_details:
-            api_stability: Low (instantiation of Profiler and the signature of the run() method will change)
-            implementation_completeness: Moderate (some augmentation and/or growth in capabilities is to be expected)
-            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
-            integration_infrastructure_test_coverage: N/A -> TBD
-            documentation_completeness: Moderate
-            bug_risk: Low/Moderate
-            expectation_completeness: Moderate
 
-        id: domain_builders
-        title: Domain Builders
-        icon:
-        short_description: Configurable Domain builders for generating lists of ExpectationConfiguration objects
-        description: Use YAML to build domains for ExpectationConfiguration generator (table, column, semantic types, etc.)
-        how_to_guide_url:
-        maturity: Experimental
-        maturity_details:
-            api_stability: Moderate
-            implementation_completeness: Moderate (additional DomainBuilder classes will be developed)
-            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
-            integration_infrastructure_test_coverage: N/A -> TBD
-            documentation_completeness: Moderate
-            bug_risk: Low/Moderate
-            expectation_completeness: Moderate
-
-        id: parameter_builders
-        title: Parameter Builders
-        icon:
-        short_description: Configurable Parameter builders for generating parameters to be used by ExpectationConfigurationBuilder classes for generating lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments), corresponding to the Domain built by a DomainBuilder class
-        description: Use YAML to configure single and multi batch based parameter computation modules for the use by ExpectationConfigurationBuilder classes
-        how_to_guide_url:
-        maturity: Experimental
-        maturity_details:
-            api_stability: Moderate
-            implementation_completeness: Moderate (additional ParameterBuilder classes will be developed)
-            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
-            integration_infrastructure_test_coverage: N/A -> TBD
-            documentation_completeness: Moderate
-            bug_risk: Low/Moderate
-            expectation_completeness: Moderate
-
-        id: expectation_configuration_builders
-        title: ExpectationConfiguration Builders
-        icon:
-        short_description: Configurable ExpectationConfigurationBuilder classes for generating lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments), corresponding to the Domain built by a DomainBuilder class and using parameters, computed by ParameterBuilder classes
-        description: Use YAML to configure ExpectationConfigurationBuilder classes, which emit lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments)
-        how_to_guide_url:
-        maturity: Experimental
-        maturity_details:
-            api_stability: Moderate
-            implementation_completeness: Moderate (additional ExpectationConfigurationBuilder classes might be developed)
-            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
-            integration_infrastructure_test_coverage: N/A -> TBD
-            documentation_completeness: Moderate
-            bug_risk: Low/Moderate
-            expectation_completeness: Moderate
-
-    --ge-feature-maturity-info--
+class BaseRuleBasedProfiler(ConfigPeer):
+    """
+    BaseRuleBasedProfiler class is initialized from RuleBasedProfilerConfig typed object and contains all functionality
+    in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
     """
 
     def __init__(
         self,
-        name: str,
-        config_version: float,
-        variables: Optional[Dict[str, Any]] = None,
-        rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        profiler_config: RuleBasedProfilerConfig,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
         """
-        Create a new Profiler using configured rules.
+        Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
+
         For a rule or an item in a rule configuration, instantiates the following if
         available: a domain builder, a parameter builder, and a configuration builder.
         These will be used to define profiler computation patterns.
 
         Args:
-            name: The name of the RBP instance
-            config_version: The version of the RBP (currently only 1.0 is supported)
-            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
-            expectation_configuration_builders configuration components
-            variables: Any variables to be substituted within the rules
+            profiler_config: RuleBasedProfilerConfig -- formal typed object containing configuration
             data_context: DataContext object that defines a full runtime environment (data access, etc.)
         """
+        name: str = profiler_config.name
+        config_version: float = profiler_config.config_version
+        variables: Optional[Dict[str, Any]] = profiler_config.variables
+        rules: Optional[Dict[str, Dict[str, Any]]] = profiler_config.rules
+
         self._name = name
         self._config_version = config_version
 
+        self._profiler_config = profiler_config
+
         if variables is None:
             variables = {}
-
-        # Convert variables argument to ParameterContainer
-        _variables: ParameterContainer = build_parameter_container_for_variables(
-            variables_configs=variables
-        )
-        self._variables = _variables
-
-        self._data_context = data_context
 
         # Necessary to annotate ExpectationSuite during `run()`
         self._citation = {
@@ -148,6 +105,14 @@ class RuleBasedProfiler:
             "variables": variables,
             "rules": rules,
         }
+
+        # Convert variables argument to ParameterContainer
+        _variables: ParameterContainer = build_parameter_container_for_variables(
+            variables_configs=variables
+        )
+        self._variables = _variables
+
+        self._data_context = data_context
 
         self._rules = self._init_profiler_rules(rules=rules)
 
@@ -389,7 +354,7 @@ class RuleBasedProfiler:
         if rules is None:
             rules = {}
 
-        effective_rules: Dict[str, Rule] = self._get_rules_as_dict()
+        effective_rules: Dict[str, Rule] = self.get_rules_as_dict()
 
         rule_name: str
         rule_config: dict
@@ -511,7 +476,7 @@ class RuleBasedProfiler:
 
         effective_domain_builder_config: dict = serialized_config
         if domain_builder_config:
-            validate_builder_override_config(builder_config=domain_builder_config)
+            _validate_builder_override_config(builder_config=domain_builder_config)
             effective_domain_builder_config.update(domain_builder_config)
 
         return effective_domain_builder_config
@@ -536,7 +501,7 @@ class RuleBasedProfiler:
         """
         parameter_builder_config: dict
         for parameter_builder_config in parameter_builder_configs:
-            validate_builder_override_config(builder_config=parameter_builder_config)
+            _validate_builder_override_config(builder_config=parameter_builder_config)
 
         effective_parameter_builder_configs: Dict[str, dict] = {}
 
@@ -607,7 +572,7 @@ class RuleBasedProfiler:
         for (
             expectation_configuration_builder_config
         ) in expectation_configuration_builder_configs:
-            validate_builder_override_config(
+            _validate_builder_override_config(
                 builder_config=expectation_configuration_builder_config
             )
 
@@ -664,7 +629,7 @@ class RuleBasedProfiler:
 
         return list(effective_expectation_configuration_builder_configs.values())
 
-    def _get_rules_as_dict(self) -> Dict[str, Rule]:
+    def get_rules_as_dict(self) -> Dict[str, Rule]:
         rule: Rule
         return {rule.name: rule for rule in self._rules}
 
@@ -691,6 +656,10 @@ class RuleBasedProfiler:
         return report_object
 
     @property
+    def config(self) -> RuleBasedProfilerConfig:
+        return self._profiler_config
+
+    @property
     def name(self) -> str:
         return self._name
 
@@ -705,8 +674,295 @@ class RuleBasedProfiler:
 
     @property
     def rules(self) -> List[Rule]:
-        return list(self._get_rules_as_dict().values())
+        return self._rules
 
     @rules.setter
     def rules(self, value: List[Rule]):
         self._rules = value
+
+
+class RuleBasedProfiler(BaseRuleBasedProfiler):
+    """
+    RuleBasedProfiler object serves to profile, or automatically evaluate a set of rules, upon a given
+    batch / multiple batches of data.
+
+    --ge-feature-maturity-info--
+
+        id: rule_based_profiler_overall
+        title: Rule-Based Profiler
+        icon:
+        short_description: Configuration Driven Profiler
+        description: Use YAML to configure a flexible Profiler engine, which will then generate an ExpectationSuite for a data set
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Low (instantiation of Profiler and the signature of the run() method will change)
+            implementation_completeness: Moderate (some augmentation and/or growth in capabilities is to be expected)
+            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
+            integration_infrastructure_test_coverage: N/A -> TBD
+            documentation_completeness: Moderate
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
+
+        id: domain_builders
+        title: Domain Builders
+        icon:
+        short_description: Configurable Domain builders for generating lists of ExpectationConfiguration objects
+        description: Use YAML to build domains for ExpectationConfiguration generator (table, column, semantic types, etc.)
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Moderate
+            implementation_completeness: Moderate (additional DomainBuilder classes will be developed)
+            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
+            integration_infrastructure_test_coverage: N/A -> TBD
+            documentation_completeness: Moderate
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
+
+        id: parameter_builders
+        title: Parameter Builders
+        icon:
+        short_description: Configurable Parameter builders for generating parameters to be used by ExpectationConfigurationBuilder classes for generating lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments), corresponding to the Domain built by a DomainBuilder class
+        description: Use YAML to configure single and multi batch based parameter computation modules for the use by ExpectationConfigurationBuilder classes
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Moderate
+            implementation_completeness: Moderate (additional ParameterBuilder classes will be developed)
+            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
+            integration_infrastructure_test_coverage: N/A -> TBD
+            documentation_completeness: Moderate
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
+
+        id: expectation_configuration_builders
+        title: ExpectationConfiguration Builders
+        icon:
+        short_description: Configurable ExpectationConfigurationBuilder classes for generating lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments), corresponding to the Domain built by a DomainBuilder class and using parameters, computed by ParameterBuilder classes
+        description: Use YAML to configure ExpectationConfigurationBuilder classes, which emit lists of ExpectationConfiguration objects (e.g., as kwargs and meta arguments)
+        how_to_guide_url:
+        maturity: Experimental
+        maturity_details:
+            api_stability: Moderate
+            implementation_completeness: Moderate (additional ExpectationConfigurationBuilder classes might be developed)
+            unit_test_coverage: High (but not complete -- additional unit tests will be added, commensurate with the upcoming new functionality)
+            integration_infrastructure_test_coverage: N/A -> TBD
+            documentation_completeness: Moderate
+            bug_risk: Low/Moderate
+            expectation_completeness: Moderate
+
+    --ge-feature-maturity-info--
+    """
+
+    def __init__(
+        self,
+        name: str,
+        config_version: float,
+        variables: Optional[Dict[str, Any]] = None,
+        rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
+    ):
+        """
+        Create a new Profiler using configured rules.
+        For a rule or an item in a rule configuration, instantiates the following if
+        available: a domain builder, a parameter builder, and a configuration builder.
+        These will be used to define profiler computation patterns.
+
+        Args:
+            name: The name of the RBP instance
+            config_version: The version of the RBP (currently only 1.0 is supported)
+            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
+            expectation_configuration_builders configuration components
+            variables: Any variables to be substituted within the rules
+            data_context: DataContext object that defines a full runtime environment (data access, etc.)
+        """
+        profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+            name=name,
+            config_version=config_version,
+            variables=variables,
+            rules=rules,
+        )
+
+        super().__init__(
+            profiler_config=profiler_config,
+            data_context=data_context,
+        )
+
+    @staticmethod
+    def run_profiler(
+        data_context: "DataContext",  # noqa: F821
+        profiler_store: ProfilerStore,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        variables: Optional[dict] = None,
+        rules: Optional[dict] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> ExpectationSuite:
+
+        profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
+            data_context=data_context,
+            profiler_store=profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
+        result: ExpectationSuite = profiler.run(
+            variables=variables,
+            rules=rules,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
+
+        return result
+
+    @staticmethod
+    def add_profiler(
+        config: RuleBasedProfilerConfig,
+        data_context: "DataContext",  # noqa: F821
+        profiler_store: ProfilerStore,
+        ge_cloud_id: Optional[str] = None,
+    ) -> "RuleBasedProfiler":
+        if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(
+            config=config
+        ):
+            raise ge_exceptions.InvalidConfigError(
+                f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store.store_name}"'
+            )
+
+        # Chetan - 20220204 - DataContext to be removed once it can be decoupled from RBP
+        new_profiler: "RuleBasedProfiler" = instantiate_class_from_config(
+            config=config.to_json_dict(),
+            runtime_environment={
+                "data_context": data_context,
+            },
+            config_defaults={
+                "module_name": "great_expectations.rule_based_profiler",
+                "class_name": "RuleBasedProfiler",
+            },
+        )
+
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        if ge_cloud_id:
+            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+        else:
+            key = ConfigurationIdentifier(
+                configuration_key=config.name,
+            )
+
+        profiler_store.set(key=key, value=config)
+
+        return new_profiler
+
+    @staticmethod
+    def _check_validity_of_batch_requests_in_config(
+        config: RuleBasedProfilerConfig,
+    ) -> bool:
+        # Evaluate nested types in RuleConfig to parse out BatchRequests
+        batch_requests: List[Union[BatchRequest, RuntimeBatchRequest, dict]] = []
+        rule: dict
+        for rule in config.rules.values():
+
+            domain_builder: dict = rule["domain_builder"]
+            if "batch_request" in domain_builder:
+                batch_requests.append(domain_builder["batch_request"])
+
+            parameter_builders: List[dict] = rule.get("parameter_builders", [])
+            parameter_builder: dict
+            for parameter_builder in parameter_builders:
+                if "batch_request" in parameter_builder:
+                    batch_requests.append(parameter_builder["batch_request"])
+
+        # DataFrames shouldn't be saved to ProfilerStore
+        batch_request: Union[BatchRequest, RuntimeBatchRequest, dict]
+        for batch_request in batch_requests:
+            if batch_request_contains_batch_data(batch_request=batch_request):
+                return False
+
+        return True
+
+    @staticmethod
+    def get_profiler(
+        data_context: "DataContext",  # noqa: F821
+        profiler_store: ProfilerStore,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> "RuleBasedProfiler":
+        assert bool(name) ^ bool(
+            ge_cloud_id
+        ), "Must provide either name or ge_cloud_id (but not both)"
+
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        if ge_cloud_id:
+            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+        else:
+            key = ConfigurationIdentifier(
+                configuration_key=name,
+            )
+        try:
+            profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
+        except ge_exceptions.InvalidKeyError as exc_ik:
+            id_ = (
+                key.configuration_key
+                if isinstance(key, ConfigurationIdentifier)
+                else key
+            )
+            raise ge_exceptions.ProfilerNotFoundError(
+                message=f'Non-existent Profiler configuration named "{id_}".\n\nDetails: {exc_ik}'
+            )
+
+        config = profiler_config.to_json_dict()
+        if name:
+            config.update({"name": name})
+        config = filter_properties_dict(properties=config, clean_falsy=True)
+
+        profiler = instantiate_class_from_config(
+            config=config,
+            runtime_environment={
+                "data_context": data_context,
+            },
+            config_defaults={
+                "module_name": "great_expectations.rule_based_profiler",
+                "class_name": "RuleBasedProfiler",
+            },
+        )
+
+        return profiler
+
+    @staticmethod
+    def delete_profiler(
+        profiler_store: ProfilerStore,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> None:
+        assert bool(name) ^ bool(
+            ge_cloud_id
+        ), "Must provide either name or ge_cloud_id (but not both)"
+
+        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
+        if ge_cloud_id:
+            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+        else:
+            key = ConfigurationIdentifier(configuration_key=name)
+
+        try:
+            profiler_store.remove_key(key=key)
+        except (ge_exceptions.InvalidKeyError, KeyError) as exc_ik:
+            id_ = (
+                key.configuration_key
+                if isinstance(key, ConfigurationIdentifier)
+                else key
+            )
+            raise ge_exceptions.ProfilerNotFoundError(
+                message=f'Non-existent Profiler configuration named "{id_}".\n\nDetails: {exc_ik}'
+            )
+
+    @staticmethod
+    def list_profilers(
+        profiler_store: ProfilerStore,
+        ge_cloud_mode: bool,
+    ) -> List[str]:
+        if ge_cloud_mode:
+            return profiler_store.list_keys()
+        return [x.configuration_key for x in profiler_store.list_keys()]
