@@ -107,7 +107,7 @@ def test_simple_date_format_parameter_builder_alice(
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
-    batch_request = {
+    batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
         "data_connector_name": "alice_columnar_table_single_batch_data_connector",
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
