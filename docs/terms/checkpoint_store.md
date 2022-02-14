@@ -34,6 +34,6 @@ When you save your first Checkpoint, a Checkpoint Store configuration will autom
 
 ### How to access
 
-Your Data Context will handle accessing your Checkpoint Store behind the scenes when you use it to store or retrieve a Checkpoint's configuration.  Rather than interacting with the Checkpoint Store itself, you will generally be interacting with a Checkpoint and your Data Context.
+Your Data Context will handle accessing your Checkpoint Store behind the scenes when you use it to store or retrieve a Checkpoint's configuration.  Rather than interacting with the Checkpoint Store itself, you will generally be interacting with your Data Context and a Checkpoint itself.
 
 
