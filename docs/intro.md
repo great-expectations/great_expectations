@@ -5,7 +5,7 @@ slug: /
 
 Welcome to Great Expectations!
 
-Great Expectations is the leading tool for [validating](./reference/core_concepts.md#expectations), [documenting](./reference/core_concepts.md#data-docs), and [profiling](./reference/core_concepts.md#profiling) your data to maintain quality and improve communication between teams. Head over to our [getting started](./tutorials/getting_started/intro.md) tutorial.
+Great Expectations is the leading tool for [validating](./reference/core_concepts.md#expectations), [documenting](./reference/core_concepts.md#data-docs), and [profiling](./reference/core_concepts.md#profiling) your data to maintain quality and improve communication between teams. Head over to our [getting started](./tutorials/getting_started/tutorial_overview.md) tutorial.
 
 Software developers have long known that automated testing is essential for managing complex codebases. Great Expectations brings the same discipline, confidence, and acceleration to data science and data engineering teams.
 
