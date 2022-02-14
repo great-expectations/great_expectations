@@ -200,7 +200,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         best_fmt_string: Optional[str] = None
         best_ratio: int = 0
 
-        threshold = get_parameter_value_and_validate_return_type(
+        threshold: float = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self._threshold,
             expected_return_type=float,
