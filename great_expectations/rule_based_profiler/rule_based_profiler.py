@@ -7,6 +7,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
     batch_request_contains_batch_data,
+    get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -308,6 +309,22 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 )
 
         return expectation_suite
+
+    def reconcile_batch_requests_in_builders(
+        self, batch_request: Union[dict, BatchRequest, RuntimeBatchRequest]
+    ) -> None:
+        if isinstance(batch_request, dict):
+            batch_request = get_batch_request_from_acceptable_arguments(**batch_request)
+
+        for rule in self.rules:
+            # TODO(cdkini): Should only work on Column and -1 index?
+            rule.domain_builder._batch_request = batch_request
+
+            if rule.parameter_builders:
+                for parameter_builder in rule.parameter_builders:
+                    parameter_builder._batch_request = batch_request
+
+            # TODO(cdkini): Let's use setters
 
     def reconcile_profiler_variables(
         self, variables: Optional[Dict[str, Any]] = None
@@ -814,6 +831,25 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             include_citation=include_citation,
         )
 
+        return result
+
+    @staticmethod
+    def run_profiler_on_data(
+        data_context: "DataContext",  # noqa: F821
+        profiler_store: ProfilerStore,
+        batch_request: Union[dict, BatchRequest, RuntimeBatchRequest],
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> ExpectationSuite:
+        profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
+            data_context=data_context,
+            profiler_store=profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+        profiler.reconcile_batch_requests_in_builders(batch_request)
+
+        result: ExpectationSuite = profiler.run()
         return result
 
     @staticmethod

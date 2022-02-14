@@ -3354,12 +3354,16 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     def run_profiler_on_data(
         self,
         name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
         batch_request: Optional[Union[dict, BatchRequest, RuntimeBatchRequest]] = None,
     ) -> ExpectationSuite:
-        if isinstance(batch_request, dict):
-            batch_request = get_batch_request_from_acceptable_arguments(**batch_request)
-
-        # TODO(cdkini): Figure out what happens next!
+        return RuleBasedProfiler.run_profiler_on_data(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            batch_request=batch_request,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
 
     def test_yaml_config(
         self,
