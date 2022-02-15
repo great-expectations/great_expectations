@@ -313,7 +313,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return expectation_suite
 
-    def reconcile_batch_requests_in_builders(
+    def _reconcile_batch_requests_in_builders(
         self, batch_request: Union[dict, BatchRequest, RuntimeBatchRequest]
     ) -> None:
         """
@@ -867,7 +867,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             name=name,
             ge_cloud_id=ge_cloud_id,
         )
-        profiler.reconcile_batch_requests_in_builders(batch_request)
+        profiler._reconcile_batch_requests_in_builders(batch_request)
 
         result: ExpectationSuite = profiler.run()
         return result

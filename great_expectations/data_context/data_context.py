@@ -3353,9 +3353,9 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
     )
     def run_profiler_on_data(
         self,
+        batch_request: Union[dict, BatchRequest, RuntimeBatchRequest],
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
-        batch_request: Optional[Union[dict, BatchRequest, RuntimeBatchRequest]] = None,
     ) -> ExpectationSuite:
         return RuleBasedProfiler.run_profiler_on_data(
             data_context=self,
