@@ -16,7 +16,10 @@ along with many others developed by data practitioners from around the world as 
 
 ## Steps
 
-### 1. Choose a parent class to help your implementation.
+### 1. Verify that your Custom Expectation is ready for contribution
+
+We accept contributions into the Great Expectations codebase at several levels: Experimental, Beta, and Production. The requirements to meet these benchmarks are available in our 
+document on levels of maturity
 
 There are four Expectation subclasses that make the development of particular types of Expectations significantly easier by handling boilerplate code and letting you focus on the business logic of your Expectation. Consider choosing one that suites your Expectation:
 
