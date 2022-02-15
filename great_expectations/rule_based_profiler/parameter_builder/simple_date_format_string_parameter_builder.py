@@ -107,6 +107,8 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         metric_computation_result: MetricComputationResult
 
+        metric_values: np.ndarray
+
         metric_computation_result = self.get_metrics(
             batch_ids=batch_ids,
             validator=validator,
@@ -117,7 +119,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: np.ndarray = metric_computation_result.metric_values
+        metric_values = metric_computation_result.metric_values
         metric_values = metric_values[:, 0]
 
         nonnull_count: int = sum(metric_values)
@@ -147,7 +149,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 variables=variables,
                 parameters=parameters,
             )
-            metric_values: np.ndarray = metric_computation_result.metric_values
+            metric_values = metric_computation_result.metric_values
             metric_values = metric_values[:, 0]
 
             match_strftime_unexpected_count: int = sum(metric_values)
