@@ -15,7 +15,7 @@ import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
 ### Definition
 
-A Data Connector provides the configuration details based on the source data system which are needed by a Datasource to define Data Assets.
+A Data Connector provides the configuration details based on the source data system which are needed by a <TechnicalTag relative="../" tag="datasource" text="Datasource" /> to define <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.
 
 ### Features and promises
 
@@ -26,7 +26,9 @@ A Data Connector facilitates access to an external source data system, such as a
 
 ### Relationship to other objects
 
-A Data Connector is an integral element of a Datasource.  When a Batch Request is passed to a Datasource, the Datasource's Execution Engine will pass the Batch Request to its Data Connector, which will then query the source data system it is configured for.
+A Data Connector is an integral element of a Datasource.  When a Batch Request is passed to a Datasource, the Datasource's <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" /> will pass the <TechnicalTag relative="../" tag="batch_request" text="Batch Request" /> to its Data Connector, which will then query the source data system it is configured for.  This will result in the return of a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
+
+Data Connectors provide Batches to <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, <TechnicalTag relative="../" tag="profiler" text="Profilers" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.
 
 ## Use cases
 
@@ -42,11 +44,11 @@ In addition to those examples, Great Expectations makes it possible to configure
 
 <CreateHeader/>
 
-When creating Expectations Datasources will use their Data Connectors behind the scenes as part of the process of providing Batches to Expectation Suites and Profilers.
+When creating Expectations, Datasources will use their Data Connectors behind the scenes as part of the process of providing Batches to Expectation Suites and Profilers.
 
 <ValidateHeader/>
 
-Likewise, when validating Data Datasources will use their Data Connectors behind the scenes as part of the process of providing Batches to Checkpoints.
+Likewise, when validating Data, Datasources will use their Data Connectors behind the scenes as part of the process of providing Batches to Checkpoints.
 
 ## Features
 
