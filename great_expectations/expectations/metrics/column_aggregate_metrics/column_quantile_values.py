@@ -292,8 +292,8 @@ def _get_column_quantiles_sqlite(
     column, quantiles: Iterable, selectable, sqlalchemy_engine, table_row_count
 ) -> list:
     """
-    The present implementation is somewhat inefficient, because it requires as many
-    calls to "sqlalchemy_engine.execute()" as the number of partitions in the "quantiles" parameter (albeit, typically,
+    The present implementation is somewhat inefficient, because it requires as many calls to
+    "sqlalchemy_engine.execute()" as the number of partitions in the "quantiles" parameter (albeit, typically,
     only a few).  However, this is the only mechanism available for SQLite at the present time (11/17/2021), because
     the analytical processing is not a very strongly represented capability of the SQLite database management system.
     """
