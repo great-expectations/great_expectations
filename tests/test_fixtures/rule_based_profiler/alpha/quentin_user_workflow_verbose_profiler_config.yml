@@ -1,0 +1,54 @@
+# This profiler is meant to be used on the NYC taxi data:
+# tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_20(18|19|20)-*.csv
+name: quentin user workflow
+class_name: RuleBasedProfiler
+config_version: 1.0
+
+variables:
+  quantiles:
+    - 2.5e-1
+    - 5.0e-1
+    - 7.5e-1
+
+  # BatchRequest yielding thirty five (35) batches (January, 2018 -- November, 2020 trip data)
+  jan_2018_thru_nov_2020_monthly_tripdata_batch_request:
+    datasource_name: taxi_pandas
+    data_connector_name: monthly
+    data_asset_name: my_reports
+    data_connector_query:
+      index: ":-1"
+
+  false_positive_rate: 5.0e-2
+
+rules:
+  column_quantiles_rule:
+    domain_builder:
+      class_name: SimpleColumnSuffixDomainBuilder
+      # BatchRequest yielding exactly one batch (November, 2020 trip data)
+      batch_request:
+        datasource_name: taxi_pandas
+        data_connector_name: monthly
+        data_asset_name: my_reports
+        data_connector_query:
+          index: -1
+      column_name_suffixes:
+        - _amount
+    parameter_builders:
+      - name: quantile_value_ranges
+        class_name: NumericMetricRangeMultiBatchParameterBuilder
+        batch_request: $variables.jan_2018_thru_nov_2020_monthly_tripdata_batch_request
+        metric_name: column.quantile_values
+        metric_domain_kwargs: $domain.domain_kwargs
+        metric_value_kwargs:
+          quantiles: $variables.quantiles
+          allow_relative_error: linear
+        false_positive_rate: $variables.false_positive_rate
+    expectation_configuration_builders:
+      - expectation_type: expect_column_quantile_values_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        quantiles: $variables.quantiles
+        value_ranges: $parameter.quantile_value_ranges.value.value_range
+        meta:
+          profiler_details: $parameter.quantile_value_ranges.details
