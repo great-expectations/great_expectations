@@ -254,7 +254,7 @@ def compute_bootstrap_quantiles(
         year = 2000
     }
     The article outlines a three-step minimax procedure that relies on the Central Limit Theorem (C.L.T.) along with the
-    bootsrap sampling technique (please see https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for background) for
+    bootstrap sampling technique (see https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for background) for
     computing the stopping criterion, expressed as the optimal number of bootstrap samples, needed to achieve a maximum
     probability that the value of the statistic of interest will be minimally deviating from its actual (ideal) value.
     """

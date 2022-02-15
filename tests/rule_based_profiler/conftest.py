@@ -1361,8 +1361,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
     Bobster has multiple tables of columnar data called user_events (DataAsset) that he wants to check periodically as
     new data is added.
 
-      - He knows what some of the columns are of the acconting/financial/account type, but he is currently interested in
-        the average table size (in terms of the number of rows in a table).
+      - He knows what some of the columns are of the accounting/financial/account type, but he is currently interested
+        in the average table size (in terms of the number of rows in a table).
 
     He wants to use a configurable profiler to generate a description (ExpectationSuite) about tables so that he can:
 
@@ -1526,8 +1526,8 @@ def quentin_columnar_table_multi_batch():
     Quentin has multiple tables of columnar data called user_events (DataAsset) that he wants to check periodically as
     new data is added.
 
-      - He knows what some of the columns are of the acconting/financial/account type, but he is currently interested in
-        the range of quantiles of columns capturing financial quantities (column names ending on the "_amount" suffix).
+      - He knows what some of the columns are of the accounting/financial/account type, but he is currently interested
+        in the range of quantiles of columns capturing financial quantities (column names ending on "_amount" suffix).
 
     He wants to use a configurable profiler to generate a description (ExpectationSuite) about tables so that he can:
 
