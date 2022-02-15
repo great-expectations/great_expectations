@@ -48,7 +48,7 @@ Datasources support connecting to a variety of different data backends.  No matt
 
 ### No Unexpected Modifications
 
-Datasources do not modify your data during profiling or validation, but they may create temporary artifacts to optimize computing Metrics and Validation
+Datasources do not modify your data during profiling or validation, but they may create temporary artifacts to optimize computing Metrics and Validation.
 
 ### API Basics
 
