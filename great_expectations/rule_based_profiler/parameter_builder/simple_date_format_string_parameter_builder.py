@@ -183,7 +183,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         match_strftime_metric_value_kwargs: dict
         for fmt_string in self._candidate_strings:
             if self._metric_value_kwargs:
-                match_strftime_metric_value_kwargs: dict = {
+                match_strftime_metric_value_kwargs = {
                     **self._metric_value_kwargs,
                     **{"strftime_format": fmt_string},
                 }
