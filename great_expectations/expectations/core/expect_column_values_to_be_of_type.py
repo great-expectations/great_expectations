@@ -437,19 +437,26 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             actual_column_types_list = execution_engine.resolve_metrics(
                 [table_column_types_configuration]
             )[table_column_types_configuration.id]
-            actual_column_type = [
-                type_dict["type"]
-                for type_dict in actual_column_types_list
-                if type_dict["name"] == column_name
-            ][0]
+            try:
+                actual_column_type = [
+                    type_dict["type"]
+                    for type_dict in actual_column_types_list
+                    if type_dict["name"] == column_name
+                ][0]
+            except IndexError:
+                actual_column_type = None
 
             # only use column map version if column dtype is object
-            if actual_column_type.type.__name__ == "object_" and expected_type not in [
-                "object",
-                "object_",
-                "O",
-                None,
-            ]:
+            if (
+                actual_column_type
+                and actual_column_type.type.__name__ == "object_"
+                and expected_type not in [
+                    "object",
+                    "object_",
+                    "O",
+                    None,
+                ]
+            ):
                 # this resets dependencies using  ColumnMapExpectation.get_validation_dependencies
                 dependencies = super().get_validation_dependencies(
                     configuration, execution_engine, runtime_configuration
