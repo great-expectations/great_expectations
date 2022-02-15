@@ -1,6 +1,8 @@
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Set, Union
 
+import numpy as np
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
@@ -11,6 +13,9 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     build_parameter_container,
+)
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.validator.validator import Validator
 
@@ -30,6 +35,55 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         "%y-%m-%d",
         "%Y-%m-%dT%z",
         "%Y-%m-%d %H:%M:%S",
+        "%Y %b %d %H:%M:%S.%f %Z",
+        "%b %d %H:%M:%S %z %Y",
+        "%d/%b/%Y:%H:%M:%S %z",
+        "%b %d, %Y %H:%M:%S %p",
+        "%b %d %Y %H:%M:%S",
+        "%b %d %H:%M:%S %Y",
+        "%b %d %H:%M:%S %z",
+        "%b %d %H:%M:%S",
+        "%Y-%m-%d'T'%H:%M:%S%z",
+        "%Y-%m-%d'T'%H:%M:%S.%f'%z'",
+        "%Y-%m-%d %H:%M:%S %z",
+        "%Y-%m-%d %H:%M:%S%z",
+        "%Y-%m-%d %H:%M:%S,%f",
+        "%Y/%m/%d*%H:%M:%S",
+        "%Y %b %d %H:%M:%S.%f*%Z",
+        "%Y %b %d %H:%M:%S.%f",
+        "%Y-%m-%d %H:%M:%S,%f%z",
+        "%Y-%m-%d %H:%M:%S.%f",
+        "%Y-%m-%d %H:%M:%S.%f%z",
+        "%Y-%m-%d'T'%H:%M:%S.%f",
+        "%Y-%m-%d'T'%H:%M:%S",
+        "%Y-%m-%d'T'%H:%M:%S'%z'",
+        "%Y-%m-%d*%H:%M:%S:%f",
+        "%Y-%m-%d*%H:%M:%S",
+        "%y-%m-%d %H:%M:%S,%f %z",
+        "%y-%m-%d %H:%M:%S,%f",
+        "%y-%m-%d %H:%M:%S",
+        "%y/%m/%d %H:%M:%S",
+        "%y%m%d %H:%M:%S",
+        "%Y%m%d %H:%M:%S.%f",
+        "%m/%d/%y*%H:%M:%S",
+        "%m/%d/%Y*%H:%M:%S",
+        "%m/%d/%Y*%H:%M:%S*%f",
+        "%m/%d/%y %H:%M:%S %z",
+        "%m/%d/%Y %H:%M:%S %z",
+        "%H:%M:%S",
+        "%H:%M:%S.%f",
+        "%H:%M:%S,%f",
+        "%d/%b %H:%M:%S,%f",
+        "%d/%b/%Y:%H:%M:%S",
+        "%d/%b/%Y %H:%M:%S",
+        "%d-%b-%Y %H:%M:%S",
+        "%d-%b-%Y %H:%M:%S.%f",
+        "%d %b %Y %H:%M:%S",
+        "%d %b %Y %H:%M:%S*%f",
+        "%m%d_%H:%M:%S",
+        "%m%d_%H:%M:%S.%f",
+        "%m/%d/%Y %H:%M:%S %p:%f",
+        "%m/%d/%Y %H:%M:%S %p",
     }
 
     def __init__(
@@ -65,6 +119,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         self._metric_value_kwargs = metric_value_kwargs
 
         self._threshold = threshold
+
         if candidate_strings is not None:
             self._candidate_strings = set(candidate_strings)
         else:
@@ -76,7 +131,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
@@ -103,7 +157,11 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        nonnull_metrics: MetricComputationResult = self.get_metrics(
+        metric_computation_result: MetricComputationResult
+
+        metric_values: np.ndarray
+
+        metric_computation_result = self.get_metrics(
             batch_ids=batch_ids,
             validator=validator,
             metric_name="column_values.nonnull.count",
@@ -113,23 +171,28 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        nonnull_count: int = sum(nonnull_metrics.metric_values)
+        metric_values = metric_computation_result.metric_values
+        # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
+        metric_values = metric_values[:, 0]
+
+        nonnull_count: int = sum(metric_values)
 
         format_string_success_ratios: dict = {}
+
+        fmt_string: str
+        match_strftime_metric_value_kwargs: dict
         for fmt_string in self._candidate_strings:
             if self._metric_value_kwargs:
-                match_strftime_metric_value_kwargs: dict = (
-                    {
-                        **self._metric_value_kwargs,
-                        **{"strftime_format": fmt_string},
-                    },
-                )
-            else:
                 match_strftime_metric_value_kwargs: dict = {
-                    "strftime_format": fmt_string
+                    **self._metric_value_kwargs,
+                    **{"strftime_format": fmt_string},
+                }
+            else:
+                match_strftime_metric_value_kwargs = {
+                    "strftime_format": fmt_string,
                 }
 
-            match_strftime_metrics: MetricComputationResult = self.get_metrics(
+            metric_computation_result = self.get_metrics(
                 batch_ids=batch_ids,
                 validator=validator,
                 metric_name="column_values.match_strftime_format.unexpected_count",
@@ -139,18 +202,30 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 variables=variables,
                 parameters=parameters,
             )
-            match_strftime_unexpected_count: int = sum(
-                match_strftime_metrics.metric_values
-            )
+            metric_values = metric_computation_result.metric_values
+            # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
+            metric_values = metric_values[:, 0]
 
+            match_strftime_unexpected_count: int = sum(metric_values)
             format_string_success_ratios[fmt_string] = (
                 nonnull_count - match_strftime_unexpected_count
             ) / nonnull_count
 
         best_fmt_string: Optional[str] = None
         best_ratio: int = 0
+
+        threshold: float = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._threshold,
+            expected_return_type=float,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        fmt_string: str
+        ratio: float
         for fmt_string, ratio in format_string_success_ratios.items():
-            if ratio > best_ratio and ratio >= self._threshold:
+            if ratio > best_ratio and ratio >= threshold:
                 best_fmt_string = fmt_string
                 best_ratio = ratio
 
