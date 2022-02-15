@@ -1,7 +1,7 @@
 import copy
 import uuid
 from numbers import Number
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -199,7 +199,7 @@ def get_parameter_value(
 def compute_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
-) -> tuple:
+) -> Tuple[Number, Number]:
     lower_quantile = np.quantile(
         metric_values,
         q=(false_positive_rate / 2),
@@ -219,7 +219,7 @@ def compute_bootstrap_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
-) -> tuple:
+) -> Tuple[Number, Number]:
     """
     Internal implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
     See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.

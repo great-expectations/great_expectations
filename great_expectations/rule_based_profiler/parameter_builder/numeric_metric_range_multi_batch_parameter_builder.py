@@ -1,6 +1,6 @@
 import itertools
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 
@@ -514,7 +514,7 @@ positive integer, or must be omitted (or set to None).
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
-    ) -> tuple:
+    ) -> Tuple[Number, Number]:
         # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         false_positive_rate: np.float64 = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -559,7 +559,7 @@ positive integer, or must be omitted (or set to None).
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
-    ) -> tuple:
+    ) -> Tuple[Number, Number]:
         # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         false_positive_rate: np.float64 = get_parameter_value_and_validate_return_type(
             domain=domain,
