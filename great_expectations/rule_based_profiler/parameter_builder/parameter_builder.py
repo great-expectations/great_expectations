@@ -27,6 +27,8 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 # TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
+MetricValue = Union[Any, List[Any], np.ndarray]
+MetricValues = Union[MetricValue, np.ndarray]
 MetricComputationDetails = Dict[str, Any]
 MetricComputationResult = make_dataclass(
     "MetricComputationResult", ["metric_values", "details"]
@@ -220,10 +222,9 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
-        # TODO: <Alex>Create a special type encapsulating "value of any type or list of values of any type".</Alex>
-        metric_values: Union[Union[Any, List[Any]], np.ndarray] = []
+        metric_values: MetricValues = []
 
-        metric_value: Union[Any, List[Any]]
+        metric_value: MetricValue
         batch_id: str
         for batch_id in batch_ids:
             metric_domain_kwargs["batch_id"] = batch_id
