@@ -701,3 +701,15 @@ def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
 
     assert res == keys
     assert store.list_keys.called
+
+
+def test_reconcile_batch_requests_in_builders_replaces_batch_requests():
+    pass  # TBD
+
+
+def test_reconcile_batch_requests_in_builders_does_not_replace_batch_requests():
+    pass  # TBD
+
+
+def test_run_profiler_on_data():
+    pass  # TBD

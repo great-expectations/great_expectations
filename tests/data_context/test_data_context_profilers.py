@@ -79,3 +79,7 @@ def test_run_profiler_with_dynamic_arguments_emits_proper_usage_stats(
             }
         )
     ]
+
+
+def test_run_profiler_on_data_emits_proper_usage_stats():
+    pass  # TBD
