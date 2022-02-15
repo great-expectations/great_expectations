@@ -86,7 +86,7 @@ def build_batch_request(
     if batch_request is None:
         return None
 
-    # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
+    # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.
     materialized_batch_request: Optional[
         Union[BatchRequest, dict]
     ] = get_parameter_value_and_validate_return_type(
@@ -108,7 +108,7 @@ def build_metric_domain_kwargs(
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ):
-    # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+    # Obtain domain kwargs from "rule state" (i.e., variables and parameters); from instance variable otherwise.
     metric_domain_kwargs = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=metric_domain_kwargs,

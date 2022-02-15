@@ -138,7 +138,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         metric_values: np.ndarray = metric_computation_result.metric_values
         details: MetricComputationDetails = metric_computation_result.details
 
-        # Obtain reduce_scalar_metric from rule state (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain reduce_scalar_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         reduce_scalar_metric: bool = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self._reduce_scalar_metric,

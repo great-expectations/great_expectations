@@ -255,7 +255,7 @@ detected.
         metric_values: np.ndarray = metric_computation_result.metric_values
         details: MetricComputationDetails = metric_computation_result.details
 
-        # Obtain sampling_method directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain sampling_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         sampling_method: str = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self._sampling_method,
@@ -434,7 +434,7 @@ detected.
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> Dict[str, Union[Optional[int], Optional[float]]]:
-        # Obtain truncate_values directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain truncate_values directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         truncate_values: Dict[
             str, Optional[Number]
         ] = get_parameter_value_and_validate_return_type(
@@ -483,7 +483,7 @@ detected.
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> int:
-        # Obtain round_decimals directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain round_decimals directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         round_decimals: Optional[
             Union[Any]
         ] = get_parameter_value_and_validate_return_type(
@@ -517,7 +517,7 @@ positive integer, or must be omitted (or set to None).
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
     ) -> tuple:
-        # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         false_positive_rate: np.float64 = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=kwargs.get("false_positive_rate", 5.0e-2),
@@ -530,7 +530,7 @@ positive integer, or must be omitted (or set to None).
                 message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
             )
 
-        # Obtain num_bootstrap_samples override from rule state (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain num_bootstrap_samples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         num_bootstrap_samples: Optional[
             int
         ] = get_parameter_value_and_validate_return_type(
@@ -562,7 +562,7 @@ positive integer, or must be omitted (or set to None).
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
     ) -> tuple:
-        # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         false_positive_rate: np.float64 = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=kwargs.get("false_positive_rate", 5.0e-2),

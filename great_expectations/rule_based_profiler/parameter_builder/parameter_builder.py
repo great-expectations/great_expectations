@@ -177,6 +177,26 @@ class ParameterBuilder(Builder, ABC):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> MetricComputationResult:
+        """
+        General multi-batch metric computation facility.
+
+        Computes specified metric (can be multi-dimensional, numeric, non-numeric, or mixed) and conditions (or
+        "sanitizes") result according to two criteria: enforcing metric output to be numeric and handling NaN values.
+        :param batch_ids: IDs of Batch objects used to compute the metric -- commonly obtained via the "get_batch_ids()"
+        method in this module, although it can readily accept the list of Batch IDs generated through any other means.
+        :param validator: the Validator used for metric calculation purposes.
+        :param metric_name: Name of metric of interest, being computed.
+        :param metric_domain_kwargs: Metric Domain Kwargs is an essential parameter of the MetricConfiguration object.
+        :param metric_value_kwargs: Metric Value Kwargs is an essential parameter of the MetricConfiguration object.
+        :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
+        :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
+        :param domain: Domain object scoping "$variable"/"$parameter"-style references in configuration and runtime.
+        :param variables: Part of the "rule state" available for "$variable"-style references.
+        :param parameters: Part of the "rule state" available for "$parameter"-style references.
+        :return: MetricComputationResult object, containing data samples in the format "N x R^m", where "N" (most
+        significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
+        multi-dimensional metric, whose values are being estimated.
+        """
         domain_kwargs = build_metric_domain_kwargs(
             batch_id=None,
             metric_domain_kwargs=metric_domain_kwargs,
@@ -187,7 +207,7 @@ class ParameterBuilder(Builder, ABC):
 
         metric_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
 
-        # Obtain value kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain value kwargs from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         metric_value_kwargs = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=metric_value_kwargs,
@@ -251,7 +271,15 @@ class ParameterBuilder(Builder, ABC):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> np.ndarray:
-        # Obtain enforce_numeric_metric from rule state (i.e., variables and parameters); from instance variable otherwise.
+        """
+        This method conditions (or "sanitizes") data samples in the format "N x R^m", where "N" (most significant
+        dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the multi-dimensional
+        metric, whose values are being estimated.  The "conditioning" operations are:
+        1. If "enforce_numeric_metric" flag is set, raise an error if a non-numeric value is found in sample vectors.
+        2. Further, if a NaN is encountered in a sample vectors and "replace_nan_with_zero" is True, then replace those
+        NaN values with the 0.0 floating point number; if "replace_nan_with_zero" is False, then raise an error.
+        """
+        # Obtain enforce_numeric_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         enforce_numeric_metric = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=enforce_numeric_metric,
@@ -260,7 +288,7 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
-        # Obtain replace_nan_with_zero from rule state (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain replace_nan_with_zero from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         replace_nan_with_zero = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=replace_nan_with_zero,
@@ -269,8 +297,10 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
+        # Outer-most dimension is data samples (e.g., one per Batch); the rest are dimensions of the actual metric.
         metric_value_shape: tuple = metric_values.shape[1:]
 
+        # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
         metric_value_shape_idx: int
         axes: List[np.ndarray] = [
             np.indices(dimensions=(metric_value_shape_idx,))[0]
@@ -278,16 +308,19 @@ class ParameterBuilder(Builder, ABC):
         ]
         metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
 
+        # Generate all permutations of indexes for accessing estimates of every element of the multi-dimensional metric.
+        # Prefixing multi-dimensional index with "(slice(None, None, None),)" is equivalent to "[:,]" access.
         metric_value_idx: tuple
         metric_value_vector_indices: List[tuple] = [
             (slice(None, None, None),) + metric_value_idx
             for metric_value_idx in metric_value_indices
         ]
 
+        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
         metric_value_vector: np.ndarray
         for metric_value_idx in metric_value_vector_indices:
+            # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
             metric_value_vector = metric_values[metric_value_idx]
-
             if enforce_numeric_metric:
                 if not np.issubdtype(metric_value_vector.dtype, np.number):
                     raise ge_exceptions.ProfilerExecutionError(
