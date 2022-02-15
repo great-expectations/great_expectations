@@ -6,13 +6,16 @@ import pandas as pd
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.util import (
     convert_to_json_serializable,
     requires_lossy_conversion,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.util import (
+    deep_filter_properties_iterable,
+    filter_properties_dict,
+)
 
 
 def test_lossy_serialization_warning(caplog):
@@ -69,7 +72,7 @@ def test_serialization_of_spark_df(spark_session):
 
 def test_batch_request_deepcopy():
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    batch_request: BatchRequest = RuntimeBatchRequest(
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -82,7 +85,7 @@ def test_batch_request_deepcopy():
         }
     )
 
-    batch_request_copy: BatchRequest = copy.deepcopy(batch_request)
+    batch_request_copy: RuntimeBatchRequest = copy.deepcopy(batch_request)
     assert deep_filter_properties_iterable(
         properties=batch_request_copy.to_dict(),
         clean_falsy=True,
@@ -105,7 +108,7 @@ def test_checkpoint_config_deepcopy(
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    batch_request: BatchRequest = RuntimeBatchRequest(
+    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -144,15 +147,15 @@ def test_checkpoint_config_deepcopy(
     )
     nested_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
-        **{
-            key: value
-            for key, value in nested_checkpoint_config.to_json_dict().items()
-            if key not in ["module_name", "class_name"]
-        }
+        **filter_properties_dict(
+            properties=nested_checkpoint_config.to_json_dict(),
+            delete_fields={"class_name", "module_name"},
+            clean_falsy=True,
+        ),
     )
     substituted_config_template_and_runtime_kwargs: dict = nested_checkpoint.get_substituted_config(
         runtime_kwargs={
-            "batch_request": batch_request,
+            "batch_request": runtime_batch_request,
             "expectation_suite_name": "runtime_suite_name",
             "template_name": "my_nested_checkpoint_template_3",
             "validations": [
@@ -238,7 +241,7 @@ def test_checkpoint_config_print(
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
+    runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
         **{
             "datasource_name": "my_datasource",
             "data_connector_name": "my_runtime_data_connector",
@@ -277,15 +280,15 @@ def test_checkpoint_config_print(
     )
     nested_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
-        **{
-            key: value
-            for key, value in nested_checkpoint_config.to_json_dict().items()
-            if key not in ["module_name", "class_name"]
-        }
+        **filter_properties_dict(
+            properties=nested_checkpoint_config.to_json_dict(),
+            delete_fields={"class_name", "module_name"},
+            clean_falsy=True,
+        ),
     )
     substituted_config_template_and_runtime_kwargs: dict = nested_checkpoint.get_substituted_config(
         runtime_kwargs={
-            "batch_request": batch_request,
+            "batch_request": runtime_batch_request,
             "expectation_suite_name": "runtime_suite_name",
             "template_name": "my_nested_checkpoint_template_3",
             "validations": [
@@ -348,10 +351,12 @@ def test_checkpoint_config_print(
 
     expected_nested_checkpoint_config_template_and_runtime_template_name: CheckpointConfig = CheckpointConfig(
         name="my_nested_checkpoint",
-        config_version=1,
+        config_version=1.0,
+        class_name="Checkpoint",
+        module_name="great_expectations.checkpoint",
         template_name="my_nested_checkpoint_template_3",
         run_name_template="runtime_run_template",
-        batch_request=batch_request.to_dict(),
+        batch_request=runtime_batch_request.to_dict(),
         expectation_suite_name="runtime_suite_name",
         action_list=[
             {
@@ -445,11 +450,7 @@ def test_checkpoint_config_print(
         properties=substituted_config_template_and_runtime_kwargs,
         clean_falsy=True,
     ) == deep_filter_properties_iterable(
-        properties={
-            key: value
-            for key, value in expected_nested_checkpoint_config_template_and_runtime_template_name.to_raw_dict().items()
-            if key not in ["module_name", "class_name"]
-        },
+        properties=expected_nested_checkpoint_config_template_and_runtime_template_name.to_dict(),
         clean_falsy=True,
     )
 
@@ -462,10 +463,6 @@ def test_checkpoint_config_print(
         properties=substituted_config_template_and_runtime_kwargs_json_dict,
         clean_falsy=True,
     ) == deep_filter_properties_iterable(
-        properties={
-            key: value
-            for key, value in expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict().items()
-            if key not in ["module_name", "class_name"]
-        },
+        properties=expected_nested_checkpoint_config_template_and_runtime_template_name.to_json_dict(),
         clean_falsy=True,
     )

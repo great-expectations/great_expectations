@@ -956,6 +956,7 @@ def test_notebook_execution_with_pandas_backend(
         context=context,
         expectation_suite_name=expectation_suite_name,
         profile=False,
+        profiler_name=None,
         usage_event="test_notebook_execution",
         interactive_mode=CLISuiteInteractiveFlagCombinations.UNPROMPTED_INTERACTIVE_FALSE_MANUAL_TRUE,
         no_jupyter=True,

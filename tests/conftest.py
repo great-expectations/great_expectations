@@ -137,9 +137,14 @@ def pytest_addoption(parser):
         help="If set, execute tests against bigquery",
     )
     parser.addoption(
+        "--aws",
+        action="store_true",
+        help="If set, execute tests against AWS resources like S3, RedShift and Athena",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
-        help="If set, run aws integration tests",
+        help="If set, run aws integration tests for usage_statistics",
     )
     parser.addoption(
         "--docs-tests",
@@ -174,6 +179,7 @@ def build_test_backends_list_cfe(metafunc):
     include_mysql: bool = metafunc.config.getoption("--mysql")
     include_mssql: bool = metafunc.config.getoption("--mssql")
     include_bigquery: bool = metafunc.config.getoption("--bigquery")
+    include_aws: bool = metafunc.config.getoption("--aws")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -3804,7 +3810,26 @@ def data_context_custom_notebooks(tmp_path_factory):
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
     """
-    project_path = str(tmp_path_factory.mktemp("data_context"))
+    ge_yml_fixture = "great_expectations_custom_notebooks.yml"
+    context_path = _create_custom_notebooks_context(tmp_path_factory, ge_yml_fixture)
+
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_custom_notebooks_defaults(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    ge_yml_fixture = "great_expectations_custom_notebooks_defaults.yml"
+    context_path = _create_custom_notebooks_context(tmp_path_factory, ge_yml_fixture)
+
+    return ge.data_context.DataContext(context_path)
+
+
+def _create_custom_notebooks_context(path, ge_yml_name):
+    project_path = str(path.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
@@ -3813,7 +3838,7 @@ def data_context_custom_notebooks(tmp_path_factory):
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_custom_notebooks.yml"),
+        os.path.join(fixture_dir, ge_yml_name),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     shutil.copy(
@@ -3823,10 +3848,8 @@ def data_context_custom_notebooks(tmp_path_factory):
         ),
         os.path.join(asset_config_path, "my_dag_node", "default.json"),
     )
-
     os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
-
-    return ge.data_context.DataContext(context_path)
+    return context_path
 
 
 @pytest.fixture
@@ -4881,7 +4904,7 @@ def ge_cloud_base_url():
 
 
 @pytest.fixture
-def ge_cloud_account_id():
+def ge_cloud_organization_id():
     return "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
 
 
@@ -4891,17 +4914,17 @@ def ge_cloud_access_token():
 
 
 @pytest.fixture
-def ge_cloud_config(ge_cloud_base_url, ge_cloud_account_id, ge_cloud_access_token):
+def ge_cloud_config(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token):
     return GeCloudConfig(
         base_url=ge_cloud_base_url,
-        account_id=ge_cloud_account_id,
+        organization_id=ge_cloud_organization_id,
         access_token=ge_cloud_access_token,
     )
 
 
 @pytest.fixture(scope="function")
 def empty_ge_cloud_data_context_config(
-    ge_cloud_base_url, ge_cloud_account_id, ge_cloud_access_token
+    ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token
 ):
     config_yaml_str = f"""
 stores:
@@ -4916,7 +4939,7 @@ stores:
       ge_cloud_resource_type: expectation_suite
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
-        account_id: {ge_cloud_account_id}
+        organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
   default_validations_store:
@@ -4927,7 +4950,7 @@ stores:
       ge_cloud_resource_type: suite_validation_result
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
-        account_id: {ge_cloud_account_id}
+        organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
   default_checkpoint_store:
@@ -4938,7 +4961,7 @@ stores:
       ge_cloud_resource_type: contract
       ge_cloud_credentials:
         access_token: {ge_cloud_access_token}
-        account_id: {ge_cloud_account_id}
+        organization_id: {ge_cloud_organization_id}
       suppress_store_backend_id: True
 
 evaluation_parameter_store_name: default_evaluation_parameter_store

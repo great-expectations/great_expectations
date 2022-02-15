@@ -351,7 +351,7 @@ class DataConnector:
 
         """
         if pretty_print:
-            print(f"\n\t\tFetching batch data...")
+            print("\n\t\tFetching batch data...")
 
         batch_definition_list: List[
             BatchDefinition
@@ -396,7 +396,7 @@ class DataConnector:
         )
 
         if pretty_print and data is not None:
-            print(f"\n\t\tShowing 5 rows")
+            print("\n\t\tShowing 5 rows")
             print(data)
 
         return {

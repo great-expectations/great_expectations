@@ -1,23 +1,22 @@
 from typing import Any, List, Optional, Union
 
+from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-
-from ...core import ExpectationValidationResult
-from ...exceptions import InvalidExpectationConfigurationError
-from ...render.renderer.renderer import renderer
-from ...render.types import (
+from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.expectations.expectation import ColumnMapExpectation
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import (
     RenderedBulletListContent,
     RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
-from ...render.util import (
+from great_expectations.render.util import (
     handle_strict_min_max,
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation
 
 try:
     import sqlalchemy as sa
