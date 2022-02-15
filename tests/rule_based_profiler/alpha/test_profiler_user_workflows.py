@@ -376,7 +376,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     )
 
     rtol: float = 1.0e-7
-    atol: float = 1.0e-2
+    atol: float = 5.0e-2
 
     value_range: List[Number]
     paired_quantiles: zip
