@@ -3,14 +3,13 @@ import logging
 import uuid
 import warnings
 
+from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.dataset import SparkDFDataset
+from great_expectations.datasource.datasource import LegacyDatasource
+from great_expectations.exceptions import BatchKwargsError
 from great_expectations.types import ClassConfig
-
-from ..core.batch import Batch, BatchMarkers
-from ..core.util import get_or_create_spark_application
-from ..dataset import SparkDFDataset
-from ..exceptions import BatchKwargsError
-from ..types.configurations import classConfigSchema
-from .datasource import LegacyDatasource
+from great_expectations.types.configurations import classConfigSchema
 
 logger = logging.getLogger(__name__)
 

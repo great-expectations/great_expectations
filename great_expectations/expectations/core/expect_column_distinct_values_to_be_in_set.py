@@ -5,19 +5,24 @@ import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.expectation import (
+    ColumnExpectation,
+    InvalidExpectationConfigurationError,
+)
+from great_expectations.expectations.metrics.util import parse_value_set
 from great_expectations.expectations.util import (
     add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
-
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedGraphContent, RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import (
+    RenderedGraphContent,
+    RenderedStringTemplateContent,
+)
+from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnExpectation, InvalidExpectationConfigurationError
-from ..metrics.util import parse_value_set
 
 
 class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
