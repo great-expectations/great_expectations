@@ -1361,8 +1361,8 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
     Bobster has multiple tables of columnar data called user_events (DataAsset) that he wants to check periodically as
     new data is added.
 
-      - He knows what some of the columns are of the acconting/financial/account type, but he is currently interested in
-        the average table size (in terms of the number of rows in a table).
+      - He knows what some of the columns are of the accounting/financial/account type, but he is currently interested
+        in the average table size (in terms of the number of rows in a table).
 
     He wants to use a configurable profiler to generate a description (ExpectationSuite) about tables so that he can:
 
@@ -1394,7 +1394,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
         verbose_profiler_config = f.read()
 
     expectation_suite_name_bootstrap_sampling_method: str = (
-        "bobby_columnar_table_multi_batch_bootstrap_sampling_method"
+        "bobster_columnar_table_multi_batch_bootstrap_sampling_method"
     )
 
     my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = (
@@ -1510,6 +1510,137 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
         # noinspection PyTypeChecker
         df.to_csv(
             path_or_buf=os.path.join(context_path, "..", "data", file_name), index=False
+        )
+
+    context: DataContext = DataContext(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    return context
+
+
+@pytest.fixture
+def quentin_columnar_table_multi_batch():
+    """
+    About the "Quentin" User Workflow Fixture
+
+    Quentin has multiple tables of columnar data called user_events (DataAsset) that he wants to check periodically as
+    new data is added.
+
+      - He knows what some of the columns are of the accounting/financial/account type, but he is currently interested
+        in the range of quantiles of columns capturing financial quantities (column names ending on "_amount" suffix).
+
+    He wants to use a configurable profiler to generate a description (ExpectationSuite) about tables so that he can:
+
+        1. monitor the range of quantiles of columns capturing financial quantities in the tables
+
+        2. have a place to add his domain knowledge of the data (that can also be validated against new data)
+
+        3. if all goes well, generalize some of the Profiler to use on his other tables
+
+    Quentin uses a custom implementation of the "bootstrap" non-parametric (i.e, data-driven) statistical estimator.
+
+    Quentin configures his Profiler using the YAML configurations and data file locations captured in this fixture.
+    """
+    skip_if_python_below_minimum_version()
+
+    verbose_profiler_config_file_path: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "test_fixtures",
+            "rule_based_profiler",
+            "alpha",
+            "quentin_user_workflow_verbose_profiler_config.yml",
+        ),
+    )
+
+    verbose_profiler_config: str
+    with open(verbose_profiler_config_file_path) as f:
+        verbose_profiler_config = f.read()
+
+    expectation_suite_name_bootstrap_sampling_method: str = (
+        "quentin_columnar_table_multi_batch"
+    )
+
+    return {
+        "profiler_config": verbose_profiler_config,
+        "test_configuration": {
+            "expectation_suite_name": expectation_suite_name_bootstrap_sampling_method,
+            "expect_column_quantile_values_to_be_between_quantile_ranges_by_column": {
+                "tolls_amount": [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
+                "fare_amount": [
+                    [5.842754275, 6.5],
+                    [8.675167517, 9.661311131],
+                    [13.344354435, 15.815389039],
+                ],
+                "tip_amount": [
+                    [0.0, 0.0],
+                    [0.81269502, 1.97259736],
+                    [2.346049055, 2.993680968],
+                ],
+                "total_amount": [
+                    [8.2740033, 11.422183043],
+                    [11.358555106, 14.959993149],
+                    [16.746263451, 21.327684643],
+                ],
+            },
+        },
+    }
+
+
+@pytest.fixture
+def quentin_columnar_table_multi_batch_data_context(
+    tmp_path_factory,
+    monkeypatch,
+) -> DataContext:
+    """
+    This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
+    of each batch being equal to the original number per log file (10,000 rows).
+    """
+    skip_if_python_below_minimum_version()
+
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path: str = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "..",
+                "integration",
+                "fixtures",
+                "yellow_tripdata_pandas_fixture",
+                "great_expectations",
+                "great_expectations.yml",
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    base_directory: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "..",
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+        ),
+    )
+    file_name_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
+        base_directory_path=base_directory, glob_directive="*.csv"
+    )
+    file_name_list = sorted(file_name_list)
+
+    file_name: str
+    csv_source_path: str
+    for file_name in file_name_list:
+        csv_source_path = os.path.join(base_directory, file_name)
+        shutil.copy(
+            csv_source_path,
+            os.path.join(context_path, "..", "data", file_name),
         )
 
     context: DataContext = DataContext(context_root_dir=context_path)

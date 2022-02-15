@@ -1,7 +1,7 @@
 import copy
 import uuid
 from numbers import Number
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -86,7 +86,7 @@ def build_batch_request(
     if batch_request is None:
         return None
 
-    # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
+    # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.
     materialized_batch_request: Optional[
         Union[BatchRequest, dict]
     ] = get_parameter_value_and_validate_return_type(
@@ -108,7 +108,7 @@ def build_metric_domain_kwargs(
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ):
-    # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+    # Obtain domain kwargs from "rule state" (i.e., variables and parameters); from instance variable otherwise.
     metric_domain_kwargs = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=metric_domain_kwargs,
@@ -197,9 +197,9 @@ def get_parameter_value(
 
 
 def compute_quantiles(
-    metric_values: Union[np.ndarray, List[Number]],
+    metric_values: np.ndarray,
     false_positive_rate: np.float64,
-) -> tuple:
+) -> Tuple[Number, Number]:
     lower_quantile = np.quantile(
         metric_values,
         q=(false_positive_rate / 2),
@@ -219,7 +219,45 @@ def compute_bootstrap_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
-) -> tuple:
+) -> Tuple[Number, Number]:
+    """
+    Internal implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
+    See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+
+    This implementation is sub-par compared to the one available from the "SciPy" standard library
+    ("https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html"), because it introduces bias and
+    does not handle multi-dimensional statistics (unlike "scipy.stats.bootstrap", which corrects for bias and is
+    vectorized, thus having the ability to accept a multi-dimensional statistic function and process all dimensions).
+
+    This implementation will be replaced by "scipy.stats.bootstrap" when Great Expectations can be upgraded to use a
+    more up-to-date version of the "scipy" Python package (the currently used version does not have "bootstrap").
+
+    Additional future direction (potentially as a contribution submission to the "SciPy" community) include developing
+    enhancements to bootstrapped estimator based on theory presented in "http://dido.econ.yale.edu/~dwka/pub/p1001.pdf":
+    @article{Andrews2000a,
+        added-at = {2008-04-25T10:38:44.000+0200},
+        author = {Andrews, Donald W. K. and Buchinsky, Moshe},
+        biburl = {https://www.bibsonomy.org/bibtex/28e2f0a58cdb95e39659921f989a17bdd/smicha},
+        day = 01,
+        interhash = {778746398daa9ba63bdd95391f1efd37},
+        intrahash = {8e2f0a58cdb95e39659921f989a17bdd},
+        journal = {Econometrica},
+        keywords = {imported},
+        month = Jan,
+        note = {doi: 10.1111/1468-0262.00092},
+        number = 1,
+        pages = {23--51},
+        timestamp = {2008-04-25T10:38:52.000+0200},
+        title = {A Three-step Method for Choosing the Number of Bootstrap Repetitions},
+        url = {http://www.blackwell-synergy.com/doi/abs/10.1111/1468-0262.00092},
+        volume = 68,
+        year = 2000
+    }
+    The article outlines a three-step minimax procedure that relies on the Central Limit Theorem (C.L.T.) along with the
+    bootstrap sampling technique (see https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for background) for
+    computing the stopping criterion, expressed as the optimal number of bootstrap samples, needed to achieve a maximum
+    probability that the value of the statistic of interest will be minimally deviating from its actual (ideal) value.
+    """
     bootstraps: np.ndarray = np.random.choice(
         metric_values, size=(n_resamples, metric_values.size)
     )
