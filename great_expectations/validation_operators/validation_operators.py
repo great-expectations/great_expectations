@@ -9,6 +9,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.core.async_executor import AsyncExecutor
 from great_expectations.core.batch import Batch
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.types.resource_identifiers import (
@@ -20,8 +21,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
-
-from ..core.run_identifier import RunIdentifier
 
 logger = logging.getLogger(__name__)
 
