@@ -338,13 +338,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
         for rule in self.rules:
             domain_builder = rule.domain_builder
             if isinstance(domain_builder, ColumnDomainBuilder):
-                domain_builder._batch_request = batch_request
+                domain_builder._batch_request = copy.deepcopy(batch_request)
                 domain_builder._batch_request.data_connector_query = {"index": -1}
 
             parameter_builders = rule.parameter_builders
             if parameter_builders:
                 for parameter_builder in parameter_builders:
-                    parameter_builder._batch_request = batch_request
+                    parameter_builder._batch_request = copy.deepcopy(batch_request)
 
     def reconcile_profiler_variables(
         self, variables: Optional[Dict[str, Any]] = None
