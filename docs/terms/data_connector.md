@@ -1,5 +1,5 @@
 ---
-title: "Technical Term"
+title: "Data Connector"
 ---
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '../term_tags/_tag.mdx';
