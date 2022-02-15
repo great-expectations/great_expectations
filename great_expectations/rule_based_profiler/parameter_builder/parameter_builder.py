@@ -193,9 +193,9 @@ class ParameterBuilder(Builder, ABC):
         :param domain: Domain object scoping "$variable"/"$parameter"-style references in configuration and runtime.
         :param variables: Part of the "rule state" available for "$variable"-style references.
         :param parameters: Part of the "rule state" available for "$parameter"-style references.
-        :return: MetricComputationResult object, containing data samples in the format "N x R^m", where "N" (most
+        :return: MetricComputationResult object, containing both: data samples in the format "N x R^m", where "N" (most
         significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
-        multi-dimensional metric, whose values are being estimated.
+        multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
         domain_kwargs = build_metric_domain_kwargs(
             batch_id=None,
