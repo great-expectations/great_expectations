@@ -1,17 +1,21 @@
 from typing import Any, Dict, List, Optional, Union
 
+import numpy as np
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     MetricComputationDetails,
     MetricComputationResult,
-    MetricComputationValues,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     build_parameter_container,
+)
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
 )
 from great_expectations.validator.validator import Validator
 
@@ -30,6 +34,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
+        reduce_scalar_metric: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
@@ -44,6 +49,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
             replace_nan_with_zero: if False (default), then if the computed metric gives NaN, then exception is raised;
             otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
+            reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             data_context: DataContext
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
@@ -59,6 +65,8 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
 
         self._enforce_numeric_metric = enforce_numeric_metric
         self._replace_nan_with_zero = replace_nan_with_zero
+
+        self._reduce_scalar_metric = reduce_scalar_metric
 
     @property
     def metric_name(self) -> str:
@@ -79,6 +87,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     @property
     def replace_nan_with_zero(self) -> Union[str, bool]:
         return self._replace_nan_with_zero
+
+    @property
+    def reduce_scalar_metric(self) -> Union[str, bool]:
+        return self._reduce_scalar_metric
 
     def _build_parameters(
         self,
@@ -123,8 +135,20 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricComputationValues = metric_computation_result.metric_values
+        metric_values: np.ndarray = metric_computation_result.metric_values
         details: MetricComputationDetails = metric_computation_result.details
+
+        # Obtain reduce_scalar_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        reduce_scalar_metric: bool = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._reduce_scalar_metric,
+            expected_return_type=bool,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        if reduce_scalar_metric and metric_values.shape[0] == 1:
+            metric_values = metric_values[:, 0]
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.name}": {
