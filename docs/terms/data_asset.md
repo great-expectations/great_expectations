@@ -3,31 +3,30 @@ title: "Data Asset"
 ---
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '../term_tags/_tag.mdx';
-import SetupHeader from '/docs/images/universal_map/_um_setup_header.mdx'
 import ConnectHeader from '/docs/images/universal_map/_um_connect_header.mdx';
 import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
 
-<UniversalMap setup='active' connect='active' create='active' validate='active'/> 
+<UniversalMap setup='inactive' connect='active' create='active' validate='active'/> 
 
 ## Overview
 
 ### Definition
 
-A Data Asset is a collection of records within a Datasource which is usually named based on the underlying data system and sliced to correspond to a desired specification.
+A Data Asset is a collection of records within a <TechnicalTag relative="../" tag="datasource" text="Datasource" /> which is usually named based on the underlying data system and sliced to correspond to a desired specification.
 
 ### Features and promises
 
-Data Assets are used to specify how Great Expectations will organize data into Batches.
+Data Assets are used to specify how Great Expectations will organize data into <TechnicalTag relative="../" tag="batch" text="Batches" />.
 
 Data Assets are usually tied to existing data that already has a name (e.g. “the UserEvents table”). In many cases, Data Assets slice the data one step further (e.g. “new records for each day within the UserEvents table.”) To further illustrate with some examples: in a SQL database, rows from a table grouped by the week they were delivered may be a data asset; in an S3 bucket or filesystem, files matching a particular regex pattern may be a data asset. 
 
-The specifics of a Data Asset are typically defined when it is configured within a Datasource. You can define multiple Data Assets built from the same underlying source data system to support different workflows such as interactive exploration and creation of Expectations, automatic Profiling of data, and ongoing Validation.
+The specifics of a Data Asset are typically defined when it is configured within a <TechnicalTag relative="../" tag="datasource" text="Datasource's" /> <TechnicalTag relative="../" tag="data_connector" text="Data Connector" />. You can define multiple Data Assets built from the same underlying source data system to support different workflows such as interactive exploration and creation of <TechnicalTag relative="../" tag="expectation" text="Expectations" />, the use of <TechnicalTag relative="../" tag="profiler" text="Profilers" /> to analyze data, and ongoing <TechnicalTag relative="../" tag="validation" text="Validation" /> through <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.
 
 ### Relationship to other objects
 
-A Data Asset is a collection of records that you care about, which a Datasource is configured to interact with.  Batches are subsets of Data Asset records.  When a Batch Request is provided to a Datasource, the Datasource will reference its Data Asset in order to translate the Batch Request into a query for a specific Batch of data.
+A Data Asset is a collection of records that you care about, which a Datasource is configured to interact with.  Batches are subsets of Data Asset records.  When a <TechnicalTag relative="../" tag="batch_request" text="Batch Request" /> is provided to a Datasource, the Datasource will reference its Data Asset in order to translate the Batch Request into a query for a specific Batch of data.
 
 For the most part, Data Assets are utilized by Great Expectations behind the scenes.  Other than configuring them, you will rarely have to interact with them directly (if at all).
 
@@ -35,7 +34,7 @@ For the most part, Data Assets are utilized by Great Expectations behind the sce
 
 <ConnectHeader/>
 
-When connecting to your data you will define a Data Asset as a part of each of your Datasources' configurations.  These configurations defining your Data Assets are where you will have the most direct interaction with Data Assets.  After this point, you will typically be interacting with Datasources, which will utilize their configured Data Assets behind the scenes in response to Batch Requests.
+When connecting to your data you will define a Data Asset as a part of each of your Datasources' configurations (under the configuration for their Data Connectors).  These configurations defining your Data Assets are where you will have the most direct interaction with Data Assets.  After this point, you will typically be interacting with the Datasources themselves, which will utilize their configured Data Assets behind the scenes in response to Batch Requests.
 
 <CreateHeader/>
 
@@ -45,7 +44,7 @@ When using a Profiler, Great Expectations can take advantage of as much informat
 
 <ValidateHeader/>
 
-Finally, when you are Validating new Batches of data you'll be using a Datasource and Batch Request to indicate the Batch of data to Validate.  This process will use a Data Asset behind the scenes.
+When you are Validating new Batches of data you'll be using a Datasource and Batch Request to indicate the Batch of data to Validate.  This process will use a Data Asset behind the scenes.
 
 ## Features
 
@@ -78,18 +77,18 @@ You will not need to manually create a Data Asset.  Instead, they will be create
 
 ### Configuration
 
-Data Assets are configured under the `assets` key under a named data connector in the `data_connectors` key of a Datasource configuration.  Exactly how a Data Asset is configured will depend on the type of Data Connector you are using.  For detailed guidance on configuring Data Assets for various environments and source data systems, please see [our how-to guides for connecting to data](../guides/connecting_to_your_data/index.md).
+Data Assets are configured under the `assets` key under a named Data Connector in the `data_connectors` key of a Datasource configuration.  Exactly how a Data Asset is configured will depend on the type of Data Connector you are using.  For detailed guidance on configuring Data Assets for various environments and source data systems, please see [our how-to guides for connecting to data](../guides/connecting_to_your_data/index.md).
 
 ## More details
 
 ### Design motivation
 
 Great Expectations is designed to help you think and communicate clearly about your data. To do that, we need to rely on
-some specific ideas about *what* we're protecting. You usually do not need to think about these nuances to use Great
+some specific ideas about *what* we're protecting with our Expectations. You usually do not need to think about these nuances to use Great
 Expectations, and many users never think about what *exactly* makes a Data Asset or Batch. But we think it can be
 extremely useful to understand the design decisions that guide Great Expectations.
 
-Great Expectations protects **Data Assets**. A **Data Asset** is a logical collection of records. Great Expectations
+Great Expectations protects the quality of **Data Assets**. A **Data Asset** is a logical collection of records. Great Expectations
 consumes and creates **metadata about Data Assets**.
 
 - For example, a Data Asset might be *a user table in a database*, *monthly financial data*, *a collection of event log
