@@ -450,7 +450,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             if (
                 actual_column_type
                 and actual_column_type.type.__name__ == "object_"
-                and expected_type not in [
+                and expected_type
+                not in [
                     "object",
                     "object_",
                     "O",
