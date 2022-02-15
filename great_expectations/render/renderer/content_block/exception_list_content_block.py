@@ -1,9 +1,10 @@
+from great_expectations.render.renderer.content_block.content_block import (
+    ContentBlockRenderer,
+)
 from great_expectations.render.types import (
     RenderedBulletListContent,
     RenderedStringTemplateContent,
 )
-
-from .content_block import ContentBlockRenderer
 
 
 class ExceptionListContentBlockRenderer(ContentBlockRenderer):
