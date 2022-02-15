@@ -319,6 +319,13 @@ detected.
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
     ) -> np.ndarray:
+        """
+        This method accepts an estimator Callable and data samples in the format "N x R^m", where "N" (most significant
+        dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the multi-dimensional
+        metric, whose values are being estimated.  Thus, for each element in the "R^m" hypercube, an "N"-dimensional
+        vector of sample measurements is constructed and given to the estimator to apply its specific algorithm for
+        computing the range of values in this vector.  Estimator algorithms differ based on their use of data samples.
+        """
         truncate_values: Dict[str, Number] = self._get_truncate_values_using_heuristics(
             metric_values=metric_values,
             domain=domain,
@@ -341,34 +348,42 @@ detected.
         lower_quantile: Number
         upper_quantile: Number
 
+        # Outer-most dimension is data samples (e.g., one per Batch); the rest are dimensions of the actual metric.
         metric_value_shape: tuple = metric_values.shape[1:]
 
+        # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
         metric_value_shape_idx: int
         axes: List[np.ndarray] = [
             np.indices(dimensions=(metric_value_shape_idx,))[0]
             for metric_value_shape_idx in metric_value_shape
         ]
-
         metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
 
+        # Generate all permutations of indexes for accessing estimates of every element of the multi-dimensional metric.
+        # Prefixing multi-dimensional index with "(slice(None, None, None),)" is equivalent to "[:,]" access.
         metric_value_idx: tuple
         metric_value_vector_indices: List[tuple] = [
             (slice(None, None, None),) + metric_value_idx
             for metric_value_idx in metric_value_indices
         ]
 
+        # Since range includes min and max values, value range estimate contains 2-element least-significant dimension.
         metric_value_range_shape: tuple = metric_value_shape + (2,)
+        # Initialize value range estimate for multi-dimensional metric to all trivial values (to be updated in situ).
         metric_value_range: np.ndarray = np.zeros(shape=metric_value_range_shape)
 
         metric_value_vector: np.ndarray
         metric_value_range_min_idx: tuple
         metric_value_range_max_idx: tuple
+        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
         for metric_value_idx in metric_value_vector_indices:
+            # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
             metric_value_vector = metric_values[metric_value_idx]
             if np.all(np.isclose(metric_value_vector, metric_value_vector[0])):
                 # Computation is unnecessary if distribution is degenerate.
                 lower_quantile = upper_quantile = metric_value_vector[0]
             else:
+                # Compute low and high estimates for vector of samples for given element of multi-dimensional metric.
                 lower_quantile, upper_quantile = estimator(
                     metric_values=metric_value_vector,
                     domain=domain,
@@ -390,14 +405,22 @@ detected.
             if upper_bound is not None:
                 max_value = min(cast(float, max_value), upper_bound)
 
+            # Obtain index of metric element (by discarding "N"-element samples dimension).
             metric_value_idx = metric_value_idx[1:]
 
-            metric_value_range_min_idx = metric_value_idx + (slice(0, 1, None),)
-            metric_value_range_max_idx = metric_value_idx + (slice(1, 2, None),)
+            # Compute indices for min and max value range estimates.
+            metric_value_range_min_idx = metric_value_idx + (
+                slice(0, 1, None),
+            )  # appends "[0]" element
+            metric_value_range_max_idx = metric_value_idx + (
+                slice(1, 2, None),
+            )  # appends "[0]" element
 
+            # Store computed min and max value estimates into allocated range estimate for multi-dimensional metric.
             metric_value_range[metric_value_range_min_idx] = min_value
             metric_value_range[metric_value_range_max_idx] = max_value
 
+        # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
         if metric_value_range.shape[0] == 1:
             metric_value_range = metric_value_range[0]
 

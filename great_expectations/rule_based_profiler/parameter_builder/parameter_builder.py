@@ -276,13 +276,10 @@ class ParameterBuilder(Builder, ABC):
             np.indices(dimensions=(metric_value_shape_idx,))[0]
             for metric_value_shape_idx in metric_value_shape
         ]
+        metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
 
-        metric_value_indices: List[tuple]
-        metric_value_indices = list(itertools.product(*tuple(axes)))
-
-        metric_value_vector_indices: List[tuple]
         metric_value_idx: tuple
-        metric_value_vector_indices = [
+        metric_value_vector_indices: List[tuple] = [
             (slice(None, None, None),) + metric_value_idx
             for metric_value_idx in metric_value_indices
         ]
