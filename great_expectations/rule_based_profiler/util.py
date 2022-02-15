@@ -197,7 +197,7 @@ def get_parameter_value(
 
 
 def compute_quantiles(
-    metric_values: Union[np.ndarray, List[Number]],
+    metric_values: np.ndarray,
     false_positive_rate: np.float64,
 ) -> tuple:
     lower_quantile = np.quantile(
