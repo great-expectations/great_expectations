@@ -3,7 +3,6 @@ title: "Technical Term"
 ---
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '../term_tags/_tag.mdx';
-import SetupHeader from '/docs/images/universal_map/_um_setup_header.mdx'
 import ConnectHeader from '/docs/images/universal_map/_um_connect_header.mdx';
 import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
@@ -52,7 +51,7 @@ Likewise, when validating Data, Datasources will use their Data Connectors behin
 
 ## Features
 
-### Wild card data references
+### Identifying Batches and building Batch References
 
 To maintain the guarantees for the relationships between Batches and Batch Requests, Data Connectors provide configuration options that allow them to divide Data Assets into different Batches of data, which Batch Requests reference in order to specify Batches for retrieval. We use the term "Data Reference" below to describe a general pointer to data, like a filesystem path or database view. Batch Identifiers then define a conversion process:
 
@@ -65,7 +64,7 @@ Data Reference can be lossy.
 It’s pretty easy to construct examples where no regex can reasonably capture enough information to allow lossless
 conversion from a Batch Request to a unique Data Reference:
 
-### Example 1
+#### Example 1
 
 For example, imagine a daily logfile that includes a random hash:
 
@@ -91,7 +90,7 @@ we can reconstruct *part* of the filename, but not the whole thing:
 
 `2020/10/15/log-file-[????].txt.gz`
 
-### Example 2
+#### Example 2
 
 A slightly more subtle example: imagine a logfile that is generated daily at about the same time, but includes the exact
 time stamp when the file was created.
@@ -107,7 +106,7 @@ part of the filename:
 
 `log-file-20201015-??????.????????.txt.gz`
 
-### Example 3
+#### Example 3
 
 Finally, imagine an S3 bucket with log files like so:
 
@@ -120,6 +119,16 @@ like `some_bucket/(\d{4})/(\d{2})/(\d{2})/log_file_\d+.txt.gz`.
 The Wildcard Data Reference is how Data Connectors deal with that problem, making it easy to search external stores and understand data.
 
 Under the hood, when processing a Batch Request, the Data Connector may find multiple matching Batches. Generally, the Data Connector will simply return a list of all matching Batch Identifiers.
+
+### Translating Batch Definitions to Batch Specs
+
+A **Batch Definition** includes all the information required to precisely identify a set of data in a source data system.
+
+A **Batch Spec** is an Execution Engine-specific description of the Batch defined by a Batch Definition.
+
+A Data Connector is responsible for working with an Execution Engine to translate Batch Definitions into a Batch Spec that enables Great Expectations to access the data using that Execution Engine.
+
+
 
 ## API basics
 
