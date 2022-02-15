@@ -1,4 +1,5 @@
 import copy
+import logging
 import uuid
 from typing import Any, Dict, List, Optional, Union
 
@@ -44,6 +45,8 @@ from great_expectations.rule_based_profiler.types import (
     build_parameter_container_for_variables,
 )
 from great_expectations.util import filter_properties_dict
+
+logger = logging.getLogger(__name__)
 
 
 def _validate_builder_override_config(builder_config: dict):
@@ -323,7 +326,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         The provided batch request is propagated to the following relevant Builders attributes (as applicable):
             - ParameterBuilders
             - ColumnDomainBuilder
-              - We default to the latest value as a sensible default
+              - We default to the latest value as a sensible default (using index: -1)
 
         The reconciliation logic for "batch_request" is of the "replace" nature: the provided data is consistently applied, regardless
         of existing Builder state.
@@ -334,17 +337,23 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if isinstance(batch_request, dict):
             batch_request = get_batch_request_from_acceptable_arguments(**batch_request)
 
-        # TODO(cdkini): Let's use setters
         for rule in self.rules:
             domain_builder = rule.domain_builder
             if isinstance(domain_builder, ColumnDomainBuilder):
-                domain_builder._batch_request = copy.deepcopy(batch_request)
-                domain_builder._batch_request.data_connector_query = {"index": -1}
+                domain_builder.batch_request = copy.deepcopy(batch_request)
+                domain_builder.batch_request.data_connector_query = {"index": -1}
+                logger.info(
+                    "Overwrote Rule %s's DomainBuilder batch_request attr", rule.name
+                )
 
             parameter_builders = rule.parameter_builders
             if parameter_builders:
                 for parameter_builder in parameter_builders:
-                    parameter_builder._batch_request = copy.deepcopy(batch_request)
+                    parameter_builder.batch_request = copy.deepcopy(batch_request)
+                    logger.info(
+                        "Overwrote ParameterBuilder %s's batch_request attr",
+                        parameter_builder.name,
+                    )
 
     def reconcile_profiler_variables(
         self, variables: Optional[Dict[str, Any]] = None

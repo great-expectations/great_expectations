@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, List, Optional
 from unittest import mock
 
@@ -5,6 +6,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -509,6 +511,84 @@ def test_run_profiler_with_dynamic_args(
     )
 
 
+@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_run_profiler_on_data_emits_appropriate_logging(
+    mock_data_context: mock.MagicMock,
+    mock_profiler_run: mock.MagicMock,
+    populated_profiler_store: ProfilerStore,
+    profiler_name: str,
+    caplog: Any,
+):
+    batch_request: Dict[str, str] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_data_connector",
+        "data_asset_name": "my_data_asset",
+    }
+
+    with caplog.at_level(logging.INFO):
+        RuleBasedProfiler.run_profiler_on_data(
+            data_context=mock_data_context,
+            profiler_store=populated_profiler_store,
+            name=profiler_name,
+            batch_request=batch_request,
+        )
+
+    assert "Overwrote ParameterBuilder" in caplog.text
+
+
+@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_run_profiler_on_data_creates_suite_with_dict_arg(
+    mock_data_context: mock.MagicMock,
+    mock_profiler_run: mock.MagicMock,
+    populated_profiler_store: ProfilerStore,
+    profiler_name: str,
+):
+    batch_request: Dict[str, str] = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_data_connector",
+        "data_asset_name": "my_data_asset",
+    }
+
+    RuleBasedProfiler.run_profiler_on_data(
+        data_context=mock_data_context,
+        profiler_store=populated_profiler_store,
+        name=profiler_name,
+        batch_request=batch_request,
+    )
+
+    # run() is invoked but without any runtime args
+    assert mock_profiler_run.called
+    assert mock_profiler_run.call_args == []
+
+
+@mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
+@mock.patch("great_expectations.data_context.data_context.DataContext")
+def test_run_profiler_on_data_creates_suite_with_batch_request_arg(
+    mock_data_context: mock.MagicMock,
+    mock_profiler_run: mock.MagicMock,
+    populated_profiler_store: ProfilerStore,
+    profiler_name: str,
+):
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="my_data_connector",
+        data_asset_name="my_data_asset",
+    )
+
+    RuleBasedProfiler.run_profiler_on_data(
+        data_context=mock_data_context,
+        profiler_store=populated_profiler_store,
+        name=profiler_name,
+        batch_request=batch_request,
+    )
+
+    # run() is invoked but without any runtime args
+    assert mock_profiler_run.called
+    assert mock_profiler_run.call_args == []
+
+
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_get_profiler_with_too_many_args_raises_error(
     mock_data_context: mock.MagicMock,
@@ -712,15 +792,3 @@ def test_list_profilers_in_cloud_mode(mock_profiler_store: mock.MagicMock):
 
     assert res == keys
     assert store.list_keys.called
-
-
-def test_reconcile_batch_requests_in_builders_replaces_batch_requests():
-    pass  # TBD
-
-
-def test_reconcile_batch_requests_in_builders_does_not_replace_batch_requests():
-    pass  # TBD
-
-
-def test_run_profiler_on_data():
-    pass  # TBD
