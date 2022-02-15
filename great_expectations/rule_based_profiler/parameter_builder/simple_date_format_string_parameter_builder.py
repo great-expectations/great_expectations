@@ -14,6 +14,9 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     build_parameter_container,
 )
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -32,6 +35,55 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         "%y-%m-%d",
         "%Y-%m-%dT%z",
         "%Y-%m-%d %H:%M:%S",
+        "%Y %b %d %H:%M:%S.%f %Z",
+        "%b %d %H:%M:%S %z %Y",
+        "%d/%b/%Y:%H:%M:%S %z",
+        "%b %d, %Y %H:%M:%S %p",
+        "%b %d %Y %H:%M:%S",
+        "%b %d %H:%M:%S %Y",
+        "%b %d %H:%M:%S %z",
+        "%b %d %H:%M:%S",
+        "%Y-%m-%d'T'%H:%M:%S%z",
+        "%Y-%m-%d'T'%H:%M:%S.%f'%z'",
+        "%Y-%m-%d %H:%M:%S %z",
+        "%Y-%m-%d %H:%M:%S%z",
+        "%Y-%m-%d %H:%M:%S,%f",
+        "%Y/%m/%d*%H:%M:%S",
+        "%Y %b %d %H:%M:%S.%f*%Z",
+        "%Y %b %d %H:%M:%S.%f",
+        "%Y-%m-%d %H:%M:%S,%f%z",
+        "%Y-%m-%d %H:%M:%S.%f",
+        "%Y-%m-%d %H:%M:%S.%f%z",
+        "%Y-%m-%d'T'%H:%M:%S.%f",
+        "%Y-%m-%d'T'%H:%M:%S",
+        "%Y-%m-%d'T'%H:%M:%S'%z'",
+        "%Y-%m-%d*%H:%M:%S:%f",
+        "%Y-%m-%d*%H:%M:%S",
+        "%y-%m-%d %H:%M:%S,%f %z",
+        "%y-%m-%d %H:%M:%S,%f",
+        "%y-%m-%d %H:%M:%S",
+        "%y/%m/%d %H:%M:%S",
+        "%y%m%d %H:%M:%S",
+        "%Y%m%d %H:%M:%S.%f",
+        "%m/%d/%y*%H:%M:%S",
+        "%m/%d/%Y*%H:%M:%S",
+        "%m/%d/%Y*%H:%M:%S*%f",
+        "%m/%d/%y %H:%M:%S %z",
+        "%m/%d/%Y %H:%M:%S %z",
+        "%H:%M:%S",
+        "%H:%M:%S.%f",
+        "%H:%M:%S,%f",
+        "%d/%b %H:%M:%S,%f",
+        "%d/%b/%Y:%H:%M:%S",
+        "%d/%b/%Y %H:%M:%S",
+        "%d-%b-%Y %H:%M:%S",
+        "%d-%b-%Y %H:%M:%S.%f",
+        "%d %b %Y %H:%M:%S",
+        "%d %b %Y %H:%M:%S*%f",
+        "%m%d_%H:%M:%S",
+        "%m%d_%H:%M:%S.%f",
+        "%m/%d/%Y %H:%M:%S %p:%f",
+        "%m/%d/%Y %H:%M:%S %p",
     }
 
     def __init__(
@@ -67,6 +119,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         self._metric_value_kwargs = metric_value_kwargs
 
         self._threshold = threshold
+
         if candidate_strings is not None:
             self._candidate_strings = set(candidate_strings)
         else:
@@ -78,7 +131,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
@@ -131,7 +183,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         match_strftime_metric_value_kwargs: dict
         for fmt_string in self._candidate_strings:
             if self._metric_value_kwargs:
-                match_strftime_metric_value_kwargs = {
+                match_strftime_metric_value_kwargs: dict = {
                     **self._metric_value_kwargs,
                     **{"strftime_format": fmt_string},
                 }
@@ -161,8 +213,19 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         best_fmt_string: Optional[str] = None
         best_ratio: int = 0
+
+        threshold: float = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self._threshold,
+            expected_return_type=float,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        fmt_string: str
+        ratio: float
         for fmt_string, ratio in format_string_success_ratios.items():
-            if ratio > best_ratio and ratio >= self._threshold:
+            if ratio > best_ratio and ratio >= threshold:
                 best_fmt_string = fmt_string
                 best_ratio = ratio
 
