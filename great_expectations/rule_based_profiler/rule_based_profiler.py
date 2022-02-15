@@ -26,6 +26,9 @@ from great_expectations.rule_based_profiler.config.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
+from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
+    ColumnDomainBuilder,
+)
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
@@ -313,18 +316,35 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def reconcile_batch_requests_in_builders(
         self, batch_request: Union[dict, BatchRequest, RuntimeBatchRequest]
     ) -> None:
+        """
+        Profiler "batch_request" reconciliation involves combining existing Profiler state, instantiated from Profiler configuration
+        (e.g., stored in a YAML file managed by the Profiler store), with the batch request overrides, provided at run time.
+
+        The provided batch request is propagated to the following relevant Builders attributes (as applicable):
+            - ParameterBuilders
+            - ColumnDomainBuilder
+              - We default to the latest value as a sensible default
+
+        The reconciliation logic for "batch_request" is of the "replace" nature: the provided data is consistently applied, regardless
+        of existing Builder state.
+
+        Args:
+            batch_request: Data provided at runtime used to hydrate nested builder attributes
+        """
         if isinstance(batch_request, dict):
             batch_request = get_batch_request_from_acceptable_arguments(**batch_request)
 
+        # TODO(cdkini): Let's use setters
         for rule in self.rules:
-            # TODO(cdkini): Should only work on Column and -1 index?
-            rule.domain_builder._batch_request = batch_request
+            domain_builder = rule.domain_builder
+            if isinstance(domain_builder, ColumnDomainBuilder):
+                domain_builder._batch_request = batch_request
+                domain_builder._batch_request.data_connector_query = {"index": -1}
 
-            if rule.parameter_builders:
-                for parameter_builder in rule.parameter_builders:
+            parameter_builders = rule.parameter_builders
+            if parameter_builders:
+                for parameter_builder in parameter_builders:
                     parameter_builder._batch_request = batch_request
-
-            # TODO(cdkini): Let's use setters
 
     def reconcile_profiler_variables(
         self, variables: Optional[Dict[str, Any]] = None
