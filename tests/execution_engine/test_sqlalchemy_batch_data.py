@@ -1,6 +1,5 @@
 import pytest
 
-from great_expectations.core.batch import BatchSpec
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
@@ -12,8 +11,7 @@ except ImportError:
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-
-from ..test_utils import get_sqlite_temp_table_names
+from tests.test_utils import get_sqlite_temp_table_names
 
 
 def test_instantiation_with_table_name(sqlite_view_engine):

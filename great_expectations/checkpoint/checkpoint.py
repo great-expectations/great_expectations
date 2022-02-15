@@ -24,6 +24,7 @@ from great_expectations.core.batch import (
     batch_request_contains_batch_data,
     get_batch_request_as_dict,
 )
+from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
 from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
     usage_statistics_enabled_method,
@@ -33,7 +34,6 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import substitute_all_config_variables
-from great_expectations.util import filter_properties_dict
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
@@ -43,9 +43,9 @@ from great_expectations.validator.validator import Validator
 logger = logging.getLogger(__name__)
 
 
-class CheckpointBase:
+class BaseCheckpoint(ConfigPeer):
     """
-    CheckpointBase class is initialized from CheckpointConfig typed object and contains all functionality
+    BaseCheckpoint class is initialized from CheckpointConfig typed object and contains all functionality
     in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
     """
 
@@ -176,7 +176,7 @@ class CheckpointBase:
         return CheckpointResult(
             run_id=run_id,
             run_results=run_results,
-            checkpoint_config=self.checkpoint_config,
+            checkpoint_config=self.config,
         )
 
     def get_substituted_config(
@@ -186,7 +186,7 @@ class CheckpointBase:
         if runtime_kwargs is None:
             runtime_kwargs = {}
 
-        config_kwargs: dict = self.get_config(mode="json_dict")
+        config_kwargs: dict = self.get_config(mode=ConfigOutputModes.JSON_DICT)
 
         template_name: Optional[str] = runtime_kwargs.get("template_name")
         if template_name:
@@ -212,7 +212,7 @@ class CheckpointBase:
             checkpoint: Checkpoint = self.data_context.get_checkpoint(
                 name=template_name
             )
-            template_config: dict = checkpoint.checkpoint_config.to_json_dict()
+            template_config: dict = checkpoint.config.to_json_dict()
 
             if template_config["config_version"] != source_config["config_version"]:
                 raise ge_exceptions.CheckpointError(
@@ -370,7 +370,7 @@ class CheckpointBase:
 
     def self_check(self, pretty_print=True) -> dict:
         # Provide visibility into parameters that Checkpoint was instantiated with.
-        report_object: dict = {"config": self.checkpoint_config.to_json_dict()}
+        report_object: dict = {"config": self.config.to_json_dict()}
 
         if pretty_print:
             print(f"\nCheckpoint class name: {self.__class__.__name__}")
@@ -416,87 +416,42 @@ is run), with each validation having its own defined "action_list" attribute.
 
         return report_object
 
-    # noinspection PyShadowingBuiltins
-    def get_config(
-        self,
-        mode: str = "typed",
-        clean_falsy: bool = False,
-    ) -> Union[CheckpointConfig, dict, str]:
-        config: CheckpointConfig = self.checkpoint_config
-
-        if mode == "typed":
-            return config
-
-        if mode == "commented_map":
-            return config.commented_map
-
-        if mode == "dict":
-            config_kwargs: dict = config.to_dict()
-            if clean_falsy:
-                filter_properties_dict(
-                    properties=config_kwargs,
-                    clean_falsy=True,
-                    inplace=True,
-                )
-
-            return config_kwargs
-
-        if mode == "json_dict":
-            config_kwargs: dict = config.to_json_dict()
-            if clean_falsy:
-                filter_properties_dict(
-                    properties=config_kwargs,
-                    clean_falsy=True,
-                    inplace=True,
-                )
-
-            return config_kwargs
-
-        if mode == "yaml":
-            return config.to_yaml_str()
-
-        raise ValueError(f'Unknown mode {mode} in "CheckpointBase.get_config()".')
-
     @property
-    def checkpoint_config(self) -> CheckpointConfig:
+    def config(self) -> CheckpointConfig:
         return self._checkpoint_config
-
-    @checkpoint_config.setter
-    def checkpoint_config(self, value: CheckpointConfig):
-        self._checkpoint_config = value
 
     @property
     def name(self) -> Optional[str]:
         try:
-            return self.checkpoint_config.name
+            return self.config.name
         except AttributeError:
             return None
 
     @property
     def config_version(self) -> Optional[float]:
         try:
-            return self.checkpoint_config.config_version
+            return self.config.config_version
         except AttributeError:
             return None
 
     @property
     def action_list(self) -> List[Dict]:
         try:
-            return self.checkpoint_config.action_list
+            return self.config.action_list
         except AttributeError:
             return []
 
     @property
     def validations(self) -> List[Dict]:
         try:
-            return self.checkpoint_config.validations
+            return self.config.validations
         except AttributeError:
             return []
 
     @property
     def ge_cloud_id(self) -> Optional[UUID]:
         try:
-            return self.checkpoint_config.ge_cloud_id
+            return self.config.ge_cloud_id
         except AttributeError:
             return None
 
@@ -508,7 +463,7 @@ is run), with each validation having its own defined "action_list" attribute.
         return str(self.get_config())
 
 
-class Checkpoint(CheckpointBase):
+class Checkpoint(BaseCheckpoint):
     """
     --ge-feature-maturity-info--
 

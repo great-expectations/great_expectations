@@ -1,8 +1,10 @@
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-
-from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    InvalidExpectationConfigurationError,
+)
 
 
 class ExpectColumnValueZScoresToBeLessThan(ColumnMapExpectation):
