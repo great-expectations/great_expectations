@@ -33,7 +33,6 @@ except ImportError:
 
 import great_expectations.checkpoint.toolkit as checkpoint_toolkit
 import great_expectations.exceptions as ge_exceptions
-import great_expectations.rule_based_profiler.toolkit as profiler_toolkit
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.batch import (
@@ -922,9 +921,7 @@ class BaseDataContext(ConfigPeer):
         try:
             return self.project_config_with_variables_substituted.profiler_store_name
         except AttributeError:
-            if profiler_toolkit.default_profilers_exist(
-                directory_path=self.root_directory
-            ):
+            if DataContext._default_profilers_exist(directory_path=self.root_directory):
                 return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
             if self.root_directory:
                 error_message: str = f'Attempted to access the "profiler_store_name" field with no `profilers` directory.\n  Please create the following directory: {os.path.join(self.root_directory, DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value)}\n  To use the new "Profiler Store" feature, please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)}.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
@@ -938,9 +935,7 @@ class BaseDataContext(ConfigPeer):
         try:
             return self.stores[profiler_store_name]
         except KeyError:
-            if profiler_toolkit.default_profilers_exist(
-                directory_path=self.root_directory
-            ):
+            if DataContext._default_profilers_exist(directory_path=self.root_directory):
                 logger.warning(
                     f'Profiler store named "{profiler_store_name}" is not a configured store, so will try to use default Profiler store.\n  Please update your configuration to the new version number {float(CURRENT_GE_CONFIG_VERSION)} in order to use the new "Profiler Store" feature.\n  Visit https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api to learn more about the upgrade process.'
                 )
@@ -951,6 +946,17 @@ class BaseDataContext(ConfigPeer):
             raise ge_exceptions.StoreConfigurationError(
                 f'Attempted to access the Profiler store named "{profiler_store_name}", which is not a configured store.'
             )
+
+    @staticmethod
+    def _default_profilers_exist(directory_path: Optional[str]) -> bool:
+        if not directory_path:
+            return False
+
+        profiler_directory_path: str = os.path.join(
+            directory_path,
+            DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
+        )
+        return os.path.isdir(profiler_directory_path)
 
     @property
     def expectations_store_name(self) -> Optional[str]:
@@ -3290,8 +3296,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
 
         config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(**profiler_config)
 
-        # Chetan - 20220127 - Open to refactor all Profiler CRUD from toolkit to class methods
-        return profiler_toolkit.add_profiler(
+        return RuleBasedProfiler.add_profiler(
             config=config,
             data_context=self,
             profiler_store=self.profiler_store,
@@ -3303,7 +3308,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
-        return profiler_toolkit.get_profiler(
+        return RuleBasedProfiler.get_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
             name=name,
@@ -3315,7 +3320,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
-        profiler_toolkit.delete_profiler(
+        RuleBasedProfiler.delete_profiler(
             profiler_store=self.profiler_store,
             name=name,
             ge_cloud_id=ge_cloud_id,
@@ -3326,7 +3331,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             raise ge_exceptions.StoreConfigurationError(
                 "Attempted to list profilers from a Profiler Store, which is not a configured store."
             )
-        return profiler_toolkit.list_profilers(
+        return RuleBasedProfiler.list_profilers(
             profiler_store=self.profiler_store,
             ge_cloud_mode=self.ge_cloud_mode,
         )
@@ -3343,7 +3348,7 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         expectation_suite_name: Optional[str] = None,
         include_citation: bool = True,
     ) -> ExpectationSuite:
-        return profiler_toolkit.run_profiler(
+        return RuleBasedProfiler.run_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
             name=name,
