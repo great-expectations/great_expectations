@@ -375,6 +375,8 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
         ]["tolls_amount"]
     )
 
+    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
+    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
     rtol: float = 1.0e-7
     atol: float = 5.0e-2
 

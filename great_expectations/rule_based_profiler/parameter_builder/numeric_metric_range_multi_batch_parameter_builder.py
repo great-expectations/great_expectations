@@ -193,7 +193,6 @@ detected.
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
@@ -263,9 +262,9 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        if not (
+        if (
             sampling_method
-            in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
+            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
         ):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""The directive "sampling_method" for {self.__class__.__name__} can be only one of
@@ -313,7 +312,6 @@ detected.
         self,
         metric_values: np.ndarray,
         estimator: Callable,
-        *,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,

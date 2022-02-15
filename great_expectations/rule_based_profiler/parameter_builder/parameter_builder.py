@@ -80,7 +80,6 @@ class ParameterBuilder(Builder, ABC):
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
@@ -108,7 +107,6 @@ class ParameterBuilder(Builder, ABC):
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
@@ -216,20 +214,20 @@ class ParameterBuilder(Builder, ABC):
             parameters=parameters,
         )
 
-        metric_values: Union[List[Any], np.ndarray] = []
+        # TODO: <Alex>Create a special type encapsulating "value of any type or list of values of any type".</Alex>
+        metric_values: Union[Union[Any, List[Any]], np.ndarray] = []
 
         metric_value: Union[Any, List[Any]]
         batch_id: str
         for batch_id in batch_ids:
             metric_domain_kwargs["batch_id"] = batch_id
-            metric_configuration_arguments: Dict[str, Any] = {
-                "metric_name": metric_name,
-                "metric_domain_kwargs": metric_domain_kwargs,
-                "metric_value_kwargs": metric_value_kwargs,
-                "metric_dependencies": None,
-            }
             metric_value = validator.get_metric(
-                metric=MetricConfiguration(**metric_configuration_arguments)
+                metric=MetricConfiguration(
+                    metric_name=metric_name,
+                    metric_domain_kwargs=metric_domain_kwargs,
+                    metric_value_kwargs=metric_value_kwargs,
+                    metric_dependencies=None,
+                )
             )
             if np.isscalar(metric_value):
                 metric_value = [metric_value]

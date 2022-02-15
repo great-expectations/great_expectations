@@ -147,9 +147,8 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        if reduce_scalar_metric:
-            if metric_values.shape[0] == 1:
-                metric_values = metric_values[:, 0]
+        if reduce_scalar_metric and metric_values.shape[0] == 1:
+            metric_values = metric_values[:, 0]
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.name}": {

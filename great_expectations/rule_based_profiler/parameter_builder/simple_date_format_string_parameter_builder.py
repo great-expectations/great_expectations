@@ -120,6 +120,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
         metric_values = metric_computation_result.metric_values
+        # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
 
         nonnull_count: int = sum(metric_values)
@@ -150,6 +151,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 parameters=parameters,
             )
             metric_values = metric_computation_result.metric_values
+            # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
             metric_values = metric_values[:, 0]
 
             match_strftime_unexpected_count: int = sum(metric_values)
