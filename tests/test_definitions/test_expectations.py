@@ -21,8 +21,7 @@ from great_expectations.self_check.util import (
     postgresqlDialect,
     sqliteDialect,
 )
-
-from ..conftest import build_test_backends_list
+from tests.conftest import build_test_backends_list
 
 logger = logging.getLogger(__name__)
 tmp_dir = str(tempfile.mkdtemp())
