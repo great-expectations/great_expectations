@@ -17,6 +17,8 @@ from great_expectations.core.util import (
 )
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.dataset import Dataset
+from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.dataset.util import (
     check_sql_engine_dialect,
     get_approximate_percentile_disc_sql,
@@ -26,9 +28,6 @@ from great_expectations.util import (
     get_sqlalchemy_inspector,
     import_library_module,
 )
-
-from .dataset import Dataset
-from .pandas_dataset import PandasDataset
 
 logger = logging.getLogger(__name__)
 

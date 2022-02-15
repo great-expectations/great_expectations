@@ -9,13 +9,14 @@ from io import BytesIO
 import pandas as pd
 
 from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.core.util import S3Url
+from great_expectations.datasource.datasource import LegacyDatasource
 from great_expectations.exceptions import BatchKwargsError
+from great_expectations.execution_engine.pandas_execution_engine import (
+    hash_pandas_dataframe,
+)
 from great_expectations.types import ClassConfig
-
-from ..core.util import S3Url
-from ..execution_engine.pandas_execution_engine import hash_pandas_dataframe
-from ..types.configurations import classConfigSchema
-from .datasource import LegacyDatasource
+from great_expectations.types.configurations import classConfigSchema
 
 logger = logging.getLogger(__name__)
 

@@ -7,8 +7,7 @@ from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.data_context.util import file_relative_path
-
-from ..test_utils import create_files_in_directory
+from tests.test_utils import create_files_in_directory
 
 yaml = YAML()
 
