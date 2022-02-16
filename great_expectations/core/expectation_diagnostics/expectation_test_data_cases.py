@@ -56,6 +56,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
             output=out,
             exact_match_out=exact_match_out,
             suppress_test_for=suppress_test_for,
+            only_for=kwargs.get("only_for"),
         )
 
 
@@ -66,4 +67,4 @@ class ExpectationTestDataCases(SerializableDictDot):
     data: TestData
     tests: List[ExpectationTestCase]
     schemas: Dict[Backend, Dict[str, str]] = field(default_factory=dict)
-    # test_backends: Optional[List[Dict]] = field(default_factory=list)
+    test_backends: Optional[List[Dict]] = field(default_factory=list)

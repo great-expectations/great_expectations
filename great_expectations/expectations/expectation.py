@@ -74,8 +74,12 @@ from ..render.renderer.renderer import renderer
 from ..render.types import (
     CollapseContent,
     RenderedAtomicContent,
+    RenderedContentBlockContainer,
+    RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
+    RenderedTableContent,
+    ValueListContent,
     renderedAtomicValueSchema,
 )
 from ..render.util import num_to_str
@@ -1050,6 +1054,11 @@ class Expectation(metaclass=MetaExpectation):
         for example in all_examples:
 
             included_test_cases = []
+            # As of commit 7766bb5caa4e0 on 1/28/22, only_for does not need to be applied to individual tests
+            # See:
+            #   - https://github.com/great-expectations/great_expectations/blob/7766bb5caa4e0e5b22fa3b3a5e1f2ac18922fdeb/tests/test_definitions/column_map_expectations/expect_column_values_to_be_unique.json#L174
+            #   - https://github.com/great-expectations/great_expectations/pull/4073
+            top_level_only_for = example.get("only_for")
             for test in example["tests"]:
                 if (
                     test.get("include_in_gallery") == True
@@ -1057,6 +1066,8 @@ class Expectation(metaclass=MetaExpectation):
                     or is_core_expectation == True
                 ):
                     copied_test = deepcopy(test)
+                    if top_level_only_for and "only_for" not in copied_test:
+                        copied_test["only_for"] = top_level_only_for
                     included_test_cases.append(
                         ExpectationLegacyTestCaseAdapter(**copied_test)
                     )
@@ -1066,7 +1077,6 @@ class Expectation(metaclass=MetaExpectation):
             if len(included_test_cases) > 0:
                 copied_example = deepcopy(example)
                 copied_example["tests"] = included_test_cases
-                copied_example.pop("test_backends", None)
                 copied_example.pop("_notes", None)
                 copied_example.pop("only_for", None)
                 included_examples.append(ExpectationTestDataCases(**copied_example))
@@ -1300,7 +1310,28 @@ class Expectation(metaclass=MetaExpectation):
             return rendered_result.__str__()
 
         elif isinstance(rendered_result, RenderedAtomicContent):
-            return rendered_result.__str__()
+            return "(RenderedAtomicContent) " + repr(rendered_result.to_json_dict())
+
+        elif isinstance(rendered_result, RenderedContentBlockContainer):
+            return "(RenderedContentBlockContainer) " + repr(rendered_result.to_json_dict())
+
+        elif isinstance(rendered_result, RenderedTableContent):
+            return "(RenderedTableContent) " + repr(rendered_result.to_json_dict())
+
+        elif isinstance(rendered_result, RenderedGraphContent):
+            return "(RenderedGraphContent) " + repr(rendered_result.to_json_dict())
+
+        elif isinstance(rendered_result, ValueListContent):
+            return "(ValueListContent) " + repr(rendered_result.to_json_dict())
+
+        elif isinstance(rendered_result, dict):
+            return "(dict) " + repr(rendered_result)
+
+        elif isinstance(rendered_result, int):
+            return repr(rendered_result)
+
+        elif rendered_result == None:
+            return ""
 
         else:
             raise TypeError(
@@ -1343,7 +1374,6 @@ class Expectation(metaclass=MetaExpectation):
                         rendered_result = renderer(
                             configuration=executed_test_case[
                                 "expectation_configuration"
-                            ].to_dict(),
                             ],
                             result=executed_test_case["validation_result"],
                         )
@@ -1466,7 +1496,7 @@ class Expectation(metaclass=MetaExpectation):
 
             keys = self.library_metadata.keys()
             has_all_required_keys = all(
-                [key in keys for key in {"maturity", "tags", "contributors"}]
+                (key in keys for key in {"maturity", "tags", "contributors"})
             )
             has_no_forbidden_keys = all(
                 (
@@ -1510,7 +1540,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         experimental_checks.append(
             ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
-                execution_engines
+                tests
             )
         )
 
@@ -1520,7 +1550,7 @@ class Expectation(metaclass=MetaExpectation):
         beta_checks.append(ExpectationDiagnostics._check_renderer_methods(self))
         beta_checks.append(
             ExpectationDiagnostics._check_core_logic_for_all_applicable_execution_engines(
-                execution_engines
+                tests
             )
         )
 

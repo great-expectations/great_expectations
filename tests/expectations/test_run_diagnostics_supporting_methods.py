@@ -304,27 +304,13 @@ def test__get_test_results():
             SparkDFExecutionEngine=False,
         ),
     )
-    assert len(test_results) == 6
+    assert len(test_results) == 9
     for result in test_results:
         # Abe: 1/1/2022: I'm not sure this is the behavior we want long term. How does backend relate to ExecutionEngine?
-        assert result.backend in ["pandas", "sqlite"]
+        assert result.backend in ["pandas", "sqlite", "postgresql"]
         if result.backend == "pandas":
             assert result.test_passed == True
         elif result.backend == "sqlite":
             assert result.test_passed == False
-        # print(result.to_dict())
-
-
-# executed_test_examples, errors = self._execute_test_examples(
-#     expectation_type=description_diagnostics.snake_name,
-#     examples=examples,
-# )
-# renderers : List[ExpectationRendererDiagnostics] = self._get_renderer_diagnostics(
-#     expectation_name=description_diagnostics.snake_name,
-#     executed_test_examples=executed_test_examples,
-# )
-# from great_expectations.expectations.registry import _registered_metrics
-# print(_registered_metrics)
-# print(_registered_metrics.keys())
-# print(len(_registered_metrics))
-# supported_renderers = []
+        elif result.backend == "postgresql":
+            assert result.test_passed == False

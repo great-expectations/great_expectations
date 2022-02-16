@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import List, Tuple
 
@@ -133,45 +134,100 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_core_logic_for_at_least_one_execution_engine(
-        execution_engines: ExpectationExecutionEngineDiagnostics,
+        test_results: List[ExpectationTestDiagnostics]
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""
 
+        sub_messages = []
+        backends_passing_all_tests = []
+        backend_results = defaultdict(list)
         passed = False
         message = "Has core logic and passes tests on at least one Execution Engine"
-        successful_execution_engines = 0
-        for k, v in execution_engines.items():
-            if v is True:
-                successful_execution_engines += 1
 
-        if successful_execution_engines > 0:
+        for test_result in test_results:
+            backend_results[test_result.backend].append(test_result.test_passed)
+
+        for backend in backend_results:
+            if all(backend_results[backend]):
+                backends_passing_all_tests.append(backend)
+
+        if len(backends_passing_all_tests) > 0:
             passed = True
+            backend = backends_passing_all_tests[0]
+            sub_messages.append({
+                "message": f"All {len(backend_results[backend])} tests for {backend} are passing",
+                "passed": True,
+            })
+
+        if not test_results:
+            sub_messages.append({
+                "message": f"There are no test results",
+                "passed": False,
+            })
 
         return ExpectationDiagnosticCheckMessage(
             message=message,
             passed=passed,
+            sub_messages=sub_messages,
         )
 
     @staticmethod
     def _check_core_logic_for_all_applicable_execution_engines(
-        execution_engines: ExpectationExecutionEngineDiagnostics,
+        test_results: List[ExpectationTestDiagnostics]
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on all applicable Execution Engines"""
 
-        # TODO: Update this once Expectation._execute_test_examples gets batches using an engine
+        sub_messages = []
+        backends_passing_all_tests = []
+        backends_failing_any_tests = []
+        failing_names = []
+        backend_results = defaultdict(list)
         passed = False
         message = "Has core logic that passes tests for all applicable Execution Engines and SQL dialects"
-        successful_execution_engines = 0
-        for k, v in execution_engines.items():
-            if v is True:
-                successful_execution_engines += 1
+        for test_result in test_results:
+            backend_results[test_result.backend].append(test_result.test_passed)
+            if test_result.test_passed == False:
+                failing_names.append(test_result.test_title)
 
-        if successful_execution_engines > 0:
+        for backend in backend_results:
+            if all(backend_results[backend]):
+                backends_passing_all_tests.append(backend)
+            else:
+                backends_failing_any_tests.append(backend)
+
+        if len(backends_passing_all_tests) > 0 and len(backends_failing_any_tests) == 0:
             passed = True
+
+        for backend in backends_passing_all_tests:
+            sub_messages.append({
+                "message": f"All {len(backend_results[backend])} tests for {backend} are passing",
+                "passed": True,
+            })
+
+        for backend in backends_failing_any_tests:
+            num_tests = len(backend_results[backend])
+            num_passing = backend_results[backend].count(True)
+            sub_messages.append({
+                "message": f"Only {num_passing} / {num_tests} tests for {backend} are passing",
+                "passed": False,
+            })
+
+        if len(failing_names) > 0:
+            sub_messages.append({
+                "message": f"Failing: {', '.join(failing_names)}",
+                "passed": False,
+            })
+
+        if not test_results:
+            sub_messages.append({
+                "message": f"There are no test results",
+                "passed": False,
+            })
 
         return ExpectationDiagnosticCheckMessage(
             message=message,
             passed=passed,
+            sub_messages=sub_messages,
         )
 
     @staticmethod
@@ -271,20 +327,21 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check if all statment renderers are defined"""
         passed = False
-        # For now, don't include the "question" type since it is so sparsely implemented
+        # For now, don't include the "question" and "descriptive" types since they are so
+        # sparsely implemented
         # all_renderer_types = {"diagnostic", "prescriptive", "question", "descriptive"}
-        all_renderer_types = {"diagnostic", "prescriptive", "descriptive"}
+        all_renderer_types = {"diagnostic", "prescriptive"}
         renderer_names = [
             name
             for name in dir(expectation_instance)
             if name.endswith("renderer") and name.startswith("_")
         ]
         renderer_types = {name.split("_")[1] for name in renderer_names}
-        if renderer_types - {"question"} == all_renderer_types:
+        if renderer_types - {"question", "descriptive"} == all_renderer_types:
             passed = True
         return ExpectationDiagnosticCheckMessage(
             # message="Has all four statement Renderers: question, descriptive, prescriptive, diagnostic",
-            message="Has all three statement Renderers: descriptive, prescriptive, diagnostic",
+            message="Has both statement Renderers: prescriptive and diagnostic",
             passed=passed,
         )
 

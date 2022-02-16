@@ -247,6 +247,15 @@ except (ImportError, KeyError):
     MSSQL_TYPES = {}
 
 
+SQL_DIALECT_NAMES = (
+    "sqlite",
+    "postgresql",
+    "mysql",
+    "mssql",
+    "bigquery",
+)
+
+
 class SqlAlchemyConnectionManager:
     def __init__(self):
         self.lock = threading.Lock()
@@ -1430,19 +1439,40 @@ def generate_expectation_tests(
     parametrized_tests = []
 
     for d in test_data_cases:
-        print(d)
         d = copy.deepcopy(d)
-        print("*", d)
+        dialects_to_include = {}
+
+        # Some Expectations (mostly contrib) explicitly list test_backends/dialects to test with
+        if d.test_backends:
+            for tb in d.test_backends:
+                if tb["backend"] == "sqlalchemy":
+                    for dialect in tb["dialects"]:
+                        dialects_to_include[dialect] = True
+
+        # Some individual tests (or groups of tests) may be "only_for" certain engines/dialects
+        for t in d.tests:
+            if t.only_for is not None:
+                for o in t.only_for:
+                    if o in SQL_DIALECT_NAMES:
+                        dialects_to_include[o] = True
+
+        # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
+        if (
+            execution_engine_diagnostics.SqlAlchemyExecutionEngine is True
+            and not dialects_to_include
+        ):
+            dialects_to_include["sqlite"] = True
+            dialects_to_include["postgresql"] = True
 
         backends = build_test_backends_list(
             include_pandas=execution_engine_diagnostics.PandasExecutionEngine,
             include_spark=execution_engine_diagnostics.SparkDFExecutionEngine,
             include_sqlalchemy=execution_engine_diagnostics.SqlAlchemyExecutionEngine,
-            include_sqlite=True,
-            include_postgresql=False,
-            include_mysql=False,
-            include_mssql=False,
-            include_bigquery=False,
+            include_sqlite=dialects_to_include.get("sqlite", False),
+            include_postgresql=dialects_to_include.get("postgresql", False),
+            include_mysql=dialects_to_include.get("mysql", False),
+            include_mssql=dialects_to_include.get("mssql", False),
+            include_bigquery=dialects_to_include.get("bigquery", False),
         )
 
         for c in backends:
@@ -1452,27 +1482,25 @@ def generate_expectation_tests(
                     c, d["data"], d["schemas"]
                 )
             except Exception as e:
-
                 continue
 
             for test in d["tests"]:
                 if not should_we_generate_this_test(
                     backend=c,
                     expectation_test_case=test,
-                    execution_engine_diagnostics=execution_engine_diagnostics,
                 ):
                     continue
 
                 # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
-                # if (
-                #     "allow_cross_type_comparisons" in test["in"]
-                #     and validator_with_data
-                #     and isinstance(
-                #         validator_with_data.execution_engine.active_batch_data,
-                #         SqlAlchemyBatchData,
-                #     )
-                # ):
-                #     skip_test = True
+                if (
+                    "allow_cross_type_comparisons" in test["input"]
+                    and validator_with_data
+                    and isinstance(
+                        validator_with_data.execution_engine.active_batch_data,
+                        SqlAlchemyBatchData,
+                    )
+                ):
+                    continue
 
                 parametrized_tests.append(
                     {
@@ -1489,18 +1517,41 @@ def generate_expectation_tests(
 def should_we_generate_this_test(
     backend: str,
     expectation_test_case: ExpectationTestCase,
-    execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
 ):
-    # print(backend)
-    # print(expectation_test_case) # suppress_test_for, only_for
+
+    # backend will only ever be pandas, spark, or a specific SQL dialect, but sometimes
+    # suppress_test_for or only_for may include "sqlalchemy"
+    #
+    # There is one Expectation (expect_column_values_to_be_of_type) that has some tests that
+    # are only for specific versions of pandas
+    #   - only_for can be any of: pandas, pandas_022, pandas_023, pandas>=024
+    #   - See: https://github.com/great-expectations/great_expectations/blob/7766bb5caa4e0e5b22fa3b3a5e1f2ac18922fdeb/tests/test_definitions/test_expectations_cfe.py#L176-L185
     if backend in expectation_test_case.suppress_test_for:
         return False
     if (
-        expectation_test_case.only_for != None
-        and not backend in expectation_test_case.only_for
+        "sqlalchemy" in expectation_test_case.suppress_test_for
+        and backend in SQL_DIALECT_NAMES
     ):
         return False
-    print(execution_engine_diagnostics)
+    if expectation_test_case.only_for != None and expectation_test_case.only_for:
+        if not backend in expectation_test_case.only_for:
+            if "sqlalchemy" in expectation_test_case.only_for and backend in SQL_DIALECT_NAMES:
+                return True
+            elif "pandas" == backend:
+                major, minor, *_ = pd.__version__.split(".")
+                if (
+                    "pandas_022" in expectation_test_case.only_for
+                    or "pandas_023" in expectation_test_case.only_for
+                ):
+                    if major == "0" and minor in ["22", "23"]:
+                        return True
+                elif "pandas>=024" in expectation_test_case.only_for:
+                    if (
+                        (major == "0" and int(minor) >= 24)
+                        or int(major) >= 1
+                    ):
+                        return True
+            return False
 
     return True
     # # use the expectation_execution_engines_dict of the expectation
@@ -1730,18 +1781,24 @@ def evaluate_json_test(data_asset, expectation_type, test):
             "Invalid test configuration detected: 'exact_match_out' is required."
         )
 
-    if "in" not in test:
-        raise ValueError("Invalid test configuration detected: 'in' is required.")
+    if "input" not in test:
+        if "in" in test:
+            test["input"] = test["in"]
+        else:
+            raise ValueError("Invalid test configuration detected: 'input' is required.")
 
-    if "out" not in test:
-        raise ValueError("Invalid test configuration detected: 'out' is required.")
+    if "output" not in test:
+        if "out" in test:
+            test["output"] = test["out"]
+        else:
+            raise ValueError("Invalid test configuration detected: 'output' is required.")
 
     # Support tests with positional arguments
-    if isinstance(test["in"], list):
-        result = getattr(data_asset, expectation_type)(*test["in"])
+    if isinstance(test["input"], list):
+        result = getattr(data_asset, expectation_type)(*test["input"])
     # As well as keyword arguments
     else:
-        result = getattr(data_asset, expectation_type)(**test["in"])
+        result = getattr(data_asset, expectation_type)(**test["input"])
 
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
@@ -1785,15 +1842,21 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
             "Invalid test configuration detected: 'exact_match_out' is required."
         )
 
-    if "in" not in test:
-        raise ValueError("Invalid test configuration detected: 'in' is required.")
+    if "input" not in test:
+        if "in" in test:
+            test["input"] = test["in"]
+        else:
+            raise ValueError("Invalid test configuration detected: 'input' is required.")
 
-    if "out" not in test:
-        raise ValueError("Invalid test configuration detected: 'out' is required.")
+    if "output" not in test:
+        if "out" in test:
+            test["output"] = test["out"]
+        else:
+            raise ValueError("Invalid test configuration detected: 'output' is required.")
 
-    kwargs = copy.deepcopy(test["in"])
+    kwargs = copy.deepcopy(test["input"])
 
-    if isinstance(test["in"], list):
+    if isinstance(test["input"], list):
         result = getattr(validator, expectation_type)(*kwargs)
     # As well as keyword arguments
     else:
@@ -1811,53 +1874,52 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
 def check_json_test_result(test, result, data_asset=None):
     # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
     if "unexpected_list" in result["result"]:
-        if ("result" in test["out"]) and ("unexpected_list" in test["out"]["result"]):
+        if ("result" in test["output"]) and ("unexpected_list" in test["output"]["result"]):
             (
-                test["out"]["result"]["unexpected_list"],
+                test["output"]["result"]["unexpected_list"],
                 result["result"]["unexpected_list"],
             ) = sort_unexpected_values(
-                test["out"]["result"]["unexpected_list"],
+                test["output"]["result"]["unexpected_list"],
                 result["result"]["unexpected_list"],
             )
-        elif "unexpected_list" in test["out"]:
+        elif "unexpected_list" in test["output"]:
             (
-                test["out"]["unexpected_list"],
+                test["output"]["unexpected_list"],
                 result["result"]["unexpected_list"],
             ) = sort_unexpected_values(
-                test["out"]["unexpected_list"],
+                test["output"]["unexpected_list"],
                 result["result"]["unexpected_list"],
             )
 
     if "partial_unexpected_list" in result["result"]:
-        if ("result" in test["out"]) and (
-            "partial_unexpected_list" in test["out"]["result"]
+        if ("result" in test["output"]) and (
+            "partial_unexpected_list" in test["output"]["result"]
         ):
             (
-                test["out"]["result"]["partial_unexpected_list"],
+                test["output"]["result"]["partial_unexpected_list"],
                 result["result"]["partial_unexpected_list"],
             ) = sort_unexpected_values(
-                test["out"]["result"]["partial_unexpected_list"],
+                test["output"]["result"]["partial_unexpected_list"],
                 result["result"]["partial_unexpected_list"],
             )
-        elif "partial_unexpected_list" in test["out"]:
+        elif "partial_unexpected_list" in test["output"]:
             (
-                test["out"]["partial_unexpected_list"],
+                test["output"]["partial_unexpected_list"],
                 result["result"]["partial_unexpected_list"],
             ) = sort_unexpected_values(
-                test["out"]["partial_unexpected_list"],
+                test["output"]["partial_unexpected_list"],
                 result["result"]["partial_unexpected_list"],
             )
 
     # Check results
     if test["exact_match_out"] is True:
-        assert result == expectationValidationResultSchema.load(test["out"])
+        assert result == expectationValidationResultSchema.load(test["output"])
     else:
         # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
         # representations, serializations, and objects should interact and how much of that is shown to the user.
         result = result.to_json_dict()
-        # print(result)
-        for key, value in test["out"].items():
+        for key, value in test["output"].items():
             # Apply our great expectations-specific test logic
 
             if key == "success":
