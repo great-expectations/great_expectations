@@ -1449,7 +1449,7 @@ def _verify_bigquery_dependent_modules() -> bool:
         module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
     sqlalchemy_bigquery_ok = verify_library_dependent_modules(
-        python_import_name="sqlalchemy_bigquery.sqlalchemy_bigquery",
+        python_import_name="sqlalchemy_bigquery",
         pip_library_name="sqlalchemy_bigquery",
         module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )

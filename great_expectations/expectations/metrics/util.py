@@ -64,9 +64,9 @@ try:
 except ImportError:
     sqlalchemy_dremio = None
 
-_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery.sqlalchemy_bigquery"
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
-    import sqlalchemy_bigquery.sqlalchemy_bigquery as sqla_bigquery
+    import sqlalchemy_bigquery as sqla_bigquery
 
     registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
     bigquery_types_tuple = None

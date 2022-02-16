@@ -95,7 +95,7 @@ except (ImportError, KeyError, AttributeError):
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
-    import sqlalchemy_bigquery.sqlalchemy_bigquery as sqla_bigquery
+    import sqlalchemy_bigquery as sqla_bigquery
 
     sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     bigquery_types_tuple = None
@@ -104,7 +104,8 @@ except ImportError:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
         logger.warn(
-            "The pybigquery package is obsolete, please use sqlalchemy-bigquery"
+            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            DeprecationWarning
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
         ###
