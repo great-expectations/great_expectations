@@ -1008,12 +1008,6 @@ def test_stats_mixed_expectations():
 def test_generate_library_json_from_registered_expectations():
     library_json = ge.util.generate_library_json_from_registered_expectations()
     assert len(library_json) > 50
-    import json
-
-    print(library_json)
-    print(type(library_json))
-    print(json.dumps([obj.to_dict() for _, obj in library_json.items()], indent=2))
-    assert False
 
 
 class TestIO(unittest.TestCase):

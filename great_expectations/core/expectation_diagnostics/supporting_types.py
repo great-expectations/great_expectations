@@ -159,12 +159,6 @@ class ExecutedExpectationTestCase(SerializableDictDot):
     validation_result: ExpectationValidationResult
     error_diagnostics: ExpectationErrorDiagnostics
 
-    # test_title: str
-    # backend: str
-    # test_passed: bool
-    # error_message: Union[str, None] = None
-    # stack_trace: Union[str, None] = None
-
 
 @dataclass
 class ExpectationDiagnosticCheckMessage(SerializableDictDot):

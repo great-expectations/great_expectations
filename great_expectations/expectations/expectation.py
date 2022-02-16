@@ -1263,24 +1263,6 @@ class Expectation(metaclass=MetaExpectation):
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
     ):
         """This is a placeholder method to adapt the typed objects used to build ExpectationDiagnostics with the untyped dictionaries used in generate_expectation_tests"""
-        # retrofitted_examples = []
-        # for test_data_cases in test_data_cases:
-        #     retro_test_data_case = test_data_cases.to_dict()
-
-        #     retro_test_cases = []
-        #     for test_case in test_data_cases.tests:
-        #         retro_test_case = test_case.to_dict()
-        #         retro_test_case["in"] = retro_test_case["input"]
-        #         retro_test_case["out"] = retro_test_case["output"]
-        #         del retro_test_case["input"]
-        #         del retro_test_case["output"]
-
-        #         retro_test_cases.append(retro_test_case)
-
-        #     retro_test_data_case["tests"] = retro_test_cases
-
-        #     retrofitted_examples.append(retro_test_data_case)
-
         parameterized_tests = generate_expectation_tests(
             expectation_type=snake_name,
             test_data_cases=test_data_cases,
@@ -1337,7 +1319,6 @@ class Expectation(metaclass=MetaExpectation):
             raise TypeError(
                 f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string."
             )
-            # print(type(rendered_result))
 
     def _get_renderer_diagnostics(
         self,

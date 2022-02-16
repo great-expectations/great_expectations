@@ -189,9 +189,6 @@ def test__execute_test_examples__with_a_single_example():
             examples=[example],
         )
     )
-    print(executed_test_cases)
-    print(json.dumps(executed_test_cases[0].to_dict(), indent=2))
-    print(type(executed_test_cases[0]))
     assert len(executed_test_cases) == 1
 
     # FIXME: Need more here?
@@ -205,7 +202,6 @@ def test__get_metric_diagnostics_list_on_a_class_without_metrics():
             executed_test_cases=executed_test_cases
         )
     )
-    print(metric_diagnostics_list)
     assert len(metric_diagnostics_list) == 0
     ExpectationMetricDiagnostics(
         name="column_values.something",
@@ -220,7 +216,6 @@ def test__get_metric_diagnostics_list_on_a_class_with_metrics():
             executed_test_cases=executed_test_cases
         )
     )
-    print(metric_diagnostics_list)
     assert len(metric_diagnostics_list) == 0
     ExpectationMetricDiagnostics(
         name="column_values.something",
@@ -291,7 +286,6 @@ def test__get_test_results():
     assert len(test_results) == 3
     for result in test_results:
         assert result.test_passed
-        # print(result.to_dict())
 
     test_results = ExpectColumnValuesToEqualThree__ThirdIteration()._get_test_results(
         expectation_type="expect_column_values_to_equal_three",
