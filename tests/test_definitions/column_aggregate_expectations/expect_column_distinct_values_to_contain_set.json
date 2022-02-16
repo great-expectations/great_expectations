@@ -5,7 +5,8 @@
             "dist1" : [1,2,3,4,5,6,7,8],
             "dist2" : [1,2,3,4,5,null,null,null],
             "dist3" : [2,2,2,2,5,6,7,8],
-            "dist4" : [1,1,1,1,2,null,null,null]
+            "dist4" : [1,1,1,1,2,null,null,null],
+            "dist5" : ["hello", "mello", "jello", "hello", "mello", "jello", "hello", "mello"]
         },
     "tests": [
       {
@@ -114,6 +115,116 @@
         "out": {
           "success": false,
           "observed_value": [1, 2]
+        }
+      },
+      {
+        "title": "positive_test_string_values",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist5",
+          "value_set": ["hello", "mello"]
+        },
+        "out": {
+          "success": true,
+          "observed_value": ["hello", "jello", "mello"]
+        }
+      },
+      {
+        "title": "negative_test_string_values",
+        "exact_match_out": false,
+        "in": {
+          "column": "dist5",
+          "value_set": ["hello", "yellow"]
+        },
+        "out": {
+          "success": false,
+          "observed_value": ["hello", "jello", "mello"]
+        }
+      }
+    ]
+  },
+  {
+    "data" : {
+      "dates" : ["2018-01-01", "2018-01-02", "2018-01-03", "2018-01-03", "2018-01-02"],
+      "datetimes" : ["2018-01-01 00:34:01", "2018-01-02 00:34:01", "2018-01-03 00:34:01", "2018-01-03 00:34:01", "2018-01-02 00:34:01"]
+    },
+    "schemas": {
+      "pandas": {
+        "dates": "date",
+        "datetimes": "datetime64"
+      },
+      "sqlite": {
+        "dates": "DATE",
+        "datetimes": "DATETIME"
+      },
+      "postgresql": {
+        "dates": "DATE",
+        "datetimes": "TIMESTAMP"
+      },
+      "mysql": {
+        "dates": "DATE",
+        "datetimes": "TIMESTAMP"
+      },
+      "mssql": {
+        "dates": "DATE",
+        "datetimes": "DATETIME"
+      }
+    },
+    "tests" : [
+      {
+        "title": "basic_positive_test_case_date_set",
+        "suppress_test_for": ["sqlite"],
+        "exact_match_out": false,
+        "in": {
+          "column": "dates",
+          "value_set": ["2018-01-01", "2018-01-02"],
+          "parse_strings_as_datetimes": true
+        },
+        "out": {
+          "success": true,
+          "observed_value": ["2018-01-01T00:00:00", "2018-01-02T00:00:00", "2018-01-03T00:00:00"]
+        }
+      },
+      {
+        "title": "basic_negative_test_case_date_set",
+        "suppress_test_for": ["sqlite"],
+        "exact_match_out": false,
+        "in": {
+          "column": "dates",
+          "value_set": ["2018-01-04", "2018-01-02"],
+          "parse_strings_as_datetimes": true
+        },
+        "out": {
+          "success": false,
+          "observed_value": ["2018-01-01T00:00:00", "2018-01-02T00:00:00", "2018-01-03T00:00:00"]
+        }
+      },
+      {
+        "title": "basic_positive_test_case_datetime_set",
+        "suppress_test_for": ["sqlite"],
+        "exact_match_out": false,
+        "in": {
+          "column": "datetimes",
+          "value_set": ["2018-01-01 00:34:01", "2018-01-02 00:34:01"],
+          "parse_strings_as_datetimes": true
+        },
+        "out": {
+          "success": true,
+          "observed_value": ["2018-01-01T00:34:01", "2018-01-02T00:34:01", "2018-01-03T00:34:01"]
+        }
+      },
+      {
+        "title": "basic_negative_test_case_datetime_set",
+        "suppress_test_for": ["sqlite"],
+        "exact_match_out": false,
+        "in": {
+          "column": "datetimes",
+          "value_set": ["2018-01-04", "2018-01-02"],
+          "parse_strings_as_datetimes": true
+        },
+        "out": {
+          "success": false,
+          "observed_value": ["2018-01-01T00:34:01", "2018-01-02T00:34:01", "2018-01-03T00:34:01"]
         }
       }
     ]

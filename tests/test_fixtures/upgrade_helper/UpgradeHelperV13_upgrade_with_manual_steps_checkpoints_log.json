@@ -1,0 +1,20 @@
+{
+  "skipped_checkpoint_store_upgrade": false,
+  "skipped_checkpoint_config_upgrade": false,
+  "skipped_datasources_upgrade": true,
+  "skipped_validation_operators_upgrade": true,
+  "update_version": true,
+  "added_checkpoint_store": {
+    "stores": {
+      "checkpoint_store": {
+        "class_name": "CheckpointStore",
+        "store_backend": {
+          "class_name": "TupleFilesystemStoreBackend",
+          "suppress_store_backend_id": true,
+          "base_directory": "checkpoints/"
+        }
+      }
+    },
+    "checkpoint_store_name": "checkpoint_store"
+  }
+}

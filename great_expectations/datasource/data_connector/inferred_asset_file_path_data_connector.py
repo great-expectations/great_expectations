@@ -4,7 +4,9 @@ from typing import List, Optional
 
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector import FilePathDataConnector
+from great_expectations.datasource.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+)
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -20,8 +22,8 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
     the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names)
 
     *Note*: InferredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently
-    InferredAssetFilesystemDataConnector and InferredAssetS3DataConnector are subclasses of
-    InferredAssetFilePathDataConnector.
+    InferredAssetFilesystemDataConnector, InferredAssetS3DataConnector, InferredAssetAzureDataConnector, and
+    InferredAssetGCSDataConnector are subclasses of InferredAssetFilePathDataConnector.
     """
 
     def __init__(
@@ -43,6 +45,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
             default_regex (dict): Optional dict the filter and organize the data_references.
             sorters (list): Optional list if you want to sort the data_references
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         logger.debug(f'Constructing InferredAssetFilePathDataConnector "{name}".')
 
@@ -52,12 +55,11 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
-        self._batch_spec_passthrough = batch_spec_passthrough or {}
-
     def _refresh_data_references_cache(self):
-        """ refreshes data_reference cache """
+        """refreshes data_reference cache"""
         # Map data_references to batch_definitions
         self._data_references_cache = {}
 
@@ -77,11 +79,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             number of data_references known by this DataConnector
         """
-        if self._data_references_cache is None:
-            raise ValueError(
-                f"data references cache for {self.__class__.__name__} {self.name} has not yet been populated."
-            )
-
         return len(self._data_references_cache)
 
     def get_unmatched_data_references(self) -> List[str]:
@@ -92,11 +89,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """
-        if self._data_references_cache is None:
-            raise ValueError(
-                '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
-            )
-
         return [k for k, v in self._data_references_cache.items() if v is None]
 
     def get_available_data_asset_names(self) -> List[str]:
@@ -106,7 +98,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             A list of available names
         """
-        if self._data_references_cache is None:
+        if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
         # This will fetch ALL batch_definitions in the cache
@@ -116,6 +108,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             batch_request=BatchRequestBase(
                 datasource_name=self.datasource_name,
                 data_connector_name=self.name,
+                data_asset_name="",
             )
         )
 
@@ -139,8 +132,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         batch_spec: BatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
-
-        batch_spec.update(self._batch_spec_passthrough)
 
         return PathBatchSpec(batch_spec)
 

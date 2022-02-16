@@ -5,11 +5,9 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.map_metric import (
+from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
@@ -17,7 +15,7 @@ from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_value,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class ColumnValuesNonNull(ColumnMapMetricProvider):
@@ -62,8 +60,14 @@ class ColumnValuesNonNullCount(MetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        return {
-            "column_values.null.unexpected_count": MetricConfiguration(
-                "column_values.null.unexpected_count", metric.metric_domain_kwargs
-            )
-        }
+        dependencies: dict = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+        dependencies["column_values.null.unexpected_count"] = MetricConfiguration(
+            metric_name="column_values.null.unexpected_count",
+            metric_domain_kwargs=metric.metric_domain_kwargs,
+        )
+        return dependencies

@@ -10,7 +10,6 @@ from great_expectations.data_context.util import (
     verify_dynamic_loading_support,
 )
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -25,8 +24,8 @@ class LegacyDatasource:
     Each Datasource provides Batches connected to a specific compute environment, such as a
     SQL database, a Spark cluster, or a local in-memory Pandas DataFrame.
 
-    Datasources use Batch Kwargs to specify instructions for how to access data from
-    relevant sources such as an existing object from a DAG runner, a SQL database, S3 bucket, or local filesystem.
+    Datasources use Batch Kwargs to specify instructions for how to access data from relevant sources such as an
+    existing object from a DAG runner, a SQL database, S3 bucket, or local filesystem.
 
     To bridge the gap between those worlds, Datasources interact closely with *generators* which
     are aware of a source of data and can produce produce identifying information, called
@@ -233,7 +232,7 @@ class LegacyDatasource:
         kwargs["class_name"] = class_name
         generator = self._build_batch_kwargs_generator(**kwargs)
         if "batch_kwargs_generators" not in self._datasource_config:
-            self._datasource_config["batch_kwargs_generators"] = dict()
+            self._datasource_config["batch_kwargs_generators"] = {}
         self._datasource_config["batch_kwargs_generators"][name] = kwargs
 
         return generator
@@ -257,7 +256,7 @@ class LegacyDatasource:
         return generator
 
     def get_batch_kwargs_generator(self, name):
-        """Get the (named) BatchKwargGenerator from a datasource)
+        """Get the (named) BatchKwargGenerator from a datasource
 
         Args:
             name (str): name of BatchKwargGenerator (default value is 'default')
@@ -320,7 +319,7 @@ class LegacyDatasource:
         if dataset_options is not None:
             # Then update with any locally-specified reader options
             if not batch_kwargs.get("dataset_options"):
-                batch_kwargs["dataset_options"] = dict()
+                batch_kwargs["dataset_options"] = {}
             batch_kwargs["dataset_options"].update(dataset_options)
 
         return batch_kwargs
@@ -379,7 +378,7 @@ class LegacyDatasource:
             ] = generator.get_available_data_asset_names()
         return available_data_asset_names
 
-    # TODO: move to connector
+    # TODO: move to dataconnector
     def build_batch_kwargs(
         self, batch_kwargs_generator, data_asset_name=None, partition_id=None, **kwargs
     ):

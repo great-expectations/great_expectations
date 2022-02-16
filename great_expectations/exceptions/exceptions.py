@@ -1,6 +1,7 @@
 import importlib
 import itertools
 import json
+from collections.abc import Iterable
 
 from great_expectations.marshmallow__shade import ValidationError
 
@@ -43,10 +44,6 @@ class CheckpointNotFoundError(CheckpointError):
 
 
 class StoreBackendError(DataContextError):
-    pass
-
-
-class UnavailableMetricError(GreatExpectationsError):
     pass
 
 
@@ -98,6 +95,10 @@ class InvalidBatchSpecError(GreatExpectationsError):
     pass
 
 
+class InvalidBatchRequestError(GreatExpectationsError):
+    pass
+
+
 class InvalidBatchIdError(GreatExpectationsError):
     pass
 
@@ -115,6 +116,22 @@ class EvaluationParameterError(GreatExpectationsError):
 
 
 class ProfilerError(GreatExpectationsError):
+    pass
+
+
+class ProfilerConfigurationError(ProfilerError):
+    """A configuration error for a profiler."""
+
+    pass
+
+
+class ProfilerExecutionError(ProfilerError):
+    """A runtime error for a profiler."""
+
+    pass
+
+
+class ProfilerNotFoundError(ProfilerError):
     pass
 
 
@@ -228,6 +245,10 @@ class PluginClassNotFoundError(DataContextError, AttributeError):
             "S3Generator": "S3GlobReaderBatchKwargsGenerator",
             "ExtractAndStoreEvaluationParamsAction": "StoreEvaluationParametersAction",
             "StoreAction": "StoreValidationResultAction",
+            "PartitionDefinitionSubset": "IDDict",
+            "PartitionRequest": "IDDict",
+            "PartitionDefinition": "IDDict",
+            "PartitionQuery": "BatchFilter",
         }
 
         if class_name_changes.get(class_name):
@@ -343,7 +364,7 @@ class ExecutionEngineError(DataContextError):
         super().__init__(self.message)
 
 
-class PartitionQueryError(DataContextError):
+class BatchFilterError(DataContextError):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
@@ -353,3 +374,39 @@ class SorterError(DataContextError):
     def __init__(self, message):
         self.message = message
         super().__init__(self.message)
+
+
+class MetricError(GreatExpectationsError):
+    pass
+
+
+class UnavailableMetricError(MetricError):
+    pass
+
+
+class MetricProviderError(MetricError):
+    pass
+
+
+class MetricComputationError(MetricError):
+    pass
+
+
+class InvalidMetricAccessorDomainKwargsKeyError(MetricError):
+    pass
+
+
+class MetricResolutionError(MetricError):
+    def __init__(self, message, failed_metrics):
+        super().__init__(message)
+        if not isinstance(failed_metrics, Iterable):
+            failed_metrics = (failed_metrics,)
+        self.failed_metrics = failed_metrics
+
+
+class GeCloudError(GreatExpectationsError):
+    """
+    Generic error used to provide additional context around Cloud-specific issues.
+    """
+
+    pass

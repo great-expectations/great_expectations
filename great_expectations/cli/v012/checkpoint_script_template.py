@@ -1,7 +1,7 @@
 """
 This is a basic generated Great Expectations script that runs a checkpoint.
 
-A checkpoint is a list of one or more batches paired with one or more
+Internally, a Checkpoint is a list of one or more batches paired with one or more
 Expectation Suites and a configurable Validation Operator.
 
 Checkpoints can be run directly without this script using the
@@ -31,20 +31,8 @@ from great_expectations import DataContext
 context = DataContext("{1}")
 checkpoint = context.get_checkpoint("{0}")
 
-# load batches of data
-batches_to_validate = []
-for batch in checkpoint.batches:
-    batch_kwargs = batch["batch_kwargs"]
-    for suite_name in batch["expectation_suite_names"]:
-        suite = context.get_expectation_suite(suite_name)
-        batch = context.get_batch(batch_kwargs, suite)
-        batches_to_validate.append(batch)
-
-# run the validation operator
-results = context.run_validation_operator(
-    checkpoint.validation_operator_name,
-    assets_to_validate=batches_to_validate,
-)
+# run the Checkpoint
+results = checkpoint.run()
 
 # take action based on results
 if not results["success"]:

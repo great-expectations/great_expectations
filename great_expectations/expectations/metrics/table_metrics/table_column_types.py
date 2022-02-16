@@ -1,4 +1,4 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import (
@@ -10,14 +10,17 @@ from great_expectations.execution_engine.execution_engine import MetricDomainTyp
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
-from great_expectations.expectations.metrics.import_manager import (
-    reflection,
-    sa,
-    sparktypes,
-)
+from great_expectations.expectations.metrics.import_manager import sparktypes
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.expectations.metrics.table_metric import TableMetricProvider
-from great_expectations.expectations.metrics.util import column_reflection_fallback
+from great_expectations.expectations.metrics.table_metric_provider import (
+    TableMetricProvider,
+)
+from great_expectations.expectations.metrics.util import get_sqlalchemy_column_metadata
+
+try:
+    from sqlalchemy.sql.elements import TextClause
+except ImportError:
+    TextClause = None
 
 
 class ColumnTypes(TableMetricProvider):
@@ -31,7 +34,7 @@ class ColumnTypes(TableMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         df, _, _ = execution_engine.get_compute_domain(
@@ -48,7 +51,7 @@ class ColumnTypes(TableMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         batch_id = metric_domain_kwargs.get("batch_id")
@@ -73,7 +76,7 @@ class ColumnTypes(TableMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         df, _, _ = execution_engine.get_compute_domain(
@@ -85,35 +88,20 @@ class ColumnTypes(TableMetricProvider):
 
 
 def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
-    insp = reflection.Inspector.from_engine(engine)
-
-    table_name = batch_data.source_table_name or batch_data.selectable.name
-    schema_name = batch_data.source_schema_name or batch_data.selectable.schema
-
-    try:
-        columns = insp.get_columns(
-            table_name,
-            schema=schema_name,
+    # if a custom query was passed
+    if isinstance(batch_data.selectable, TextClause):
+        table_selectable: TextClause = batch_data.selectable
+        schema_name = None
+    else:
+        table_selectable: str = (
+            batch_data.source_table_name or batch_data.selectable.name
         )
-
-    except (KeyError, AttributeError, sa.exc.NoSuchTableError):
-        # we will get a KeyError for temporary tables, since
-        # reflection will not find the temporary schema
-        columns = column_reflection_fallback(
-            selectable=batch_data.selectable,
-            dialect=batch_data.sql_engine_dialect,
-            sqlalchemy_engine=engine,
-        )
-
-    # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
-    if len(columns) == 0:
-        columns = column_reflection_fallback(
-            selectable=batch_data.selectable,
-            dialect=batch_data.sql_engine_dialect,
-            sqlalchemy_engine=engine,
-        )
-
-    return columns
+        schema_name = batch_data.source_schema_name or batch_data.selectable.schema
+    return get_sqlalchemy_column_metadata(
+        engine=engine,
+        table_selectable=table_selectable,
+        schema_name=schema_name,
+    )
 
 
 def _get_spark_column_metadata(field, parent_name="", include_nested=True):

@@ -1,12 +1,14 @@
 import datetime
+import gzip
 import json
 import locale
+import logging
 import os
 import random
 import shutil
-import threading
-from types import ModuleType
-from typing import Optional
+import sys
+from pathlib import Path
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -21,26 +23,50 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
-from great_expectations.data_context import BaseDataContext
-from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.data_context.store.profiler_store import ProfilerStore
+from great_expectations.data_context.types.base import (
+    CheckpointConfig,
+    DataContextConfig,
+    GeCloudConfig,
+)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
 )
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.datasource import SqlAlchemyDatasource
-from great_expectations.datasource.new_datasource import Datasource
+from great_expectations.datasource import (
+    LegacyDatasource,
+    SimpleSqlalchemyDatasource,
+    SqlAlchemyDatasource,
+)
+from great_expectations.datasource.data_connector.util import (
+    get_filesystem_one_level_directory_glob_path_list,
+)
+from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.util import import_library_module
-from tests.test_utils import (
-    create_files_in_directory,
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
+from great_expectations.rule_based_profiler.config.base import (
+    ruleBasedProfilerConfigSchema,
+)
+from great_expectations.self_check.util import (
+    build_test_backends_list as build_test_backends_list_v3,
+)
+from great_expectations.self_check.util import (
+    expectationSuiteSchema,
     expectationSuiteValidationResultSchema,
     get_dataset,
+    get_sqlite_connection_url,
 )
+from great_expectations.util import is_library_loadable
+from tests.test_utils import create_files_in_directory
+
+RULE_BASED_PROFILER_MIN_PYTHON_VERSION: tuple = (3, 7)
 
 yaml = YAML()
 ###
@@ -51,26 +77,22 @@ yaml = YAML()
 
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
+logger = logging.getLogger(__name__)
 
-class LockingConnectionCheck:
-    def __init__(self, sa, connection_string):
-        self.lock = threading.Lock()
-        self.sa = sa
-        self.connection_string = connection_string
-        self._is_valid = None
 
-    def is_valid(self):
-        with self.lock:
-            if self._is_valid is None:
-                try:
-                    engine = self.sa.create_engine(self.connection_string)
-                    conn = engine.connect()
-                    conn.close()
-                    self._is_valid = True
-                except (ImportError, self.sa.exc.SQLAlchemyError) as e:
-                    print(f"{str(e)}")
-                    self._is_valid = False
-            return self._is_valid
+def skip_if_python_below_minimum_version():
+    """
+    All test fixtures for Rule-Based Profiler must execute this method; for example:
+        ```
+        skip_if_python_below_minimum_version()
+        ```
+    for as long as the support for Python versions less than 3.7 is provided.  In particular, Python-3.6 support for
+    "dataclasses.asdict()" does not handle None values as well as the more recent versions of Python do.
+    """
+    if sys.version_info < RULE_BASED_PROFILER_MIN_PYTHON_VERSION:
+        pytest.skip(
+            "skipping fixture because Python version 3.7 (or greater) is required"
+        )
 
 
 def pytest_configure(config):
@@ -116,150 +138,64 @@ def pytest_addoption(parser):
         help="If set, execute tests against mssql",
     )
     parser.addoption(
+        "--bigquery",
+        action="store_true",
+        help="If set, execute tests against bigquery",
+    )
+    parser.addoption(
+        "--aws",
+        action="store_true",
+        help="If set, execute tests against AWS resources like S3, RedShift and Athena",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
-        help="If set, run aws integration tests",
+        help="If set, run aws integration tests for usage_statistics",
+    )
+    parser.addoption(
+        "--docs-tests",
+        action="store_true",
+        help="If set, run integration tests for docs",
+    )
+    parser.addoption(
+        "--performance-tests",
+        action="store_true",
+        help="If set, run performance tests (which might also require additional arguments like --bigquery)",
     )
 
 
 def build_test_backends_list(metafunc):
-    test_backends = ["PandasDataset"]
-    no_spark = metafunc.config.getoption("--no-spark")
-    if not no_spark:
-        try:
-            import pyspark
-            from pyspark.sql import SparkSession
-        except ImportError:
-            raise ValueError("spark tests are requested, but pyspark is not installed")
-        test_backends += ["SparkDFDataset"]
-    no_sqlalchemy = metafunc.config.getoption("--no-sqlalchemy")
-    if not no_sqlalchemy:
-        test_backends += ["sqlite"]
-
-        sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
-
-        no_postgresql = metafunc.config.getoption("--no-postgresql")
-        if not (sa is None or no_postgresql):
-            ###
-            # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
-            # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
-            # round trip compared to NUMERIC, which stays as a python DECIMAL
-
-            # Be sure to ensure that tests (and users!) understand that subtlety,
-            # which can be important for distributional expectations, for example.
-            ###
-            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
-            checker = LockingConnectionCheck(sa, connection_string)
-            if checker.is_valid() is True:
-                test_backends += ["postgresql"]
-            else:
-                raise ValueError(
-                    f"backend-specific tests are requested, but unable "
-                    f"to connect to the database at {connection_string}"
-                )
-        mysql = metafunc.config.getoption("--mysql")
-        if sa and mysql:
-            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            try:
-                engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
-                conn = engine.connect()
-                conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
-                raise ImportError(
-                    "mysql tests are requested, but unable to connect to the mysql database at "
-                    f"'mysql+pymysql://root@{db_hostname}/test_ci'"
-                )
-            test_backends += ["mysql"]
-        mssql = metafunc.config.getoption("--mssql")
-        if sa and mssql:
-            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            try:
-                engine = sa.create_engine(
-                    f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
-                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
-                    # echo=True,
-                )
-                conn = engine.connect()
-                conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
-                raise ImportError(
-                    "mssql tests are requested, but unable to connect to the mssql database at "
-                    f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
-                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
-                )
-            test_backends += ["mssql"]
-    return test_backends
+    test_backend_names: List[str] = build_test_backends_list_cfe(metafunc)
+    backend_name_class_name_map: Dict[str, str] = {
+        "pandas": "PandasDataset",
+        "spark": "SparkDFDataset",
+    }
+    backend_name: str
+    return [
+        (backend_name_class_name_map.get(backend_name) or backend_name)
+        for backend_name in test_backend_names
+    ]
 
 
 def build_test_backends_list_cfe(metafunc):
-    test_backends = ["pandas"]
-    no_spark = metafunc.config.getoption("--no-spark")
-    if not no_spark:
-        try:
-            import pyspark
-            from pyspark.sql import SparkSession
-        except ImportError:
-            raise ValueError("spark tests are requested, but pyspark is not installed")
-        test_backends += ["spark"]
-    no_sqlalchemy = metafunc.config.getoption("--no-sqlalchemy")
-    if not no_sqlalchemy:
-        test_backends += ["sqlite"]
-
-        sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
-
-        no_postgresql = metafunc.config.getoption("--no-postgresql")
-        if not (sa is None or no_postgresql):
-            ###
-            # NOTE: 20190918 - JPC: Since I've had to relearn this a few times, a note here.
-            # SQLALCHEMY coerces postgres DOUBLE_PRECISION to float, which loses precision
-            # round trip compared to NUMERIC, which stays as a python DECIMAL
-
-            # Be sure to ensure that tests (and users!) understand that subtlety,
-            # which can be important for distributional expectations, for example.
-            ###
-            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
-            checker = LockingConnectionCheck(sa, connection_string)
-            if checker.is_valid() is True:
-                test_backends += ["postgresql"]
-            else:
-                raise ValueError(
-                    f"backend-specific tests are requested, but unable to connect to the database at "
-                    f"{connection_string}"
-                )
-        mysql = metafunc.config.getoption("--mysql")
-        if sa and mysql:
-            try:
-                db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-                engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
-                conn = engine.connect()
-                conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
-                raise ImportError(
-                    "mysql tests are requested, but unable to connect to the mysql database at "
-                    f"'mysql+pymysql://root@{db_hostname}/test_ci'"
-                )
-            test_backends += ["mysql"]
-        mssql = metafunc.config.getoption("--mssql")
-        if sa and mssql:
-            db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-            try:
-                engine = sa.create_engine(
-                    f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
-                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
-                    # echo=True,
-                )
-                conn = engine.connect()
-                conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError):
-                raise ImportError(
-                    "mssql tests are requested, but unable to connect to the mssql database at "
-                    f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
-                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
-                )
-            test_backends += ["mssql"]
-    return test_backends
+    include_pandas: bool = True
+    include_spark: bool = not metafunc.config.getoption("--no-spark")
+    include_sqlalchemy: bool = not metafunc.config.getoption("--no-sqlalchemy")
+    include_postgresql = not metafunc.config.getoption("--no-postgresql")
+    include_mysql: bool = metafunc.config.getoption("--mysql")
+    include_mssql: bool = metafunc.config.getoption("--mssql")
+    include_bigquery: bool = metafunc.config.getoption("--bigquery")
+    include_aws: bool = metafunc.config.getoption("--aws")
+    test_backend_names: List[str] = build_test_backends_list_v3(
+        include_pandas=include_pandas,
+        include_spark=include_spark,
+        include_sqlalchemy=include_sqlalchemy,
+        include_postgresql=include_postgresql,
+        include_mysql=include_mysql,
+        include_mssql=include_mssql,
+        include_bigquery=include_bigquery,
+    )
+    return test_backend_names
 
 
 def pytest_generate_tests(metafunc):
@@ -274,12 +210,18 @@ def pytest_collection_modifyitems(config, items):
     if config.getoption("--aws-integration"):
         # --aws-integration given in cli: do not skip aws-integration tests
         return
+    if config.getoption("--docs-tests"):
+        # --docs-tests given in cli: do not skip documentation integration tests
+        return
     skip_aws_integration = pytest.mark.skip(
         reason="need --aws-integration option to run"
     )
+    skip_docs_integration = pytest.mark.skip(reason="need --docs-tests option to run")
     for item in items:
         if "aws_integration" in item.keywords:
             item.add_marker(skip_aws_integration)
+        if "docs" in item.keywords:
+            item.add_marker(skip_docs_integration)
 
 
 @pytest.fixture(autouse=True)
@@ -288,13 +230,10 @@ def no_usage_stats(monkeypatch):
     monkeypatch.setenv("GE_USAGE_STATS", "False")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def sa(test_backends):
-    if (
-        "postgresql" not in test_backends
-        and "sqlite" not in test_backends
-        and "mysql" not in test_backends
-        and "mssql" not in test_backends
+    if not any(
+        [dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
@@ -306,15 +245,56 @@ def sa(test_backends):
             raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
 
+@pytest.mark.order(index=2)
 @pytest.fixture
 def spark_session(test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
+
     try:
         import pyspark
         from pyspark.sql import SparkSession
 
-        return SparkSession.builder.getOrCreate()
+        return get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+            }
+        )
+    except ImportError:
+        raise ValueError("spark tests are requested, but pyspark is not installed")
+
+
+@pytest.fixture
+def basic_spark_df_execution_engine(spark_session):
+    from great_expectations.execution_engine import SparkDFExecutionEngine
+
+    conf: List[tuple] = spark_session.sparkContext.getConf().getAll()
+    spark_config: Dict[str, str] = dict(conf)
+    execution_engine: SparkDFExecutionEngine = SparkDFExecutionEngine(
+        spark_config=spark_config,
+    )
+    return execution_engine
+
+
+@pytest.mark.order(index=3)
+@pytest.fixture
+def spark_session_v012(test_backends):
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
+    try:
+        import pyspark
+        from pyspark.sql import SparkSession
+
+        return get_or_create_spark_application(
+            spark_config={
+                "spark.sql.catalogImplementation": "hive",
+                "spark.executor.memory": "450m",
+                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+            }
+        )
     except ImportError:
         raise ValueError("spark tests are requested, but pyspark is not installed")
 
@@ -330,7 +310,8 @@ def empty_expectation_suite():
 
 
 @pytest.fixture
-def basic_expectation_suite():
+def basic_expectation_suite(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     expectation_suite = ExpectationSuite(
         expectation_suite_name="default",
         meta={},
@@ -350,6 +331,7 @@ def basic_expectation_suite():
                 kwargs={"column": "naturals"},
             ),
         ],
+        data_context=context,
     )
     return expectation_suite
 
@@ -2225,8 +2207,6 @@ def sqlalchemy_dataset(test_backends):
 @pytest.fixture
 def sqlitedb_engine(test_backend):
     if test_backend == "sqlite":
-        import sqlalchemy as sa
-
         try:
             import sqlalchemy as sa
 
@@ -2255,13 +2235,18 @@ def postgresql_engine(test_backend):
         pytest.skip("Skipping test designed for postgresql on non-postgresql backend.")
 
 
-@pytest.fixture
-def empty_data_context(tmp_path_factory) -> DataContext:
-    project_path = str(tmp_path_factory.mktemp("empty_data_context"))
+@pytest.fixture(scope="function")
+def empty_data_context(
+    tmp_path,
+) -> DataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     os.makedirs(asset_config_path, exist_ok=True)
+    assert context.list_datasources() == []
     return context
 
 
@@ -2270,23 +2255,26 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     tmp_path_factory,
     monkeypatch,
 ):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path = os.path.join(context_path, "..", "data", "titanic")
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")
     os.makedirs(os.path.join(data_path), exist_ok=True)
     shutil.copy(
         file_relative_path(
             __file__,
-            "./test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
+            os.path.join(
+                "test_fixtures",
+                "great_expectations_v013_no_datasource_stats_enabled.yml",
+            ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
         str(
             os.path.join(
                 context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
@@ -2294,17 +2282,24 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
         ),
     )
     shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        str(
+            os.path.join(context_path, "..", "data", "titanic", "Titanic_19120414_1313")
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
     )
     shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
-    context = ge.data_context.DataContext(context_path)
+
+    context: DataContext = DataContext(context_root_dir=context_path)
     assert context.root_directory == context_path
 
-    datasource_config = f"""
+    datasource_config: str = f"""
         class_name: Datasource
 
         execution_engine:
@@ -2352,12 +2347,126 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
             my_runtime_data_connector:
                 module_name: great_expectations.datasource.data_connector
                 class_name: RuntimeDataConnector
-                runtime_keys:
+                batch_identifiers:
                     - pipeline_stage_name
                     - airflow_run_id
-        """
+    """
 
-    context.test_yaml_config(
+    # noinspection PyUnusedLocal
+    datasource: Datasource = context.test_yaml_config(
+        name="my_datasource", yaml_config=datasource_config, pretty_print=False
+    )
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
+    tmp_path_factory,
+    monkeypatch,
+    spark_session,
+):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "test_fixtures",
+                "great_expectations_v013_no_datasource_stats_enabled.yml",
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        str(
+            os.path.join(
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        str(
+            os.path.join(context_path, "..", "data", "titanic", "Titanic_19120414_1313")
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
+    )
+    shutil.copy(
+        file_relative_path(__file__, os.path.join("test_sets", "Titanic.csv")),
+        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
+    )
+
+    context: DataContext = DataContext(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    datasource_config: str = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: SparkDFExecutionEngine
+
+        data_connectors:
+            my_basic_data_connector:
+                class_name: InferredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                default_regex:
+                    pattern: (.*)\\.csv
+                    group_names:
+                        - data_asset_name
+
+            my_special_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users:
+                        base_directory: {data_path}
+                        pattern: (.+)_(\\d+)_(\\d+)\\.csv
+                        group_names:
+                            - name
+                            - timestamp
+                            - size
+
+            my_other_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users: {{}}
+
+            my_runtime_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: RuntimeDataConnector
+                batch_identifiers:
+                    - pipeline_stage_name
+                    - airflow_run_id
+    """
+
+    # noinspection PyUnusedLocal
+    datasource: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
     # noinspection PyProtectedMember
@@ -2366,11 +2475,106 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
 
 
 @pytest.fixture
+def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    tmp_path_factory,
+    monkeypatch,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    project_dir: str = context.root_directory
+    data_path: str = os.path.join(project_dir, "..", "data", "titanic")
+
+    datasource_config: str = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: PandasExecutionEngine
+
+        data_connectors:
+            my_additional_data_connector:
+                class_name: InferredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                default_regex:
+                    pattern: (.*)\\.csv
+                    group_names:
+                        - data_asset_name
+    """
+
+    # noinspection PyUnusedLocal
+    datasource: BaseDatasource = context.add_datasource(
+        "my_additional_datasource", **yaml.load(datasource_config)
+    )
+
+    return context
+
+
+@pytest.fixture
+def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
+    sa,
+    spark_session,
+    titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
+    tmp_path_factory,
+    test_backends,
+    monkeypatch,
+):
+    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    project_dir: str = context.root_directory
+    data_path: str = os.path.join(project_dir, "..", "data", "titanic")
+
+    if (
+        any(
+            [
+                dbms in test_backends
+                for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
+            ]
+        )
+        and (sa is not None)
+        and is_library_loadable(library_name="sqlalchemy")
+    ):
+        db_fixture_file_path: str = file_relative_path(
+            __file__,
+            os.path.join("test_sets", "titanic_sql_test_cases.db"),
+        )
+        db_file_path: str = os.path.join(
+            data_path,
+            "titanic_sql_test_cases.db",
+        )
+        shutil.copy(
+            db_fixture_file_path,
+            db_file_path,
+        )
+
+        datasource_config: str = f"""
+        class_name: Datasource
+        execution_engine:
+          class_name: SqlAlchemyExecutionEngine
+          connection_string: sqlite:///{db_file_path}
+        data_connectors:
+          default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+              - default_identifier_name
+          default_inferred_data_connector_name:
+            class_name: InferredAssetSqlDataConnector
+            name: whole_table
+        """
+
+        # noinspection PyUnusedLocal
+        datasource: BaseDatasource = context.add_datasource(
+            "my_sqlite_db_datasource", **yaml.load(datasource_config)
+        )
+
+    return context
+
+
+@pytest.fixture
 def assetless_dataconnector_context(
     tmp_path_factory,
     monkeypatch,
 ):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
@@ -2421,7 +2625,7 @@ def deterministic_asset_dataconnector_context(
     tmp_path_factory,
     monkeypatch,
 ):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
@@ -2581,7 +2785,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
                     "datasource_name": "my_datasource_template_1",
                     "data_connector_name": "my_special_data_connector_template_1",
                     "data_asset_name": "users_from_template_1",
-                    "partition_request": {"partition_index": -999},
+                    "data_connector_query": {"partition_index": -999},
                 }
             }
         ],
@@ -2814,8 +3018,19 @@ def empty_context_with_checkpoint_stats_enabled(empty_data_context_stats_enabled
 
 @pytest.fixture
 def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Reenable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS", raising=False)
+    project_path = str(tmp_path_factory.mktemp("empty_data_context"))
+    context = ge.data_context.DataContext.create(project_path)
+    context_path = os.path.join(project_path, "great_expectations")
+    asset_config_path = os.path.join(context_path, "expectations")
+    os.makedirs(asset_config_path, exist_ok=True)
+    return context
+
+
+@pytest.fixture(scope="module")
+def empty_data_context_module_scoped(tmp_path_factory):
+    # Re-enable GE_USAGE_STATS
     project_path = str(tmp_path_factory.mktemp("empty_data_context"))
     context = ge.data_context.DataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
@@ -2847,13 +3062,15 @@ def empty_context_with_checkpoint_v1_stats_enabled(
     )
     checkpoints_file = os.path.join(root_dir, "checkpoints", fixture_name)
     shutil.copy(fixture_path, checkpoints_file)
-    # noinspection PyProtectedMember
+    # # noinspection PyProtectedMember
     context._save_project_config()
     return context
 
 
 @pytest.fixture
-def titanic_data_context(tmp_path_factory):
+def titanic_data_context(
+    tmp_path_factory,
+) -> DataContext:
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
@@ -2862,6 +3079,29 @@ def titanic_data_context(tmp_path_factory):
     os.makedirs(os.path.join(data_path), exist_ok=True)
     titanic_yml_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_v013_titanic.yml"
+    )
+    shutil.copy(
+        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+    )
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    shutil.copy(
+        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def titanic_data_context_clean(
+    tmp_path_factory,
+) -> DataContext:
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
+    data_path = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    titanic_yml_path = file_relative_path(
+        __file__, "./test_fixtures/great_expectations_v013clean_titanic.yml"
     )
     shutil.copy(
         titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
@@ -2917,7 +3157,7 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_no_config_store(tmp_path_factory, monkeypatch):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -2940,7 +3180,7 @@ def titanic_data_context_stats_enabled_no_config_store(tmp_path_factory, monkeyp
 
 @pytest.fixture
 def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -2963,7 +3203,7 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 @pytest.fixture
 def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkeypatch):
-    # Reenable GE_USAGE_STATS
+    # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")
@@ -2973,6 +3213,29 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
     os.makedirs(os.path.join(data_path), exist_ok=True)
     titanic_yml_path = file_relative_path(
         __file__, "./test_fixtures/great_expectations_titanic.yml"
+    )
+    shutil.copy(
+        titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
+    )
+    titanic_csv_path = file_relative_path(__file__, "./test_sets/Titanic.csv")
+    shutil.copy(
+        titanic_csv_path, str(os.path.join(context_path, "..", "data", "Titanic.csv"))
+    )
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkeypatch):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    os.makedirs(os.path.join(context_path, "checkpoints"), exist_ok=True)
+    data_path = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    titanic_yml_path = file_relative_path(
+        __file__, "./test_fixtures/great_expectations_v013_upgraded_titanic.yml"
     )
     shutil.copy(
         titanic_yml_path, str(os.path.join(context_path, "great_expectations.yml"))
@@ -3006,7 +3269,7 @@ def titanic_sqlite_db(sa):
         from sqlalchemy import create_engine
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
-        engine = create_engine("sqlite:///{}".format(titanic_db_path))
+        engine = create_engine(f"sqlite:///{titanic_db_path}")
         assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
         return engine
     except ImportError:
@@ -3014,7 +3277,8 @@ def titanic_sqlite_db(sa):
 
 
 @pytest.fixture
-def titanic_expectation_suite():
+def titanic_expectation_suite(empty_data_context_stats_enabled):
+    data_context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
         expectation_suite_name="Titanic.warning",
         meta={},
@@ -3032,6 +3296,7 @@ def titanic_expectation_suite():
                 kwargs={"value": 1313},
             ),
         ],
+        data_context=data_context,
     )
 
 
@@ -3118,12 +3383,14 @@ def site_builder_data_context_with_html_store_titanic_random(
     return context
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 @freeze_time("09/26/2019 13:42:41")
 def site_builder_data_context_v013_with_html_store_titanic_random(
-    tmp_path_factory, filesystem_csv_3
+    tmp_path, filesystem_csv_3
 ):
-    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    base_dir = tmp_path / "project_dir"
+    base_dir.mkdir()
+    base_dir = str(base_dir)
     project_dir = os.path.join(base_dir, "project_path")
     os.mkdir(project_dir)
 
@@ -3187,15 +3454,17 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
     return context
 
 
-@pytest.fixture
-def titanic_multibatch_data_context(tmp_path_factory):
+@pytest.fixture(scope="function")
+def titanic_multibatch_data_context(
+    tmp_path,
+) -> DataContext:
     """
     Based on titanic_data_context, but with 2 identical batches of
     data asset "titanic"
-    :param tmp_path_factory:
-    :return:
     """
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    project_path = tmp_path / "titanic_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
     data_path = os.path.join(context_path, "..", "data", "titanic")
@@ -3253,6 +3522,54 @@ def v20_project_directory(tmp_path_factory):
     shutil.copy(
         file_relative_path(
             __file__, "./test_fixtures/upgrade_helper/great_expectations_v2.yml"
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
+
+
+@pytest.fixture
+def v20_project_directory_with_v30_configuration_and_v20_checkpoints(tmp_path_factory):
+    """
+    GE config_version: 3 project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v30_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v20_project_with_v30_configuration_and_v20_checkpoints/",
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
+        ),
+        os.path.join(context_root_dir, "great_expectations.yml"),
+    )
+    return context_root_dir
+
+
+@pytest.fixture
+def v20_project_directory_with_v30_configuration_and_no_checkpoints(tmp_path_factory):
+    """
+    GE config_version: 3 project for testing upgrade helper
+    """
+    project_path = str(tmp_path_factory.mktemp("v30_project"))
+    context_root_dir = os.path.join(project_path, "great_expectations")
+    shutil.copytree(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v20_project_with_v30_configuration_and_no_checkpoints/",
+        ),
+        context_root_dir,
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            "./test_fixtures/upgrade_helper/great_expectations_v2_with_v3_configuration_without_checkpoint_store.yml",
         ),
         os.path.join(context_root_dir, "great_expectations.yml"),
     )
@@ -3499,7 +3816,26 @@ def data_context_custom_notebooks(tmp_path_factory):
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
     """
-    project_path = str(tmp_path_factory.mktemp("data_context"))
+    ge_yml_fixture = "great_expectations_custom_notebooks.yml"
+    context_path = _create_custom_notebooks_context(tmp_path_factory, ge_yml_fixture)
+
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_custom_notebooks_defaults(tmp_path_factory):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    ge_yml_fixture = "great_expectations_custom_notebooks_defaults.yml"
+    context_path = _create_custom_notebooks_context(tmp_path_factory, ge_yml_fixture)
+
+    return ge.data_context.DataContext(context_path)
+
+
+def _create_custom_notebooks_context(path, ge_yml_name):
+    project_path = str(path.mktemp("data_context"))
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
@@ -3508,7 +3844,7 @@ def data_context_custom_notebooks(tmp_path_factory):
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_custom_notebooks.yml"),
+        os.path.join(fixture_dir, ge_yml_name),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
     shutil.copy(
@@ -3518,8 +3854,76 @@ def data_context_custom_notebooks(tmp_path_factory):
         ),
         os.path.join(asset_config_path, "my_dag_node", "default.json"),
     )
-
     os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    return context_path
+
+
+@pytest.fixture
+def data_context_v3_custom_notebooks(tmp_path):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = tmp_path
+    context_path = os.path.join(project_path, "great_expectations")
+    expectations_dir = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    custom_notebook_assets_dir = os.path.join("v3", "notebook_assets")
+    os.makedirs(
+        os.path.join(expectations_dir, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_v013_custom_notebooks.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(expectations_dir, "my_dag_node", "default.json"),
+    )
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copytree(
+        os.path.join(fixture_dir, custom_notebook_assets_dir),
+        str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
+    )
+
+    return ge.data_context.DataContext(context_path)
+
+
+@pytest.fixture
+def data_context_v3_custom_bad_notebooks(tmp_path):
+    """
+    This data_context is *manually* created to have the config we want, vs
+    created with DataContext.create()
+    """
+    project_path = tmp_path
+    context_path = os.path.join(project_path, "great_expectations")
+    expectations_dir = os.path.join(context_path, "expectations")
+    fixture_dir = file_relative_path(__file__, "./test_fixtures")
+    custom_notebook_assets_dir = os.path.join("v3", "notebook_assets")
+    os.makedirs(
+        os.path.join(expectations_dir, "my_dag_node"),
+        exist_ok=True,
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "great_expectations_v013_bad_notebooks.yml"),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        os.path.join(
+            fixture_dir,
+            "expectation_suites/parameterized_expectation_suite_fixture.json",
+        ),
+        os.path.join(expectations_dir, "my_dag_node", "default.json"),
+    )
+    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    shutil.copytree(
+        os.path.join(fixture_dir, custom_notebook_assets_dir),
+        str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
+    )
 
     return ge.data_context.DataContext(context_path)
 
@@ -3627,7 +4031,10 @@ def filesystem_csv_data_context_with_validation_operators(
 
 
 @pytest.fixture()
-def filesystem_csv_data_context(empty_data_context, filesystem_csv_2):
+def filesystem_csv_data_context(
+    empty_data_context,
+    filesystem_csv_2,
+) -> DataContext:
     empty_data_context.add_datasource(
         "rad_datasource",
         module_name="great_expectations.datasource",
@@ -3661,36 +4068,55 @@ def filesystem_csv(tmp_path_factory):
     return base_dir
 
 
-@pytest.fixture
-def filesystem_csv_2(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp("test_files")
+@pytest.fixture(scope="function")
+def filesystem_csv_2(tmp_path):
+    base_dir = tmp_path / "filesystem_csv_2"
+    base_dir.mkdir()
     base_dir = str(base_dir)
 
     # Put a file in the directory
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
-    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)
+    assert os.path.isabs(base_dir)
+    assert os.path.isfile(os.path.join(base_dir, "f1.csv"))
 
     return base_dir
 
 
 @pytest.fixture
-def filesystem_csv_3(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp("test_files")
+def filesystem_csv_2_gz(filesystem_csv_2):
+    _compress_csv_in_dir(filesystem_csv_2)
+    return filesystem_csv_2
+
+
+def _compress_csv_in_dir(dir: os.PathLike):
+    dir = Path(dir)
+    for file in dir.glob("*.csv"):
+        file_gz = file.with_name(file.name + ".gz")
+        file_gz.write_bytes(gzip.compress(file.read_bytes(), compresslevel=1))
+        file.unlink()
+
+
+@pytest.fixture(scope="function")
+def filesystem_csv_3(tmp_path):
+    base_dir = tmp_path / "filesystem_csv_3"
+    base_dir.mkdir()
     base_dir = str(base_dir)
 
     # Put a file in the directory
     toy_dataset = PandasDataset({"x": [1, 2, 3]})
-    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=None)
+    toy_dataset.to_csv(os.path.join(base_dir, "f1.csv"), index=False)
 
     toy_dataset_2 = PandasDataset({"y": [1, 2, 3]})
-    toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=None)
+    toy_dataset_2.to_csv(os.path.join(base_dir, "f2.csv"), index=False)
 
     return base_dir
 
 
-@pytest.fixture()
-def filesystem_csv_4(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp("test_files")
+@pytest.fixture(scope="function")
+def filesystem_csv_4(tmp_path):
+    base_dir = tmp_path / "filesystem_csv_4"
+    base_dir.mkdir()
     base_dir = str(base_dir)
 
     # Put a file in the directory
@@ -3737,29 +4163,36 @@ def titanic_profiled_name_column_evrs():
 
 
 @pytest.fixture
-def titanic_profiled_expectations_1():
+def titanic_profiled_expectations_1(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     with open(
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
         ),
     ) as infile:
-        return expectationSuiteSchema.load(json.load(infile))
+        expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(infile))
+        return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 @pytest.fixture
-def titanic_profiled_name_column_expectations():
-    from great_expectations.render.renderer.renderer import Renderer
-
+def titanic_profiled_name_column_expectations(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     with open(
         file_relative_path(
             __file__, "./render/fixtures/BasicDatasetProfiler_expectations.json"
         ),
     ) as infile:
-        titanic_profiled_expectations = expectationSuiteSchema.load(json.load(infile))
+        titanic_profiled_expectations_dict: dict = expectationSuiteSchema.load(
+            json.load(infile)
+        )
+        titanic_profiled_expectations = ExpectationSuite(
+            **titanic_profiled_expectations_dict, data_context=context
+        )
 
-    columns, ordered_columns = Renderer()._group_and_order_expectations_by_column(
-        titanic_profiled_expectations
-    )
+    (
+        columns,
+        ordered_columns,
+    ) = titanic_profiled_expectations.get_grouped_and_ordered_expectations_by_column()
     name_column_expectations = columns["Name"]
 
     return name_column_expectations
@@ -3861,7 +4294,7 @@ def sqlite_view_engine(test_backends):
 
             sqlite_engine = sa.create_engine("sqlite://")
             df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
-            df.to_sql("test_table", con=sqlite_engine)
+            df.to_sql(name="test_table", con=sqlite_engine, index=True)
             sqlite_engine.execute(
                 "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
             )
@@ -3890,13 +4323,13 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(sa):
     if sa is None:
         raise ValueError("SQL Database tests require sqlalchemy to be installed.")
 
-    db_file = file_relative_path(
+    db_file_path: str = file_relative_path(
         __file__,
         os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
     )
 
-    engine = sa.create_engine(f"sqlite:////{db_file}")
-    conn = engine.connect()
+    engine: sa.engine.Engine = sa.create_engine(get_sqlite_connection_url(db_file_path))
+    conn: sa.engine.Connection = engine.connect()
 
     # Build a SqlAlchemyDataset using that database
     return SqlAlchemyExecutionEngine(
@@ -3942,8 +4375,8 @@ def test_db_connection_string(tmp_path_factory, test_backends):
         basepath = str(tmp_path_factory.mktemp("db_context"))
         path = os.path.join(basepath, "test.db")
         engine = sa.create_engine("sqlite:///" + str(path))
-        df1.to_sql("table_1", con=engine, index=True)
-        df2.to_sql("table_2", con=engine, index=True, schema="main")
+        df1.to_sql(name="table_1", con=engine, index=True)
+        df2.to_sql(name="table_2", con=engine, index=True, schema="main")
 
         # Return a connection string to this newly-created db
         return "sqlite:///" + str(path)
@@ -4042,29 +4475,120 @@ SELECT EXISTS (
 """
     ).fetchall()
     if table_check_results != [(True,)]:
-        test_df.to_sql("test_df", con=engine, index=True, schema="connection_test")
+        test_df.to_sql(name="test_df", con=engine, index=True, schema="connection_test")
 
     # Return a connection string to this newly-created db
     return engine
 
 
 @pytest.fixture
-def data_context_with_sql_datasource_for_testing_get_batch(sa, empty_data_context):
-    context = empty_data_context
+def data_context_with_sql_data_connectors_including_schema_for_testing_get_batch(
+    sa,
+    empty_data_context,
+    test_db_connection_string,
+):
+    context: DataContext = empty_data_context
 
-    db_file = file_relative_path(
+    sqlite_engine: sa.engine.base.Engine = sa.create_engine(test_db_connection_string)
+    # noinspection PyUnusedLocal
+    conn: sa.engine.base.Connection = sqlite_engine.connect()
+    datasource_config: str = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: SqlAlchemyExecutionEngine
+            connection_string: {test_db_connection_string}
+
+        data_connectors:
+            my_runtime_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: RuntimeDataConnector
+                batch_identifiers:
+                    - pipeline_stage_name
+                    - airflow_run_id
+            my_inferred_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: InferredAssetSqlDataConnector
+                include_schema_name: true
+            my_configured_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: ConfiguredAssetSqlDataConnector
+                assets:
+                    my_first_data_asset:
+                        table_name: table_1
+                    my_second_data_asset:
+                        schema_name: main
+                        table_name: table_2
+                    table_1: {{}}
+                    table_2:
+                        schema_name: main
+    """
+
+    try:
+        # noinspection PyUnusedLocal
+        my_sql_datasource: Optional[
+            Union[SimpleSqlalchemyDatasource, LegacyDatasource]
+        ] = context.add_datasource(
+            "test_sqlite_db_datasource", **yaml.load(datasource_config)
+        )
+    except AttributeError:
+        pytest.skip("SQL Database tests require sqlalchemy to be installed.")
+
+    return context
+
+
+@pytest.fixture
+def data_context_with_runtime_sql_datasource_for_testing_get_batch(
+    sa,
+    empty_data_context,
+):
+    context: DataContext = empty_data_context
+    db_file_path: str = file_relative_path(
         __file__,
-        "test_sets/test_cases_for_sql_data_connector.db",
+        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
     )
 
-    config = yaml.load(
-        f"""
+    datasource_config: str = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: SqlAlchemyExecutionEngine
+            connection_string: sqlite:///{db_file_path}
+
+        data_connectors:
+            my_runtime_data_connector:
+                module_name: great_expectations.datasource.data_connector
+                class_name: RuntimeDataConnector
+                batch_identifiers:
+                    - pipeline_stage_name
+                    - airflow_run_id
+    """
+
+    context.test_yaml_config(
+        name="my_runtime_sql_datasource", yaml_config=datasource_config
+    )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+    return context
+
+
+@pytest.fixture
+def data_context_with_simple_sql_datasource_for_testing_get_batch(
+    sa, empty_data_context
+):
+    context: DataContext = empty_data_context
+
+    db_file_path: str = file_relative_path(
+        __file__,
+        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+    datasource_config: str = f"""
 class_name: SimpleSqlalchemyDatasource
-connection_string: sqlite:///{db_file}
-"""
-        + """
+connection_string: sqlite:///{db_file_path}
 introspection:
-    whole_table: {}
+    whole_table: {{}}
 
     daily:
         splitter_method: _split_on_converted_datetime
@@ -4083,11 +4607,10 @@ introspection:
         splitter_kwargs:
             column_name: id
             divisor: 12
-""",
-    )
+"""
 
     try:
-        context.add_datasource("my_sqlite_db", **config)
+        context.add_datasource("my_sqlite_db", **yaml.load(datasource_config))
     except AttributeError:
         pytest.skip("SQL Database tests require sqlalchemy to be installed.")
 
@@ -4165,10 +4688,10 @@ data_connectors:
     test_runtime_data_connector:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
-        runtime_keys:
-        - pipeline_stage_name
-        - airflow_run_id
-        - custom_key_0
+        batch_identifiers:
+            - pipeline_stage_name
+            - airflow_run_id
+            - custom_key_0
 
 execution_engine:
     class_name: PandasExecutionEngine
@@ -4184,3 +4707,2245 @@ execution_engine:
     )
 
     return basic_datasource
+
+
+@pytest.fixture(scope="function")
+def misc_directory(tmp_path):
+    misc_dir = tmp_path / "random"
+    misc_dir.mkdir()
+    assert os.path.isabs(misc_dir)
+    return misc_dir
+
+
+@pytest.fixture()
+def yellow_trip_pandas_data_context(
+    tmp_path_factory,
+    monkeypatch,
+) -> DataContext:
+    """
+    Provides a data context with a data_connector for a pandas datasource which can connect to three months of
+    yellow trip taxi data in csv form. This data connector enables access to all three months through a BatchRequest
+    where the "year" in batch_filter_parameters is set to "2019", or to individual months if the "month" in
+    batch_filter_parameters is set to "01", "02", or "03"
+    """
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path: str = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "integration",
+                "fixtures",
+                "yellow_tripdata_pandas_fixture",
+                "great_expectations",
+                "great_expectations.yml",
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "test_sets",
+                "taxi_yellow_tripdata_samples",
+                "yellow_tripdata_sample_2019-01.csv",
+            ),
+        ),
+        str(
+            os.path.join(
+                context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "test_sets",
+                "taxi_yellow_tripdata_samples",
+                "yellow_tripdata_sample_2019-02.csv",
+            ),
+        ),
+        str(
+            os.path.join(
+                context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "test_sets",
+                "taxi_yellow_tripdata_samples",
+                "yellow_tripdata_sample_2019-03.csv",
+            ),
+        ),
+        str(
+            os.path.join(
+                context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
+            )
+        ),
+    )
+
+    context: DataContext = DataContext(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    return context
+
+
+@pytest.fixture
+def db_file():
+    return file_relative_path(
+        __file__,
+        os.path.join("test_sets", "test_cases_for_sql_data_connector.db"),
+    )
+
+
+@pytest.fixture
+def data_context_with_datasource_pandas_engine(empty_data_context):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def data_context_with_datasource_spark_engine(empty_data_context, spark_session):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SparkDFExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def data_context_with_datasource_spark_engine_batch_spec_passthrough(
+    empty_data_context, spark_session
+):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SparkDFExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+            batch_spec_passthrough:
+                reader_method: csv
+                reader_options:
+                    header: True
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def data_context_with_datasource_sqlalchemy_engine(empty_data_context, db_file):
+    context = empty_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: sqlite:///{db_file}
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def ge_cloud_base_url():
+    return "https://app.test.greatexpectations.io"
+
+
+@pytest.fixture
+def ge_cloud_organization_id():
+    return "bd20fead-2c31-4392-bcd1-f1e87ad5a79c"
+
+
+@pytest.fixture
+def ge_cloud_access_token():
+    return "6bb5b6f5c7794892a4ca168c65c2603e"
+
+
+@pytest.fixture
+def ge_cloud_config(ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token):
+    return GeCloudConfig(
+        base_url=ge_cloud_base_url,
+        organization_id=ge_cloud_organization_id,
+        access_token=ge_cloud_access_token,
+    )
+
+
+@pytest.fixture(scope="function")
+def empty_ge_cloud_data_context_config(
+    ge_cloud_base_url, ge_cloud_organization_id, ge_cloud_access_token
+):
+    config_yaml_str = f"""
+stores:
+  default_evaluation_parameter_store:
+    class_name: EvaluationParameterStore
+
+  default_expectations_store:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: GeCloudStoreBackend
+      ge_cloud_base_url: {ge_cloud_base_url}
+      ge_cloud_resource_type: expectation_suite
+      ge_cloud_credentials:
+        access_token: {ge_cloud_access_token}
+        organization_id: {ge_cloud_organization_id}
+      suppress_store_backend_id: True
+
+  default_validations_store:
+    class_name: ValidationsStore
+    store_backend:
+      class_name: GeCloudStoreBackend
+      ge_cloud_base_url: {ge_cloud_base_url}
+      ge_cloud_resource_type: suite_validation_result
+      ge_cloud_credentials:
+        access_token: {ge_cloud_access_token}
+        organization_id: {ge_cloud_organization_id}
+      suppress_store_backend_id: True
+
+  default_checkpoint_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: GeCloudStoreBackend
+      ge_cloud_base_url: {ge_cloud_base_url}
+      ge_cloud_resource_type: contract
+      ge_cloud_credentials:
+        access_token: {ge_cloud_access_token}
+        organization_id: {ge_cloud_organization_id}
+      suppress_store_backend_id: True
+
+evaluation_parameter_store_name: default_evaluation_parameter_store
+expectations_store_name: default_expectations_store
+validations_store_name: default_validations_store
+checkpoint_store_name: default_checkpoint_store
+"""
+    data_context_config_dict = yaml.load(config_yaml_str)
+    return DataContextConfig(**data_context_config_dict)
+
+
+@pytest.fixture(scope="function")
+def empty_cloud_data_context(
+    tmp_path, empty_ge_cloud_data_context_config, ge_cloud_config
+) -> DataContext:
+    project_path = tmp_path / "empty_data_context"
+    project_path.mkdir()
+    project_path = str(project_path)
+
+    context = ge.data_context.BaseDataContext(
+        project_config=empty_ge_cloud_data_context_config,
+        context_root_dir=project_path,
+        ge_cloud_mode=True,
+        ge_cloud_config=ge_cloud_config,
+    )
+    assert context.list_datasources() == []
+    return context
+
+
+@pytest.fixture
+def cloud_data_context_with_datasource_pandas_engine(empty_cloud_data_context):
+    context = empty_cloud_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture
+def cloud_data_context_with_datasource_sqlalchemy_engine(
+    empty_cloud_data_context, db_file
+):
+    context = empty_cloud_data_context
+    config = yaml.load(
+        f"""
+    class_name: Datasource
+    execution_engine:
+        class_name: SqlAlchemyExecutionEngine
+        connection_string: sqlite:///{db_file}
+    data_connectors:
+        default_runtime_data_connector_name:
+            class_name: RuntimeDataConnector
+            batch_identifiers:
+                - default_identifier_name
+        """,
+    )
+    context.add_datasource(
+        "my_datasource",
+        **config,
+    )
+    return context
+
+
+@pytest.fixture(scope="function")
+def profiler_name() -> str:
+    skip_if_python_below_minimum_version()
+
+    return "my_first_profiler"
+
+
+@pytest.fixture(scope="function")
+def profiler_store_name() -> str:
+    skip_if_python_below_minimum_version()
+
+    return "profiler_store"
+
+
+@pytest.fixture(scope="function")
+def profiler_config_with_placeholder_args(
+    profiler_name: str,
+) -> RuleBasedProfilerConfig:
+    """
+    This fixture does not correspond to a practical profiler with rules, whose constituent components perform meaningful
+    computations; rather, it uses "placeholder" style attribute values, which is adequate for configuration level tests.
+    """
+    skip_if_python_below_minimum_version()
+
+    return RuleBasedProfilerConfig(
+        name=profiler_name,
+        config_version=1.0,
+        variables={
+            "false_positive_threshold": 1.0e-2,
+        },
+        rules={
+            "rule_1": {
+                "domain_builder": {
+                    "class_name": "TableDomainBuilder",
+                },
+                "parameter_builders": [
+                    {
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                        "name": "my_parameter",
+                        "metric_name": "my_metric",
+                    },
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    },
+                ],
+            },
+        },
+    )
+
+
+@pytest.fixture
+def empty_profiler_store(profiler_store_name: str) -> ProfilerStore:
+    skip_if_python_below_minimum_version()
+
+    return ProfilerStore(profiler_store_name)
+
+
+@pytest.fixture
+def profiler_key(profiler_name: str) -> ConfigurationIdentifier:
+    skip_if_python_below_minimum_version()
+
+    return ConfigurationIdentifier(configuration_key=profiler_name)
+
+
+@pytest.fixture
+def ge_cloud_profiler_id() -> str:
+    skip_if_python_below_minimum_version()
+
+    return "my_ge_cloud_profiler_id"
+
+
+@pytest.fixture
+def ge_cloud_profiler_key(ge_cloud_profiler_id: str) -> GeCloudIdentifier:
+    skip_if_python_below_minimum_version()
+
+    return GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_profiler_id)
+
+
+@pytest.fixture
+def populated_profiler_store(
+    empty_profiler_store: ProfilerStore,
+    profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
+    profiler_key: ConfigurationIdentifier,
+) -> ProfilerStore:
+    skip_if_python_below_minimum_version()
+
+    profiler_store = empty_profiler_store
+    profiler_store.set(key=profiler_key, value=profiler_config_with_placeholder_args)
+    return profiler_store
+
+
+@pytest.fixture
+@freeze_time("09/26/2019 13:42:41")
+def alice_columnar_table_single_batch(empty_data_context):
+    """
+    About the "Alice" User Workflow Fixture
+
+    Alice has a single table of columnar data called user_events (DataAsset) that she wants to check periodically as new
+    data is added.
+
+      - She knows what some of the columns mean, but not all - and there are MANY of them (only a subset currently shown
+        in examples and fixtures).
+
+      - She has organized other tables similarly so that for example column name suffixes indicate which are for user
+        ids (_id) and which timestamps are for versioning (_ts).
+
+    She wants to use a configurable profiler to generate a description (ExpectationSuite) about table so that she can:
+
+        1. use it to validate the user_events table periodically and set up alerts for when things change
+
+        2. have a place to add her domain knowledge of the data (that can also be validated against new data)
+
+        3. if all goes well, generalize some of the Profiler to use on her other tables
+
+    Alice configures her Profiler using the YAML configurations and data file locations captured in this fixture.
+    """
+    skip_if_python_below_minimum_version()
+
+    verbose_profiler_config_file_path: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "test_fixtures",
+            "rule_based_profiler",
+            "alice_user_workflow_verbose_profiler_config.yml",
+        ),
+    )
+
+    verbose_profiler_config: str
+    with open(verbose_profiler_config_file_path) as f:
+        verbose_profiler_config = f.read()
+
+    my_rule_for_user_ids_expectation_configurations: List[ExpectationConfiguration] = [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_be_of_type",
+                "kwargs": {
+                    "column": "user_id",
+                    "type_": "INTEGER",
+                },
+                "meta": {},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_be_between",
+                "kwargs": {
+                    "min_value": 397433,  # From the data
+                    "max_value": 999999999999,
+                    "column": "user_id",
+                },
+                "meta": {},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_not_be_null",
+                "kwargs": {
+                    "column": "user_id",
+                },
+                "meta": {},
+            }
+        ),
+    ]
+
+    event_ts_column_data: Dict[str, str] = {
+        "column_name": "event_ts",
+        "observed_max_time_str": "2004-10-19 11:05:20",
+        "observed_strftime_format": "%Y-%m-%d %H:%M:%S",
+    }
+
+    my_rule_for_timestamps_column_data: List[Dict[str, str]] = [
+        event_ts_column_data,
+        {
+            "column_name": "server_ts",
+            "observed_max_time_str": "2004-10-19 11:05:20",
+        },
+        {
+            "column_name": "device_ts",
+            "observed_max_time_str": "2004-10-19 11:05:22",
+        },
+    ]
+    my_rule_for_timestamps_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = []
+    column_data: Dict[str, str]
+    for column_data in my_rule_for_timestamps_column_data:
+        my_rule_for_timestamps_expectation_configurations.extend(
+            [
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_be_of_type",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "type_": "TIMESTAMP",
+                        },
+                        "meta": {},
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_be_increasing",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                        },
+                        "meta": {},
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_be_dateutil_parseable",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                        },
+                        "meta": {},
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_min_to_be_between",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "min_value": "2004-10-19T10:23:54",  # From variables
+                            "max_value": "2004-10-19T10:23:54",  # From variables
+                        },
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
+                                ],
+                            }
+                        },
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_max_to_be_between",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "min_value": "2004-10-19T10:23:54",  # From variables
+                            "max_value": event_ts_column_data[
+                                "observed_max_time_str"
+                            ],  # Pin to event_ts column
+                        },
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
+                                ],
+                            }
+                        },
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_match_strftime_format",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "strftime_format": {
+                                "value": event_ts_column_data[
+                                    "observed_strftime_format"
+                                ],  # Pin to event_ts column
+                                "details": {"success_ratio": 1.0},
+                            },
+                        },
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                                ],
+                            }
+                        },
+                    }
+                ),
+            ]
+        )
+
+    expectation_configurations: List[ExpectationConfiguration] = []
+
+    expectation_configurations.extend(my_rule_for_user_ids_expectation_configurations)
+    expectation_configurations.extend(my_rule_for_timestamps_expectation_configurations)
+
+    expectation_suite_name: str = "alice_columnar_table_single_batch"
+    expected_expectation_suite: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name, data_context=empty_data_context
+    )
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in expectation_configurations:
+        # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
+        # called within a fixture, and we will prevent it from sending a usage_event by calling the private method
+        # _add_expectation().
+        expected_expectation_suite._add_expectation(
+            expectation_configuration=expectation_configuration, send_usage_event=False
+        )
+
+    # NOTE that this expectation suite should fail when validated on the data in "sample_data_relative_path"
+    # because the device_ts is ahead of the event_ts for the latest event
+    sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
+
+    profiler_config: dict = yaml.load(verbose_profiler_config)
+
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
+    expected_expectation_suite.add_citation(
+        comment="Suite created by Rule-Based Profiler with the configuration included.",
+        profiler_config=serialized_config,
+    )
+
+    return {
+        "profiler_config": verbose_profiler_config,
+        "expected_expectation_suite_name": expectation_suite_name,
+        "expected_expectation_suite": expected_expectation_suite,
+        "sample_data_relative_path": sample_data_relative_path,
+    }
+
+
+@pytest.fixture
+def alice_columnar_table_single_batch_context(
+    monkeypatch,
+    empty_data_context,
+    alice_columnar_table_single_batch,
+):
+    skip_if_python_below_minimum_version()
+
+    context: DataContext = empty_data_context
+    monkeypatch.chdir(context.root_directory)
+    data_relative_path: str = "../data"
+    data_path: str = os.path.join(context.root_directory, data_relative_path)
+    os.makedirs(data_path, exist_ok=True)
+
+    # Copy data
+    filename: str = alice_columnar_table_single_batch["sample_data_relative_path"]
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "test_sets",
+                f"{filename}",
+            ),
+        ),
+        str(os.path.join(data_path, filename)),
+    )
+
+    data_connector_base_directory: str = "./"
+    monkeypatch.setenv("base_directory", data_connector_base_directory)
+    monkeypatch.setenv("data_fixtures_root", data_relative_path)
+
+    datasource_name: str = "alice_columnar_table_single_batch_datasource"
+    data_connector_name: str = "alice_columnar_table_single_batch_data_connector"
+    data_asset_name: str = "alice_columnar_table_single_batch_data_asset"
+    datasource_config: str = rf"""
+class_name: Datasource
+module_name: great_expectations.datasource
+execution_engine:
+  module_name: great_expectations.execution_engine
+  class_name: PandasExecutionEngine
+data_connectors:
+  {data_connector_name}:
+    class_name: ConfiguredAssetFilesystemDataConnector
+    assets:
+      {data_asset_name}:
+        module_name: great_expectations.datasource.data_connector.asset
+        group_names:
+          - filename
+        pattern: (.*)\.csv
+        reader_options:
+          delimiter: ","
+        class_name: Asset
+        base_directory: ${{data_fixtures_root}}
+        glob_directive: "*.csv"
+    base_directory: ${{base_directory}}
+    module_name: great_expectations.datasource.data_connector
+        """
+
+    context.add_datasource(name=datasource_name, **yaml.load(datasource_config))
+
+    assert context.list_datasources() == [
+        {
+            "class_name": "Datasource",
+            "data_connectors": {
+                data_connector_name: {
+                    "assets": {
+                        data_asset_name: {
+                            "base_directory": data_relative_path,
+                            "class_name": "Asset",
+                            "glob_directive": "*.csv",
+                            "group_names": ["filename"],
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                            "pattern": "(.*)\\.csv",
+                        }
+                    },
+                    "base_directory": data_connector_base_directory,
+                    "class_name": "ConfiguredAssetFilesystemDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
+                },
+            },
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "module_name": "great_expectations.datasource",
+            "name": datasource_name,
+        }
+    ]
+    return context
+
+
+@pytest.fixture
+@freeze_time("09/26/2019 13:42:41")
+def bobby_columnar_table_multi_batch(empty_data_context):
+    """
+    About the "Bobby" User Workflow Fixture
+    Bobby has multiple tables of columnar data called user_events (DataAsset) that he wants to check periodically as new
+    data is added.
+      - He knows what some of the columns are of the accounting/financial/account type.
+    He wants to use a configurable profiler to generate a description (ExpectationSuite) about tables so that he can:
+        1. monitor the average number of rows in the tables
+        2. use it to validate min/max boundaries of all columns are of the accounting/financial/account type and set up
+           alerts for when things change
+        3. have a place to add his domain knowledge of the data (that can also be validated against new data)
+        4. if all goes well, generalize some of the Profiler to use on his other tables
+    Bobby uses a crude, highly inaccurate deterministic parametric estimator -- for illustrative purposes.
+    Bobby configures his Profiler using the YAML configurations and data file locations captured in this fixture.
+    """
+    skip_if_python_below_minimum_version()
+
+    verbose_profiler_config_file_path: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "test_fixtures",
+            "rule_based_profiler",
+            "bobby_user_workflow_verbose_profiler_config.yml",
+        ),
+    )
+
+    verbose_profiler_config: str
+    with open(verbose_profiler_config_file_path) as f:
+        verbose_profiler_config = f.read()
+
+    my_row_count_range_rule_expectation_configurations_oneshot_sampling_method: List[
+        ExpectationConfiguration
+    ] = [
+        ExpectationConfiguration(
+            **{
+                "kwargs": {"min_value": 7505, "max_value": 8495},
+                "expectation_type": "expect_table_row_count_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "table.row_count",
+                            "domain_kwargs": {},
+                        },
+                        "num_batches": 2,
+                    },
+                },
+            },
+        ),
+    ]
+
+    my_column_ranges_rule_expectation_configurations_oneshot_sampling_method: List[
+        ExpectationConfiguration
+    ] = [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "VendorID"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "VendorID",
+                    "min_value": 1,
+                    "max_value": 1,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "VendorID"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "VendorID",
+                    "min_value": 4,
+                    "max_value": 4,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "passenger_count"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "passenger_count",
+                    "min_value": 0,
+                    "max_value": 1,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "passenger_count"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "passenger_count",
+                    "min_value": 6,
+                    "max_value": 6,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "trip_distance"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "trip_distance",
+                    "min_value": 0.0,
+                    "max_value": 0.0,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "trip_distance"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "trip_distance",
+                    "min_value": 37.62,
+                    "max_value": 57.85,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "RatecodeID"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "RatecodeID",
+                    "min_value": 1,
+                    "max_value": 1,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "RatecodeID"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "RatecodeID",
+                    "min_value": 5,
+                    "max_value": 6,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "PULocationID"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "PULocationID",
+                    "min_value": 1,
+                    "max_value": 1,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "PULocationID"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "PULocationID",
+                    "min_value": 265,
+                    "max_value": 265,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "DOLocationID"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "DOLocationID",
+                    "min_value": 1,
+                    "max_value": 1,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "DOLocationID"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "DOLocationID",
+                    "min_value": 265,
+                    "max_value": 265,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "payment_type"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "payment_type",
+                    "min_value": 1,
+                    "max_value": 1,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "payment_type"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "payment_type",
+                    "min_value": 4,
+                    "max_value": 4,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "fare_amount"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "fare_amount",
+                    "min_value": -51.84,
+                    "max_value": -21.16,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "fare_amount"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "fare_amount",
+                    "min_value": 228.94,
+                    "max_value": 2990.05,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "extra"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "extra",
+                    "min_value": -36.53,
+                    "max_value": -1.18,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "extra"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "extra",
+                    "min_value": 4.51,
+                    "max_value": 6.99,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "mta_tax"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "mta_tax",
+                    "min_value": -0.5,
+                    "max_value": -0.5,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "mta_tax"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "mta_tax",
+                    "min_value": 0.69,
+                    "max_value": 37.32,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "tip_amount"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "tip_amount",
+                    "min_value": 0.0,
+                    "max_value": 0.0,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "tip_amount"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "tip_amount",
+                    "min_value": 46.84,
+                    "max_value": 74.86,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "tolls_amount"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "tolls_amount",
+                    "min_value": 0.0,
+                    "max_value": 0.0,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "tolls_amount"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "tolls_amount",
+                    "min_value": 26.4,
+                    "max_value": 497.67,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "improvement_surcharge"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "improvement_surcharge",
+                    "min_value": -0.3,
+                    "max_value": -0.3,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "improvement_surcharge"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "improvement_surcharge",
+                    "min_value": 0.3,
+                    "max_value": 0.3,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "total_amount"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "total_amount",
+                    "min_value": -52.66,
+                    "max_value": -24.44,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "total_amount"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "total_amount",
+                    "min_value": 550.18,
+                    "max_value": 2992.47,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_min_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.min",
+                            "domain_kwargs": {"column": "congestion_surcharge"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "congestion_surcharge",
+                    "min_value": -2.49,
+                    "max_value": -0.01,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_max_to_be_between",
+                "meta": {
+                    "profiler_details": {
+                        "metric_configuration": {
+                            "metric_name": "column.max",
+                            "domain_kwargs": {"column": "congestion_surcharge"},
+                        },
+                        "num_batches": 2,
+                    }
+                },
+                "kwargs": {
+                    "column": "congestion_surcharge",
+                    "min_value": 0.01,
+                    "max_value": 2.49,
+                    "mostly": 1.0,
+                },
+            },
+        ),
+    ]
+
+    my_column_timestamps_rule_expectation_configurations_oneshot_sampling_method: List[
+        ExpectationConfiguration
+    ] = [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_strftime_format",
+                "kwargs": {
+                    "column": "pickup_datetime",
+                    "strftime_format": {
+                        "value": "%Y-%m-%d %H:%M:%S",
+                        "details": {"success_ratio": 1.0},
+                    },
+                },
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                        ],
+                    }
+                },
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_match_strftime_format",
+                "kwargs": {
+                    "column": "dropoff_datetime",
+                    "strftime_format": {
+                        "value": "%Y-%m-%d %H:%M:%S",
+                        "details": {"success_ratio": 1.0},
+                    },
+                },
+                "meta": {
+                    "notes": {
+                        "format": "markdown",
+                        "content": [
+                            "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                        ],
+                    }
+                },
+            }
+        ),
+    ]
+
+    expectation_configurations: List[ExpectationConfiguration] = []
+
+    expectation_configurations.extend(
+        my_row_count_range_rule_expectation_configurations_oneshot_sampling_method
+    )
+    expectation_configurations.extend(
+        my_column_ranges_rule_expectation_configurations_oneshot_sampling_method
+    )
+    expectation_configurations.extend(
+        my_column_timestamps_rule_expectation_configurations_oneshot_sampling_method
+    )
+
+    expectation_suite_name_oneshot_sampling_method: str = (
+        "bobby_columnar_table_multi_batch_oneshot_sampling_method"
+    )
+    expected_expectation_suite_oneshot_sampling_method: ExpectationSuite = (
+        ExpectationSuite(
+            expectation_suite_name=expectation_suite_name_oneshot_sampling_method,
+            data_context=empty_data_context,
+        )
+    )
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in expectation_configurations:
+        # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
+        # called within a fixture, and we will prevent it from sending a usage_event by calling the private method.
+        expected_expectation_suite_oneshot_sampling_method._add_expectation(
+            expectation_configuration=expectation_configuration, send_usage_event=False
+        )
+
+    profiler_config: dict = yaml.load(verbose_profiler_config)
+
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
+
+    expected_expectation_suite_oneshot_sampling_method.add_citation(
+        comment="Suite created by Rule-Based Profiler with the configuration included.",
+        profiler_config=serialized_config,
+    )
+
+    return {
+        "profiler_config": verbose_profiler_config,
+        "test_configuration_oneshot_sampling_method": {
+            "expectation_suite_name": expectation_suite_name_oneshot_sampling_method,
+            "expected_expectation_suite": expected_expectation_suite_oneshot_sampling_method,
+        },
+    }
+
+
+@pytest.fixture
+def bobby_columnar_table_multi_batch_deterministic_data_context(
+    tmp_path_factory,
+    monkeypatch,
+) -> DataContext:
+    skip_if_python_below_minimum_version()
+
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path: str = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "integration",
+                "fixtures",
+                "yellow_tripdata_pandas_fixture",
+                "great_expectations",
+                "great_expectations.yml",
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "test_sets",
+                "taxi_yellow_tripdata_samples",
+                "random_subsamples",
+                "yellow_tripdata_7500_lines_sample_2019-01.csv",
+            ),
+        ),
+        str(
+            os.path.join(
+                context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "test_sets",
+                "taxi_yellow_tripdata_samples",
+                "random_subsamples",
+                "yellow_tripdata_8500_lines_sample_2019-02.csv",
+            ),
+        ),
+        str(
+            os.path.join(
+                context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "test_sets",
+                "taxi_yellow_tripdata_samples",
+                "random_subsamples",
+                "yellow_tripdata_9000_lines_sample_2019-03.csv",
+            ),
+        ),
+        str(
+            os.path.join(
+                context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
+            )
+        ),
+    )
+
+    context: DataContext = DataContext(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    return context
+
+
+@pytest.fixture
+def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
+    """
+    About the "Bobster" User Workflow Fixture
+
+    Bobster has multiple tables of columnar data called user_events (DataAsset) that he wants to check periodically as
+    new data is added.
+
+      - He knows what some of the columns are of the acconting/financial/account type, but he is currently interested in
+        the average table size (in terms of the number of rows in a table).
+
+    He wants to use a configurable profiler to generate a description (ExpectationSuite) about tables so that he can:
+
+        1. monitor the average number of rows in the tables
+
+        2. have a place to add his domain knowledge of the data (that can also be validated against new data)
+
+        3. if all goes well, generalize some of the Profiler to use on his other tables
+
+    Bobster uses a custom implementation of the "bootstrap" non-parametric (i.e, data-driven) statistical estimator.
+
+    Bobster configures his Profiler using the YAML configurations and data file locations captured in this fixture.
+    """
+    skip_if_python_below_minimum_version()
+
+    verbose_profiler_config_file_path: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "test_fixtures",
+            "rule_based_profiler",
+            "bobster_user_workflow_verbose_profiler_config.yml",
+        ),
+    )
+
+    verbose_profiler_config: str
+    with open(verbose_profiler_config_file_path) as f:
+        verbose_profiler_config = f.read()
+
+    expectation_suite_name_bootstrap_sampling_method: str = (
+        "bobby_columnar_table_multi_batch_bootstrap_sampling_method"
+    )
+
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value: int = (
+        5000
+    )
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value: float = (
+        1.0e3
+    )
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds: float = (
+        3.00
+    )
+
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value: int = round(
+        float(
+            my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
+        )
+        - (
+            my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds
+            * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
+        )
+    )
+
+    my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value: int = round(
+        float(
+            my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value
+        )
+        + (
+            my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_num_stds
+            * my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_std_value
+        )
+    )
+
+    return {
+        "profiler_config": verbose_profiler_config,
+        "test_configuration_bootstrap_sampling_method": {
+            "expectation_suite_name": expectation_suite_name_bootstrap_sampling_method,
+            "expect_table_row_count_to_be_between_mean_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_mean_value,
+            "expect_table_row_count_to_be_between_min_value_mean_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_min_value_mean_value,
+            "expect_table_row_count_to_be_between_max_value_mean_value": my_row_count_range_rule_expect_table_row_count_to_be_between_expectation_max_value_mean_value,
+        },
+    }
+
+
+@pytest.fixture
+def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
+    tmp_path_factory,
+    monkeypatch,
+) -> DataContext:
+    """
+    This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
+    of a batch sampled from a normal distribution with the mean of 5,000 rows and the standard deviation of 1,000 rows.
+    """
+    skip_if_python_below_minimum_version()
+
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path: str = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "integration",
+                "fixtures",
+                "yellow_tripdata_pandas_fixture",
+                "great_expectations",
+                "great_expectations.yml",
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    base_directory: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+        ),
+    )
+    file_name_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
+        base_directory_path=base_directory, glob_directive="*.csv"
+    )
+    file_name_list = sorted(file_name_list)
+    num_files: int = len(file_name_list)
+
+    rnd_num_sample: np.float64
+    output_file_lenths: List[int] = [
+        round(rnd_num_sample)
+        for rnd_num_sample in np.random.normal(loc=5.0e3, scale=1.0e3, size=num_files)
+    ]
+
+    idx: int
+    file_name: str
+
+    output_file_name_length_map: Dict[str, int] = {
+        file_name_list[idx]: output_file_lenths[idx]
+        for idx, file_name in enumerate(file_name_list)
+    }
+
+    csv_source_path: str
+    df: pd.DataFrame
+    for file_name in file_name_list:
+        csv_source_path = os.path.join(base_directory, file_name)
+        df = pd.read_csv(filepath_or_buffer=csv_source_path)
+        df = df.sample(
+            n=output_file_name_length_map[file_name], replace=False, random_state=1
+        )
+        # noinspection PyTypeChecker
+        df.to_csv(
+            path_or_buf=os.path.join(context_path, "..", "data", file_name), index=False
+        )
+
+    context: DataContext = DataContext(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    return context
+
+
+@pytest.fixture
+@freeze_time("09/26/2019 13:42:41")
+def alice_columnar_table_single_batch(empty_data_context):
+    """
+    About the "Alice" User Workflow Fixture
+
+    Alice has a single table of columnar data called user_events (DataAsset) that she wants to check periodically as new
+    data is added.
+
+      - She knows what some of the columns mean, but not all - and there are MANY of them (only a subset currently shown
+        in examples and fixtures).
+
+      - She has organized other tables similarly so that for example column name suffixes indicate which are for user
+        ids (_id) and which timestamps are for versioning (_ts).
+
+    She wants to use a configurable profiler to generate a description (ExpectationSuite) about table so that she can:
+
+        1. use it to validate the user_events table periodically and set up alerts for when things change
+
+        2. have a place to add her domain knowledge of the data (that can also be validated against new data)
+
+        3. if all goes well, generalize some of the Profiler to use on her other tables
+
+    Alice configures her Profiler using the YAML configurations and data file locations captured in this fixture.
+    """
+    skip_if_python_below_minimum_version()
+
+    verbose_profiler_config_file_path: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "test_fixtures",
+            "rule_based_profiler",
+            "alice_user_workflow_verbose_profiler_config.yml",
+        ),
+    )
+
+    verbose_profiler_config: str
+    with open(verbose_profiler_config_file_path) as f:
+        verbose_profiler_config = f.read()
+
+    my_rule_for_user_ids_expectation_configurations: List[ExpectationConfiguration] = [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_be_of_type",
+                "kwargs": {
+                    "column": "user_id",
+                    "type_": "INTEGER",
+                },
+                "meta": {},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_be_between",
+                "kwargs": {
+                    "min_value": 397433,  # From the data
+                    "max_value": 999999999999,
+                    "column": "user_id",
+                },
+                "meta": {},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_not_be_null",
+                "kwargs": {
+                    "column": "user_id",
+                },
+                "meta": {},
+            }
+        ),
+    ]
+
+    event_ts_column_data: Dict[str, str] = {
+        "column_name": "event_ts",
+        "observed_max_time_str": "2004-10-19 11:05:20",
+        "observed_strftime_format": "%Y-%m-%d %H:%M:%S",
+    }
+
+    my_rule_for_timestamps_column_data: List[Dict[str, str]] = [
+        event_ts_column_data,
+        {
+            "column_name": "server_ts",
+            "observed_max_time_str": "2004-10-19 11:05:20",
+        },
+        {
+            "column_name": "device_ts",
+            "observed_max_time_str": "2004-10-19 11:05:22",
+        },
+    ]
+    my_rule_for_timestamps_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = []
+    column_data: Dict[str, str]
+    for column_data in my_rule_for_timestamps_column_data:
+        my_rule_for_timestamps_expectation_configurations.extend(
+            [
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_be_of_type",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "type_": "TIMESTAMP",
+                        },
+                        "meta": {},
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_be_increasing",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                        },
+                        "meta": {},
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_be_dateutil_parseable",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                        },
+                        "meta": {},
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_min_to_be_between",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "min_value": "2004-10-19T10:23:54",  # From variables
+                            "max_value": "2004-10-19T10:23:54",  # From variables
+                        },
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
+                                ],
+                            }
+                        },
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_max_to_be_between",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "min_value": "2004-10-19T10:23:54",  # From variables
+                            "max_value": event_ts_column_data[
+                                "observed_max_time_str"
+                            ],  # Pin to event_ts column
+                        },
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
+                                ],
+                            }
+                        },
+                    }
+                ),
+                ExpectationConfiguration(
+                    **{
+                        "expectation_type": "expect_column_values_to_match_strftime_format",
+                        "kwargs": {
+                            "column": column_data["column_name"],
+                            "strftime_format": {
+                                "value": event_ts_column_data[
+                                    "observed_strftime_format"
+                                ],  # Pin to event_ts column
+                                "details": {"success_ratio": 1.0},
+                            },
+                        },
+                        "meta": {
+                            "notes": {
+                                "format": "markdown",
+                                "content": [
+                                    "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+                                ],
+                            }
+                        },
+                    }
+                ),
+            ]
+        )
+
+    expectation_configurations: List[ExpectationConfiguration] = []
+
+    expectation_configurations.extend(my_rule_for_user_ids_expectation_configurations)
+    expectation_configurations.extend(my_rule_for_timestamps_expectation_configurations)
+
+    expectation_suite_name: str = "alice_columnar_table_single_batch"
+    expected_expectation_suite: ExpectationSuite = ExpectationSuite(
+        expectation_suite_name=expectation_suite_name, data_context=empty_data_context
+    )
+    expectation_configuration: ExpectationConfiguration
+    for expectation_configuration in expectation_configurations:
+        # NOTE Will 20211208 add_expectation() method, although being called by an ExpectationSuite instance, is being
+        # called within a fixture, and we will prevent it from sending a usage_event by calling the private method
+        # _add_expectation().
+        expected_expectation_suite._add_expectation(
+            expectation_configuration=expectation_configuration, send_usage_event=False
+        )
+
+    # NOTE that this expectation suite should fail when validated on the data in "sample_data_relative_path"
+    # because the device_ts is ahead of the event_ts for the latest event
+    sample_data_relative_path: str = "alice_columnar_table_single_batch_data.csv"
+
+    profiler_config: dict = yaml.load(verbose_profiler_config)
+
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
+    expected_expectation_suite.add_citation(
+        comment="Suite created by Rule-Based Profiler with the configuration included.",
+        profiler_config=serialized_config,
+    )
+
+    return {
+        "profiler_config": verbose_profiler_config,
+        "expected_expectation_suite_name": expectation_suite_name,
+        "expected_expectation_suite": expected_expectation_suite,
+        "sample_data_relative_path": sample_data_relative_path,
+    }
+
+
+@pytest.fixture
+def quentin_columnar_table_multi_batch():
+    """
+    About the "Quentin" User Workflow Fixture
+    Quentin has multiple tables of columnar data called user_events (DataAsset) that he wants to check periodically as
+    new data is added.
+      - He knows what some of the columns are of the accounting/financial/account type, but he is currently interested
+        in the range of quantiles of columns capturing financial quantities (column names ending on "_amount" suffix).
+    He wants to use a configurable profiler to generate a description (ExpectationSuite) about tables so that he can:
+        1. monitor the range of quantiles of columns capturing financial quantities in the tables
+        2. have a place to add his domain knowledge of the data (that can also be validated against new data)
+        3. if all goes well, generalize some of the Profiler to use on his other tables
+    Quentin uses a custom implementation of the "bootstrap" non-parametric (i.e, data-driven) statistical estimator.
+    Quentin configures his Profiler using the YAML configurations and data file locations captured in this fixture.
+    """
+    skip_if_python_below_minimum_version()
+
+    verbose_profiler_config_file_path: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "test_fixtures",
+            "rule_based_profiler",
+            "quentin_user_workflow_verbose_profiler_config.yml",
+        ),
+    )
+
+    verbose_profiler_config: str
+    with open(verbose_profiler_config_file_path) as f:
+        verbose_profiler_config = f.read()
+
+    expectation_suite_name_bootstrap_sampling_method: str = (
+        "quentin_columnar_table_multi_batch"
+    )
+
+    return {
+        "profiler_config": verbose_profiler_config,
+        "test_configuration": {
+            "expectation_suite_name": expectation_suite_name_bootstrap_sampling_method,
+            "expect_column_quantile_values_to_be_between_quantile_ranges_by_column": {
+                "tolls_amount": [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
+                "fare_amount": [
+                    [5.842754275, 6.5],
+                    [8.675167517, 9.661311131],
+                    [13.344354435, 15.815389039],
+                ],
+                "tip_amount": [
+                    [0.0, 0.0],
+                    [0.81269502, 1.97259736],
+                    [2.346049055, 2.993680968],
+                ],
+                "total_amount": [
+                    [8.2740033, 11.422183043],
+                    [11.358555106, 14.959993149],
+                    [16.746263451, 21.327684643],
+                ],
+            },
+        },
+    }
+
+
+@pytest.fixture
+def quentin_columnar_table_multi_batch_data_context(
+    tmp_path_factory,
+    monkeypatch,
+) -> DataContext:
+    """
+    This fixture generates three years' worth (36 months; i.e., 36 batches) of taxi trip data with the number of rows
+    of each batch being equal to the original number per log file (10,000 rows).
+    """
+    skip_if_python_below_minimum_version()
+
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    context_path: str = os.path.join(project_path, "great_expectations")
+    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
+    data_path: str = os.path.join(context_path, "..", "data")
+    os.makedirs(os.path.join(data_path), exist_ok=True)
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            os.path.join(
+                "integration",
+                "fixtures",
+                "yellow_tripdata_pandas_fixture",
+                "great_expectations",
+                "great_expectations.yml",
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),
+    )
+    base_directory: str = file_relative_path(
+        __file__,
+        os.path.join(
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+        ),
+    )
+    file_name_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
+        base_directory_path=base_directory, glob_directive="*.csv"
+    )
+    file_name_list = sorted(file_name_list)
+
+    file_name: str
+    csv_source_path: str
+    for file_name in file_name_list:
+        csv_source_path = os.path.join(base_directory, file_name)
+        shutil.copy(
+            csv_source_path,
+            os.path.join(context_path, "..", "data", file_name),
+        )
+
+    context: DataContext = DataContext(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    return context
+
+
+# TODO: AJB 20210525 This fixture is not yet used but may be helpful to generate batches for unit tests of multibatch
+#  workflows.  It should probably be extended to add different column types / data.
+@pytest.fixture
+def multibatch_generic_csv_generator():
+    """
+    Construct a series of csv files with many data types for use in multibatch testing
+    """
+    skip_if_python_below_minimum_version()
+
+    def _multibatch_generic_csv_generator(
+        data_path: str,
+        start_date: Optional[datetime.datetime] = None,
+        num_event_batches: Optional[int] = 20,
+        num_events_per_batch: Optional[int] = 5,
+    ) -> List[str]:
+
+        if start_date is None:
+            start_date = datetime.datetime(2000, 1, 1)
+
+        file_list = []
+        category_strings = {
+            0: "category0",
+            1: "category1",
+            2: "category2",
+            3: "category3",
+            4: "category4",
+            5: "category5",
+            6: "category6",
+        }
+        for batch_num in range(num_event_batches):
+            # generate a dataframe with multiple column types
+            batch_start_date = start_date + datetime.timedelta(
+                days=(batch_num * num_events_per_batch)
+            )
+            # TODO: AJB 20210416 Add more column types
+            df = pd.DataFrame(
+                {
+                    "event_date": [
+                        (batch_start_date + datetime.timedelta(days=i)).strftime(
+                            "%Y-%m-%d"
+                        )
+                        for i in range(num_events_per_batch)
+                    ],
+                    "batch_num": [batch_num + 1 for _ in range(num_events_per_batch)],
+                    "string_cardinality_3": [
+                        category_strings[i % 3] for i in range(num_events_per_batch)
+                    ],
+                }
+            )
+            filename = f"csv_batch_{batch_num + 1:03}_of_{num_event_batches:03}.csv"
+            file_list.append(filename)
+            # noinspection PyTypeChecker
+            df.to_csv(
+                os.path.join(data_path, filename),
+                index_label="intra_batch_index",
+            )
+
+        return file_list
+
+    return _multibatch_generic_csv_generator
+
+
+@pytest.fixture
+def multibatch_generic_csv_generator_context(monkeypatch, empty_data_context):
+    skip_if_python_below_minimum_version()
+
+    context: DataContext = empty_data_context
+    monkeypatch.chdir(context.root_directory)
+    data_relative_path = "../data"
+    data_path = os.path.join(context.root_directory, data_relative_path)
+    os.makedirs(data_path, exist_ok=True)
+
+    data_connector_base_directory = "./"
+    monkeypatch.setenv("base_directory", data_connector_base_directory)
+    monkeypatch.setenv("data_fixtures_root", data_relative_path)
+
+    datasource_name = "generic_csv_generator"
+    data_connector_name = "daily_data_connector"
+    asset_name = "daily_data_asset"
+    datasource_config = rf"""
+class_name: Datasource
+module_name: great_expectations.datasource
+execution_engine:
+  module_name: great_expectations.execution_engine
+  class_name: PandasExecutionEngine
+data_connectors:
+  {data_connector_name}:
+    class_name: ConfiguredAssetFilesystemDataConnector
+    assets:
+      {asset_name}:
+        module_name: great_expectations.datasource.data_connector.asset
+        group_names:
+          - batch_num
+          - total_batches
+        pattern: csv_batch_(\d.+)_of_(\d.+)\.csv
+        reader_options:
+          delimiter: ","
+        class_name: Asset
+        base_directory: $data_fixtures_root
+        glob_directive: "*.csv"
+    base_directory: $base_directory
+    module_name: great_expectations.datasource.data_connector
+        """
+
+    context.add_datasource(name=datasource_name, **yaml.load(datasource_config))
+
+    assert context.list_datasources() == [
+        {
+            "class_name": "Datasource",
+            "data_connectors": {
+                data_connector_name: {
+                    "assets": {
+                        asset_name: {
+                            "base_directory": data_relative_path,
+                            "class_name": "Asset",
+                            "glob_directive": "*.csv",
+                            "group_names": ["batch_num", "total_batches"],
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                            "pattern": "csv_batch_(\\d.+)_of_(\\d.+)\\.csv",
+                        }
+                    },
+                    "base_directory": data_connector_base_directory,
+                    "class_name": "ConfiguredAssetFilesystemDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
+                }
+            },
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "module_name": "great_expectations.datasource",
+            "name": "generic_csv_generator",
+        }
+    ]
+    return context

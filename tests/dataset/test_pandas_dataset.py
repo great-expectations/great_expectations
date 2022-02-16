@@ -1,13 +1,19 @@
 import datetime
 import json
+from unittest import mock
 
 import pandas as pd
 import pytest
 
 import great_expectations as ge
+from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.profile import ColumnsExistProfiler
-from tests.test_utils import expectationSuiteSchema, expectationValidationResultSchema
+from great_expectations.self_check.util import (
+    expectationSuiteSchema,
+    expectationValidationResultSchema,
+)
 
 
 def test_expect_column_values_to_be_dateutil_parseable():
@@ -191,7 +197,7 @@ def test_expectation_decorator_summary_mode():
                     {"value": 7.0, "count": 2},
                     {"value": 6.0, "count": 1},
                 ],
-                "unexpected_percent": 30.0,
+                "unexpected_percent": 37.5,
                 "unexpected_percent_nonmissing": 37.5,
                 "partial_unexpected_list": [6.0, 7.0, 7.0],
                 "partial_unexpected_index_list": [5, 6, 7],
@@ -235,10 +241,10 @@ def test_positional_arguments():
         {
             "success": True,
             "result": {
-                "observed_value": 5,
+                "observed_value": 5.0,
                 "element_count": 5,
-                "missing_count": 0,
-                "missing_percent": 0.0,
+                "missing_count": None,
+                "missing_percent": None,
             },
         }
     )
@@ -356,10 +362,10 @@ def test_result_format_argument_in_decorators():
         {
             "success": True,
             "result": {
-                "observed_value": 5,
+                "observed_value": 5.0,
                 "element_count": 5,
-                "missing_count": 0,
-                "missing_percent": 0.0,
+                "missing_count": None,
+                "missing_percent": None,
             },
         }
     )
@@ -374,8 +380,8 @@ def test_result_format_argument_in_decorators():
                 "missing_count": 0,
                 "missing_percent": 0.0,
                 "partial_unexpected_counts": [
-                    {"count": 1, "value": 8},
                     {"count": 1, "value": 10},
+                    {"count": 1, "value": 8},
                 ],
                 "partial_unexpected_index_list": [3, 4],
                 "partial_unexpected_list": [8, 10],
@@ -527,7 +533,8 @@ def test_ge_pandas_merging():
     assert df.get_expectation_suite().expectations == exp_m
 
 
-def test_ge_pandas_sampling():
+def test_ge_pandas_sampling(empty_data_context):
+    context: DataContext = empty_data_context
     df = ge.dataset.PandasDataset(
         {
             "A": [1, 2, 3, 4],
@@ -564,7 +571,7 @@ def test_ge_pandas_sampling():
     # in the sample.
     df.expect_column_values_to_be_in_set("D", ["e", "f", "g", "x"])
     samp1 = df.sample(n=2)
-    exp1 = expectationSuiteSchema.load(
+    exp1_dict: dict = expectationSuiteSchema.load(
         {
             "expectation_suite_name": "test",
             "expectations": [
@@ -603,6 +610,7 @@ def test_ge_pandas_sampling():
             ],
         }
     )
+    exp1: ExpectationSuite = ExpectationSuite(**exp1_dict, data_context=context)
     assert (
         samp1.get_expectation_suite(discard_failed_expectations=False).expectations
         == exp1.expectations
@@ -665,6 +673,10 @@ def test_ge_pandas_subsetting():
     assert sub1.get_expectation_suite().expectations == exp1
 
 
+@pytest.mark.filterwarnings(
+    "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
+)
+@pytest.mark.filterwarnings("ignore:Removed*:UserWarning:great_expectations.data_asset")
 def test_ge_pandas_automatic_failure_removal():
     df = ge.dataset.PandasDataset(
         {
@@ -877,6 +889,30 @@ def test_ge_value_count_of_object_dtype_column_with_mixed_types():
 
     value_counts = df.get_column_value_counts("A")
     assert value_counts["I am a string in an otherwise float column"] == 1
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_adding_expectation_to_pandas_dataset_not_send_usage_message(mock_emit):
+    """
+    What does this test and why?
+
+    When an Expectation is called using a PandasDataset, it validates the dataset using the implementation of
+    the Expectation. As part of the process, it also adds the Expectation to the active
+    ExpectationSuite. This test ensures that this in-direct way of adding an Expectation to the ExpectationSuite
+    (ie not calling add_expectations() directly) does not emit a usage_stats event.
+    """
+    df = ge.dataset.PandasDataset(
+        {
+            "A": [[1, 2], None, [4, 5], 6],
+        }
+    )
+
+    validation = df.expect_column_values_to_be_of_type("A", "list")
+    # add_expectation() will not send usage_statistics event when called from a Pandas Dataset
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
 
 def test_expect_values_to_be_of_type_list():

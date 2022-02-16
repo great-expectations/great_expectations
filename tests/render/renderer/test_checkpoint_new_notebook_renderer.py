@@ -115,7 +115,7 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "import great_expectations as ge\n\ncontext = ge.get_context()",
+            "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\nfrom pprint import pprint\n\nyaml = YAML()\ncontext = ge.get_context()",
             "outputs": [],
         },
     ]
@@ -129,12 +129,7 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": """# Run this cell to print out the names of your Datasources, Data Connectors and Data Assets\n\nfor datasource_name, datasource in context.datasources.items():
-    print(f"datasource_name: {datasource_name}")
-    for data_connector_name, data_connector in datasource.data_connectors.items():
-        print(f"\tdata_connector_name: {data_connector_name}")
-        for data_asset_name in data_connector.get_available_data_asset_names():
-            print(f"\t\tdata_asset_name: {data_asset_name}")""",
+            "source": """# Run this cell to print out the names of your Datasources, Data Connectors and Data Assets\npprint(context.get_available_data_asset_names())""",
             "outputs": [],
         },
         {
@@ -150,7 +145,7 @@ def checkpoint_new_notebook_assets():
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Create a Checkpoint Configuration\n\n**If you are new to Great Expectations or the Checkpoint feature**, you should start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.\n\nIn the cell below we have created a sample Checkpoint configuration using **your configuration** and **SimpleCheckpoint** to run a single validation of a single Expectation Suite against a single Batch of data.\n\nTo keep it simple, we are just choosing the first available instance of each of the following items you have configured in your Data Context:\n* Datasource\n* DataConnector\n* DataAsset\n* Partition\n* Expectation Suite\n\nOf course this is purely an example, you may edit this to your heart's content.\n\n**My configuration is not so simple - are there more advanced options?**\n\nGlad you asked! Checkpoints are very versatile. For example, you can validate many Batches in a single Checkpoint, validate Batches against different Expectation Suites or against many Expectation Suites, control the specific post-validation actions based on Expectation Suite / Batch / results of validation among other features. Check out our documentation on Checkpoints for more details and for instructions on how to implement other more advanced features including using the **Checkpoint** class:\n- https://docs.greatexpectations.io/en/latest/reference/core_concepts/checkpoints_and_actions.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint.html\n- https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_create_a_new_checkpoint_using_test_yaml_config.html""",
+            "source": """# Create a Checkpoint Configuration\n\n**If you are new to Great Expectations or the Checkpoint feature**, you should start with SimpleCheckpoint because it includes default configurations like a default list of post validation actions.\n\nIn the cell below we have created a sample Checkpoint configuration using **your configuration** and **SimpleCheckpoint** to run a single validation of a single Expectation Suite against a single Batch of data.\n\nTo keep it simple, we are just choosing the first available instance of each of the following items you have configured in your Data Context:\n* Datasource\n* DataConnector\n* DataAsset\n* Partition\n* Expectation Suite\n\nOf course this is purely an example, you may edit this to your heart's content.\n\n**My configuration is not so simple - are there more advanced options?**\n\nGlad you asked! Checkpoints are very versatile. For example, you can validate many Batches in a single Checkpoint, validate Batches against different Expectation Suites or against many Expectation Suites, control the specific post-validation actions based on Expectation Suite / Batch / results of validation among other features. Check out our documentation on Checkpoints for more details and for instructions on how to implement other more advanced features including using the **Checkpoint** class:\n- https://docs.greatexpectations.io/docs/reference/checkpoints_and_actions\n- https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint\n- https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config""",
         },
     ]
     sample_checkpoint_config_code_correct = [
@@ -160,7 +155,7 @@ def checkpoint_new_notebook_assets():
             "execution_count": None,
             "source": (
                 'my_checkpoint_name = "my_checkpoint_name"  # This was populated from your CLI command.\n\n'
-                'my_checkpoint_name_config = f"""\n'
+                'yaml_config = f"""\n'
                 "name: {my_checkpoint_name}\n"
                 """config_version: 1.0
 class_name: SimpleCheckpoint
@@ -170,12 +165,12 @@ validations:
       datasource_name: my_datasource
       data_connector_name: my_other_data_connector
       data_asset_name: users
-      partition_request:
+      data_connector_query:
         index: -1
     expectation_suite_name: Titanic.warning
 """
                 '"""'
-                "\nprint(my_checkpoint_name_config)"
+                "\nprint(yaml_config)"
             ),
             "outputs": [],
         },
@@ -192,15 +187,13 @@ validations:
         {
             "cell_type": "markdown",
             "metadata": {},
-            "source": """# Test and Store Your Checkpoint Configuration\nHere we will test your Checkpoint configuration to make sure it is valid.\n\nNote that if it is valid, it will be automatically saved to your Checkpoint Store.\n\nThis `test_yaml_config()` function is meant to enable fast dev loops. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.\n\nIf you instead wish to use python instead of yaml to configure your Checkpoint, you can use `context.add_checkpoint()` and specify all the required parameters.""",
+            "source": """# Test Your Checkpoint Configuration\nHere we will test your Checkpoint configuration to make sure it is valid.\n\nThis `test_yaml_config()` function is meant to enable fast dev loops. If your configuration is correct, this cell will show a message that you successfully instantiated a Checkpoint. You can continually edit your Checkpoint config yaml and re-run the cell to check until the new config is valid.\n\nIf you instead wish to use python instead of yaml to configure your Checkpoint, you can use `context.add_checkpoint()` and specify all the required parameters.""",
         },
         {
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": """my_checkpoint = context.test_yaml_config(
-    name=my_checkpoint_name, yaml_config=my_checkpoint_name_config
-)""",
+            "source": """my_checkpoint = context.test_yaml_config(yaml_config=yaml_config)""",
             "outputs": [],
         },
     ]
@@ -214,7 +207,21 @@ validations:
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "print(my_checkpoint.get_substituted_config().to_yaml_str())",
+            "source": 'print(my_checkpoint.get_config(mode="yaml"))',
+            "outputs": [],
+        },
+    ]
+    add_checkpoint = [
+        {
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": """# Add Your Checkpoint\n\nRun the following cell to save this Checkpoint to your Checkpoint Store.""",
+        },
+        {
+            "cell_type": "code",
+            "metadata": {},
+            "execution_count": None,
+            "source": f"context.add_checkpoint(**yaml.load(yaml_config))",
             "outputs": [],
         },
     ]
@@ -242,6 +249,7 @@ validations:
         "sample_checkpoint_config_markdown_error_message": sample_checkpoint_config_markdown_error_message,
         "test_and_save_your_checkpoint_configuration": test_and_save_your_checkpoint_configuration,
         "review_checkpoint": review_checkpoint,
+        "add_checkpoint": add_checkpoint,
         "optional_run_checkpoint": optional_run_checkpoint,
     }
 
@@ -280,6 +288,7 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
         + checkpoint_new_notebook_assets["optional_customize_your_config"]
         + checkpoint_new_notebook_assets["test_and_save_your_checkpoint_configuration"]
         + checkpoint_new_notebook_assets["review_checkpoint"]
+        + checkpoint_new_notebook_assets["add_checkpoint"]
         + checkpoint_new_notebook_assets["optional_run_checkpoint"]
     )
 
@@ -328,6 +337,7 @@ def test_render_checkpoint_new_notebook_with_unavailable_data_asset(
         + checkpoint_new_notebook_assets["optional_customize_your_config"]
         + checkpoint_new_notebook_assets["test_and_save_your_checkpoint_configuration"]
         + checkpoint_new_notebook_assets["review_checkpoint"]
+        + checkpoint_new_notebook_assets["add_checkpoint"]
         + checkpoint_new_notebook_assets["optional_run_checkpoint"]
     )
 

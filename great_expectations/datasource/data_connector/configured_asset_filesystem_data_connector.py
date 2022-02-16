@@ -2,10 +2,10 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from great_expectations.datasource.data_connector import (
+from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
     normalize_directory_path,
@@ -37,6 +37,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         default_regex: Optional[dict] = None,
         glob_directive: str = "**/*",
         sorters: Optional[list] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         Base class for DataConnectors that connect to data on a filesystem. This class supports the configuration of default_regex
@@ -48,8 +49,9 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             assets (dict): configured assets as a dictionary. These can each have their own regex and sorters
             execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
             default_regex (dict): Optional dict the filter and organize the data_references.
-            glob_directive (str): glob for selecting files in directory (defaults to *)
+            glob_directive (str): glob for selecting files in directory (defaults to **/*) or nested directories (e.g. */*/*.csv)
             sorters (list): Optional list if you want to sort the data_references
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
 
         """
         logger.debug(f'Constructing ConfiguredAssetFilesystemDataConnector "{name}".')
@@ -61,6 +63,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         self._base_directory = base_directory

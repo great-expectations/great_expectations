@@ -1,7 +1,7 @@
 version: '3.2'
 services:
   mssql_db:
-    image: microsoft/mssql-server-linux
+    image: mcr.microsoft.com/mssql/server:2019-latest
     environment:
       ACCEPT_EULA: Y
       MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*

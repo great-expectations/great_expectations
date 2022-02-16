@@ -3,7 +3,7 @@ from typing import Iterator
 import pytest
 
 import great_expectations.exceptions.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition, PartitionDefinition
+from great_expectations.core.batch import BatchDefinition, IDDict
 from great_expectations.datasource.data_connector.sorter import (
     CustomListSorter,
     DateTimeSorter,
@@ -19,7 +19,7 @@ def example_batch_def_list():
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="james_20200810_1003",
-        partition_definition=PartitionDefinition(
+        batch_identifiers=IDDict(
             {"name": "james", "timestamp": "20200810", "price": "1003"}
         ),
     )
@@ -27,7 +27,7 @@ def example_batch_def_list():
         datasource_name="A",
         data_connector_name="b",
         data_asset_name="abe_20200809_1040",
-        partition_definition=PartitionDefinition(
+        batch_identifiers=IDDict(
             {"name": "abe", "timestamp": "20200809", "price": "1040"}
         ),
     )
@@ -35,7 +35,7 @@ def example_batch_def_list():
         datasource_name="A",
         data_connector_name="c",
         data_asset_name="eugene_20200809_1500",
-        partition_definition=PartitionDefinition(
+        batch_identifiers=IDDict(
             {"name": "eugene", "timestamp": "20200809", "price": "1500"}
         ),
     )
@@ -43,7 +43,7 @@ def example_batch_def_list():
         datasource_name="A",
         data_connector_name="d",
         data_asset_name="alex_20200819_1300",
-        partition_definition=PartitionDefinition(
+        batch_identifiers=IDDict(
             {"name": "alex", "timestamp": "20200819", "price": "1300"}
         ),
     )
@@ -51,7 +51,7 @@ def example_batch_def_list():
         datasource_name="A",
         data_connector_name="e",
         data_asset_name="alex_20200809_1000",
-        partition_definition=PartitionDefinition(
+        batch_identifiers=IDDict(
             {"name": "alex", "timestamp": "20200809", "price": "1000"}
         ),
     )
@@ -59,7 +59,7 @@ def example_batch_def_list():
         datasource_name="A",
         data_connector_name="f",
         data_asset_name="will_20200810_1001",
-        partition_definition=PartitionDefinition(
+        batch_identifiers=IDDict(
             {"name": "will", "timestamp": "20200810", "price": "1001"}
         ),
     )
@@ -67,7 +67,7 @@ def example_batch_def_list():
         datasource_name="A",
         data_connector_name="g",
         data_asset_name="eugene_20201129_1900",
-        partition_definition=PartitionDefinition(
+        batch_identifiers=IDDict(
             {"name": "eugene", "timestamp": "20201129", "price": "1900"}
         ),
     )
@@ -75,7 +75,7 @@ def example_batch_def_list():
         datasource_name="A",
         data_connector_name="h",
         data_asset_name="will_20200809_1002",
-        partition_definition=PartitionDefinition(
+        batch_identifiers=IDDict(
             {"name": "will", "timestamp": "20200809", "price": "1002"}
         ),
     )
@@ -83,7 +83,7 @@ def example_batch_def_list():
         datasource_name="A",
         data_connector_name="i",
         data_asset_name="james_20200811_1009",
-        partition_definition=PartitionDefinition(
+        batch_identifiers=IDDict(
             {"name": "james", "timestamp": "20200811", "price": "1009"}
         ),
     )
@@ -91,7 +91,7 @@ def example_batch_def_list():
         datasource_name="A",
         data_connector_name="j",
         data_asset_name="james_20200713_1567",
-        partition_definition=PartitionDefinition(
+        batch_identifiers=IDDict(
             {"name": "james", "timestamp": "20200713", "price": "1567"}
         ),
     )
@@ -103,19 +103,19 @@ def test_create_three_batch_definitions_sort_lexicographically():
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
-        partition_definition=PartitionDefinition({"id": "A"}),
+        batch_identifiers=IDDict({"id": "A"}),
     )
     b = BatchDefinition(
         datasource_name="B",
         data_connector_name="b",
         data_asset_name="bbb",
-        partition_definition=PartitionDefinition({"id": "B"}),
+        batch_identifiers=IDDict({"id": "B"}),
     )
     c = BatchDefinition(
         datasource_name="C",
         data_connector_name="c",
         data_asset_name="ccc",
-        partition_definition=PartitionDefinition({"id": "C"}),
+        batch_identifiers=IDDict({"id": "C"}),
     )
 
     batch_list = [a, b, c]
@@ -140,19 +140,19 @@ def test_create_three_batch_definitions_sort_numerically():
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
-        partition_definition=PartitionDefinition({"id": 1}),
+        batch_identifiers=IDDict({"id": 1}),
     )
     two = BatchDefinition(
         datasource_name="B",
         data_connector_name="b",
         data_asset_name="bbb",
-        partition_definition=PartitionDefinition({"id": 2}),
+        batch_identifiers=IDDict({"id": 2}),
     )
     three = BatchDefinition(
         datasource_name="C",
         data_connector_name="c",
         data_asset_name="ccc",
-        partition_definition=PartitionDefinition({"id": 3}),
+        batch_identifiers=IDDict({"id": 3}),
     )
 
     batch_list = [one, two, three]
@@ -169,7 +169,7 @@ def test_create_three_batch_definitions_sort_numerically():
         datasource_name="C",
         data_connector_name="c",
         data_asset_name="ccc",
-        partition_definition=PartitionDefinition({"id": "aaa"}),
+        batch_identifiers=IDDict({"id": "aaa"}),
     )
 
     batch_list = [one, two, three, i_should_not_work]
@@ -182,19 +182,19 @@ def test_date_time():
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
-        partition_definition=PartitionDefinition({"date": "20210101"}),
+        batch_identifiers=IDDict({"date": "20210101"}),
     )
     second = BatchDefinition(
         datasource_name="B",
         data_connector_name="b",
         data_asset_name="bbb",
-        partition_definition=PartitionDefinition({"date": "20210102"}),
+        batch_identifiers=IDDict({"date": "20210102"}),
     )
     third = BatchDefinition(
         datasource_name="C",
         data_connector_name="c",
         data_asset_name="ccc",
-        partition_definition=PartitionDefinition({"date": "20210103"}),
+        batch_identifiers=IDDict({"date": "20210103"}),
     )
 
     batch_list = [first, second, third]
@@ -214,7 +214,7 @@ def test_date_time():
         datasource_name="C",
         data_connector_name="c",
         data_asset_name="ccc",
-        partition_definition=PartitionDefinition({"date": 20210103}),
+        batch_identifiers=IDDict({"date": 20210103}),
     )
 
     batch_list = [first, second, third, my_date_is_not_a_string]
@@ -229,19 +229,19 @@ def test_custom_list(periodic_table_of_elements):
         datasource_name="A",
         data_connector_name="a",
         data_asset_name="aaa",
-        partition_definition=PartitionDefinition({"element": "Hydrogen"}),
+        batch_identifiers=IDDict({"element": "Hydrogen"}),
     )
     Helium = BatchDefinition(
         datasource_name="B",
         data_connector_name="b",
         data_asset_name="bbb",
-        partition_definition=PartitionDefinition({"element": "Helium"}),
+        batch_identifiers=IDDict({"element": "Helium"}),
     )
     Lithium = BatchDefinition(
         datasource_name="C",
         data_connector_name="c",
         data_asset_name="ccc",
-        partition_definition=PartitionDefinition({"element": "Lithium"}),
+        batch_identifiers=IDDict({"element": "Lithium"}),
     )
 
     batch_list = [Hydrogen, Helium, Lithium]

@@ -1,74 +1,128 @@
-from typing import Any, Dict, Tuple
+import warnings
 
 from dateutil.parser import parse
 
-from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.map_metric import MapMetricProvider
-from great_expectations.expectations.metrics.metric_provider import metric_partial
-from great_expectations.expectations.metrics.util import filter_pair_metric_nulls
+from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.map_metric_provider import (
+    ColumnPairMapMetricProvider,
+    column_pair_condition_partial,
+)
 
 
-class ColumnPairValuesAGreaterThanB(MapMetricProvider):
+class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
     condition_metric_name = "column_pair_values.a_greater_than_b"
-    condition_value_keys = (
+    condition_domain_keys = (
+        "batch_id",
+        "table",
+        "column_A",
+        "column_B",
+        "row_condition",
+        "condition_parser",
         "ignore_row_if",
+    )
+    condition_value_keys = (
         "or_equal",
         "parse_strings_as_datetimes",
         "allow_cross_type_comparisons",
     )
-    domain_keys = ("batch_id", "table", "column_A", "column_B")
 
-    @metric_partial(
-        engine=PandasExecutionEngine,
-        partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
-        domain_type=MetricDomainTypes.COLUMN_PAIR,
-    )
-    def _pandas(
-        cls,
-        execution_engine: "PandasExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
-        runtime_configuration: Dict,
-    ):
-
-        ignore_row_if = metric_value_kwargs.get("ignore_row_if")
-        if not ignore_row_if:
-            ignore_row_if = "both_values_are_missing"
-        or_equal = metric_value_kwargs.get("or_equal")
-        parse_strings_as_datetimes = metric_value_kwargs.get(
-            "parse_strings_as_datetimes"
+    # noinspection PyPep8Naming
+    @column_pair_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, column_A, column_B, **kwargs):
+        allow_cross_type_comparisons: bool = (
+            kwargs.get("allow_cross_type_comparisons") or False
         )
-        allow_cross_type_comparisons = metric_value_kwargs.get(
-            "allow_cross_type_comparisons"
-        )
-
-        df, compute_domain, accessor_domain = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN_PAIR
-        )
-
-        column_A, column_B = filter_pair_metric_nulls(
-            df[metric_domain_kwargs["column_A"]],
-            df[metric_domain_kwargs["column_B"]],
-            ignore_row_if=ignore_row_if,
-        )
-
         if allow_cross_type_comparisons:
             raise NotImplementedError
 
+        parse_strings_as_datetimes: bool = (
+            kwargs.get("parse_strings_as_datetimes") or False
+        )
         if parse_strings_as_datetimes:
-            temp_column_A = column_A.map(parse)
-            temp_column_B = column_B.map(parse)
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
 
+            try:
+                temp_column_A = column_A.map(parse)
+            except TypeError:
+                temp_column_A = column_A
+
+            try:
+                temp_column_B = column_B.map(parse)
+            except TypeError:
+                temp_column_B = column_B
         else:
             temp_column_A = column_A
             temp_column_B = column_B
 
+        or_equal: bool = kwargs.get("or_equal") or False
         if or_equal:
-            return temp_column_A >= temp_column_B, compute_domain, accessor_domain
+            return temp_column_A >= temp_column_B
         else:
-            return temp_column_A > temp_column_B, compute_domain, accessor_domain
+            return temp_column_A > temp_column_B
+
+    # noinspection PyPep8Naming
+    @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(cls, column_A, column_B, **kwargs):
+        allow_cross_type_comparisons: bool = (
+            kwargs.get("allow_cross_type_comparisons") or False
+        )
+        if allow_cross_type_comparisons:
+            raise NotImplementedError
+
+        parse_strings_as_datetimes: bool = (
+            kwargs.get("parse_strings_as_datetimes") or False
+        )
+        if parse_strings_as_datetimes:
+            raise NotImplementedError
+
+        or_equal: bool = kwargs.get("or_equal") or False
+        if or_equal:
+            return sa.or_(
+                column_A >= column_B, sa.and_(column_A == None, column_B == None)
+            )
+        else:
+            return column_A > column_B
+
+    # noinspection PyPep8Naming
+    @column_pair_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column_A, column_B, **kwargs):
+        allow_cross_type_comparisons: bool = (
+            kwargs.get("allow_cross_type_comparisons") or False
+        )
+        if allow_cross_type_comparisons:
+            raise NotImplementedError
+
+        parse_strings_as_datetimes: bool = (
+            kwargs.get("parse_strings_as_datetimes") or False
+        )
+        if parse_strings_as_datetimes:
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
+
+            temp_column_A = F.to_date(column_A)
+            temp_column_B = F.to_date(column_B)
+        else:
+            temp_column_A = column_A
+            temp_column_B = column_B
+
+        or_equal: bool = kwargs.get("or_equal") or False
+        if or_equal:
+            return (temp_column_A >= temp_column_B) | (
+                temp_column_A.eqNullSafe(temp_column_B)
+            )
+        else:
+            return temp_column_A > temp_column_B

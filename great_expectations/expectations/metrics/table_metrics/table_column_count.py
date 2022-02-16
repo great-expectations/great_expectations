@@ -1,17 +1,17 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.expectations.metrics.table_metric import TableMetricProvider
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.expectations.metrics.table_metric_provider import (
+    TableMetricProvider,
+)
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class TableColumnCount(TableMetricProvider):
@@ -23,7 +23,7 @@ class TableColumnCount(TableMetricProvider):
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         columns = metrics.get("table.columns")
@@ -35,7 +35,7 @@ class TableColumnCount(TableMetricProvider):
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         columns = metrics.get("table.columns")
@@ -47,7 +47,7 @@ class TableColumnCount(TableMetricProvider):
         execution_engine: "ExecutionEngine",
         metric_domain_kwargs: Dict,
         metric_value_kwargs: Dict,
-        metrics: Dict[Tuple, Any],
+        metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
         columns = metrics.get("table.columns")
@@ -61,8 +61,19 @@ class TableColumnCount(TableMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        return {
-            "table.columns": MetricConfiguration(
-                "table.columns", metric.metric_domain_kwargs
-            ),
+        dependencies: dict = super()._get_evaluation_dependencies(
+            metric=metric,
+            configuration=configuration,
+            execution_engine=execution_engine,
+            runtime_configuration=runtime_configuration,
+        )
+        table_domain_kwargs: dict = {
+            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
+        dependencies["table.columns"] = MetricConfiguration(
+            metric_name="table.columns",
+            metric_domain_kwargs=table_domain_kwargs,
+            metric_value_kwargs=None,
+            metric_dependencies=None,
+        )
+        return dependencies

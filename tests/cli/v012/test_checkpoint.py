@@ -53,7 +53,7 @@ def titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled(
     yaml = YAML()
     context = titanic_data_context_stats_enabled_config_version_2
     context.save_expectation_suite(titanic_expectation_suite)
-    # TODO context should save a checkpoint
+    # TODO context should save a Checkpoint
     checkpoint_path = os.path.join(
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
@@ -256,7 +256,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_g
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "A checkpoint named `passengers` was added to your project" in stdout
+    assert "A Checkpoint named `passengers` was added to your project" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -289,7 +289,7 @@ def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_g
         # TODO: <Alex>ALEX</Alex>
         #     assert (
         #         """\
-        # # This checkpoint was created by the command `great_expectations checkpoint new`.
+        # # This Checkpoint was created by the command `great_expectations checkpoint new`.
         # #
         # # A checkpoint is a list of one or more batches paired with one or more
         # # Expectation Suites and a configurable Validation Operator.
@@ -357,7 +357,7 @@ def test_checkpoint_new_specify_datasource_with_ge_config_v2(
     )
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "A checkpoint named `passengers` was added to your project" in stdout
+    assert "A Checkpoint named `passengers` was added to your project" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -421,7 +421,7 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        'Attempted to access the "checkpoint_store_name" field with a legacy config version (2.0) and no `checkpoints` directory.'
+        'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.'
         in stdout
     )
 
@@ -578,7 +578,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
     #     in stdout
     # )
     # assert (
-    #     "Please verify these batch kwargs in checkpoint bad_batch`"
+    #     "Please verify these batch kwargs in Checkpoint bad_batch`"
     #     in stdout
     # )
     # assert "No such file or directory" in stdout
@@ -651,7 +651,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge
         'Batch: {"path": "/totally/not/a/file.csv", "datasource": "mydatasource", "reader_method": "read_csv"}'
         in stdout
     )
-    assert "Please add at least one suite to checkpoint bad_batch" in stdout
+    assert "Please add at least one suite to Checkpoint bad_batch" in stdout
 
     assert mock_emit.call_count == 2
     assert mock_emit.call_args_list == [
@@ -680,6 +680,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error_with_ge
 def test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
 ):
+    # checkpoint should still run using fallback action_list_operator
     context = titanic_data_context_stats_enabled_config_version_2
     root_dir = context.root_directory
     csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
@@ -716,18 +717,16 @@ def test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2(
         catch_exceptions=False,
     )
     stdout = result.stdout
-    assert result.exit_code == 1
+    assert result.exit_code == 0
 
-    assert (
-        f"No validation operator `foo` was found in your project. Please verify this in your great_expectations.yml"
-        in stdout
-    )
+    assert "Validation succeeded!" in stdout
     usage_emits = mock_emit.call_args_list
 
-    assert mock_emit.call_count == 3
+    assert mock_emit.call_count == 4
     assert usage_emits[0][0][0]["success"] is True
-    assert usage_emits[1][0][0]["success"] is False
-    assert usage_emits[2][0][0]["success"] is False
+    assert usage_emits[1][0][0]["success"] is True
+    assert usage_emits[2][0][0]["success"] is True
+    assert usage_emits[3][0][0]["success"] is True
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -992,7 +991,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_c
     caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -1045,7 +1044,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
     caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
     """
-    We call the "checkpoint script" command on a project with a checkpoint.
+    We call the "checkpoint script" command on a project with a Checkpoint.
 
     The command should:
     - create the script (note output is tested in other tests)
@@ -1095,138 +1094,6 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
     print(f"\n\nScript exited with code: {status} and output:\n{output}")
     assert status == 1
     assert "Validation failed!" in output
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_new_with_ge_config_3_raises_error(
-    mock_emit, caplog, titanic_data_context_stats_enabled
-):
-    context = titanic_data_context_stats_enabled
-    root_dir = context.root_directory
-    mock_emit.reset_mock()
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        f"checkpoint new foo not_a_suite -d {root_dir}",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert result.exit_code == 1
-    assert (
-        "The `checkpoint new` CLI command is not yet implemented for Great Expectations config versions >= 3."
-        in stdout
-    )
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.new",
-                "event_payload": {"api_version": "v2"},
-                "success": False,
-            }
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_run_with_ge_config_3_raises_error(
-    mock_emit, caplog, titanic_data_context_stats_enabled
-):
-    context = titanic_data_context_stats_enabled
-    root_dir = context.root_directory
-    mock_emit.reset_mock()
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        f"checkpoint run my_checkpoint -d {root_dir}",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert result.exit_code == 1
-    assert (
-        "The `checkpoint run` CLI command is not yet implemented for Great Expectations config versions >= 3."
-        in stdout
-    )
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.run",
-                "event_payload": {"api_version": "v2"},
-                "success": False,
-            }
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
-
-
-@mock.patch(
-    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
-)
-def test_checkpoint_script_with_ge_config_3_raises_error(
-    mock_emit, caplog, titanic_data_context_stats_enabled
-):
-    context = titanic_data_context_stats_enabled
-    root_dir = context.root_directory
-    mock_emit.reset_mock()
-
-    runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(
-        cli,
-        f"checkpoint script my_checkpoint -d {root_dir}",
-        catch_exceptions=False,
-    )
-    stdout = result.stdout
-    assert result.exit_code == 1
-    assert (
-        "The `checkpoint script` CLI command is not yet implemented for Great Expectations config versions >= 3."
-        in stdout
-    )
-
-    assert mock_emit.call_count == 2
-    assert mock_emit.call_args_list == [
-        mock.call(
-            {"event_payload": {}, "event": "data_context.__init__", "success": True}
-        ),
-        mock.call(
-            {
-                "event": "cli.checkpoint.script",
-                "event_payload": {"api_version": "v2"},
-                "success": False,
-            }
-        ),
-    ]
-
-    assert_no_logging_messages_or_tracebacks(
-        my_caplog=caplog,
-        click_result=result,
-        allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
-    )
 
 
 def _write_checkpoint_dict_to_file(bad, checkpoint_file_path):

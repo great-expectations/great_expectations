@@ -5,7 +5,7 @@ repos:
       - id: check-yaml
         exclude: docs/.*|tests/data_context/fixtures/bad_yml/great_expectations\.yml
       - id: end-of-file-fixer
-        exclude: docs/.*|tests/test_sets/broken_excel_file\.xls
+        exclude: docs/.*|tests/test_sets/broken_excel_file\.xls|.*.ge_store_backend_id
       - id: trailing-whitespace
         exclude: docs/.*|tests/.*.fixture
       - id: requirements-txt-fixer
@@ -16,10 +16,10 @@ repos:
       - id: isort
         exclude: venv/.*\|docs/.*|tests/test_sets/broken_excel_file\.xls
   - repo: https://github.com/psf/black
-    rev: 20.8b1
+    rev: 22.1.0
     hooks:
       - id: black
-        exclude: docs/.*|tests/.*.fixture
+        exclude: docs/.*|tests/.*.fixture|.*.ge_store_backend_id
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.8.3
     hooks:

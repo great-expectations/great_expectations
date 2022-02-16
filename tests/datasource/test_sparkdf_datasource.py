@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
+from great_expectations import DataContext
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import SparkDFDataset
@@ -96,6 +97,94 @@ def test_sparkdf_datasource_custom_data_asset(
         quantile_ranges={"quantiles": [0.0, 1.0], "value_ranges": [[1, 1], [5, 5]]},
     )
     assert res.success is True
+
+
+def test_force_reuse_spark_context(
+    data_context_parameterized_expectation_suite, tmp_path_factory, test_backends
+):
+    """
+    Ensure that using an external sparkSession can be used by specfying the
+    force_reuse_spark_context argument.
+    """
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+    from pyspark.sql import SparkSession  # isort:skip
+
+    dataset_name = "test_spark_dataset"
+
+    spark = SparkSession.builder.appName("local").master("local[1]").getOrCreate()
+    data = {"col1": [0, 1, 2], "col2": ["a", "b", "c"]}
+
+    spark_df = spark.createDataFrame(pd.DataFrame(data))
+    tmp_parquet_filename = os.path.join(
+        tmp_path_factory.mktemp(dataset_name).as_posix(), dataset_name
+    )
+    spark_df.write.format("parquet").save(tmp_parquet_filename)
+
+    data_context_parameterized_expectation_suite.add_datasource(
+        dataset_name,
+        class_name="SparkDFDatasource",
+        force_reuse_spark_context=True,
+        module_name="great_expectations.datasource",
+        batch_kwargs_generators={},
+    )
+
+    df = spark.read.format("parquet").load(tmp_parquet_filename)
+    batch_kwargs = {"dataset": df, "datasource": dataset_name}
+    _ = data_context_parameterized_expectation_suite.create_expectation_suite(
+        dataset_name
+    )
+    batch = data_context_parameterized_expectation_suite.get_batch(
+        batch_kwargs=batch_kwargs, expectation_suite_name=dataset_name
+    )
+    results = batch.expect_column_max_to_be_between("col1", min_value=1, max_value=100)
+    assert results.success, "Failed to use external SparkSession"
+    spark.stop()
+
+
+def test_spark_kwargs_are_passed_through(
+    data_context_parameterized_expectation_suite,
+    tmp_path_factory,
+    test_backends,
+    spark_session,
+):
+    """
+    Ensure that an external SparkSession is not stopped when the spark_config matches
+    the one specfied in the GE Context.
+    """
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+    dataset_name = "test_spark_dataset"
+    data_context_parameterized_expectation_suite.add_datasource(
+        dataset_name,
+        class_name="SparkDFDatasource",
+        spark_config=dict(spark_session.sparkContext.getConf().getAll()),
+        force_reuse_spark_context=False,
+        module_name="great_expectations.datasource",
+        batch_kwargs_generators={},
+    )
+    datasource_config = data_context_parameterized_expectation_suite.get_datasource(
+        dataset_name
+    ).config
+    assert datasource_config["spark_config"] == dict(
+        spark_session.sparkContext.getConf().getAll()
+    )
+    assert datasource_config["force_reuse_spark_context"] == False
+
+    dataset_name = "test_spark_dataset_2"
+    data_context_parameterized_expectation_suite.add_datasource(
+        dataset_name,
+        class_name="SparkDFDatasource",
+        spark_config={},
+        force_reuse_spark_context=True,
+        module_name="great_expectations.datasource",
+        batch_kwargs_generators={},
+    )
+    datasource_config = data_context_parameterized_expectation_suite.get_datasource(
+        dataset_name
+    ).config
+    assert datasource_config["spark_config"] == {}
+    assert datasource_config["force_reuse_spark_context"] == True
 
 
 def test_create_sparkdf_datasource(
@@ -333,36 +422,10 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
     assert batch.data.head()["a"] == "1"
 
 
-@pytest.mark.skipif(
-    is_library_loadable(library_name="pyspark"),
-    reason="Spark 3.0.0 creates one JVM per session, makikng configuration immutable.  A future PR handles this better.",
-)
-def test_spark_config(test_backends):
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("Spark has not been enabled, so this test must be skipped.")
-    source = SparkDFDatasource()
-    conf = source.spark.sparkContext.getConf().getAll()
-    # Without specifying any spark_config values we get defaults
-    assert ("spark.app.name", "pyspark-shell") in conf
-
-    source = SparkDFDatasource(
-        spark_config={
-            "spark.app.name": "great_expectations",
-            "spark.sql.catalogImplementation": "hive",
-            "spark.executor.memory": "128m",
-        }
-    )
-
-    # Test that our values were set
-    conf = source.spark.sparkContext.getConf().getAll()
-    assert ("spark.app.name", "great_expectations") in conf
-    assert ("spark.sql.catalogImplementation", "hive") in conf
-    assert ("spark.executor.memory", "128m") in conf
-
-
 def test_spark_datasource_processes_dataset_options(
-    test_folder_connection_path_csv, test_backends
+    test_folder_connection_path_csv, test_backends, empty_data_context
 ):
+    context: DataContext = empty_data_context
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
     datasource = SparkDFDatasource(
@@ -379,7 +442,9 @@ def test_spark_datasource_processes_dataset_options(
     )
     batch_kwargs["dataset_options"] = {"caching": False, "persist": False}
     batch = datasource.get_batch(batch_kwargs)
-    validator = BridgeValidator(batch, ExpectationSuite(expectation_suite_name="foo"))
+    validator = BridgeValidator(
+        batch, ExpectationSuite(expectation_suite_name="foo", data_context=context)
+    )
     dataset = validator.get_dataset()
     assert dataset.caching is False
     assert dataset._persist is False

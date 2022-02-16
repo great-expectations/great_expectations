@@ -151,7 +151,7 @@ class Field(FieldABC):
         load_only: bool = False,
         dump_only: bool = False,
         error_messages: typing.Dict[str, str] = None,
-        **metadata
+        **metadata,
     ) -> None:
         self.default = default
         self.attribute = attribute
@@ -287,7 +287,7 @@ class Field(FieldABC):
         attr: str,
         obj: typing.Any,
         accessor: typing.Callable[[typing.Any, str, typing.Any], typing.Any] = None,
-        **kwargs
+        **kwargs,
     ):
         """Pulls the value for the given key from the object, applies the
         field's formatting and returns the result.
@@ -313,7 +313,7 @@ class Field(FieldABC):
         value: typing.Any,
         attr: str = None,
         data: typing.Mapping[str, typing.Any] = None,
-        **kwargs
+        **kwargs,
     ):
         """Deserialize ``value``.
 
@@ -373,7 +373,7 @@ class Field(FieldABC):
         value: typing.Any,
         attr: typing.Optional[str],
         data: typing.Optional[typing.Mapping[str, typing.Any]],
-        **kwargs
+        **kwargs,
     ):
         """Deserialize value. Concrete :class:`Field` classes should implement this method.
 
@@ -471,7 +471,7 @@ class Nested(Field):
         exclude: types.StrSequenceOrSet = (),
         many: bool = False,
         unknown: str = None,
-        **kwargs
+        **kwargs,
     ):
         # Raise error if only or exclude is passed as string, not list of strings
         if only is not None and not is_collection(only):
@@ -619,7 +619,7 @@ class Pluck(Nested):
         self,
         nested: typing.Union[SchemaABC, type, str, typing.Callable[[], SchemaABC]],
         field_name: str,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(nested, only=(field_name,), **kwargs)
         self.field_name = field_name
@@ -1008,7 +1008,7 @@ class Decimal(Number):
         *,
         allow_nan: bool = False,
         as_string: bool = False,
-        **kwargs
+        **kwargs,
     ):
         self.places = (
             decimal.Decimal((0, (1,), -places)) if places is not None else None
@@ -1391,7 +1391,7 @@ class TimeDelta(Field):
 
         if precision not in units:
             msg = 'The precision must be {} or "{}".'.format(
-                ", ".join(['"{}"'.format(each) for each in units[:-1]]), units[-1]
+                ", ".join([f'"{each}"' for each in units[:-1]]), units[-1]
             )
             raise ValueError(msg)
 
@@ -1441,7 +1441,7 @@ class Mapping(Field):
         self,
         keys: typing.Union[Field, type] = None,
         values: typing.Union[Field, type] = None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
         if keys is None:
@@ -1588,7 +1588,7 @@ class Url(String):
         relative: bool = False,
         schemes: types.StrSequenceOrSet = None,
         require_tld: bool = True,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
 
@@ -1706,7 +1706,7 @@ class Function(Field):
             typing.Callable[[typing.Any], typing.Any],
             typing.Callable[[typing.Any, typing.Dict], typing.Any],
         ] = None,
-        **kwargs
+        **kwargs,
     ):
         # Set dump_only and load_only based on arguments
         kwargs["dump_only"] = bool(serialize) and not bool(deserialize)
@@ -1726,7 +1726,7 @@ class Function(Field):
     def _call_or_raise(self, func, value, attr):
         if len(utils.get_func_args(func)) > 1:
             if self.parent.context is None:
-                msg = "No context available for Function field {!r}".format(attr)
+                msg = f"No context available for Function field {attr!r}"
                 raise ValidationError(msg)
             return func(value, self.parent.context)
         else:

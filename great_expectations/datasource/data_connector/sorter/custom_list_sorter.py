@@ -36,14 +36,14 @@ class CustomListSorter(Sorter):
                 )
         return reference_list
 
-    def get_partition_key(self, batch_definition: BatchDefinition) -> Any:
-        partition_definition: dict = batch_definition.partition_definition
-        partition_value: Any = partition_definition[self.name]
-        if partition_value in self._reference_list:
-            return self._reference_list.index(partition_value)
+    def get_batch_key(self, batch_definition: BatchDefinition) -> Any:
+        batch_identifiers: dict = batch_definition.batch_identifiers
+        batch_value: Any = batch_identifiers[self.name]
+        if batch_value in self._reference_list:
+            return self._reference_list.index(batch_value)
         else:
             raise ge_exceptions.SorterError(
-                f"Source {partition_value} was not found in Reference list.  Try again..."
+                f"Source {batch_value} was not found in Reference list.  Try again..."
             )
 
     def __repr__(self) -> str:

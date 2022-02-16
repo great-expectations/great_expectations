@@ -51,6 +51,14 @@ class S3BatchSpec(PathBatchSpec):
     pass
 
 
+class AzureBatchSpec(PathBatchSpec):
+    pass
+
+
+class GCSBatchSpec(PathBatchSpec):
+    pass
+
+
 class SqlAlchemyDatasourceBatchSpec(BatchSpec, metaclass=ABCMeta):
     """This is an abstract class and should not be instantiated. It's relevant for testing whether
     a subclass is allowed
@@ -83,3 +91,19 @@ class RuntimeDataBatchSpec(BatchSpec):
     @batch_data.setter
     def batch_data(self, batch_data):
         self["batch_data"] = batch_data
+
+
+class RuntimeQueryBatchSpec(BatchSpec):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.query is None:
+            raise InvalidBatchSpecError("RuntimeQueryBatchSpec query cannot be None")
+
+    @property
+    def query(self):
+        return self.get("query")
+
+    @query.setter
+    def query(self, query):
+        self["query"] = query

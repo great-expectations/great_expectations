@@ -1,0 +1,161 @@
+trigger:
+  branches:
+    include:
+    - pre_pr_docs-*
+
+resources:
+  containers:
+  - container: postgres
+    image: postgres:11
+    ports:
+    - 5432:5432
+    env:
+      POSTGRES_DB: "test_ci"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+  - container: mysql
+    image: mysql:8.0.20
+    ports:
+      - 3306:3306
+    env:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: test_ci
+  - container: mssql
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    env:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: ReallyStrongPwd1234%^&*
+      MSSQL_DB: test_ci
+      MSSQL_PID: Developer
+    ports:
+      - 1433:1433
+
+variables:
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
+  GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
+
+stages:
+  - stage: scope_check
+    pool:
+      vmImage: 'ubuntu-20.04'
+    jobs:
+      - job: changes
+        steps:
+          - task: ChangedFiles@1
+            name: CheckDocsChanges
+            inputs:
+              verbose: true
+              rules: |
+                [DocsChanged]
+                docs/**
+                tests/integration/docusaurus/**
+                tests/integration/fixtures/**
+                tests/test_sets/**
+
+          - bash: ./scripts/check_for_docs_deps_changes
+            name: CheckDocsDependenciesChanges
+
+  - stage: custom_checks
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+    - job: link_checker
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      steps:
+      - bash: python scripts/docs_link_checker.py -p docs -r docs -s docs --skip-external
+        name: LinkChecker
+
+  - stage: docusaurus_tests
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+    jobs:
+    - job: test_docs
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      variables:
+        python.version: '3.8'
+      services:
+        postgres: postgres
+        mysql: mysql
+        mssql: mssql
+
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '$(python.version)'
+          displayName: 'Use Python $(python.version)'
+
+        - bash: python -m pip install --upgrade pip==20.2.4
+          displayName: 'Update pip'
+
+        - script: |
+            pip install --requirement requirements-dev-base.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
+            pip install --requirement requirements.txt
+            pip install .
+          displayName: 'Install dependencies'
+        - script: |
+            pip install "pyathena[SQLAlchemy]"
+          displayName: 'Install awsathena dependency'
+        - task: DownloadSecureFile@1
+          name: gcp_authkey
+          displayName: 'Download GCS Credentials'
+          inputs:
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+              retryCount: '2'
+        - task: DownloadSecureFile@1
+          name: aws_authkey
+          displayName: 'Download AWS Credentials'
+          inputs:
+              secureFile: 'aws_config_sandbox'
+              retryCount: '2'
+        - script: |
+            # install google cloud storage dependency
+            pip install google-cloud-bigquery-storage
+            # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
+            curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
+            ./google-cloud-sdk/install.sh --usage-reporting=False --path-update=True --quiet --install-python=False
+            # creating new named configuration
+            ./google-cloud-sdk/bin/gcloud config configurations create ge-oss-ci-cd-configurations
+            # setting account config using project and service account info
+            ./google-cloud-sdk/bin/gcloud config set account account-for-azure-tests --project=$(GE_TEST_GCP_PROJECT) --access-token-file=$(gcp_authkey.secureFilePath)
+            # Pass the configured Cloud SDK authentication to gsutil.
+            ./google-cloud-sdk/bin/gcloud config set pass_credentials_to_gsutil True
+            # Authorize access to Google Cloud with a service account
+            ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$(gcp_authkey.secureFilePath)
+          displayName: 'Install and setup Google Cloud SDK'
+
+        - script: |
+            sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+          displayName: 'Create MSSQL database test_ci'
+
+        - script: |
+            pip install pytest pytest-azurepipelines
+            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --aws tests/integration/test_script_runner.py
+          displayName: 'pytest'
+          env:
+            # snowflake credentials
+            SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
+            SNOWFLAKE_USER: $(SNOWFLAKE_USER)
+            SNOWFLAKE_PW: $(SNOWFLAKE_PW)
+            SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
+            SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
+            SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
+            # redshift credentials
+            REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
+            REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
+            REDSHIFT_HOST: $(REDSHIFT_HOST)
+            REDSHIFT_PORT: $(REDSHIFT_PORT)
+            REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
+            REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
+            # AWS credentials
+            AWS_CONFIG_FILE: $(aws_authkey.secureFilePath)
+            ATHENA_DB_NAME: $(ATHENA_DB_NAME)
+            ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
+            # GCP credentials
+            GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+            GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+            GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+            # Azure credentials
+            AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
+            AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)

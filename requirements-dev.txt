@@ -4,9 +4,7 @@
 # Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
 
 --requirement requirements.txt
---requirement requirements-dev-util.txt
+
+--requirement requirements-dev-base.txt
 --requirement requirements-dev-spark.txt
 --requirement requirements-dev-sqlalchemy.txt
---requirement requirements-dev-test.txt
---requirement requirements-dev-build.txt
---requirement requirements-dev-publish.txt

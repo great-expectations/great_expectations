@@ -1,0 +1,160 @@
+/* stylelint-disable docusaurus/copyright-header */
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* import Montserrat*/
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
+
+/* You can override the default Infima variables here. */
+:root {
+    --ifm-font-color-base: rgb(15, 42, 63);
+    --ifm-navbar-link-color: rgb(15, 42, 63);
+    --ifm-menu-color: rgb(15, 42, 63);
+    --ifm-footer-title-color: rgb(15, 42, 63);
+    --ifm-footer-link-color: rgb(15, 42, 63);
+    --ifm-dropdown-font-weight: 700;
+    --ifm-footer-background-color: #fff;
+    --ifm-color-primary: #fd5383;
+    --ifm-color-primary-dark: #fd326b;
+    --ifm-color-primary-darker: #fc215f;
+    --ifm-color-primary-darkest: #e80344;
+    --ifm-color-primary-light: #fd749b;
+    --ifm-color-primary-lighter: #fe85a7;
+    --ifm-color-primary-lightest: #feb7cb;
+    --ifm-code-font-size: 95%;
+    --ifm-menu-link-sublist-icon: 'url(img/menu_carat_down.png)';
+
+    /* sync up some of the typography */
+    --ifm-heading-line-height: 1;
+    --ifm-h1-font-size: 40px;
+    --ifm-h2-font-size: 20px;
+    --ifm-font-family-base: Montserrat, 'Open Sans', Verdana, sans‑serif;
+    --ifm-dropdown-font-weight: bold;
+    --ifm-heading-margin-bottom: 0;
+    --ifm-heading-vertical-rhythm-bottom: 0;
+
+    /* make pagination look like the nice buttons */
+    --ifm-pagination-nav-border-radius: 40px;
+}
+
+/* override huge h1 */
+.h1Heading_node_modules-\@docusaurus-theme-classic-lib-next-theme-Heading-styles-module {
+    font-size: var(--ifm-h1-font-size) !important;
+}
+
+h3 {
+    color: #8884FF;
+}
+
+.markdown p {
+    line-height: 29px;
+}
+
+/* pagination overrides */
+.pagination-nav__item {
+    flex: inherit;
+}
+
+.pagination-nav {
+    justify-content: space-between;
+}
+
+.pagination-nav__sublabel {
+    color: #fff;
+}
+
+.pagination-nav__link {
+    border: none;
+    color: #fff;
+    padding: 12px 28px;
+    background: var(--ifm-link-color);
+}
+
+a.pagination-nav__link:hover {
+    color: #fff;
+}
+
+.docusaurus-highlight-code-line {
+    background-color: rgb(72, 77, 91);
+    display: block;
+    margin: 0 calc(-1 * var(--ifm-pre-padding));
+    padding: 0 var(--ifm-pre-padding);
+}
+
+/* navbar tweaks */
+.navbar--fixed-top {
+    opacity: .95;
+}
+
+.navbar__link {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.navbar__brand {
+    width: 190px;
+    height: auto;
+}
+
+
+/* change the carat in the top menu to open carat */
+.dropdown > .navbar__link:after,
+.menu__link--sublist:after{
+    border: transparent;
+    background: url('/img/menu_carat_down.png') center center no-repeat;
+    width: 16px;
+    height: 16px;
+    top: 3px;
+    transform: none;
+    background-size: 10px;
+}
+
+.menu__list-item--collapsed .menu__link--sublist:after{
+      transform: rotateZ(270deg);
+}
+
+.navbar__item.navbar__link svg {
+    display: none;
+}
+
+table.borderless {
+    border-collapse: collapse;
+    border: none;
+}
+
+table.borderless tr {
+    border-top: none;
+}
+
+table.borderless tr td {
+    border-collapse: collapse;
+    background-color: transparent;
+    border: none;
+    border-top: none;
+    vertical-align: center;
+}
+
+table.borderless tr:nth-child(2n) {
+    background-color: transparent;
+}
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+    width: 75%;
+}
+
+.tabs-container .margin-vert--md{
+    margin-top: 0 !important;
+}
+
+div[role="tabpanel"]{
+   --ifm-code-background: var(--ifm-alert-background-color-highlight);
+    border-radius: var(--ifm-alert-border-radius);
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 1px 2px 0px;
+    border-top: 0;
+    padding: var(--ifm-alert-padding-vertical) var(--ifm-alert-padding-horizontal);
+}

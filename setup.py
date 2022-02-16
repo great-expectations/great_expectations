@@ -22,7 +22,7 @@ config = {
     "install_requires": required,
     "extras_require": {
         "spark": ["pyspark>=2.3.2"],
-        "sqlalchemy": ["sqlalchemy>=1.2"],
+        "sqlalchemy": ["sqlalchemy>=1.3.18"],
         "airflow": ["apache-airflow[s3]>=1.9.0", "boto3>=1.7.3"],
         "gcp": [
             "google-cloud>=0.34.0",
@@ -32,6 +32,8 @@ config = {
         ],
         "redshift": ["psycopg2>=2.8"],
         "s3": ["boto3>=1.14"],
+        "aws_secrets": ["boto3>=1.8.7"],
+        "azure_secrets": ["azure-identity>=1.0.0", "azure-keyvault-secrets>=4.0.0"],
         "snowflake": ["snowflake-sqlalchemy>=1.2"],
     },
     "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),
@@ -56,6 +58,7 @@ config = {
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
 }
 

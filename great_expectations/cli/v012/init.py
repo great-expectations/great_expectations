@@ -24,6 +24,7 @@ from great_expectations.cli.v012.cli_messages import (
 from great_expectations.cli.v012.datasource import add_datasource as add_datasource_impl
 from great_expectations.cli.v012.docs import build_docs
 from great_expectations.cli.v012.util import cli_message
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.exceptions import (
     DataContextError,
     DatasourceInitializationError,
@@ -76,7 +77,7 @@ def init(target_directory, view, usage_stats):
                 # Ensure the context can be instantiated
                 cli_message(PROJECT_IS_COMPLETE)
         except (DataContextError, DatasourceInitializationError) as e:
-            cli_message("<red>{}</red>".format(e.message))
+            cli_message(f"<red>{e.message}</red>")
             sys.exit(1)
 
         try:
@@ -88,7 +89,7 @@ def init(target_directory, view, usage_stats):
             # cli_message(SETUP_SUCCESS)
             # exit(0)
         except DataContextError as e:
-            cli_message("<red>{}</red>".format(e.message))
+            cli_message(f"<red>{e.message}</red>")
             # TODO ensure this is covered by a test
             exit(5)
     else:
@@ -101,12 +102,15 @@ def init(target_directory, view, usage_stats):
             context = DataContext.create(
                 target_directory, usage_statistics_enabled=usage_stats
             )
-            toolkit.send_usage_message(
-                data_context=context, event="cli.init.create", success=True
+            send_usage_message(
+                data_context=context,
+                event="cli.init.create",
+                api_version="v2",
+                success=True,
             )
         except DataContextError as e:
             # TODO ensure this is covered by a test
-            cli_message("<red>{}</red>".format(e))
+            cli_message(f"<red>{e}</red>")
 
     try:
         # if expectations exist, offer to build docs
@@ -188,7 +192,7 @@ def init(target_directory, view, usage_stats):
         OSError,
         SQLAlchemyError,
     ) as e:
-        cli_message("<red>{}</red>".format(e))
+        cli_message(f"<red>{e}</red>")
         sys.exit(1)
 
 

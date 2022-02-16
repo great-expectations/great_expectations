@@ -63,6 +63,33 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
     }
+    args_keys = ("other_table_name",)
+
+    @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
+        template_str = "Row count must equal the row count of table $other_table_name."
+
+        params_with_json_schema = {
+            "other_table_name": {
+                "schema": {"type": "string"},
+                "value": params.get("other_table_name"),
+            },
+        }
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -73,7 +100,7 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
@@ -105,7 +132,7 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         if not result.result.get("observed_value"):
             return "--"

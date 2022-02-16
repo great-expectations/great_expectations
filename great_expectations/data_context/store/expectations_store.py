@@ -1,4 +1,6 @@
 import random
+import uuid
+from typing import Dict
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
@@ -9,6 +11,7 @@ from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
 )
 from great_expectations.data_context.util import load_class
 from great_expectations.util import (
@@ -103,9 +106,16 @@ class ExpectationsStore(Store):
 
     _key_class = ExpectationSuiteIdentifier
 
-    def __init__(self, store_backend=None, runtime_environment=None, store_name=None):
+    def __init__(
+        self,
+        store_backend=None,
+        runtime_environment=None,
+        store_name=None,
+        data_context=None,
+    ):
         self._expectationSuiteSchema = ExpectationSuiteSchema()
-
+        # TODO: refactor so ExpectationStore can have access to DataContext. Currently used by usage_stats messages.
+        self._data_context = data_context
         if store_backend is not None:
             store_backend_module_name = store_backend.get(
                 "module_name", "great_expectations.data_context.store"
@@ -148,16 +158,36 @@ class ExpectationsStore(Store):
             "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,
         }
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
+
+    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+        """
+        This method takes full json response from GE cloud and outputs a dict appropriate for
+        deserialization into a GE object
+        """
+        ge_cloud_expectation_suite_id = response_json["data"]["id"]
+        expectation_suite_dict = response_json["data"]["attributes"]["suite"]
+        expectation_suite_dict["ge_cloud_id"] = ge_cloud_expectation_suite_id
+
+        return expectation_suite_dict
+
+    def get(self, key) -> ExpectationSuite:
+        return super().get(key)
 
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
 
     def serialize(self, key, value):
+        if self.ge_cloud_mode:
+            # GeCloudStoreBackend expects a json str
+            return self._expectationSuiteSchema.dump(value)
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
     def deserialize(self, key, value):
-        return self._expectationSuiteSchema.loads(value)
+        if isinstance(value, dict):
+            return self._expectationSuiteSchema.load(value)
+        else:
+            return self._expectationSuiteSchema.loads(value)
 
     def self_check(self, pretty_print):
         return_obj = {}
@@ -183,8 +213,15 @@ class ExpectationsStore(Store):
         test_key_name = "test-key-" + "".join(
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
-        test_key = self._key_class(test_key_name)
-        test_value = ExpectationSuite(test_key_name)
+        if self.ge_cloud_mode:
+            test_key: GeCloudIdentifier = self.key_class(
+                resource_type="contract", ge_cloud_id=str(uuid.uuid4())
+            )
+        else:
+            test_key: ExpectationSuiteIdentifier = self.key_class(test_key_name)
+        test_value = ExpectationSuite(
+            expectation_suite_name=test_key_name, data_context=self._data_context
+        )
 
         if pretty_print:
             print(f"Attempting to add a new test key: {test_key}...")
@@ -201,7 +238,7 @@ class ExpectationsStore(Store):
             key=test_key,
         )
         if pretty_print:
-            print("\tTest value successfully retreived.")
+            print("\tTest value successfully retrieved.")
             print()
 
         if pretty_print:

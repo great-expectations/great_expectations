@@ -1,4 +1,6 @@
 import os
+from contextlib import contextmanager
+from unittest import mock
 
 import pytest
 
@@ -6,6 +8,10 @@ import great_expectations.exceptions as gee
 from great_expectations.data_context.util import (
     PasswordMasker,
     parse_substitution_variable,
+    substitute_value_from_aws_secrets_manager,
+    substitute_value_from_azure_keyvault,
+    substitute_value_from_gcp_secret_manager,
+    substitute_value_from_secret_store,
 )
 from great_expectations.util import load_class
 
@@ -42,7 +48,7 @@ def test_load_class_raises_error_when_module_name_is_not_string():
             load_class(bad_input, "great_expectations.datasource")
 
 
-def test_password_masker_mask_db_url():
+def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     """
     What does this test and why?
     The PasswordMasker.mask_db_url() should mask passwords consistently in database urls. The output of mask_db_url should be the same whether user_urlparse is set to True or False.
@@ -217,10 +223,16 @@ def test_password_masker_mask_db_url():
 
     # SQLite
     # relative path
-    assert PasswordMasker.mask_db_url("sqlite:///foo.db") == "sqlite:///foo.db"
+    temp_dir = tmp_path / "sqllite_tests"
+    temp_dir.mkdir()
+    monkeypatch.chdir(temp_dir)
     assert (
-        PasswordMasker.mask_db_url("sqlite:///foo.db", use_urlparse=True)
-        == "sqlite:///foo.db"
+        PasswordMasker.mask_db_url(f"sqlite:///something/foo.db")
+        == f"sqlite:///something/foo.db"
+    )
+    assert (
+        PasswordMasker.mask_db_url(f"sqlite:///something/foo.db", use_urlparse=True)
+        == f"sqlite:///something/foo.db"
     )
 
     # absolute path
@@ -278,3 +290,225 @@ def test_parse_substitution_variable():
     assert parse_substitution_variable("some_$tring") is None
     assert parse_substitution_variable("${SOME_$TRING}") is None
     assert parse_substitution_variable("$SOME_$TRING") == "SOME_"
+
+
+@contextmanager
+def does_not_raise():
+    yield
+
+
+@pytest.mark.parametrize(
+    "input_value,method_to_patch,return_value",
+    [
+        ("any_value", None, "any_value"),
+        ("secret|any_value", None, "secret|any_value"),
+        (
+            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret",
+            "great_expectations.data_context.util.substitute_value_from_aws_secrets_manager",
+            "success",
+        ),
+        (
+            "secret|projects/project_id/secrets/my_secret",
+            "great_expectations.data_context.util.substitute_value_from_gcp_secret_manager",
+            "success",
+        ),
+        (
+            "secret|https://my-vault-name.vault.azure.net/secrets/my_secret",
+            "great_expectations.data_context.util.substitute_value_from_azure_keyvault",
+            "success",
+        ),
+    ],
+)
+def test_substitute_value_from_secret_store(input_value, method_to_patch, return_value):
+    if method_to_patch:
+        with mock.patch(method_to_patch, return_value=return_value):
+            assert substitute_value_from_secret_store(value=input_value) == return_value
+    else:
+        assert substitute_value_from_secret_store(value=input_value) == return_value
+
+
+class MockedBoto3Client:
+    def __init__(self, secret_response):
+        self.secret_response = secret_response
+
+    def get_secret_value(self, *args, **kwargs):
+        return self.secret_response
+
+
+class MockedBoto3Session:
+    def __init__(self, secret_response):
+        self.secret_response = secret_response
+
+    def __call__(self):
+        return self
+
+    def client(self, *args, **kwargs):
+        return MockedBoto3Client(self.secret_response)
+
+
+@pytest.mark.parametrize(
+    "input_value,secret_response,raises,expected",
+    [
+        (
+            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret",
+            {"SecretString": "value"},
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret",
+            {"SecretBinary": b"dmFsdWU="},
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret|key",
+            {"SecretString": '{"key": "value"}'},
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret|key",
+            {"SecretBinary": b"eyJrZXkiOiAidmFsdWUifQ=="},
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-se%&et|key",
+            None,
+            pytest.raises(ValueError),
+            None,
+        ),
+        (
+            "secret|arn:aws:secretsmanager:region-name-1:123456789012:secret:my-secret:000000000-0000-0000-0000-00000000000|key",
+            None,
+            pytest.raises(ValueError),
+            None,
+        ),
+    ],
+)
+def test_substitute_value_from_aws_secrets_manager(
+    input_value, secret_response, raises, expected
+):
+    with raises:
+        with mock.patch(
+            "great_expectations.data_context.util.boto3.session.Session",
+            return_value=MockedBoto3Session(secret_response),
+        ):
+            assert substitute_value_from_aws_secrets_manager(input_value) == expected
+
+
+class MockedSecretManagerServiceClient:
+    def __init__(self, secret_response):
+        self.secret_response = secret_response
+
+    def __call__(self):
+        return self
+
+    def access_secret_version(self, *args, **kwargs):
+        class Response:
+            pass
+
+        response = Response()
+        response._pb = Response()
+        response._pb.payload = Response()
+        response._pb.payload.data = self.secret_response
+
+        return response
+
+
+@pytest.mark.parametrize(
+    "input_value,secret_response,raises,expected",
+    [
+        (
+            "secret|projects/project_id/secrets/my_secret",
+            b"value",
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|projects/project_id/secrets/my_secret|key",
+            b'{"key": "value"}',
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|projects/project_id/secrets/my_se%&et|key",
+            None,
+            pytest.raises(ValueError),
+            None,
+        ),
+        (
+            "secret|projects/project_id/secrets/my_secret/version/A|key",
+            None,
+            pytest.raises(ValueError),
+            None,
+        ),
+    ],
+)
+def test_substitute_value_from_gcp_secret_manager(
+    input_value, secret_response, raises, expected
+):
+    with raises:
+        with mock.patch(
+            "great_expectations.data_context.util.secretmanager.SecretManagerServiceClient",
+            return_value=MockedSecretManagerServiceClient(secret_response),
+        ):
+            assert substitute_value_from_gcp_secret_manager(input_value) == expected
+
+
+class MockedSecretClient:
+    def __init__(self, secret_response):
+        self.secret_response = secret_response
+
+    def __call__(self, *args, **kwargs):
+        return self
+
+    def get_secret(self, *args, **kwargs):
+        class Response:
+            pass
+
+        response = Response()
+        response.value = self.secret_response
+        return response
+
+
+@mock.patch("great_expectations.data_context.util.DefaultAzureCredential", new=object)
+@pytest.mark.parametrize(
+    "input_value,secret_response,raises,expected",
+    [
+        (
+            "secret|https://my-vault-name.vault.azure.net/secrets/my-secret",
+            "value",
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|https://my-vault-name.vault.azure.net/secrets/my-secret|key",
+            '{"key": "value"}',
+            does_not_raise(),
+            "value",
+        ),
+        (
+            "secret|https://my-vault-name.vault.azure.net/secrets/my-se%&et|key",
+            None,
+            pytest.raises(ValueError),
+            None,
+        ),
+        (
+            "secret|https://my_vault_name.vault.azure.net/secrets/my-secret/A0000000000000000000000000000000|key",
+            None,
+            pytest.raises(ValueError),
+            None,
+        ),
+    ],
+)
+def test_substitute_value_from_azure_keyvault(
+    input_value, secret_response, raises, expected
+):
+    with raises:
+        with mock.patch(
+            "great_expectations.data_context.util.SecretClient",
+            return_value=MockedSecretClient(secret_response),
+        ):
+            assert substitute_value_from_azure_keyvault(input_value) == expected

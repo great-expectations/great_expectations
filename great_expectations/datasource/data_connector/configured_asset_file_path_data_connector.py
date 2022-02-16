@@ -1,5 +1,5 @@
-import copy
 import logging
+from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
@@ -26,8 +26,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     This allows more fine-tuning, but also requires more setup.
 
     *Note*: ConfiguredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently
-    ConfiguredAssetFilesystemDataConnector and ConfiguredAssetS3DataConnector are subclasses of
-    ConfiguredAssetFilePathDataConnector.
+    ConfiguredAssetFilesystemDataConnector, ConfiguredAssetS3DataConnector, ConfiguredAssetAzureDataConnector, and
+    ConfiguredAssetGCSDataConnector are subclasses of ConfiguredAssetFilePathDataConnector.
 
     """
 
@@ -39,6 +39,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
+        batch_spec_passthrough: Optional[dict] = None,
     ):
         """
         Base class for DataConnectors that connect to filesystem-like data by taking in
@@ -52,6 +53,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             execution_engine (ExecutionEngine): Execution Engine object to actually read the data
             default_regex (dict): Optional dict the filter and organize the data_references.
             sorters (list): Optional list if you want to sort the data_references
+            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         logger.debug(f'Constructing ConfiguredAssetFilePathDataConnector "{name}".')
         super().__init__(
@@ -60,6 +62,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             execution_engine=execution_engine,
             default_regex=default_regex,
             sorters=sorters,
+            batch_spec_passthrough=batch_spec_passthrough,
         )
 
         if assets is None:
@@ -148,16 +151,9 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             number of data_references known by this DataConnector.
         """
-        if self._data_references_cache is None:
-            raise ValueError(
-                f"data references cache for {self.__class__.__name__} {self.name} has not yet been populated."
-            )
-
         total_references: int = sum(
-            [
-                len(self._data_references_cache[data_asset_name])
-                for data_asset_name in self._data_references_cache
-            ]
+            len(self._data_references_cache[data_asset_name])
+            for data_asset_name in self._data_references_cache
         )
 
         return total_references
@@ -170,11 +166,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """
-        if self._data_references_cache is None:
-            raise ValueError(
-                '_data_references_cache is None.  Have you called "_refresh_data_references_cache()" yet?'
-            )
-
         unmatched_data_references: List[str] = []
         for (
             data_asset_name,
@@ -204,7 +195,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         return self._get_full_file_path_for_asset(path=path, asset=asset)
 
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
-        regex_config: dict = copy.deepcopy(self._default_regex)
+        regex_config: dict = deepcopy(self._default_regex)
         asset: Optional[Asset] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
@@ -242,12 +233,26 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         Returns:
             BatchSpec built from batch_definition
         """
+
+        data_asset_name: str = batch_definition.data_asset_name
+        if (
+            data_asset_name in self.assets
+            and self.assets[data_asset_name].batch_spec_passthrough
+            and isinstance(self.assets[data_asset_name].batch_spec_passthrough, dict)
+        ):
+            # batch_spec_passthrough from data_asset
+            batch_spec_passthrough = deepcopy(
+                self.assets[data_asset_name]["batch_spec_passthrough"]
+            )
+            batch_definition_batch_spec_passthrough = (
+                deepcopy(batch_definition.batch_spec_passthrough) or {}
+            )
+            # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset
+            batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
+            batch_definition.batch_spec_passthrough = batch_spec_passthrough
+
         batch_spec: PathBatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
-
-        data_asset_name: str = batch_definition.data_asset_name
-        if data_asset_name in self.assets:
-            batch_spec.update(self.assets[data_asset_name].batch_spec_passthrough)
 
         return batch_spec

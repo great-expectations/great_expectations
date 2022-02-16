@@ -1,13 +1,17 @@
 import logging
 import os
 
-import pyparsing as pp
 import pytest
 
 import tests.test_utils as test_utils
 from great_expectations.data_context.store import DatabaseStoreBackend
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import StoreBackendError
+
+try:
+    sqlalchemy = pytest.importorskip("sqlalchemy")
+except ImportError:
+    sqlalchemy = None
 
 
 def test_database_store_backend_schema_spec(caplog, sa, test_backends):

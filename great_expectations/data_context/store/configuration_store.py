@@ -62,8 +62,8 @@ class ConfigurationStore(Store):
             # Store Backend Class was loaded successfully; verify that it is of a correct subclass.
             if issubclass(store_backend_class, TupleStoreBackend):
                 # Provide defaults for this common case
-                store_backend["filepath_template"] = store_backend.get(
-                    "filepath_template", "{0}.yml"
+                store_backend["filepath_suffix"] = store_backend.get(
+                    "filepath_suffix", ".yml"
                 )
 
         super().__init__(
@@ -82,7 +82,7 @@ class ConfigurationStore(Store):
             "module_name": self.__class__.__module__,
             "class_name": self.__class__.__name__,
         }
-        filter_properties_dict(properties=self._config, inplace=True)
+        filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
         self._overwrite_existing = overwrite_existing
 
@@ -90,14 +90,18 @@ class ConfigurationStore(Store):
         return self.store_backend.remove_key(key)
 
     def serialize(self, key, value):
+        if self.ge_cloud_mode:
+            # GeCloudStoreBackend expects a json str
+            config_schema = value.get_schema_class()()
+            return config_schema.dump(value)
         return value.to_yaml_str()
 
     def deserialize(self, key, value):
-        config_commented_map_from_yaml: CommentedMap = yaml.load(value)
+        config = value
+        if isinstance(value, str):
+            config: CommentedMap = yaml.load(value)
         try:
-            return self._configuration_class.from_commented_map(
-                commented_map=config_commented_map_from_yaml
-            )
+            return self._configuration_class.from_commented_map(commented_map=config)
         except ge_exceptions.InvalidBaseYamlConfigError:
             # Just to be explicit about what we intended to catch
             raise
@@ -122,7 +126,7 @@ class ConfigurationStore(Store):
             print("Checking for existing keys...")
 
         report_object["keys"] = sorted(
-            [key.configuration_key for key in self.list_keys()]
+            key.configuration_key for key in self.list_keys()
         )
 
         report_object["len_keys"] = len(report_object["keys"])

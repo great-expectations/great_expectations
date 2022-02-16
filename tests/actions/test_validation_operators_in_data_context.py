@@ -2,15 +2,18 @@ import json
 
 import pytest
 
-from great_expectations.core.expectation_suite import ExpectationSuiteSchema
+from great_expectations import DataContext
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import DataContextError
-from tests.test_utils import expectationSuiteSchema
+from great_expectations.self_check.util import expectationSuiteSchema
 
 
 @pytest.fixture()
-def parameterized_expectation_suite():
+def parameterized_expectation_suite(empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
     fixture_path = file_relative_path(
         __file__,
         "../test_fixtures/expectation_suites/parameterized_expression_expectation_suite_fixture.json",
@@ -18,7 +21,8 @@ def parameterized_expectation_suite():
     with open(
         fixture_path,
     ) as suite:
-        return expectationSuiteSchema.load(json.load(suite))
+        expectation_suite_dict: dict = expectationSuiteSchema.load(json.load(suite))
+        return ExpectationSuite(**expectation_suite_dict, data_context=context)
 
 
 @pytest.fixture
@@ -162,7 +166,7 @@ def test_action_list_operator(validation_operators_data_context):
     # a tuple of parameters for get_batch
     operator_result = data_context.run_validation_operator(
         assets_to_validate=[batch, (validator_batch_kwargs, "f1.warning")],
-        run_id="test-100",
+        run_id=RunIdentifier(run_name="test-100"),
         evaluation_parameters={},
         validation_operator_name="store_val_res_and_extract_eval_params",
     )
@@ -269,7 +273,7 @@ def test_warning_and_failure_validation_operator(validation_operators_data_conte
     # a tuple of parameters for get_batch
     results = data_context.run_validation_operator(
         assets_to_validate=[batch],
-        run_id="test-100",
+        run_id=RunIdentifier(run_name="test-100"),
         validation_operator_name="errors_and_warnings_validation_operator",
         base_expectation_suite_name="f1",
     )

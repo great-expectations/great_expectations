@@ -16,7 +16,7 @@ from great_expectations.exceptions import EvaluationParameterError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import Expectation
 from great_expectations.expectations.registry import register_expectation
-from tests.test_utils import expectationSuiteValidationResultSchema
+from great_expectations.self_check.util import expectationSuiteValidationResultSchema
 
 
 @pytest.fixture

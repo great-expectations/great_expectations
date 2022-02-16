@@ -2,20 +2,21 @@ import datetime
 import logging
 import uuid
 import warnings
-from collections import Callable
+from collections.abc import Callable
 from functools import partial
 from io import BytesIO
 
 import pandas as pd
 
 from great_expectations.core.batch import Batch, BatchMarkers
+from great_expectations.core.util import S3Url
+from great_expectations.datasource.datasource import LegacyDatasource
 from great_expectations.exceptions import BatchKwargsError
+from great_expectations.execution_engine.pandas_execution_engine import (
+    hash_pandas_dataframe,
+)
 from great_expectations.types import ClassConfig
-
-from ..core.util import S3Url
-from ..execution_engine.pandas_execution_engine import hash_pandas_dataframe
-from ..types.configurations import classConfigSchema
-from .datasource import LegacyDatasource
+from great_expectations.types.configurations import classConfigSchema
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ class PandasDatasource(LegacyDatasource):
         reader_method=None,
         reader_options=None,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         """
         Build a full configuration object for a datasource, potentially including generators with defaults.
@@ -114,7 +115,7 @@ class PandasDatasource(LegacyDatasource):
         reader_method=None,
         reader_options=None,
         limit=None,
-        **kwargs
+        **kwargs,
     ):
         configuration_with_defaults = PandasDatasource.build_configuration(
             data_asset_type,
@@ -123,7 +124,7 @@ class PandasDatasource(LegacyDatasource):
             reader_method=reader_method,
             reader_options=reader_options,
             limit=limit,
-            **kwargs
+            **kwargs,
         )
 
         data_asset_type = configuration_with_defaults.pop("data_asset_type")
@@ -135,7 +136,7 @@ class PandasDatasource(LegacyDatasource):
             data_context=data_context,
             data_asset_type=data_asset_type,
             batch_kwargs_generators=batch_kwargs_generators,
-            **configuration_with_defaults
+            **configuration_with_defaults,
         )
 
         self._build_generators()
@@ -159,23 +160,23 @@ class PandasDatasource(LegacyDatasource):
         if self._reader_options:
             # Then update with any locally-specified reader options
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"].update(self._reader_options)
 
         # Then update with any locally-specified reader options
         if reader_options:
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"].update(reader_options)
 
         if self._limit:
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"]["nrows"] = self._limit
 
         if limit is not None:
             if not batch_kwargs.get("reader_options"):
-                batch_kwargs["reader_options"] = dict()
+                batch_kwargs["reader_options"] = {}
             batch_kwargs["reader_options"]["nrows"] = limit
 
         if self._reader_method:
@@ -222,9 +223,7 @@ class PandasDatasource(LegacyDatasource):
             raw_url = batch_kwargs["s3"]
             reader_method = batch_kwargs.get("reader_method")
             url = S3Url(raw_url)
-            logger.debug(
-                "Fetching s3 object. Bucket: {} Key: {}".format(url.bucket, url.key)
-            )
+            logger.debug(f"Fetching s3 object. Bucket: {url.bucket} Key: {url.key}")
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
             reader_fn = self._get_reader_fn(reader_method, url.key)
             default_reader_options = self._infer_default_options(
@@ -284,6 +283,8 @@ class PandasDatasource(LegacyDatasource):
                 "reader_method": "read_csv",
                 "reader_options": {"compression": "gzip"},
             }
+        elif path.endswith(".sas7bdat") or path.endswith(".xpt"):
+            return {"reader_method": "read_sas"}
 
         raise BatchKwargsError(
             "Unable to determine reader method from path: %s" % path, {"path": path}
@@ -300,9 +301,13 @@ class PandasDatasource(LegacyDatasource):
         Returns:
             dict: A copy of the reader options post-inference
         """
-        if reader_fn.__name__ == "read_parquet":
+        while isinstance(reader_fn, partial):
+            # reader_fn might be partial so need to unwrap to get underlying method
+            reader_fn = reader_fn.func
+        name = reader_fn.__name__
+        if name == "read_parquet":
             return {}
-        if reader_fn.__name__ == "read_excel":
+        if name == "read_excel":
             return {}
         else:
             return {"encoding": "utf-8"}

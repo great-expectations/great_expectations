@@ -18,45 +18,41 @@ class SuiteScaffoldNotebookRenderer(SuiteEditNotebookRenderer):
 
     def add_header(self):
         self.add_markdown_cell(
-            """# Scaffold a new Expectation Suite (Experimental)
-This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns you care about and letting a profiler write some candidate expectations for you to adjust.
+            f"""# Scaffold a new Expectation Suite (Experimental)
+This process helps you avoid writing lots of boilerplate when authoring suites by allowing you to select columns and other factors that you care about and letting a profiler write some candidate expectations for you to adjust.
 
-**Expectation Suite Name**: `{}`
+**Expectation Suite Name**: `{self.suite_name}`
 
-We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)!""".format(
-                self.suite_name
-            )
+We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Channel**](https://greatexpectations.io/slack)!"""
         )
 
         if not self.batch_kwargs:
-            self.batch_kwargs = dict()
+            self.batch_kwargs = {}
         self.add_code_cell(
-            """\
-import datetime
+            f"""\
 import great_expectations as ge
-import great_expectations.jupyter_ux
 from great_expectations.checkpoint import LegacyCheckpoint
-from great_expectations.profile import BasicSuiteBuilderProfiler
+from great_expectations.profile.user_configurable_profiler import UserConfigurableProfiler
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
 context = ge.data_context.DataContext()
 
-expectation_suite_name = "{}"
+expectation_suite_name = "{self.suite_name}"
+
+# Wipe the suite clean to prevent unwanted expectations in the batch
 suite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
 
-batch_kwargs = {}
+batch_kwargs = {self.batch_kwargs}
 batch = context.get_batch(batch_kwargs, suite)
-batch.head()""".format(
-                self.suite_name, self.batch_kwargs
-            ),
+batch.head()""",
             lint=True,
         )
 
     def _add_scaffold_column_list(self):
-        columns = [f"    # '{col}'" for col in self.batch.get_table_columns()]
+        columns = [f"    '{col}'" for col in self.batch.get_table_columns()]
         columns = ",\n".join(columns)
         code = f"""\
-included_columns = [
+ignored_columns = [
 {columns}
 ]"""
         self.add_code_cell(code, lint=True)
@@ -125,11 +121,11 @@ This can be done by running `great_expectations suite edit {self.suite_name}`.""
         self._notebook = nbformat.v4.new_notebook()
         self.add_header()
         self.add_markdown_cell(
-            """## Select the columns on which you would like to scaffold expectations
+            """## Select the columns on which you would like to scaffold expectations and those which you would like to ignore.
 
 Great Expectations will choose which expectations might make sense for a column based on the **data type** and **cardinality** of the data in each selected column.
 
-Simply uncomment columns that are important. You can select multiple lines and
+Simply comment out columns that are important and should be included. You can select multiple lines and
 use a jupyter keyboard shortcut to toggle each line: **Linux/Windows**:
 `Ctrl-/`, **macOS**: `Cmd-/`"""
         )
@@ -144,10 +140,11 @@ The suites generated here are **not meant to be production suites** - they are *
 suite](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_edit_an_expectation_suite_using_a_disposable_notebook.html?utm_source=notebook&utm_medium=scaffold_expectations)
 after scaffolding gets you close to what you want.**
 
-This is highly configurable depending on your goals. You can include or exclude
-columns, and include or exclude expectation types (when applicable). [The
-Expectation Glossary](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html?utm_source=notebook&utm_medium=scaffold_expectations)
-contains a list of possible expectations."""
+This is highly configurable depending on your goals.
+You can ignore columns or exclude certain expectations, specify a threshold for creating value set expectations, or even specify semantic types for a given column.
+You can find more information about [how to configure this profiler, including a list of the expectations that it uses, here.](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_and_editing_expectations/how_to_create_an_expectation_suite_with_the_user_configurable_profiler.html)
+
+"""
         )
         self._add_scaffold_cell()
         self.add_footer()
@@ -166,16 +163,15 @@ contains a list of possible expectations."""
     def _add_scaffold_cell(self):
         self.add_code_cell(
             """\
-# Wipe the suite clean to prevent unwanted expectations in the batch
-suite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
-batch = context.get_batch(batch_kwargs, suite)
+profiler = UserConfigurableProfiler(profile_dataset=batch,
+    ignored_columns=ignored_columns,
+    excluded_expectations=None,
+    not_null_only=False,
+    primary_or_compound_key=False,
+    semantic_types_dict=None,
+    table_expectations_only=False,
+    value_set_threshold="MANY",
+    )
 
-# In the scaffold_config, included or excluded expectation names should be strings.
-scaffold_config = {
-    "included_columns": included_columns,
-    # "excluded_columns": [],
-    # "included_expectations": [],
-    # "excluded_expectations": [],
-}
-suite, evr = BasicSuiteBuilderProfiler().profile(batch, profiler_configuration=scaffold_config)"""
+suite = profiler.build_suite()"""
         )

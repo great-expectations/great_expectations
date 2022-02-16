@@ -8,8 +8,7 @@ import pandas as pd
 import pytest
 
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
-
-from ..test_utils import (
+from great_expectations.self_check.util import (
     candidate_getter_is_on_temporary_notimplemented_list,
     get_dataset,
 )

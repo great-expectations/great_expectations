@@ -1,4 +1,6 @@
 import json
+import logging
+import traceback
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
@@ -26,11 +28,13 @@ from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric_value,
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
+    column_aggregate_partial,
+    column_aggregate_value,
 )
+from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.util import render_evaluation_parameter_string
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import RenderedStringTemplateContent
@@ -41,6 +45,32 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
+
+logger = logging.getLogger(__name__)
+
+try:
+    from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.sql import Select
+except ImportError:
+    logger.debug(
+        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    )
+    ProgrammingError = None
+    Select = None
+
+try:
+    from sqlalchemy.engine.row import Row
+except ImportError:
+    try:
+        from sqlalchemy.engine.row import RowProxy
+
+        Row = RowProxy
+    except ImportError:
+        logger.debug(
+            "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
+        )
+        RowProxy = None
+        Row = None
 
 
 class ColumnSkew(ColumnMetricProvider):
@@ -55,34 +85,80 @@ class ColumnSkew(ColumnMetricProvider):
             return np.abs(stats.skew(column))
         return stats.skew(column)
 
-    #
-    # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
-    # def _sqlalchemy(
-    #     cls,
-    #     execution_engine: "SqlAlchemyExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     (
-    #         selectable,
-    #         compute_domain_kwargs,
-    #         accessor_domain_kwargs,
-    #     ) = execution_engine.get_compute_domain(
-    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
-    #     )
-    #     column_name = accessor_domain_kwargs["column"]
-    #     column = sa.column(column_name)
-    #     sqlalchemy_engine = execution_engine.engine
-    #     dialect = sqlalchemy_engine.dialect
-    #
-    #     column_median = None
-    #
-    #     # TODO: compute the value and return it
-    #
-    #     return column_median
-    #
+    @metric_value(engine=SqlAlchemyExecutionEngine)
+    def _sqlalchemy(
+        cls,
+        execution_engine: "SqlAlchemyExecutionEngine",
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[Tuple, Any],
+        runtime_configuration: Dict,
+    ):
+        (
+            selectable,
+            compute_domain_kwargs,
+            accessor_domain_kwargs,
+        ) = execution_engine.get_compute_domain(
+            metric_domain_kwargs, MetricDomainTypes.COLUMN
+        )
+
+        column_name = accessor_domain_kwargs["column"]
+        column = sa.column(column_name)
+        sqlalchemy_engine = execution_engine.engine
+        dialect = sqlalchemy_engine.dialect
+
+        column_mean = _get_query_result(
+            func=sa.func.avg(column * 1.0),
+            selectable=selectable,
+            sqlalchemy_engine=sqlalchemy_engine,
+        )
+
+        column_count = _get_query_result(
+            func=sa.func.count(column),
+            selectable=selectable,
+            sqlalchemy_engine=sqlalchemy_engine,
+        )
+
+        if dialect.name.lower() == "mssql":
+            standard_deviation = sa.func.stdev(column)
+        else:
+            standard_deviation = sa.func.stddev_samp(column)
+
+        column_std = _get_query_result(
+            func=standard_deviation,
+            selectable=selectable,
+            sqlalchemy_engine=sqlalchemy_engine,
+        )
+
+        column_third_moment = _get_query_result(
+            func=sa.func.sum(sa.func.pow(column - column_mean, 3)),
+            selectable=selectable,
+            sqlalchemy_engine=sqlalchemy_engine,
+        )
+
+        column_skew = column_third_moment / (column_std**3) / (column_count - 1)
+        if metric_value_kwargs["abs"]:
+            return np.abs(column_skew)
+        else:
+            return column_skew
+
+
+def _get_query_result(func, selectable, sqlalchemy_engine):
+    simple_query: Select = sa.select(func).select_from(selectable)
+
+    try:
+        result: Row = sqlalchemy_engine.execute(simple_query).fetchone()[0]
+        return result
+    except ProgrammingError as pe:
+        exception_message: str = "An SQL syntax Exception occurred."
+        exception_traceback: str = traceback.format_exc()
+        exception_message += (
+            f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
+        )
+        logger.error(exception_message)
+        raise pe()
+
+        #
     # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
     # def _spark(
     #     cls,
@@ -229,6 +305,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     "title": "positive_test_positive_skew",
                     "exact_match_out": False,
                     "include_in_gallery": True,
+                    "tolerance": 0.1,
                     "in": {"column": "a", "min_value": 0.25, "max_value": 10},
                     "out": {"success": True, "observed_value": 1.6974323016687487},
                 },
@@ -236,6 +313,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     "title": "negative_test_no_skew",
                     "exact_match_out": False,
                     "include_in_gallery": True,
+                    "tolerance": 0.1,
                     "in": {"column": "b", "min_value": 0.25, "max_value": 10},
                     "out": {"success": False, "observed_value": -0.07638895580386174},
                 },
@@ -243,6 +321,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     "title": "positive_test_negative_skew",
                     "exact_match_out": False,
                     "include_in_gallery": True,
+                    "tolerance": 0.1,
                     "in": {"column": "c", "min_value": -10, "max_value": -0.5},
                     "out": {"success": True, "observed_value": -0.9979514313860596},
                 },
@@ -250,6 +329,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     "title": "negative_test_abs_skew",
                     "exact_match_out": False,
                     "include_in_gallery": True,
+                    "tolerance": 0.1,
                     "in": {
                         "column": "c",
                         "abs": True,
@@ -262,6 +342,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     "title": "positive_test_abs_skew",
                     "exact_match_out": False,
                     "include_in_gallery": True,
+                    "tolerance": 0.1,
                     "in": {
                         "column": "c",
                         "abs": True,
@@ -271,7 +352,17 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     "out": {"success": True, "observed_value": 0.9979514313860596},
                 },
             ],
-        },
+            "test_backends": [
+                {
+                    "backend": "pandas",
+                    "dialects": None,
+                },
+                {
+                    "backend": "sqlalchemy",
+                    "dialects": ["mysql", "postgresql"],
+                },
+            ],
+        }
     ]
 
     # This dictionary contains metadata for display in the public gallery
@@ -307,7 +398,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
     # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
     #     """
     #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-    #     neccessary configuration arguments have been provided for the validation of the expectation.
+    #     necessary configuration arguments have been provided for the validation of the expectation.
     #
     #     Args:
     #         configuration (OPTIONAL[ExpectationConfiguration]): \
@@ -401,4 +492,5 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
 
 if __name__ == "__main__":
     self_check_report = ExpectColumnSkewToBeBetween().run_diagnostics()
+
     print(json.dumps(self_check_report, indent=2))

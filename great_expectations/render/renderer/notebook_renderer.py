@@ -4,7 +4,10 @@ import nbformat
 
 from great_expectations import DataContext
 from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.util import lint_code
+from great_expectations.util import (
+    convert_json_string_to_be_python_compliant,
+    lint_code,
+)
 
 
 class BaseNotebookRenderer(Renderer):
@@ -19,7 +22,9 @@ class BaseNotebookRenderer(Renderer):
         # self.render() and/or self.render_to_disk() method(s):
         self._notebook: Optional[nbformat.NotebookNode] = None
 
-    def add_code_cell(self, code: str, lint: bool = False) -> None:
+    def add_code_cell(
+        self, code: str, lint: bool = False, enforce_py_syntax: bool = True
+    ) -> None:
         """
         Add the given code as a new code cell.
         Args:
@@ -29,8 +34,11 @@ class BaseNotebookRenderer(Renderer):
         Returns:
             Nothing, adds a cell to the class instance notebook
         """
+        if enforce_py_syntax:
+            code = convert_json_string_to_be_python_compliant(code)
+
         if lint:
-            code: str = lint_code(code).rstrip("\n")
+            code = lint_code(code).rstrip("\n")
 
         cell = nbformat.v4.new_code_cell(code)
         self._notebook["cells"].append(cell)
@@ -64,31 +72,6 @@ class BaseNotebookRenderer(Renderer):
         """
         Render a notebook from parameters.
         """
-        # Implementation example from `suite edit`:
-
-        # def render(
-        #         self, suite: ExpectationSuite, batch_kwargs=None
-        # ) -> nbformat.NotebookNode:
-        #     """
-        #     Render a notebook dict from an expectation suite.
-        #     """
-        # Check for errors in parameters, get values to be used
-        #     if not isinstance(suite, ExpectationSuite):
-        #         raise RuntimeWarning("render must be given an ExpectationSuite.")
-        #
-        #     self._notebook = nbformat.v4.new_notebook()
-        #
-        #     suite_name = suite.expectation_suite_name
-        #
-        #     batch_kwargs = self.get_batch_kwargs(suite, batch_kwargs)
-        # Add cells
-        #     self.add_header(suite_name, batch_kwargs)
-        #     self.add_authoring_intro()
-        #     self.add_expectation_cells_from_suite(suite.expectations)
-        #     self.add_footer()
-        #
-        # Return notebook
-        #     return self._notebook
         raise NotImplementedError
 
     def render_to_disk(
@@ -98,17 +81,4 @@ class BaseNotebookRenderer(Renderer):
         """
         Render a notebook to disk from arguments
         """
-        # Implementation example from `suite edit`:
-
-        # def render_to_disk(
-        #         self, suite: ExpectationSuite, notebook_file_path: str, batch_kwargs=None
-        # ) -> None:
-        #     """
-        #     Render a notebook to disk from an expectation suite.
-        #
-        #     If batch_kwargs are passed they will override any found in suite
-        #     citations.
-        #     """
-        #     self.render(suite, batch_kwargs)
-        #     self.write_notebook_to_disk(self._notebook, notebook_file_path)
         raise NotImplementedError

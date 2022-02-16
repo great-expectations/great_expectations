@@ -5,17 +5,15 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.map_metric import (
+from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
     column_function_partial,
 )
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
@@ -45,18 +43,20 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        if metric.metric_name == "column_values.value_length.equals.condition":
-            return {
-                "column_values.value_length.map": MetricConfiguration(
-                    "column_values.value_length.map", metric.metric_domain_kwargs
-                )
-            }
-        return super()._get_evaluation_dependencies(
+        dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
+
+        if metric.metric_name == "column_values.value_length.equals.condition":
+            dependencies["column_values.value_length.map"] = MetricConfiguration(
+                metric_name="column_values.value_length.map",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
+
+        return dependencies
 
 
 class ColumnValuesValueLength(ColumnMapMetricProvider):
@@ -212,15 +212,17 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        if metric.metric_name == "column_values.value_length.between.condition":
-            return {
-                "column_values.value_length.map": MetricConfiguration(
-                    "column_values.value_length.map", metric.metric_domain_kwargs
-                )
-            }
-        return super()._get_evaluation_dependencies(
+        dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
+
+        if metric.metric_name == "column_values.value_length.between.condition":
+            dependencies["column_values.value_length.map"] = MetricConfiguration(
+                metric_name="column_values.value_length.map",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+            )
+
+        return dependencies

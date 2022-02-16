@@ -179,7 +179,7 @@ two common reasons why `setup.py` might not be in the root:
   `setup.cfg`, and `tox.ini`. Projects like these produce multiple PyPI
   distributions (and upload multiple independently-installable tarballs).
 * Source trees whose main purpose is to contain a C library, but which also
-  provide bindings to Python (and perhaps other langauges) in subdirectories.
+  provide bindings to Python (and perhaps other languages) in subdirectories.
 
 Versioneer will look for `.git` in parent directories, and most operations
 should get the right version string. However `pip` and `setuptools` have bugs
@@ -412,7 +412,7 @@ def run_command(commands, args, cwd=None, verbose=False, hide_stderr=False, env=
             return None, None
     else:
         if verbose:
-            print("unable to find command, tried {}".format(commands))
+            print(f"unable to find command, tried {commands}")
         return None, None
     stdout = p.communicate()[0].strip()
     if sys.version_info[0] >= 3:
@@ -697,7 +697,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
         # TAG-NUM-gHEX
         mo = re.search(r'^(.+)-(\d+)-g([0-9a-f]+)$', git_describe)
         if not mo:
-            # unparseable. Maybe git-describe is misbehaving?
+            # unparsable. Maybe git-describe is misbehaving?
             pieces["error"] = ("unable to parse git-describe output: '%%s'"
                                %% describe_out)
             return pieces
@@ -1104,7 +1104,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
         # TAG-NUM-gHEX
         mo = re.search(r"^(.+)-(\d+)-g([0-9a-f]+)$", git_describe)
         if not mo:
-            # unparseable. Maybe git-describe is misbehaving?
+            # unparsable. Maybe git-describe is misbehaving?
             pieces["error"] = "unable to parse git-describe output: '%s'" % describe_out
             return pieces
 
@@ -1480,7 +1480,7 @@ def get_versions(verbose=False):
     try:
         ver = versions_from_file(versionfile_abs)
         if verbose:
-            print("got version from file {} {}".format(versionfile_abs, ver))
+            print(f"got version from file {versionfile_abs} {ver}")
         return ver
     except NotThisMethod:
         pass

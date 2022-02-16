@@ -9,6 +9,7 @@ from great_expectations import DataContext
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidTopLevelConfigKeyError
 from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
@@ -37,8 +38,8 @@ yaml.indent(mapping=2, sequence=4, offset=2)
     id: checkpoint_command_line
     title: LegacyCheckpoint - Command Line
     icon:
-    short_description: Run a configured checkpoint from a command line.
-    description: Run a configured checkpoint from a command line in a Terminal shell.
+    short_description: Run a configured Checkpoint from a command line.
+    description: Run a configured Checkpoint from a command line in a Terminal shell.
     how_to_guide_url: https://docs.greatexpectations.io/en/latest/guides/how_to_guides/validation/how_to_run_a_checkpoint_in_terminal.html
     maturity: Experimental
     maturity_details:
@@ -68,15 +69,15 @@ def checkpoint(ctx):
     A Checkpoint can be as complex as many batches of data across different
     datasources paired with one or more Expectation Suites each.
     """
-    directory: str = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context: DataContext = toolkit.load_data_context_with_error_handling(
-        directory=directory,
-        from_cli_upgrade_command=False,
+    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
+
+    usage_stats_prefix = f"cli.checkpoint.{ctx.invoked_subcommand}"
+    send_usage_message(
+        data_context=ctx.obj.data_context,
+        event=f"{usage_stats_prefix}.begin",
+        success=True,
     )
-    # TODO consider moving this all the way up in to the CLIState constructor
-    ctx.obj.data_context = context
+    ctx.obj.usage_event_end = f"{usage_stats_prefix}.end"
 
 
 @checkpoint.command(name="new")
@@ -98,11 +99,11 @@ def checkpoint_new(ctx, name, jupyter):
 
 def _checkpoint_new(ctx, checkpoint_name, jupyter):
 
-    usage_event: str = "cli.checkpoint.new"
-    context = ctx.obj.data_context
+    context: DataContext = ctx.obj.data_context
+    usage_event_end: str = ctx.obj.usage_event_end
 
     try:
-        _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event)
+        _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event_end)
 
         # Create notebook on disk
         notebook_name = f"edit_checkpoint_{checkpoint_name}.ipynb"
@@ -119,7 +120,11 @@ def _checkpoint_new(ctx, checkpoint_name, jupyter):
                 f"To continue editing this Checkpoint, run <green>jupyter notebook {notebook_file_path}</green>"
             )
 
-        toolkit.send_usage_message(context, event=usage_event, success=True)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
+        )
 
         if jupyter:
             cli_message(
@@ -130,8 +135,8 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
-            usage_event=usage_event,
+            data_context=context,
+            usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
         return
@@ -143,13 +148,13 @@ def _verify_checkpoint_does_not_exist(
     try:
         if checkpoint_name in context.list_checkpoints():
             toolkit.exit_with_failure_message_and_stats(
-                context,
-                usage_event,
-                f"A Checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
+                data_context=context,
+                usage_event=usage_event,
+                message=f"A Checkpoint named `{checkpoint_name}` already exists. Please choose a new name.",
             )
     except InvalidTopLevelConfigKeyError as e:
         toolkit.exit_with_failure_message_and_stats(
-            context, usage_event, f"<red>{e}</red>"
+            data_context=context, usage_event=usage_event, message=f"<red>{e}</red>"
         )
 
 
@@ -161,19 +166,24 @@ def _get_notebook_path(context, notebook_name):
     )
 
 
-# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="list")
 @click.pass_context
 def checkpoint_list(ctx):
-    """List configured Checkpoints."""
+    """List configured checkpoints."""
     context: DataContext = ctx.obj.data_context
+    usage_event_end: str = ctx.obj.usage_event_end
+
     checkpoints: List[str] = context.list_checkpoints()
     if not checkpoints:
         cli_message(
             "No Checkpoints found.\n"
             "  - Use the command `great_expectations checkpoint new` to create one."
         )
-        toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
+        )
         sys.exit(0)
 
     number_found: int = len(checkpoints)
@@ -181,29 +191,37 @@ def checkpoint_list(ctx):
     message: str = f"Found {number_found} Checkpoint{plural}."
     pretty_list: list = [f" - <cyan>{cp}</cyan>" for cp in checkpoints]
     cli_message_list(pretty_list, list_intro_string=message)
-    toolkit.send_usage_message(context, event="cli.checkpoint.list", success=True)
+    send_usage_message(
+        data_context=context,
+        event=usage_event_end,
+        success=True,
+    )
 
 
-# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="delete")
 @click.argument("checkpoint")
 @click.pass_context
 def checkpoint_delete(ctx, checkpoint):
     """Delete a Checkpoint."""
-    usage_event: str = "cli.checkpoint.delete"
     context: DataContext = ctx.obj.data_context
+    usage_event_end: str = ctx.obj.usage_event_end
 
     try:
         toolkit.delete_checkpoint(
             context=context,
             checkpoint_name=checkpoint,
-            usage_event=usage_event,
+            usage_event=usage_event_end,
+            assume_yes=ctx.obj.assume_yes,
         )
-        toolkit.send_usage_message(context, event="cli.checkpoint.delete", success=True)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
+        )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
-            usage_event=usage_event,
+            data_context=context,
+            usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
         return
@@ -212,37 +230,44 @@ def checkpoint_delete(ctx, checkpoint):
     sys.exit(0)
 
 
-# TODO: <Alex>ALEX Or should we put the code here into a separate method to be called once CLI options are parsed?</Alex>
 @checkpoint.command(name="run")
 @click.argument("checkpoint")
 @click.pass_context
 def checkpoint_run(ctx, checkpoint):
     """Run a Checkpoint."""
-    usage_event: str = "cli.checkpoint.run"
     context: DataContext = ctx.obj.data_context
+    usage_event_end: str = ctx.obj.usage_event_end
 
     try:
         result: CheckpointResult = toolkit.run_checkpoint(
             context=context,
             checkpoint_name=checkpoint,
-            usage_event=usage_event,
+            usage_event=usage_event_end,
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
-            usage_event=usage_event,
+            data_context=context,
+            usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )
         return
 
     if not result["success"]:
         cli_message(string="Validation failed!")
-        toolkit.send_usage_message(context, event=usage_event, success=True)
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
+        )
         print_validation_operator_results_details(result=result)
         sys.exit(1)
 
     cli_message("Validation succeeded!")
-    toolkit.send_usage_message(context, event=usage_event, success=True)
+    send_usage_message(
+        data_context=context,
+        event=usage_event_end,
+        success=True,
+    )
     print_validation_operator_results_details(result=result)
     sys.exit(0)
 
@@ -288,11 +313,11 @@ def checkpoint_script(ctx, checkpoint):
 
     This script is provided for those who wish to run Checkpoints via python.
     """
-    usage_event: str = "cli.checkpoint.script"
     context: DataContext = ctx.obj.data_context
+    usage_event_end: str = ctx.obj.usage_event_end
 
     toolkit.validate_checkpoint(
-        context=context, checkpoint_name=checkpoint, usage_event=usage_event
+        context=context, checkpoint_name=checkpoint, usage_event=usage_event_end
     )
 
     script_name: str = f"run_{checkpoint}.py"
@@ -302,9 +327,9 @@ def checkpoint_script(ctx, checkpoint):
 
     if os.path.isfile(script_path):
         toolkit.exit_with_failure_message_and_stats(
-            context,
-            usage_event,
-            f"""<red>Warning! A script named {script_name} already exists and this command will not overwrite it.</red>
+            data_context=context,
+            usage_event=usage_event_end,
+            message=f"""<red>Warning! A script named {script_name} already exists and this command will not overwrite it.</red>
   - Existing file path: {script_path}""",
         )
 
@@ -318,7 +343,11 @@ def checkpoint_script(ctx, checkpoint):
   - The script is located in `great_expectations/uncommitted/run_{checkpoint}.py`
   - The script can be run with `python great_expectations/uncommitted/run_{checkpoint}.py`"""
     )
-    toolkit.send_usage_message(context, event=usage_event, success=True)
+    send_usage_message(
+        data_context=context,
+        event=usage_event_end,
+        success=True,
+    )
 
 
 def _write_checkpoint_script_to_disk(

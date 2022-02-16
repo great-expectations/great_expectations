@@ -1,14 +1,14 @@
+import warnings
+
 from dateutil.parser import parse
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.import_manager import sa
-from great_expectations.expectations.metrics.map_metric import (
+from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
@@ -33,7 +33,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes: bool = False,
         allow_cross_type_comparisons=None,
         **kwargs
     ):
@@ -41,12 +41,24 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
             raise ValueError("min_value and max_value cannot both be None")
 
         if parse_strings_as_datetimes:
-            # tolerance = timedelta(days=tolerance)
-            if min_value:
-                min_value = parse(min_value)
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
 
-            if max_value:
-                max_value = parse(max_value)
+            if min_value is not None:
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
+
+            if max_value is not None:
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
 
             try:
                 temp_column = column.map(parse)
@@ -153,15 +165,28 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes: bool = False,
         **kwargs
     ):
         if parse_strings_as_datetimes:
-            if min_value:
-                min_value = parse(min_value)
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
 
-            if max_value:
-                max_value = parse(max_value)
+            if min_value is not None:
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
+
+            if max_value is not None:
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
 
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")
@@ -199,15 +224,28 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         max_value=None,
         strict_min=None,
         strict_max=None,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes: bool = False,
         **kwargs
     ):
         if parse_strings_as_datetimes:
-            if min_value:
-                min_value = parse(min_value)
+            warnings.warn(
+                """The parameter "parse_strings_as_datetimes" is no longer supported and will be deprecated in a \
+future release.  Please update code accordingly.
+""",
+                DeprecationWarning,
+            )
 
-            if max_value:
-                max_value = parse(max_value)
+            if min_value is not None:
+                try:
+                    min_value = parse(min_value)
+                except TypeError:
+                    pass
+
+            if max_value is not None:
+                try:
+                    max_value = parse(max_value)
+                except TypeError:
+                    pass
 
         if min_value is not None and max_value is not None and min_value > max_value:
             raise ValueError("min_value cannot be greater than max_value")

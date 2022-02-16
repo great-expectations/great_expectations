@@ -43,7 +43,7 @@ Upgrade Confirmation
 Please consult the 0.11.x migration guide for instructions on how to complete any required manual steps or
 to learn more about the automated upgrade process:
 
-    https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html#id1
+    https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api
 
 Would you like to proceed with the project upgrade? [Y/n]: 
 
@@ -67,5 +67,5 @@ A log detailing the upgrade can be found here:
     - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
     - When complete, increment the config_version key in your [36mgreat_expectations.yml[0m to [36m2.0[0m
 
-To learn more about the upgrade process, visit [36mhttps://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html[0m
+To learn more about the upgrade process, visit [36mhttps://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api[0m
 [0m

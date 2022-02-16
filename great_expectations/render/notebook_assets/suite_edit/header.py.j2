@@ -11,7 +11,9 @@ context = ge.data_context.DataContext()
 expectation_suite_name = "{{ suite_name }}"
 suite = context.get_expectation_suite(expectation_suite_name)
 suite.expectations = []
-
+{% if suite_notes is not none -%}
+suite.meta["notes"] = {{ suite_notes }}
+{%- endif %}
 batch_kwargs = {{ batch_kwargs }}
 batch = context.get_batch(batch_kwargs, suite)
 batch.head()

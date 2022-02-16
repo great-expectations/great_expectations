@@ -3,7 +3,7 @@
 # Here you can define datasources, batch kwargs generators, integrations and
 # more. This file is intended to be committed to your repo. For help with
 # configuration please:
-#   - Read our docs: https://docs.greatexpectations.io/en/latest/how_to_guides/spare_parts/data_context_reference.html#configuration
+#   - Read our docs: https://docs.greatexpectations.io/en/latest/reference/spare_parts/data_context_reference.html#configuration
 #   - Join our slack channel: http://greatexpectations.io/slack
 
 # config_version refers to the syntactic version of this config file, and is used in maintaining backwards compatibility
@@ -12,7 +12,7 @@ config_version: 2.0
 
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
-# add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource_reference.html
+# add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
 datasources:
   my_pandas_runtime_datasource:
     class_name: Datasource
@@ -22,7 +22,7 @@ datasources:
       my_data_connector:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
-        runtime_keys:
+        batch_identifiers:
           - an_example_key
           - another_example_key
   my_spark_datasource:
@@ -33,7 +33,7 @@ datasources:
       my_data_connector:
         module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
-        runtime_keys:
+        batch_identifiers:
           - an_example_key
           - another_example_key
 config_variables_file_path: uncommitted/config_variables.yml
@@ -117,5 +117,5 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 
 anonymous_usage_statistics:
-  enabled: false
+  enabled: true
 notebooks:

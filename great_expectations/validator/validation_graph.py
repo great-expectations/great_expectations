@@ -1,61 +1,15 @@
 import copy
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Union, cast
 
-from great_expectations.core.id_dict import IDDict
-
-
-class MetricConfiguration:
-    def __init__(
-        self,
-        metric_name: str,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: dict = None,
-        metric_dependencies: dict = None,
-    ):
-        self._metric_name = metric_name
-        if not isinstance(metric_domain_kwargs, IDDict):
-            metric_domain_kwargs = IDDict(metric_domain_kwargs)
-        self._metric_domain_kwargs = metric_domain_kwargs
-        if not isinstance(metric_value_kwargs, IDDict):
-            if metric_value_kwargs is None:
-                metric_value_kwargs = dict()
-            metric_value_kwargs = IDDict(metric_value_kwargs)
-        self._metric_value_kwargs = metric_value_kwargs
-        if metric_dependencies is None:
-            metric_dependencies = dict()
-        self.metric_dependencies = metric_dependencies
-
-    @property
-    def metric_name(self):
-        return self._metric_name
-
-    @property
-    def metric_domain_kwargs(self):
-        return self._metric_domain_kwargs
-
-    @property
-    def metric_value_kwargs(self):
-        return self._metric_value_kwargs
-
-    @property
-    def metric_domain_kwargs_id(self):
-        return self._metric_domain_kwargs.to_id()
-
-    @property
-    def metric_value_kwargs_id(self):
-        return self._metric_value_kwargs.to_id()
-
-    @property
-    def id(self) -> Tuple[str, str, str]:
-        return (
-            self.metric_name,
-            self.metric_domain_kwargs_id,
-            self.metric_value_kwargs_id,
-        )
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.validator.exception_info import ExceptionInfo
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 class MetricEdge:
-    def __init__(self, left: MetricConfiguration, right: Optional[MetricConfiguration]):
+    def __init__(
+        self, left: MetricConfiguration, right: Optional[MetricConfiguration] = None
+    ):
         self._left = left
         self._right = right
 
@@ -91,3 +45,70 @@ class ValidationGraph:
     @property
     def edges(self):
         return copy.deepcopy(self._edges)
+
+    @property
+    def edge_ids(self):
+        return {edge.id for edge in self.edges}
+
+
+class ExpectationValidationGraph:
+    def __init__(self, configuration: ExpectationConfiguration):
+        self._configuration = configuration
+        self._graph = ValidationGraph()
+
+    def update(self, graph: ValidationGraph):
+        edge: MetricEdge
+        for edge in graph.edges:
+            self.graph.add(edge=edge)
+
+    def get_exception_info(
+        self,
+        metric_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ],
+    ) -> Set[ExceptionInfo]:
+        metric_info = self._filter_metric_info_in_graph(metric_info=metric_info)
+        metric_exception_info: Set[ExceptionInfo] = set()
+        metric_id: Tuple[str, str, str]
+        metric_info_item: Union[MetricConfiguration, Set[ExceptionInfo], int]
+        for metric_id, metric_info_item in metric_info.items():
+            metric_exception_info.update(
+                cast(Set[ExceptionInfo], metric_info_item["exception_info"])
+            )
+
+        return metric_exception_info
+
+    def _filter_metric_info_in_graph(
+        self,
+        metric_info: Dict[
+            Tuple[str, str, str],
+            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+        ],
+    ) -> Dict[
+        Tuple[str, str, str],
+        Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+    ]:
+        graph_metric_ids: List[Tuple[str, str, str]] = []
+        edge: MetricEdge
+        vertex: MetricConfiguration
+        for edge in self.graph.edges:
+            for vertex in [edge.left, edge.right]:
+                if vertex is not None:
+                    graph_metric_ids.append(vertex.id)
+
+        metric_id: Tuple[str, str, str]
+        metric_info_item: Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]]
+        return {
+            metric_id: metric_info_item
+            for metric_id, metric_info_item in metric_info.items()
+            if metric_id in graph_metric_ids
+        }
+
+    @property
+    def configuration(self) -> ExpectationConfiguration:
+        return self._configuration
+
+    @property
+    def graph(self) -> ValidationGraph:
+        return self._graph

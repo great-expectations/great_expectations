@@ -78,3 +78,7 @@ data_docs_sites:
       base_directory: uncommitted/data_docs/local_site/ # this is the default path but can be changed as required
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
+
+anonymous_usage_statistics:
+  data_context_id: 7f76b3c9-330c-4307-b882-7ad9186adf0c
+  enabled: true

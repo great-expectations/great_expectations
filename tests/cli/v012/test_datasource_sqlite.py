@@ -23,7 +23,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
         cli, ["datasource", "list", "-d", project_root_dir], catch_exceptions=False
     )
 
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
     assert "No Datasources found" in stdout
     assert context.list_datasources() == []
 
@@ -54,7 +54,7 @@ def test_cli_datasource_list(empty_data_context, empty_sqlite_db, caplog):
 """.format(
         url
     ).strip()
-    stdout = result.output.strip()
+    stdout = result.stdout.strip()
 
     assert stdout == expected_output
 
@@ -154,7 +154,7 @@ def _add_datasource__with_two_generators_and_credentials_to_context(
     return context
 
 
-def test_cli_datasorce_new_connection_string(
+def test_cli_datasource_new_connection_string(
     empty_data_context, empty_sqlite_db, caplog
 ):
     project_root_dir = empty_data_context.root_directory
@@ -165,7 +165,7 @@ def test_cli_datasorce_new_connection_string(
     result = runner.invoke(
         cli,
         ["datasource", "new", "-d", project_root_dir],
-        input="2\n6\nmynewsource\n{}\n\n".format(str(empty_sqlite_db.url)),
+        input=f"2\n6\nmynewsource\n{str(empty_sqlite_db.url)}\n\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -284,7 +284,7 @@ def test_cli_datasource_profile_with_datasource_arg(
     stdout = result.stdout
 
     assert result.exit_code == 0
-    assert "Profiling '{}'".format(datasource_name) in stdout
+    assert f"Profiling '{datasource_name}'" in stdout
 
     context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
@@ -355,7 +355,7 @@ def test_cli_datasource_profile_with_datasource_arg_and_generator_name_arg(
     stdout = result.stdout
 
     assert result.exit_code == 0
-    assert "Profiling '{}'".format(datasource_name) in stdout
+    assert f"Profiling '{datasource_name}'" in stdout
 
     context = DataContext(project_root_dir)
     assert len(context.list_datasources()) == 1
@@ -439,6 +439,7 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
     context = _add_datasource_and_credentials_to_context(
         context, datasource_name, titanic_sqlite_db
     )
+    res = context.get_available_data_asset_names("wow_a_datasource")
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -457,10 +458,9 @@ def test_cli_datasource_profile_with_data_asset_and_additional_batch_kwargs_with
         input="Y\n",
         catch_exceptions=False,
     )
-
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "Profiling '{}'".format(datasource_name) in stdout
+    assert f"Profiling '{datasource_name}'" in stdout
     assert "The following Data Docs sites will be built:\n" in stdout
     assert "local_site:" in stdout
 
@@ -528,7 +528,7 @@ def test_cli_datasource_profile_with_valid_data_asset_arg(
 
     stdout = result.stdout
     assert result.exit_code == 0
-    assert "Profiling '{}'".format(datasource_name) in stdout
+    assert f"Profiling '{datasource_name}'" in stdout
     assert "The following Data Docs sites will be built:\n" in stdout
     assert "local_site:" in stdout
 

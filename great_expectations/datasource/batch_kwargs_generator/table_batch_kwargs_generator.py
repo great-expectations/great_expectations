@@ -2,6 +2,9 @@ import logging
 import warnings
 from string import Template
 
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
+    BatchKwargsGenerator,
+)
 from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
 from great_expectations.marshmallow__shade import (
@@ -10,8 +13,6 @@ from great_expectations.marshmallow__shade import (
     fields,
     post_load,
 )
-
-from .batch_kwargs_generator import BatchKwargsGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -225,10 +226,17 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                         ]
                     )
                 else:
+                    # set default_schema_name
+                    if self.engine.dialect.name.lower() == "sqlite":
+                        # Workaround for compatibility with sqlalchemy < 1.4.0 and is described in issue #2641
+                        default_schema_name = None
+                    else:
+                        default_schema_name = self.inspector.default_schema_name
+
                     tables.extend(
                         [
                             (table_name, "table")
-                            if self.inspector.default_schema_name == schema_name
+                            if default_schema_name == schema_name
                             else (schema_name + "." + table_name, "table")
                             for table_name in self.inspector.get_table_names(
                                 schema=schema_name
@@ -240,7 +248,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                     tables.extend(
                         [
                             (table_name, "view")
-                            if self.inspector.default_schema_name == schema_name
+                            if default_schema_name == schema_name
                             else (schema_name + "." + table_name, "view")
                             for table_name in self.inspector.get_view_names(
                                 schema=schema_name
