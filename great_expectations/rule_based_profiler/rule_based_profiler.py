@@ -876,9 +876,19 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             name=name,
             ge_cloud_id=ge_cloud_id,
         )
-        profiler._reconcile_batch_requests_in_builders(batch_request)
 
-        result: ExpectationSuite = profiler.run()
+        # Parsing the input batch_request
+        rules = profiler.get_rules_as_dict()
+        variables = {}
+
+        # profiler._reconcile_batch_requests_in_builders(batch_request)
+
+        result: ExpectationSuite = profiler.run(
+            variables=variables,
+            rules=rules,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
         return result
 
     @staticmethod
