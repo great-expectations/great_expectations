@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-import pyparsing as pp
+from pyparsing import Suppress, Word, alphanums, alphas, nums, oneOf
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -25,22 +25,14 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
         self._condition = condition
 
     def _parse_condition(self):
-        var = pp.Word(pp.alphas + "._", pp.alphanums + "._")
-        text = pp.Suppress("'") + pp.Word(pp.alphas, pp.alphanums) + pp.Suppress("'")
-        integer = pp.Word(pp.nums).setParseAction(lambda t: int(t[0]))
-        operator = pp.oneOf(">= <= != > < ==")
+        var = Word(alphas + "._", alphanums + "._")
+        text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
+        integer = Word(nums).setParseAction(lambda t: int(t[0]))
+        operator = oneOf(">= <= != > < ==")
         comparison = (var + operator + (integer | text)).setParseAction(
             lambda t: self.operands_map[t[1]](t[0], t[2])
         )
-
-        expr = pp.operatorPrecedence(
-            pp.binary_op,
-            [
-                ("NOT", 1, pp.opAssoc.RIGHT, lambda t: pp.do_not(t)),
-                ("OR", 2, pp.opAssoc.LEFT, lambda t: pp.do_or(t)),
-                ("AND", 2, pp.opAssoc.LEFT, lambda t: pp.do_and(t)),
-            ],
-        )
+        comparison
 
     def _build_expectation_configuration(
         self,
@@ -58,7 +50,7 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
                 variables=variables,
                 parameters=parameters,
             )
-            for parameter_name, fully_qualified_parameter_name in self._expectation_kwargs.items()
+            # for parameter_name, fully_qualified_parameter_name in self._expectation_kwargs.items()
         }
         meta: Dict[str, Any] = get_parameter_value_and_validate_return_type(
             domain=domain,

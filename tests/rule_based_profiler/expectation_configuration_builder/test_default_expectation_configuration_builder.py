@@ -1,7 +1,7 @@
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
-    ConditionalExpectationConfigurationBuilder,
+    DefaultExpectationConfigurationBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
@@ -13,9 +13,7 @@ from great_expectations.rule_based_profiler.types import (
 )
 
 
-def test_conditional_expectation_configuration_builder_alice(
-    alice_columnar_table_single_batch_context,
-):
+def test_build_expectation_configuration(alice_columnar_table_single_batch_context):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
@@ -52,12 +50,8 @@ def test_conditional_expectation_configuration_builder_alice(
         parameters={domain.id: parameter_container},
     )
 
-    condition = None
-
-    conditional_expectation_configuration_builder = (
-        ConditionalExpectationConfigurationBuilder(
-            expectation_type="expect_column_values_to_be_between", condition=condition
-        )
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        expectation_type="expect_column_values_to_be_between",
     )
 
     assert value.value[0] == 397433
