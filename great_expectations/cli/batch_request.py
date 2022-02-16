@@ -19,8 +19,6 @@ try:
 except (ImportError, ModuleNotFoundError):
     parse_bigquery_url = None
 
-from great_expectations import DataContext
-
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.datasource import (
     BaseDatasource,
