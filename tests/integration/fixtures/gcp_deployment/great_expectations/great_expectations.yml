@@ -13,7 +13,64 @@ config_version: 3.0
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
-datasources: {}
+datasources:
+  my_taxi_datasource:
+    execution_engine:
+      module_name: great_expectations.execution_engine
+      class_name: PandasExecutionEngine
+    module_name: great_expectations.datasource
+    class_name: Datasource
+    data_connectors:
+      default_inferred_data_connector_name:
+        module_name: great_expectations.datasource.data_connector
+        default_regex:
+          group_names:
+            - data_asset_name
+          pattern: (.*)
+        base_directory: <PATH TO YOUR LOCAL DATA>
+        class_name: InferredAssetFilesystemDataConnector
+      default_runtime_data_connector_name:
+        module_name: great_expectations.datasource.data_connector
+        class_name: RuntimeDataConnector
+        batch_identifiers:
+          - default_identifier_name
+  my_gcs_datasource:
+    execution_engine:
+      module_name: great_expectations.execution_engine
+      class_name: PandasExecutionEngine
+    module_name: great_expectations.datasource
+    class_name: Datasource
+    data_connectors:
+      default_runtime_data_connector_name:
+        module_name: great_expectations.datasource.data_connector
+        class_name: RuntimeDataConnector
+        batch_identifiers:
+          - default_identifier_name
+      default_inferred_data_connector_name:
+        prefix: <YOUR GCS PREFIX NAME>
+        bucket_or_name: <YOUR GCS BUCKET NAME>
+        module_name: great_expectations.datasource.data_connector
+        default_regex:
+          pattern: (.*)\.csv
+          group_names:
+            - data_asset_name
+        class_name: InferredAssetGCSDataConnector
+  my_bigquery_datasource:
+    execution_engine:
+      module_name: great_expectations.execution_engine
+      connection_string: bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>
+      class_name: SqlAlchemyExecutionEngine
+    module_name: great_expectations.datasource
+    class_name: Datasource
+    data_connectors:
+      default_runtime_data_connector_name:
+        module_name: great_expectations.datasource.data_connector
+        class_name: RuntimeDataConnector
+        batch_identifiers:
+          - default_identifier_name
+      default_inferred_data_connector_name:
+        module_name: great_expectations.datasource.data_connector
+        class_name: InferredAssetSqlDataConnector
 
 config_variables_file_path: uncommitted/config_variables.yml
 

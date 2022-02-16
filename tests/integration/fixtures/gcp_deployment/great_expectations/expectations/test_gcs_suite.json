@@ -1,0 +1,26 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "test_gcs_suite",
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "passenger_count"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "congestion_surcharge",
+        "max_value": 1000,
+        "min_value": 0
+      },
+      "meta": {}
+    }
+  ],
+  "ge_cloud_id": null,
+  "meta": {
+    "great_expectations_version": "0.13.49+47.g43f9a53.dirty"
+  }
+}
