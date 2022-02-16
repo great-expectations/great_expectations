@@ -142,6 +142,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         ), "min_value and max_value cannot both be None"
 
         self.validate_metric_value_between_configuration(configuration=configuration)
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(

@@ -126,6 +126,8 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         super().validate_configuration(configuration=configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
 
+        return True
+
     @classmethod
     def _atomic_prescriptive_template(
         cls,
