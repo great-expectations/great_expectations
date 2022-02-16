@@ -44,7 +44,7 @@ If you've satisified at least the first four checks, you're ready to make a cont
 :::info
 Not quite there yet? See our guides on [creating Custom Expectations](../guides/expectations/creating_custom_expectations/overview.md) for help!
 
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](./contributing_maturity.md#contributing-expectations) for Expectations.
 :::
 
 ### 2. Double-check your Library Metadata
@@ -60,7 +60,7 @@ Ensure that your Custom Expectation's `library_metadata` has correct information
 
 <details>
 <summary>Packages?</summary>
-If you're interested in learning more about Custom Expectation Packages, see our <a href="contributing_package.md">guide on packaging your Custom Expectations</a>.
+If you're interested in learning more about Custom Expectation Packages, see our <a href="./contributing_package">guide on packaging your Custom Expectations</a>.
 <br/><br/>
 Not contributing to a specifc package? Your Custom Expectation will be automatically published in the <a href="https://pypi.org/project/great-expectations-experimental/">PyPI package <inlineCode>great-expectations-experimental</inlineCode></a>. 
 This package contains all of our Experimental community-contributed Custom Expectations, and is separate from the core <inlineCode>great-expectations</inlineCode> package.
