@@ -13,7 +13,9 @@ from great_expectations.rule_based_profiler.types import (
 )
 
 
-def test_build_expectation_configuration(alice_columnar_table_single_batch_context):
+def test_default_expectation_configuration_builder_alice(
+    alice_columnar_table_single_batch_context,
+):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     batch_request: dict = {
