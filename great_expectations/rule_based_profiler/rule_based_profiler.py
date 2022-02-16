@@ -9,7 +9,6 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     batch_request_contains_batch_data,
     get_batch_request_as_dict,
-    get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -315,45 +314,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 )
 
         return expectation_suite
-
-    def _reconcile_batch_requests_in_builders(
-        self, batch_request: Union[dict, BatchRequest, RuntimeBatchRequest]
-    ) -> None:
-        """
-        Profiler "batch_request" reconciliation involves combining existing Profiler state, instantiated from Profiler configuration
-        (e.g., stored in a YAML file managed by the Profiler store), with the batch request overrides, provided at run time.
-
-        The provided batch request is propagated to the following relevant Builders attributes (as applicable):
-            - ParameterBuilders
-            - ColumnDomainBuilder
-              - We default to the latest value as a sensible default (using index: -1)
-
-        The reconciliation logic for "batch_request" is of the "replace" nature: the provided data is consistently applied, regardless
-        of existing Builder state.
-
-        Args:
-            batch_request: Data provided at runtime used to hydrate nested builder attributes
-        """
-        if not isinstance(batch_request, dict):
-            batch_request = get_batch_request_as_dict(batch_request)
-
-        for rule in self.rules:
-            domain_builder = rule.domain_builder
-            if isinstance(domain_builder, ColumnDomainBuilder):
-                domain_builder.batch_request = copy.deepcopy(batch_request)
-                domain_builder.batch_request.data_connector_query = {"index": -1}
-                logger.info(
-                    "Overwrote Rule %s's DomainBuilder batch_request attr", rule.name
-                )
-
-            parameter_builders = rule.parameter_builders
-            if parameter_builders:
-                for parameter_builder in parameter_builders:
-                    parameter_builder.batch_request = copy.deepcopy(batch_request)
-                    logger.info(
-                        "Overwrote ParameterBuilder %s's batch_request attr",
-                        parameter_builder.name,
-                    )
 
     def reconcile_profiler_variables(
         self, variables: Optional[Dict[str, Any]] = None
@@ -869,6 +829,8 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         batch_request: Union[dict, BatchRequest, RuntimeBatchRequest],
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
     ) -> ExpectationSuite:
         profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
             data_context=data_context,
@@ -877,19 +839,67 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             ge_cloud_id=ge_cloud_id,
         )
 
-        # Parsing the input batch_request
-        rules = profiler.get_rules_as_dict()
-        variables = {}
+        # Convert Rules into dictionaries and then hydrate with batch request elements
+        rules = profiler._overwrite_rules_with_batch_request(batch_request)
 
-        # profiler._reconcile_batch_requests_in_builders(batch_request)
+        # NOTE: Slightly blocked at the moment
+        # Is "rules" a list or a dict of dicts? This is very important to figure out.
+        # Do we only need to overwrite rules? What about variables? (don't think so?)
 
         result: ExpectationSuite = profiler.run(
-            variables=variables,
             rules=rules,
             expectation_suite_name=expectation_suite_name,
             include_citation=include_citation,
         )
         return result
+
+    def _overwrite_rules_with_batch_request(
+        self, batch_request: Union[dict, BatchRequest, RuntimeBatchRequest]
+    ) -> List[dict]:
+        """
+        FIXME(cdkini): Clean this up!
+
+        Profiler "batch_request" reconciliation involves combining existing Profiler state, instantiated from Profiler configuration
+        (e.g., stored in a YAML file managed by the Profiler store), with the batch request overrides, provided at run time.
+
+        The provided batch request is propagated to the following relevant Builders attributes (as applicable):
+            - ParameterBuilders
+            - ColumnDomainBuilder
+              - We default to the latest value as a sensible default (using index: -1)
+
+        The reconciliation logic for "batch_request" is of the "replace" nature: the provided data is consistently applied, regardless
+        of existing Builder state.
+
+        Args:
+            batch_request: Data provided at runtime used to hydrate nested builder attributes
+        """
+        rules: List[Rule] = copy.deepcopy(self.rules)
+        if not isinstance(batch_request, dict):
+            batch_request = get_batch_request_as_dict(batch_request)
+
+        resulting_rules: List[Dict[str, Any]] = []
+
+        for rule in rules:
+            domain_builder = rule.domain_builder
+            if isinstance(domain_builder, ColumnDomainBuilder):
+                domain_builder.batch_request = copy.deepcopy(batch_request)
+                domain_builder.batch_request["data_connector_query"] = {"index": -1}
+                logger.info(
+                    "Overwrote Rule %s's DomainBuilder batch_request attr", rule.name
+                )
+
+            parameter_builders = rule.parameter_builders
+            if parameter_builders:
+                for parameter_builder in parameter_builders:
+                    parameter_builder.batch_request = copy.deepcopy(batch_request)
+                    logger.info(
+                        "Overwrote ParameterBuilder %s's batch_request attr",
+                        parameter_builder.name,
+                    )
+
+            resulting_rules.append(rule.to_dict())
+
+        return resulting_rules
 
     @staticmethod
     def add_profiler(
