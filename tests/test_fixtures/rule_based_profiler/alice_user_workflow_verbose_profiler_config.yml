@@ -136,7 +136,7 @@ rules:
       column_name_suffixes:
         - user_agent
     parameter_builders:
-      - name: my_value_set
+      - name: my_user_agent_value_set
         class_name: ValueSetMultiBatchParameterBuilder
         batch_request: $variables.alice_single_batch_data_batch_request
         module_name: great_expectations.rule_based_profiler.parameter_builder
@@ -146,4 +146,4 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        value_set: $parameter.my_value_set
+        value_set: $parameter.my_user_agent_value_set
