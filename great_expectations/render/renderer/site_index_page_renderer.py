@@ -102,8 +102,8 @@ class SiteIndexPageRenderer(Renderer):
                     "clearBtn": "true",
                     "autoclose": "true",
                     "format": "yyyy-mm-dd",
-                    "todayHighlight": "true"
-                }
+                    "todayHighlight": "true",
+                },
             },
             {
                 "field": "asset_name",
@@ -174,7 +174,7 @@ class SiteIndexPageRenderer(Renderer):
             "filterControl": "true",
             "iconSize": "sm",
             "toolbarAlign": "right",
-            "showSearchClearButton": "true"
+            "showSearchClearButton": "true",
         }
 
         table_columns = [
@@ -197,8 +197,8 @@ class SiteIndexPageRenderer(Renderer):
                     "clearBtn": "true",
                     "autoclose": "true",
                     "format": "yyyy-mm-dd",
-                    "todayHighlight": "true"
-                }
+                    "todayHighlight": "true",
+                },
             },
             {
                 "field": "run_name",
