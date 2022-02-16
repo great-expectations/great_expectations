@@ -577,11 +577,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             "sqlite",
             "oracle",
             "mssql",
+            "hive",
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
                 module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
+
         elif dialect_name == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
@@ -1457,6 +1459,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif engine_dialect == "teradatasql":
             stmt = 'CREATE VOLATILE TABLE "{table_name}" AS ({custom_sql}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 table_name=table_name, custom_sql=custom_sql
+            )
+        elif self.sql_engine_dialect.name.lower() in ("hive", b"hive"):
+            stmt = "CREATE TEMPORARY TABLE {schema_name}.{table_name} AS {custom_sql}".format(
+                schema_name=schema_name if schema_name is not None else "default",
+                table_name=table_name,
+                custom_sql=custom_sql,
             )
         else:
             stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
