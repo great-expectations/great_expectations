@@ -53,6 +53,7 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
 )
 from great_expectations.core.util import nested_update
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 STOP_SIGNAL = object()
 
@@ -539,6 +540,47 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
         except Exception as e:
             logger.debug(
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
+            )
+
+    return payload
+
+
+def get_profiler_run_usage_statistics(
+    profiler: RuleBasedProfiler, *args, **kwargs
+) -> dict:
+    data_context_id: Optional[str] = None
+    try:
+        data_context_id = profiler._data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+
+    anonymizer: Anonymizer = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+
+    payload: dict = {}
+
+    if profiler._usage_statistics_handler:
+        # noinspection PyBroadException
+        try:
+            # profiler_run_anonymizer: ProfilerRunAnonymizer
+            profiler_run_anonymizer = (
+                profiler._usage_statistics_handler._profiler_run_anonymizer
+            )
+
+            resolved_runtime_kwargs: dict = (
+                profiler_run_anonymizer.resolve_config_using_acceptable_arguments(
+                    *(profiler,), **kwargs
+                )
+            )
+
+            payload = profiler_run_anonymizer.anonymize_checkpoint_run(
+                *(profiler,), **resolved_runtime_kwargs
+            )
+        except Exception as e:
+            logger.debug(
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_profiler_run payload field"
             )
 
     return payload
