@@ -190,7 +190,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         message = "Has core logic that passes tests for all applicable Execution Engines and SQL dialects"
         for test_result in test_results:
             backend_results[test_result.backend].append(test_result.test_passed)
-            if test_result.test_passed == False:
+            if test_result.test_passed is False:
                 failing_names.append(test_result.test_title)
 
         for backend in backend_results:
