@@ -101,7 +101,9 @@ class ExpectColumnValuesToMatchRegexList(ColumnMapExpectation):
         "regex_list",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
