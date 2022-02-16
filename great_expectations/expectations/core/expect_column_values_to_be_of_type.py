@@ -52,11 +52,17 @@ except ImportError:
     sqlalchemy_redshift = None
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
+BIGQUERY_GEO_SUPPORT = False
 try:
     import sqlalchemy_bigquery as sqla_bigquery
 
     registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
     bigquery_types_tuple = None
+    try:
+        from sqlalchemy_bigquery import GEOGRAPHY
+        BIGQUERY_GEO_SUPPORT = True
+    except ImportError:
+        BIGQUERY_GEO_SUPPORT = False
 except ImportError:
     try:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
@@ -364,6 +370,17 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             types = []
             type_module = _get_dialect_type_module(execution_engine=execution_engine)
             try:
+                # bigquery geography requires installing an extra package
+                if (
+                    expected_type.lower() == "geography"
+                    and execution_engine.engine.dialect.name.lower() == "bigquery"
+                    and not BIGQUERY_GEO_SUPPORT
+                ):
+                    logger.warning(
+                        "BigQuery GEOGRAPHY type is not supported by default. " +
+                        "To install support, please run:" +
+                        "  $ pip install 'sqlalchemy-bigquery[geography]'"
+                    )
                 potential_type = getattr(type_module, expected_type)
                 # In the case of the PyAthena dialect we need to verify that
                 # the type returned is indeed a type and not an instance.
@@ -380,6 +397,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 )
             types = tuple(types)
             success = isinstance(actual_column_type, types)
+
 
         return {
             "success": success,
