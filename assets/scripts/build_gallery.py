@@ -22,6 +22,7 @@ logger.setLevel(logging.DEBUG)
 
 
 expectation_tracebacks = StringIO()
+expectation_checklists = StringIO()
 
 
 def execute_shell_command(command: str) -> int:
@@ -147,6 +148,9 @@ def build_gallery(
             )
             try:
                 diagnostics = impl().run_diagnostics()
+                checklist_string = diagnostics.generate_checklist()
+                expectation_checklists.write(f"\n\n----------------\n{expectation}\n")
+                expectation_checklists.write(f"{checklist_string}\n")
                 gallery_info[expectation] = diagnostics.to_json_dict()
                 built_expectations.add(expectation)
             except Exception:
@@ -213,6 +217,9 @@ def build_gallery(
                 )
                 try:
                     diagnostics = impl().run_diagnostics()
+                    checklist_string = diagnostics.generate_checklist()
+                    expectation_checklists.write(f"\n\n----------------\n(contrib) {expectation}\n")
+                    expectation_checklists.write(f"{checklist_string}\n")
                     gallery_info[expectation] = diagnostics.to_json_dict()
                     built_expectations.add(expectation)
                 except Exception:
@@ -243,7 +250,11 @@ def build_gallery(
 if __name__ == "__main__":
     gallery_info = build_gallery(include_core=True, include_contrib_experimental=True)
     tracebacks = expectation_tracebacks.getvalue()
+    checklists = expectation_checklists.getvalue()
     if tracebacks != "":
         print(tracebacks)
+    if checklists != "":
+        with open("./checklists.txt", "w") as outfile:
+            outfile.write(checklists)
     with open("./expectation_library.json", "w") as outfile:
         json.dump(gallery_info, outfile)
