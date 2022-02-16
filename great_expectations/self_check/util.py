@@ -99,10 +99,10 @@ except (ImportError, KeyError):
     sqliteDialect = None
     SQLITE_TYPES = {}
 
-_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery.sqlalchemy_bigquery"
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
-    import sqlalchemy_bigquery.sqlalchemy_bigquery as sqla_bigquery
-    import sqlalchemy_bigquery.sqlalchemy_bigquery as BigQueryDialect
+    import sqlalchemy_bigquery as sqla_bigquery
+    import sqlalchemy_bigquery as BigQueryDialect
 
     sqlalchemy.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     bigquery_types_tuple = None
@@ -120,6 +120,13 @@ try:
         "DATE": sqla_bigquery.DATE,
         "DATETIME": sqla_bigquery.DATETIME,
     }
+    try:
+        from sqlalchemy_bigquery import GEOGRAPHY
+
+        BIGQUERY_TYPES["GEOGRAPHY"] = GEOGRAPHY
+    except ImportError:
+        # BigQuery GEOGRAPHY support is optional
+        pass
 except ImportError:
     try:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
