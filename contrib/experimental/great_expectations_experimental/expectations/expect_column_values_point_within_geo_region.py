@@ -1,7 +1,7 @@
 import json
 
 import geopandas
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
@@ -39,33 +39,23 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
     # Please see {some doc} for information on how to choose an id string for your Metric.
     condition_metric_name = "column_values.point_within_geo_region"
-    condition_value_keys = ("country_iso_a3", "polygon_points")
+    condition_value_keys = ("country_iso_a3",)
     world = geopandas.read_file(geopandas.datasets.get_path("naturalearth_lowres"))
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, country_iso_a3, polygon_points, **kwargs):
-
-        # Check if the parameter are None
-        if polygon_points is not None:
-            polygon = Polygon(polygon_points)
-
-        elif country_iso_a3 is not None:
-            country_shapes = cls.world[["geometry", "iso_a3"]]
-            country_shapes = country_shapes[country_shapes["iso_a3"] == country_iso_a3]
-            country_shapes.reset_index(drop=True, inplace=True)
-
-            if country_shapes.empty:
-                raise Exception("This ISO country code is not supported.")
-
-            polygon = country_shapes["geometry"][0]
-        else:
-            raise Exception("Specify country_iso_a3 or polygon_points")
+    def _pandas(cls, column, country_iso_a3, **kwargs):
+        # Fetches polygon points from Geopandas library for the iso code
+        country_shapes = cls.world[["geometry", "iso_a3"]]
+        country_shapes = country_shapes[country_shapes["iso_a3"] == country_iso_a3]
+        country_shapes.reset_index(drop=True, inplace=True)
+        if country_shapes.empty:
+            raise Exception("This ISO country code is not supported.")
+        country_polygon = country_shapes["geometry"][0]
 
         points = geopandas.GeoSeries(column.apply(Point))
-
-        return points.within(polygon)
+        return points.within(country_polygon)
 
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
@@ -83,7 +73,7 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
 # The main business logic for calculation lives here.
 class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
     """This expectation will check a (longitude, latitude) tuple to see if it falls within a country input by the
-    user or a polygon specified by user input points. To do this geo calculation, it leverages the Geopandas library. So for now it only supports the countries
+    user. To do this geo calculation, it leverages the Geopandas library. So for now it only supports the countries
     that are in the Geopandas world database. Importantly, countries are defined by their iso_a3 country code, not their
     full name."""
 
@@ -105,23 +95,15 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
                     (-3.435973, 55.378051),
                     None,
                 ],
-                "mostly_points_within_geo_region_US": [
-                    (-116.884380, 33.570321),
-                    (-117.063457, 32.699316),
-                    (-117.063457, 32.699316),
-                    (-117.721397, 33.598757),
-                    None,
-                ],
             },
             "tests": [
                 {
-                    "title": "positive_test_with_mostly_iso_country_code",
+                    "title": "positive_test_with_mostly",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
                         "column": "mostly_points_within_geo_region_PER",
                         "country_iso_a3": "PER",
-                        "polygon_points": None,
                         "mostly": 0.5,
                     },
                     "out": {
@@ -131,76 +113,12 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
                     },
                 },
                 {
-                    "title": "negative_test_with_mostly_iso_country_code",
+                    "title": "negative_test_with_mostly",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
                         "column": "mostly_points_within_geo_region_GBR",
                         "country_iso_a3": "PER",
-                        "polygon_points": None,
-                        "mostly": 0.9,
-                    },
-                    "out": {
-                        "success": False,
-                        "unexpected_index_list": [2, 3],
-                        "unexpected_list": [(2.2426, 53.4808), (-3.435973, 55.378051)],
-                    },
-                },
-                {
-                    "title": "positive_test_with_mostly_input_points",
-                    "exact_match_out": False,
-                    "include_in_gallery": True,
-                    "in": {
-                        "column": "mostly_points_within_geo_region_PER",
-                        "country_iso_a3": None,
-                        "polygon_points": [
-                            (-80.397, -5.267),
-                            (-73.534, -8.908),
-                            (-70.500, -17.582),
-                            (-81.490, -14.627),
-                        ],
-                        "mostly": 0.5,
-                    },
-                    "out": {
-                        "success": True,
-                        "unexpected_index_list": [3],
-                        "unexpected_list": [(-3.435973, 55.378051)],
-                    },
-                },
-                {
-                    "title": "positive_test_with_mostly_input_points_usa",
-                    "exact_match_out": False,
-                    "include_in_gallery": True,
-                    "in": {
-                        "column": "mostly_points_within_geo_region_US",
-                        "country_iso_a3": None,
-                        "polygon_points": [
-                            (-117.012247, 32.580302),
-                            (-109.352, 41.258),
-                            (-121.426414, 36.346576),
-                            (-122.724666, 29.921319),
-                        ],
-                        "mostly": 1.0,
-                    },
-                    "out": {
-                        "success": True,
-                        "unexpected_index_list": [],
-                        "unexpected_list": [],
-                    },
-                },
-                {
-                    "title": "negative_test_with_mostly_input_points",
-                    "exact_match_out": False,
-                    "include_in_gallery": True,
-                    "in": {
-                        "column": "mostly_points_within_geo_region_GBR",
-                        "country_iso_a3": None,
-                        "polygon_points": [
-                            (-80.397, -5.267),
-                            (-73.534, -8.908),
-                            (-70.500, -17.582),
-                            (-81.490, -14.627),
-                        ],
                         "mostly": 0.9,
                     },
                     "out": {
@@ -234,7 +152,6 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
     # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
     success_keys = (
         "country_iso_a3",
-        "polygon_points",
         "mostly",
     )
 
