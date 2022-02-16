@@ -97,6 +97,12 @@ class SiteIndexPageRenderer(Renderer):
                 "sortName": "_run_time_sort",
                 "sortable": "true",
                 "filterControl": "datepicker",
+                "filterCustomSearch": "formatRuntimeDateForFilter",
+                "filterDatepickerOptions": {
+                   "clearBtn": "true",
+                    "autoClose": "true",
+                    "todayHighlight": "true"
+                }
             },
             {
                 "field": "asset_name",
@@ -167,6 +173,7 @@ class SiteIndexPageRenderer(Renderer):
             "filterControl": "true",
             "iconSize": "sm",
             "toolbarAlign": "right",
+            "showSearchClearButton": "true"
         }
 
         table_columns = [
@@ -184,6 +191,12 @@ class SiteIndexPageRenderer(Renderer):
                 "sortName": "_run_time_sort",
                 "sortable": "true",
                 "filterControl": "datepicker",
+                "filterCustomSearch": "formatRuntimeDateForFilter",
+                "filterDatepickerOptions": {
+                    "clearBtn": "true",
+                    "autoClose": "true",
+                    "todayHighlight": "true"
+                }
             },
             {
                 "field": "run_name",

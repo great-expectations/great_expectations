@@ -22,6 +22,16 @@
     return row._validation_success_text;
   }
 
+    function getFormattedDateWithoutTime  (date) {
+      return date.getFullYear() + "/" + (date.getMonth() + 1) + "/" + date.getDate();
+    }
+
+  function formatRuntimeDateForFilter(text, value, field, data){
+    const inputAsDateObj = new Date(text);
+    const cellValueAsDateObj = new Date(value);
+    return getFormattedDateWithoutTime(inputAsDateObj) == getFormattedDateWithoutTime(cellValueAsDateObj);
+  }
+
   function clearTableFilters(tableId) {
     $(`#${tableId}`).bootstrapTable('clearFilterControl');
     $(`#${tableId}`).bootstrapTable('resetSearch');
