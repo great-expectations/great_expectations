@@ -114,6 +114,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
         self._variables = _variables
 
+        if data_context:
+            self._usage_statistics_handler = data_context._usage_statistics_handler
+        else:
+            self._usage_statistics_handler = None
+
         self._data_context = data_context
 
         self._rules = self._init_profiler_rules(rules=rules)

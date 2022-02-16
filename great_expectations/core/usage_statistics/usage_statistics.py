@@ -40,6 +40,9 @@ from great_expectations.core.usage_statistics.anonymizers.execution_engine_anony
 from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
     ExpectationSuiteAnonymizer,
 )
+from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
+    ProfilerRunAnonymizer,
+)
 from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
     StoreAnonymizer,
 )
@@ -564,8 +567,7 @@ def get_profiler_run_usage_statistics(
     if profiler._usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            # profiler_run_anonymizer: ProfilerRunAnonymizer
-            profiler_run_anonymizer = (
+            profiler_run_anonymizer: ProfilerRunAnonymizer = (
                 profiler._usage_statistics_handler._profiler_run_anonymizer
             )
 
@@ -575,7 +577,7 @@ def get_profiler_run_usage_statistics(
                 )
             )
 
-            payload = profiler_run_anonymizer.anonymize_checkpoint_run(
+            payload = profiler_run_anonymizer.anonymize_profiler_run(
                 *(profiler,), **resolved_runtime_kwargs
             )
         except Exception as e:
