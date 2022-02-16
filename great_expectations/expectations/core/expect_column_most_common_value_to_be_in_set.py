@@ -99,7 +99,9 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
         "value_set",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """Validating that user has inputted a value set and that configuration has been initialized"""
         super().validate_configuration(configuration)
         if configuration is None:
