@@ -3,7 +3,6 @@ import json
 import geopandas
 from shapely.geometry import Point, Polygon
 
-
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import (
@@ -154,7 +153,12 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
                     "in": {
                         "column": "mostly_points_within_geo_region_PER",
                         "country_iso_a3": None,
-                        "polygon_points": [(-80.397, -5.267), (-73.534, -8.908), (-70.500, -17.582), (-81.490, -14.627)],
+                        "polygon_points": [
+                            (-80.397, -5.267),
+                            (-73.534, -8.908),
+                            (-70.500, -17.582),
+                            (-81.490, -14.627),
+                        ],
                         "mostly": 0.5,
                     },
                     "out": {
@@ -170,8 +174,12 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
                     "in": {
                         "column": "mostly_points_within_geo_region_US",
                         "country_iso_a3": None,
-                        "polygon_points": [(-117.012247, 32.580302), (-109.352, 41.258),
-                                           (-121.426414, 36.346576), (-122.724666, 29.921319)],
+                        "polygon_points": [
+                            (-117.012247, 32.580302),
+                            (-109.352, 41.258),
+                            (-121.426414, 36.346576),
+                            (-122.724666, 29.921319),
+                        ],
                         "mostly": 1.0,
                     },
                     "out": {
@@ -187,8 +195,12 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
                     "in": {
                         "column": "mostly_points_within_geo_region_GBR",
                         "country_iso_a3": None,
-                        "polygon_points": [(-80.397, -5.267), (-73.534, -8.908), (-70.500, -17.582),
-                                           (-81.490, -14.627)],
+                        "polygon_points": [
+                            (-80.397, -5.267),
+                            (-73.534, -8.908),
+                            (-70.500, -17.582),
+                            (-81.490, -14.627),
+                        ],
                         "mostly": 0.9,
                     },
                     "out": {
