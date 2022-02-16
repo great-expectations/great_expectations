@@ -149,6 +149,8 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
 
         # If this is not a manually configured asset, we fall back to inspection of the database
         elif self.engine is not None and self.inspector is not None:
+            project_id = None
+            schema_name = None
             split_data_asset_name = data_asset_name.split(".")
             if len(split_data_asset_name) == 2:
                 schema_name = split_data_asset_name[0]
@@ -159,19 +161,31 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             elif len(split_data_asset_name) == 1:
                 schema_name = self.inspector.default_schema_name
                 table_name = split_data_asset_name[0]
-            else:
-                raise ValueError(
-                    "Table name must be of shape '[SCHEMA.]TABLE'. Passed: "
-                    + split_data_asset_name
-                )
-            tables = self.inspector.get_table_names(schema=schema_name)
-            try:
-                tables.extend(self.inspector.get_view_names(schema=schema_name))
-            except NotImplementedError:
-                # Not implemented by bigquery dialect
-                pass
 
-            if table_name in tables:
+            elif (
+                len(split_data_asset_name) == 3
+                and self.engine.dialect.name.lower() == "bigquery"
+            ):
+                project_id = split_data_asset_name[0]
+                schema_name = split_data_asset_name[1]
+                table_name = data_asset_name
+            else:
+                shape = "[SCHEMA.]TABLE"
+                if self.engine.dialect.name.lower() == "bigquery":
+                    shape = "[PROJECT_ID.]{}".format(shape)
+
+                raise ValueError(
+                    "Table name must be of shape '{}'. Passed: {}".format(
+                        shape, split_data_asset_name
+                    )
+                )
+
+            try:
+                has_table = self.inspector.has_table
+            except AttributeError:
+                has_table = self.engine.has_table
+
+            if has_table(table_name, schema=schema_name):
                 batch_kwargs = SqlAlchemyDatasourceTableBatchKwargs(
                     table=table_name, schema=schema_name
                 )
@@ -182,6 +196,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                     f"TABLE : {table_name}",
                     {},
                 )
+
         if batch_kwargs is not None:
             if partition_id is not None:
                 logger.warning(
