@@ -355,7 +355,9 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         return new_block
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         if not super().validate_configuration(configuration):
             return False
         try:
