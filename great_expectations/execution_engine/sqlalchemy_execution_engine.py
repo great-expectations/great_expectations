@@ -93,7 +93,7 @@ try:
 except (ImportError, KeyError, AttributeError):
     snowflake = None
 
-_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery.sqlalchemy_bigquery"
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
     import sqlalchemy_bigquery.sqlalchemy_bigquery as sqla_bigquery
 
