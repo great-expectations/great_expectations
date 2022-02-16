@@ -6,7 +6,7 @@ from great_expectations_contrib.commands import (
     init_cmd,
     publish_cmd,
     read_package_from_file,
-    write_package_to_disk,
+    sync_package,
 )
 from great_expectations_contrib.package import GreatExpectationsContribPackageManifest
 
@@ -39,16 +39,20 @@ def init() -> None:
 @click.pass_obj
 def publish(pkg: GreatExpectationsContribPackageManifest) -> None:
     publish_cmd()
-    pkg.update_package_state()
-    write_package_to_disk(pkg, PACKAGE_PATH)
+    sync_package(pkg, PACKAGE_PATH)
 
 
 @cli.command(help="Check your package to make sure it's met all the requirements")
 @click.pass_obj
 def check(pkg: GreatExpectationsContribPackageManifest) -> None:
     check_cmd()
-    pkg.update_package_state()
-    write_package_to_disk(pkg, PACKAGE_PATH)
+    sync_package(pkg, PACKAGE_PATH)
+
+
+@cli.command(help="Manually sync your package state")
+@click.pass_obj
+def sync(pkg: GreatExpectationsContribPackageManifest) -> None:
+    sync_package(pkg, PACKAGE_PATH)
 
 
 if __name__ == "__main__":

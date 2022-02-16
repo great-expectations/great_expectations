@@ -25,7 +25,6 @@ from great_expectations.marshmallow__shade import (
 )
 from great_expectations.marshmallow__shade.validate import OneOf
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
-from great_expectations.types.base import SerializableDotDict
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -901,6 +900,7 @@ sqlalchemy data source (your data source is "{data['class_name']}").  Please upd
 class AnonymizedUsageStatisticsConfig(DictDot):
     def __init__(self, enabled=True, data_context_id=None, usage_statistics_url=None):
         self._enabled = enabled
+
         if data_context_id is None:
             data_context_id = str(uuid.uuid4())
             self._explicit_id = False
@@ -908,48 +908,56 @@ class AnonymizedUsageStatisticsConfig(DictDot):
             self._explicit_id = True
 
         self._data_context_id = data_context_id
+
         if usage_statistics_url is None:
             usage_statistics_url = DEFAULT_USAGE_STATISTICS_URL
             self._explicit_url = False
         else:
             self._explicit_url = True
+
         self._usage_statistics_url = usage_statistics_url
 
     @property
-    def enabled(self):
+    def enabled(self) -> bool:
         return self._enabled
 
     @enabled.setter
-    def enabled(self, enabled):
+    def enabled(self, enabled) -> None:
         if not isinstance(enabled, bool):
             raise ValueError("usage statistics enabled property must be boolean")
+
         self._enabled = enabled
 
     @property
-    def data_context_id(self):
+    def data_context_id(self) -> str:
         return self._data_context_id
 
     @data_context_id.setter
-    def data_context_id(self, data_context_id):
+    def data_context_id(self, data_context_id) -> None:
         try:
             uuid.UUID(data_context_id)
         except ValueError:
             raise ge_exceptions.InvalidConfigError(
                 "data_context_id must be a valid uuid"
             )
+
         self._data_context_id = data_context_id
         self._explicit_id = True
 
     @property
-    def explicit_id(self):
+    def explicit_id(self) -> bool:
         return self._explicit_id
 
     @property
-    def usage_statistics_url(self):
+    def explicit_url(self) -> bool:
+        return self._explicit_url
+
+    @property
+    def usage_statistics_url(self) -> str:
         return self._usage_statistics_url
 
     @usage_statistics_url.setter
-    def usage_statistics_url(self, usage_statistics_url):
+    def usage_statistics_url(self, usage_statistics_url) -> None:
         self._usage_statistics_url = usage_statistics_url
         self._explicit_url = True
 
@@ -2022,6 +2030,49 @@ class DataContextConfig(BaseYamlConfig):
     def config_version(self):
         return self._config_version
 
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
+    def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        json_dict: dict = self.to_json_dict()
+        deep_filter_properties_iterable(
+            properties=json_dict,
+            inplace=True,
+        )
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
+
+    def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
+        return self.__repr__()
+
 
 class CheckpointConfigSchema(Schema):
     class Meta:
@@ -2148,14 +2199,6 @@ class CheckpointConfigSchema(Schema):
                 data.pop(key)
 
         return data
-
-
-class Attributes(SerializableDotDict):
-    def to_dict(self) -> dict:
-        return dict(self)
-
-    def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=self.to_dict())
 
 
 class CheckpointConfig(BaseYamlConfig):
@@ -2413,6 +2456,18 @@ class CheckpointConfig(BaseYamlConfig):
 
         return result
 
+    def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
+        dict_obj: dict = self.to_dict()
+        serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
+        return serializeable_dict
+
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
@@ -2426,7 +2481,13 @@ class CheckpointConfig(BaseYamlConfig):
             properties=json_dict,
             inplace=True,
         )
-        return json.dumps(json_dict, indent=2)
+
+        keys: List[str] = sorted(list(json_dict.keys()))
+
+        key: str
+        sorted_json_dict: dict = {key: json_dict[key] for key in keys}
+
+        return json.dumps(sorted_json_dict, indent=2)
 
     def __str__(self) -> str:
         """

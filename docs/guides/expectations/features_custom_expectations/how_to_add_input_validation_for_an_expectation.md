@@ -96,7 +96,7 @@ Putting this all together, our `validate_configuration` method looks like:
 
 ### 4. Verifying our method
 
-If you now run your file, `print_diagnostic_checklist` will attempt to execute the `validate_configuration` using the input provided in your [Example Cases](how_to_add_example_cases_for_an_expectation.md).
+If you now run your file, `print_diagnostic_checklist` will attempt to execute the `validate_configuration` using the input provided in your [Example Cases](./how_to_add_example_cases_for_an_expectation.md).
 
 If your input is successfully validated, and the rest the logic in your Custom Expectation is already complete, you will see the following in your Diagnostic Checklist:
 
