@@ -1462,7 +1462,6 @@ def generate_expectation_tests(
             and not dialects_to_include
         ):
             dialects_to_include["sqlite"] = True
-            dialects_to_include["postgresql"] = True
 
         backends = build_test_backends_list(
             include_pandas=execution_engine_diagnostics.PandasExecutionEngine,
