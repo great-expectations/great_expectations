@@ -124,7 +124,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "type_list",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert "type_list" in configuration.kwargs, "type_list is required"

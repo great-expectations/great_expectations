@@ -115,7 +115,9 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
 
     """ A Column Map MetricProvider Decorator for the Maximum"""
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -128,6 +130,8 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
+
+        return True
 
     @classmethod
     def _atomic_prescriptive_template(
