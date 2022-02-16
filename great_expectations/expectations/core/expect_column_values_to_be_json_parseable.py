@@ -81,7 +81,9 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
     }
     args_keys = ("column",)
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         return True
 
