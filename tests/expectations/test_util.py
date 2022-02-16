@@ -11,7 +11,6 @@ from great_expectations.core import (
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestCase,
 )
-
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.metrics.util import column_reflection_fallback
@@ -21,8 +20,10 @@ from great_expectations.self_check.util import build_sa_validator_with_data
 from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
-from great_expectations.self_check.util import generate_test_table_name
-from great_expectations.self_check.util import should_we_generate_this_test
+from great_expectations.self_check.util import (
+    generate_test_table_name,
+    should_we_generate_this_test,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 

@@ -78,7 +78,6 @@ from ..render.types import (
     RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
-    RenderedTableContent,
     ValueListContent,
     renderedAtomicValueSchema,
 )
