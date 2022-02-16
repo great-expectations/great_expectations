@@ -19,59 +19,56 @@ along with many others developed by data practitioners from around the world as 
 ### 1. Verify that your Custom Expectation is ready for contribution
 
 We accept contributions into the Great Expectations codebase at several levels: Experimental, Beta, and Production. The requirements to meet these benchmarks are available in our 
-document on levels of maturity
+document on [levels of maturity for Expectations](./contributing_maturity.md).
 
-There are four Expectation subclasses that make the development of particular types of Expectations significantly easier by handling boilerplate code and letting you focus on the business logic of your Expectation. Consider choosing one that suites your Expectation:
+If you call the `print_diagnostic_checklist()` method on your Custom Expectation, you should see a checklist similar to this one:
 
-* `ColumnMapExpectation` - Expectations of this type validate a single column of tabular data. First they ask a yes/no question from every row in that column. Then they ask what percentage of rows gave a positive answer to the first question. If the answer to the second question is above a specified threshold, the Expectation considers the data valid.
-* `ColumnExpectation` s are also evaluated for a single column, but produce an aggregate metric, such as a mean, standard deviation, number of unique values, type, etc.
-* `ColumnPairMapExpectation`s are similar to `ColumnMapExpectations`, except that they are based on two columns, instead of one.
-* `TableExpectation` s are a generic catchall for other types of Expectations applied to tabular data.
+:::warning
+checklist
+:::
 
-Choose the template that fits your Expectation. Starting your development with these templates is significantly easier than developing from scratch:
+If you've satisified at least the first four checks, you're ready to make a contribution!
 
-* `ColumnMapExpectation`: `examples/expectations/column_map_expectation_template.py`
-* `ColumnExpectation`: `examples/expectations/column_aggregate_expectation_template.py`
-* `ColumnPairMapExpectation`: coming soon…
-* `TableExpectation`: coming soon…
+:::warning
+Not quite there? See our guides on creating Custom Expectations for help!
+:::
 
-#### 2. Copy the template file
+### 2. Double-check your Library Metadata
 
-Copy the template file into `contrib/experimental/great_expectations_experimental/expectations/` directory.
+We want to verify that your Custom Expectation is properly credited and accurately described. 
 
-Recently we introduced a fast-track release process for community contributed Expectations. You will commit the file with your Expectation’s implementation into `great_expectations` repo. Once your PR is approved and merged, your Expectation will be automatically published in the PyPI package `great-expectations-experimental`. This package contains community contributed Expectations and is separate from `great-expectations`.
+Ensure that your Custom Expectation's `library_metadata` has correct information for the following:
 
-#### 3. Pick a name for your Expectation, rename the file and the class within it.
+- `contributors`: You and anyone else who helped you create this Custom Expectation.
+- `tags`: These are simple descriptors of your Custom Expectation's functionality and domain (`statistics`, `flexible comparisons`, `geography`, etc.).
+- `package` (optional): **PLACEHOLDER** If you're contributing to a specific package, be sure to list it here!
 
-1. Pick a name for your Expectation
+<details>
+<summary>Packages?</summary>
+If you're interested in learning more about Custom Expectation Packages, see our guide on packaging your Custom Expectations.
 
-	Expectations follow a naming convention.
+Not contributing to a specifc package? Your Custom Expectation will be automatically published in the [PyPI package `great-expectations-experimental`](https://pypi.org/project/great-expectations-experimental/). 
+This package contains all of our Experimental community-contributed Custom Expectations, and is separate from the core `great-expectations` package.
+</details>
 
-	Names of Expectations are snake_case (e.g., `expect_column_values_to_equal_three`).
+### 3. Open a Pull Request
 
-	Give your new Expectation a name that will be clear to its future users. Based on the class that your new Expectation will be extending, use the following conventions:
+You're ready to open a [Pull Request](https://github.com/great-expectations/great_expectations/pulls)! 
 
-	* `Column map Expectations`: `expect_column_values_...` (e.g., `expect_column_values_to_match_regex`)
-	* `Column aggregate Expectations`: `expect_column_...` (e.g., `expect_column_mean_to_be_between`)
-	* Column pair map Expectations: `expect_column_pair_values_...` (e.g., `expect_column_pair_values_to_be_in_set`)
-	* Table Expectations: `expect_table_...` (e.g., `expect_table_row_count_to_be_equal`)
+As a part of this process, we ask you to:
 
-2. Name the file
+- Sign our [Contributor License Agreement (CLA)](./contributing_misc.md#contributor-license-agreement-cla)
+- Provide some information for our reviewers to expedite your contribution process, including:
+  - A [CONTRIB] tag in your title
+  - Titleing your Pull Request with the name of your Custom Expectation
+  - A brief summary of the functionality and use-cases for your Custom Expectation
+  - A description of any previous discussion or coordination related to this Pull Request
+- Update your branch with the most recent code from the Great Expectations main repository
+- Resolve any failing tests and merge conflicts
 
-	The Python file that implements the Expectation should be given the snake_case name of the Expectation (e.g., `expect_column_values_to_equal_three.py`).
 
-	For example, if you call your Expectation `expect_column_values_to_equal_three`, the file with its implementation should be: `contrib/experimental/great_expectations_experimental/expectations/expect_column_values_to_equal_three.py`
-
-3. Name the class
-
-	Within the file, update the name of the class that implements your Expectation. Classes that implement Expectations have CamelCase names (e.g., `ExpectColumnValuesToEqualThree`). The framework will automatically translate this class name into a method with the snake_case name of `expect_column_values_to_equal_three`. You will make this change in two places:
-
-	* Class declaration (search for `class Expect`)
-	* A call to `run_diagnostic` in the very end of the template (search for ``diagnostics_report = ``). Next section explains the role this code plays.
-	
-
-	For more style conventions that your code should follow consult our [Style Guide](/docs/contributing/style_guides/code_style).
-
+:::breakpoint
+:::
 #### 4. Run diagnostics on your Expectation.
 
 Expectations contain a self diagnostic tool that will help you during development. The simplest way to run it is to execute the file as a standalone script. Note: if you prefer, you can also run it within a notebook or IDE.
@@ -418,4 +415,22 @@ For more comprehensive documentation consult this [how-to guide](/docs/guides/ex
 
 #### 9. Submit your contribution
 
-Follow [Contribution Checklist](/docs/contributing/contributing_checklist)  to submit your contribution.
+Follow [Contribution Checklist](/docs/contributing/contributing_checklist) to submit your contribution.
+
+
+
+
+
+There are four Expectation subclasses that make the development of particular types of Expectations significantly easier by handling boilerplate code and letting you focus on the business logic of your Expectation. Consider choosing one that suites your Expectation:
+
+* `ColumnMapExpectation` - Expectations of this type validate a single column of tabular data. First they ask a yes/no question from every row in that column. Then they ask what percentage of rows gave a positive answer to the first question. If the answer to the second question is above a specified threshold, the Expectation considers the data valid.
+* `ColumnExpectation` s are also evaluated for a single column, but produce an aggregate metric, such as a mean, standard deviation, number of unique values, type, etc.
+* `ColumnPairMapExpectation`s are similar to `ColumnMapExpectations`, except that they are based on two columns, instead of one.
+* `TableExpectation` s are a generic catchall for other types of Expectations applied to tabular data.
+
+Choose the template that fits your Expectation. Starting your development with these templates is significantly easier than developing from scratch:
+
+* `ColumnMapExpectation`: `examples/expectations/column_map_expectation_template.py`
+* `ColumnExpectation`: `examples/expectations/column_aggregate_expectation_template.py`
+* `ColumnPairMapExpectation`: coming soon…
+* `TableExpectation`: coming soon…
