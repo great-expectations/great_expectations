@@ -218,7 +218,9 @@ def build_gallery(
                 try:
                     diagnostics = impl().run_diagnostics()
                     checklist_string = diagnostics.generate_checklist()
-                    expectation_checklists.write(f"\n\n----------------\n(contrib) {expectation}\n")
+                    expectation_checklists.write(
+                        f"\n\n----------------\n(contrib) {expectation}\n"
+                    )
                     expectation_checklists.write(f"{checklist_string}\n")
                     gallery_info[expectation] = diagnostics.to_json_dict()
                     built_expectations.add(expectation)

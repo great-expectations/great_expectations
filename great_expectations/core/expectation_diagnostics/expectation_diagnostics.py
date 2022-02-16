@@ -134,7 +134,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_core_logic_for_at_least_one_execution_engine(
-        test_results: List[ExpectationTestDiagnostics]
+        test_results: List[ExpectationTestDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""
 
@@ -154,16 +154,20 @@ class ExpectationDiagnostics(SerializableDictDot):
         if len(backends_passing_all_tests) > 0:
             passed = True
             backend = backends_passing_all_tests[0]
-            sub_messages.append({
-                "message": f"All {len(backend_results[backend])} tests for {backend} are passing",
-                "passed": True,
-            })
+            sub_messages.append(
+                {
+                    "message": f"All {len(backend_results[backend])} tests for {backend} are passing",
+                    "passed": True,
+                }
+            )
 
         if not test_results:
-            sub_messages.append({
-                "message": f"There are no test results",
-                "passed": False,
-            })
+            sub_messages.append(
+                {
+                    "message": "There are no test results",
+                    "passed": False,
+                }
+            )
 
         return ExpectationDiagnosticCheckMessage(
             message=message,
@@ -173,7 +177,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_core_logic_for_all_applicable_execution_engines(
-        test_results: List[ExpectationTestDiagnostics]
+        test_results: List[ExpectationTestDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on all applicable Execution Engines"""
 
@@ -199,30 +203,38 @@ class ExpectationDiagnostics(SerializableDictDot):
             passed = True
 
         for backend in backends_passing_all_tests:
-            sub_messages.append({
-                "message": f"All {len(backend_results[backend])} tests for {backend} are passing",
-                "passed": True,
-            })
+            sub_messages.append(
+                {
+                    "message": f"All {len(backend_results[backend])} tests for {backend} are passing",
+                    "passed": True,
+                }
+            )
 
         for backend in backends_failing_any_tests:
             num_tests = len(backend_results[backend])
             num_passing = backend_results[backend].count(True)
-            sub_messages.append({
-                "message": f"Only {num_passing} / {num_tests} tests for {backend} are passing",
-                "passed": False,
-            })
+            sub_messages.append(
+                {
+                    "message": f"Only {num_passing} / {num_tests} tests for {backend} are passing",
+                    "passed": False,
+                }
+            )
 
         if len(failing_names) > 0:
-            sub_messages.append({
-                "message": f"Failing: {', '.join(failing_names)}",
-                "passed": False,
-            })
+            sub_messages.append(
+                {
+                    "message": f"Failing: {', '.join(failing_names)}",
+                    "passed": False,
+                }
+            )
 
         if not test_results:
-            sub_messages.append({
-                "message": f"There are no test results",
-                "passed": False,
-            })
+            sub_messages.append(
+                {
+                    "message": "There are no test results",
+                    "passed": False,
+                }
+            )
 
         return ExpectationDiagnosticCheckMessage(
             message=message,
@@ -304,10 +316,12 @@ class ExpectationDiagnostics(SerializableDictDot):
         try:
             first_test = examples[0]["tests"][0]
         except IndexError:
-            sub_messages.append({
-                "message": "No example found to get kwargs for ExpectationConfiguration",
-                "passed": False,
-            })
+            sub_messages.append(
+                {
+                    "message": "No example found to get kwargs for ExpectationConfiguration",
+                    "passed": False,
+                }
+            )
         else:
             expectation_config = ExpectationConfiguration(
                 expectation_type=expectation_instance.expectation_type,

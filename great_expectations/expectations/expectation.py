@@ -1295,7 +1295,9 @@ class Expectation(metaclass=MetaExpectation):
             return "(RenderedAtomicContent) " + repr(rendered_result.to_json_dict())
 
         elif isinstance(rendered_result, RenderedContentBlockContainer):
-            return "(RenderedContentBlockContainer) " + repr(rendered_result.to_json_dict())
+            return "(RenderedContentBlockContainer) " + repr(
+                rendered_result.to_json_dict()
+            )
 
         elif isinstance(rendered_result, RenderedTableContent):
             return "(RenderedTableContent) " + repr(rendered_result.to_json_dict())

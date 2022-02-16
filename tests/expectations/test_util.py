@@ -550,6 +550,7 @@ def test__should_we_generate_this_test__sqlalchemy():
 
     assert should_we_generate_this_test(backend5, test_case5) == True
 
+
 def test__should_we_generate_this_test__pandas():
     """
     Our CI/CD runs tests against pandas versions 0.23.4, 0.25.3, and latest (1.x currently)
@@ -596,10 +597,7 @@ def test__should_we_generate_this_test__pandas():
     backend3 = "pandas"
 
     expected3 = False
-    if (
-        (major == "0" and int(minor) >= 24)
-        or int(major) >= 1
-    ):
+    if (major == "0" and int(minor) >= 24) or int(major) >= 1:
         expected3 = True
 
     assert should_we_generate_this_test(backend3, test_case3) == expected3

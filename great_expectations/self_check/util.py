@@ -1535,7 +1535,10 @@ def should_we_generate_this_test(
         return False
     if expectation_test_case.only_for != None and expectation_test_case.only_for:
         if not backend in expectation_test_case.only_for:
-            if "sqlalchemy" in expectation_test_case.only_for and backend in SQL_DIALECT_NAMES:
+            if (
+                "sqlalchemy" in expectation_test_case.only_for
+                and backend in SQL_DIALECT_NAMES
+            ):
                 return True
             elif "pandas" == backend:
                 major, minor, *_ = pd.__version__.split(".")
@@ -1546,10 +1549,7 @@ def should_we_generate_this_test(
                     if major == "0" and minor in ["22", "23"]:
                         return True
                 elif "pandas>=024" in expectation_test_case.only_for:
-                    if (
-                        (major == "0" and int(minor) >= 24)
-                        or int(major) >= 1
-                    ):
+                    if (major == "0" and int(minor) >= 24) or int(major) >= 1:
                         return True
             return False
 
@@ -1619,13 +1619,17 @@ def evaluate_json_test(data_asset, expectation_type, test):
         if "in" in test:
             test["input"] = test["in"]
         else:
-            raise ValueError("Invalid test configuration detected: 'input' is required.")
+            raise ValueError(
+                "Invalid test configuration detected: 'input' is required."
+            )
 
     if "output" not in test:
         if "out" in test:
             test["output"] = test["out"]
         else:
-            raise ValueError("Invalid test configuration detected: 'output' is required.")
+            raise ValueError(
+                "Invalid test configuration detected: 'output' is required."
+            )
 
     # Support tests with positional arguments
     if isinstance(test["input"], list):
@@ -1680,13 +1684,17 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
         if "in" in test:
             test["input"] = test["in"]
         else:
-            raise ValueError("Invalid test configuration detected: 'input' is required.")
+            raise ValueError(
+                "Invalid test configuration detected: 'input' is required."
+            )
 
     if "output" not in test:
         if "out" in test:
             test["output"] = test["out"]
         else:
-            raise ValueError("Invalid test configuration detected: 'output' is required.")
+            raise ValueError(
+                "Invalid test configuration detected: 'output' is required."
+            )
 
     kwargs = copy.deepcopy(test["input"])
 
@@ -1708,7 +1716,9 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
 def check_json_test_result(test, result, data_asset=None):
     # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
     if "unexpected_list" in result["result"]:
-        if ("result" in test["output"]) and ("unexpected_list" in test["output"]["result"]):
+        if ("result" in test["output"]) and (
+            "unexpected_list" in test["output"]["result"]
+        ):
             (
                 test["output"]["result"]["unexpected_list"],
                 result["result"]["unexpected_list"],
