@@ -60,6 +60,7 @@ try:
     bigquery_types_tuple = None
     try:
         from sqlalchemy_bigquery import GEOGRAPHY
+
         BIGQUERY_GEO_SUPPORT = True
     except ImportError:
         BIGQUERY_GEO_SUPPORT = False
@@ -377,9 +378,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     and not BIGQUERY_GEO_SUPPORT
                 ):
                     logger.warning(
-                        "BigQuery GEOGRAPHY type is not supported by default. " +
-                        "To install support, please run:" +
-                        "  $ pip install 'sqlalchemy-bigquery[geography]'"
+                        "BigQuery GEOGRAPHY type is not supported by default. "
+                        + "To install support, please run:"
+                        + "  $ pip install 'sqlalchemy-bigquery[geography]'"
                     )
                 potential_type = getattr(type_module, expected_type)
                 # In the case of the PyAthena dialect we need to verify that
@@ -397,7 +398,6 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 )
             types = tuple(types)
             success = isinstance(actual_column_type, types)
-
 
         return {
             "success": success,
