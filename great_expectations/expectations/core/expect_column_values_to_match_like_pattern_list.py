@@ -38,7 +38,9 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
         "like_pattern_list",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert (
