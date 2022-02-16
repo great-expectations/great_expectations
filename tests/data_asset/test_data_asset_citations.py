@@ -6,7 +6,11 @@ def test_data_asset_citations(pandas_dataset):
     pandas_dataset.add_citation("test citation", citation_date=citation_date)
     suite = pandas_dataset.get_expectation_suite()
     assert filter_properties_dict(
-        properties=suite.meta["citations"][0], delete_fields=["interactive"]
+        properties=suite.meta["citations"][0],
+        delete_fields={
+            "interactive",
+        },
+        clean_falsy=True,
     ) == filter_properties_dict(
         properties={
             "comment": "test citation",
@@ -14,5 +18,6 @@ def test_data_asset_citations(pandas_dataset):
             "batch_parameters": pandas_dataset.batch_parameters,
             "batch_markers": pandas_dataset.batch_markers,
             "citation_date": citation_date,
-        }
+        },
+        clean_falsy=True,
     )

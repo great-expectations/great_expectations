@@ -1,7 +1,12 @@
 import logging
+from typing import Dict
 
 from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudStoreBackend,
+)
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
@@ -56,15 +61,26 @@ class Store:
             )
         self._use_fixed_length_key = self._store_backend.fixed_length_key
 
+    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+        """
+        This method takes full json response from GE cloud and outputs a dict appropriate for
+        deserialization into a GE object
+        """
+        return response_json
+
     def _validate_key(self, key):
         # STORE_BACKEND_ID_KEY always validated
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return
-        elif not isinstance(key, self._key_class):
+        elif not isinstance(key, self.key_class):
             raise TypeError(
                 "key must be an instance of %s, not %s"
-                % (self._key_class.__name__, type(key))
+                % (self.key_class.__name__, type(key))
             )
+
+    @property
+    def ge_cloud_mode(self):
+        return isinstance(self._store_backend, GeCloudStoreBackend)
 
     @property
     def store_backend(self):
@@ -82,6 +98,12 @@ class Store:
             store_backend_id which is a UUID(version=4)
         """
         return self._store_backend.store_backend_id
+
+    @property
+    def key_class(self):
+        if self.ge_cloud_mode:
+            return GeCloudIdentifier
+        return self._key_class
 
     @property
     def store_backend_id_warnings_suppressed(self):
@@ -106,8 +128,8 @@ class Store:
         if tuple_ == StoreBackend.STORE_BACKEND_ID_KEY:
             return StoreBackend.STORE_BACKEND_ID_KEY[0]
         if self._use_fixed_length_key:
-            return self._key_class.from_fixed_length_tuple(tuple_)
-        return self._key_class.from_tuple(tuple_)
+            return self.key_class.from_fixed_length_tuple(tuple_)
+        return self.key_class.from_tuple(tuple_)
 
     # noinspection PyMethodMayBeStatic
     def deserialize(self, key, value):
@@ -116,21 +138,28 @@ class Store:
     def get(self, key):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
+        elif self.ge_cloud_mode:
+            self._validate_key(key)
+            value = self._store_backend.get(self.key_to_tuple(key))
+            # TODO [Robby] MER-285: Handle non-200 http errors
+            if value:
+                value = self.ge_cloud_response_json_to_object_dict(response_json=value)
         else:
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
-            if value:
-                return self.deserialize(key, value)
-            else:
-                return None
 
-    def set(self, key, value):
+        if value:
+            return self.deserialize(key, value)
+        else:
+            return None
+
+    def set(self, key, value, **kwargs):
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
-            return self._store_backend.set(key, value)
+            return self._store_backend.set(key, value, **kwargs)
         else:
             self._validate_key(key)
             return self._store_backend.set(
-                self.key_to_tuple(key), self.serialize(key, value)
+                self.key_to_tuple(key), self.serialize(key, value), **kwargs
             )
 
     def list_keys(self):

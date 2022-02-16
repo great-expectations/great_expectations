@@ -3,7 +3,9 @@ from copy import copy, deepcopy
 from typing import Any, Dict, List
 
 import pytest
+from ruamel.yaml import YAML
 
+from great_expectations import DataContext
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.util import filter_properties_dict
@@ -82,27 +84,40 @@ def table_exp3():
 
 
 @pytest.fixture
-def empty_suite():
+def empty_suite(empty_data_context):
+    context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
-def single_expectation_suite(exp1):
+def single_expectation_suite(exp1, empty_data_context):
+    context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
 def suite_with_table_and_column_expectations(
-    exp1, exp2, exp3, exp4, column_pair_expectation, table_exp1, table_exp2, table_exp3
+    exp1,
+    exp2,
+    exp3,
+    exp4,
+    column_pair_expectation,
+    table_exp1,
+    table_exp2,
+    table_exp3,
+    empty_data_context,
 ):
+    context: DataContext = empty_data_context
     suite = ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[
@@ -116,6 +131,7 @@ def suite_with_table_and_column_expectations(
             table_exp3,
         ],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
     assert suite.expectations == [
         exp1,
@@ -131,41 +147,93 @@ def suite_with_table_and_column_expectations(
 
 
 @pytest.fixture
-def baseline_suite(exp1, exp2):
+def baseline_suite(exp1, exp2, empty_data_context):
+    context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp2],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
-def identical_suite(exp1, exp3):
+def identical_suite(exp1, exp3, empty_data_context):
+    context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp3],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
 
 
 @pytest.fixture
-def equivalent_suite(exp1, exp3):
+def equivalent_suite(exp1, exp3, empty_data_context):
+    context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="danger",
         expectations=[exp1, exp3],
         meta={
             "notes": "This is another expectation suite, with a different name and meta"
         },
+        data_context=context,
     )
 
 
 @pytest.fixture
-def different_suite(exp1, exp4):
+def different_suite(exp1, exp4, empty_data_context):
+    context: DataContext = empty_data_context
     return ExpectationSuite(
         expectation_suite_name="warning",
         expectations=[exp1, exp4],
         meta={"notes": "This is an expectation suite."},
+        data_context=context,
     )
+
+
+@pytest.fixture
+def profiler_config():
+    # Profiler configuration is pulled from the Bobster use case in tests/rule_based_profiler/
+    yaml_config = """
+    # This profiler is meant to be used on the NYC taxi data:
+    # tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_20(18|19|20)-*.csv
+    variables:
+      # BatchRequest yielding thirty five (35) batches (January, 2018 -- November, 2020 trip data)
+      jan_2018_thru_nov_2020_monthly_tripdata_batch_request:
+        datasource_name: taxi_pandas
+        data_connector_name: monthly
+        data_asset_name: my_reports
+        data_connector_query:
+          index: ":-1"
+      confidence_level: 9.5e-1
+      mostly: 1.0
+
+    rules:
+      row_count_range_rule:
+        domain_builder:
+          class_name: TableDomainBuilder
+        parameter_builders:
+          - parameter_name: row_count_range
+            class_name: NumericMetricRangeMultiBatchParameterBuilder
+            batch_request: $variables.jan_2018_thru_nov_2020_monthly_tripdata_batch_request
+            metric_name: table.row_count
+            confidence_level: $variables.confidence_level
+            round_decimals: 0
+            truncate_values:
+              lower_bound: 0
+        expectation_configuration_builders:
+         - expectation_type: expect_table_row_count_to_be_between
+           class_name: DefaultExpectationConfigurationBuilder
+           module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+           min_value: $parameter.row_count_range.value.min_value
+           max_value: $parameter.row_count_range.value.max_value
+           mostly: $variables.mostly
+           meta:
+             profiler_details: $parameter.row_count_range.details
+    """
+    yaml = YAML()
+    return yaml.load(yaml_config)
 
 
 def test_expectation_suite_equality(baseline_suite, identical_suite, equivalent_suite):
@@ -285,13 +353,19 @@ def test_expectation_suite_deepcopy(baseline_suite):
     assert baseline_suite.expectations[0].meta["notes"] == "This is an expectation."
 
 
-def test_suite_without_metadata_includes_ge_version_metadata_if_none_is_provided():
-    suite = ExpectationSuite("foo")
+def test_suite_without_metadata_includes_ge_version_metadata_if_none_is_provided(
+    empty_data_context,
+):
+    context: DataContext = empty_data_context
+    suite = ExpectationSuite("foo", data_context=context)
     assert "great_expectations_version" in suite.meta.keys()
 
 
-def test_suite_does_not_overwrite_existing_version_metadata():
-    suite = ExpectationSuite("foo", meta={"great_expectations_version": "0.0.0"})
+def test_suite_does_not_overwrite_existing_version_metadata(empty_data_context):
+    context: DataContext = empty_data_context
+    suite = ExpectationSuite(
+        "foo", meta={"great_expectations_version": "0.0.0"}, data_context=context
+    )
     assert "great_expectations_version" in suite.meta.keys()
     assert suite.meta["great_expectations_version"] == "0.0.0"
 
@@ -309,6 +383,18 @@ def test_add_citation(baseline_suite):
     assert baseline_suite.meta["citations"][0].get("comment") == "hello!"
 
 
+def test_add_citation_with_profiler_config(baseline_suite, profiler_config):
+    assert (
+        "citations" not in baseline_suite.meta
+        or len(baseline_suite.meta["citations"]) == 0
+    )
+    baseline_suite.add_citation(
+        "adding profiler config citation",
+        profiler_config=profiler_config,
+    )
+    assert baseline_suite.meta["citations"][0].get("profiler_config") == profiler_config
+
+
 def test_get_citations_with_no_citations(baseline_suite):
     assert "citations" not in baseline_suite.meta
     assert baseline_suite.get_citations() == []
@@ -324,7 +410,9 @@ def test_get_citations_not_sorted(baseline_suite):
         sort=False
     )
     for properties_dict in properties_dict_list:
-        filter_properties_dict(properties=properties_dict, inplace=True)
+        filter_properties_dict(
+            properties=properties_dict, clean_falsy=True, inplace=True
+        )
         properties_dict.pop("interactive", None)
 
     assert properties_dict_list == [
@@ -344,7 +432,9 @@ def test_get_citations_sorted(baseline_suite):
     baseline_suite.add_citation("second", citation_date="2000-01-02")
     properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(sort=True)
     for properties_dict in properties_dict_list:
-        filter_properties_dict(properties=properties_dict, inplace=True)
+        filter_properties_dict(
+            properties=properties_dict, clean_falsy=True, inplace=True
+        )
         properties_dict.pop("interactive", None)
 
     assert properties_dict_list == [
@@ -378,7 +468,9 @@ def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_
         sort=True, require_batch_kwargs=True
     )
     for properties_dict in properties_dict_list:
-        filter_properties_dict(properties=properties_dict, inplace=True)
+        filter_properties_dict(
+            properties=properties_dict, clean_falsy=True, inplace=True
+        )
         properties_dict.pop("interactive", None)
 
     assert properties_dict_list == [
@@ -390,6 +482,46 @@ def test_get_citations_with_multiple_citations_containing_batch_kwargs(baseline_
         {
             "citation_date": "2001-01-01T00:00:00.000000Z",
             "batch_kwargs": {"path": "second"},
+            "comment": "second",
+        },
+    ]
+
+
+def test_get_citations_with_multiple_citations_containing_profiler_config(
+    baseline_suite, profiler_config
+):
+    assert "citations" not in baseline_suite.meta
+
+    baseline_suite.add_citation(
+        "first",
+        citation_date="2000-01-01",
+        profiler_config=profiler_config,
+    )
+    baseline_suite.add_citation(
+        "second",
+        citation_date="2001-01-01",
+        profiler_config=profiler_config,
+    )
+    baseline_suite.add_citation("third", citation_date="2002-01-01")
+
+    properties_dict_list: List[Dict[str, Any]] = baseline_suite.get_citations(
+        sort=True, require_profiler_config=True
+    )
+    for properties_dict in properties_dict_list:
+        filter_properties_dict(
+            properties=properties_dict, clean_falsy=True, inplace=True
+        )
+        properties_dict.pop("interactive", None)
+
+    assert properties_dict_list == [
+        {
+            "citation_date": "2000-01-01T00:00:00.000000Z",
+            "profiler_config": profiler_config,
+            "comment": "first",
+        },
+        {
+            "citation_date": "2001-01-01T00:00:00.000000Z",
+            "profiler_config": profiler_config,
             "comment": "second",
         },
     ]

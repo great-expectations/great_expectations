@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from typing import List
+from typing import List, Optional, Union
 
 import pandas as pd
 import pytest
@@ -197,36 +197,39 @@ data_connectors:
 def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
     report = basic_pandas_datasource_v013.self_check()
     assert report == {
+        "execution_engine": {
+            "caching": True,
+            "module_name": "great_expectations.execution_engine.pandas_execution_engine",
+            "class_name": "PandasExecutionEngine",
+            "discard_subset_failing_expectations": False,
+            "boto3_options": {},
+            "azure_options": {},
+            "gcs_options": {},
+        },
         "data_connectors": {
             "count": 2,
             "my_filesystem_data_connector": {
                 "class_name": "ConfiguredAssetFilesystemDataConnector",
                 "data_asset_count": 1,
+                "example_data_asset_names": ["Titanic"],
                 "data_assets": {
                     "Titanic": {
                         "batch_definition_count": 0,
                         "example_data_references": [],
                     }
                 },
-                "example_data_asset_names": ["Titanic"],
-                "example_unmatched_data_references": [],
                 "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": [],
             },
             "test_runtime_data_connector": {
                 "class_name": "RuntimeDataConnector",
                 "data_asset_count": 0,
-                "data_assets": {},
                 "example_data_asset_names": [],
-                "example_unmatched_data_references": [],
+                "data_assets": {},
+                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
                 "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": [],
             },
-        },
-        "execution_engine": {
-            "boto3_options": {},
-            "caching": True,
-            "class_name": "PandasExecutionEngine",
-            "discard_subset_failing_expectations": False,
-            "module_name": "great_expectations.execution_engine.pandas_execution_engine",
         },
     }
 
@@ -237,6 +240,9 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
     report["execution_engine"]["spark_config"].pop("spark.driver.host", None)
     report["execution_engine"]["spark_config"].pop("spark.driver.port", None)
     report["execution_engine"]["spark_config"].pop("spark.submit.pyFiles", None)
+    report["execution_engine"]["spark_config"].pop("spark.app.startTime", None)
+    report["execution_engine"]["spark_config"].pop("spark.sql.warehouse.dir", None)
+
     assert report == {
         "data_connectors": {
             "count": 2,
@@ -251,14 +257,16 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
             "test_runtime_data_connector": {
                 "class_name": "RuntimeDataConnector",
                 "data_asset_count": 0,
-                "data_assets": {},
                 "example_data_asset_names": [],
-                "example_unmatched_data_references": [],
+                "data_assets": {},
+                "note": "RuntimeDataConnector will not have data_asset_names until they are passed in through RuntimeBatchRequest",
                 "unmatched_data_reference_count": 0,
+                "example_unmatched_data_references": [],
             },
         },
         "execution_engine": {
             "caching": True,
+            "azure_options": {},
             "class_name": "SparkDFExecutionEngine",
             "module_name": "great_expectations.execution_engine.sparkdf_execution_engine",
             "persist": True,
@@ -395,7 +403,7 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
     )
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
-    batch_request: dict = {
+    batch_request: Union[BatchRequest, dict] = {
         "datasource_name": datasource_name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
@@ -409,7 +417,7 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
         #     "limit": 2000
         # }
     }
-    batch_request: BatchRequest = BatchRequest(**batch_request)
+    batch_request = BatchRequest(**batch_request)
     batch_list: List[
         Batch
     ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
@@ -435,7 +443,7 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v01
     data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "IN_MEMORY_DATA_ASSET"
 
-    batch_request: dict = {
+    batch_request: Union[RuntimeBatchRequest, dict] = {
         "datasource_name": basic_pandas_datasource_v013.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
@@ -446,7 +454,7 @@ def test_get_batch_with_pipeline_style_batch_request(basic_pandas_datasource_v01
             "airflow_run_id": 1234567890,
         },
     }
-    batch_request: BatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_request = RuntimeBatchRequest(**batch_request)
     batch_list: List[
         Batch
     ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
@@ -476,7 +484,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_quer
     data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "test_asset_1"
 
-    batch_request: dict = {
+    batch_request: Union[RuntimeBatchRequest, dict] = {
         "datasource_name": basic_pandas_datasource_v013.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
@@ -485,8 +493,9 @@ def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_quer
         },
         "batch_identifiers": None,
     }
-    batch_request: BatchRequest = RuntimeBatchRequest(**batch_request)
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(TypeError):
+        batch_request = RuntimeBatchRequest(**batch_request)
+
         # noinspection PyUnusedLocal
         batch_list: List[
             Batch
@@ -501,7 +510,7 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
     data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "IN_MEMORY_DATA_ASSET"
 
-    batch_request: Union[dict, BatchRequest]
+    batch_request: Union[RuntimeBatchRequest, dict]
 
     batch_request = {
         "datasource_name": basic_pandas_datasource_v013.name,
@@ -531,7 +540,7 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
     data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "IN_MEMORY_DATA_ASSET"
 
-    batch_request: Union[dict, BatchRequest]
+    batch_request: Union[RuntimeBatchRequest, dict]
 
     batch_request = {
         "datasource_name": basic_spark_datasource.name,
@@ -564,7 +573,7 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
     data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "IN_MEMORY_DATA_ASSET"
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    batch_request: dict = {
+    batch_request: Union[RuntimeBatchRequest, dict] = {
         "datasource_name": basic_pandas_datasource_v013.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
@@ -575,7 +584,7 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
             "airflow_run_id": 1234567890,
         },
     }
-    batch_request: BatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_request = RuntimeBatchRequest(**batch_request)
     # noinspection PyUnusedLocal
     batch_list: List[
         Batch
@@ -683,7 +692,7 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
     data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "IN_MEMORY_DATA_ASSET"
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-    batch_request: dict = {
+    batch_request: Union[RuntimeBatchRequest, dict] = {
         "datasource_name": datasource.name,
         "data_connector_name": data_connector_name,
         "data_asset_name": data_asset_name,
@@ -694,7 +703,7 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
             "airflow_run_id": 1234567890,
         },
     }
-    batch_request: BatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_request = RuntimeBatchRequest(**batch_request)
     # noinspection PyUnusedLocal
     batch_list: List[Batch] = datasource.get_batch_list_from_batch_request(
         batch_request=batch_request
@@ -815,7 +824,7 @@ x,y
 
     my_datasource: Datasource = instantiate_class_from_config(
         yaml.load(
-            fr"""
+            rf"""
 class_name: Datasource
 
 execution_engine:
@@ -908,7 +917,7 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
                 base_directory: {base_directory}
                 batch_spec_passthrough:
                     reader_options:
-                        header: True 
+                        header: True
                 glob_directive: '*'
                 default_regex:
                     pattern: (.+)\\.csv

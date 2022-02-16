@@ -7,18 +7,18 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import (
+    AzureBatchSpec,
+    GCSBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.exceptions.metric_exceptions import MetricProviderError
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.self_check.util import build_spark_engine
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
 
@@ -26,11 +26,12 @@ try:
     pyspark = pytest.importorskip("pyspark")
     # noinspection PyPep8Naming
     import pyspark.sql.functions as F
-    from pyspark.sql.types import IntegerType, Row, StringType
+    from pyspark.sql.types import IntegerType, LongType, Row, StringType
 except ImportError:
     pyspark = None
     F = None
     IntegerType = None
+    LongType = None
     StringType = None
     Row = None
 
@@ -138,6 +139,353 @@ def test_reader_fn_parameters(
         PathBatchSpec(path=test_df_small_csv_path, data_asset_name="DATA_ASSET")
     ).dataframe
     assert test_sparkdf_with_no_header_param.head() == Row(_c0="x", _c1="y")
+
+
+def test_get_domain_records_with_column_domain(
+    spark_session, basic_spark_df_execution_engine
+):
+    pd_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column": "a",
+            "row_condition": 'col("b")<5',
+            "condition_parser": "great_expectations__experimental__",
+        }
+    )
+
+    expected_column_pd_df = pd_df.iloc[:3]
+    expected_column_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_column_pd_df.to_records(index=False)
+        ],
+        expected_column_pd_df.columns.tolist(),
+    )
+
+    assert dataframes_equal(
+        data, expected_column_df
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_column_pair_domain(
+    spark_session, basic_spark_df_execution_engine
+):
+    pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [2, 3, 4, 5, None, 6],
+            "c": [1, 2, 3, 4, 5, None],
+        }
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_A": "a",
+            "column_B": "b",
+            "row_condition": 'col("b")>2',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "both_values_are_missing",
+        }
+    )
+
+    expected_column_pair_pd_df = pd.DataFrame(
+        {"a": [2, 3, 4, 6], "b": [3.0, 4.0, 5.0, 6.0], "c": [2.0, 3.0, 4.0, None]}
+    )
+    expected_column_pair_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_column_pair_pd_df.to_records(index=False)
+        ],
+        expected_column_pair_pd_df.columns.tolist(),
+    )
+
+    assert dataframes_equal(
+        data, expected_column_pair_df
+    ), "Data does not match after getting full access compute domain"
+
+    pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [2, 3, 4, 5, None, 6],
+            "c": [1, 2, 3, 4, 5, None],
+        }
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_A": "b",
+            "column_B": "c",
+            "row_condition": 'col("b")>2',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "either_value_is_missing",
+        }
+    )
+    for column_name in data.columns:
+        data = data.withColumn(column_name, data[column_name].cast(LongType()))
+
+    expected_column_pair_pd_df = pd.DataFrame(
+        {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}
+    )
+    expected_column_pair_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_column_pair_pd_df.to_records(index=False)
+        ],
+        expected_column_pair_pd_df.columns.tolist(),
+    )
+
+    assert dataframes_equal(
+        data, expected_column_pair_df
+    ), "Data does not match after getting full access compute domain"
+
+    pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [2, 3, 4, 5, None, 6],
+            "c": [1, 2, 3, 4, 5, None],
+        }
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_A": "b",
+            "column_B": "c",
+            "row_condition": 'col("a")<6',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "neither",
+        }
+    )
+
+    expected_column_pair_pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5],
+            "b": [2.0, 3.0, 4.0, 5.0, None],
+            "c": [1.0, 2.0, 3.0, 4.0, 5.0],
+        }
+    )
+    expected_column_pair_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_column_pair_pd_df.to_records(index=False)
+        ],
+        expected_column_pair_pd_df.columns.tolist(),
+    )
+
+    assert dataframes_equal(
+        data, expected_column_pair_df
+    ), "Data does not match after getting full access compute domain"
+
+
+def test_get_domain_records_with_multicolumn_domain(
+    spark_session, basic_spark_df_execution_engine
+):
+    pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, None, 5],
+            "b": [2, 3, 4, 5, 6, 7],
+            "c": [1, 2, 3, 4, None, 6],
+        }
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_list": ["a", "c"],
+            "row_condition": 'col("b")>2',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "all_values_are_missing",
+        }
+    )
+    for column_name in data.columns:
+        data = data.withColumn(column_name, data[column_name].cast(LongType()))
+
+    expected_multicolumn_pd_df = pd.DataFrame(
+        {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
+    )
+    expected_multicolumn_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_multicolumn_pd_df.to_records(index=False)
+        ],
+        expected_multicolumn_pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=expected_multicolumn_df)
+
+    assert dataframes_equal(
+        data, expected_multicolumn_df
+    ), "Data does not match after getting full access compute domain"
+
+    pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, 5, 6],
+            "b": [2, 3, 4, 5, None, 6],
+            "c": [1, 2, 3, 4, 5, None],
+        }
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_list": ["b", "c"],
+            "row_condition": 'col("a")<5',
+            "condition_parser": "great_expectations__experimental__",
+            "ignore_row_if": "any_value_is_missing",
+        }
+    )
+    for column_name in data.columns:
+        data = data.withColumn(column_name, data[column_name].cast(LongType()))
+
+    expected_multicolumn_pd_df = pd.DataFrame(
+        {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}, index=[0, 1, 2, 3]
+    )
+
+    expected_multicolumn_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_multicolumn_pd_df.to_records(index=False)
+        ],
+        expected_multicolumn_pd_df.columns.tolist(),
+    )
+
+    assert dataframes_equal(
+        data, expected_multicolumn_df
+    ), "Data does not match after getting full access compute domain"
+
+    pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, None, 5],
+            "b": [2, 3, 4, 5, 6, 7],
+            "c": [1, 2, 3, 4, None, 6],
+        }
+    )
+    df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in pd_df.to_records(index=False)
+        ],
+        pd_df.columns.tolist(),
+    )
+    engine = basic_spark_df_execution_engine
+    engine.load_batch_data(batch_id="1234", batch_data=df)
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "column_list": ["b", "c"],
+            "ignore_row_if": "never",
+        }
+    )
+
+    expected_multicolumn_pd_df = pd.DataFrame(
+        {
+            "a": [1, 2, 3, 4, None, 5],
+            "b": [2, 3, 4, 5, 6, 7],
+            "c": [1, 2, 3, 4, None, 6],
+        },
+        index=[0, 1, 2, 3, 4, 5],
+    )
+
+    expected_multicolumn_df = spark_session.createDataFrame(
+        [
+            tuple(
+                None if isinstance(x, (float, int)) and np.isnan(x) else x
+                for x in record.tolist()
+            )
+            for record in expected_multicolumn_pd_df.to_records(index=False)
+        ],
+        expected_multicolumn_pd_df.columns.tolist(),
+    )
+
+    assert dataframes_equal(
+        data, expected_multicolumn_df
+    ), "Data does not match after getting full access compute domain"
 
 
 def test_get_compute_domain_with_no_domain_kwargs(
@@ -287,7 +635,7 @@ def test_get_batch_data(test_sparkdf, basic_spark_df_execution_engine):
 
 
 def test_get_batch_empty_splitter(
-    test_folder_connection_path_csv, spark_session, basic_spark_df_execution_engine
+    test_folder_connection_path_csv, basic_spark_df_execution_engine
 ):
     # reader_method not configured because spark will configure own reader by default
     # reader_options are needed to specify the fact that the first line of test file is the header
@@ -303,7 +651,7 @@ def test_get_batch_empty_splitter(
 
 
 def test_get_batch_empty_splitter_tsv(
-    test_folder_connection_path_tsv, spark_session, basic_spark_df_execution_engine
+    test_folder_connection_path_tsv, basic_spark_df_execution_engine
 ):
     # reader_method not configured because spark will configure own reader by default
     # reader_options are needed to specify the fact that the first line of test file is the header
@@ -320,7 +668,7 @@ def test_get_batch_empty_splitter_tsv(
 
 
 def test_get_batch_empty_splitter_parquet(
-    test_folder_connection_path_parquet, spark_session, basic_spark_df_execution_engine
+    test_folder_connection_path_parquet, basic_spark_df_execution_engine
 ):
     # Note: reader method and reader_options are not needed, because
     # SparkDFExecutionEngine automatically determines the file type as well as the schema of the Parquet file.
@@ -334,8 +682,20 @@ def test_get_batch_empty_splitter_parquet(
     assert len(test_sparkdf.columns) == 2
 
 
+def test_get_batch_with_split_on_whole_table_runtime(
+    test_sparkdf, basic_spark_df_execution_engine
+):
+    test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
+        RuntimeDataBatchSpec(
+            batch_data=test_sparkdf, splitter_method="_split_on_whole_table"
+        )
+    ).dataframe
+    assert test_sparkdf.count() == 120
+    assert len(test_sparkdf.columns) == 10
+
+
 def test_get_batch_with_split_on_whole_table_filesystem(
-    test_folder_connection_path_csv, spark_session, basic_spark_df_execution_engine
+    test_folder_connection_path_csv, basic_spark_df_execution_engine
 ):
     # reader_method not configured because spark will configure own reader by default
     test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
@@ -385,20 +745,82 @@ def test_get_batch_with_split_on_whole_table_s3(
     assert len(test_sparkdf.columns) == 2
 
 
-def test_get_batch_with_split_on_whole_table(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+def test_get_batch_with_split_on_whole_table_azure(
+    spark_session, basic_spark_df_execution_engine
 ):
-    test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
-        RuntimeDataBatchSpec(
-            batch_data=test_sparkdf, splitter_method="_split_on_whole_table"
+    # noinspection PyUnusedLocal
+    def mocked_get_reader_function(*args, **kwargs):
+        # noinspection PyUnusedLocal,PyShadowingNames
+        def mocked_reader_function(*args, **kwargs):
+            pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+            df = spark_session.createDataFrame(
+                [
+                    tuple(
+                        None if isinstance(x, (float, int)) and np.isnan(x) else x
+                        for x in record.tolist()
+                    )
+                    for record in pd_df.to_records(index=False)
+                ],
+                pd_df.columns.tolist(),
+            )
+            return df
+
+        return mocked_reader_function
+
+    spark_engine = basic_spark_df_execution_engine
+    spark_engine._get_reader_fn = mocked_get_reader_function
+
+    test_sparkdf = spark_engine.get_batch_data(
+        AzureBatchSpec(
+            path="wasbs://test_container@test_account.blob.core.windows.net/test_dir/test_file.csv",
+            reader_method="csv",
+            reader_options={"header": True},
+            splitter_method="_split_on_whole_table",
         )
     ).dataframe
-    assert test_sparkdf.count() == 120
-    assert len(test_sparkdf.columns) == 10
+    assert test_sparkdf.count() == 4
+    assert len(test_sparkdf.columns) == 2
+
+
+def test_get_batch_with_split_on_whole_table_gcs(
+    spark_session, basic_spark_df_execution_engine
+):
+    # noinspection PyUnusedLocal
+    def mocked_get_reader_function(*args, **kwargs):
+        # noinspection PyUnusedLocal,PyShadowingNames
+        def mocked_reader_function(*args, **kwargs):
+            pd_df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [2, 3, 4, None]})
+            df = spark_session.createDataFrame(
+                [
+                    tuple(
+                        None if isinstance(x, (float, int)) and np.isnan(x) else x
+                        for x in record.tolist()
+                    )
+                    for record in pd_df.to_records(index=False)
+                ],
+                pd_df.columns.tolist(),
+            )
+            return df
+
+        return mocked_reader_function
+
+    spark_engine = basic_spark_df_execution_engine
+    spark_engine._get_reader_fn = mocked_get_reader_function
+
+    test_sparkdf = spark_engine.get_batch_data(
+        GCSBatchSpec(
+            path="gcs://bucket/test/test.csv",
+            reader_method="csv",
+            reader_options={"header": True},
+            splitter_method="_split_on_whole_table",
+        )
+    ).dataframe
+    assert test_sparkdf.count() == 4
+    assert len(test_sparkdf.columns) == 2
 
 
 def test_get_batch_with_split_on_column_value(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     split_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -431,7 +853,7 @@ def test_get_batch_with_split_on_column_value(
 
 
 def test_get_batch_with_split_on_converted_datetime(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     split_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -448,7 +870,7 @@ def test_get_batch_with_split_on_converted_datetime(
 
 
 def test_get_batch_with_split_on_divided_integer(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     split_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -470,7 +892,7 @@ def test_get_batch_with_split_on_divided_integer(
 
 
 def test_get_batch_with_split_on_mod_integer(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     split_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -493,7 +915,7 @@ def test_get_batch_with_split_on_mod_integer(
 
 
 def test_get_batch_with_split_on_multi_column_values(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     split_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -535,7 +957,6 @@ def test_get_batch_with_split_on_multi_column_values(
 
 def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(
     test_sparkdf,
-    spark_session,
     basic_spark_df_execution_engine,
 ):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
@@ -557,7 +978,7 @@ def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(
 
 
 def test_get_batch_with_split_on_hashed_column(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     split_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -578,9 +999,7 @@ def test_get_batch_with_split_on_hashed_column(
 
 
 # ### Sampling methods ###
-def test_get_batch_empty_sampler(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
-):
+def test_get_batch_empty_sampler(test_sparkdf, basic_spark_df_execution_engine):
     sampled_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(batch_data=test_sparkdf, sampling_method=None)
     ).dataframe
@@ -588,9 +1007,7 @@ def test_get_batch_empty_sampler(
     assert len(sampled_df.columns) == 10
 
 
-def test_sample_using_random(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
-):
+def test_sample_using_random(test_sparkdf, basic_spark_df_execution_engine):
     sampled_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf, sampling_method="_sample_using_random"
@@ -604,7 +1021,7 @@ def test_sample_using_random(
     assert sampled_df.count() < 25
 
 
-def test_sample_using_mod(test_sparkdf, spark_session, basic_spark_df_execution_engine):
+def test_sample_using_mod(test_sparkdf, basic_spark_df_execution_engine):
     sampled_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
@@ -620,9 +1037,7 @@ def test_sample_using_mod(test_sparkdf, spark_session, basic_spark_df_execution_
     assert len(sampled_df.columns) == 10
 
 
-def test_sample_using_a_list(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
-):
+def test_sample_using_a_list(test_sparkdf, basic_spark_df_execution_engine):
     sampled_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
@@ -638,7 +1053,7 @@ def test_sample_using_a_list(
 
 
 def test_sample_using_md5_wrong_hash_function_name(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     with pytest.raises(ge_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
@@ -654,7 +1069,7 @@ def test_sample_using_md5_wrong_hash_function_name(
         ).dataframe
 
 
-def test_sample_using_md5(test_sparkdf, spark_session, basic_spark_df_execution_engine):
+def test_sample_using_md5(test_sparkdf, basic_spark_df_execution_engine):
     sampled_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=test_sparkdf,
@@ -674,7 +1089,7 @@ def test_sample_using_md5(test_sparkdf, spark_session, basic_spark_df_execution_
 
 
 def test_split_on_multi_column_values_and_sample_using_random(
-    test_sparkdf, spark_session, basic_spark_df_execution_engine
+    test_sparkdf, basic_spark_df_execution_engine
 ):
     returned_df = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -730,7 +1145,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=True, filter_nan=False
     )
-    assert new_domain_kwargs["row_condition"] == 'col("foo").notnull()'
+    assert new_domain_kwargs["row_condition"] == "foo IS NOT NULL"
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     assert res == [(1,), (2,), (3,), (3,), (2,), (3,), (4,), (5,), (6,)]
@@ -768,7 +1183,7 @@ def test_add_column_row_condition(spark_session, basic_spark_df_execution_engine
     new_domain_kwargs = engine.add_column_row_condition(
         domain_kwargs, filter_null=True, filter_nan=False
     )
-    assert new_domain_kwargs["row_condition"] == 'col("foo").notnull()'
+    assert new_domain_kwargs["row_condition"] == "foo IS NOT NULL"
     df, cd, ad = engine.get_compute_domain(new_domain_kwargs, domain_type="table")
     res = df.collect()
     expected = [(1,), (2,), (3,), (3,), (np.nan,), (2,), (3,), (4,), (5,), (6,)]
@@ -809,7 +1224,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_1 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -817,7 +1232,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -825,7 +1240,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -833,7 +1248,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min.aggregate_fn",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "table.columns": table_columns_metric,
         },
@@ -852,7 +1267,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_1 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_1,
             "table.columns": table_columns_metric,
@@ -861,7 +1276,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_2,
             "table.columns": table_columns_metric,
@@ -870,7 +1285,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_3,
             "table.columns": table_columns_metric,
@@ -879,7 +1294,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
         metric_dependencies={
             "metric_partial_fn": desired_metric_4,
             "table.columns": table_columns_metric,
@@ -917,9 +1332,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
 
 
 # Ensuring functionality of compute_domain when no domain kwargs are given
-def test_get_compute_domain_with_no_domain_kwargs_alt(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_compute_domain_with_no_domain_kwargs_alt(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -942,9 +1355,7 @@ def test_get_compute_domain_with_no_domain_kwargs_alt(
 
 
 # Testing for only untested use case - multicolumn
-def test_get_compute_domain_with_column_pair(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_compute_domain_with_column_pair(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -968,25 +1379,9 @@ def test_get_compute_domain_with_column_pair(
         "column_B": "b",
     }, "Accessor kwargs have been modified"
 
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"column_A": "a", "column_B": "b"}, domain_type="identity"
-    )
-
-    # Ensuring that with no domain nothing happens to the data itself
-    assert dataframes_equal(
-        data, df
-    ), "Data does not match after getting compute domain"
-    assert compute_kwargs == {
-        "column_A": "a",
-        "column_B": "b",
-    }, "Compute domain kwargs should not be modified"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-
 
 # Testing for only untested use case - multicolumn
-def test_get_compute_domain_with_multicolumn(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_compute_domain_with_multicolumn(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -997,7 +1392,7 @@ def test_get_compute_domain_with_multicolumn(
     df = engine.dataframe
 
     data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"columns": ["a", "b", "c"]}, domain_type="multicolumn"
+        domain_kwargs={"column_list": ["a", "b", "c"]}, domain_type="multicolumn"
     )
 
     # Ensuring that with no domain nothing happens to the data itself
@@ -1006,29 +1401,12 @@ def test_get_compute_domain_with_multicolumn(
     ), "Data does not match after getting compute domain"
     assert compute_kwargs == {}, "Compute domain kwargs should be empty"
     assert accessor_kwargs == {
-        "columns": ["a", "b", "c"]
+        "column_list": ["a", "b", "c"]
     }, "Accessor kwargs have been modified"
-
-    # Checking for identity
-    engine.load_batch_data(batch_data=df, batch_id="1234")
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"columns": ["a", "b", "c"]}, domain_type="identity"
-    )
-
-    # Ensuring that with no domain nothing happens to the data itself
-    assert dataframes_equal(
-        data, df
-    ), "Data does not match after getting compute domain"
-    assert compute_kwargs == {
-        "columns": ["a", "b", "c"]
-    }, "Compute domain kwargs should not change for identity domain"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
 
 # Testing whether compute domain is properly calculated, but this time obtaining a column
-def test_get_compute_domain_with_column_domain_alt(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_compute_domain_with_column_domain_alt(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1051,9 +1429,7 @@ def test_get_compute_domain_with_column_domain_alt(
 
 
 # Using an unmeetable row condition to see if empty dataset will result in errors
-def test_get_compute_domain_with_row_condition_alt(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_domain_records_with_row_condition_alt(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1067,9 +1443,11 @@ def test_get_compute_domain_with_row_condition_alt(
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"row_condition": "b > 2", "condition_parser": "spark"},
-        domain_type="identity",
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "row_condition": "b > 2",
+            "condition_parser": "spark",
+        }
     )
 
     # Ensuring data has been properly queried
@@ -1077,17 +1455,9 @@ def test_get_compute_domain_with_row_condition_alt(
         data, expected_df
     ), "Data does not match after getting compute domain"
 
-    # Ensuring compute kwargs have not been modified
-    assert (
-        "row_condition" in compute_kwargs.keys()
-    ), "Row condition should be located within compute kwargs"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-
 
 # What happens when we filter such that no value meets the condition?
-def test_get_compute_domain_with_unmeetable_row_condition_alt(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_domain_records_with_unmeetable_row_condition_alt(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1101,23 +1471,19 @@ def test_get_compute_domain_with_unmeetable_row_condition_alt(
     # Loading batch data
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
-        domain_kwargs={"row_condition": "b > 24", "condition_parser": "spark"},
-        domain_type="identity",
+    data = engine.get_domain_records(
+        domain_kwargs={
+            "row_condition": "b > 24",
+            "condition_parser": "spark",
+        }
     )
     # Ensuring data has been properly queried
     assert dataframes_equal(
         data, expected_df
     ), "Data does not match after getting compute domain"
 
-    # Ensuring compute kwargs have not been modified
-    assert (
-        "row_condition" in compute_kwargs.keys()
-    ), "Row condition should be located within compute kwargs"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
-
     # Ensuring errors for column and column_ pair domains are caught
-    with pytest.raises(GreatExpectationsError):
+    with pytest.raises(ge_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
@@ -1126,7 +1492,7 @@ def test_get_compute_domain_with_unmeetable_row_condition_alt(
             },
             domain_type="column",
         )
-    with pytest.raises(GreatExpectationsError) as g:
+    with pytest.raises(ge_exceptions.GreatExpectationsError) as g:
         # noinspection PyUnusedLocal
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
@@ -1138,9 +1504,7 @@ def test_get_compute_domain_with_unmeetable_row_condition_alt(
 
 
 # Testing to ensure that great expectation experimental parser also works in terms of defining a compute domain
-def test_get_compute_domain_with_ge_experimental_condition_parser(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_compute_domain_with_ge_experimental_condition_parser(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1176,30 +1540,21 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(
     ), "Row condition should be located within compute kwargs"
     assert accessor_kwargs == {"column": "b"}, "Accessor kwargs have been modified"
 
-    # Should react differently for domain type identity
-    data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+    # Should react same for get_domain_records()
+    data = engine.get_domain_records(
         domain_kwargs={
             "column": "b",
             "row_condition": 'col("b") == 2',
             "condition_parser": "great_expectations__experimental__",
-        },
-        domain_type="identity",
+        }
     )
     # Ensuring data has been properly queried
     assert dataframes_equal(
-        data, expected_df.select("b")
+        data, expected_df
     ), "Data does not match after getting compute domain"
 
-    # Ensuring compute kwargs have not been modified
-    assert (
-        "row_condition" in compute_kwargs.keys()
-    ), "Row condition should be located within compute kwargs"
-    assert accessor_kwargs == {}, "Accessor kwargs have been modified"
 
-
-def test_get_compute_domain_with_nonexistent_condition_parser(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_get_compute_domain_with_nonexistent_condition_parser(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1213,21 +1568,18 @@ def test_get_compute_domain_with_nonexistent_condition_parser(
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
     # Expect GreatExpectationsError because parser doesn't exist
-    with pytest.raises(GreatExpectationsError):
+    with pytest.raises(ge_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
-        data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
+        data = engine.get_domain_records(
             domain_kwargs={
                 "row_condition": "b > 24",
                 "condition_parser": "nonexistent",
             },
-            domain_type=MetricDomainTypes.IDENTITY,
         )
 
 
 # Ensuring that we can properly inform user when metric doesn't exist - should get a metric provider error
-def test_resolve_metric_bundle_with_nonexistent_metric(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -1239,26 +1591,26 @@ def test_resolve_metric_bundle_with_nonexistent_metric(
     desired_metric_1 = MetricConfiguration(
         metric_name="column_values.unique",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
     desired_metric_4 = MetricConfiguration(
         metric_name="column.does_not_exist",
         metric_domain_kwargs={"column": "b"},
-        metric_value_kwargs=dict(),
+        metric_value_kwargs=None,
     )
 
     # Ensuring a metric provider error is raised if metric does not exist
-    with pytest.raises(MetricProviderError) as e:
+    with pytest.raises(ge_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
         res = engine.resolve_metrics(
             metrics_to_resolve=(
@@ -1272,9 +1624,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(
 
 
 # Making sure dataframe property is functional
-def test_dataframe_property_given_loaded_batch(
-    spark_session, basic_spark_df_execution_engine
-):
+def test_dataframe_property_given_loaded_batch(spark_session):
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(

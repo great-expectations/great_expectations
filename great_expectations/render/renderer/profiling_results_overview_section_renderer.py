@@ -2,6 +2,7 @@ import warnings
 from collections import Counter, defaultdict
 
 from great_expectations.profile.base import ProfilerTypeMapping
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
     CollapseContent,
     RenderedBulletListContent,
@@ -11,8 +12,6 @@ from great_expectations.render.types import (
     RenderedTableContent,
 )
 
-from .renderer import Renderer
-
 
 class ProfilingResultsOverviewSectionRenderer(Renderer):
     @classmethod
@@ -21,7 +20,7 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         content_blocks = []
         # NOTE: I don't love the way this builds content_blocks as a side effect.
         # The top-level API is clean and scannable, but the function internals are counterintutitive and hard to test.
-        # I wonder if we can enable something like jquery chaining for this. Tha would be concise AND testable.
+        # I wonder if we can enable something like jquery chaining for this. That would be concise AND testable.
         # Pressing on for now...
         cls._render_header(evrs, content_blocks)
         cls._render_dataset_info(evrs, content_blocks)
@@ -305,13 +304,11 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         # assume 100.0 missing for columns where ["result"]["unexpected_percent"] is not available
         return "{:.2f}%".format(
             sum(
-                [
-                    evr.result["unexpected_percent"]
-                    if "unexpected_percent" in evr.result
-                    and evr.result["unexpected_percent"] is not None
-                    else 100.0
-                    for evr in expect_column_values_to_not_be_null_evrs
-                ]
+                evr.result["unexpected_percent"]
+                if "unexpected_percent" in evr.result
+                and evr.result["unexpected_percent"] is not None
+                else 100.0
+                for evr in expect_column_values_to_not_be_null_evrs
             )
             / len(columns)
         )

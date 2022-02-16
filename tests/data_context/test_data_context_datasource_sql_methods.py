@@ -30,110 +30,113 @@ def test_get_batch(data_context_with_simple_sql_datasource_for_testing_get_batch
     )
 
     # Successful specification using a typed BatchRequest
-    context.get_batch(
-        batch_request=BatchRequest(
+    with pytest.deprecated_call():
+        context.get_batch(
+            batch_request=BatchRequest(
+                datasource_name="my_sqlite_db",
+                data_connector_name="daily",
+                data_asset_name="table_partitioned_by_date_column__A",
+                data_connector_query=IDDict(
+                    batch_filter_parameters={"date": "2020-01-15"}
+                ),
+            )
+        )
+
+        # Failed specification using an untyped BatchRequest
+        with pytest.raises(TypeError):
+            context.get_batch(
+                batch_request={
+                    "datasource_name": "my_sqlite_db",
+                    "data_connector_name": "daily",
+                    "data_asset_name": "table_partitioned_by_date_column__A",
+                    "data_connector_query": {
+                        "batch_filter_parameters": {"date": "2020-01-15"}
+                    },
+                }
+            )
+
+        # Failed specification using an incomplete BatchRequest
+        with pytest.raises(ValueError):
+            context.get_batch(
+                batch_request=BatchRequest(
+                    datasource_name="my_sqlite_db",
+                    data_connector_name="daily",
+                    data_asset_name="table_partitioned_by_date_column__A",
+                    data_connector_query=IDDict(batch_filter_parameters={}),
+                )
+            )
+
+        # Failed specification using an incomplete BatchRequest
+        with pytest.raises(ValueError):
+            context.get_batch(
+                batch_request=BatchRequest(
+                    datasource_name="my_sqlite_db",
+                    data_connector_name="daily",
+                    data_asset_name="table_partitioned_by_date_column__A",
+                )
+            )
+
+        # Failed specification using an incomplete BatchRequest
+        with pytest.raises(TypeError):
+            context.get_batch(
+                batch_request=BatchRequest(
+                    datasource_name="my_sqlite_db", data_connector_name="daily"
+                )
+            )
+
+        # Failed specification using an incomplete BatchRequest
+        # with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
+            context.get_batch(
+                batch_request=BatchRequest(
+                    data_connector_name="daily",
+                    data_asset_name="table_partitioned_by_date_column__A",
+                    data_connector_query=IDDict(batch_filter_parameters={}),
+                )
+            )
+
+        # Successful specification using parameters
+        context.get_batch(
             datasource_name="my_sqlite_db",
             data_connector_name="daily",
             data_asset_name="table_partitioned_by_date_column__A",
-            data_connector_query=IDDict(batch_filter_parameters={"date": "2020-01-15"}),
+            date="2020-01-15",
         )
-    )
 
-    # Failed specification using an untyped BatchRequest
-    with pytest.raises(TypeError):
+        # Successful specification using parameters without parameter names for the identifying triple
+        # This is the thinnest this can plausibly get.
         context.get_batch(
-            batch_request={
-                "datasource_name": "my_sqlite_db",
-                "data_connector_name": "daily",
-                "data_asset_name": "table_partitioned_by_date_column__A",
-                "data_connector_query": {
-                    "batch_filter_parameters": {"date": "2020-01-15"}
-                },
-            }
+            "my_sqlite_db",
+            "daily",
+            "table_partitioned_by_date_column__A",
+            date="2020-01-15",
         )
 
-    # Failed specification using an incomplete BatchRequest
-    with pytest.raises(ValueError):
+        # Successful specification using parameters without parameter names for the identifying triple
+        # In the case of a data_asset containing a single Batch, we don't even need parameters
         context.get_batch(
-            batch_request=BatchRequest(
-                datasource_name="my_sqlite_db",
-                data_connector_name="daily",
-                data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query=IDDict(batch_filter_parameters={}),
-            )
+            "my_sqlite_db",
+            "whole_table",
+            "table_partitioned_by_date_column__A",
         )
 
-    # Failed specification using an incomplete BatchRequest
-    with pytest.raises(ValueError):
+        # Successful specification using parameters and data_connector_query
         context.get_batch(
-            batch_request=BatchRequest(
-                datasource_name="my_sqlite_db",
-                data_connector_name="daily",
-                data_asset_name="table_partitioned_by_date_column__A",
-            )
+            "my_sqlite_db",
+            "daily",
+            "table_partitioned_by_date_column__A",
+            data_connector_query=IDDict(
+                {"batch_filter_parameters": {"date": "2020-01-15"}}
+            ),
         )
 
-    # Failed specification using an incomplete BatchRequest
-    with pytest.raises(TypeError):
+        # Successful specification using parameters and batch_identifiers
         context.get_batch(
-            batch_request=BatchRequest(
-                datasource_name="my_sqlite_db", data_connector_name="daily"
-            )
+            "my_sqlite_db",
+            "daily",
+            "table_partitioned_by_date_column__A",
+            batch_identifiers={"date": "2020-01-15"},
         )
-
-    # Failed specification using an incomplete BatchRequest
-    # with pytest.raises(ValueError):
-    with pytest.raises(TypeError):
-        context.get_batch(
-            batch_request=BatchRequest(
-                data_connector_name="daily",
-                data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query=IDDict(batch_filter_parameters={}),
-            )
-        )
-
-    # Successful specification using parameters
-    context.get_batch(
-        datasource_name="my_sqlite_db",
-        data_connector_name="daily",
-        data_asset_name="table_partitioned_by_date_column__A",
-        date="2020-01-15",
-    )
-
-    # Successful specification using parameters without parameter names for the identifying triple
-    # This is the thinnest this can plausibly get.
-    context.get_batch(
-        "my_sqlite_db",
-        "daily",
-        "table_partitioned_by_date_column__A",
-        date="2020-01-15",
-    )
-
-    # Successful specification using parameters without parameter names for the identifying triple
-    # In the case of a data_asset containing a single Batch, we don't even need parameters
-    context.get_batch(
-        "my_sqlite_db",
-        "whole_table",
-        "table_partitioned_by_date_column__A",
-    )
-
-    # Successful specification using parameters and data_connector_query
-    context.get_batch(
-        "my_sqlite_db",
-        "daily",
-        "table_partitioned_by_date_column__A",
-        data_connector_query=IDDict(
-            {"batch_filter_parameters": {"date": "2020-01-15"}}
-        ),
-    )
-
-    # Successful specification using parameters and batch_identifiers
-    context.get_batch(
-        "my_sqlite_db",
-        "daily",
-        "table_partitioned_by_date_column__A",
-        batch_identifiers={"date": "2020-01-15"},
-    )
 
 
 def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_batch):
@@ -172,28 +175,36 @@ def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_b
             expectation_suite_name="my_expectations",
         )
 
-    # Failed specification using an incomplete BatchRequest
-    with pytest.raises(ValueError):
-        context.get_validator(
-            batch_request=BatchRequest(
-                datasource_name="my_sqlite_db",
-                data_connector_name="daily",
-                data_asset_name="table_partitioned_by_date_column__A",
-                data_connector_query=IDDict(batch_filter_parameters={}),
-            ),
-            expectation_suite_name="my_expectations",
+    # A BatchRequest specified without the date batch_filter_parameter will return all 30 batches.
+    assert (
+        len(
+            context.get_validator(
+                batch_request=BatchRequest(
+                    datasource_name="my_sqlite_db",
+                    data_connector_name="daily",
+                    data_asset_name="table_partitioned_by_date_column__A",
+                    data_connector_query=IDDict(batch_filter_parameters={}),
+                ),
+                expectation_suite_name="my_expectations",
+            ).batches
         )
+        == 30
+    )
 
-    # Failed specification using an incomplete BatchRequest
-    with pytest.raises(ValueError):
-        context.get_validator(
-            batch_request=BatchRequest(
-                datasource_name="my_sqlite_db",
-                data_connector_name="daily",
-                data_asset_name="table_partitioned_by_date_column__A",
-            ),
-            expectation_suite_name="my_expectations",
+    # A BatchRequest specified without a data_connector_query will return all 30 batches.
+    assert (
+        len(
+            context.get_validator(
+                batch_request=BatchRequest(
+                    datasource_name="my_sqlite_db",
+                    data_connector_name="daily",
+                    data_asset_name="table_partitioned_by_date_column__A",
+                ),
+                expectation_suite_name="my_expectations",
+            ).batches
         )
+        == 30
+    )
 
     # Failed specification using an incomplete BatchRequest
     with pytest.raises(TypeError):

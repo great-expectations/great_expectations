@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pandas as pd
 import pytest
 
@@ -6,7 +8,7 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import PandasDataset
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
-    profiler_semantic_types,
+    ProfilerSemanticTypes,
 )
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
@@ -122,8 +124,8 @@ def test_init_with_semantic_types(cardinality_dataset):
     """
 
     semantic_types = {
-        "numeric": ["col_few", "col_many", "col_very_many"],
-        "value_set": ["col_two", "col_very_few"],
+        ProfilerSemanticTypes.NUMERIC.value: ["col_few", "col_many", "col_very_many"],
+        ProfilerSemanticTypes.VALUE_SET.value: ["col_two", "col_very_few"],
     }
     profiler = UserConfigurableProfiler(
         cardinality_dataset,
@@ -240,7 +242,7 @@ def test__validate_semantic_types_dict(cardinality_dataset):
         )
     assert e.value.args[0] == (
         f"incorrect_type is not a recognized semantic_type. Please only include one of "
-        f"{profiler_semantic_types}"
+        f"{[semantic_type.value for semantic_type in ProfilerSemanticTypes]}"
     )
 
     # Error if column is specified for both semantic_types and ignored
@@ -298,7 +300,11 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     assert len(suite.expectations) == 29
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_build_suite_with_semantic_types_dict(
+    mock_emit,
     cardinality_dataset,
     possible_expectations_set,
 ):
@@ -342,8 +348,17 @@ def test_build_suite_with_semantic_types_dict(
     assert len(value_set_columns) == 2
     assert value_set_columns == {"col_two", "col_very_few"}
 
+    # Note 20211209 - Currently the only method called by the Profiler that is instrumented for usage_statistics
+    # is ExpectationSuite's add_expectation(). It will not send a usage_stats event when called from a Profiler.
+    # this number can change in the future if our instrumentation changes.
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
-def test_build_suite_when_suite_already_exists(cardinality_dataset):
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_build_suite_when_suite_already_exists(mock_emit, cardinality_dataset):
     """
     What does this test do and why?
     Confirms that creating a new suite on an existing profiler wipes the previous suite
@@ -365,8 +380,17 @@ def test_build_suite_when_suite_already_exists(cardinality_dataset):
     assert len(suite.expectations) == 1
     assert "expect_table_row_count_to_be_between" in expectations
 
+    # Note 20211209 - Currently the only method called by the Profiler that is instrumented for usage_statistics
+    # is ExpectationSuite's add_expectation(). It will not send a usage_stats event when called from a Profiler.
+    # this number can change in the future if our instrumentation changes.
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
-def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_primary_or_compound_key_not_found_in_columns(mock_emit, cardinality_dataset):
     """
     What does this test do and why?
     Confirms that an error is raised if a primary_or_compound key is specified with a column not found in the dataset
@@ -379,13 +403,15 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
 
     # key includes a non-existent column, should fail
     with pytest.raises(ValueError) as e:
+        # noinspection PyUnusedLocal
         bad_key_profiler = UserConfigurableProfiler(
             cardinality_dataset,
             primary_or_compound_key=["col_unique", "col_that_does_not_exist"],
         )
     assert e.value.args[0] == (
-        f"Column col_that_does_not_exist not found. Please ensure that this column is in the PandasDataset if "
-        f"you would like to use it as a primary_or_compound_key."
+        """Column col_that_does_not_exist not found. Please ensure that this column is in the PandasDataset if you \
+would like to use it as a primary_or_compound_key.
+"""
     )
 
     # key includes a column that exists, but is in ignored_columns, should pass
@@ -395,6 +421,12 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_dataset):
         ignored_columns=["col_none", "col_one"],
     )
     assert ignored_column_profiler.primary_or_compound_key == ["col_unique", "col_one"]
+
+    # Note 20211209 - Currently the only method called by the Profiler that is instrumented for usage_statistics
+    # is ExpectationSuite's add_expectation(). It will not send a usage_stats event when called from a Profiler.
+    # this number can change in the future if our instrumentation changes.
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
 
 def test_config_with_not_null_only(nulls_dataset, possible_expectations_set):
@@ -482,7 +514,7 @@ def test_profiler_all_expectation_types(
     df = ge.read_csv(
         file_relative_path(
             __file__,
-            "../test_sets/taxi_yellow_trip_data_samples/yellow_trip_data_sample_2019-01.csv",
+            "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
         )
     )
     batch_df = ge.dataset.PandasDataset(df)

@@ -27,7 +27,7 @@ We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Cha
         )
 
         if not self.batch_kwargs:
-            self.batch_kwargs = dict()
+            self.batch_kwargs = {}
         self.add_code_cell(
             f"""\
 import great_expectations as ge
@@ -162,7 +162,7 @@ You can find more information about [how to configure this profiler, including a
 
     def _add_scaffold_cell(self):
         self.add_code_cell(
-            f"""\
+            """\
 profiler = UserConfigurableProfiler(profile_dataset=batch,
     ignored_columns=ignored_columns,
     excluded_expectations=None,

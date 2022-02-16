@@ -1,11 +1,13 @@
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.expectations.expectation import (
+    ColumnMapExpectation,
+    InvalidExpectationConfigurationError,
+)
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...render.renderer.renderer import renderer
-from ...render.util import substitute_none_for_missing
-from ..expectation import ColumnMapExpectation, InvalidExpectationConfigurationError
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.util import substitute_none_for_missing
 
 
 class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
@@ -70,7 +72,6 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         "like_pattern_list",
         "mostly",
     )
-
     default_kwarg_values = {
         "like_pattern_list": None,
         "row_condition": None,
@@ -80,8 +81,14 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": True,
     }
+    args_keys = (
+        "column",
+        "like_pattern_list",
+    )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert (

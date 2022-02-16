@@ -5,12 +5,24 @@ import random
 import pytest
 from ruamel.yaml import YAML
 
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+    logger.debug(
+        "Unable to load pandas; install optional pandas dependency for support."
+    )
+
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest
+from great_expectations import DataContext
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
+from great_expectations.validator.validator import Validator
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -50,13 +62,13 @@ data_connectors:
     """,
     )
 
-    my_data_connector = instantiate_class_from_config(
+    my_data_source = instantiate_class_from_config(
         config,
         config_defaults={"module_name": "great_expectations.datasource"},
         runtime_environment={"name": "my_sql_datasource"},
     )
 
-    report = my_data_connector.self_check()
+    report = my_data_source.self_check()
     # print(json.dumps(report, indent=4))
 
     report["execution_engine"].pop("connection_string")
@@ -130,12 +142,12 @@ data_connectors:
     """,
     )
 
-    my_data_connector = instantiate_class_from_config(
+    my_data_source = instantiate_class_from_config(
         config,
         config_defaults={"module_name": "great_expectations.datasource"},
         runtime_environment={"name": "my_sql_datasource"},
     )
-    report = my_data_connector.self_check()
+    report = my_data_source.self_check()
 
     connection_string_to_test = f"""sqlite:///{db_file}"""
     assert report == {
@@ -185,7 +197,7 @@ def test_SimpleSqlalchemyDatasource(empty_data_context):
     )
 
     # Absolutely minimal starting config
-    my_sql_datasource = context.test_yaml_config(
+    datasource_with_minimum_config = context.test_yaml_config(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
@@ -195,9 +207,13 @@ introspection:
     whole_table: {}
 """
     )
-    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
+    print(
+        json.dumps(
+            datasource_with_minimum_config.get_available_data_asset_names(), indent=4
+        )
+    )
 
-    assert my_sql_datasource.get_available_data_asset_names() == {
+    assert datasource_with_minimum_config.get_available_data_asset_names() == {
         "whole_table": [
             "table_containing_id_spacers_for_D",
             "table_full__I",
@@ -223,10 +239,45 @@ introspection:
         ]
     }
 
+    assert datasource_with_minimum_config.get_available_data_asset_names_and_types() == {
+        "whole_table": [
+            ("table_containing_id_spacers_for_D", "table"),
+            ("table_full__I", "table"),
+            ("table_partitioned_by_date_column__A", "table"),
+            ("table_partitioned_by_foreign_key__F", "table"),
+            ("table_partitioned_by_incrementing_batch_id__E", "table"),
+            (
+                "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "table",
+            ),
+            ("table_partitioned_by_multiple_columns__G", "table"),
+            (
+                "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+                "table",
+            ),
+            ("table_partitioned_by_timestamp_column__B", "table"),
+            ("table_that_should_be_partitioned_by_random_hash__H", "table"),
+            ("table_with_fk_reference_from_F", "table"),
+            ("view_by_date_column__A", "view"),
+            ("view_by_incrementing_batch_id__E", "view"),
+            (
+                "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "view",
+            ),
+            ("view_by_multiple_columns__G", "view"),
+            ("view_by_regularly_spaced_incrementing_id_column__C", "view"),
+            ("view_by_timestamp_column__B", "view"),
+            ("view_containing_id_spacers_for_D", "view"),
+            ("view_partitioned_by_foreign_key__F", "view"),
+            ("view_that_should_be_partitioned_by_random_hash__H", "view"),
+            ("view_with_fk_reference_from_F", "view"),
+        ]
+    }
+
     # Here we should test getting a batch
 
     # Very thin starting config
-    my_sql_datasource = context.test_yaml_config(
+    datasource_with_name_suffix = context.test_yaml_config(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
@@ -239,7 +290,7 @@ introspection:
 """
     )
 
-    assert my_sql_datasource.get_available_data_asset_names() == {
+    assert datasource_with_name_suffix.get_available_data_asset_names() == {
         "whole_table": [
             "table_containing_id_spacers_for_D__whole_table",
             "table_full__I__whole_table",
@@ -265,10 +316,45 @@ introspection:
         ]
     }
 
+    assert datasource_with_name_suffix.get_available_data_asset_names_and_types() == {
+        "whole_table": [
+            ("table_containing_id_spacers_for_D", "table"),
+            ("table_full__I", "table"),
+            ("table_partitioned_by_date_column__A", "table"),
+            ("table_partitioned_by_foreign_key__F", "table"),
+            ("table_partitioned_by_incrementing_batch_id__E", "table"),
+            (
+                "table_partitioned_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "table",
+            ),
+            ("table_partitioned_by_multiple_columns__G", "table"),
+            (
+                "table_partitioned_by_regularly_spaced_incrementing_id_column__C",
+                "table",
+            ),
+            ("table_partitioned_by_timestamp_column__B", "table"),
+            ("table_that_should_be_partitioned_by_random_hash__H", "table"),
+            ("table_with_fk_reference_from_F", "table"),
+            ("view_by_date_column__A", "view"),
+            ("view_by_incrementing_batch_id__E", "view"),
+            (
+                "view_by_irregularly_spaced_incrementing_id_with_spacing_in_a_second_table__D",
+                "view",
+            ),
+            ("view_by_multiple_columns__G", "view"),
+            ("view_by_regularly_spaced_incrementing_id_column__C", "view"),
+            ("view_by_timestamp_column__B", "view"),
+            ("view_containing_id_spacers_for_D", "view"),
+            ("view_partitioned_by_foreign_key__F", "view"),
+            ("view_that_should_be_partitioned_by_random_hash__H", "view"),
+            ("view_with_fk_reference_from_F", "view"),
+        ]
+    }
+
     # Here we should test getting a batch
 
     # Add some manually configured tables...
-    my_sql_datasource = context.test_yaml_config(
+    datasource_manually_configured = context.test_yaml_config(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
@@ -321,8 +407,12 @@ tables:
 """
     )
 
-    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
-    assert my_sql_datasource.get_available_data_asset_names() == {
+    print(
+        json.dumps(
+            datasource_manually_configured.get_available_data_asset_names(), indent=4
+        )
+    )
+    assert datasource_manually_configured.get_available_data_asset_names() == {
         "whole_table": [
             "table_containing_id_spacers_for_D",
             "table_full__I",
@@ -354,10 +444,15 @@ tables:
         ],
     }
 
+    # can't use get_available_data_asset_names_and_types here because it's only implemented
+    # on InferredAssetSqlDataConnector, not ConfiguredAssetSqlDataConnector
+    with pytest.raises(NotImplementedError):
+        datasource_manually_configured.get_available_data_asset_names_and_types()
+
     # Here we should test getting another batch
 
     # Drop the introspection...
-    my_sql_datasource = context.test_yaml_config(
+    datasource_without_introspection = context.test_yaml_config(
         f"""
 class_name: SimpleSqlalchemyDatasource
 connection_string: sqlite:///{db_file}
@@ -384,8 +479,12 @@ tables:
                     divisor: 12
 """
     )
-    print(json.dumps(my_sql_datasource.get_available_data_asset_names(), indent=4))
-    assert my_sql_datasource.get_available_data_asset_names() == {
+    print(
+        json.dumps(
+            datasource_without_introspection.get_available_data_asset_names(), indent=4
+        )
+    )
+    assert datasource_without_introspection.get_available_data_asset_names() == {
         "whole_table": [
             "table_partitioned_by_date_column__A",
         ],
@@ -401,6 +500,70 @@ tables:
     }
 
     # Here we should test getting another batch
+
+
+def test_basic_instantiation_with_bigquery_creds(sa, empty_data_context):
+    context = empty_data_context
+    my_data_source = instantiate_class_from_config(
+        # private key is valid but useless
+        config={
+            "connection_string": "bigquery://project-1353/dataset",
+            "credentials_info": {
+                "type": "service_account",
+                "project_id": "project-1353",
+                "private_key_id": "df87033061fd7c27dcc953e235fe099a7017f9c4",
+                "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDJGtBAt//4Mro3\n58HfA8JfoX1KtTtCCsvGqVhXY5Z74q7knLJUm3cy6pheIUrJ7qvTSuzQZrguI+x5\n/J3+iosjgEhtkHfkDwPreW/K5TL/JXh1xjr/qMro4P10csVmmiAtVDypFIj2Tl4f\n6oJ5qGJJ6WBtFmswgHZeSZCis3FYIpho9Dqzj/Uahji4/ApaY4s/O463ymr4VhFW\n3ieIiepUB/XBBYzJOa5xAmo5HA6aSw7SJX+HUdxqHyhdsIz6kNV+3ej/YF4hgzVF\n2vn2+/+71GqSaZKK12frdfFU4VkWMzgvr2tO9XYX49tPOHTlZdEmi1UV2VuS2M39\nsuHHpaOTAgMBAAECggEARRGg+cFYN/nQLDg8RSiI3whbPEffSNDlaN8rmKP7AKR7\ntce9lcJpX4Lj/txHT/BZcjG3AOJummY7JzBkYRJbND+wYHTwQFMJ4Rttkk1CxQ+s\n/iItjDYALphrZE2wz4rax0a5qMaFPbbvq92Cn17+Fu2A8SZ0fQ152etBMigYIxDu\nzvmT4Fb67zJF5BOt8ay75a50H2sxtJcOWiaFX4Esil7+9gJft04MHSsZXBh8GgQK\nKo8xFlBe37tT1vE6Np0igxJIm+HjqObOpQ0pkaE1H2/rWt7k+HfuEWxKYva2t8C2\neexSupeTj1AkwgzKhk7sbyKMieTWg8+Tc3UODxZEMQKBgQDm4Slc8g5e59xw/Wg2\neyM/Gv2Syh1NLDChuFph4A0SBZhNYG7v5BZE4hVIHfZrrLzqSq7KQ2RojDIQzB7u\nUnrtdblvjZcwc1eepgbB9yjcUifaANZg8k9ukN2V0glPvYtIE1yHX6p8kvrIOlEb\n+WxTWXecmq8FL5QnUvboByFogwKBgQDe/FCneKBmaQPEJWa1cx2izA3JFyViRKx5\nWMv3CqEAL96YuL2JOnEvZFGeG+Bup8nohA8YD58TaED58vKjs9j0WFxw9T2V5d9M\n24fT0AwcZMnnrMKslC6ShyWMzntqHL3FvLh4jBthcJ+fsJbLN+vs/7qhU0qWht26\nvCzqAPpLsQKBgAmmMWdcCnO29wSV4qwcO13gz+Y5oj3ece3gWY6roYA2UaYyOJC4\nFKIuXLtV3T2ky4RzOJjldiXUbic7kLNfKRoRiH18CmyQ9YGA6NlkbgW/PUEkNdF5\nbw5s6YXgcFkvz8lkXcKeoe5w6iBCJ6+mnfthytj1sgjicyutkPojiibnAoGAKBEu\nbOk/6Sb1hkkyK2iD6ry/vWJrVT0BwMwz2jAOvfncBZUseXwG2n0sLTzVFw0POrh/\n/dLQwqv5APCmqMOoOD+oXKO0bTrg5O6NeYHoqzFxFi/0yw3VUH74QFTZ2DdR4jYG\n76I9SUTzab5RWjKyMePBpTtSK7oQHX2ylFmYoAECgYBmkwKQkj1b0WZ3+lbb79Jc\nZayAGUgg/W1Fh0V1m8on8wzGOoBoYSbmriyUlUycEivnJaskxCU1Yac2hNQS8KaU\nnm/gd3D0/8ghNW9szvvvRKc99dpgU6OYHvESq4+vG5gdIDHm2C5jMQGQgf1l2VOV\n0z7hg6e3jgecJweN7Yzfnw==\n-----END PRIVATE KEY-----\n",
+                "client_email": "testme@project-1353.iam.gserviceaccount.com",
+                "client_id": "100945395817716260007",
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/testme%40project-1353.iam.gserviceaccount.com",
+            },
+        },
+        config_defaults={
+            "module_name": "great_expectations.datasource",
+            "class_name": "SimpleSqlalchemyDatasource",
+        },
+        runtime_environment={"name": "my_sql_datasource"},
+    )
+
+    # bigquery driver is invoked upon datasource instantiation, and validates credentials_info
+    print(my_data_source)
+
+
+def test_basic_instantiation_with_bigquery_creds_failure_pkey(sa, empty_data_context):
+    context = empty_data_context
+    try:
+        my_data_source = instantiate_class_from_config(
+            # private key is valid but useless
+            config={
+                "connection_string": "bigquery://project-1353/dataset",
+                "credentials_info": {
+                    "type": "service_account",
+                    "project_id": "project-1353",
+                    "private_key_id": "df87033061fd7c27dcc953e235fe099a7017f9c4",
+                    "private_key": "bad_pkey",
+                    "client_email": "testme@project-1353.iam.gserviceaccount.com",
+                    "client_id": "100945395817716260007",
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/testme%40project-1353.iam.gserviceaccount.com",
+                },
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource",
+                "class_name": "SimpleSqlalchemyDatasource",
+            },
+            runtime_environment={"name": "my_sql_datasource"},
+        )
+    except:
+        return
+
+    raise Exception("BigQuery incorrectly passed with invalid private key")
+
+    print(my_data_source)
 
 
 # Note: Abe 2020111: this test belongs with the data_connector tests, not here.
@@ -778,3 +941,152 @@ introspection:
             date_format_string: "%Y-%m-%d"
     """
         )
+
+
+def test_batch_request_sql_with_schema(
+    data_context_with_sql_data_connectors_including_schema_for_testing_get_batch,
+):
+    context: DataContext = (
+        data_context_with_sql_data_connectors_including_schema_for_testing_get_batch
+    )
+
+    df_table_expected_my_first_data_asset: pd.DataFrame = pd.DataFrame(
+        {"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]}
+    )
+    df_table_expected_my_second_data_asset: pd.DataFrame = pd.DataFrame(
+        {"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]}
+    )
+
+    batch_request: dict
+    validator: Validator
+    df_table_actual: pd.DataFrame
+
+    # Exercise RuntimeDataConnector using SQL query against database table with empty schema name.
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_runtime_data_connector",
+        "data_asset_name": "test_asset",
+        "runtime_parameters": {"query": "SELECT * FROM table_1"},
+        "batch_identifiers": {
+            "pipeline_stage_name": "core_processing",
+            "airflow_run_id": 1234567890,
+        },
+    }
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_first_data_asset)
+
+    # Exercise RuntimeDataConnector using SQL query against database table with non-empty ("main") schema name.
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_runtime_data_connector",
+        "data_asset_name": "test_asset",
+        "runtime_parameters": {"query": "SELECT * FROM main.table_2"},
+        "batch_identifiers": {
+            "pipeline_stage_name": "core_processing",
+            "airflow_run_id": 1234567890,
+        },
+    }
+    validator = context.get_validator(
+        batch_request=RuntimeBatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_second_data_asset)
+
+    # Exercise InferredAssetSqlDataConnector using data_asset_name introspected with schema from table, named "table_1".
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_inferred_data_connector",
+        "data_asset_name": "main.table_1",
+    }
+    validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_first_data_asset)
+
+    # Exercise InferredAssetSqlDataConnector using data_asset_name introspected with schema from table, named "table_2".
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_inferred_data_connector",
+        "data_asset_name": "main.table_2",
+    }
+    validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_second_data_asset)
+
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_1" (implicitly).
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_configured_data_connector",
+        "data_asset_name": "my_first_data_asset",
+    }
+    validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_first_data_asset)
+
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_2" (implicitly).
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_configured_data_connector",
+        "data_asset_name": "my_second_data_asset",
+    }
+    validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_second_data_asset)
+
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_1" (explicitly).
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_configured_data_connector",
+        "data_asset_name": "table_1",
+    }
+    validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_first_data_asset)
+
+    # Exercise ConfiguredAssetSqlDataConnector using data_asset_name corresponding to "table_2" (explicitly).
+    batch_request = {
+        "datasource_name": "test_sqlite_db_datasource",
+        "data_connector_name": "my_configured_data_connector",
+        "data_asset_name": "table_2",
+    }
+    validator = context.get_validator(
+        batch_request=BatchRequest(**batch_request),
+        expectation_suite=ExpectationSuite(
+            "my_expectation_suite", data_context=context
+        ),
+    )
+    df_table_actual = validator.head(n_rows=0, fetch_all=True).drop(columns=["index"])
+    assert df_table_actual.equals(df_table_expected_my_second_data_asset)

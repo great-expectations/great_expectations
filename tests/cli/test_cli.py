@@ -2,6 +2,7 @@ import os
 from typing import List
 from unittest import mock
 
+import pytest
 from click.testing import CliRunner, Result
 from ruamel.yaml import YAML
 
@@ -13,28 +14,50 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 yaml = YAML()
 yaml.default_flow_style = False
 
-TOP_LEVEL_HELP = """Usage: great_expectations [OPTIONS] COMMAND [ARGS]...
+
+@pytest.mark.parametrize("invocation", [None, "--help", "--v3-api --help"])
+def test_cli_command_help(caplog, invocation):
+    runner = CliRunner(mix_stderr=True)
+    result = runner.invoke(cli, invocation, catch_exceptions=False)
+    assert result.exit_code == 0
+    # Note that click 8.0 fixed a longstanding bug in 7.x which added empty
+    # lines in "Options". This test looks for chunks of output to support both.
+    assert (
+        """Usage: great_expectations [OPTIONS] COMMAND [ARGS]...
 
   Welcome to the great_expectations CLI!
 
   Most commands follow this format: great_expectations <NOUN> <VERB>
 
   The nouns are: checkpoint, datasource, docs, init, project, store, suite,
-  validation-operator. Most nouns accept the following verbs: new, list, edit
-
-Options:
+  validation-operator. Most nouns accept the following verbs: new, list, edit"""
+        in result.output
+    )
+    assert (
+        """Options:
   --version                Show the version and exit.
-  --v2-api / --v3-api      Default to v2 (Batch Kwargs) API. Use --v3-api for v3
-                           (Batch Request) API
-
-  -v, --verbose            Set great_expectations to use verbose output.
-  -c, --config TEXT        Path to great_expectations configuration file
+  --v3-api / --v2-api      Default to v3 (Batch Request) API. Use --v2-api for
+                           v2 (Batch Kwargs) API"""
+        in result.output
+    )
+    assert (
+        "  -v, --verbose            Set great_expectations to use verbose output."
+        in result.output
+    )
+    assert (
+        """  -c, --config TEXT        Path to great_expectations configuration file
                            location (great_expectations.yml). Inferred if not
-                           provided.
-
-  -y, --assume-yes, --yes  Assume "yes" for all prompts.
+                           provided."""
+        in result.output
+    )
+    assert (
+        """  -y, --assume-yes, --yes  Assume "yes" for all prompts.
   --help                   Show this message and exit.
-
+"""
+        in result.output
+    )
+    assert (
+        """
 Commands:
   checkpoint  Checkpoint operations
   datasource  Datasource operations
@@ -44,29 +67,8 @@ Commands:
   store       Store operations
   suite       Expectation Suite operations
 """
-
-
-def test_cli_command_entrance(caplog):
-    runner = CliRunner(mix_stderr=True)
-    result = runner.invoke(cli, catch_exceptions=False)
-    assert result.exit_code == 0
-    assert result.output == TOP_LEVEL_HELP
-    assert_no_logging_messages_or_tracebacks(caplog, result)
-
-
-def test_cli_top_level_help(caplog):
-    runner = CliRunner(mix_stderr=True)
-    result = runner.invoke(cli, "--help", catch_exceptions=False)
-    assert result.exit_code == 0
-    assert result.output == TOP_LEVEL_HELP
-    assert_no_logging_messages_or_tracebacks(caplog, result)
-
-
-def test_cli_top_level_help_with_v3_flag(caplog):
-    runner = CliRunner(mix_stderr=True)
-    result = runner.invoke(cli, "--v3-api --help", catch_exceptions=False)
-    assert result.exit_code == 0
-    assert result.output == TOP_LEVEL_HELP
+        in result.output
+    )
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 

@@ -16,7 +16,7 @@ repos:
       - id: isort
         exclude: venv/.*\|docs/.*|tests/test_sets/broken_excel_file\.xls
   - repo: https://github.com/psf/black
-    rev: 20.8b1
+    rev: 22.1.0
     hooks:
       - id: black
         exclude: docs/.*|tests/.*.fixture|.*.ge_store_backend_id

@@ -53,8 +53,8 @@
         "result": {
           "observed_value": 5.1397782097623862e-53,
           "element_count": 1000,
-          "missing_count": 0,
-          "missing_percent": 0,
+          "missing_count": null,
+          "missing_percent": null,
           "details": {
             "observed_partition": {
               "values": ["A", "B", "C"],

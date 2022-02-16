@@ -164,6 +164,7 @@ def test_data_connector_query_limit(create_files_and_instantiate_data_connector)
 
     # illegal limit
     with pytest.raises(ge_exceptions.BatchFilterError):
+        # noinspection PyUnusedLocal
         sorted_batch_definition_list = (
             my_data_connector.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
@@ -376,49 +377,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_int
     assert returned_batch_definition_list == expected
 
 
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_string(
-    create_files_and_instantiate_data_connector,
-):
-    my_data_connector = create_files_and_instantiate_data_connector
-
-    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
-    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
-        return (
-            batch_identifiers["name"] in ["abe", "james", "eugene"]
-            and datetime.datetime.strptime(
-                batch_identifiers["timestamp"], "%Y%m%d"
-            ).date()
-            > datetime.datetime(2020, 7, 15).date()
-        )
-
-    returned_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=BatchRequest(
-                datasource_name="test_environment",
-                data_connector_name="general_filesystem_data_connector",
-                data_asset_name="TestFiles",
-                data_connector_query={
-                    "custom_filter_function": my_custom_batch_selector,
-                    "index": "-1",
-                },
-            )
-        )
-    )
-    assert len(returned_batch_definition_list) == 1
-    expected: List[BatchDefinition] = [
-        BatchDefinition(
-            datasource_name="test_environment",
-            data_connector_name="general_filesystem_data_connector",
-            data_asset_name="TestFiles",
-            batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
-            ),
-        ),
-    ]
-    assert returned_batch_definition_list == expected
-
-
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_list(
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_list(
     create_files_and_instantiate_data_connector,
 ):
     # <TODO> is this behavior correct?
@@ -471,7 +430,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_lis
     assert returned_batch_definition_list == expected
 
 
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_tuple(
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_tuple(
     create_files_and_instantiate_data_connector,
 ):
     my_data_connector = create_files_and_instantiate_data_connector
@@ -522,7 +481,363 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_tup
     assert returned_batch_definition_list == expected
 
 
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_str(
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_string(
+    create_files_and_instantiate_data_connector,
+):
+    my_data_connector = create_files_and_instantiate_data_connector
+
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
+        return (
+            batch_identifiers["name"] in ["abe", "james", "eugene"]
+            and datetime.datetime.strptime(
+                batch_identifiers["timestamp"], "%Y%m%d"
+            ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
+
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector,
+                    "index": "-1",
+                },
+            )
+        )
+    )
+    assert len(returned_batch_definition_list) == 1
+    expected: List[BatchDefinition] = [
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
+        ),
+    ]
+    assert returned_batch_definition_list == expected
+
+
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_no_left_no_right_no_step(
+    create_files_and_instantiate_data_connector,
+):
+    my_data_connector = create_files_and_instantiate_data_connector
+
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
+        return (
+            batch_identifiers["name"] in ["abe", "james", "eugene"]
+            and datetime.datetime.strptime(
+                batch_identifiers["timestamp"], "%Y%m%d"
+            ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
+
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector,
+                    "index": "::",
+                },
+            )
+        )
+    )
+    assert len(returned_batch_definition_list) == 5
+    expected: List[BatchDefinition] = [
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
+        ),
+    ]
+    assert returned_batch_definition_list == expected
+
+
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_no_left_no_right_step(
+    create_files_and_instantiate_data_connector,
+):
+    my_data_connector = create_files_and_instantiate_data_connector
+
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
+        return (
+            batch_identifiers["name"] in ["abe", "james", "eugene"]
+            and datetime.datetime.strptime(
+                batch_identifiers["timestamp"], "%Y%m%d"
+            ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
+
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector,
+                    "index": "::2",
+                },
+            )
+        )
+    )
+    assert len(returned_batch_definition_list) == 3
+    expected: List[BatchDefinition] = [
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
+        ),
+    ]
+    assert returned_batch_definition_list == expected
+
+
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_no_left_no_right_step_reverse(
+    create_files_and_instantiate_data_connector,
+):
+    my_data_connector = create_files_and_instantiate_data_connector
+
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
+        return (
+            batch_identifiers["name"] in ["abe", "james", "eugene"]
+            and datetime.datetime.strptime(
+                batch_identifiers["timestamp"], "%Y%m%d"
+            ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
+
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector,
+                    "index": "::-1",
+                },
+            )
+        )
+    )
+    assert len(returned_batch_definition_list) == 5
+    expected: List[BatchDefinition] = [
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
+        ),
+    ]
+    assert returned_batch_definition_list == expected
+
+
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_no_left_right_no_step(
+    create_files_and_instantiate_data_connector,
+):
+    my_data_connector = create_files_and_instantiate_data_connector
+
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
+        return (
+            batch_identifiers["name"] in ["abe", "james", "eugene"]
+            and datetime.datetime.strptime(
+                batch_identifiers["timestamp"], "%Y%m%d"
+            ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
+
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector,
+                    "index": ":3",
+                },
+            )
+        )
+    )
+    assert len(returned_batch_definition_list) == 3
+    expected: List[BatchDefinition] = [
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+            ),
+        ),
+    ]
+    assert returned_batch_definition_list == expected
+
+
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_left_no_right_no_step(
+    create_files_and_instantiate_data_connector,
+):
+    my_data_connector = create_files_and_instantiate_data_connector
+
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
+        return (
+            batch_identifiers["name"] in ["abe", "james", "eugene"]
+            and datetime.datetime.strptime(
+                batch_identifiers["timestamp"], "%Y%m%d"
+            ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
+
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector,
+                    "index": "3:",
+                },
+            )
+        )
+    )
+    assert len(returned_batch_definition_list) == 2
+    expected: List[BatchDefinition] = [
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200810", "price": "1003"}
+            ),
+        ),
+    ]
+    assert returned_batch_definition_list == expected
+
+
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_left_right_no_step(
     create_files_and_instantiate_data_connector,
 ):
     # <TODO> is this behavior correct?
@@ -574,7 +889,57 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_as_str
     assert returned_batch_definition_list == expected
 
 
-def test_data_connector_query_sorted_filtered_by_custom_filter_with_slice_obj(
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_via_string_left_right_step(
+    create_files_and_instantiate_data_connector,
+):
+    my_data_connector = create_files_and_instantiate_data_connector
+
+    # Note that both a function and a lambda Callable types are acceptable as the definition of a custom filter.
+    def my_custom_batch_selector(batch_identifiers: dict) -> bool:
+        return (
+            batch_identifiers["name"] in ["abe", "james", "eugene"]
+            and datetime.datetime.strptime(
+                batch_identifiers["timestamp"], "%Y%m%d"
+            ).date()
+            > datetime.datetime(2020, 7, 15).date()
+        )
+
+    returned_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+                data_connector_query={
+                    "custom_filter_function": my_custom_batch_selector,
+                    "index": "0:4:3",
+                },
+            )
+        )
+    )
+    assert len(returned_batch_definition_list) == 2
+    expected: List[BatchDefinition] = [
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+            ),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict(
+                {"name": "james", "timestamp": "20200811", "price": "1009"}
+            ),
+        ),
+    ]
+    assert returned_batch_definition_list == expected
+
+
+def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_slice_obj(
     create_files_and_instantiate_data_connector,
 ):
     # <TODO> is this behavior correct?

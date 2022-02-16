@@ -1,5 +1,7 @@
 import json
+import os
 from typing import List
+from unittest import mock
 
 import boto3
 import pandas as pd
@@ -8,6 +10,7 @@ from moto import mock_s3
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as ge_exceptions
+from great_expectations import DataContext
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -15,7 +18,11 @@ from great_expectations.core.batch import (
     IDDict,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
+from great_expectations.datasource.data_connector import (
+    ConfiguredAssetS3DataConnector,
+    FilePathDataConnector,
+)
+from great_expectations.execution_engine import PandasExecutionEngine
 
 yaml = YAML()
 
@@ -43,6 +50,7 @@ def test_basic_instantiation():
     my_data_connector = ConfiguredAssetS3DataConnector(
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE_NAME",
+        execution_engine=PandasExecutionEngine(),
         default_regex={
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
@@ -92,9 +100,12 @@ def test_basic_instantiation():
         )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock_s3
-def test_instantiation_from_a_config(empty_data_context):
-    context = empty_data_context
+def test_instantiation_from_a_config(mock_emit, empty_data_context_stats_enabled):
+    context: DataContext = empty_data_context_stats_enabled
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -128,6 +139,9 @@ def test_instantiation_from_a_config(empty_data_context):
         assets:
             alpha:
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -152,11 +166,33 @@ def test_instantiation_from_a_config(empty_data_context):
         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
         # "example_data_reference": {},
     }
+    assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetS3DataConnector",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock_s3
-def test_instantiation_from_a_config_regex_does_not_match_paths(empty_data_context):
-    context = empty_data_context
+def test_instantiation_from_a_config_regex_does_not_match_paths(
+    mock_emit, empty_data_context_stats_enabled
+):
+    context: DataContext = empty_data_context_stats_enabled
 
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
@@ -195,6 +231,9 @@ assets:
     alpha:
 
     """,
+        runtime_environment={
+            "execution_engine": PandasExecutionEngine(),
+        },
         return_mode="report_object",
     )
 
@@ -216,6 +255,23 @@ assets:
         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
         # "example_data_reference": {},
     }
+    assert mock_emit.call_count == 1
+    anonymized_name = mock_emit.call_args_list[0][0][0]["event_payload"][
+        "anonymized_name"
+    ]
+    expected_call_args_list = [
+        mock.call(
+            {
+                "event": "data_context.test_yaml_config",
+                "event_payload": {
+                    "anonymized_name": anonymized_name,
+                    "parent_class": "ConfiguredAssetS3DataConnector",
+                },
+                "success": True,
+            }
+        ),
+    ]
+    assert mock_emit.call_args_list == expected_call_args_list
 
 
 @mock_s3
@@ -249,8 +305,6 @@ def test_return_all_batch_definitions_unsorted():
         f"""
             class_name: ConfiguredAssetS3DataConnector
             datasource_name: test_environment
-            #execution_engine:
-            #    class_name: PandasExecutionEngine
             bucket: {bucket}
             prefix: ""
             assets:
@@ -268,12 +322,13 @@ def test_return_all_batch_definitions_unsorted():
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_s3_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
 
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request()
 
     # with unnamed data_asset_name
@@ -282,7 +337,7 @@ def test_return_all_batch_definitions_unsorted():
             BatchRequest(
                 datasource_name="test_environment",
                 data_connector_name="general_s3_data_connector",
-                data_asset_name=None,
+                data_asset_name="",
             )
         )
 
@@ -292,7 +347,7 @@ def test_return_all_batch_definitions_unsorted():
             BatchRequestBase(
                 datasource_name="test_environment",
                 data_connector_name="general_s3_data_connector",
-                data_asset_name=None,
+                data_asset_name="",
             )
         )
     )
@@ -424,8 +479,6 @@ def test_return_all_batch_definitions_sorted():
         f"""
         class_name: ConfiguredAssetS3DataConnector
         datasource_name: test_environment
-        #execution_engine:
-        #    class_name: PandasExecutionEngine
         bucket: {bucket}
         prefix: ""
         assets:
@@ -455,7 +508,7 @@ def test_return_all_batch_definitions_sorted():
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_s3_data_connector",
-            "datasource_name": "test_environment",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -645,6 +698,7 @@ def test_alpha():
         f"""
                 module_name: great_expectations.datasource.data_connector
                 class_name: ConfiguredAssetS3DataConnector
+                datasource_name: BASE
                 bucket: {bucket}
                 prefix: test_dir_alpha
                 assets:
@@ -660,7 +714,7 @@ def test_alpha():
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_s3_data_connector",
-            "datasource_name": "BASE",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -739,6 +793,7 @@ def test_foxtrot():
         f"""
             module_name: great_expectations.datasource.data_connector
             class_name: ConfiguredAssetS3DataConnector
+            datasource_name: BASE
             bucket: {bucket}
             prefix: test_dir_foxtrot
             assets:
@@ -766,7 +821,7 @@ def test_foxtrot():
         config=my_data_connector_yaml,
         runtime_environment={
             "name": "general_s3_data_connector",
-            "datasource_name": "BASE",
+            "execution_engine": PandasExecutionEngine(),
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
@@ -853,8 +908,6 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
         f"""
         class_name: ConfiguredAssetS3DataConnector
         datasource_name: test_environment
-        #execution_engine:
-        #    class_name: PandasExecutionEngine
         bucket: bucket
         assets:
             TestFiles:
@@ -887,7 +940,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
                 config=my_data_connector_yaml,
                 runtime_environment={
                     "name": "general_s3_data_connector",
-                    "datasource_name": "test_environment",
+                    "execution_engine": PandasExecutionEngine(),
                 },
                 config_defaults={
                     "module_name": "great_expectations.datasource.data_connector"
@@ -927,8 +980,6 @@ def test_return_all_batch_definitions_too_many_sorters():
         f"""
         class_name: ConfiguredAssetS3DataConnector
         datasource_name: test_environment
-        #execution_engine:
-        #    class_name: PandasExecutionEngine
         bucket: {bucket}
         prefix: ""
         assets:
@@ -958,7 +1009,7 @@ def test_return_all_batch_definitions_too_many_sorters():
                 config=my_data_connector_yaml,
                 runtime_environment={
                     "name": "general_s3_data_connector",
-                    "datasource_name": "test_environment",
+                    "execution_engine": PandasExecutionEngine(),
                 },
                 config_defaults={
                     "module_name": "great_expectations.datasource.data_connector"
@@ -1022,7 +1073,10 @@ assets:
     my_data_connector = instantiate_class_from_config(
         config,
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},
-        runtime_environment={"name": "my_data_connector"},
+        runtime_environment={
+            "name": "my_data_connector",
+            "execution_engine": PandasExecutionEngine(),
+        },
     )
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
@@ -1067,3 +1121,31 @@ assets:
         )
         == 5
     )
+
+
+def test_sanitize_prefix_behaves_the_same_as_local_files():
+    def check_sameness(prefix, expected_output):
+        s3_sanitized = ConfiguredAssetS3DataConnector.sanitize_prefix_for_s3(prefix)
+        file_system_sanitized = FilePathDataConnector.sanitize_prefix(prefix)
+        if os.sep == "\\":  # Fix to ensure tests work on Windows
+            file_system_sanitized = file_system_sanitized.replace("\\", "/")
+
+        assert file_system_sanitized == expected_output, (
+            f"Expected output does not match original sanitization behavior, got "
+            f"{file_system_sanitized} instead of {expected_output}"
+        )
+        assert (
+            s3_sanitized == expected_output == file_system_sanitized
+        ), f'S3 sanitized result is incorrect, "{s3_sanitized} instead of {expected_output}'
+
+    # Copy of all samples from tests/datasource/data_connector/test_file_path_data_connector.py
+    check_sameness("foo/", "foo/")
+    check_sameness("bar", "bar/")
+    check_sameness("baz.txt", "baz.txt")
+    check_sameness("a/b/c/baz.txt", "a/b/c/baz.txt")
+
+    # A couple additional checks
+    check_sameness("a/b/c", "a/b/c/")
+    check_sameness("a.x/b/c", "a.x/b/c/")
+    check_sameness("path/to/folder.something/", "path/to/folder.something/")
+    check_sameness("path/to/folder.something", "path/to/folder.something")

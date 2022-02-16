@@ -5,12 +5,10 @@ import pandas as pd
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics.import_manager import sa
-from great_expectations.expectations.metrics.map_metric import (
+from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
@@ -45,10 +43,10 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
             raise NotImplementedError
 
         return sa.and_(
-            *[
+            *(
                 get_dialect_regex_expression(column, regex, _dialect, positive=False)
                 for regex in regex_list
-            ]
+            )
         )
 
     @column_condition_partial(engine=SparkDFExecutionEngine)

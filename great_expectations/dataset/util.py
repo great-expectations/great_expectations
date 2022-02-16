@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import Any, List
 
 import numpy as np
 import pandas as pd
@@ -302,7 +302,7 @@ def infer_distribution_parameters(data, distribution, params=None):
     """
 
     if params is None:
-        params = dict()
+        params = {}
     elif not isinstance(params, dict):
         raise TypeError(
             "params must be a dictionary object, see great_expectations documentation"
@@ -375,7 +375,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
 
        See the `cdf()` function here https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.beta.html#Methods\
        to see an example of scipy's positional arguments. This function returns the arguments specified by the \
-       scipy.stat.distribution.cdf() for tha distribution.
+       scipy.stat.distribution.cdf() for that distribution.
 
        Args:
            distribution (string): \
@@ -474,7 +474,7 @@ def validate_distribution_parameters(distribution, params):
         # elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
         #    raise ValueError("Invalid parameters: %s" %poisson_msg)
 
-        # df is necessary and required to be positve
+        # df is necessary and required to be positive
         elif distribution == "chi2" and params.get("df", -1) <= 0:
             raise ValueError("Invalid parameters: %s:" % chi2_msg)
 

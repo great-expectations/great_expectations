@@ -7,6 +7,7 @@ import os
 import re
 import warnings
 from collections import OrderedDict
+from functools import lru_cache
 from typing import Optional
 from urllib.parse import urlparse
 
@@ -32,13 +33,7 @@ except ImportError:
 import pyparsing as pp
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    CheckpointConfigSchema,
-    DataContextConfig,
-    DataContextConfigDefaults,
-    DataContextConfigSchema,
-)
+from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 try:
@@ -233,6 +228,7 @@ See https://great-expectations.readthedocs.io/en/latest/reference/data_context_r
     return template_str
 
 
+@lru_cache(maxsize=None)
 def substitute_value_from_secret_store(value):
     """
     This method takes a value, tries to parse the value to fetch a secret from a secret manager
@@ -454,13 +450,11 @@ def substitute_all_config_variables(
 
     :param data:
     :param replace_variables_dict:
+    :param dollar_sign_escape_string: a reserved character for specifying parameters
     :return: a dictionary with all the variables replaced with their values
     """
-    if isinstance(data, DataContextConfig):
-        data = DataContextConfigSchema().dump(data)
-
-    if isinstance(data, CheckpointConfig):
-        data = CheckpointConfigSchema().dump(data)
+    if isinstance(data, BaseYamlConfig):
+        data = (data.__class__.get_schema_class())().dump(data)
 
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {
@@ -511,14 +505,6 @@ def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
         return parsed_substitution_variable.substitution_variable_name
     except pp.ParseException:
         return None
-
-
-def default_checkpoints_exist(directory_path: str) -> bool:
-    checkpoints_directory_path: str = os.path.join(
-        directory_path,
-        DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
-    )
-    return os.path.isdir(checkpoints_directory_path)
 
 
 class PasswordMasker:

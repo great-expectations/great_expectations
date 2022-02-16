@@ -21,6 +21,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         engine=None,  # sqlalchemy.engine.Engine
         introspection: dict = None,
         tables: dict = None,
+        **kwargs
     ):
         introspection = introspection or {}
         tables = tables or {}
@@ -32,6 +33,8 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
             "credentials": credentials,
             "engine": engine,
         }
+
+        self._execution_engine_config.update(**kwargs)
 
         super().__init__(name=name, execution_engine=self._execution_engine_config)
 
@@ -45,7 +48,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         self._datasource_config = {}
 
     # noinspection PyMethodOverriding
-    # Note: This method is meant to overwrite Datasource._init_data_connectors (dispite signature mismatch).
+    # Note: This method is meant to overwrite Datasource._init_data_connectors (despite signature mismatch).
     def _init_data_connectors(
         self,
         introspection_configs: dict,

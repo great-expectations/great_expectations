@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 
 import nbformat
@@ -6,21 +7,31 @@ from great_expectations import DataContext
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
 
+try:
+    import black
+except ImportError:
+    black = None
+
+logger = logging.getLogger(__name__)
+
 
 class DatasourceNewNotebookRenderer(BaseNotebookRenderer):
     SQL_DOCS = """\
 ### For SQL based Datasources:
 
-Here we are creating an example configuration using `SimpleSqlalchemyDatasource` based on the database backend you specified in the CLI.
+Here we are creating an example configuration based on the database backend you specified in the CLI.  The configuration contains an **InferredAssetSqlDataConnector**, which will add a Data Asset for each table in the database, and a **RuntimeDataConnector** which can accept SQL queries. This is just an example, and you may customize this as you wish!
+
+Also, if you would like to learn more about the **DataConnectors** used in this configuration, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_an_inferredassetdataconnector.html) and [RuntimeDataConnectors](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_batches/how_to_configure_a_runtime_data_connector.html).
 
 Credentials will not be saved until you run the last cell. The credentials will be saved in `uncommitted/config_variables.yml` which should not be added to source control."""
 
     FILES_DOCS = """### For files based Datasources:
-Here we are creating an example configuration using an InferredAssetDataConnector which will add a Data Asset for each file in the base directory you provided. This is just a sample, you may customize this as you wish!
+Here we are creating an example configuration.  The configuration contains an **InferredAssetFilesystemDataConnector** which will add a Data Asset for each file in the base directory you provided. It also contains a **RuntimeDataConnector** which can accept filepaths.   This is just an example, and you may customize this as you wish!
 
-See our docs for other methods to organize assets, handle multi-file assets, name assets based on parts of a filename, etc."""
+Also, if you would like to learn more about the **DataConnectors** used in this configuration, including other methods to organize assets, handle multi-file assets, name assets based on parts of a filename, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources/how_to_configure_an_inferredassetdataconnector.html) and [RuntimeDataConnectors](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/creating_batches/how_to_configure_a_runtime_data_connector.html).
+"""
 
-    DOCS_INTRO = f"""## Customize Your Datasource Configuration
+    DOCS_INTRO = """## Customize Your Datasource Configuration
 
 **If you are new to Great Expectations Datasources,** you should check out our [how-to documentation](https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_datasources.html)
 
@@ -34,7 +45,7 @@ Give your datasource a unique name:"""
         context: DataContext,
         datasource_type: DatasourceTypes,
         datasource_yaml: str,
-        datasource_name: Optional[str] = "my_datasource",
+        datasource_name: str = "my_datasource",
         sql_credentials_snippet: Optional[str] = None,
     ):
         super().__init__(context=context)
@@ -68,14 +79,14 @@ context = ge.get_context()""",
     def _add_sql_credentials_cell(self):
         self.add_code_cell(self.sql_credentials_code_snippet)
 
-    def _add_template_cell(self):
+    def _add_template_cell(self, lint: bool = True) -> None:
         self.add_code_cell(
             f"""example_yaml = {self.datasource_yaml}
 print(example_yaml)""",
-            lint=True,
+            lint=lint,
         )
 
-    def _add_test_yaml_cells(self):
+    def _add_test_yaml_cells(self, lint: bool = True) -> None:
         self.add_markdown_cell(
             """\
 # Test Your Datasource Configuration
@@ -91,10 +102,10 @@ you can use `context.add_datasource()` and specify all the required parameters."
         )
         self.add_code_cell(
             "context.test_yaml_config(yaml_config=example_yaml)",
-            lint=True,
+            lint=lint,
         )
 
-    def _add_save_datasource_cell(self):
+    def _add_save_datasource_cell(self, lint: bool = True) -> None:
         self.add_markdown_cell(
             """## Save Your Datasource Configuration
 Here we will save your Datasource in your Data Context once you are satisfied with the configuration. Note that `overwrite_existing` defaults to False, but you may change it to True if you wish to overwrite. Please note that if you wish to include comments you must add them directly to your `great_expectations.yml`."""
@@ -102,7 +113,7 @@ Here we will save your Datasource in your Data Context once you are satisfied wi
         self.add_code_cell(
             """sanitize_yaml_and_save_datasource(context, example_yaml, overwrite_existing=False)
 context.list_datasources()""",
-            lint=True,
+            lint=lint,
         )
         self.add_markdown_cell("Now you can close this notebook and delete it!")
 
@@ -112,9 +123,16 @@ context.list_datasources()""",
         self._add_docs_cell()
         if self.datasource_type == DatasourceTypes.SQL:
             self._add_sql_credentials_cell()
-        self._add_template_cell()
-        self._add_test_yaml_cells()
-        self._add_save_datasource_cell()
+
+        lint = black is not None
+        if not lint:
+            logger.warning(
+                "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
+            )
+        self._add_template_cell(lint)
+        self._add_test_yaml_cells(lint)
+        self._add_save_datasource_cell(lint)
+
         return self._notebook
 
     def render_to_disk(

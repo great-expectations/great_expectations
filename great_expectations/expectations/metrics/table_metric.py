@@ -1,14 +1,12 @@
-import logging
+import warnings
 
-from great_expectations.expectations.metrics.metric_provider import MetricProvider
+# noinspection PyUnresolvedReferences
+from great_expectations.expectations.metrics.table_metric_provider import *
 
-logger = logging.getLogger(__name__)
-
-
-class TableMetricProvider(MetricProvider):
-    domain_keys = (
-        "batch_id",
-        "table",
-        "row_condition",
-        "condition_parser",
-    )
+warnings.warn(
+    f"""The module "{__name__}" has been renamed to "{__name__}_provider" -- the alias "{__name__}" will be deprecated \
+in the future.
+""",
+    DeprecationWarning,
+    stacklevel=2,
+)

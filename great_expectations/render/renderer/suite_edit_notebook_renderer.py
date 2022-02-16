@@ -127,14 +127,14 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         for k, v in expectation["kwargs"].items():
             if k == "column":
                 # make the column a positional argument
-                kwargs.insert(0, "{}='{}'".format(k, v))
+                kwargs.insert(0, f"{k}='{v}'")
 
             elif isinstance(v, str):
                 # Put strings in quotes
-                kwargs.append("{}='{}'".format(k, v))
+                kwargs.append(f"{k}='{v}'")
             else:
                 # Pass other types as is
-                kwargs.append("{}={}".format(k, v))
+                kwargs.append(f"{k}={v}")
 
         return ", ".join(kwargs)
 
@@ -142,7 +142,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self,
         notebook_config: Optional[NotebookTemplateConfig],
         default_file_name: str,
-        **default_kwargs
+        **default_kwargs,
     ):
         if notebook_config:
             rendered = self.template_env.get_template(notebook_config.file_name).render(
@@ -154,7 +154,9 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             )
         return rendered
 
-    def add_header(self, suite_name: str, batch_kwargs) -> None:
+    def add_header(
+        self, suite_name: str, batch_kwargs, suite_notes: Optional[dict]
+    ) -> None:
         markdown = self.render_with_overwrite(
             self.header_markdown, "HEADER.md", suite_name=suite_name
         )
@@ -162,10 +164,11 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self.add_markdown_cell(markdown)
 
         if not batch_kwargs:
-            batch_kwargs = dict()
+            batch_kwargs = {}
         code = self.render_with_overwrite(
             self.header_code,
             "header.py.j2",
+            suite_notes=suite_notes,
             suite_name=suite_name,
             batch_kwargs=batch_kwargs,
             env=os.environ,
@@ -264,7 +267,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             meta.pop(profiler)
 
         if meta.keys():
-            return ", meta={}".format(meta)
+            return f", meta={meta}"
 
         return ""
 
@@ -282,7 +285,9 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         suite_name = suite.expectation_suite_name
 
         batch_kwargs = self.get_batch_kwargs(suite, batch_kwargs)
-        self.add_header(suite_name, batch_kwargs)
+        self.add_header(
+            suite_name, batch_kwargs, suite_notes=suite.meta.get("notes", None)
+        )
         self.add_authoring_intro()
         self.add_expectation_cells_from_suite(suite.expectations)
         self.add_footer()

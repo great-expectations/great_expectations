@@ -15,9 +15,8 @@ from dateutil.parser import parse
 
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
-
-from .dataset import Dataset
-from .pandas_dataset import PandasDataset
+from great_expectations.dataset.dataset import Dataset
+from great_expectations.dataset.pandas_dataset import PandasDataset
 
 logger = logging.getLogger(__name__)
 
@@ -277,7 +276,14 @@ class MetaSparkDFDataset(Dataset):
                         eval_col_A, eval_col_B
                     ),
                 )
+            # elif ignore_row_if == "neither":
             elif ignore_row_if == "never":
+                """
+                TODO: <Alex>Note: The value of the "ignore_row_if" directive in the commented out line above is correct.
+                However, fixing the error would constitute a breaking change.  Hence, the documentation is updated now
+                (8/16/2021), while the implementation is corrected as part of the Expectations V3 API release.
+                </Alex>
+                """
                 boolean_mapped_null_values = cols_df.selectExpr(
                     "`__row`",
                     "`{0}` AS `A_{0}`".format(eval_col_A),
@@ -294,8 +300,8 @@ class MetaSparkDFDataset(Dataset):
             nonnull_df = boolean_mapped_null_values.filter("__null_val = False")
             nonnull_count = nonnull_df.count()
 
-            col_A_df = nonnull_df.select("__row", "`A_{}`".format(eval_col_A))
-            col_B_df = nonnull_df.select("__row", "`B_{}`".format(eval_col_B))
+            col_A_df = nonnull_df.select("__row", f"`A_{eval_col_A}`")
+            col_B_df = nonnull_df.select("__row", f"`B_{eval_col_B}`")
 
             success_df = func(self, col_A_df, col_B_df, *args, **kwargs)
             success_count = success_df.filter("__success = True").count()
@@ -312,8 +318,8 @@ class MetaSparkDFDataset(Dataset):
                     unexpected_df = unexpected_df.limit(unexpected_count_limit)
                 maybe_limited_unexpected_list = [
                     (
-                        row["A_{}".format(eval_col_A)],
-                        row["B_{}".format(eval_col_B)],
+                        row[f"A_{eval_col_A}"],
+                        row[f"B_{eval_col_B}"],
                     )
                     for row in unexpected_df.collect()
                 ]
@@ -719,7 +725,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         # Note that this can be an expensive computation; we are not exposing
         # spark's ability to estimate.
         # We add two to 2 * n_values to maintain a legitimate quantile
-        # in the degnerate case when n_values = 0
+        # in the degenerate case when n_values = 0
         result = self.spark_df.approxQuantile(
             column, [0.5, 0.5 + (1 / (2 + (2 * self.get_row_count())))], 0
         )
@@ -1286,7 +1292,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         if match_on == "any":
             return column.withColumn("__success", column[0].rlike("|".join(regex_list)))
         elif match_on == "all":
-            formatted_regex_list = ["(?={})".format(regex) for regex in regex_list]
+            formatted_regex_list = [f"(?={regex})" for regex in regex_list]
             return column.withColumn(
                 "__success", column[0].rlike("".join(formatted_regex_list))
             )
@@ -1356,8 +1362,8 @@ class SparkDFDataset(MetaSparkDFDataset):
             _udf = udf(parse, sparktypes.TimestampType())
             # Create new columns for comparison without replacing original values.
             (timestamp_column_A, timestamp_column_B) = (
-                "__ts_{}".format(column_A_name),
-                "__ts_{}".format(column_B_name),
+                f"__ts_{column_A_name}",
+                f"__ts_{column_B_name}",
             )
             temp_column_A = column_A.withColumn(timestamp_column_A, _udf(column_A_name))
             temp_column_B = column_B.withColumn(timestamp_column_B, _udf(column_B_name))
@@ -1630,7 +1636,8 @@ class SparkDFDataset(MetaSparkDFDataset):
     ):
         """ Multi-Column Map Expectation
 
-        Expects that sum of all rows for a set of columns is equal to a specific value
+        Expects that the sum of row values is the same for each row, summing only values in columns specified in
+        column_list, and equal to the specific value, sum_total.
 
         Args:
             column_list (List[str]): \
@@ -1638,9 +1645,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             sum_total (int): \
                 expected sum of columns
         """
-        expression = "+".join(
-            ["COALESCE({}, 0)".format(col) for col in column_list.columns]
-        )
+        expression = "+".join([f"COALESCE({col}, 0)" for col in column_list.columns])
         column_list = column_list.withColumn("actual_total", expr(expression))
         return column_list.withColumn(
             "__success",

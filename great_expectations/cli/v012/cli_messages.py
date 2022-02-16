@@ -17,7 +17,6 @@ First, Great Expectations will create a new directory:
     |-- great_expectations.yml
     |-- expectations
     |-- checkpoints
-    |-- notebooks
     |-- plugins
     |-- .gitignore
     |-- uncommitted

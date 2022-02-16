@@ -18,7 +18,7 @@ from great_expectations.self_check.util import (
     build_test_backends_list as build_test_backends_list_v3,
 )
 from great_expectations.self_check.util import generate_test_table_name
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -320,6 +320,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
     include_postgresql: bool = "postgresql" in test_backends
     include_mysql: bool = "mysql" in test_backends
     include_mssql: bool = "mssql" in test_backends
+    include_bigquery: bool = "bigquery" in test_backends
 
     if not create_engine:
         pytest.skip("Unable to import sqlalchemy.create_engine() -- skipping.")
@@ -331,6 +332,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
         include_postgresql=include_postgresql,
         include_mysql=include_mysql,
         include_mssql=include_mssql,
+        include_bigquery=include_bigquery,
     )
 
     df: pd.DataFrame = pd.DataFrame(

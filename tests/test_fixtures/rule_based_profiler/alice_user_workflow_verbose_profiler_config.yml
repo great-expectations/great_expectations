@@ -1,0 +1,130 @@
+name: alice user workflow
+class_name: RuleBasedProfiler
+config_version: 1.0
+
+variables:
+  # BatchRequest yielding exactly one batch
+  alice_single_batch_data_batch_request:
+    datasource_name: alice_columnar_table_single_batch_datasource
+    data_connector_name: alice_columnar_table_single_batch_data_connector
+    data_asset_name: alice_columnar_table_single_batch_data_asset
+  integer_type: INTEGER
+  timestamp_type: TIMESTAMP
+  max_user_id: 999999999999
+  min_timestamp: 2004-10-19 10:23:54
+rules:
+  my_rule_for_user_ids:
+    domain_builder: # If placing custom class into the general plugins directory works, remove module_name from config.
+      class_name: MyCustomSemanticTypeColumnDomainBuilder
+      module_name: tests.test_fixtures.rule_based_profiler.plugins
+      batch_request: $variables.alice_single_batch_data_batch_request
+      semantic_types:
+        - user_id
+    parameter_builders:
+      - name: my_min_user_id
+        class_name: MetricMultiBatchParameterBuilder
+        module_name: great_expectations.rule_based_profiler.parameter_builder
+        batch_request: $variables.alice_single_batch_data_batch_request
+        metric_name: column.min
+        metric_domain_kwargs: $domain.domain_kwargs
+    expectation_configuration_builders:
+      - expectation_type: expect_column_values_to_be_of_type
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        type_: $variables.integer_type
+      - expectation_type: expect_column_values_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        min_value: $parameter.my_min_user_id.value[0]
+        max_value: $variables.max_user_id
+        column: $domain.domain_kwargs.column
+      - expectation_type: expect_column_values_to_not_be_null
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+  my_rule_for_timestamps:
+    domain_builder:
+      class_name: SimpleColumnSuffixDomainBuilder
+      module_name: great_expectations.rule_based_profiler.domain_builder
+      batch_request: $variables.alice_single_batch_data_batch_request
+      column_name_suffixes:
+        - _ts
+    parameter_builders:
+      # unused parameter my_max_ts
+      - name: my_max_ts
+        class_name: MetricMultiBatchParameterBuilder
+        batch_request: $variables.alice_single_batch_data_batch_request
+        module_name: great_expectations.rule_based_profiler.parameter_builder
+        metric_name: column.max
+        metric_domain_kwargs: $domain.domain_kwargs
+      - name: my_max_event_ts
+        class_name: MetricMultiBatchParameterBuilder
+        batch_request: $variables.alice_single_batch_data_batch_request
+        module_name: great_expectations.rule_based_profiler.parameter_builder
+        metric_name: column.max
+        # Note this parameter builder computes parameters only on the provided domain:
+        metric_domain_kwargs:
+          column: event_ts
+      # unused parameter my_min_ts
+      - name: my_min_ts
+        class_name: MetricMultiBatchParameterBuilder
+        module_name: great_expectations.rule_based_profiler.parameter_builder
+        batch_request: $variables.alice_single_batch_data_batch_request
+        metric_name: column.min
+        metric_domain_kwargs: $domain.domain_kwargs
+      - name: my_date_format
+        class_name: SimpleDateFormatStringParameterBuilder
+        module_name: great_expectations.rule_based_profiler.parameter_builder
+        batch_request: $variables.alice_single_batch_data_batch_request
+        # Note this parameter builder computes parameters only on the provided domain:
+        metric_domain_kwargs:
+          column: event_ts
+    expectation_configuration_builders:
+      - expectation_type: expect_column_values_to_be_of_type
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        type_: $variables.timestamp_type
+      - expectation_type: expect_column_values_to_be_increasing
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+      - expectation_type: expect_column_values_to_be_dateutil_parseable
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+      - expectation_type: expect_column_min_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        min_value: $variables.min_timestamp
+        max_value: $variables.min_timestamp
+        meta:
+          notes:
+            format: markdown
+            content:
+              - "### This expectation confirms no events occur before tracking started **2004-10-19 10:23:54**"
+        # Note: This expectation accesses a parameter for a set domain (event_ts)
+        # to confirm that the event_ts contains the latest timestamp of all _ts domains
+      - expectation_type: expect_column_max_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        min_value: $variables.min_timestamp
+        max_value: $parameter.my_max_event_ts.value[0]
+        meta:
+          notes:
+            format: markdown
+            content:
+              - "### This expectation confirms that the event_ts contains the latest timestamp of all domains"
+      - expectation_type: expect_column_values_to_match_strftime_format
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        strftime_format: $parameter.my_date_format
+        meta:
+          notes:
+            format: markdown
+            content:
+              - "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"

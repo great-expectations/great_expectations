@@ -143,6 +143,31 @@ def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
     not is_library_loadable(library_name="pyspark"),
     reason="pyspark must be installed",
 )
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_adding_expectation_to_sparkdf_dataset_not_send_usage_message(
+    mock_emit, spark_session, test_dataframe
+):
+    """
+    What does this test and why?
+
+    When an Expectation is called using a SparkDFdataset, it validates the dataset using the implementation of
+    the Expectation. As part of the process, it also adds the Expectation to the active
+    ExpectationSuite. This test ensures that this in-direct way of adding an Expectation to the ExpectationSuite
+    (ie not calling add_expectations() directly) does not emit a usage_stats event.
+    """
+    validation = test_dataframe.expect_column_values_to_be_of_type(
+        "address.street", "StringType"
+    )
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
+
+
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
+)
 def test_expect_column_values_to_be_of_type(spark_session, test_dataframe):
     """
     data asset expectation
@@ -391,7 +416,7 @@ def test_expect_column_values_to_be_json_parseable(spark_session):
         "most": [d1, d2, d3, "d4"],
     }
 
-    data_reshaped = list(zip(*[v for _, v in inner.items()]))
+    data_reshaped = list(zip(*(v for _, v in inner.items())))
     df = spark_session.createDataFrame(
         data_reshaped, ["json_col", "not_json", "py_dict", "most"]
     )

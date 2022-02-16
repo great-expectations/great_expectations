@@ -1,4 +1,5 @@
 import os
+from unittest import mock
 
 import pytest
 
@@ -37,7 +38,10 @@ def test_ColumnsExistProfiler():
     assert expectations_config.expectations[0].kwargs["column"] == "x"
 
 
-def test_BasicDatasetProfiler():
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_BasicDatasetProfiler(mock_emit):
     toy_dataset = PandasDataset(
         {"x": [1, 2, 3]},
     )
@@ -81,6 +85,12 @@ def test_BasicDatasetProfiler():
     }
 
     assert expected_expectations.issubset(added_expectations)
+
+    # Note 20211209 - Currently the only method called by the Profiler that is instrumented for usage_statistics
+    # is ExpectationSuite's add_expectation(). It will not send a usage_stats event when called from a Profiler.
+    # this number can change in the future our instrumentation changes.
+    assert mock_emit.call_count == 0
+    assert mock_emit.call_args_list == []
 
 
 def test_BasicDatasetProfiler_null_column():
@@ -267,6 +277,7 @@ def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
         "batch_kwargs",
         "batch_markers",
         "batch_parameters",
+        "expectation_suite_meta",
         "expectation_suite_name",
         "great_expectations_version",
         "run_id",

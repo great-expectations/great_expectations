@@ -5,6 +5,7 @@ import numpy as np
 from dateutil.parser import parse
 
 from great_expectations.execution_engine.util import check_sql_engine_dialect
+from great_expectations.util import get_sqlalchemy_inspector
 
 try:
     import psycopg2
@@ -23,20 +24,30 @@ try:
     from sqlalchemy.engine import Engine, reflection
     from sqlalchemy.engine.interfaces import Dialect
     from sqlalchemy.exc import OperationalError
-    from sqlalchemy.sql import Select
-    from sqlalchemy.sql.elements import BinaryExpression, TextClause, literal
+    from sqlalchemy.sql import Insert, Select, TableClause
+    from sqlalchemy.sql.elements import (
+        BinaryExpression,
+        ColumnElement,
+        Label,
+        TextClause,
+        literal,
+    )
     from sqlalchemy.sql.operators import custom_op
 except ImportError:
     sa = None
     registry = None
-    Select = None
-    BinaryExpression = None
-    TextClause = None
-    literal = None
-    custom_op = None
     Engine = None
     reflection = None
     Dialect = None
+    Insert = None
+    Select = None
+    BinaryExpression = None
+    ColumnElement = None
+    Label = None
+    TableClause = None
+    TextClause = None
+    literal = None
+    custom_op = None
     OperationalError = None
 
 try:
@@ -47,11 +58,27 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 try:
+    import sqlalchemy_dremio.pyodbc
+
+    registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
+except ImportError:
+    sqlalchemy_dremio = None
+
+try:
     import pybigquery.sqlalchemy_bigquery
 
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in certain environments, so we do it explicitly.
+    ###
+    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+    # to define an attribute "dialect". A PR has been submitted to fix this upstream
+    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+    # fix isn't present, add this "dialect" attribute here:
+    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
+        pybigquery.sqlalchemy_bigquery.dialect = (
+            pybigquery.sqlalchemy_bigquery.BigQueryDialect
+        )
+    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
     # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "BigQueryDialect")
+    registry.register("bigquery", "pybigquery.sqlalchemy_bigquery", "dialect")
     try:
         getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
         bigquery_types_tuple = None
@@ -69,6 +96,14 @@ try:
 except ImportError:
     bigquery_types_tuple = None
     pybigquery = None
+    namedtuple = None
+
+try:
+    import teradatasqlalchemy.dialect
+    import teradatasqlalchemy.types as teradatatypes
+except ImportError:
+    teradatasqlalchemy = None
+    teradatatypes = None
 
 
 def get_dialect_regex_expression(column, regex, dialect, positive=True):
@@ -84,6 +119,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # redshift
+        # noinspection PyUnresolvedReferences
         if issubclass(dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             if positive:
                 return BinaryExpression(column, literal(regex), custom_op("~"))
@@ -123,7 +159,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # Bigquery
-        if issubclass(dialect.dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+        if hasattr(dialect, "BigQueryDialect"):
             if positive:
                 return sa.func.REGEXP_CONTAINS(column, literal(regex))
             else:
@@ -132,6 +168,33 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
         AttributeError,
         TypeError,
     ):  # TypeError can occur if the driver was not installed and so is None
+        logger.debug(
+            "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util",
+            exc_info=True,
+        )
+        pass
+
+    try:
+        # Dremio
+        if hasattr(dialect, "DremioDialect"):
+            if positive:
+                return sa.func.REGEXP_MATCHES(column, literal(regex))
+            else:
+                return sa.not_(sa.func.REGEXP_MATCHES(column, literal(regex)))
+    except (
+        AttributeError,
+        TypeError,
+    ):  # TypeError can occur if the driver was not installed and so is None
+        pass
+
+    try:
+        # Teradata
+        if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):
+            if positive:
+                return sa.func.REGEXP_SIMILAR(column, literal(regex), literal("i")) == 1
+            else:
+                return sa.func.REGEXP_SIMILAR(column, literal(regex), literal("i")) == 0
+    except (AttributeError, TypeError):
         pass
 
     return None
@@ -145,6 +208,7 @@ def _get_dialect_type_module(dialect=None):
         return sa
     try:
         # Redshift does not (yet) export types to top level; only recognize base SA types
+        # noinspection PyUnresolvedReferences
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             return dialect.sa
     except (TypeError, AttributeError):
@@ -163,10 +227,24 @@ def _get_dialect_type_module(dialect=None):
     except (TypeError, AttributeError):
         pass
 
+    # Teradata types module
+    try:
+        if (
+            issubclass(
+                dialect,
+                teradatasqlalchemy.dialect.TeradataDialect,
+            )
+            and teradatatypes is not None
+        ):
+            return teradatatypes
+    except (TypeError, AttributeError):
+        pass
+
     return dialect
 
 
 def attempt_allowing_relative_error(dialect):
+    # noinspection PyUnresolvedReferences
     detected_redshift: bool = (
         sqlalchemy_redshift is not None
         and check_sql_engine_dialect(
@@ -207,12 +285,16 @@ def get_sqlalchemy_column_metadata(
     try:
         columns: List[Dict[str, Any]]
 
-        inspector: reflection.Inspector = reflection.Inspector.from_engine(engine)
+        inspector: reflection.Inspector = get_sqlalchemy_inspector(engine)
         try:
-            columns = inspector.get_columns(
-                table_selectable,
-                schema=schema_name,
-            )
+            # if a custom query was passed
+            if isinstance(table_selectable, TextClause):
+                columns = table_selectable.selected_columns.columns
+            else:
+                columns = inspector.get_columns(
+                    table_selectable,
+                    schema=schema_name,
+                )
         except (
             KeyError,
             AttributeError,
@@ -227,7 +309,7 @@ def get_sqlalchemy_column_metadata(
                 sqlalchemy_engine=engine,
             )
 
-        # Use fallback because for mssql reflection doesn't throw an error but returns an empty list
+        # Use fallback because mssql reflection mechanism does not throw an error but returns an empty list
         if len(columns) == 0:
             columns = column_reflection_fallback(
                 selectable=table_selectable,
@@ -245,29 +327,109 @@ def column_reflection_fallback(
 ) -> List[Dict[str, str]]:
     """If we can't reflect the table, use a query to at least get column names."""
     col_info_dict_list: List[Dict[str, str]]
+    # noinspection PyUnresolvedReferences
     if dialect.name.lower() == "mssql":
         # Get column names and types from the database
         # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
-        columns_query: str = f"""
-SELECT
-    SCHEMA_NAME(tab.schema_id) AS schema_name,
-    tab.name AS table_name, 
-    col.column_id AS column_id,
-    col.name AS column_name, 
-    t.name AS column_data_type,    
-    col.max_length AS column_max_length,
-    col.precision AS column_precision
-FROM sys.tables AS tab
-    INNER JOIN sys.columns AS col
-    ON tab.object_id = col.object_id
-    LEFT JOIN sys.types AS t
-    ON col.user_type_id = t.user_type_id
-WHERE tab.name = '{selectable}'
-ORDER BY schema_name,
-    table_name, 
-    column_id
-"""
-        col_info_query: TextClause = sa.text(columns_query)
+        tables_table_clause: TableClause = sa.table(
+            "tables",
+            sa.column("object_id"),
+            sa.column("schema_id"),
+            sa.column("name"),
+            schema="sys",
+        ).alias("sys_tables_table_clause")
+        tables_table_query: Select = (
+            sa.select(
+                [
+                    tables_table_clause.c.object_id.label("object_id"),
+                    sa.func.schema_name(tables_table_clause.c.schema_id).label(
+                        "schema_name"
+                    ),
+                    tables_table_clause.c.name.label("table_name"),
+                ]
+            )
+            .select_from(tables_table_clause)
+            .alias("sys_tables_table_subquery")
+        )
+        columns_table_clause: TableClause = sa.table(
+            "columns",
+            sa.column("object_id"),
+            sa.column("user_type_id"),
+            sa.column("column_id"),
+            sa.column("name"),
+            sa.column("max_length"),
+            sa.column("precision"),
+            schema="sys",
+        ).alias("sys_columns_table_clause")
+        columns_table_query: Select = (
+            sa.select(
+                [
+                    columns_table_clause.c.object_id.label("object_id"),
+                    columns_table_clause.c.user_type_id.label("user_type_id"),
+                    columns_table_clause.c.column_id.label("column_id"),
+                    columns_table_clause.c.name.label("column_name"),
+                    columns_table_clause.c.max_length.label("column_max_length"),
+                    columns_table_clause.c.precision.label("column_precision"),
+                ]
+            )
+            .select_from(columns_table_clause)
+            .alias("sys_columns_table_subquery")
+        )
+        types_table_clause: TableClause = sa.table(
+            "types",
+            sa.column("user_type_id"),
+            sa.column("name"),
+            schema="sys",
+        ).alias("sys_types_table_clause")
+        types_table_query: Select = (
+            sa.select(
+                [
+                    types_table_clause.c.user_type_id.label("user_type_id"),
+                    types_table_clause.c.name.label("column_data_type"),
+                ]
+            )
+            .select_from(types_table_clause)
+            .alias("sys_types_table_subquery")
+        )
+        inner_join_conditions: BinaryExpression = sa.and_(
+            *(tables_table_query.c.object_id == columns_table_query.c.object_id,)
+        )
+        outer_join_conditions: BinaryExpression = sa.and_(
+            *(
+                columns_table_query.columns.user_type_id
+                == types_table_query.columns.user_type_id,
+            )
+        )
+        col_info_query: Select = (
+            sa.select(
+                [
+                    tables_table_query.c.schema_name,
+                    tables_table_query.c.table_name,
+                    columns_table_query.c.column_id,
+                    columns_table_query.c.column_name,
+                    types_table_query.c.column_data_type,
+                    columns_table_query.c.column_max_length,
+                    columns_table_query.c.column_precision,
+                ]
+            )
+            .select_from(
+                tables_table_query.join(
+                    right=columns_table_query,
+                    onclause=inner_join_conditions,
+                    isouter=False,
+                ).join(
+                    right=types_table_query,
+                    onclause=outer_join_conditions,
+                    isouter=True,
+                )
+            )
+            .where(tables_table_query.c.table_name == selectable.name)
+            .order_by(
+                tables_table_query.c.schema_name.asc(),
+                tables_table_query.c.table_name.asc(),
+                columns_table_query.c.column_id.asc(),
+            )
+        )
         col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
             col_info_query
         ).fetchall()
@@ -281,7 +443,11 @@ ORDER BY schema_name,
             for schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision in col_info_tuples_list
         ]
     else:
-        query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
+        # if a custom query was passed
+        if isinstance(selectable, TextClause):
+            query: TextClause = selectable
+        else:
+            query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
         result_object = sqlalchemy_engine.execute(query)
         # noinspection PyProtectedMember
         col_names: List[str] = result_object._metadata.keys
@@ -296,30 +462,12 @@ def parse_value_set(value_set):
     return parsed_value_set
 
 
-def filter_pair_metric_nulls(column_A, column_B, ignore_row_if):
-    if ignore_row_if == "both_values_are_missing":
-        boolean_mapped_null_values = column_A.isnull() & column_B.isnull()
-    elif ignore_row_if == "either_value_is_missing":
-        boolean_mapped_null_values = column_A.isnull() | column_B.isnull()
-    elif ignore_row_if == "never":
-        boolean_mapped_null_values = column_A.map(lambda x: False)
-    else:
-        raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
-
-    assert len(column_A) == len(column_B), "Series A and B must be the same length"
-
-    return (
-        column_A[boolean_mapped_null_values == False],
-        column_B[boolean_mapped_null_values == False],
-    )
-
-
 def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=True):
     dialect_supported: bool = False
 
     try:
         # Bigquery
-        if isinstance(dialect, pybigquery.sqlalchemy_bigquery.BigQueryDialect):
+        if hasattr(dialect, "BigQueryDialect"):
             dialect_supported = True
     except (
         AttributeError,
@@ -339,7 +487,19 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
         dialect_supported = True
 
     try:
+        # noinspection PyUnresolvedReferences
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+    try:
+        if hasattr(dialect, "DremioDialect"):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
+    try:
+        if issubclass(dialect.dialect, teradatasqlalchemy.dialect.TeradataDialect):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass
@@ -422,7 +582,7 @@ def validate_distribution_parameters(distribution, params):
         # elif distribution == 'poisson' and params.get('lambda', -1) <= 0:
         #    raise ValueError("Invalid parameters: %s" %poisson_msg)
 
-        # df is necessary and required to be positve
+        # df is necessary and required to be positive
         elif distribution == "chi2" and params.get("df", -1) <= 0:
             raise ValueError("Invalid parameters: %s:" % chi2_msg)
 
@@ -503,7 +663,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
 
        See the `cdf()` function here https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.beta.html#Methods\
        to see an example of scipy's positional arguments. This function returns the arguments specified by the \
-       scipy.stat.distribution.cdf() for tha distribution.
+       scipy.stat.distribution.cdf() for that distribution.
 
        Args:
            distribution (string): \

@@ -1,8 +1,5 @@
 from unittest import mock
 
-import pytest
-
-import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext
 from great_expectations.cli.datasource import (
     BigqueryCredentialYamlHelper,
@@ -27,23 +24,31 @@ host = "YOUR_HOST"
 port = "YOUR_PORT"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
-database = "YOUR_DATABASE"'''
+database = "YOUR_DATABASE"
+schema_name = "YOUR_SCHEMA"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
-
     assert (
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  port: '{port}'
-  username: {username}
-  password: {password}
-  database: {database}"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+    schema_name: {schema_name}
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    include_schema_name: True"""'''
     )
 
     renderer = helper.get_notebook_renderer(empty_data_context)
@@ -57,24 +62,35 @@ host = "YOUR_HOST"
 port = "YOUR_PORT"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
-database = "YOUR_DATABASE"'''
+database = "YOUR_DATABASE"
+schema_name = "YOUR_SCHEMA"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
+
+    print(helper.yaml_snippet())
 
     assert (
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  port: '{port}'
-  username: {username}
-  password: {password}
-  database: {database}
-  drivername: stuff"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+    schema_name: {schema_name}
+    drivername: stuff
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    include_schema_name: True"""'''
     )
 
     renderer = helper.get_notebook_renderer(empty_data_context)
@@ -91,24 +107,33 @@ host = "YOUR_HOST"
 port = "3306"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
-database = "YOUR_DATABASE"'''
+database = "YOUR_DATABASE"
+schema_name = "YOUR_SCHEMA"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  port: '{port}'
-  username: {username}
-  password: {password}
-  database: {database}
-  drivername: mysql+pymysql"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+    schema_name: {schema_name}
+    drivername: mysql+pymysql
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    include_schema_name: True"""'''
     )
 
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
@@ -141,24 +166,33 @@ host = "YOUR_HOST"
 port = "5432"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
-database = "postgres"'''
+database = "YOUR_DATABASE"
+schema_name = "YOUR_SCHEMA"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  port: '{port}'
-  username: {username}
-  password: {password}
-  database: {database}
-  drivername: postgresql"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+    schema_name: {schema_name}
+    drivername: postgresql
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    include_schema_name: True"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -189,27 +223,36 @@ host = "YOUR_HOST"
 port = "5439"
 username = "YOUR_USERNAME"
 password = "YOUR_PASSWORD"
-database = "YOUR_DATABASE"'''
+database = "YOUR_DATABASE"
+schema_name = "YOUR_SCHEMA"'''
     assert helper.credentials_snippet() == expected_credentials_snippet
-
     assert (
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  port: '{port}'
-  username: {username}
-  password: {password}
-  database: {database}
-  query:
-    sslmode: prefer
-  drivername: postgresql+psycopg2"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+    schema_name: {schema_name}
+    query:
+      sslmode: prefer
+    drivername: postgresql+psycopg2
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    include_schema_name: True"""'''
     )
+
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
     assert mock_emit.call_args_list == [
@@ -245,31 +288,39 @@ def test_SnowflakeCredentialYamlHelper_password_auth(
     expected_credentials_snippet = '''\
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
-database = ""  # The database name (optional -- leave blank for none)
-schema = ""  # The schema name (optional -- leave blank for none)
-warehouse = ""  # The warehouse name (optional -- leave blank for none)
-role = ""  # The role name (optional -- leave blank for none)
+database = ""  # The database name
+schema = ""  # The schema name
+warehouse = ""  # The warehouse name
+role = ""  # The role name
 password = "YOUR_PASSWORD"'''
+
     assert helper.credentials_snippet() == expected_credentials_snippet
 
     assert (
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  username: {username}
-  database: {database}
-  query:
-    schema: {schema}
-    warehouse: {warehouse}
-    role: {role}
-  password: {password}
-  drivername: snowflake"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    username: {username}
+    database: {database}
+    query:
+      schema: {schema}
+      warehouse: {warehouse}
+      role: {role}
+    password: {password}
+    drivername: snowflake
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    include_schema_name: True"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -293,32 +344,38 @@ def test_SnowflakeCredentialYamlHelper_sso_auth(
     expected_credentials_snippet = """\
 host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
-database = ""  # The database name (optional -- leave blank for none)
-schema = ""  # The schema name (optional -- leave blank for none)
-warehouse = ""  # The warehouse name (optional -- leave blank for none)
-role = ""  # The role name (optional -- leave blank for none)
+database = ""  # The database name
+schema = ""  # The schema name
+warehouse = ""  # The warehouse name
+role = ""  # The role name
 authenticator_url = "externalbrowser"  # A valid okta URL or 'externalbrowser' used to connect through SSO"""
     assert helper.credentials_snippet() == expected_credentials_snippet
-
     assert (
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  username: {username}
-  database: {database}
-  query:
-    schema: {schema}
-    warehouse: {warehouse}
-    role: {role}
-  connect_args:
-    authenticator: {authenticator_url}
-  drivername: snowflake"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    username: {username}
+    database: {database}
+    query:
+      schema: {schema}
+      warehouse: {warehouse}
+      role: {role}
+    connect_args:
+      authenticator: {authenticator_url}
+    drivername: snowflake
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    include_schema_name: True"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -338,12 +395,13 @@ def test_SnowflakeCredentialYamlHelper_key_pair_auth(
     helper.prompt()
     assert helper.auth_method == SnowflakeAuthMethod.KEY_PAIR
 
-    expected_credentials_snippet = """host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
+    expected_credentials_snippet = """\
+host = "YOUR_HOST"  # The account name (include region -- ex 'ABCD.us-east-1')
 username = "YOUR_USERNAME"
-database = ""  # The database name (optional -- leave blank for none)
-schema = ""  # The schema name (optional -- leave blank for none)
-warehouse = ""  # The warehouse name (optional -- leave blank for none)
-role = ""  # The role name (optional -- leave blank for none)
+database = ""  # The database name
+schema = ""  # The schema name
+warehouse = ""  # The warehouse name
+role = ""  # The role name
 private_key_path = "YOUR_KEY_PATH"  # Path to the private key used for authentication
 private_key_passphrase = ""   # Passphrase for the private key used for authentication (optional -- leave blank for none)"""
     assert helper.credentials_snippet() == expected_credentials_snippet
@@ -352,21 +410,28 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-credentials:
-  host: {host}
-  username: {username}
-  database: {database}
-  query:
-    schema: {schema}
-    warehouse: {warehouse}
-    role: {role}
-  private_key_path: {private_key_path}
-  private_key_passphrase: {private_key_passphrase}
-  drivername: snowflake"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    username: {username}
+    database: {database}
+    query:
+      schema: {schema}
+      warehouse: {warehouse}
+      role: {role}
+    private_key_path: {private_key_path}
+    private_key_passphrase: {private_key_passphrase}
+    drivername: snowflake
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    include_schema_name: True"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     _snowflake_usage_stats_assertions(mock_emit)
@@ -408,11 +473,18 @@ connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-connection_string: {connection_string}"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  connection_string: {connection_string}
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    include_schema_name: True"""'''
     )
     helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
     assert mock_emit.call_count == 1
@@ -450,11 +522,18 @@ connection_string = "YOUR_CONNECTION_STRING"'''
         helper.yaml_snippet()
         == '''f"""
 name: {datasource_name}
-class_name: SimpleSqlalchemyDatasource
-introspection:
-  whole_table:
-    data_asset_name_suffix: __whole_table
-connection_string: {connection_string}"""'''
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  connection_string: {connection_string}
+data_connectors:
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
+  default_inferred_data_connector_name:
+    class_name: InferredAssetSqlDataConnector
+    include_schema_name: True"""'''
     )
 
     assert helper.verify_libraries_installed() is True
@@ -512,14 +591,17 @@ class_name: Datasource
 execution_engine:
   class_name: PandasExecutionEngine
 data_connectors:
-  {datasource_name}_example_data_connector:
+  default_inferred_data_connector_name:
     class_name: InferredAssetFilesystemDataConnector
-    datasource_name: {datasource_name}
     base_directory: ../path/to/data
     default_regex:
       group_names: 
         - data_asset_name
       pattern: (.*)
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
 """'''
     )
 
@@ -560,14 +642,17 @@ class_name: Datasource
 execution_engine:
   class_name: SparkDFExecutionEngine
 data_connectors:
-  {datasource_name}_example_data_connector:
+  default_inferred_data_connector_name:
     class_name: InferredAssetFilesystemDataConnector
-    datasource_name: {datasource_name}
     base_directory: ../path/to/data
     default_regex:
       group_names: 
         - data_asset_name
       pattern: (.*)
+  default_runtime_data_connector_name:
+    class_name: RuntimeDataConnector
+    batch_identifiers:
+      - default_identifier_name
 """'''
     )
 

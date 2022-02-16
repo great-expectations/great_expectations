@@ -1,0 +1,47 @@
+{
+  "data_asset_type": null,
+  "expectation_suite_name": "Titanic.profiled",
+  "expectations": [
+    {
+      "expectation_type": "expect_table_columns_to_match_ordered_list",
+      "ge_cloud_id": null,
+      "kwargs": {
+        "column_list": [
+          "_c0",
+          "Name",
+          "PClass",
+          "Age",
+          "Sex",
+          "Survived",
+          "SexCode"
+        ]
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "ge_cloud_id": null,
+      "kwargs": {
+        "max_value": 1313,
+        "min_value": 1313
+      },
+      "meta": {}
+    }
+  ],
+  "ge_cloud_id": null,
+  "meta": {
+    "citations": [
+      {
+        "batch_request": {
+          "data_asset_name": "Titanic.csv",
+          "data_connector_name": "default_inferred_data_connector_name",
+          "datasource_name": "my_datasource",
+          "limit": 1000
+        },
+        "citation_date": "2021-10-19T23:24:33.681234Z",
+        "comment": "Created suite added via CLI"
+      }
+    ],
+    "great_expectations_version": "0.13.37+20.g863890e.dirty"
+  }
+}

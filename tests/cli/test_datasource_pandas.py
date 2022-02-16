@@ -192,29 +192,34 @@ def test_cli_datasource_new(
     context = DataContext(root_dir)
 
     assert len(context.list_datasources()) == 1
-
     assert context.list_datasources() == [
         {
-            "name": "my_datasource",
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
             "class_name": "Datasource",
             "module_name": "great_expectations.datasource",
-            "execution_engine": {
-                "module_name": "great_expectations.execution_engine",
-                "class_name": "PandasExecutionEngine",
-            },
             "data_connectors": {
-                "my_datasource_example_data_connector": {
+                "default_inferred_data_connector_name": {
+                    "module_name": "great_expectations.datasource.data_connector",
                     "default_regex": {
                         "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
-                    "module_name": "great_expectations.datasource.data_connector",
                     "base_directory": "../../filesystem_csv_2",
                     "class_name": "InferredAssetFilesystemDataConnector",
-                }
+                },
+                "default_runtime_data_connector_name": {
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "batch_identifiers": ["default_identifier_name"],
+                    "class_name": "RuntimeDataConnector",
+                },
             },
+            "name": "my_datasource",
         }
     ]
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
@@ -333,29 +338,34 @@ def test_cli_datasource_new_with_name_param(
     context = DataContext(root_dir)
 
     assert len(context.list_datasources()) == 1
-
     assert context.list_datasources() == [
         {
-            "name": "foo",
-            "class_name": "Datasource",
             "module_name": "great_expectations.datasource",
             "execution_engine": {
                 "module_name": "great_expectations.execution_engine",
                 "class_name": "PandasExecutionEngine",
             },
             "data_connectors": {
-                "foo_example_data_connector": {
+                "default_inferred_data_connector_name": {
                     "default_regex": {
                         "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
                     "module_name": "great_expectations.datasource.data_connector",
-                    "base_directory": "../../filesystem_csv_2",
                     "class_name": "InferredAssetFilesystemDataConnector",
-                }
+                    "base_directory": "../../filesystem_csv_2",
+                },
+                "default_runtime_data_connector_name": {
+                    "batch_identifiers": ["default_identifier_name"],
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "class_name": "RuntimeDataConnector",
+                },
             },
+            "class_name": "Datasource",
+            "name": "foo",
         }
     ]
+
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
@@ -401,26 +411,32 @@ def test_cli_datasource_new_from_misc_directory(
 
     del context
     context = DataContext(root_dir)
+
     assert context.list_datasources() == [
         {
-            "name": "my_datasource",
-            "class_name": "Datasource",
             "module_name": "great_expectations.datasource",
             "execution_engine": {
                 "module_name": "great_expectations.execution_engine",
                 "class_name": "PandasExecutionEngine",
             },
+            "class_name": "Datasource",
             "data_connectors": {
-                "my_datasource_example_data_connector": {
+                "default_inferred_data_connector_name": {
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "class_name": "InferredAssetFilesystemDataConnector",
+                    "base_directory": "../../filesystem_csv_2",
                     "default_regex": {
                         "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
+                },
+                "default_runtime_data_connector_name": {
                     "module_name": "great_expectations.datasource.data_connector",
-                    "base_directory": "../../filesystem_csv_2",
-                    "class_name": "InferredAssetFilesystemDataConnector",
-                }
+                    "batch_identifiers": ["default_identifier_name"],
+                    "class_name": "RuntimeDataConnector",
+                },
             },
+            "name": "my_datasource",
         }
     ]
     assert_no_logging_messages_or_tracebacks(caplog, result)

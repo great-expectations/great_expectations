@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Data documentation compiled by Great Expectations</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+
+    {# {# Remove this when not debugging: #}
+    {# <meta http-equiv="refresh" content="1"/> #}
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/bootstrap-table@1.19.0/dist/extensions/filter-control/bootstrap-table-filter-control.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@forevolve/bootstrap-dark@1.1.0/dist/css/bootstrap-prefers-dark.css" />
+
+    <style>{% include 'data_docs_default_styles.css' %}</style>
+    <style>{% include 'data_docs_custom_styles.css' ignore missing %}</style>
+
+    {% include 'js_script_imports.j2' %}
+    {% include 'favicon.j2' %}
+  </head>
+
+  <body>
+    <div class="container-fluid pt-4 pb-4 pl-5 pr-5">
+      <div class="row">
+        <div class="col-12">
+        {% for section in sections %}
+          {% set section_loop = loop -%}
+          {% include 'section.j2' %}
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

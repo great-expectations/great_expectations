@@ -119,7 +119,7 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "only_for": ["sqlite", "postresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql"]
     },
     {
       "title" : "positive_test_with_multiple_like_patternes",
@@ -134,7 +134,7 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "only_for": ["sqlite", "postresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql"]
     },
     {
       "title" : "positive_test_with_match_on__any",
@@ -149,7 +149,7 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "only_for": ["sqlite", "postresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql"]
     },
     {
       "title" : "positive_test_column_name_has_space_and_match_on__any",
@@ -164,7 +164,7 @@
         "unexpected_index_list": [],
         "success": true
       },
-      "only_for": ["sqlite", "postresql", "mysql"]
+      "only_for": ["sqlite", "postgresql", "mysql"]
     }
    ]
   }]

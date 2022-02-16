@@ -4,43 +4,7 @@
     {
       "data": [
         {
-          "data": {
-            "c1": [
-              4,
-              5,
-              6,
-              7
-            ],
-            "c2": [
-              "a",
-              "b",
-              "c",
-              "d"
-            ],
-            "c3": [
-              null,
-              null,
-              null,
-              null
-            ],
-            "c4": [
-              4.0,
-              3.0,
-              3.5,
-              1.2
-            ]
-          },
           "dataset_name": "expect_table_row_count_to_equal_other_table_data_1",
-          "schemas": {
-            "spark": {
-              "c1": "IntegerType",
-              "c2": "StringType",
-              "c3": "StringType",
-              "c4": "FloatType"
-            }
-          }
-        },
-        {
           "data": {
             "c1": [
               4,
@@ -66,18 +30,39 @@
               3.5,
               1.2
             ]
-          },
-          "dataset_name": "expect_table_row_count_to_equal_other_table_data_2",
-          "schemas": {
-            "spark": {
-              "c1": "IntegerType",
-              "c2": "StringType",
-              "c3": "StringType",
-              "c4": "FloatType"
-            }
           }
         },
         {
+          "dataset_name": "expect_table_row_count_to_equal_other_table_data_2",
+          "data": {
+            "c1": [
+              4,
+              5,
+              6,
+              7
+            ],
+            "c2": [
+              "a",
+              "b",
+              "c",
+              "d"
+            ],
+            "c3": [
+              null,
+              null,
+              null,
+              null
+            ],
+            "c4": [
+              4.0,
+              3.0,
+              3.5,
+              1.2
+            ]
+          }
+        },
+        {
+          "dataset_name": "expect_table_row_count_to_equal_other_table_data_3",
           "data": {
             "c1": [
               4,
@@ -99,15 +84,6 @@
               3.0,
               3.5
             ]
-          },
-          "dataset_name": "expect_table_row_count_to_equal_other_table_data_3",
-          "schemas": {
-            "spark": {
-              "c1": "IntegerType",
-              "c2": "StringType",
-              "c3": "StringType",
-              "c4": "FloatType"
-            }
           }
         }
       ],

@@ -207,6 +207,7 @@ def test_cli_datasource_new_connection_string(
 
     uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
+
     assert os.path.isfile(expected_notebook)
     mock_subprocess.assert_called_once_with(["jupyter", "notebook", expected_notebook])
 
@@ -249,21 +250,36 @@ def test_cli_datasource_new_connection_string(
         nb = nbformat.read(f, as_version=4)
 
     # mock the user adding a connection string into the notebook by overwriting the right cell
+
     assert "connection_string" in nb["cells"][5]["source"]
-    nb["cells"][5]["source"] = 'connection_string = "sqlite://"'
+    nb["cells"][5]["source"] = '  connection_string = "sqlite://"'
     ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     del context
     context = DataContext(root_dir)
+
     assert context.list_datasources() == [
         {
-            "class_name": "SimpleSqlalchemyDatasource",
-            "connection_string": "sqlite://",
-            "introspection": {
-                "whole_table": {"data_asset_name_suffix": "__whole_table"}
-            },
             "module_name": "great_expectations.datasource",
+            "execution_engine": {
+                "module_name": "great_expectations.execution_engine",
+                "connection_string": "sqlite://",
+                "class_name": "SqlAlchemyExecutionEngine",
+            },
+            "class_name": "Datasource",
+            "data_connectors": {
+                "default_runtime_data_connector_name": {
+                    "batch_identifiers": ["default_identifier_name"],
+                    "class_name": "RuntimeDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
+                },
+                "default_inferred_data_connector_name": {
+                    "class_name": "InferredAssetSqlDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "include_schema_name": True,
+                },
+            },
             "name": "my_datasource",
         }
     ]

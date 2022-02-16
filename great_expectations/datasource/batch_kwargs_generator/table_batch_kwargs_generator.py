@@ -2,6 +2,9 @@ import logging
 import warnings
 from string import Template
 
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
+    BatchKwargsGenerator,
+)
 from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
 from great_expectations.marshmallow__shade import (
@@ -10,8 +13,6 @@ from great_expectations.marshmallow__shade import (
     fields,
     post_load,
 )
-
-from .batch_kwargs_generator import BatchKwargsGenerator
 
 logger = logging.getLogger(__name__)
 

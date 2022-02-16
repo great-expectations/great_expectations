@@ -1,29 +1,15 @@
-import json
-from datetime import datetime
-from typing import Dict, List, Optional, Union
-
-import numpy as np
-import pandas as pd
+from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.util import render_evaluation_parameter_string
-
-from ...core.batch import Batch
-from ...data_asset.util import parse_result_format
-from ...execution_engine.sqlalchemy_execution_engine import SqlAlchemyExecutionEngine
-from ...render.renderer.renderer import renderer
-from ...render.types import RenderedStringTemplateContent
-from ...render.util import (
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from ..expectation import ColumnMapExpectation
 
 try:
     import sqlalchemy as sa
@@ -83,9 +69,8 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
         "requirements": [],
     }
 
-    map_metric = "column_values.json_parsable"
+    map_metric = "column_values.json_parseable"
     success_keys = ("mostly",)
-
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -94,10 +79,75 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": True,
     }
+    args_keys = ("column",)
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         return True
+
+    @classmethod
+    def _atomic_prescriptive_template(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs,
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            ["column", "mostly", "row_condition", "condition_parser"],
+        )
+        params_with_json_schema = {
+            "column": {"schema": {"type": "string"}, "value": params.get("column")},
+            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
+            "mostly_pct": {
+                "schema": {"type": "number"},
+                "value": params.get("mostly_pct"),
+            },
+            "row_condition": {
+                "schema": {"type": "string"},
+                "value": params.get("row_condition"),
+            },
+            "condition_parser": {
+                "schema": {"type": "string"},
+                "value": params.get("condition_parser"),
+            },
+        }
+
+        template_str = "values must be parseable as JSON"
+
+        if params["mostly"] is not None:
+            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
+            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
+            template_str += ", at least $mostly_pct % of the time."
+        else:
+            template_str += "."
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(
+                params["row_condition"], with_schema=True
+            )
+            template_str = conditional_template_str + ", then " + template_str
+            params_with_json_schema.update(conditional_params)
+
+        return (template_str, params_with_json_schema, styling)
 
     @classmethod
     @renderer(renderer_type="renderer.prescriptive")
@@ -108,7 +158,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
         result=None,
         language=None,
         runtime_configuration=None,
-        **kwargs
+        **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
         include_column_name = runtime_configuration.get("include_column_name", True)
