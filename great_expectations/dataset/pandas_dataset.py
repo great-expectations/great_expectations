@@ -16,13 +16,12 @@ from scipy import stats
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.dataset import Dataset
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
 )
-
-from .dataset import Dataset
 
 logger = logging.getLogger(__name__)
 

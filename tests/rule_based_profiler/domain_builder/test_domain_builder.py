@@ -15,7 +15,7 @@ from great_expectations.rule_based_profiler.types import (
     build_parameter_container_for_variables,
 )
 
-yaml = YAML()
+yaml = YAML(typ="safe")
 
 
 # noinspection PyPep8Naming
