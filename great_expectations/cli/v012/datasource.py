@@ -9,6 +9,11 @@ import uuid
 
 import click
 
+try:
+    from pybigquery.parse_url import parse_url as parse_bigquery_url
+except (ImportError, ModuleNotFoundError):
+    parse_bigquery_url = None
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations import DataContext, rtd_url_ge_version
 from great_expectations.cli.v012 import toolkit
@@ -1366,6 +1371,11 @@ Would you like to continue?"""
     datasource = context.get_datasource(datasource_name)
 
     if datasource.engine.dialect.name.lower() == "bigquery":
+        # bigquery table needs to contain the project id if it differs from the credentials project
+        if len(data_asset_name.split(".")) < 3:
+            project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
+            data_asset_name = "{}.{}".format(project_id, data_asset_name)
+
         # bigquery also requires special handling
         bigquery_temp_table = click.prompt(
             "Great Expectations will create a table to use for "
