@@ -41,6 +41,7 @@ Ensure that your Custom Expectation's `library_metadata` has correct information
 
 - `contributors`: You and anyone else who helped you create this Custom Expectation.
 - `tags`: These are simple descriptors of your Custom Expectation's functionality and domain (`statistics`, `flexible comparisons`, `geography`, etc.).
+- `requirements`: If your Custom Expectation relies on any third-party packages, verify that those dependencies are listed here.
 - `package` (optional): **PLACEHOLDER** If you're contributing to a specific package, be sure to list it here!
 
 <details>
@@ -67,9 +68,7 @@ As a part of this process, we ask you to:
 - Resolve any failing tests and merge conflicts
 
 
-:::breakpoint
-:::
-#### 4. Run diagnostics on your Expectation.
+### 4. Run diagnostics on your Expectation.
 
 Expectations contain a self diagnostic tool that will help you during development. The simplest way to run it is to execute the file as a standalone script. Note: if you prefer, you can also run it within a notebook or IDE.
 
