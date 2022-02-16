@@ -6,7 +6,10 @@ import Prerequisites from '../creating_custom_expectations/components/prerequisi
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you implement renderers for your custom Expectations, allowing you to control how your custom Expectations are displayed in Data Docs. Implementing renderers as part of your custom Expectations is not strictly required - if not provided, Great Expectations will render your Expectation using a basic default renderer:
+This guide will help you implement Statement Renderers for your Custom Expectations. 
+Renderers allow you to control how your Custom Expectations are displayed in your [Data Docs](../../../reference/data_docs.md).
+
+Implementing renderers as part of your Custom Expectations is not strictly required - if not provided, Great Expectations will render your Custom Expectation using a basic default renderer:
 
 ![Expectation rendered using default renderer](../../../images/expectation_fallback.png)
 
@@ -16,23 +19,21 @@ This guide will help you implement renderers for your custom Expectations, allow
 
 </Prerequisites>
 
-:::warning
-See also this [complete custom expectation with renderer example](https://github.com/superconductive/ge_tutorials/tree/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/custom_column_max_example.py).
-:::
-
-Renderers allow you to control how your Custom Expectations are displayed in your [Data Docs](../../../reference/data_docs.md).
-
 This guide will walk you through the process of adding Statement Renderers to the Custom Expectation built in the guide for [how to create a Custom Column Aggregate Expectation](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
 
 ## Steps
 
 ### 1. Decide which renderer type to implement
 
-There are three basic types of Statement Renderers:
+There are two basic types of Statement Renderers:
 
 - `renderer.prescriptive` renders a human-readable form of your Custom Expectation
 - `renderer.diagnostic` renders diagnostic information about the results of your Custom Expectation
-- `renderer.descriptive` renders 
+
+Prescriptive Renderers help provide clarity and structure in your Data Docs.
+
+Diagnostic Renderers allow you to serve 
+summary statistics, unexpected value samples, and observed values from your Custom Expectation, delivering further insights about your data.
 
 - **First, decide which renderer types you need to implement.**
 

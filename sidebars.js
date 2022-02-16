@@ -226,7 +226,7 @@ module.exports = {
                 'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
-                'guides/expectations/features_custom_expectations/how_to_add_text_renderers_for_an_expectation',
+                'guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
