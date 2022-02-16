@@ -8,6 +8,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
     batch_request_contains_batch_data,
+    get_batch_request_as_dict,
     get_batch_request_from_acceptable_arguments,
 )
 from great_expectations.core.config_peer import ConfigPeer
@@ -333,8 +334,8 @@ class BaseRuleBasedProfiler(ConfigPeer):
         Args:
             batch_request: Data provided at runtime used to hydrate nested builder attributes
         """
-        if isinstance(batch_request, dict):
-            batch_request = get_batch_request_from_acceptable_arguments(**batch_request)
+        if not isinstance(batch_request, dict):
+            batch_request = get_batch_request_as_dict(batch_request)
 
         for rule in self.rules:
             domain_builder = rule.domain_builder

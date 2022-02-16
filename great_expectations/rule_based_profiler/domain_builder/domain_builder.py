@@ -113,9 +113,7 @@ class DomainBuilder(Builder, ABC):
         return self._batch_request
 
     @batch_request.setter
-    def batch_request(
-        self, batch_request: Union[BatchRequest, RuntimeBatchRequest, dict]
-    ) -> None:
+    def batch_request(self, batch_request: dict) -> None:
         self._batch_request = batch_request
 
     @property
