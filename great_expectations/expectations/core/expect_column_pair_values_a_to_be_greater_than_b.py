@@ -85,7 +85,9 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         "or_equal",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
