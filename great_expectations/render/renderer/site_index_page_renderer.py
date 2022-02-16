@@ -99,8 +99,9 @@ class SiteIndexPageRenderer(Renderer):
                 "filterControl": "datepicker",
                 "filterCustomSearch": "formatRuntimeDateForFilter",
                 "filterDatepickerOptions": {
-                   "clearBtn": "true",
-                    "autoClose": "true",
+                    "clearBtn": "true",
+                    "autoclose": "true",
+                    "format": "yyyy-mm-dd",
                     "todayHighlight": "true"
                 }
             },
@@ -194,7 +195,8 @@ class SiteIndexPageRenderer(Renderer):
                 "filterCustomSearch": "formatRuntimeDateForFilter",
                 "filterDatepickerOptions": {
                     "clearBtn": "true",
-                    "autoClose": "true",
+                    "autoclose": "true",
+                    "format": "yyyy-mm-dd",
                     "todayHighlight": "true"
                 }
             },
