@@ -1,10 +1,12 @@
 import datetime
-from typing import Any, Dict
+import os
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
+from great_expectations import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
@@ -19,7 +21,7 @@ from great_expectations.rule_based_profiler.types import (
 )
 from tests.conftest import skip_if_python_below_minimum_version
 
-yaml = YAML(typ="safe")
+yaml = YAML()
 
 
 @pytest.fixture

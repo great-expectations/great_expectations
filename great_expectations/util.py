@@ -166,7 +166,9 @@ def profile(func: Callable = None) -> Callable:
     return profile_function_call
 
 
-def measure_execution_time(pretty_print: bool = False) -> Callable:
+def measure_execution_time(
+    pretty_print: bool = False,
+) -> Callable:
     def execution_time_decorator(func: Callable) -> Callable:
         func.execution_duration_milliseconds = 0
 
@@ -179,10 +181,10 @@ def measure_execution_time(pretty_print: bool = False) -> Callable:
                 time_end: int = int(round(time.time() * 1000))
                 delta_t: int = time_end - time_begin
                 func.execution_duration_milliseconds = delta_t
-                bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-                call_args: OrderedDict = bound_args.arguments
 
                 if pretty_print:
+                    bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
+                    call_args: OrderedDict = bound_args.arguments
                     print(
                         f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
                     )
