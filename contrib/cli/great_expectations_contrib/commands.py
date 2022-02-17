@@ -8,7 +8,8 @@ from dataclasses import asdict
 
 import click
 from cookiecutter.main import cookiecutter
-from great_expectations_contrib.package import GreatExpectationsContribPackageManifest
+
+from .package import GreatExpectationsContribPackageManifest
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
