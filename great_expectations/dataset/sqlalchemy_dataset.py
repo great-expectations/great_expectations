@@ -101,9 +101,9 @@ try:
 except (ImportError, KeyError, AttributeError):
     snowflake = None
 
-_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery.sqlalchemy_bigquery"
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
-    import sqlalchemy_bigquery.sqlalchemy_bigquery as sqla_bigquery
+    import sqlalchemy_bigquery as sqla_bigquery
 
     registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
     bigquery_types_tuple = None
@@ -111,8 +111,9 @@ except ImportError:
     try:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
-        logger.warn(
-            "The pybigquery package is obsolete, please use sqlalchemy-bigquery"
+        warnings.warn(
+            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
         ###
