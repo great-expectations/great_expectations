@@ -54,10 +54,12 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
         try:
             # Go to package, read manifest, and sync it
             os.chdir(path)
+            package_path: str = ".great_expectations_package.json"
+
             package: GreatExpectationsContribPackageManifest = read_package_from_file(
-                path
+                package_path
             )
-            sync_package(package, path)
+            sync_package(package, package_path)
 
             # Serialize to dict to append to payload
             json_data: dict = asdict(package)
@@ -84,7 +86,7 @@ def write_results_to_disk(path: str, package_manifests: List[dict]) -> None:
         package_manifest: A list of dictionaries that represents contributor package manifests
     """
     with open(path, "w") as outfile:
-        json.dump(package_manifests, outfile)
+        json.dump(package_manifests, outfile, indent=4)
         logger.info(f"Successfully wrote package manifests to {path}")
 
 
