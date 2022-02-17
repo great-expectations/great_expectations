@@ -1,6 +1,8 @@
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
+import numpy as np
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
@@ -108,7 +110,11 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
                 message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
             )
 
-        nonnull_metrics: MetricComputationResult = self.get_metrics(
+        metric_computation_result: MetricComputationResult
+
+        metric_values: np.ndarray
+
+        metric_computation_result: MetricComputationResult = self.get_metrics(
             batch_ids=batch_ids,
             validator=validator,
             metric_name="column_values.nonnull.count",
@@ -117,13 +123,16 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
-        nonnull_count: int = sum(nonnull_metrics.metric_values)
+        metric_values = metric_computation_result.metric_values
+        # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
+        metric_values = metric_values[:, 0]
+
+        nonnull_count: int = sum(metric_values)
 
         regex_string_success_ratios: dict = {}
 
         regex_string: str
         match_regex_metric_value_kwargs: dict
-
         for regex_string in self._candidate_regexes:
             if self._metric_value_kwargs:
                 match_regex_metric_value_kwargs = {
@@ -162,19 +171,21 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
+
         regex_string: str
         ratio: float
-
         for regex_string, ratio in regex_string_success_ratios.items():
             if ratio > best_ratio and ratio >= threshold:
                 best_regex_string = regex_string
                 best_ratio = ratio
+
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.name}": {
                 "value": best_regex_string,
                 "details": {"success_ratio": best_ratio},
             },
         }
+
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )

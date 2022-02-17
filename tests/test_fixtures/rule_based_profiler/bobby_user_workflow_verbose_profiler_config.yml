@@ -140,10 +140,10 @@ rules:
         batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
         # Note this parameter builder computes parameters only on the provided domain:
         metric_domain_kwargs:
+          column: VendorID
         candidate_regexes:
-          - r"\d{1}"
-          - r"\d{2}"
-        column: VendorID
+          - "^\\d{1}$"
+          - "^\\d{2}$"
         threshold: 0.9
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_match_regex
