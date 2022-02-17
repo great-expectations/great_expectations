@@ -1,20 +1,6 @@
-import enum
-
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
-
-
-class CardinalityCategory(enum.Enum):
-    """Used to determine appropriate Expectation configurations based on data.
-
-    Defines relative and absolute number of records (table rows) that
-    correspond to each cardinality category.
-
-    """
-
-    # TODO AJB 20220216: add implementation
-    raise NotImplementedError
 
 
 class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):

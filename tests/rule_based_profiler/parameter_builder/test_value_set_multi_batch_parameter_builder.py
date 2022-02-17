@@ -1,6 +1,7 @@
 # TODO AJB 20220216 Add tests for the following conditions:
 # Test instantiation
 # Test error states
+# Integration tests:
 # Test single batch (alice)
 # Test single batch (alice) exceeds cardinality limit
 # Test multi batch (bobby)

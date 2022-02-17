@@ -130,17 +130,15 @@ rules:
               - "### This expectation confirms that fields ending in _ts are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
   my_rule_for_user_agent:
     domain_builder:
-      class_name: SimpleColumnSuffixDomainBuilder
+      class_name: CategoricalColumnDomainBuilder
       module_name: great_expectations.rule_based_profiler.domain_builder
       batch_request: $variables.alice_single_batch_data_batch_request
-      column_name_suffixes:
-        - user_agent
+      cardinality_category: few
     parameter_builders:
       - name: my_user_agent_value_set
         class_name: ValueSetMultiBatchParameterBuilder
         batch_request: $variables.alice_single_batch_data_batch_request
         module_name: great_expectations.rule_based_profiler.parameter_builder
-        cardinality_category: very_few
     expectation_configuration_builders:
       - expectation_type: expect_column_values_to_be_in_set
         class_name: DefaultExpectationConfigurationBuilder
