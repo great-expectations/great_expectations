@@ -520,11 +520,11 @@ def test_run_profiler_on_data_emits_appropriate_logging(
     profiler_name: str,
     caplog: Any,
 ):
-    batch_request: Dict[str, str] = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_data_connector",
-        "data_asset_name": "my_data_asset",
-    }
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name="my_datasource",
+        data_connector_name="my_data_connector",
+        data_asset_name="my_data_asset",
+    )
 
     with caplog.at_level(logging.INFO):
         RuleBasedProfiler.run_profiler_on_data(
@@ -534,7 +534,7 @@ def test_run_profiler_on_data_emits_appropriate_logging(
             batch_request=batch_request,
         )
 
-    assert "Overwrote ParameterBuilder" in caplog.text
+    assert "Converted batch request" in caplog.text
 
 
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
@@ -558,9 +558,11 @@ def test_run_profiler_on_data_creates_suite_with_dict_arg(
         batch_request=batch_request,
     )
 
-    # run() is invoked but without any runtime args
     assert mock_profiler_run.called
-    assert mock_profiler_run.call_args == []
+
+    rule = mock_profiler_run.call_args[1]["rules"]["rule_1"]
+    resulting_batch_request = rule["parameter_builders"][0]["batch_request"]
+    assert resulting_batch_request == batch_request
 
 
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
@@ -584,9 +586,11 @@ def test_run_profiler_on_data_creates_suite_with_batch_request_arg(
         batch_request=batch_request,
     )
 
-    # run() is invoked but without any runtime args
     assert mock_profiler_run.called
-    assert mock_profiler_run.call_args == []
+
+    rule = mock_profiler_run.call_args[1]["rules"]["rule_1"]
+    resulting_batch_request = rule["parameter_builders"][0]["batch_request"]
+    assert resulting_batch_request == batch_request.to_dict()
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")

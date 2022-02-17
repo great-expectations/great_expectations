@@ -839,12 +839,9 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
             ge_cloud_id=ge_cloud_id,
         )
 
-        # Convert Rules into dictionaries and then hydrate with batch request elements
-        rules = profiler._overwrite_rules_with_batch_request(batch_request)
-
-        # NOTE: Slightly blocked at the moment
-        # Is "rules" a list or a dict of dicts? This is very important to figure out.
-        # Do we only need to overwrite rules? What about variables? (don't think so?)
+        rules: Dict[
+            str, Dict[str, Any]
+        ] = profiler._generate_rule_overrides_from_batch_request(batch_request)
 
         result: ExpectationSuite = profiler.run(
             rules=rules,
@@ -853,51 +850,28 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         )
         return result
 
-    def _overwrite_rules_with_batch_request(
+    def _generate_rule_overrides_from_batch_request(
         self, batch_request: Union[dict, BatchRequest, RuntimeBatchRequest]
-    ) -> List[dict]:
-        """
-        FIXME(cdkini): Clean this up!
-
-        Profiler "batch_request" reconciliation involves combining existing Profiler state, instantiated from Profiler configuration
-        (e.g., stored in a YAML file managed by the Profiler store), with the batch request overrides, provided at run time.
-
-        The provided batch request is propagated to the following relevant Builders attributes (as applicable):
-            - ParameterBuilders
-            - ColumnDomainBuilder
-              - We default to the latest value as a sensible default (using index: -1)
-
-        The reconciliation logic for "batch_request" is of the "replace" nature: the provided data is consistently applied, regardless
-        of existing Builder state.
-
-        Args:
-            batch_request: Data provided at runtime used to hydrate nested builder attributes
-        """
-        rules: List[Rule] = copy.deepcopy(self.rules)
+    ) -> Dict[str, Dict[str, Any]]:
+        rules: List[Rule] = self.rules
         if not isinstance(batch_request, dict):
             batch_request = get_batch_request_as_dict(batch_request)
+            logger.info("Converted batch request to dictionary: %s", batch_request)
 
-        resulting_rules: List[Dict[str, Any]] = []
+        resulting_rules: Dict[str, Dict[str, Any]] = {}
 
         for rule in rules:
             domain_builder = rule.domain_builder
             if isinstance(domain_builder, ColumnDomainBuilder):
                 domain_builder.batch_request = copy.deepcopy(batch_request)
                 domain_builder.batch_request["data_connector_query"] = {"index": -1}
-                logger.info(
-                    "Overwrote Rule %s's DomainBuilder batch_request attr", rule.name
-                )
 
             parameter_builders = rule.parameter_builders
             if parameter_builders:
                 for parameter_builder in parameter_builders:
                     parameter_builder.batch_request = copy.deepcopy(batch_request)
-                    logger.info(
-                        "Overwrote ParameterBuilder %s's batch_request attr",
-                        parameter_builder.name,
-                    )
 
-            resulting_rules.append(rule.to_dict())
+            resulting_rules[rule.name] = rule.to_dict()
 
         return resulting_rules
 

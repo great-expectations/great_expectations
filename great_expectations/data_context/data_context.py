@@ -3356,6 +3356,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
         batch_request: Union[dict, BatchRequest, RuntimeBatchRequest],
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
     ) -> ExpectationSuite:
         return RuleBasedProfiler.run_profiler_on_data(
             data_context=self,
@@ -3363,6 +3365,8 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             batch_request=batch_request,
             name=name,
             ge_cloud_id=ge_cloud_id,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
         )
 
     def test_yaml_config(
