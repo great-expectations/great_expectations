@@ -99,6 +99,11 @@
     "definition": "Generates Metrics and candidate Expectations from data.",
     "url": "terms/profiler"
   },
+  "profiling": {
+    "term": "Profiling",
+    "definition": "The act of generating Metrics and candidate Expectations from data.",
+    "url": "terms/profiler"
+  },
   "renderer": {
     "term": "Renderer",
     "definition": "A method for converting Expectations, Validation Results, etc. into Data Docs or other output such as email notifications or slack messages.",

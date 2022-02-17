@@ -15,7 +15,7 @@ import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
 ### Definition
 
-A Batch Request is provided to a Datasource in order to create a Batch.
+A Batch Request is provided to a <TechnicalTag relative="../" tag="datasource" text="Datasource" /> in order to create a <TechnicalTag relative="../" tag="batch" text="Batch" />.
 
 ### Features and promises
 
@@ -23,7 +23,7 @@ A Batch Request contains all the necessary details to query the appropriate unde
 
 ### Relationship to other objects
 
-A Batch Request is always used when Great Expectations builds a Batch.  The Batch Request includes a "query" for a Datasource's Data Connector to describe the data to include in the Batch.  Any time you interact with something that requires a Batch of Data (such as a Profiler, Checkpoint, or Validator) you will use a Batch Request and Datasource to create the Batch that is used.
+A Batch Request is always used when Great Expectations builds a Batch.  The Batch Request includes a "query" for a Datasource's <TechnicalTag relative="../" tag="data_connector" text="Data Connector" /> to describe the data to include in the Batch.  Any time you interact with something that requires a Batch of Data (such as a <TechnicalTag relative="../" tag="profiler" text="Profiler" />, <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" />, or <TechnicalTag relative="../" tag="validator" text="Validator" />) you will use a Batch Request and Datasource to create the Batch that is used.
 
 ## Use cases
 
@@ -44,7 +44,7 @@ For more information, see:
 
 <ValidateHeader/>
 
-When Validating data with a Checkpoint, you will need to provide one or more Batch Requests and one or more Expectation Suites.  You can do this at runtime, or by defining Batch Request and Expectation Suite pairs in advance, in the Checkpoint's configuration.
+When <TechnicalTag relative="../" tag="validation" text="Validating" /> data with a Checkpoint, you will need to provide one or more Batch Requests and one or more <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />.  You can do this at runtime, or by defining Batch Request and Expectation Suite pairs in advance, in the Checkpoint's configuration.
 
 For more information on setting up Batch Request/Expectation Suite pairs in a Checkpoint's configuration, see:
 
@@ -53,7 +53,7 @@ For more information on setting up Batch Request/Expectation Suite pairs in a Ch
 
 When passing `RuntimeBatchRequest`s to a Checkpoint, you will not be pairing Expectation Suites with Batch Requests.  Instead, when you provide `RuntimeBatchRequest`s to a Checkpoint, it will run all of its configured Expectation Suites against each of the `RuntimeBatchRequest`s that are passed in.
 
-For examples of how to pass `RuntimeBatchRequest`s to a Checkpoint, see the examples used to test your Datasource configurations in [our documentation on how to connect to data.](../guides/connecting_to_your_data/index.md)
+For examples of how to pass `RuntimeBatchRequest`s to a Checkpoint, see the examples used to test your Datasource configurations in [our documentation on how to connect to data](../guides/connecting_to_your_data/index.md).  `RuntimeBatchRequest`s are typically used when you need to pass in a DataFrame at runtime.
 
 For a good example if you don't have a specific source data system in mind right now, check out [Example 2 of our guide on how to pass an in memory dataframe to a checkpoint](../guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md#example-2-pass-a-complete-runtimebatchrequest-at-runtime).
 
