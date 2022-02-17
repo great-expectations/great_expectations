@@ -133,7 +133,7 @@ rules:
       class_name: CategoricalColumnDomainBuilder
       module_name: great_expectations.rule_based_profiler.domain_builder
       batch_request: $variables.alice_single_batch_data_batch_request
-      cardinality_category: few
+      cardinality_limit: few
     parameter_builders:
       - name: my_user_agent_value_set
         class_name: ValueSetMultiBatchParameterBuilder

@@ -126,7 +126,7 @@ rules:
       class_name: CategoricalColumnDomainBuilder
       module_name: great_expectations.rule_based_profiler.domain_builder
       batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
-      cardinality_category: few
+      cardinality_limit: few
     parameter_builders:
       - name: my_pickup_location_id_value_set
         class_name: ValueSetMultiBatchParameterBuilder

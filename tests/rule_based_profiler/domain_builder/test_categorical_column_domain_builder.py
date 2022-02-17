@@ -11,9 +11,16 @@ from great_expectations.rule_based_profiler.types import Domain
 def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_context):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         data_context=data_context,
-        batch_request=None,
+        batch_request=batch_request,
+        cardinality_limit="very_few",
     )
     domains: List[Domain] = domain_builder.get_domains()
 
@@ -39,3 +46,19 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
         for column_name in alice_column_names
     ]
     assert domains == alice_all_column_domains
+
+
+def test_unsupported_cardinality_limit():
+    raise NotImplementedError
+
+
+def test_unspecified_cardinality_limit():
+    raise NotImplementedError
+
+
+def test_cardinality_limit_specified_as_str():
+    raise NotImplementedError
+
+
+def test_cardinality_limit_specified_as_object():
+    raise NotImplementedError

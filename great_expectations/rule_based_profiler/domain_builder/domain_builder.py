@@ -3,6 +3,7 @@ from typing import List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
     Builder,
     Domain,
@@ -115,3 +116,26 @@ class DomainBuilder(Builder, ABC):
     @property
     def data_context(self) -> "DataContext":  # noqa: F821
         return self._data_context
+
+
+def build_domains_from_column_names(column_names: List[str]) -> List[Domain]:
+    """Build column type domains from column names
+
+    Args:
+        column_names: List of columns to convert
+
+    Returns:
+        A list of column type Domain objects built from column names
+    """
+    column_name: str
+    domains: List[Domain] = [
+        Domain(
+            domain_type=MetricDomainTypes.COLUMN,
+            domain_kwargs={
+                "column": column_name,
+            },
+        )
+        for column_name in column_names
+    ]
+
+    return domains

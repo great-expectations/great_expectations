@@ -10,7 +10,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     whether they qualify as categorical based on cardinality setting.
 
     Attributes:
-        cardinality_category: A CardinalityCategory to set the number of unique
+        cardinality_limit: A CardinalityCategory to set the number of unique
             values allowed to be considered categorical.
     """
 
