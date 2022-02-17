@@ -105,7 +105,7 @@ except ImportError:
 
         logger.warn(
             "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
-            DeprecationWarning
+            DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
         ###
