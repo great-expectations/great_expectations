@@ -212,7 +212,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             ) / nonnull_count
 
         best_fmt_string: Optional[str] = None
-        best_ratio: int = 0
+        best_ratio: float = 0.0
 
         threshold: float = get_parameter_value_and_validate_return_type(
             domain=domain,

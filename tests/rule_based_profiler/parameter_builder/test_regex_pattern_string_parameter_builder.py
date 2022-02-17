@@ -14,29 +14,30 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
-from tests.integration.profiling.rule_based_profilers.conftest import (
-    alice_columnar_table_single_batch,
-    alice_columnar_table_single_batch_context,
-    bobby_columnar_table_multi_batch_deterministic_data_context,
-)
 
 
 def test_regex_pattern_string_parameter_builder_instantiation():
     candidate_regexes: Set[str] = {
-        r"^\d{1}$",
-        r"^\d{2}$",
-        r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
+        r"/\d+/",  # whole number with 1 or more digits ExpectValuesToBeNumeric? (.. youw oudl want to emit that expectation)?
+        r"/-?\d+/",  # negative whole numbers
+        r"/-?\d+(\.\d*)?/",  # decimal numbers with . (period) separator
+        r"/[A-Za-z0-9\.,;:!?()\"'%\-]+/",  # general text
+        r"^ +/",  # leading space
+        r" +/$",  # trailing space
+        r"/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)/",  # Matching URL (including http(s) protocol)
+        r"/<\/?(?:p|a|b|img)(?: \/)?>/",  # HTML tags
+        r"/(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}/",  # IPv4 IP address
+        r"/(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}/",  # IPv6 IP address,
     }
-
     regex_pattern_string_parameter: RegexPatternStringParameterBuilder = (
         RegexPatternStringParameterBuilder(
             name="my_simple_regex_string_parameter_builder",
+            candidate_regexes=candidate_regexes,
         )
     )
 
-    assert regex_pattern_string_parameter._threshold == 1.0
-    assert regex_pattern_string_parameter._candidate_strings == candidate_regexes
-    assert regex_pattern_string_parameter.CANDIDATE_STRINGS == candidate_regexes
+    assert regex_pattern_string_parameter._threshold == 0.9
+    assert regex_pattern_string_parameter._candidate_regexes == candidate_regexes
 
 
 def test_regex_pattern_string_parameter_builder_zero_batch_id_error():
@@ -55,7 +56,7 @@ def test_regex_pattern_string_parameter_builder_zero_batch_id_error():
 
     assert (
         str(e.value)
-        == "Utilizing a RegexPatternStringParameterBuilder requires a non-empty list of batch identifiers."
+        == "RegexPatternStringParameterBuilder was not able to get Validator using domain, variables and parameters provided."
     )
 
 
@@ -69,7 +70,7 @@ def test_regex_pattern_string_parameter_builder_alice(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    candidate_strings: Set[str] = {
+    candidate_regexes: Set[str] = {
         r"^\d{1}$",
         r"^\d{2}$",
         r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
@@ -80,13 +81,13 @@ def test_regex_pattern_string_parameter_builder_alice(
         RegexPatternStringParameterBuilder(
             name="my_regex",
             metric_domain_kwargs=metric_domain_kwargs,
+            candidate_regexes=candidate_regexes,
             data_context=data_context,
             batch_request=batch_request,
         )
     )
-
-    assert regex_pattern_string_parameter._candidate_strings == candidate_strings
-    assert regex_pattern_string_parameter._threshold == 1.0
+    assert regex_pattern_string_parameter._candidate_regexes == candidate_regexes
+    assert regex_pattern_string_parameter._threshold == 0.9
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
@@ -122,7 +123,7 @@ def test_regex_pattern_string_parameter_builder_bobby(
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
     metric_domain_kwargs: dict = {"column": "VendorID"}
-    candidate_strings: Set[str] = {
+    candidate_regexes: Set[str] = {
         r"^\d{1}$",
         r"^\d{3}$",  # won't match
         r"^\d{4}$",  # won't match
@@ -139,15 +140,15 @@ def test_regex_pattern_string_parameter_builder_bobby(
         RegexPatternStringParameterBuilder(
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
-            candidate_strings=candidate_strings,
+            candidate_regexes=candidate_regexes,
             threshold=threshold,
             data_context=data_context,
             batch_request=batch_request,
         )
     )
 
-    assert regex_parameter.CANDIDATE_STRINGS != candidate_strings
-    assert regex_parameter._candidate_strings == candidate_strings
+    assert regex_parameter.CANDIDATE_REGEX != candidate_regexes
+    assert regex_parameter._candidate_regexes == candidate_regexes
     assert regex_parameter._threshold == 0.9
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
@@ -188,7 +189,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
     metric_domain_kwargs: dict = {"column": "VendorID"}
-    candidate_strings: Set[str] = {
+    candidate_regexes: Set[str] = {
         r"^\d{3}$",  # won't match
     }
     threshold: float = 0.9
@@ -203,7 +204,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         RegexPatternStringParameterBuilder(
             name="my_regex_pattern_string_parameter_builder",
             metric_domain_kwargs=metric_domain_kwargs,
-            candidate_strings=candidate_strings,
+            candidate_regexes=candidate_regexes,
             threshold=threshold,
             data_context=data_context,
             batch_request=batch_request,
