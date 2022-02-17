@@ -394,13 +394,13 @@ stages:
     condition: eq(variables.isRefactor, true)
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
+#   dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
 
     jobs:
       - job: build_gallery
         variables:
           python.version: '3.7'
-          GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
+          GE_pytest_pip_opts: '"pyspark<3.0.0" "cookiecutter==1.7.3" --requirement requirements-dev.txt --constraint constraints-dev.txt'
           GE_pytest_opts: ''
 
         services:
@@ -431,6 +431,10 @@ stages:
           - bash: python ./build_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
+
+          - bash: python ./build_package_gallery.py
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Build Package Gallery'
 
           - task: S3Upload@1
             inputs:
