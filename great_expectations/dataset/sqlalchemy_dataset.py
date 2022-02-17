@@ -17,6 +17,8 @@ from great_expectations.core.util import (
 )
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.dataset import Dataset
+from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.dataset.util import (
     check_sql_engine_dialect,
     get_approximate_percentile_disc_sql,
@@ -26,9 +28,6 @@ from great_expectations.util import (
     get_sqlalchemy_inspector,
     import_library_module,
 )
-
-from .dataset import Dataset
-from .pandas_dataset import PandasDataset
 
 logger = logging.getLogger(__name__)
 
@@ -586,11 +585,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             "sqlite",
             "oracle",
             "mssql",
+            "hive",
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
                 module_name="sqlalchemy.dialects." + self.engine.dialect.name
             )
+
         elif dialect_name == "snowflake":
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
@@ -1464,6 +1465,12 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif engine_dialect == "teradatasql":
             stmt = 'CREATE VOLATILE TABLE "{table_name}" AS ({custom_sql}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 table_name=table_name, custom_sql=custom_sql
+            )
+        elif self.sql_engine_dialect.name.lower() in ("hive", b"hive"):
+            stmt = "CREATE TEMPORARY TABLE {schema_name}.{table_name} AS {custom_sql}".format(
+                schema_name=schema_name if schema_name is not None else "default",
+                table_name=table_name,
+                custom_sql=custom_sql,
             )
         else:
             stmt = 'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'.format(
