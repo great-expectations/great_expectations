@@ -19,11 +19,13 @@ CLI stands for Command Line Interface.
 
 ### Features and promises
 
-The CLI provides useful convenience functions covering all the steps of working with Great Expectations.
+The CLI provides useful convenience functions covering all the steps of working with Great Expectations.  CLI commands consist of a noun indicating what you want to operate on, and a verb indicating the operation to perform.  All CLI commands have help documentation that can be accessed by including the `--help` option.
 
 ### Relationship to other objects
 
-The CLI provides commands for performing operations on Checkpoints, Datasources, Data Docs, Stores, Expectation Suites, and projects.  It will also allow you to initialize your Data Context.
+The CLI provides commands for performing operations on your Great Expectations deployment, as well as on <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />, <TechnicalTag relative="../" tag="datasource" text="Datasources" />, <TechnicalTag relative="../" tag="data_docs" text="Data Docs" />, <TechnicalTag relative="../" tag="store" text="Stores" />, and <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />.  
+
+You will usually also initialize your <TechnicalTag relative="../" tag="data_context" text="Data Context" /> through the CLI.
 
 Most CLI commands will either execute entirely in the terminal, or will open Jupyter Notebooks with boilerplate code and additional commentary to help you accomplish a task that requires more complicated configuration.
 
@@ -68,6 +70,12 @@ To assist you in Validating your data, the CLI provides commands for listing exi
 
 ```bash title="Terminal command"
 great_expectations checkpoint --help
+```
+
+There are also commands available through the CLI for building, deleting, and listing your available Data Docs.  You can read about these commands in the CLI with the command:
+
+```bash title="Terminal command"
+great_expectations docs --help
 ```
 
 ## Features
