@@ -153,13 +153,14 @@ class Rule(SerializableDictDot):
         return self._name
 
     def _get_parameter_builders_as_dict(self) -> Dict[str, ParameterBuilder]:
-        if self._parameter_builders is None:
-            return {}
+        parameter_builders: List[ParameterBuilder] = self.parameter_builders
+        if parameter_builders is None:
+            parameter_builders = []
 
         parameter_builder: ParameterBuilder
         return {
             parameter_builder.name: parameter_builder
-            for parameter_builder in self._parameter_builders
+            for parameter_builder in parameter_builders
         }
 
     def _get_expectation_configuration_builders_as_dict(
@@ -168,7 +169,7 @@ class Rule(SerializableDictDot):
         expectation_configuration_builder: ExpectationConfigurationBuilder
         return {
             expectation_configuration_builder.expectation_type: expectation_configuration_builder
-            for expectation_configuration_builder in self._expectation_configuration_builders
+            for expectation_configuration_builder in self.expectation_configuration_builders
         }
 
     @property
@@ -177,20 +178,13 @@ class Rule(SerializableDictDot):
 
     @property
     def parameter_builders(self) -> Optional[List[ParameterBuilder]]:
-        parameter_builders: Dict[
-            str, ParameterBuilder
-        ] = self._get_parameter_builders_as_dict()
-
-        if parameter_builders:
-            return list(parameter_builders.values())
-
-        return None
+        return self._parameter_builders
 
     @property
     def expectation_configuration_builders(
         self,
     ) -> List[ExpectationConfigurationBuilder]:
-        return list(self._get_expectation_configuration_builders_as_dict().values())
+        return self._expectation_configuration_builders
 
     @property
     def parameters(self) -> Dict[str, ParameterContainer]:

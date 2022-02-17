@@ -5090,6 +5090,16 @@ def profiler_config_with_placeholder_args(
                     {
                         "class_name": "DefaultExpectationConfigurationBuilder",
                         "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                        "column_A": "$domain.domain_kwargs.column_A",
+                        "column_B": "$domain.domain_kwargs.column_B",
+                        "my_arg": "$parameter.my_parameter.value[0]",
+                        "my_other_arg": "$parameter.my_parameter.value[1]",
+                        "meta": {
+                            "details": {
+                                "my_parameter_estimator": "$parameter.my_parameter.details",
+                                "note": "Important remarks about estimation algoirithm.",
+                            },
+                        },
                     },
                 ],
             },

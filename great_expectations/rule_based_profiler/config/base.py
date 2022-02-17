@@ -89,7 +89,7 @@ class NotNullSchema(Schema):
 class DomainBuilderConfig(DictDot):
     def __init__(
         self,
-        class_name: Optional[str] = None,
+        class_name: str,
         module_name: Optional[str] = None,
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
@@ -100,7 +100,10 @@ class DomainBuilderConfig(DictDot):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.warning(
-                "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
+                'Setting unknown kwarg (%s, %s) provided to config as attr in "%s".',
+                k,
+                v,
+                self.__class__.__name__,
             )
 
 
@@ -113,21 +116,23 @@ class DomainBuilderConfigSchema(NotNullSchema):
     class_name = fields.String(
         required=False,
         all_none=True,
-        missing="DomainBuilder",
     )
     module_name = fields.String(
         required=False,
         all_none=True,
         missing="great_expectations.rule_based_profiler.domain_builder",
     )
-    batch_request = fields.Raw(required=False, allow_none=True)
+    batch_request = fields.Raw(
+        required=False,
+        allow_none=True,
+    )
 
 
 class ParameterBuilderConfig(DictDot):
     def __init__(
         self,
         name: str,
-        class_name: Optional[str] = None,
+        class_name: str,
         module_name: Optional[str] = None,
         batch_request: Optional[Union[dict, str]] = None,
         **kwargs,
@@ -139,7 +144,10 @@ class ParameterBuilderConfig(DictDot):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.warning(
-                "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
+                'Setting unknown kwarg (%s, %s) provided to config as attr in "%s".',
+                k,
+                v,
+                self.__class__.__name__,
             )
 
 
@@ -149,35 +157,45 @@ class ParameterBuilderConfigSchema(NotNullSchema):
 
     __config_class__ = ParameterBuilderConfig
 
-    name = fields.String(required=True)
+    name = fields.String(
+        required=True,
+        allow_none=False,
+    )
     class_name = fields.String(
         required=False,
         all_none=True,
-        missing="ParameterBuilder",
     )
     module_name = fields.String(
         required=False,
         all_none=True,
         missing="great_expectations.rule_based_profiler.parameter_builder",
     )
-    batch_request = fields.Raw(required=False, allow_none=True)
+    batch_request = fields.Raw(
+        required=False,
+        allow_none=True,
+    )
 
 
 class ExpectationConfigurationBuilderConfig(DictDot):
     def __init__(
         self,
         expectation_type: str,
-        class_name: Optional[str] = None,
+        class_name: str,
         module_name: Optional[str] = None,
+        meta: Optional[dict] = None,
         **kwargs,
     ):
         self.expectation_type = expectation_type
         self.class_name = class_name
         self.module_name = module_name
+        self.meta = meta
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.warning(
-                "Setting unknown kwarg (%s, %s) provided to config as attr", k, v
+                'Setting unknown kwarg (%s, %s) provided to config as attr in "%s".',
+                k,
+                v,
+                self.__class__.__name__,
             )
 
 
@@ -190,14 +208,26 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
     class_name = fields.String(
         required=False,
         all_none=True,
-        missing="ExpectationConfigurationBuilder",
     )
     module_name = fields.String(
         required=False,
         all_none=True,
         missing="great_expectations.rule_based_profiler.expectation_configuration_builder",
     )
-    expectation_type = fields.String(required=True)
+    expectation_type = fields.Str(
+        required=True,
+        error_messages={
+            "required": "expectation_type missing in expectation configuration builder"
+        },
+    )
+    meta = fields.Dict(
+        keys=fields.String(
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
 
 
 class RuleConfig(DictDot):
@@ -221,16 +251,24 @@ class RuleConfigSchema(NotNullSchema):
     __config_class__ = RuleConfig
 
     domain_builder = fields.Nested(
-        DomainBuilderConfigSchema, required=False, allow_none=True
+        DomainBuilderConfigSchema,
+        required=False,
+        allow_none=True,
     )
     parameter_builders = fields.List(
-        cls_or_instance=fields.Nested(ParameterBuilderConfigSchema, required=True),
+        cls_or_instance=fields.Nested(
+            ParameterBuilderConfigSchema,
+            required=True,
+            allow_none=False,
+        ),
         required=False,
         allow_none=True,
     )
     expectation_configuration_builders = fields.List(
         cls_or_instance=fields.Nested(
-            ExpectationConfigurationBuilderConfigSchema, required=True
+            ExpectationConfigurationBuilderConfigSchema,
+            required=True,
+            allow_none=False,
         ),
         required=True,
         allow_none=False,
@@ -275,7 +313,10 @@ class RuleBasedProfilerConfigSchema(Schema):
     class Meta:
         unknown = INCLUDE
 
-    name = fields.String(required=True, allow_none=False)
+    name = fields.String(
+        required=True,
+        allow_none=False,
+    )
     class_name = fields.String(
         required=False,
         all_none=True,
@@ -296,11 +337,26 @@ class RuleBasedProfilerConfigSchema(Schema):
             "invalid": "config version is not supported; it must be 1.0 per the current version of Great Expectations"
         },
     )
-    variables = fields.Dict(keys=fields.String(), required=False, allow_none=True)
+    variables = fields.Dict(
+        keys=fields.String(
+            required=True,
+            allow_none=False,
+        ),
+        required=False,
+        allow_none=True,
+    )
     rules = fields.Dict(
-        keys=fields.String(),
-        values=fields.Nested(RuleConfigSchema, required=True, allow_none=False),
+        keys=fields.String(
+            required=True,
+            allow_none=False,
+        ),
+        values=fields.Nested(
+            RuleConfigSchema,
+            required=True,
+            allow_none=False,
+        ),
         required=True,
+        allow_none=False,
     )
 
 
