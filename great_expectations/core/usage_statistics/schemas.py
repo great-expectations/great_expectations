@@ -750,6 +750,9 @@ anonymized_legacy_profiler_build_suite_payload_schema = {
     "additionalProperties": False,
 }
 
+
+anonymized_rule_based_profiler_run_schema = {}
+
 anonymized_usage_statistics_record_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-usage-statistics-record",
@@ -781,6 +784,7 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_validations": anonymized_validations_list_schema,
         "anonymized_checkpoint_run": anonymized_checkpoint_run_schema,
         "anonymized_legacy_profiler_build_suite_payload": anonymized_legacy_profiler_build_suite_payload_schema,
+        "anonymized_rule_based_profiler_run": anonymized_rule_based_profiler_run_schema,
     },
     "type": "object",
     "properties": {
@@ -937,6 +941,15 @@ anonymized_usage_statistics_record_schema = {
             "type": "object",
             "properties": {
                 "event": {
+                    "enum": ["profiler.run"],
+                },
+                "event_payload": {"$ref": "#/definitions/anonymized_profiler_run"},
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
                     "enum": [
                         "cli.checkpoint.delete",
                         "cli.checkpoint.delete.begin",
@@ -1008,8 +1021,6 @@ anonymized_usage_statistics_record_schema = {
         "event_payload",
     ],
 }
-
-anonymized_rule_based_profiler_run_payload_schema = {}
 
 if __name__ == "__main__":
     import json
