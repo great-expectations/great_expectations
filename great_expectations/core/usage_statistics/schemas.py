@@ -1009,6 +1009,8 @@ anonymized_usage_statistics_record_schema = {
     ],
 }
 
+anonymized_rule_based_profiler_run_payload_schema = {}
+
 if __name__ == "__main__":
     import json
 

@@ -10,6 +10,7 @@ from great_expectations.core.usage_statistics.schemas import (
     anonymized_datasource_sqlalchemy_connect_payload_schema,
     anonymized_init_payload_schema,
     anonymized_legacy_profiler_build_suite_payload_schema,
+    anonymized_rule_based_profiler_run_payload_schema,
     anonymized_save_or_edit_expectation_suite_payload_schema,
     anonymized_test_yaml_config_payload_schema,
     anonymized_usage_statistics_record_schema,
@@ -353,3 +354,7 @@ def test_usage_stats_cli_payload_messages():
                 message,
                 anonymized_usage_statistics_record_schema,
             )
+
+
+def test_rule_based_profiler_run_message():
+    pass
