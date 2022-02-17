@@ -22,6 +22,7 @@ trigger:
     include:
     - pre_pr-* # Can be used to test both `great_expectations` and `dependency_graph` pipelines
     - main
+    - feature/refactor_generate_expectation_tests
     exclude:
     - develop
 
