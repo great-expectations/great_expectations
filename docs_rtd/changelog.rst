@@ -11,6 +11,7 @@ develop
 0.14.7
 -----------------
 * [FEATURE] Support Multi-Dimensional Metric Computations Generically for Multi-Batch Parameter Builders (#4206)
+* [FEATURE] Add support for sqlalchemy-bigquery while falling back on pybigquery (#4182)
 * [BUGFIX] Update validate_configuration for core Expectations that don't return True (#4216)
 * [DOCS] Fixes two references to the Getting Started tutorial (#4189)
 * [DOCS] Deepnote Deployment Pattern Guide (#4169)
