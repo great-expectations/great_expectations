@@ -47,10 +47,10 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         name: str,
-        candidate_regexes: Optional[Iterable[str]] = None,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         threshold: float = 0.9,
+        candidate_regexes: Optional[Union[str, dict]] = None,
         data_context: Optional["DataContext"] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
@@ -135,7 +135,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         match_regex_metric_value_kwargs: dict
         for regex_string in self._candidate_regexes:
             if self._metric_value_kwargs:
-                match_regex_metric_value_kwargs = {
+                match_regex_metric_value_kwargs: dict = {
                     **self._metric_value_kwargs,
                     **{"regex": regex_string},
                 }
@@ -157,9 +157,10 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             metric_values = metric_values[:, 0]
 
             match_regex_unexpected_count: int = sum(metric_values)
-            regex_string_success_ratios[regex_string] = (
+            success_ratio = (
                 nonnull_count - match_regex_unexpected_count
             ) / nonnull_count
+            regex_string_success_ratios[regex_string] = success_ratio
 
         best_regex_string: Optional[str] = None
         best_ratio: float = 0.0

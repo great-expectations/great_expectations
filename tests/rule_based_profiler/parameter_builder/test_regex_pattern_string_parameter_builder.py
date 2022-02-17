@@ -38,6 +38,7 @@ def test_regex_pattern_string_parameter_builder_instantiation():
 
     assert regex_pattern_string_parameter._threshold == 0.9
     assert regex_pattern_string_parameter._candidate_regexes == candidate_regexes
+    assert regex_pattern_string_parameter.CANDIDATE_REGEX == candidate_regexes
 
 
 def test_regex_pattern_string_parameter_builder_zero_batch_id_error():
@@ -64,7 +65,7 @@ def test_regex_pattern_string_parameter_builder_alice(
     alice_columnar_table_single_batch_context,
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
-    batch_request = {
+    batch_request: dict = {
         "datasource_name": "alice_columnar_table_single_batch_datasource",
         "data_connector_name": "alice_columnar_table_single_batch_data_connector",
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
@@ -86,8 +87,6 @@ def test_regex_pattern_string_parameter_builder_alice(
             batch_request=batch_request,
         )
     )
-    assert regex_pattern_string_parameter._candidate_regexes == candidate_regexes
-    assert regex_pattern_string_parameter._threshold == 0.9
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
@@ -98,8 +97,6 @@ def test_regex_pattern_string_parameter_builder_alice(
     regex_pattern_string_parameter._build_parameters(
         parameter_container=parameter_container, domain=domain
     )
-
-    assert len(parameter_container.parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_regex"
     expected_value: dict = {
@@ -162,8 +159,6 @@ def test_regex_pattern_string_parameter_builder_bobby(
         parameter_container=parameter_container, domain=domain
     )
 
-    assert len(parameter_container.parameter_nodes) == 1
-
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
@@ -220,7 +215,6 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
     regex_parameter._build_parameters(
         parameter_container=parameter_container, domain=domain
     )
-    assert len(parameter_container.parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
