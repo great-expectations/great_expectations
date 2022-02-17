@@ -223,7 +223,7 @@ When served, the Data Docs site provides the details of each [Validation](../ref
 
 For example, the following image shows a run where three Expectations were validated against our DataFrame and two of them failed.
 
-![Data Docs](images/datadocs.png)
+![Data Docs](./images/datadocs.png)
 
 <div style={{"text-align":"center"}}>
 <p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
