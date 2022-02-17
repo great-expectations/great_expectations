@@ -913,7 +913,10 @@ class Expectation(metaclass=MetaExpectation):
             meta=meta,
         )
 
-    def run_diagnostics(self) -> ExpectationDiagnostics:
+    def run_diagnostics(
+        self,
+        raise_exceptions_for_backends: bool = False,
+    ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
         The current uses for this method's output are
@@ -977,6 +980,7 @@ class Expectation(metaclass=MetaExpectation):
             expectation_type=description_diagnostics.snake_name,
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
+            raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
 
         maturity_checklist: ExpectationDiagnosticMaturityMessages = (
@@ -1214,6 +1218,7 @@ class Expectation(metaclass=MetaExpectation):
         expectation_type: str,
         test_data_cases: List[ExpectationTestDataCases],
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
+        raise_exceptions_for_backends: bool = False,
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
         test_results = []
@@ -1222,6 +1227,7 @@ class Expectation(metaclass=MetaExpectation):
             snake_name=expectation_type,
             test_data_cases=test_data_cases,
             execution_engine_diagnostics=execution_engine_diagnostics,
+            raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
 
         for exp_test in exp_tests:
@@ -1260,12 +1266,14 @@ class Expectation(metaclass=MetaExpectation):
         snake_name: str,
         test_data_cases: List[ExpectationTestDataCases],
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
+        raise_exceptions_for_backends: bool = False,
     ):
         """This is a placeholder method to adapt the typed objects used to build ExpectationDiagnostics with the untyped dictionaries used in generate_expectation_tests"""
         parameterized_tests = generate_expectation_tests(
             expectation_type=snake_name,
             test_data_cases=test_data_cases,
             execution_engine_diagnostics=execution_engine_diagnostics,
+            raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
         return parameterized_tests
 

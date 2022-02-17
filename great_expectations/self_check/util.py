@@ -1327,6 +1327,7 @@ def build_test_backends_list(
     include_mysql=False,
     include_mssql=False,
     include_bigquery=False,
+    raise_exceptions_for_backends: bool = True,
 ) -> List[str]:
     """Attempts to identify supported backends by checking which imports are available."""
 
@@ -1340,17 +1341,31 @@ def build_test_backends_list(
             import pyspark
             from pyspark.sql import SparkSession
         except ImportError:
-            raise ValueError("spark tests are requested, but pyspark is not installed")
-        test_backends += ["spark"]
+            if raise_exceptions_for_backends is True:
+                raise ValueError(
+                    "spark tests are requested, but pyspark is not installed"
+                )
+            else:
+                logger.warning(
+                    "spark tests are requested, but pyspark is not installed"
+                )
+        else:
+            test_backends += ["spark"]
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if include_sqlalchemy:
 
         sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
         if sa is None:
-            raise ImportError(
-                "sqlalchemy tests are requested, but sqlalchemy in not installed"
-            )
+            if raise_exceptions_for_backends is True:
+                raise ImportError(
+                    "sqlalchemy tests are requested, but sqlalchemy in not installed"
+                )
+            else:
+                logger.warning(
+                    "sqlalchemy tests are requested, but sqlalchemy in not installed"
+                )
+            return test_backends
 
         if include_sqlite:
             test_backends += ["sqlite"]
@@ -1369,10 +1384,16 @@ def build_test_backends_list(
             if checker.is_valid() is True:
                 test_backends += ["postgresql"]
             else:
-                raise ValueError(
-                    f"backend-specific tests are requested, but unable to connect to the database at "
-                    f"{connection_string}"
-                )
+                if raise_exceptions_for_backends is True:
+                    raise ValueError(
+                        f"backend-specific tests are requested, but unable to connect to the database at "
+                        f"{connection_string}"
+                    )
+                else:
+                    logger.warning(
+                        f"backend-specific tests are requested, but unable to connect to the database at "
+                        f"{connection_string}"
+                    )
 
         if include_mysql:
             try:
@@ -1380,11 +1401,18 @@ def build_test_backends_list(
                 conn = engine.connect()
                 conn.close()
             except (ImportError, SQLAlchemyError):
-                raise ImportError(
-                    "mysql tests are requested, but unable to connect to the mysql database at "
-                    f"'mysql+pymysql://root@{db_hostname}/test_ci'"
-                )
-            test_backends += ["mysql"]
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "mysql tests are requested, but unable to connect to the mysql database at "
+                        f"'mysql+pymysql://root@{db_hostname}/test_ci'"
+                    )
+                else:
+                    logger.warning(
+                        "mysql tests are requested, but unable to connect to the mysql database at "
+                        f"'mysql+pymysql://root@{db_hostname}/test_ci'"
+                    )
+            else:
+                test_backends += ["mysql"]
 
         if include_mssql:
             try:
@@ -1396,12 +1424,20 @@ def build_test_backends_list(
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
-                raise ImportError(
-                    "mssql tests are requested, but unable to connect to the mssql database at "
-                    f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
-                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
-                )
-            test_backends += ["mssql"]
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "mssql tests are requested, but unable to connect to the mssql database at "
+                        f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+                        "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
+                    )
+                else:
+                    logger.warning(
+                        "mssql tests are requested, but unable to connect to the mssql database at "
+                        f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+                        "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
+                    )
+            else:
+                test_backends += ["mssql"]
 
         if include_bigquery:
             try:
@@ -1409,10 +1445,16 @@ def build_test_backends_list(
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError) as e:
-                raise ImportError(
-                    "bigquery tests are requested, but unable to connect"
-                ) from e
-            test_backends += ["bigquery"]
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "bigquery tests are requested, but unable to connect"
+                    ) from e
+                else:
+                    logger.warning(
+                        "bigquery tests are requested, but unable to connect"
+                    )
+            else:
+                test_backends += ["bigquery"]
 
     return test_backends
 
@@ -1421,6 +1463,7 @@ def generate_expectation_tests(
     expectation_type: str,
     test_data_cases: List[ExpectationTestDataCases],
     execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
+    raise_exceptions_for_backends: bool = False,
 ):
     """
 
@@ -1472,6 +1515,7 @@ def generate_expectation_tests(
             include_mysql=dialects_to_include.get("mysql", False),
             include_mssql=dialects_to_include.get("mssql", False),
             include_bigquery=dialects_to_include.get("bigquery", False),
+            raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
 
         for c in backends:
