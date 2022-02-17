@@ -371,6 +371,8 @@ module.exports = {
           label: 'Technical Terms',
           items: [
             'terms/action',
+            'terms/batch',
+            'terms/batch_request',
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
