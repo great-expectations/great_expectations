@@ -23,7 +23,6 @@ from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.util import is_numeric
-from great_expectations.validator.validator import Validator
 
 MAX_DECIMALS: int = 9
 
@@ -223,25 +222,7 @@ detected.
         11. Return [low, high] for the desired metric as estimated by the specified sampling method.
         12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
-        validator: Validator = self.get_validator(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        if not batch_ids:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
-            )
-
         metric_computation_result: MetricComputationResult = self.get_metrics(
-            batch_ids=batch_ids,
-            validator=validator,
             metric_name=self._metric_name,
             metric_domain_kwargs=self._metric_domain_kwargs,
             metric_value_kwargs=self._metric_value_kwargs,
@@ -419,8 +400,8 @@ detected.
             metric_value_range[metric_value_range_max_idx] = max_value
 
         # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
-        if metric_value_range.shape[0] == 1:
-            metric_value_range = metric_value_range[0]
+        if metric_value_range.shape[1] == 1:
+            metric_value_range = metric_value_range[:, 0]
 
         return metric_value_range
 

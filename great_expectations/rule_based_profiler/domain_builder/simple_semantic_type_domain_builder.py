@@ -2,8 +2,8 @@ from typing import Any, Dict, List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.profile.base import ProfilerTypeMapping
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.types import (
     Domain,
@@ -42,6 +42,10 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
             semantic_types = []
 
         self._semantic_types = semantic_types
+
+    @property
+    def domain_type(self) -> Union[str, MetricDomainTypes]:
+        return MetricDomainTypes.COLUMN
 
     @property
     def semantic_types(
@@ -116,7 +120,7 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
 
         domains: List[Domain] = [
             Domain(
-                domain_type=MetricDomainTypes.COLUMN,
+                domain_type=self.domain_type,
                 domain_kwargs={
                     "column": column_name,
                 },

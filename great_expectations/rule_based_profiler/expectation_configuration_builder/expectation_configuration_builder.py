@@ -10,11 +10,11 @@ from great_expectations.rule_based_profiler.types import (
 
 
 class ExpectationConfigurationBuilder(Builder, ABC):
-    def __init__(
-        self,
-        expectation_type: str,
-    ):
+    def __init__(self, expectation_type: str, **kwargs):
         self._expectation_type = expectation_type
+
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     def build_expectation_configuration(
         self,

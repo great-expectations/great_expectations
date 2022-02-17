@@ -1,9 +1,8 @@
 import logging
-from typing import Any, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Dict, Iterable, Optional, Set, Union
 
 import numpy as np
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     MetricComputationResult,
@@ -17,7 +16,6 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -141,29 +139,11 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
         ptional details
         """
-        validator: Validator = self.get_validator(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        if not batch_ids:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
-            )
-
         metric_computation_result: MetricComputationResult
 
         metric_values: np.ndarray
 
         metric_computation_result = self.get_metrics(
-            batch_ids=batch_ids,
-            validator=validator,
             metric_name="column_values.nonnull.count",
             metric_domain_kwargs=self._metric_domain_kwargs,
             metric_value_kwargs=self._metric_value_kwargs,
@@ -193,8 +173,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
                 }
 
             metric_computation_result = self.get_metrics(
-                batch_ids=batch_ids,
-                validator=validator,
                 metric_name="column_values.match_strftime_format.unexpected_count",
                 metric_domain_kwargs=self._metric_domain_kwargs,
                 metric_value_kwargs=match_strftime_metric_value_kwargs,
