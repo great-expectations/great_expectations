@@ -11,7 +11,8 @@ import threading
 import time
 from functools import wraps
 from queue import Queue
-from typing import Optional
+from types import FrameType
+from typing import Callable, Optional
 
 import jsonschema
 import requests
@@ -71,7 +72,12 @@ class UsageStatsExceptionPrefix(enum.Enum):
 
 
 class UsageStatisticsHandler:
-    def __init__(self, data_context, data_context_id, usage_statistics_url):
+    def __init__(
+        self,
+        data_context: "DataContext",  # noqa: F821
+        data_context_id: str,
+        usage_statistics_url: str,
+    ):
         self._url = usage_statistics_url
 
         self._data_context_id = data_context_id
@@ -107,18 +113,18 @@ class UsageStatisticsHandler:
 
         atexit.register(self._close_worker)
 
-    def _teardown(self, signum: int, frame):
+    def _teardown(self, signum: int, frame: Optional[FrameType]) -> None:
         self._close_worker()
         if signum == signal.SIGTERM and self._sigterm_handler:
             self._sigterm_handler(signum, frame)
         if signum == signal.SIGINT and self._sigint_handler:
             self._sigint_handler(signum, frame)
 
-    def _close_worker(self):
+    def _close_worker(self) -> None:
         self._message_queue.put(STOP_SIGNAL)
         self._worker.join()
 
-    def _requests_worker(self):
+    def _requests_worker(self) -> None:
         session = requests.Session()
         while True:
             message = self._message_queue.get()
@@ -141,7 +147,7 @@ class UsageStatisticsHandler:
             finally:
                 self._message_queue.task_done()
 
-    def build_init_payload(self):
+    def build_init_payload(self) -> dict:
         """Adds information that may be available only after full data context construction, but is useful to
         calculate only one time (for example, anonymization)."""
         expectation_suites = [
@@ -183,7 +189,7 @@ class UsageStatisticsHandler:
             ],
         }
 
-    def build_envelope(self, message):
+    def build_envelope(self, message: dict) -> dict:
         message["version"] = "1.0.0"
         message["ge_version"] = self._ge_version
 
@@ -207,7 +213,7 @@ class UsageStatisticsHandler:
         return message
 
     @staticmethod
-    def validate_message(message, schema):
+    def validate_message(message: dict, schema: dict) -> bool:
         try:
             jsonschema.validate(message, schema=schema)
             return True
@@ -223,7 +229,7 @@ class UsageStatisticsHandler:
         event: str,
         event_payload: Optional[dict] = None,
         success: Optional[bool] = None,
-    ):
+    ) -> None:
         """send a usage statistics message."""
         # noinspection PyBroadException
         try:
@@ -236,7 +242,7 @@ class UsageStatisticsHandler:
         except Exception:
             pass
 
-    def emit(self, message):
+    def emit(self, message: dict) -> None:
         """
         Emit a message.
         """
@@ -258,7 +264,7 @@ class UsageStatisticsHandler:
             logger.debug(log_message)
 
 
-def get_usage_statistics_handler(args_array):
+def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHandler]:
     try:
         # If the object is usage_statistics-capable, then it will have a usage_statistics_handler
         handler = getattr(args_array[0], "_usage_statistics_handler", None)
@@ -284,8 +290,11 @@ def get_usage_statistics_handler(args_array):
 
 
 def usage_statistics_enabled_method(
-    func=None, event_name=None, args_payload_fn=None, result_payload_fn=None
-):
+    func: Optional[Callable] = None,
+    event_name: Optional[str] = None,
+    args_payload_fn: Optional[Callable] = None,
+    result_payload_fn: Optional[Callable] = None,
+) -> Callable:
     """
     A decorator for usage statistics which defaults to the less detailed payload schema.
     """
@@ -348,11 +357,11 @@ def usage_statistics_enabled_method(
 
 # noinspection PyUnusedLocal
 def run_validation_operator_usage_statistics(
-    data_context,
-    validation_operator_name,
-    assets_to_validate,
+    data_context: "DataContext",  # noqa: F821
+    validation_operator_name: str,
+    assets_to_validate: list,
     **kwargs,
-):
+) -> dict:
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -389,11 +398,11 @@ def run_validation_operator_usage_statistics(
 # noinspection SpellCheckingInspection
 # noinspection PyUnusedLocal
 def save_expectation_suite_usage_statistics(
-    data_context,
-    expectation_suite,
-    expectation_suite_name=None,
+    data_context: "DataContext",  # noqa: F821
+    expectation_suite: ExpectationSuite,
+    expectation_suite_name: Optional[str] = None,
     **kwargs,
-):
+) -> dict:
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -427,7 +436,7 @@ def edit_expectation_suite_usage_statistics(
     data_context: "DataContext",  # noqa: F821
     expectation_suite_name: str,
     interactive_mode: Optional[CLISuiteInteractiveFlagCombinations] = None,
-):
+) -> dict:
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -455,7 +464,9 @@ def edit_expectation_suite_usage_statistics(
     return payload
 
 
-def add_datasource_usage_statistics(data_context, name, **kwargs):
+def add_datasource_usage_statistics(
+    data_context: "DataContext", name: str, **kwargs  # noqa: F821
+) -> dict:
     if not data_context._usage_statistics_handler:
         return {}
     try:
@@ -484,7 +495,9 @@ def add_datasource_usage_statistics(data_context, name, **kwargs):
 
 
 # noinspection SpellCheckingInspection
-def get_batch_list_usage_statistics(data_context, *args, **kwargs):
+def get_batch_list_usage_statistics(
+    data_context: "DataContext", *args, **kwargs  # noqa: F821
+) -> dict:
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -511,7 +524,11 @@ def get_batch_list_usage_statistics(data_context, *args, **kwargs):
 
 
 # noinspection PyUnusedLocal
-def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
+def get_checkpoint_run_usage_statistics(
+    checkpoint: "Checkpoint",  # noqa: F821
+    *args,
+    **kwargs,
+) -> dict:
     data_context_id: Optional[str] = None
     try:
         data_context_id = checkpoint.data_context.data_context_id
@@ -601,7 +618,7 @@ def send_usage_message(
     event: str,
     event_payload: Optional[dict] = None,
     success: Optional[bool] = None,
-):
+) -> None:
     """send a usage statistics message."""
     # noinspection PyBroadException
     try:
