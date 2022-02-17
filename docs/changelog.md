@@ -3,8 +3,28 @@ title: Changelog
 ---
 
 ### Develop
-* [BUGFIX] Fix datepicker filter on data docs (#4217) 
-* [FEATURE] Allow Data Docs to be rendered in night mode (#4130)
+
+### 0.14.7
+* [FEATURE] Support Multi-Dimensional Metric Computations Generically for Multi-Batch Parameter Builders (#4206)
+* [FEATURE] Add support for sqlalchemy-bigquery while falling back on pybigquery (#4182)
+* [BUGFIX] Update validate_configuration for core Expectations that don't return True (#4216)
+* [DOCS] Fixes two references to the Getting Started tutorial (#4189)
+* [DOCS] Deepnote Deployment Pattern Guide (#4169)
+* [DOCS] Allow Data Docs to be rendered in night mode (#4130)
+* [DOCS] Fix datepicker filter on data docs (#4217) 
+* [DOCS] Deepnote Deployment Pattern Image Fixes (#4229)
+* [MAINTENANCE] Refactor RuleBasedProfiler toolkit pattern (#4191)
+* [MAINTENANCE] Revert `dependency_graph` pipeline changes to ensure `usage_stats` runs in parallel (#4198)
+* [MAINTENANCE] Refactor relative imports (#4195)
+* [MAINTENANCE] Remove temp file that was accidently committed (#4201)
+* [MAINTENANCE] Update default candidate strings SimpleDateFormatString parameter builder (#4193)
+* [MAINTENANCE] minor type hints clean up (#4214)
+* [MAINTENANCE] RBP testing framework changes (#4184)
+* [MAINTENANCE] add conditional check for 'expect_column_values_to_be_in_type_list' (#4200)
+* [MAINTENANCE] Allow users to pass in any set of polygon points in expectation for point to be within region (#2520) (thanks @ryanlindeborg)
+* [MAINTENANCE] Better support Hive, better support BigQuery. (#2624) (thanks @jacobpgallagher)
+* [MAINTENANCE] move process_evaluation_parameters into conditional (#4109)
+* [MAINTENANCE] Type hint usage stats (#4226)
 
 ### 0.14.6
 * [FEATURE] Create profiler from DataContext (#4070)
