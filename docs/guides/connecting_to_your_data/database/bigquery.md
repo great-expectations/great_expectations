@@ -30,7 +30,7 @@ This will allow you to validate and explore your data.
 First, install the necessary dependencies for Great Expectations to connect to your BigQuery database by running the following in your terminal:
 
 ```console
-pip install pybigquery
+pip install sqlalchemy-bigquery
 ```
 
 ### 3. Add credentials
