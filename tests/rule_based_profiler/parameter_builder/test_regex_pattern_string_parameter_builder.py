@@ -18,7 +18,7 @@ from great_expectations.rule_based_profiler.types import (
 
 def test_regex_pattern_string_parameter_builder_instantiation():
     candidate_regexes: Set[str] = {
-        r"/\d+/",  # whole number with 1 or more digits ExpectValuesToBeNumeric? (.. youw oudl want to emit that expectation)?
+        r"/\d+/",  # whole number with 1 or more digits ExpectValuesToBeNumeric? (.. you would want to emit that expectation)?
         r"/-?\d+/",  # negative whole numbers
         r"/-?\d+(\.\d*)?/",  # decimal numbers with . (period) separator
         r"/[A-Za-z0-9\.,;:!?()\"'%\-]+/",  # general text
