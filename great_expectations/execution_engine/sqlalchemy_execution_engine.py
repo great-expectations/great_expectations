@@ -103,7 +103,7 @@ except ImportError:
     try:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
-        logger.warn(
+        warnings.warn(
             "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
             DeprecationWarning,
         )

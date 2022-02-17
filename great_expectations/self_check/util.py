@@ -7,6 +7,7 @@ import random
 import string
 import tempfile
 import threading
+import warnings
 from functools import wraps
 from types import ModuleType
 from typing import Dict, List, Optional, Union
@@ -132,8 +133,9 @@ except ImportError:
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
         import pybigquery.sqlalchemy_bigquery as BigQueryDialect
 
-        logger.warn(
-            "The pybigquery package is obsolete, please use sqlalchemy-bigquery"
+        warnings.warn(
+            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            DeprecationWarning,
         )
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
         ###
