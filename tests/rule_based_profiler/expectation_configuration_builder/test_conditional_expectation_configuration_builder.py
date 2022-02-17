@@ -1,3 +1,4 @@
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -53,11 +54,21 @@ def test_conditional_expectation_configuration_builder_alice(
     )
 
     condition = None
+    max_user_id = 999999999999
 
     conditional_expectation_configuration_builder = (
         ConditionalExpectationConfigurationBuilder(
-            expectation_type="expect_column_values_to_be_between", condition=condition
+            expectation_type="expect_column_values_to_be_between",
+            condition=condition,
+            min_value=value.value[0],
+            max_value=max_user_id,
         )
     )
 
-    assert value.value[0] == 397433
+    expectation_configuration: ExpectationConfiguration = (
+        conditional_expectation_configuration_builder._build_expectation_configuration(
+            domain=domain, parameters={domain.id: parameter_container}
+        )
+    )
+
+    assert expectation_configuration.kwargs["min_value"] == 397433
