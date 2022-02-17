@@ -374,7 +374,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if Expectation has a full test suite"""
         return ExpectationDiagnosticCheckMessage(
-            message="Has a full suite of tests, as determined by project code standards",
+            message="Has a full suite of tests, as determined by a code owner",
             passed=library_metadata.has_full_test_suite,
         )
 

@@ -187,7 +187,7 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": "Has a full suite of tests, as determined by project code standards",
+                    "message": "Has a full suite of tests, as determined by a code owner",
                     "passed": False,
                     "sub_messages": [],
                 },
