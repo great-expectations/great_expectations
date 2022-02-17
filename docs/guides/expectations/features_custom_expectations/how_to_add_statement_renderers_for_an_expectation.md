@@ -33,77 +33,61 @@ There are two basic types of Statement Renderers:
 Prescriptive Renderers help provide clarity and structure in your Data Docs.
 
 Diagnostic Renderers allow you to serve 
-summary statistics, unexpected value samples, and observed values from your Custom Expectation, delivering further insights about your data.
+summary statistics, unexpected value samples, and observed values from your Custom Expectation, 
+delivering further insights about your data.
 
-- **First, decide which renderer types you need to implement.**
+<details>
+<summary>But what do they look like?</summary>
+There are several ways to implement Prescriptive and Diagnostic Renderers. The image below gives some examples of what 
+these Renderers look like in action!
+<br/><br/>
 
-  Use the following annotated Validation Result as a guide (most major renderer types represented):
-
-  ![Annotated Validation Result Example](../../../images/validation_result_example.png)
-
-  At minimum, you should implement a renderer with type ``renderer.prescriptive``, which is used to render the human-readable form of your expectation when displaying Expectation Suites and Validation Results. In many cases, this will be the only custom renderer you will have to implement - for the remaining renderer types used on the Validation Results page, Great Expectations provides default renderers that can handle many types of Expectations.
-
-  **Renderer Types Overview**:
-    * ``renderer.prescriptive``: renders human-readable form of Expectation from ExpectationConfiguration
-    * ``renderer.diagnostic.unexpected_statement``: renders summary statistics of unexpected values if ExpectationValidationResult includes ``unexpected_count`` and ``element_count``
-    * ``renderer.diagnostic.unexpected_table``: renders a sample of unexpected values (and in certain cases, counts) in table format, if ExpectationValidationResult includes ``partial_unexpected_list`` or ``partial_unexpected_counts``
-    * ``renderer.diagnostic.observed_value``: renders the observed value if included in ExpectationValidationResult
-
-2. **Next, implement a renderer with type ``renderer.prescriptive``.**
-
-  Declare a class method in your custom Expectation class and decorate it with ``@renderer(renderer_type="renderer.prescriptive")``. The method name is arbitrary, but the convention is to camelcase the renderer type and convert the "renderer" prefix to a suffix (e.g. ``_prescriptive_renderer``).  Adding the ``@render_evaluation_parameter_string`` decorator allows [Expectations that use Evaluation Parameters](../../../guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.md) to render the values of the Evaluation Parameters along with the rest of the output.
-
-  The method should have the following signature, which is shared across renderers:
-
-```python
-  @classmethod
-  @renderer(renderer_type="renderer.prescriptive")
-  @render_evaluation_parameter_string
-  def _prescriptive_renderer(
-      cls,
-      configuration: ExpectationConfiguration = None,
-      result: ExpectationValidationResult = None,
-      language: str = None,
-      runtime_configuration: dict = None,
-      **kwargs,
-  ) -> List[Union[dict, str, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent,
-                  RenderedGraphContent, Any]]:
-      assert configuration or result, "Must provide renderers either a configuration or result."
-      ...
-```
-
-  In general, renderers receive as input either an ExpectationConfiguration (for prescriptive renderers) or an ExpectationValidationResult (for diagnostic renderers) and return a list of rendered elements. The examples below illustrate different ways you might render your expectation - from simple strings to graphs.
+![Annotated Validation Result Example](../../../images/validation_result_example.png)
+</details>
 
 <Tabs
   groupId="renderer-types"
-  defaultValue='simple_string'
+  defaultValue='prescriptive'
   values={[
-  {label: 'Simple String', value:'simple_string'},
-  {label: 'String Template', value:'string_template'},
-  {label: 'Table', value:'table'},
+  {label: 'Prescriptive', value:'prescriptive'},
+  {label: 'Diagnostic', value:'diagnostic'},
   ]}>
 
-<TabItem value="simple_string">
+<TabItem value="prescriptive">
 
-**Input:**
+### 2. Declare the method for your Prescriptive Renderer
 
-```python
-example_expectation_config = ExpectationConfiguration(**{
-    "expectation_type": "expect_column_value_lengths_to_be_between",
-    "kwargs": {
-        "column": "SSL",
-        "min_value": 1,
-        "max_value": 11,
-        "result_format": "COMPLETE"
-    }
-})
+In general, Prescriptive Renderers receive an ExpectationConfiguration as input and return a list of rendered elements.
+
+There are several ways to implement a Prescriptive Renderer. We're going to implement Simple String, String Template, and Table Renderers. 
+All three of these implementations will share the `@renderer(renderer_type="renderer.prescriptive)` decorator, the `@render_evaluation_parameter_string` decorator, and the same initial method declaration. In our case, this looks like the following:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L231-L262
 ```
 
-**Rendered Output:**
+:::note
+While not strictly necessary for all Custom Expectations, 
+adding the ``@render_evaluation_parameter_string`` decorator allows [Expectations that use Evaluation Parameters](../../../guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.md) 
+to render the values of the Evaluation Parameters along with the rest of the output.
+:::
+
+<Tabs
+  groupId="prescriptive-types"
+  defaultValue="simple-string"
+  values={[
+  {label: 'Simple String', value: 'simple-string'},
+  {label: 'String Template', value: 'string-template'},
+  {label: 'Table', value: 'table'}
+]}>
+
+<TabItem value="simple-string">
+
+### 3. Implement the logic for your Descriptive Renderer
+
+The Simple String Prescriptive Renderer will render a semantic declaration of your Custom Expectation, similar to this:
 
 ![Simple String Example](../../../images/simple_string.png)
 
-**Implementation:**
 
 ```python
 class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
@@ -194,7 +178,9 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
 ```
 </TabItem>
 
-<TabItem value="string_template">
+</Tabs>
+
+
 
 **Input:**
 
@@ -303,9 +289,6 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         # return simple string
         return [Template(template_str).substitute(params)]
 ```
-</TabItem>
-
-<TabItem value="table">
 
 :::note 
 This example shows how you can render your custom Expectation using different content types.
@@ -432,7 +415,6 @@ This example shows how you can render your custom Expectation using different co
           return [expectation_string_obj, quantile_range_table]
   ```
 </TabItem>
-
 
 </Tabs>
 
@@ -685,3 +667,10 @@ This example shows how you can render your custom Expectation using different co
 4. **Lastly, test that your renderers are providing the desired output by building your Data Docs site.**
 
   Use the following CLI command: ``great_expectations docs build``.
+```
+  **Renderer Types Overview**:
+    * ``renderer.prescriptive``: renders human-readable form of Expectation from ExpectationConfiguration
+    * ``renderer.diagnostic.unexpected_statement``: renders summary statistics of unexpected values if ExpectationValidationResult includes ``unexpected_count`` and ``element_count``
+    * ``renderer.diagnostic.unexpected_table``: renders a sample of unexpected values (and in certain cases, counts) in table format, if ExpectationValidationResult includes ``partial_unexpected_list`` or ``partial_unexpected_counts``
+    * ``renderer.diagnostic.observed_value``: renders the observed value if included in ExpectationValidationResult
+```
