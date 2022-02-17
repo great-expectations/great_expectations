@@ -141,6 +141,7 @@ rules:
         # Note this parameter builder computes parameters only on the provided domain:
         metric_domain_kwargs:
           column: VendorID
+        # candidate regexes are loaded as string, and need to be fully delimited.
         candidate_regexes:
           - "^\\d{1}$"
           - "^\\d{2}$"

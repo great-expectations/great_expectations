@@ -16,7 +16,7 @@ from great_expectations.rule_based_profiler.types import (
 )
 
 
-def test_regex_pattern_string_parameter_builder_instantiation():
+def test_regex_pattern_string_parameter_builder_instantiation_with_defaults():
     candidate_regexes: Set[str] = {
         r"/\d+/",  # whole number with 1 or more digits ExpectValuesToBeNumeric? (.. you would want to emit that expectation)?
         r"/-?\d+/",  # negative whole numbers
@@ -36,9 +36,25 @@ def test_regex_pattern_string_parameter_builder_instantiation():
         )
     )
 
-    assert regex_pattern_string_parameter._threshold == 0.9
+    assert regex_pattern_string_parameter._threshold == 1.0
     assert regex_pattern_string_parameter._candidate_regexes == candidate_regexes
     assert regex_pattern_string_parameter.CANDIDATE_REGEX == candidate_regexes
+
+
+def test_regex_pattern_string_parameter_builder_instantiation_override_defaults():
+    candidate_regexes: Set[str] = {
+        r"\d{1}",
+    }
+    regex_pattern_string_parameter: RegexPatternStringParameterBuilder = (
+        RegexPatternStringParameterBuilder(
+            name="my_simple_regex_string_parameter_builder",
+            candidate_regexes=candidate_regexes,
+            threshold=0.5,
+        )
+    )
+    assert regex_pattern_string_parameter._threshold == 0.5
+    assert regex_pattern_string_parameter._candidate_regexes == candidate_regexes
+    assert regex_pattern_string_parameter.CANDIDATE_REGEX != candidate_regexes
 
 
 def test_regex_pattern_string_parameter_builder_zero_batch_id_error():

@@ -49,7 +49,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        threshold: float = 0.9,
+        threshold: float = 1.0,
         candidate_regexes: Optional[Union[str, dict]] = None,
         data_context: Optional["DataContext"] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
@@ -87,14 +87,14 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
+    ) -> ParameterContainer:
         """
         Check the percentage of values matching the REGEX string, and return the best fit, or None if no
         string exceeds the configured threshold.
 
         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
         """
-        validator: Union[Validator, None] = self.get_validator(
+        validator: Optional[Validator] = self.get_validator(
             domain=domain, variables=variables, parameters=parameters
         )
         if not validator:
@@ -190,3 +190,4 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )
+        return parameter_container
