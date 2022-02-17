@@ -456,11 +456,19 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override(
     assert effective_rule_configs_actual == effective_rule_configs_expected
 
 
+def test_run_emits_proper_usage_stats():
+    pass
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_run_profiler_without_dynamic_args(
     mock_data_context: mock.MagicMock,
     mock_profiler_run: mock.MagicMock,
+    mock_emit: mock.MagicMock,
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -475,12 +483,18 @@ def test_run_profiler_without_dynamic_args(
         variables=None, rules=None, expectation_suite_name=None, include_citation=True
     )
 
+    assert mock_emit.call_count == 1
 
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 @mock.patch("great_expectations.rule_based_profiler.RuleBasedProfiler.run")
 @mock.patch("great_expectations.data_context.data_context.DataContext")
 def test_run_profiler_with_dynamic_args(
     mock_data_context: mock.MagicMock,
     mock_profiler_run: mock.MagicMock,
+    mock_emit: mock.MagicMock,
     populated_profiler_store: ProfilerStore,
     profiler_name: str,
 ):
@@ -507,6 +521,8 @@ def test_run_profiler_with_dynamic_args(
         expectation_suite_name=expectation_suite_name,
         include_citation=include_citation,
     )
+
+    assert mock_emit.call_count == 1
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
