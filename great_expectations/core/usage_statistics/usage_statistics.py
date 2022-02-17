@@ -93,6 +93,7 @@ class UsageStatisticsHandler:
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
         self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
+        self._profiler_run_anonymizer = ProfilerRunAnonymizer(data_context_id)
         try:
             self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
         except ValueError:
@@ -551,24 +552,28 @@ def get_checkpoint_run_usage_statistics(checkpoint, *args, **kwargs):
 def get_profiler_run_usage_statistics(
     profiler: RuleBasedProfiler, *args, **kwargs
 ) -> dict:
+    usage_statistics_handler: Optional[
+        UsageStatisticsHandler
+    ] = profiler._usage_statistics_handler
+
     data_context_id: Optional[str] = None
     try:
-        data_context_id = profiler._data_context.data_context_id
+        data_context_id = usage_statistics_handler.data_context_id
     except AttributeError:
         data_context_id = None
 
-    anonymizer: Anonymizer = _anonymizers.get(data_context_id, None)
+    anonymizer: Optional[Anonymizer] = _anonymizers.get(data_context_id, None)
     if anonymizer is None:
         anonymizer = Anonymizer(data_context_id)
         _anonymizers[data_context_id] = anonymizer
 
     payload: dict = {}
 
-    if profiler._usage_statistics_handler:
+    if usage_statistics_handler:
         # noinspection PyBroadException
         try:
             profiler_run_anonymizer: ProfilerRunAnonymizer = (
-                profiler._usage_statistics_handler._profiler_run_anonymizer
+                usage_statistics_handler._profiler_run_anonymizer
             )
 
             resolved_runtime_kwargs: dict = (
@@ -582,7 +587,10 @@ def get_profiler_run_usage_statistics(
             )
         except Exception as e:
             logger.debug(
-                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_profiler_run payload field"
+                "%s: %s type: %s, get_batch_list_usage_statistics: Unable to create anonymized_profiler_run payload field",
+                UsageStatsExceptionPrefix.EMIT_EXCEPTION.value,
+                e,
+                type(e),
             )
 
     return payload

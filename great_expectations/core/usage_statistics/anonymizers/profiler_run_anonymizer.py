@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProfilerRunAnonymizer(Anonymizer):
-    def __init__(self, salt=None):
+    def __init__(self, salt: Optional[str] = None):
         super().__init__(salt=salt)
 
         self._salt = salt
