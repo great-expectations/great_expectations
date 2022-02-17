@@ -7,6 +7,8 @@ Changelog
 
 develop
 -----------------
+* [BUGFIX] Fix datepicker filter on data docs (#4217)
+* [FEATURE] Allow Data Docs to be rendered in night mode (#4130)
 
 0.14.6
 -----------------
