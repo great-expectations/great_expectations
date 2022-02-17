@@ -12,6 +12,7 @@ title: Changelog
 * [DOCS] Deepnote Deployment Pattern Guide (#4169)
 * [DOCS] Allow Data Docs to be rendered in night mode (#4130)
 * [DOCS] Fix datepicker filter on data docs (#4217) 
+* [DOCS] Deepnote Deployment Pattern Image Fixes (#4229)
 * [MAINTENANCE] Refactor RuleBasedProfiler toolkit pattern (#4191)
 * [MAINTENANCE] Revert `dependency_graph` pipeline changes to ensure `usage_stats` runs in parallel (#4198)
 * [MAINTENANCE] Refactor relative imports (#4195)
