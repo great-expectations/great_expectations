@@ -91,6 +91,12 @@ def write_results_to_disk(path: str, package_manifests: List[dict]) -> None:
 
 
 if __name__ == "__main__":
-    package_paths = gather_all_contrib_package_paths()
-    payload = gather_all_package_manifests(package_paths)
-    write_results_to_disk("./package_manifests.json", payload)
+    pwd = os.path.abspath(os.getcwd())
+    root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+    try:
+        os.chdir(root)
+        package_paths = gather_all_contrib_package_paths()
+        payload = gather_all_package_manifests(package_paths)
+        write_results_to_disk(os.path.join(pwd, "./package_manifests.json"), payload)
+    finally:
+        os.chdir(pwd)
