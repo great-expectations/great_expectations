@@ -256,7 +256,8 @@ if __name__ == "__main__":
     if tracebacks != "":
         print(tracebacks)
     if checklists != "":
+        print(checklists)
         with open("./checklists.txt", "w") as outfile:
             outfile.write(checklists)
-    with open("./expectation_library.json", "w") as outfile:
+    with open("./expectation_library_v2.json", "w") as outfile:
         json.dump(gallery_info, outfile)
