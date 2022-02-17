@@ -23,7 +23,7 @@ A Batch Request contains all the necessary details to query the appropriate unde
 
 ### Relationship to other objects
 
-A Batch Request is always used when Great Expectations builds a Batch.  The Batch Request includes a "query" for a Datasource's Data Connector to describe the data to include in the Batch.  Any time you interact with something that requires a Batch of Data (such as a Profiler, Checkpoint, or Expectation Suite when interactively building Expectations) you will use a Batch Request and Datasource to create the Batch that is used.
+A Batch Request is always used when Great Expectations builds a Batch.  The Batch Request includes a "query" for a Datasource's Data Connector to describe the data to include in the Batch.  Any time you interact with something that requires a Batch of Data (such as a Profiler, Checkpoint, or Validator) you will use a Batch Request and Datasource to create the Batch that is used.
 
 ## Use cases
 
@@ -61,7 +61,9 @@ For a good example if you don't have a specific source data system in mind right
 
 ### Guaranteed relationships
 
-The relationship between a Batch and the Batch Request that generated it is guaranteed.
+The relationship between a Batch and the Batch Request that generated it is guaranteed.  A Batch Request includes all of the information necessary to identify a specific Batch or Batches.
+
+Batches are always built using a Batch Request.  When the Batch is built, additional metadata is included, one of which is a Batch Definition.  The Batch Definition directly corresponds to the Batch Request that was used to create the Batch.
 
 ## API basics
 
