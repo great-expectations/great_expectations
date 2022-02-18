@@ -99,6 +99,10 @@ class ParameterBuilder(Builder, ABC):
     def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
         return self._batch_request
 
+    @batch_request.setter
+    def batch_request(self, batch_request: dict) -> None:
+        self._batch_request = batch_request
+
     @property
     def data_context(self) -> "DataContext":  # noqa: F821
         return self._data_context
