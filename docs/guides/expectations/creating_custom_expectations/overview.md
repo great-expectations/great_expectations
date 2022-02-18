@@ -70,7 +70,7 @@ Beyond the first four steps, additional features are generally similar across al
 | Has basic input validation and type checking                                                     | [How to add input validation and type checking for a Custom Expectation](../features_custom_expectations/how_to_add_input_validation_for_an_expectation.md) |
 | Has both Statement Renderers: prescriptive and diagnostic              | [How to add Statement Renderers for Custom Expectations](../features_custom_expectations/how_to_add_statement_renderers_for_an_expectation.md) |
 | Has core logic that passes tests for all applicable Execution Engines   | [How to add SQLAlchemy support for Custom Expectations](../features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation.md)<br/> [How to add Spark support for Custom Expectations](../features_custom_expectations/how_to_add_spark_support_for_an_expectation.md)|
-| Passes all linting checks                                                                        | |
+| Passes all linting checks                                                                        | [Great Expectations Code Style Guide: Linting](../../../contributing/style_guides/code_style.md#linting) |
 
 The final two checks required for acceptance into the Great Expectations codebase at a Production level require manual review and guidance by a code owner.
 
