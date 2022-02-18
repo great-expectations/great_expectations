@@ -64,7 +64,7 @@ class SimpleSemanticTypeColumnDomainBuilder(DomainBuilder):
         """
         semantic_types: List[
             SemanticDomainTypes
-        ] = _parse_semantic_domain_type_argument(semantic_types=self._semantic_types)
+        ] = _parse_semantic_domain_type_argument(semantic_types=self.semantic_types)
 
         batch_id: str = self.get_batch_id(variables=variables)
         column_types_dict_list: List[Dict[str, Any]] = self.get_validator(

@@ -105,11 +105,11 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         ptional details
         """
         metric_computation_result: MetricComputationResult = self.get_metrics(
-            metric_name=self._metric_name,
-            metric_domain_kwargs=self._metric_domain_kwargs,
-            metric_value_kwargs=self._metric_value_kwargs,
-            enforce_numeric_metric=self._enforce_numeric_metric,
-            replace_nan_with_zero=self._replace_nan_with_zero,
+            metric_name=self.metric_name,
+            metric_domain_kwargs=self.metric_domain_kwargs,
+            metric_value_kwargs=self.metric_value_kwargs,
+            enforce_numeric_metric=self.enforce_numeric_metric,
+            replace_nan_with_zero=self.replace_nan_with_zero,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -120,7 +120,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         # Obtain reduce_scalar_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         reduce_scalar_metric: bool = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._reduce_scalar_metric,
+            parameter_reference=self.reduce_scalar_metric,
             expected_return_type=bool,
             variables=variables,
             parameters=parameters,

@@ -86,7 +86,7 @@ class DomainBuilder(Builder, ABC):
         return get_validator_using_batch_list_or_batch_request(
             purpose="domain_builder",
             data_context=self.data_context,
-            batch_request=self._batch_request,
+            batch_request=self.batch_request,
             domain=None,
             variables=variables,
             parameters=None,
@@ -98,7 +98,7 @@ class DomainBuilder(Builder, ABC):
     ) -> Optional[List[str]]:
         return get_batch_ids_from_batch_list_or_batch_request(
             data_context=self.data_context,
-            batch_request=self._batch_request,
+            batch_request=self.batch_request,
             domain=None,
             variables=variables,
             parameters=None,

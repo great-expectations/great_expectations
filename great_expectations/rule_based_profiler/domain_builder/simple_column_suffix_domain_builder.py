@@ -51,7 +51,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         """
         column_name_suffixes: Union[
             str, Iterable, List[str]
-        ] = self._column_name_suffixes
+        ] = self.column_name_suffixes
         if isinstance(column_name_suffixes, str):
             column_name_suffixes = [column_name_suffixes]
         else:

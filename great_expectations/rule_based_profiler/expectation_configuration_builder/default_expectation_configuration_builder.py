@@ -71,11 +71,11 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                 variables=variables,
                 parameters=parameters,
             )
-            for parameter_name, fully_qualified_parameter_name in self._kwargs.items()
+            for parameter_name, fully_qualified_parameter_name in self.kwargs.items()
         }
         meta: Dict[str, Any] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._meta,
+            parameter_reference=self.meta,
             expected_return_type=dict,
             variables=variables,
             parameters=parameters,

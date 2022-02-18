@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Iterable, Optional, Set, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Union
 
 import numpy as np
 
@@ -89,9 +89,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        threshold: float = 1.0,
-        candidate_strings: Optional[Iterable[str]] = None,
-        data_context: Optional["DataContext"] = None,
+        threshold: Union[float, str] = 1.0,
+        candidate_strings: Optional[Union[Iterable[str], str]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
         """
@@ -118,12 +118,32 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         self._threshold = threshold
 
-        if candidate_strings is not None:
-            self._candidate_strings = set(candidate_strings)
-        else:
-            self._candidate_strings = (
-                SimpleDateFormatStringParameterBuilder.CANDIDATE_STRINGS
-            )
+        self._candidate_strings = candidate_strings
+
+    @property
+    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
+        return self._metric_domain_kwargs
+
+    @property
+    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
+        return self._metric_value_kwargs
+
+    @property
+    def threshold(self) -> Union[str, float]:
+        return self._threshold
+
+    @property
+    def candidate_strings(
+        self,
+    ) -> Union[
+        str,
+        Union[
+            Set[str],
+            List[str],
+            "SimpleDateFormatStringParameterBuilder.CANDIDATE_STRINGS",
+        ],
+    ]:  # noqa: F821
+        return self._candidate_strings
 
     def _build_parameters(
         self,
@@ -145,8 +165,8 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         metric_computation_result = self.get_metrics(
             metric_name="column_values.nonnull.count",
-            metric_domain_kwargs=self._metric_domain_kwargs,
-            metric_value_kwargs=self._metric_value_kwargs,
+            metric_domain_kwargs=self.metric_domain_kwargs,
+            metric_value_kwargs=self.metric_value_kwargs,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -159,12 +179,29 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         format_string_success_ratios: dict = {}
 
+        # Obtain candidate_strings from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        candidate_strings: Union[
+            Set[str],
+            List[str],
+            "SimpleDateFormatStringParameterBuilder.CANDIDATE_STRINGS",  # noqa: F821
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.candidate_strings,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+        if candidate_strings is not None and isinstance(candidate_strings, list):
+            candidate_strings = set(candidate_strings)
+        else:
+            candidate_strings = SimpleDateFormatStringParameterBuilder.CANDIDATE_STRINGS
+
         fmt_string: str
         match_strftime_metric_value_kwargs: dict
-        for fmt_string in self._candidate_strings:
-            if self._metric_value_kwargs:
+        for fmt_string in candidate_strings:
+            if self.metric_value_kwargs:
                 match_strftime_metric_value_kwargs = {
-                    **self._metric_value_kwargs,
+                    **self.metric_value_kwargs,
                     **{"strftime_format": fmt_string},
                 }
             else:
@@ -174,7 +211,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
             metric_computation_result = self.get_metrics(
                 metric_name="column_values.match_strftime_format.unexpected_count",
-                metric_domain_kwargs=self._metric_domain_kwargs,
+                metric_domain_kwargs=self.metric_domain_kwargs,
                 metric_value_kwargs=match_strftime_metric_value_kwargs,
                 domain=domain,
                 variables=variables,
@@ -190,11 +227,12 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             ) / nonnull_count
 
         best_fmt_string: Optional[str] = None
-        best_ratio: int = 0
+        best_ratio: float = 0.0
 
+        # Obtain threshold from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         threshold: float = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._threshold,
+            parameter_reference=self.threshold,
             expected_return_type=float,
             variables=variables,
             parameters=parameters,
