@@ -19,6 +19,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.rule_based_profiler.config.base import (
+    DomainBuilderConfig,
+    ExpectationConfigurationBuilderConfig,
+    ParameterBuilderConfig,
     RuleBasedProfilerConfig,
     domainBuilderConfigSchema,
     expectationConfigurationBuilderConfigSchema,
@@ -352,7 +355,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if rules is None:
             rules = {}
 
-        effective_rules: Dict[str, Rule] = self.get_rules_as_dict()
+        effective_rules: Dict[str, Rule] = self._get_rules_as_dict()
 
         rule_name: str
         rule_config: dict
@@ -466,11 +469,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         domain_builder_as_dict["class_name"] = domain_builder.__class__.__name__
         domain_builder_as_dict["module_name"] = domain_builder.__class__.__module__
 
-        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-        deserialized_config: dict = domainBuilderConfigSchema.load(
+        # Roundtrip through schema validation to add/or restore any missing fields.
+        deserialized_config: DomainBuilderConfig = domainBuilderConfigSchema.load(
             domain_builder_as_dict
         )
-        serialized_config: dict = domainBuilderConfigSchema.dump(deserialized_config)
+        serialized_config: dict = deserialized_config.to_dict()
 
         effective_domain_builder_config: dict = serialized_config
         if domain_builder_config:
@@ -522,13 +525,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 "module_name"
             ] = parameter_builder.__class__.__module__
 
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-            deserialized_config: dict = parameterBuilderConfigSchema.load(
-                parameter_builder_as_dict
+            # Roundtrip through schema validation to add/or restore any missing fields.
+            deserialized_config: ParameterBuilderConfig = (
+                parameterBuilderConfigSchema.load(parameter_builder_as_dict)
             )
-            serialized_config: dict = parameterBuilderConfigSchema.dump(
-                deserialized_config
-            )
+            serialized_config: dict = deserialized_config.to_dict()
 
             effective_parameter_builder_configs[
                 parameter_builder_name
@@ -597,15 +598,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 "module_name"
             ] = expectation_configuration_builder.__class__.__module__
 
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-            deserialized_config: dict = (
+            # Roundtrip through schema validation to add/or restore any missing fields.
+            deserialized_config: ExpectationConfigurationBuilderConfig = (
                 expectationConfigurationBuilderConfigSchema.load(
                     expectation_configuration_builder_as_dict
                 )
             )
-            serialized_config: dict = expectationConfigurationBuilderConfigSchema.dump(
-                deserialized_config
-            )
+            serialized_config: dict = deserialized_config.to_dict()
 
             effective_expectation_configuration_builder_configs[
                 expectation_configuration_builder_name
@@ -627,9 +626,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return list(effective_expectation_configuration_builder_configs.values())
 
-    def get_rules_as_dict(self) -> Dict[str, Rule]:
+    def _get_rules_as_dict(self) -> Dict[str, Rule]:
         rule: Rule
-        return {rule.name: rule for rule in self._rules}
+        return {rule.name: rule for rule in self.rules}
 
     def self_check(self, pretty_print=True) -> dict:
         """

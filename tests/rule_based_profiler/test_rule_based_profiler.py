@@ -88,11 +88,28 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_one_arg": "$parameter.my_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                     "expectation_type": "expect_column_min_to_be_between",
+                    "column": "$domain.domain_kwargs.column",
+                    "my_another_arg": "$parameter.my_other_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
             ],
         },
@@ -124,9 +141,26 @@ def test_reconcile_profiler_rules_new_rule_override(
             "expectation_configuration_builders": [
                 {
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_one_arg": "$parameter.my_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
                 {
                     "expectation_type": "expect_column_min_to_be_between",
+                    "column": "$domain.domain_kwargs.column",
+                    "my_another_arg": "$parameter.my_other_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
             ],
         },
@@ -145,6 +179,16 @@ def test_reconcile_profiler_rules_new_rule_override(
             "expectation_configuration_builders": [
                 {
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_arg": "$parameter.my_parameter.value[0]",
+                    "my_other_arg": "$parameter.my_parameter.value[1]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
             ],
         },
@@ -203,6 +247,16 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
             "expectation_configuration_builders": [
                 {
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_arg": "$parameter.my_parameter.value[0]",
+                    "my_other_arg": "$parameter.my_parameter.value[1]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
             ],
         },
@@ -281,6 +335,16 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
             "expectation_configuration_builders": [
                 {
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_arg": "$parameter.my_parameter.value[0]",
+                    "my_other_arg": "$parameter.my_parameter.value[1]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
             ],
         },
@@ -314,11 +378,28 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_one_arg": "$parameter.my_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                     "expectation_type": "expect_column_min_to_be_between",
+                    "column": "$domain.domain_kwargs.column",
+                    "my_another_arg": "$parameter.my_other_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
             ],
         },
@@ -340,9 +421,28 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
             "expectation_configuration_builders": [
                 {
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_arg": "$parameter.my_parameter.value[0]",
+                    "my_one_arg": "$parameter.my_parameter.value[0]",
+                    "my_other_arg": "$parameter.my_parameter.value[1]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
                 {
                     "expectation_type": "expect_column_min_to_be_between",
+                    "column": "$domain.domain_kwargs.column",
+                    "my_another_arg": "$parameter.my_other_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
             ],
         },
@@ -394,11 +494,28 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override(
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_one_arg": "$parameter.my_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
                 {
                     "class_name": "DefaultExpectationConfigurationBuilder",
                     "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
                     "expectation_type": "expect_column_min_to_be_between",
+                    "column": "$domain.domain_kwargs.column",
+                    "my_another_arg": "$parameter.my_other_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
             ],
         },
@@ -430,9 +547,28 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override(
             "expectation_configuration_builders": [
                 {
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_arg": "$parameter.my_parameter.value[0]",
+                    "my_one_arg": "$parameter.my_parameter.value[0]",
+                    "my_other_arg": "$parameter.my_parameter.value[1]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
                 {
                     "expectation_type": "expect_column_min_to_be_between",
+                    "column": "$domain.domain_kwargs.column",
+                    "my_another_arg": "$parameter.my_other_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
                 },
             ],
         },

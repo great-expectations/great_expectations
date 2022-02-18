@@ -6,13 +6,13 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
-from great_expectations.validator.validator import Validator
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 
@@ -21,20 +21,13 @@ def get_validator(
     purpose: str,
     *,
     data_context: Optional["DataContext"] = None,  # noqa: F821
+    batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Validator]:
-    if batch_request is None:
-        return None
-
-    batch_request = build_batch_request(
-        domain=domain,
-        batch_request=batch_request,
-        variables=variables,
-        parameters=parameters,
-    )
+) -> Optional["Validator"]:  # noqa: F821
+    validator: Optional["Validator"]  # noqa: F821
 
     expectation_suite_name: str = f"tmp.{purpose}"
     if domain is None:
@@ -46,33 +39,71 @@ def get_validator(
             f"{expectation_suite_name}_{domain.id}_suite_{str(uuid.uuid4())[:8]}"
         )
 
-    return data_context.get_validator(
-        batch_request=batch_request,
-        create_expectation_suite_with_name=expectation_suite_name,
-    )
+    batch: Batch
+    if batch_list is None or all([batch is None for batch in batch_list]):
+        if batch_request is None:
+            return None
+
+        batch_request = build_batch_request(
+            domain=domain,
+            batch_request=batch_request,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        validator = data_context.get_validator(
+            batch_request=batch_request,
+            create_expectation_suite_with_name=expectation_suite_name,
+        )
+    else:
+        num_batches: int = len(batch_list)
+        if num_batches == 0:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""{__name__}.get_validator() must utilize at least one Batch ({num_batches} are available).
+"""
+            )
+
+        expectation_suite: ExpectationSuite = data_context.create_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        validator = data_context.get_validator_using_batch_list(
+            expectation_suite=expectation_suite,
+            batch_list=batch_list,
+        )
+
+    return validator
 
 
 def get_batch_ids(
     data_context: Optional["DataContext"] = None,  # noqa: F821
+    batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[List[str]]:
-    if batch_request is None:
-        return None
-
-    batch_request = build_batch_request(
-        domain=domain,
-        batch_request=batch_request,
-        variables=variables,
-        parameters=parameters,
-    )
-
-    batch_list: List[Batch] = data_context.get_batch_list(batch_request=batch_request)
-
     batch: Batch
+    if batch_list is None or all([batch is None for batch in batch_list]):
+        if batch_request is None:
+            return None
+
+        batch_request = build_batch_request(
+            domain=domain,
+            batch_request=batch_request,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        batch_list = data_context.get_batch_list(batch_request=batch_request)
+
     batch_ids: List[str] = [batch.id for batch in batch_list]
+
+    num_batch_ids: int = len(batch_ids)
+    if num_batch_ids == 0:
+        raise ge_exceptions.ProfilerExecutionError(
+            message=f"""{__name__}.get_batch_ids() must return at least one batch_id ({num_batch_ids} were retrieved).
+"""
+        )
 
     return batch_ids
 

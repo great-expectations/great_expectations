@@ -33,13 +33,31 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
 
         if semantic_types is None:
             semantic_types = ["user_id"]
+
         self._semantic_types = semantic_types
 
         if column_name_suffixes is None:
             column_name_suffixes = [
                 "_id",
             ]
+
         self._column_name_suffixes = column_name_suffixes
+
+    @property
+    def domain_type(self) -> Union[str, MetricDomainTypes]:
+        return MetricDomainTypes.COLUMN
+
+    @property
+    def semantic_types(
+        self,
+    ) -> Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ]:
+        return self._semantic_types
+
+    @property
+    def column_name_suffixes(self) -> Optional[List[str]]:
+        return self._column_name_suffixes
 
     def _get_domains(
         self,
@@ -66,7 +84,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         candidate_column_names: List[str] = list(
             filter(
                 lambda candidate_column_name: candidate_column_name.endswith(
-                    tuple(self._column_name_suffixes)
+                    tuple(self.column_name_suffixes)
                 ),
                 table_column_names,
             )
