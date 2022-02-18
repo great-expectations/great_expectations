@@ -58,11 +58,13 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     def to_json_dict(self) -> dict:
         result = convert_to_json_serializable(data=asdict(self))
-        result["execution_engines_list"] = sorted([
-            engine
-            for engine, _bool in result["execution_engines"].items()
-            if _bool is True
-        ])
+        result["execution_engines_list"] = sorted(
+            [
+                engine
+                for engine, _bool in result["execution_engines"].items()
+                if _bool is True
+            ]
+        )
         return result
 
     def generate_checklist(self) -> str:
