@@ -3360,6 +3360,27 @@ Generated, evaluated, and stored %d Expectations during profiling. Please review
             include_citation=include_citation,
         )
 
+    @usage_statistics_enabled_method(
+        event_name="data_context.run_profiler_on_data",
+    )
+    def run_profiler_on_data(
+        self,
+        batch_request: Union[dict, BatchRequest, RuntimeBatchRequest],
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> ExpectationSuite:
+        return RuleBasedProfiler.run_profiler_on_data(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            batch_request=batch_request,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
+
     def test_yaml_config(
         self,
         yaml_config: str,

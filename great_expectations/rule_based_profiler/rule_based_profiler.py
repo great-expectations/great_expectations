@@ -1,4 +1,5 @@
 import copy
+import logging
 import uuid
 from typing import Any, Dict, List, Optional, Union
 
@@ -7,6 +8,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
     batch_request_contains_batch_data,
+    get_batch_request_as_dict,
 )
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -18,6 +20,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config.base import (
     DomainBuilderConfig,
     ExpectationConfigurationBuilderConfig,
@@ -42,6 +45,8 @@ from great_expectations.rule_based_profiler.types import (
     build_parameter_container_for_variables,
 )
 from great_expectations.util import filter_properties_dict
+
+logger = logging.getLogger(__name__)
 
 
 def _validate_builder_override_config(builder_config: dict):
@@ -813,6 +818,75 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         )
 
         return result
+
+    @staticmethod
+    def run_profiler_on_data(
+        data_context: "DataContext",  # noqa: F821
+        profiler_store: ProfilerStore,
+        batch_request: Union[dict, BatchRequest, RuntimeBatchRequest],
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> ExpectationSuite:
+        profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
+            data_context=data_context,
+            profiler_store=profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
+        rules: Dict[
+            str, Dict[str, Any]
+        ] = profiler._generate_rule_overrides_from_batch_request(batch_request)
+
+        result: ExpectationSuite = profiler.run(
+            rules=rules,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
+        return result
+
+    def _generate_rule_overrides_from_batch_request(
+        self, batch_request: Union[dict, BatchRequest, RuntimeBatchRequest]
+    ) -> Dict[str, Dict[str, Any]]:
+        """Iterates through the profiler's builder attributes and generates a set of
+        Rules that contain overrides from the input batch request. This only applies to
+        ParameterBuilder and any DomainBuilder with a COLUMN MetricDomainType.
+
+        Note that we are passing ALL batches to the parameter builder. If not used carefully,
+        a bias may creep in to the resulting estimates computed by these objects.
+
+        Users of this override should be aware that a batch request should either have no
+        notion of "current/active" batch or it is excluded.
+
+        Args:
+            batch_request: Data used to override builder attributes
+
+        Returns:
+            The dictionary representation of the Rules used as runtime arguments to `run()`
+        """
+        rules: List[Rule] = self.rules
+        if not isinstance(batch_request, dict):
+            batch_request = get_batch_request_as_dict(batch_request)
+            logger.info("Converted batch request to dictionary: %s", batch_request)
+
+        resulting_rules: Dict[str, Dict[str, Any]] = {}
+
+        for rule in rules:
+            domain_builder = rule.domain_builder
+            if domain_builder.domain_type == MetricDomainTypes.COLUMN:
+                domain_builder.batch_request = batch_request
+                domain_builder.batch_request["data_connector_query"] = {"index": -1}
+
+            parameter_builders = rule.parameter_builders
+            if parameter_builders:
+                for parameter_builder in parameter_builders:
+                    parameter_builder.batch_request = batch_request
+
+            resulting_rules[rule.name] = rule.to_dict()
+
+        return resulting_rules
 
     @staticmethod
     def add_profiler(
