@@ -12,12 +12,16 @@ def basic_sqlalchemy_query_store(titanic_sqlite_db):
         credentials=credentials, queries={"q1": "SELECT DISTINCT PClass FROM titanic;"}
     )
 
+
 @pytest.fixture()
-def test_basic_sqlalchemy_query_store_connection_string(titanic_sqlite_db_connection_string):
+def test_basic_sqlalchemy_query_store_connection_string(
+    titanic_sqlite_db_connection_string,
+):
     credentials = {"connection_string": titanic_sqlite_db_connection_string}
     return SqlAlchemyQueryStore(
         credentials=credentials, queries={"q1": "SELECT DISTINCT PClass FROM titanic;"}
     )
+
 
 @pytest.fixture()
 def sqlalchemy_query_store_specified_return_type(titanic_sqlite_db):
@@ -55,7 +59,8 @@ def test_basic_query(basic_sqlalchemy_query_store):
 
 def test_query_connection_string(test_basic_sqlalchemy_query_store_connection_string):
     assert (
-        test_basic_sqlalchemy_query_store_connection_string.get("q1") == "SELECT DISTINCT PClass FROM titanic;"
+        test_basic_sqlalchemy_query_store_connection_string.get("q1")
+        == "SELECT DISTINCT PClass FROM titanic;"
     )
 
 
