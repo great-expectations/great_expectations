@@ -44,7 +44,7 @@ attribute_name = Word(alphas, alphanums + "_.") + ZeroOrMore(
     )
     ^ (
         Suppress(Literal("["))
-        + Word(nums).setParseAction(lambda s, l, t: [int(t[0])])
+        + Word(nums + "-").setParseAction(lambda s, l, t: [int(t[0])])
         + Suppress(Literal("]"))
     )
 )
@@ -337,7 +337,7 @@ def get_parameter_value_by_fully_qualified_parameter_name(
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[Union[Any, ParameterNode]]:
     """
-    Get the parameter value from the current rule state using the fully-qualified parameter name.
+    Get the parameter value from the current "rule state" using the fully-qualified parameter name.
     A fully-qualified parameter name must be a dot-delimited string, or the name of a parameter (without the dots).
     Args
         :param fully_qualified_parameter_name: str -- A dot-separated string key starting with $ for fetching parameters

@@ -2,11 +2,12 @@ import logging
 import os
 import warnings
 
+from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
+    BatchKwargsGenerator,
+)
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, ClassInstantiationError
-
-from ...data_context.util import instantiate_class_from_config
-from .batch_kwargs_generator import BatchKwargsGenerator
 
 logger = logging.getLogger(__name__)
 
