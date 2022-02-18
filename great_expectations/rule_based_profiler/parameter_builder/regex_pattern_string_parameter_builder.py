@@ -193,20 +193,24 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        regex_string: str
-        ratio: float
+        regex_string_list: List[str] = []
+        ratio_list: List[float] = []
         for regex_string, ratio in regex_string_success_ratios.items():
-            if ratio > best_ratio and ratio >= threshold:
-                best_regex_string = regex_string
-                best_ratio = ratio
+            if ratio >= threshold:
+                regex_string_list.append(regex_string)
+                ratio_list.append(ratio)
+        # sort
+        sorted_regex_string_list: List[str] = [
+            x for _, x in sorted(zip(ratio_list, regex_string_list), reverse=True)
+        ]
+        sorted_ratio_list: List[float] = sorted(ratio_list, reverse=True)
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.name}": {
-                "value": best_regex_string,
-                "details": {"success_ratio": best_ratio},
+                "value": sorted_regex_string_list,
+                "details": {"success_ratio": sorted_ratio_list},
             },
         }
-
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )

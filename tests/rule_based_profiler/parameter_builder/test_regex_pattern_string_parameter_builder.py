@@ -96,8 +96,8 @@ def test_regex_pattern_string_parameter_builder_alice(
     )
     fully_qualified_parameter_name_for_value: str = "$parameter.my_regex"
     expected_value: dict = {
-        "value": r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
-        "details": {"success_ratio": 1.0},
+        "value": [r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$"],
+        "details": {"success_ratio": [1.0]},
     }
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
@@ -109,7 +109,7 @@ def test_regex_pattern_string_parameter_builder_alice(
     )
 
 
-def test_regex_pattern_string_parameter_builder_bobby(
+def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: DataContext = (
@@ -117,8 +117,8 @@ def test_regex_pattern_string_parameter_builder_bobby(
     )
     metric_domain_kwargs: dict = {"column": "VendorID"}
     candidate_regexes: List[str] = [
-        r"^\d{1}$",
-        r"^\d{3}$",  # won't match
+        r"^\d{1}$",  # will match
+        r"^[0-9]{1}$",  # will match
         r"^\d{4}$",  # won't match
     ]
     threshold: float = 0.9
@@ -159,8 +159,8 @@ def test_regex_pattern_string_parameter_builder_bobby(
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
     expected_value: dict = {
-        "value": r"^\d{1}$",
-        "details": {"success_ratio": 1.0},
+        "value": [r"^\d{1}$", r"^[0-9]{1}$"],
+        "details": {"success_ratio": [1.0, 1.0]},
     }
 
     assert (
@@ -216,7 +216,65 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
     expected_value: dict = {
-        "details": {"success_ratio": 0},
+        "value": [],
+        "details": {"success_ratio": []},
+    }
+
+    assert (
+        get_parameter_value_by_fully_qualified_parameter_name(
+            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+            domain=domain,
+            parameters={domain.id: parameter_container},
+        )
+        == expected_value
+    )
+
+
+def test_regex_pattern_string_parameter_builder_bobby_no_match(
+    bobby_columnar_table_multi_batch_deterministic_data_context,
+):
+    data_context: DataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
+    metric_domain_kwargs: dict = {"column": "VendorID"}
+    candidate_regexes: Set[str] = {
+        r"^\d{3}$",  # won't match
+    }
+    threshold: float = 0.9
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+        "data_connector_query": {"index": -1},
+    }
+
+    regex_parameter: RegexPatternStringParameterBuilder = (
+        RegexPatternStringParameterBuilder(
+            name="my_regex_pattern_string_parameter_builder",
+            metric_domain_kwargs=metric_domain_kwargs,
+            candidate_regexes=candidate_regexes,
+            threshold=threshold,
+            data_context=data_context,
+            batch_request=batch_request,
+        )
+    )
+    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    domain: Domain = Domain(
+        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
+    )
+
+    assert parameter_container.parameter_nodes is None
+
+    regex_parameter._build_parameters(
+        parameter_container=parameter_container, domain=domain
+    )
+
+    fully_qualified_parameter_name_for_value: str = (
+        "$parameter.my_regex_pattern_string_parameter_builder"
+    )
+    expected_value: dict = {
+        "value": [],
+        "details": {"success_ratio": []},
     }
 
     assert (
