@@ -3277,6 +3277,21 @@ def titanic_sqlite_db(sa):
 
 
 @pytest.fixture
+def titanic_sqlite_db_connection_string(sa):
+    try:
+        import sqlalchemy as sa
+        from sqlalchemy import create_engine
+
+        titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
+        engine = create_engine(f"sqlite:////{titanic_db_path}")
+        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+        return f"sqlite:///{titanic_db_path}"
+    except ImportError:
+        raise ValueError("sqlite tests require sqlalchemy to be installed")
+
+
+
+@pytest.fixture
 def titanic_expectation_suite(empty_data_context_stats_enabled):
     data_context: DataContext = empty_data_context_stats_enabled
     return ExpectationSuite(
