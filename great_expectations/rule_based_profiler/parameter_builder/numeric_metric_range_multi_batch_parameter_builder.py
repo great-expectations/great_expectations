@@ -400,8 +400,8 @@ detected.
             metric_value_range[metric_value_range_max_idx] = max_value
 
         # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
-        if metric_value_range.shape[1] == 1:
-            metric_value_range = metric_value_range[:, 0]
+        if metric_value_range.shape[0] == 1:
+            metric_value_range = metric_value_range[0]
 
         return metric_value_range
 
