@@ -20,6 +20,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config.base import (
     DomainBuilderConfig,
     ExpectationConfigurationBuilderConfig,
@@ -28,9 +29,6 @@ from great_expectations.rule_based_profiler.config.base import (
     domainBuilderConfigSchema,
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
-)
-from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
-    ColumnDomainBuilder,
 )
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
@@ -861,7 +859,7 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
 
         for rule in rules:
             domain_builder = rule.domain_builder
-            if isinstance(domain_builder, ColumnDomainBuilder):
+            if domain_builder.domain_type == MetricDomainTypes.COLUMN:
                 domain_builder.batch_request = copy.deepcopy(batch_request)
                 domain_builder.batch_request["data_connector_query"] = {"index": -1}
 
