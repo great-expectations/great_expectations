@@ -3,7 +3,7 @@ title: How to create a Custom Column Map Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
-**ColumnMapExpectations** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
+**`ColumnMapExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
 This guide will walk you through the process of creating a custom ColumnMapExpectation.
 
@@ -28,10 +28,10 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom ColumnMapExpectation [here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
+You can find the template file for a custom [`ColumnMapExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
-mv column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_equal_three.py
+cp column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_equal_three.py
 ```
 
 <details>
@@ -60,7 +60,7 @@ Once you've copied and renamed the template file, you can execute it as follows.
 python expect_column_values_to_equal_three.py
 ```
 
-The template file is set up so that this will run the Expectation's `generate_diagnostic_checklist` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
+The template file is set up so that this will run the Expectation's `print_diagnostic_checklist()` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
 
 ```
 Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
@@ -80,7 +80,7 @@ When in doubt, the next step to implement is the first one that doesn't have a â
 
 ### 4. Change the Expectation class name and add a docstring
 
-Let's start by updating your Expectations's name and docstring.
+Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
 ```python file=../../../../examples/expectations/column_map_expectation_template.py#L43-L45
@@ -161,20 +161,20 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 
 :::note
 For more information on tests and example cases, <br/>
-see our guide [How to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
+see our guide on [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
 ### 6. Implement your Metric and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation.   
 To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your Expectation.  
-By the time your Expectation is complete, your Metric will have functions for all three Execution Engines supported by Great Expectations. For now, we're only going to define one.  
+By the time your Expectation is complete, your Metric will have functions for all three Execution Engines (Pandas, Spark, & SQLAlchemy) supported by Great Expectations. For now, we're only going to define one.  
   
 :::note  
 Metrics answer questions about your data posed by your Expectation, <br/> and allow your Expectation to judge whether your data meets ***your*** expectations.  
 :::
 
-Your Metric function will have the `@column_condition_partial` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate whether values equal 3 using the PandasExecutionEngine.
+Your Metric function will have the `@column_condition_partial` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate whether values equal 3 using the `PandasExecutionEngine`.
 
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L49-L51
 ```
@@ -197,7 +197,7 @@ An example of Expectation Parameters is shown below (notice that we are now in a
   </div>
 </details>
 
-Next, choose a Metric Identifier for your Metric. By convention, Metric Identifiers for Column Map Expectations start with `column_values.`. The remainder of the Metric Identifier simply describes what the Metric compute, in snake case. For this example, we'll use `column_values.equal_three`.
+Next, choose a Metric Identifier for your Metric. By convention, Metric Identifiers for Column Map Expectations start with `column_values.`. The remainder of the Metric Identifier simply describes what the Metric computes, in snake case. For this example, we'll use `column_values.equal_three`.
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
