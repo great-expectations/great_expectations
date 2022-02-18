@@ -104,7 +104,10 @@ _TEST_DEFS_DIR = os.path.join(
 print("\n\n&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&")
 print(f"_TEST_DEFS_DIR -> {_TEST_DEFS_DIR}")
 print(f"os.getcwd() -> {os.getcwd()}")
-print(f"os.listdir(_TEST_DEFS_DIR) -> {os.listdir(_TEST_DEFS_DIR)}")
+try:
+    print(f"os.listdir(_TEST_DEFS_DIR) -> {os.listdir(_TEST_DEFS_DIR)}")
+except FileNotFoundError:
+    print("Cannot list files in _TEST_DEFS_DIR")
 print("&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&\n\n")
 ################################
 
