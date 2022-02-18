@@ -42,7 +42,7 @@ To do this, we're going to write a series of `assert` statements to catch invali
 
 To begin with, we want to create our `validate_configuration` method and ensure that a configuration is set:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L138-L152
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L149-L163
 ```
 
 Next, we're going to implement the logic for validating the four parameters we identified above.
@@ -51,47 +51,47 @@ Next, we're going to implement the logic for validating the four parameters we i
 
 First we need to access the parameters to be evaluated:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L154-L157
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L165-L168
 ```
 
 Now we can begin writing the assertions to validate these parameters. 
 
 We're going to ensure that at least one of `min_value` or `max_value` is set:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L160-L163
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L171-L174
 ```
 
 Check that `min_value` and `max_value` are of the correct type:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L164-L166
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L175-L177
 ```
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L167-L169
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L178-L180
 ```
 
 Verify that, if both `min_value` and `max_value` are set, `min_value` does not exceed `max_value`:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L170-L173
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L181-L184
 ```
 
 And assert that `strict_min` and `strict_max`, if provided, are of the correct type:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L174-L176
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L185-L187
 ```
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L177-L179
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L188-L190
 ```
 
 If any of these fail, we raise an exception:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L180-L181
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L191-L192
 ```
 
 Finally, if no exception is raised, we return `True`, indicating a valid Expectation Configuration. 
 
 Putting this all together, our `validate_configuration` method looks like:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L138-L183
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L149-L194
 ```
 
 ### 4. Verifying our method

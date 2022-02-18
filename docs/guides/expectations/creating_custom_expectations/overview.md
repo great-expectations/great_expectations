@@ -64,7 +64,7 @@ Beyond the first four steps, additional features are generally similar across al
 | Step | Guide |
 |------|-------|
 | Has basic input validation and type checking                                                     | [How to add configuration validation for an Expectation](../features_custom_expectations/how_to_add_input_validation_for_an_expectation.md) |
-| Has all three Statement Renderers: descriptive, prescriptive, diagnostic              | [How to add text renderers for custom Expectations](../features_custom_expectations/how_to_add_text_renderers_for_an_expectation.md) |
+| Has all three Statement Renderers: descriptive, prescriptive, diagnostic              | [How to add text renderers for custom Expectations](../features_custom_expectations/how_to_add_statement_renderers_for_an_expectation.md) |
 | Has core logic that passes tests for all applicable Execution Engines   | [How to add SQLAlchemy support for custom Metrics](../features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation.md)<br/> [How to add Spark support for custom Metrics](../features_custom_expectations/how_to_add_spark_support_for_an_expectation.md)|
 | Passes all linting checks                                                                        | |
 | Has a robust suite of tests, as determined by a code owner                               | |

@@ -10,7 +10,10 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import (
+    ColumnExpectation,
+    ExpectationValidationResult,
+)
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
     MetricDomainTypes,
@@ -20,6 +23,14 @@ from great_expectations.expectations.metrics import (
     metric_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.types import RenderedStringTemplateContent
+from great_expectations.render.util import (
+    handle_strict_min_max,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 
 class ColumnCustomMax(ColumnAggregateMetricProvider):
@@ -218,6 +229,80 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         success = above_min and below_max
 
         return {"success": success, "result": {"observed_value": column_max}}
+
+    @renderer(renderer_type="render.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration: ExpectationConfiguration = None,
+        result: ExpectationValidationResult = None,
+        language: str = None,
+        runtime_configuration: dict = None,
+        **kwargs,
+    ):
+        assert (
+            configuration or result
+        ), "Must provide renderers either a configuration or result."
+
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        # get params dict with all expected kwargs
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
+
+        # build the string, parameter by parameter
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "maximum value may have any numerical value."
+        else:
+            at_least_str, at_most_str = handle_strict_min_max(params)
+
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
+            elif params["min_value"] is None:
+                template_str = f"maximum value must be {at_most_str} $max_value."
+            elif params["max_value"] is None:
+                template_str = f"maximum value must be {at_least_str} $min_value."
+            else:
+                template_str = ""
+
+        if include_column_name:
+            template_str = "$column " + template_str
+
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
+
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
