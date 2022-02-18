@@ -46,7 +46,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree__SecondIteration:
  ✔ Has both statement Renderers: prescriptive and diagnostic
  ✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
     ✔ All 3 tests for pandas are passing
- ✔ Passes all linting checks
+   Passes all linting checks
    Has a full suite of tests, as determined by a code owner
    Has passed a manual review by a code owner for code standards and style guides
 """
@@ -72,7 +72,7 @@ Completeness checklist for ExpectColumnValuesToEqualThree__ThirdIteration:
    Has both statement Renderers: prescriptive and diagnostic
  ✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
     ✔ All 3 tests for pandas are passing
- ✔ Passes all linting checks
+   Passes all linting checks
    Has a full suite of tests, as determined by a code owner
    Has passed a manual review by a code owner for code standards and style guides
 """

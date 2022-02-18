@@ -182,7 +182,7 @@ def test_expectation_self_check():
                 {
                     "doc_url": None,
                     "message": "Passes all linting checks",
-                    "passed": True,
+                    "passed": False,
                     "sub_messages": [],
                 },
                 {

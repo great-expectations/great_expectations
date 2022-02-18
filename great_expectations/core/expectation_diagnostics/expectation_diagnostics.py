@@ -368,10 +368,10 @@ class ExpectationDiagnostics(SerializableDictDot):
     @staticmethod
     def _check_linting(expectation_instance) -> ExpectationDiagnosticCheckMessage:
         """Check if linting checks pass for Expectation"""
-        # TODO: Perform linting checks instead of just giving thumbs up
+        # TODO: Perform linting checks instead of just giving thumbs down
         return ExpectationDiagnosticCheckMessage(
             message="Passes all linting checks",
-            passed=True,
+            passed=False,
         )
 
     @staticmethod
