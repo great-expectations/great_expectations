@@ -31,17 +31,19 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
     # list of candidate strings that are most commonly used
     # source: https://regexland.com/most-common-regular-expressions/
+    # source for UUID: https://stackoverflow.com/questions/7905929/how-to-test-valid-uuid-guid/13653180#13653180
     CANDIDATE_REGEX: Set[str] = {
         r"/\d+/",  # whole number with 1 or more digits ExpectValuesToBeNumeric? (.. youw oudl want to emit that expectation)?
         r"/-?\d+/",  # negative whole numbers
         r"/-?\d+(\.\d*)?/",  # decimal numbers with . (period) separator
         r"/[A-Za-z0-9\.,;:!?()\"'%\-]+/",  # general text
-        r"^ +/",  # leading space
-        r" +/$",  # trailing space
+        r"^\s+/",  # leading space
+        r"\s+/$",  # trailing space
         r"/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)/",  #  Matching URL (including http(s) protocol)
         r"/<\/?(?:p|a|b|img)(?: \/)?>/",  # HTML tags
         r"/(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}/",  # IPv4 IP address
         r"/(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}/",  # IPv6 IP address,
+        r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ",  # UUID
     }
 
     def __init__(
