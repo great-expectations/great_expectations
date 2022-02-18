@@ -5,7 +5,7 @@ import Prerequisites from '../creating_custom_expectations/components/prerequisi
 
 **`ColumnMapExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
-This guide will walk you through the process of creating a custom ColumnMapExpectation.
+This guide will walk you through the process of creating a custom `ColumnMapExpectation`.
 
 <Prerequisites>
 
@@ -71,7 +71,7 @@ Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
     Has basic input validation and type checking
     Has both Statement Renderers: prescriptive and diagnostic
     Has core logic that passes tests for all applicable Execution Engines
-  ✔ Passes all linting checks
+    Passes all linting checks
     Has a robust suite of tests, as determined by a code owner
     Has passed a manual review by a code owner for code standards and style guides
 ```

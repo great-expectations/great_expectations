@@ -3,10 +3,10 @@ title: How to create a Custom Column Aggregate Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
-**ColumnExpectations** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). 
+**`ColumnExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). 
 They are evaluated for a single column, and produce an aggregate metric, such as a mean, standard deviation, number of unique values, column type, etc. If that metric meets the conditions you set, the Expectation considers that data valid.
 
-This guide will walk you through the process of creating your own custom ColumnExpectation.
+This guide will walk you through the process of creating your own custom `ColumnExpectation`.
 
 <Prerequisites>
 
@@ -30,7 +30,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom ColumnExpectation [here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_aggregate_expectation_template.py).
+You can find the template file for a custom [ColumnExpectation here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_aggregate_expectation_template.py).
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash 
@@ -63,7 +63,7 @@ Once you've copied and renamed the template file, you can execute it as follows.
 python expect_column_max_to_be_between_custom.py
 ```
 
-The template file is set up so that this will run the Expectation's `print_diagnostic_checklist` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
+The template file is set up so that this will run the Expectation's `print_diagnostic_checklist()` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
 This guide will walk you through the first four steps, the minimum for a functioning Custom Expectation and all that is required for [contribution back to open source](../../../contributing/contributing_maturity.md#contributing-expectations) at an Experimental level.
 
 ```
@@ -73,9 +73,9 @@ Completeness checklist for ExpectColumnAggregateToMatchSomeCriteria:
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
     Has basic input validation and type checking
-    Has all three statement Renderers: descriptive, prescriptive, diagnostic
+    Has both Statement Renderers: prescriptive and diagnostic
     Has core logic that passes tests for all applicable Execution Engines
-  ✔ Passes all linting checks
+    Passes all linting checks
     Has a robust suite of tests, as determined by a code owner
     Has passed a manual review by a code owner for code standards and style guides
 ```
@@ -174,7 +174,7 @@ see our guide on [creating example cases for a Custom Expectation](../features_c
 
 This is the stage where you implement the actual business logic for your Expectation. 
 To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your Expectation.
-By the time your Expectation is complete, your Metric will have functions for all three Execution Engines supported by Great Expectations. For now, we're only going to define one.
+By the time your Expectation is complete, your Metric will have functions for all three Execution Engines (Pandas, Spark, and SQLAlchemy) supported by Great Expectations. For now, we're only going to define one.
 
 :::note
 Metrics answer questions about your data posed by your Expectation, <br/> and allow your Expectation to judge whether your data meets ***your*** expectations.
@@ -205,7 +205,7 @@ An example of Expectation Parameters is shown below (notice that we are now in a
 </details>
 
 Next, choose a Metric Identifier for your Metric. By convention, Metric Identifiers for Column Map Expectations start with `column.`. 
-The remainder of the Metric Identifier simply describes what the Metric compute, in snake case. For this example, we'll use `column.custom_max`.
+The remainder of the Metric Identifier simply describes what the Metric computes, in snake case. For this example, we'll use `column.custom_max`.
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
@@ -245,7 +245,7 @@ with
 
 In this step, we simply need to validate that the results of our Metrics meet our Expectation.
 
-The validate method is implemented as `_validate`:
+The validate method is implemented as `_validate(...)`:
 
 ```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L65-L71
 ```
@@ -254,7 +254,7 @@ This method takes a dictionary named `metrics`, which contains all Metrics reque
 and performs a simple validation against your success keys (i.e. important thresholds) in order to return a dictionary indicating whether the Expectation has evaluated successfully or not.
 
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
-For example, here is the definition of a `_validate` method to validate the results of our `column.custom_max` Metric against our success keys:
+For example, here is the definition of a `_validate(...)` method to validate the results of our `column.custom_max` Metric against our success keys:
 
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L196-L231
 ```
