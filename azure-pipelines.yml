@@ -446,7 +446,7 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
             displayName: 'Configure mssql'
 
-          - task: DownloadSecureFile
+          - task: DownloadSecureFile@1
             name: gcp_authkey
             displayName: 'Download Google Service Account'
             inputs:
