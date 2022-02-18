@@ -134,7 +134,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         regex_string_success_ratios: dict = {}
 
-        # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise
+        # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.
         candidate_regexes: Union[
             Set[str],
             List[str],
