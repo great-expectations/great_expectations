@@ -1444,14 +1444,14 @@ def build_test_backends_list(
                 engine = _create_bigquery_engine()
                 conn = engine.connect()
                 conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError) as e:
+            except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
                 if raise_exceptions_for_backends is True:
                     raise ImportError(
                         "bigquery tests are requested, but unable to connect"
                     ) from e
                 else:
                     logger.warning(
-                        "bigquery tests are requested, but unable to connect"
+                        f"bigquery tests are requested, but unable to connect; {repr(e)}"
                     )
             else:
                 test_backends += ["bigquery"]
@@ -1499,13 +1499,16 @@ def generate_expectation_tests(
                 if tb["backend"] == "sqlalchemy":
                     for dialect in tb["dialects"]:
                         dialects_to_include[dialect] = True
-
-        # Some individual tests (or groups of tests) may be "only_for" certain engines/dialects
-        for t in d.tests:
-            if t.only_for is not None:
-                for o in t.only_for:
-                    if o in SQL_DIALECT_NAMES:
-                        dialects_to_include[o] = True
+        else:
+            if (
+                execution_engine_diagnostics.SqlAlchemyExecutionEngine is True
+                and raise_exceptions_for_backends is False
+            ):
+                dialects_to_include = {
+                    dialect: True
+                    for dialect in SQL_DIALECT_NAMES
+                    # if dialect != "bigquery"
+                }
 
         # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
         if (
