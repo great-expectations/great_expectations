@@ -89,7 +89,7 @@ In our example, `data` will have two columns, "x" and "y", each with five rows.
 If you define multiple columns, make sure that they have the same number of rows. 
 When possible, include test data and tests that includes null values (`None` in the Python test definition).
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L77
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L88
 ```
 
 :::note
@@ -119,7 +119,7 @@ You will need to:
 
 If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publically displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L75-L121
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L89-L116
 ```
 
 <details>
