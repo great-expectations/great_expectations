@@ -6,12 +6,7 @@ import Prerequisites from '../creating_custom_expectations/components/prerequisi
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you implement Statement Renderers for your Custom Expectations. 
-Renderers allow you to control how your Custom Expectations are displayed in your [Data Docs](../../../reference/data_docs.md).
-
-Implementing renderers as part of your Custom Expectations is not strictly required - if not provided, Great Expectations will render your Custom Expectation using a basic default renderer:
-
-![Expectation rendered using default renderer](../../../images/expectation_fallback.png)
+This guide will help you implement Statement Renderers for your Custom Expectations.
 
 <Prerequisites>
 
@@ -19,7 +14,16 @@ Implementing renderers as part of your Custom Expectations is not strictly requi
 
 </Prerequisites>
 
-This guide will walk you through the process of adding Statement Renderers to the Custom Expectation built in the guide for [how to create a Custom Column Aggregate Expectation](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
+We will add Statement Renderers to the Custom Expectations built in the guides for [creating Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
+and [creating Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
+
+Great Expectations supports a number of Renderers, allowing you to control how your Custom Expectations are displayed in your [Data Docs](../../../reference/data_docs.md).
+
+Implementing renderers as part of your Custom Expectations is not strictly required - if not provided, Great Expectations will render your Custom Expectation using a basic default renderer:
+
+![Expectation rendered using default renderer](../../../images/expectation_fallback.png)
+
+If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Renderers that it supports.
 
 ## Steps
 
@@ -56,13 +60,14 @@ these Renderers look like in action!
 <TabItem value="prescriptive">
 
 ### 2. Declare the method for your Prescriptive Renderer
+<br/>
 
 In general, Prescriptive Renderers receive an ExpectationConfiguration as input and return a list of rendered elements.
 
-There are several ways to implement a Prescriptive Renderer. We're going to implement Simple String, String Template, and Table Renderers. 
-All three of these implementations will share the `@renderer(renderer_type="renderer.prescriptive)` decorator, the `@render_evaluation_parameter_string` decorator, and the same initial method declaration. In our case, this looks like the following:
+There are several ways to implement a Prescriptive Renderer. We're going to implement a String Template Renderer and a Table Renderer. 
+Both of these implementations will share the `@renderer(renderer_type="renderer.prescriptive)` decorator, the `@render_evaluation_parameter_string` decorator, and the same initial method declaration. In our case, this looks like the following:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L231-L262
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L233-L266
 ```
 
 :::note
@@ -73,604 +78,279 @@ to render the values of the Evaluation Parameters along with the rest of the out
 
 <Tabs
   groupId="prescriptive-types"
-  defaultValue="simple-string"
+  defaultValue="string-template"
   values={[
-  {label: 'Simple String', value: 'simple-string'},
   {label: 'String Template', value: 'string-template'},
   {label: 'Table', value: 'table'}
 ]}>
 
-<TabItem value="simple-string">
+<TabItem value="string-template">
 
-### 3. Implement the logic for your Descriptive Renderer
+### 3. Implement the logic for your String Template Renderer
+<br/>
 
-The Simple String Prescriptive Renderer will render a semantic declaration of your Custom Expectation, similar to this:
+The String Template Prescriptive Renderer will render a semantic declaration of your Custom Expectation populated with the parameters your Custom Expectation requires.
 
-![Simple String Example](../../../images/simple_string.png)
+:::note
+The following example is being implemented in the Custom Expectation built in our [guide on how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
+:::
 
+To make this happen, we're going to build a template string based off of which parameters have been provided:
 
-```python
-class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
-    ...
-
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-            cls,
-            configuration: ExpectationConfiguration = None,
-            result: ExpectationValidationResult = None,
-            language: str = None,
-            runtime_configuration: dict = None,
-            **kwargs,
-    ) -> List[Union[dict, str, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent,
-                    RenderedGraphContent, Any]]:
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
-        styling = runtime_configuration.get("styling")
-        # get params dict with all expected kwargs
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "min_value",
-                "max_value",
-                "mostly",
-                "row_condition",
-                "condition_parser",
-                "strict_min",
-                "strict_max",
-            ],
-        )
-
-        # build string template
-        if (params["min_value"] is None) and (params["max_value"] is None):
-            template_str = "values may have any length."
-        else:
-            at_least_str = (
-                "greater than"
-                if params.get("strict_min") is True
-                else "greater than or equal to"
-            )
-            at_most_str = (
-                "less than" if params.get("strict_max") is True else "less than or equal to"
-            )
-
-            if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
-                )
-
-                if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
-
-                elif params["min_value"] is None:
-                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
-
-                elif params["max_value"] is None:
-                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
-            else:
-                if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
-
-                elif params["min_value"] is None:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
-
-                elif params["max_value"] is None:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
-
-        if include_column_name:
-            template_str = "$column " + template_str
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
-            params.update(conditional_params)
-
-        # return simple string
-        return [Template(template_str).substitute(params)]
-```
-</TabItem>
-
-</Tabs>
-
-
-
-**Input:**
-
-```python
-example_expectation_config = ExpectationConfiguration(**{
-    "expectation_type": "expect_column_value_lengths_to_be_between",
-    "kwargs": {
-        "column": "SSL",
-        "min_value": 1,
-        "max_value": 11,
-        "result_format": "COMPLETE"
-    }
-})
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L268-L292
 ```
 
-**Rendered Output:**
+Then we return our string template, including the parameters that will populate and render it:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L294-L305
+```
+
+### 4. Verifying your implementation
+<br/>
+
+If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an [Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md) 
+and validate against your data with a [Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md), 
+and see something similar to the following in your Data Docs:
 
 ![String Template Example](../../../images/string_template.png)
 
-**Implementation:**
+</TabItem>
 
-```python
-class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
-    ...
+<TabItem value="table">
 
-    @classmethod
-    @renderer(renderer_type="renderer.prescriptive")
-    @render_evaluation_parameter_string
-    def _prescriptive_renderer(
-            cls,
-            configuration: ExpectationConfiguration = None,
-            result: ExpectationValidationResult = None,
-            language: str = None,
-            runtime_configuration: dict = None,
-            **kwargs,
-    ) -> List[Union[dict, str, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent,
-                    RenderedGraphContent, Any]]:
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
-        include_column_name = (
-            include_column_name if include_column_name is not None else True
-        )
-        styling = runtime_configuration.get("styling")
-        # get params dict with all expected kwargs
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            [
-                "column",
-                "min_value",
-                "max_value",
-                "mostly",
-                "row_condition",
-                "condition_parser",
-                "strict_min",
-                "strict_max",
-            ],
-        )
+### 3. Implement the logic for your Table Renderer
+<br/>
 
-        # build string template
-        if (params["min_value"] is None) and (params["max_value"] is None):
-            template_str = "values may have any length."
-        else:
-            at_least_str = (
-                "greater than"
-                if params.get("strict_min") is True
-                else "greater than or equal to"
-            )
-            at_most_str = (
-                "less than" if params.get("strict_max") is True else "less than or equal to"
-            )
+The Table Renderer will render a semantic declaration of your Custom Expectation, including a table of values populated with the parameters your Custom Expectation requires.
 
-            if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
-                )
-
-                if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
-
-                elif params["min_value"] is None:
-                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
-
-                elif params["max_value"] is None:
-                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
-            else:
-                if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
-
-                elif params["min_value"] is None:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
-
-                elif params["max_value"] is None:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
-
-        if include_column_name:
-            template_str = "$column " + template_str
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-            template_str = conditional_template_str + ", then " + template_str
-            params.update(conditional_params)
-
-        # return simple string
-        return [Template(template_str).substitute(params)]
-```
-
-:::note 
-This example shows how you can render your custom Expectation using different content types.
+:::note
+The following example can be found in [`ExpectColumnQuantileValuesToBeBetween`](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/core/expect_column_quantile_values_to_be_between.py).
 :::
 
-**Input:**
+To make this happen, we first build our template string from our parameters:
 
-  ```python
-  example_expectation_config = ExpectationConfiguration(**{
-      "expectation_type": "expect_column_quantile_values_to_be_between",
-      "kwargs": {
-          "allow_relative_error": False,
-          "column": "OBJECTID",
-          "quantile_ranges": {
-              "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
-              "value_ranges": [
-                  [5358, 5360],
-                  [26788, 26790],
-                  [53576, 53578],
-                  [80365, 80367],
-                  [101795, 101797]
-              ]
-          },
-          "result_format": "COMPLETE"
-      }
-  })
-  ```
+```python file=../../../../great_expectations/expectations/core/expect_column_quantile_values_to_be_between.py#L357-L378
+```
 
-  **Rendered Output:**
+Then we build the table from our parameters:
 
-  ![Table Example](../../../images/table.png)
+```python file=../../../../great_expectations/expectations/core/expect_column_quantile_values_to_be_between.py#L380-L416
+```
 
-  **Implementation:**
+Finally, we return both our template string and our table:
 
-  ```python
-  class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
-      ...
+```python file=../../../../great_expectations/expectations/core/expect_column_quantile_values_to_be_between.py#L418
+```
 
-      @classmethod
-      @renderer(renderer_type="renderer.prescriptive")
-      @render_evaluation_parameter_string
-      def _prescriptive_renderer(
-          cls,
-          configuration=None,
-          result=None,
-          language=None,
-          runtime_configuration=None,
-          **kwargs
-      ):
-          runtime_configuration = runtime_configuration or {}
-          include_column_name = runtime_configuration.get("include_column_name", True)
-          include_column_name = (
-              include_column_name if include_column_name is not None else True
-          )
-          styling = runtime_configuration.get("styling")
-          # get params dict with all expected kwargs
-          params = substitute_none_for_missing(
-              configuration["kwargs"],
-              ["column", "quantile_ranges", "row_condition", "condition_parser"],
-          )
+### 4. Verifying your implementation
+<br/>
 
-          # build string template content
-          template_str = "quantiles must be within the following value ranges."
+If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an [Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md) 
+and validate against your data with a [Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md), 
+and see something similar to the following in your Data Docs:
 
-          if include_column_name:
-              template_str = "$column " + template_str
+![Table Example](../../../images/table.png)
 
-          if params["row_condition"] is not None:
-              (
-                  conditional_template_str,
-                  conditional_params,
-              ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-              template_str = (
-                  conditional_template_str
-                  + ", then "
-                  + template_str[0].lower()
-                  + template_str[1:]
-              )
-              params.update(conditional_params)
-
-          expectation_string_obj = RenderedStringTemplateContent(**{
-              "content_block_type": "string_template",
-              "string_template": {"template": template_str, "params": params},
-          })
-
-          # build table content
-          quantiles = params["quantile_ranges"]["quantiles"]
-          value_ranges = params["quantile_ranges"]["value_ranges"]
-
-          table_header_row = ["Quantile", "Min Value", "Max Value"]
-          table_rows = []
-
-          quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
-
-          for quantile, value_range in zip(quantiles, value_ranges):
-              quantile_string = quantile_strings.get(quantile, "{:3.2f}".format(quantile))
-              table_rows.append(
-                  [
-                      quantile_string,
-                      str(value_range[0]) if value_range[0] is not None else "Any",
-                      str(value_range[1]) if value_range[1] is not None else "Any",
-                  ]
-              )
-
-          quantile_range_table = RenderedTableContent(**{
-              "content_block_type": "table",
-              "header_row": table_header_row,
-              "table": table_rows,
-              "styling": {
-                  "body": {
-                      "classes": [
-                          "table",
-                          "table-sm",
-                          "table-unbordered",
-                          "col-4",
-                          "mt-2",
-                      ],
-                  },
-                  "parent": {"styles": {"list-style-type": "none"}},
-              },
-          })
-
-          # return both string template and table content
-          return [expectation_string_obj, quantile_range_table]
-  ```
 </TabItem>
-
 </Tabs>
 
-3. **If necessary, implement additional renderer types that override the Great Expectations defaults.**
+If you have already implemented one of the Diagnostic Renderers covered elsewhere in this guide, you should now see the following when you call the `print_diagnostic_checklist()` method on your Custom Expectation:
 
-  The default implementations are provided below for reference:
+```console
+✔ Has both Statement Renderers: prescriptive and diagnostic
+```
 
-  :::note 
-  These renderers do not have to have an output for every Expectation.
-  :::
+<div style={{"text-align":"center"}}>
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
+Congratulations!<br/>&#127881; You've successfully implemented a Prescriptive Renderer for a Custom Expectation! &#127881;
+</b></p>
+</div>
+
+</TabItem>
+
+<TabItem value="diagnostic">
+
+### 2. Declare the method for your Diagnostic Renderer
+<br/>
+
+In general, Diagnostic Renderers receive an ExpectationValidationResult as input and return a list of rendered elements.
+
+There are several ways to implement a Diagnostic Renderer. We're going to implement an Unexpected Statement Renderer, an Unexpected Table Renderer, and an Observed Value Renderer. 
+All three of these implementations will utilize the `@render_evaluation_parameter_string` decorator, and the same initial method declaration. 
+
+Each will have a slightly different `@renderer` decorators and method names reflecting the type of Diagnostic Renderer being implemented, but will have similar initial declarations.
+
+Here is an example for the Observed Value Renderer:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L178-L188
+```
+
+:::note
+While not strictly necessary for all Custom Expectations, 
+adding the ``@render_evaluation_parameter_string`` decorator allows [Expectations that use Evaluation Parameters](../../../guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.md) 
+to render the values of the Evaluation Parameters along with the rest of the output.
+:::
 
 <Tabs
-  groupId="additional-renderer-types"
-  defaultValue='unexpected_statement'
+  groupId="diagnostic-types"
+  defaultValue="observed-value"
   values={[
-  {label: 'diagnostic.unexpected_statement', value:'unexpected_statement'},
-  {label: 'diagnostic.unexpected_table', value:'unexpected_table'},
-  {label: 'diagnostic.observed_value', value:'observed_value'},
-  ]}>
+  {label: 'Observed Value', value: 'observed-value'},
+  {label: 'Unexpected Statement', value: 'unexpected-statement'},
+  {label: 'Unexpected Table', value: 'unexpected-table'}
+]}>
 
-<TabItem value="unexpected_statement">
+<TabItem value="observed-value">
 
-  ```python
-  @classmethod
-  @renderer(renderer_type="renderer.diagnostic.unexpected_statement")
-  def _diagnostic_unexpected_statement_renderer(
-      cls,
-      configuration=None,
-      result=None,
-      language=None,
-      runtime_configuration=None,
-      **kwargs,
-  ):
-      assert result, "Must provide a result object."
-      success = result.success
-      result_dict = result.result
+### 3. Implement the logic for your Observed Value Renderer
+<br/>
 
-      if result.exception_info["raised_exception"]:
-          exception_message_template_str = (
-              "\n\n$expectation_type raised an exception:\n$exception_message"
-          )
+The Observed Value Diagnostic Renderer will render the `observed_value` or `unexpected_percent` returned by your Custom Expectation, if one is returned.
 
-          exception_message = RenderedStringTemplateContent(
-              **{
-                  "content_block_type": "string_template",
-                  "string_template": {
-                      "template": exception_message_template_str,
-                      "params": {
-                          "expectation_type": result.expectation_config.expectation_type,
-                          "exception_message": result.exception_info[
-                              "exception_message"
-                          ],
-                      },
-                      "tag": "strong",
-                      "styling": {
-                          "classes": ["text-danger"],
-                          "params": {
-                              "exception_message": {"tag": "code"},
-                              "expectation_type": {
-                                  "classes": ["badge", "badge-danger", "mb-2"]
-                              },
-                          },
-                      },
-                  },
-              }
-          )
+:::note
+The following example is being implemented in the Custom Expectation built in our [guide on how to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
+:::
 
-          exception_traceback_collapse = CollapseContent(
-              **{
-                  "collapse_toggle_link": "Show exception traceback...",
-                  "collapse": [
-                      RenderedStringTemplateContent(
-                          **{
-                              "content_block_type": "string_template",
-                              "string_template": {
-                                  "template": result.exception_info[
-                                      "exception_traceback"
-                                  ],
-                                  "tag": "code",
-                              },
-                          }
-                      )
-                  ],
-              }
-          )
+To make this happen, we're going to access the results of our Custom Expectation:
 
-          return [exception_message, exception_traceback_collapse]
-
-      if success or not result_dict.get("unexpected_count"):
-          return []
-      else:
-          unexpected_count = num_to_str(
-              result_dict["unexpected_count"], use_locale=True, precision=20
-          )
-          unexpected_percent = (
-              num_to_str(result_dict["unexpected_percent"], precision=4) + "%"
-          )
-          element_count = num_to_str(
-              result_dict["element_count"], use_locale=True, precision=20
-          )
-
-          template_str = (
-              "\n\n$unexpected_count unexpected values found. "
-              "$unexpected_percent of $element_count total rows."
-          )
-
-          return [
-              RenderedStringTemplateContent(
-                  **{
-                      "content_block_type": "string_template",
-                      "string_template": {
-                          "template": template_str,
-                          "params": {
-                              "unexpected_count": unexpected_count,
-                              "unexpected_percent": unexpected_percent,
-                              "element_count": element_count,
-                          },
-                          "tag": "strong",
-                          "styling": {"classes": ["text-danger"]},
-                      },
-                  }
-              )
-          ]
-  ```
-
-</TabItem>
-<TabItem value="unexpected_table">
-
-  ```python
-  @classmethod
-  @renderer(renderer_type="renderer.diagnostic.unexpected_table")
-  def _diagnostic_unexpected_table_renderer(
-      cls,
-      configuration=None,
-      result=None,
-      language=None,
-      runtime_configuration=None,
-      **kwargs,
-  ):
-      try:
-          result_dict = result.result
-      except KeyError:
-          return None
-
-      if result_dict is None:
-          return None
-
-      if not result_dict.get("partial_unexpected_list") and not result_dict.get(
-          "partial_unexpected_counts"
-      ):
-          return None
-
-      table_rows = []
-
-      if result_dict.get("partial_unexpected_counts"):
-          # We will check to see whether we have *all* of the unexpected values
-          # accounted for in our count, and include counts if we do. If we do not,
-          # we will use this as simply a better (non-repeating) source of
-          # "sampled" unexpected values
-          total_count = 0
-          for unexpected_count_dict in result_dict.get("partial_unexpected_counts"):
-              if not isinstance(unexpected_count_dict, dict):
-                  # handles case: "partial_exception_counts requires a hashable type"
-                  # this case is also now deprecated (because the error is moved to an errors key
-                  # the error also *should have* been updated to "partial_unexpected_counts ..." long ago.
-                  # NOTE: JPC 20200724 - Consequently, this codepath should be removed by approximately Q1 2021
-                  continue
-              value = unexpected_count_dict.get("value")
-              count = unexpected_count_dict.get("count")
-              total_count += count
-              if value is not None and value != "":
-                  table_rows.append([value, count])
-              elif value == "":
-                  table_rows.append(["EMPTY", count])
-              else:
-                  table_rows.append(["null", count])
-
-          # Check to see if we have *all* of the unexpected values accounted for. If so,
-          # we show counts. If not, we only show "sampled" unexpected values.
-          if total_count == result_dict.get("unexpected_count"):
-              header_row = ["Unexpected Value", "Count"]
-          else:
-              header_row = ["Sampled Unexpected Values"]
-              table_rows = [[row[0]] for row in table_rows]
-      else:
-          header_row = ["Sampled Unexpected Values"]
-          sampled_values_set = set()
-          for unexpected_value in result_dict.get("partial_unexpected_list"):
-              if unexpected_value:
-                  string_unexpected_value = str(unexpected_value)
-              elif unexpected_value == "":
-                  string_unexpected_value = "EMPTY"
-              else:
-                  string_unexpected_value = "null"
-              if string_unexpected_value not in sampled_values_set:
-                  table_rows.append([unexpected_value])
-                  sampled_values_set.add(string_unexpected_value)
-
-      unexpected_table_content_block = RenderedTableContent(
-          **{
-              "content_block_type": "table",
-              "table": table_rows,
-              "header_row": header_row,
-              "styling": {
-                  "body": {"classes": ["table-bordered", "table-sm", "mt-3"]}
-              },
-          }
-      )
-
-      return unexpected_table_content_block
-  ```
-
-</TabItem>
-<TabItem value="observed_value">
-
-  ```python
-  @classmethod
-  @renderer(renderer_type="renderer.diagnostic.observed_value")
-  def _diagnostic_observed_value_renderer(
-      cls,
-      configuration=None,
-      result=None,
-      language=None,
-      runtime_configuration=None,
-      **kwargs,
-  ):
-      result_dict = result.result
-      if result_dict is None:
-          return "--"
-
-      if result_dict.get("observed_value"):
-          observed_value = result_dict.get("observed_value")
-          if isinstance(observed_value, (int, float)) and not isinstance(
-              observed_value, bool
-          ):
-              return num_to_str(observed_value, precision=10, use_locale=True)
-          return str(observed_value)
-      elif result_dict.get("unexpected_percent") is not None:
-          return (
-              num_to_str(result_dict.get("unexpected_percent"), precision=5)
-              + "% unexpected"
-          )
-      else:
-          return "--"
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L190-L192
 ```
+
+And return the observed value or unexpected percent in our results, transforming those values to strings if necessary:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L194-L207
+```
+
+### 4. Verifying your implementation
+<br/>
+
+If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an [Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md) 
+and validate against your data with a [Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md), when you build your Data Docs
+you should see an observed value or unexpected percent populating the `Observed Value` column of your validation results.
+
+</TabItem>
+
+<TabItem value="unexpected-statement">
+
+### 3. Implement the logic for your Unexpected Statement Renderer
+<br/>
+
+The Unexpected Statement Diagnostic Renderer will render summary statistics returned by your Custom Expectation, if `unexpected_count` and `element_count` are returned.
+
+:::note
+The following example is being implemented in the Custom Expectation built in our [guide on how to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
+:::
+
+To make this happen, we're going to access the results of our Custom Expectation:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L221-L222
+```
+
+If our Custom Expectation raised an exception, we're going to build an exception template string:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L224-L227
+```
+
+And return the rendered exception and traceback:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L229-L273
+```
+
+If our Custom Expectation succeeds, or encounters no unexpected values, we return an empty list:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L275-L276
+```
+
+Otherwise, we build a template string summarizing our unexpected results, and return the rendered string:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L277-L309
+```
+
+### 4. Verifying your implementation
+<br/>
+
+If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an [Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md) 
+and validate against your data with a [Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md). When you build your Data Docs, 
+if your Custom Expectation encountered unexpected values, you should see a statement in the `Expectation` column of your validation results detailing 
+summary statistics about those unexpected values.
+
+</TabItem>
+
+<TabItem value="unexpected-table">
+
+### 3. Implement the logic for your Unexpected Table Renderer
+<br/>
+
+The Unexpected Table Diagnostic Renderer will render a sample of unexpected values or value counts returned by your Custom Expectation, if `partial_unexpected_list` or `partial_unexpected_counts` are returned.
+
+:::note
+The following example is being implemented in the Custom Expectation built in our [guide on how to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
+:::
+
+To make this happen, we're going to access the results of our Custom Expectation, and return `None` if we don't have the required data:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L321-L332
+```
+
+Then, we're going to start building our table:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L334
+```
+
+If we have `partial_unexpected_counts`, we're going to total the counts for each value, and build rows of `value` and `count`. 
+If we don't have all of the unexpected values available, we reduce our table from `value` and `count` down to just the `Sampled Unexpected Values`:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L336-L355
+```
+
+If we don't have `partial_unexpected_counts`, we build our table of `Sampled Unexpected Values`:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L357-L369
+```
+
+And return the rendered table:
+
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L371-L382
+```
+
+### 4. Verifying your implementation
+<br/>
+
+If the core logic for your Custom Expectation is already complete, you can now utilize your Custom Expectation in an [Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md) 
+and validate against your data with a [Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md). When you build your Data Docs, 
+if your Custom Expectation encountered unexpected values, you should see a table in the `Expectation` column of your validation results with a sampling of those values.
 
 </TabItem>
 </Tabs>
 
-4. **Lastly, test that your renderers are providing the desired output by building your Data Docs site.**
+If you have already implemented one of the Prescriptive Renderers covered elsewhere in this guide, you should now see the following when you call the `print_diagnostic_checklist()` method on your Custom Expectation:
 
-  Use the following CLI command: ``great_expectations docs build``.
+```console
+✔ Has both Statement Renderers: prescriptive and diagnostic
 ```
-  **Renderer Types Overview**:
-    * ``renderer.prescriptive``: renders human-readable form of Expectation from ExpectationConfiguration
-    * ``renderer.diagnostic.unexpected_statement``: renders summary statistics of unexpected values if ExpectationValidationResult includes ``unexpected_count`` and ``element_count``
-    * ``renderer.diagnostic.unexpected_table``: renders a sample of unexpected values (and in certain cases, counts) in table format, if ExpectationValidationResult includes ``partial_unexpected_list`` or ``partial_unexpected_counts``
-    * ``renderer.diagnostic.observed_value``: renders the observed value if included in ExpectationValidationResult
-```
+
+<div style={{"text-align":"center"}}>
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
+Congratulations!<br/>&#127881; You've successfully implemented a Diagnostic Renderer for a Custom Expectation! &#127881;
+</b></p>
+</div>
+
+</TabItem>
+</Tabs>
+
+### 5. Contribution (Optional)
+
+Renderers are not a requirement for for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+
+Implementing at least one Prescriptive and Diagnostic Renderer from this guide is required for contribution back to Great Expectations at a Beta or Production level.
+
+If you believe your Custom Expectation is ready for contribution, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pull-requests), and we will work with you to ensure your Custom Expectation meets these standards.
+
+:::note
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
+
+To view the full scripts used in this page, see them on GitHub:
+- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
+- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
+- [expect_column_quantile_values_to_be_between.py](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/expectations/core/expect_column_quantile_values_to_be_between.py)
+:::
