@@ -4,14 +4,9 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 
 
 class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
-    """Build a set of unique values if they qualify as categorical.
+    """Build a set of unique values.
 
-    Compute existing values across a batch or a set of batches and determine
-    whether they qualify as categorical based on cardinality setting.
-
-    Attributes:
-        cardinality_limit: A CardinalityCategory to set the number of unique
-            values allowed to be considered categorical.
+    Compute unique values across a batch or a set of batches.
     """
 
     # TODO AJB 20220216: add implementation

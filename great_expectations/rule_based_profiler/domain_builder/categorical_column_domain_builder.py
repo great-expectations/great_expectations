@@ -1,8 +1,10 @@
 import enum
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.exceptions import ProfilerConfigurationError
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     build_domains_from_column_names,
@@ -24,7 +26,7 @@ class AbsoluteCardinalityLimit:
     max_unique_values: int
 
 
-class CardinalityCategory(enum.Enum):
+class CardinalityMode(enum.Enum):
     """Used to determine appropriate Expectation configurations based on data.
 
     Defines relative and absolute number of records (table rows) that
@@ -32,9 +34,21 @@ class CardinalityCategory(enum.Enum):
 
     """
 
+    ONE = AbsoluteCardinalityLimit("one", 1)
     VERY_FEW = AbsoluteCardinalityLimit("very_few", 60)
-    # TODO AJB 20220216: add implementation
-    raise NotImplementedError
+    # TODO AJB 20220216: add further implementation
+    # raise NotImplementedError
+
+
+class zz__CardinalityModeProcessor:
+    """Check cardinality"""
+
+    # TODO AJB 20220218: add further implementation, factor this out and test separately, change name
+    def __init__(self, mode, limit):
+        raise NotImplementedError
+
+    def cardinality_within_limit(self):
+        raise NotImplementedError
 
 
 class CategoricalColumnDomainBuilder(DomainBuilder):
@@ -44,16 +58,17 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         self,
         data_context: "DataContext",  # noqa: F821
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
-        cardinality_limit: Optional[Union[CardinalityCategory, str]] = None,
+        cardinality_limit: Optional[Union[CardinalityMode, str]] = None,
+        exclude_columns: Optional[List[str]] = None,
     ):
-        """Filter columns with unique values no greater than cardinality_limit
+        """Filter columns with unique values no greater than cardinality_limit.
 
         Args:
-            data_context: DataContext associated with this profiler
+            data_context: DataContext associated with this profiler.
             batch_request: BatchRequest to be optionally used to define batches
-                to consider for this domain builder
-            cardinality_limit: CardinalityCategory to use when filtering columns
-
+                to consider for this domain builder.
+            cardinality_limit: CardinalityMode to use when filtering columns.
+            exclude_columns: If provided, exclude from consideration.
         """
 
         super().__init__(
@@ -62,24 +77,30 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         )
 
         if cardinality_limit is None:
-            cardinality_limit = CardinalityCategory.VERY_FEW.value
+            cardinality_limit = CardinalityMode.VERY_FEW.value
 
         self._cardinality_limit = cardinality_limit
 
+        self._exclude_columns = exclude_columns
+
     @property
-    def cardinality_limit(self) -> CardinalityCategory:
+    def domain_type(self) -> Union[str, MetricDomainTypes]:
+        return MetricDomainTypes.COLUMN
+
+    @property
+    def cardinality_limit(self) -> CardinalityMode:
         """Process cardinality_limit which is passed as a string from config.
 
         Returns:
-            CardinalityCategory default if no cardinality_limit is set,
-            the corresponding CardinalityCategory if passed as a string or
-            a passthrough if supplied as CardinalityCategory.
+            CardinalityMode default if no cardinality_limit is set,
+            the corresponding CardinalityMode if passed as a string or
+            a passthrough if supplied as CardinalityMode.
 
         """
         if self._cardinality_limit is None:
-            return CardinalityCategory.VERY_FEW.value
+            return CardinalityMode.VERY_FEW.value
         elif isinstance(self._cardinality_limit, str):
-            return CardinalityCategory[self._cardinality_limit.upper()].value
+            return CardinalityMode[self._cardinality_limit.upper()].value
         else:
             return self._cardinality_limit.value
 
@@ -101,33 +122,132 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             List of domains that match the desired cardinality.
         """
 
-        batch_id: str = self.get_batch_id(variables=variables)
-        table_column_names: List[str] = self.get_validator(
-            variables=variables
-        ).get_metric(
+        batch_ids = self._get_batch_ids(variables=variables)
+        validator: Validator = self.get_validator(variables=variables)
+
+        latest_batch_id: str = batch_ids[0]
+
+        # Here we use a single get_metric call to get column names to build the
+        # rest of the metrics.
+        table_column_names: List[str] = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
                 metric_domain_kwargs={
-                    "batch_id": batch_id,
+                    "batch_id": latest_batch_id,
                 },
                 metric_value_kwargs=None,
                 metric_dependencies=None,
             )
         )
 
-        column_names_meeting_cardinality_limit: List[str] = [
-            column_name
-            for column_name in table_column_names
-            if self._column_cardinality_within_limit(
-                column=column_name, variables=variables
-            )
-        ]
+        if self._exclude_columns is not None:
+            table_column_names = [
+                colname
+                for colname in table_column_names
+                if colname not in self._exclude_columns
+            ]
 
-        column_domains: List[Domain] = build_domains_from_column_names(
-            column_names_meeting_cardinality_limit
+        metrics_for_cardinality_check: List[
+            Dict[str, List[MetricConfiguration]]
+        ] = self._generate_metric_configurations_to_check_cardinality(
+            batch_ids=batch_ids, column_names=table_column_names
         )
 
-        return column_domains
+        # TODO AJB 20220218: Remove loops and refactor into single call to validator.get_metrics()
+        #  by first building up MetricConfigurations to compute see GREAT-584
+        computed_metrics_for_cardinality_check: List[
+            Dict[str, List[Tuple[MetricConfiguration, Any]]]
+        ] = []
+
+        for metric_for_cardinality_check in metrics_for_cardinality_check:
+            computed_metrics_for_cardinality_check.append(
+                {
+                    column_name: [
+                        (metric_config, validator.get_metric(metric=metric_config))
+                        for metric_config in metric_config_batch_list
+                    ]
+                    for column_name, metric_config_batch_list in metric_for_cardinality_check.items()
+                }
+            )
+
+        print("breakpoint")
+        # column_names_meeting_cardinality_limit: List[
+        #     str
+        # ] = self._columns_meeting_cardinality_limit(
+        #     computed_metrics_for_cardinality_check
+        # )
+
+        # column_names_meeting_cardinality_limit: List[str] = [
+        #     column_name
+        #     for column_name in table_column_names
+        #     if self._column_cardinality_within_limit(
+        #         column=column_name, variables=variables
+        #     )
+        # ]
+
+        # column_domains: List[Domain] = build_domains_from_column_names(
+        #     column_names_meeting_cardinality_limit
+        # )
+
+        # return column_domains
+
+    def _generate_metric_configurations_to_check_cardinality(
+        self,
+        batch_ids: List[str],
+        column_names: List[str],
+    ) -> List[Dict[str, List[MetricConfiguration]]]:
+        """Generate metric configurations used to compute metrics for checking cardinality.
+
+        Args:
+            batch_ids: List of batch_ids used to create metric configurations.
+            column_names: List of column names used to create metric configurations.
+
+        Returns:
+            List of dicts of the form [{column_name: List[MetricConfiguration]},...]
+        """
+
+        cardinality_limit: CardinalityMode = self.cardinality_limit
+
+        if isinstance(cardinality_limit, AbsoluteCardinalityLimit):
+            metric_name: str = "column.distinct_values.count"
+        elif isinstance(cardinality_limit, ProportionalCardinalityLimit):
+            metric_name: str = "column.unique_proportion"
+        else:
+            raise ProfilerConfigurationError(
+                f"Unrecognized cardinality_limit: {cardinality_limit}"
+            )
+
+        metric_configurations: List[Dict[str, List[MetricConfiguration]]] = []
+
+        for column_name in column_names:
+            metric_configurations.append(
+                {
+                    column_name: [
+                        MetricConfiguration(
+                            metric_name=metric_name,
+                            metric_domain_kwargs={
+                                "batch_id": batch_id,
+                                "column": column_name,
+                            },
+                            metric_value_kwargs=None,
+                            metric_dependencies=None,
+                        )
+                        for batch_id in batch_ids
+                    ]
+                }
+            )
+
+        return metric_configurations
+
+    def _columns_meeting_cardinality_limit(
+        self, computed_metrics: List[Tuple[MetricConfiguration, Any]]
+    ) -> List[str]:
+
+        for computed_metric in computed_metrics:
+            pass
+
+        # TODO AJB 20220218: Implement, incl params
+        raise NotImplementedError
 
     def _column_cardinality_within_limit(
         self,
@@ -139,7 +259,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
 
         batch_id: str = self.get_batch_id(variables=variables)
 
-        cardinality_limit: CardinalityCategory = self.cardinality_limit
+        cardinality_limit: CardinalityMode = self.cardinality_limit
 
         if isinstance(cardinality_limit, AbsoluteCardinalityLimit):
 

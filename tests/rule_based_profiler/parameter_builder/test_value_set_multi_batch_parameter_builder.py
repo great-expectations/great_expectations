@@ -73,7 +73,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch(
     )
 
 
-def test_simple_date_format_parameter_builder_bobby(
+def test_value_set_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: DataContext = (
