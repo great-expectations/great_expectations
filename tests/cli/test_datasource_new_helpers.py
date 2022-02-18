@@ -465,7 +465,7 @@ def test_BigqueryCredentialYamlHelper(mock_emit, empty_data_context_stats_enable
         helper.credentials_snippet()
         == '''\
 # The SQLAlchemy url/connection string for the BigQuery connection
-# (reference: https://github.com/mxmzdlv/pybigquery#connection-string-parameters)"""
+# (reference: https://github.com/googleapis/python-bigquery-sqlalchemy#connection-string-parameters)"""
 connection_string = "YOUR_BIGQUERY_CONNECTION_STRING"'''
     )
 

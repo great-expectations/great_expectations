@@ -23,7 +23,6 @@ from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.util import is_numeric
-from great_expectations.validator.validator import Validator
 
 MAX_DECIMALS: int = 9
 
@@ -223,30 +222,12 @@ detected.
         11. Return [low, high] for the desired metric as estimated by the specified sampling method.
         12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
-        validator: Validator = self.get_validator(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        if not batch_ids:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
-            )
-
         metric_computation_result: MetricComputationResult = self.get_metrics(
-            batch_ids=batch_ids,
-            validator=validator,
-            metric_name=self._metric_name,
-            metric_domain_kwargs=self._metric_domain_kwargs,
-            metric_value_kwargs=self._metric_value_kwargs,
-            enforce_numeric_metric=self._enforce_numeric_metric,
-            replace_nan_with_zero=self._replace_nan_with_zero,
+            metric_name=self.metric_name,
+            metric_domain_kwargs=self.metric_domain_kwargs,
+            metric_value_kwargs=self.metric_value_kwargs,
+            enforce_numeric_metric=self.enforce_numeric_metric,
+            replace_nan_with_zero=self.replace_nan_with_zero,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -257,7 +238,7 @@ detected.
         # Obtain sampling_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         sampling_method: str = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._sampling_method,
+            parameter_reference=self.sampling_method,
             expected_return_type=str,
             variables=variables,
             parameters=parameters,
@@ -277,13 +258,13 @@ detected.
         if sampling_method == "bootstrap":
             estimator = self._get_bootstrap_estimate
             estimator_kwargs = {
-                "false_positive_rate": self._false_positive_rate,
-                "num_bootstrap_samples": self._num_bootstrap_samples,
+                "false_positive_rate": self.false_positive_rate,
+                "num_bootstrap_samples": self.num_bootstrap_samples,
             }
         else:
             estimator = self._get_deterministic_estimate
             estimator_kwargs = {
-                "false_positive_rate": self._false_positive_rate,
+                "false_positive_rate": self.false_positive_rate,
             }
 
         metric_value_range: np.ndarray = self._estimate_metric_value_range(
@@ -437,7 +418,7 @@ detected.
             str, Optional[Number]
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._truncate_values,
+            parameter_reference=self.truncate_values,
             expected_return_type=dict,
             variables=variables,
             parameters=parameters,
@@ -486,7 +467,7 @@ detected.
             Union[Any]
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._round_decimals,
+            parameter_reference=self.round_decimals,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,

@@ -775,7 +775,7 @@ def _collect_snowflake_credentials_key_pair():
 def _collect_bigquery_credentials(default_credentials=None):
     sqlalchemy_url = click.prompt(
         """What is the SQLAlchemy url/connection string for the BigQuery connection?
-(reference: https://github.com/mxmzdlv/pybigquery#connection-string-parameters)
+(reference: https://github.com/googleapis/python-bigquery-sqlalchemy#connection-string-parameters)
 """,
         show_default=False,
     ).strip()
@@ -1453,11 +1453,17 @@ def _verify_snowflake_dependent_modules() -> bool:
 
 
 def _verify_bigquery_dependent_modules() -> bool:
-    return verify_library_dependent_modules(
+    pybigquery_ok = verify_library_dependent_modules(
         python_import_name="pybigquery.sqlalchemy_bigquery",
         pip_library_name="pybigquery",
         module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
     )
+    sqlalchemy_bigquery_ok = verify_library_dependent_modules(
+        python_import_name="sqlalchemy_bigquery",
+        pip_library_name="sqlalchemy_bigquery",
+        module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+    )
+    return pybigquery_ok or sqlalchemy_bigquery_ok
 
 
 def _verify_pyspark_dependent_modules() -> bool:
