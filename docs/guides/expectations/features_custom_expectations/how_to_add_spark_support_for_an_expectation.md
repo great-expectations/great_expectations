@@ -136,7 +136,7 @@ Because in Spark we are implementing the window function directly, we have to re
 </TabItem>
 </Tabs>
 
-### 3. Verifying our implementation
+### 3. Verifying your implementation
 
 If you now run your file, `print_diagnostic_checklist` will attempt to execute your example cases using this new backend.
 
