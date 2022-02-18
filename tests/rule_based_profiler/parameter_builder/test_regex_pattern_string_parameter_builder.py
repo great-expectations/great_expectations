@@ -18,16 +18,17 @@ from great_expectations.rule_based_profiler.types import (
 
 def test_regex_pattern_string_parameter_builder_instantiation_with_defaults():
     candidate_regexes: Set[str] = {
-        r"/\d+/",  # whole number with 1 or more digits ExpectValuesToBeNumeric? (.. you would want to emit that expectation)?
+        r"/\d+/",  # whole number with 1 or more digits
         r"/-?\d+/",  # negative whole numbers
         r"/-?\d+(\.\d*)?/",  # decimal numbers with . (period) separator
         r"/[A-Za-z0-9\.,;:!?()\"'%\-]+/",  # general text
-        r"^ +/",  # leading space
-        r" +/$",  # trailing space
+        r"^\s+/",  # leading space
+        r"\s+/$",  # trailing space
         r"/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)/",  # Matching URL (including http(s) protocol)
         r"/<\/?(?:p|a|b|img)(?: \/)?>/",  # HTML tags
         r"/(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}/",  # IPv4 IP address
         r"/(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}/",  # IPv6 IP address,
+        r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ",  # UUID
     }
     regex_pattern_string_parameter: RegexPatternStringParameterBuilder = (
         RegexPatternStringParameterBuilder(

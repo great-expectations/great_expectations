@@ -33,7 +33,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     # source: https://regexland.com/most-common-regular-expressions/
     # source for UUID: https://stackoverflow.com/questions/7905929/how-to-test-valid-uuid-guid/13653180#13653180
     CANDIDATE_REGEX: Set[str] = {
-        r"/\d+/",  # whole number with 1 or more digits ExpectValuesToBeNumeric? (.. youw oudl want to emit that expectation)?
+        r"/\d+/",  # whole number with 1 or more digits
         r"/-?\d+/",  # negative whole numbers
         r"/-?\d+(\.\d*)?/",  # decimal numbers with . (period) separator
         r"/[A-Za-z0-9\.,;:!?()\"'%\-]+/",  # general text
