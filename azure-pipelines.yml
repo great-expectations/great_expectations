@@ -429,6 +429,23 @@ stages:
               pip install  .
             displayName: 'Install dependencies'
 
+          - script: |
+              printf 'Waiting for MySQL database to accept connections'
+              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+                printf '.'
+                sleep 1;
+              done;
+            displayName: 'Wait for MySQL database to initialise'
+
+          - script: |
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+            displayName: 'Configure mysql'
+
+          - script: |
+              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+            displayName: 'Configure mssql'
+
           - bash: python ./build_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
