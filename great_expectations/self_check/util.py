@@ -1533,7 +1533,7 @@ def generate_expectation_tests(
         )
 
         #########################################
-        print(f"backends -> {backends}")                                                # <----- DELETE
+        print(f"backends -> {backends}")  # <----- DELETE
         print("~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.\n")
         #########################################
 
