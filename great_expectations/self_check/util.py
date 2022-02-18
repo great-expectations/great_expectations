@@ -1481,6 +1481,14 @@ def generate_expectation_tests(
     """
     parametrized_tests = []
 
+    #########################################
+    # (For CI/CD debugging)                                                         # <----- DELETE before merging
+    print("\n\n------------------------------")
+    print(f"generate_expectation_tests for {expectation_type}")
+    print(f"execution_engine_diagnostics -> {execution_engine_diagnostics}")
+    print("------------------------------\n\n")
+    #########################################
+
     for d in test_data_cases:
         d = copy.deepcopy(d)
         dialects_to_include = {}
@@ -1506,6 +1514,12 @@ def generate_expectation_tests(
         ):
             dialects_to_include["sqlite"] = True
 
+        #########################################
+        # (For CI/CD debugging)                                                         # <----- DELETE before merging
+        print("~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.")
+        print(f"dialects_to_include -> {dialects_to_include}")
+        #########################################
+
         backends = build_test_backends_list(
             include_pandas=execution_engine_diagnostics.PandasExecutionEngine,
             include_spark=execution_engine_diagnostics.SparkDFExecutionEngine,
@@ -1517,6 +1531,11 @@ def generate_expectation_tests(
             include_bigquery=dialects_to_include.get("bigquery", False),
             raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
+
+        #########################################
+        print(f"backends -> {backends}")                                                # <----- DELETE
+        print("~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.\n")
+        #########################################
 
         for c in backends:
 
