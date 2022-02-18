@@ -85,7 +85,7 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
         self._meta = meta
         self._success_on_last_run = success_on_last_run
 
-    def _parse_condition(self, condition: str) -> ParseResults:
+    def _parse_condition(self) -> ParseResults:
         """
         Using the grammer defined by "condition", provides the parsing of collection (list, dictionary) access syntax:
         List: variable[index: int]
@@ -95,12 +95,16 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
         Applicability: To be used as part of configuration (e.g., YAML-based files or text strings).
         Extendability: Readily extensible to include "slice" and other standard accessors (as long as no dynamic elements).
         """
-        try:
-            return condition_parser.parseString(condition)
-        except ParseException:
-            raise ExpectationConfigurationConditionParserError(
-                f'Unable to parse Expectation Configuration Condition: "{condition}".'
-            )
+
+        if self._condition:
+            try:
+                return condition_parser.parseString(self._condition)
+            except ParseException:
+                raise ExpectationConfigurationConditionParserError(
+                    f'Unable to parse Expectation Configuration Condition: "{self._condition}".'
+                )
+        else:
+            return True
 
     def _build_expectation_configuration(
         self,
@@ -127,6 +131,7 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
             variables=variables,
             parameters=parameters,
         )
+        parsed_condition: ParseResults = self._parse_condition()
         return ExpectationConfiguration(
             expectation_type=self._expectation_type,
             kwargs=expectation_kwargs,
