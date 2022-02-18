@@ -134,7 +134,10 @@ def test_expectation_configuration_builder_config_unsuccessfully_loads_with_miss
     with pytest.raises(ValidationError) as e:
         schema.load(data)
 
-    assert "'expectation_type': ['Missing data for required field.']" in str(e.value)
+    assert (
+        "'expectation_type': ['expectation_type missing in expectation configuration builder']"
+        in str(e.value)
+    )
 
 
 def test_rule_config_successfully_loads_with_required_args():
