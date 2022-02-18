@@ -15,16 +15,15 @@ from great_expectations.rule_based_profiler.types import (
 )
 from great_expectations.rule_based_profiler.util import build_metric_domain_kwargs
 from great_expectations.rule_based_profiler.util import (
-    get_batch_ids as get_batch_ids_from_batch_request,
+    get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
 )
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.util import (
-    get_validator as get_validator_from_batch_request,
+    get_validator as get_validator_using_batch_list_or_batch_request,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import Validator
 
 # TODO: <Alex>These are placeholder types, until a formal metric computation state class is made available.</Alex>
 MetricValue = Union[Any, List[Any], np.ndarray]
@@ -123,11 +122,11 @@ class ParameterBuilder(Builder, ABC):
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Optional[Validator]:
-        return get_validator_from_batch_request(
+    ) -> Optional["Validator"]:  # noqa: F821
+        return get_validator_using_batch_list_or_batch_request(
             purpose="parameter_builder",
             data_context=self.data_context,
-            batch_request=self._batch_request,
+            batch_request=self.batch_request,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -139,39 +138,16 @@ class ParameterBuilder(Builder, ABC):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> Optional[List[str]]:
-        return get_batch_ids_from_batch_request(
+        return get_batch_ids_from_batch_list_or_batch_request(
             data_context=self.data_context,
-            batch_request=self._batch_request,
+            batch_request=self.batch_request,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-
-    def get_batch_id(
-        self,
-        domain: Optional[Domain] = None,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Optional[str]:
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        num_batch_ids: int = len(batch_ids)
-        if num_batch_ids != 1:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""{self.__class__.__name__}.get_batch_id() expected to return exactly one batch_id \
-({num_batch_ids} were retrieved).
-"""
-            )
-
-        return batch_ids[0]
 
     def get_metrics(
         self,
-        batch_ids: List[str],
-        validator: Validator,
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
@@ -186,9 +162,6 @@ class ParameterBuilder(Builder, ABC):
 
         Computes specified metric (can be multi-dimensional, numeric, non-numeric, or mixed) and conditions (or
         "sanitizes") result according to two criteria: enforcing metric output to be numeric and handling NaN values.
-        :param batch_ids: IDs of Batch objects used to compute the metric -- commonly obtained via the "get_batch_ids()"
-        method in this module, although it can readily accept the list of Batch IDs generated through any other means.
-        :param validator: the Validator used for metric calculation purposes.
         :param metric_name: Name of metric of interest, being computed.
         :param metric_domain_kwargs: Metric Domain Kwargs is an essential parameter of the MetricConfiguration object.
         :param metric_value_kwargs: Metric Value Kwargs is an essential parameter of the MetricConfiguration object.
@@ -201,6 +174,18 @@ class ParameterBuilder(Builder, ABC):
         significant dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the
         multi-dimensional metric, whose values are being estimated, and details (to be used for metadata purposes).
         """
+        # IDs of Batch objects used to compute the metric -- commonly obtained via the "get_batch_ids()"
+        # method in this module, although it can readily accept the list of Batch IDs generated through any other means.
+        batch_ids: Optional[List[str]] = self.get_batch_ids(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+        if not batch_ids:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
+            )
+
         domain_kwargs = build_metric_domain_kwargs(
             batch_id=None,
             metric_domain_kwargs=metric_domain_kwargs,
@@ -221,6 +206,13 @@ class ParameterBuilder(Builder, ABC):
         )
 
         metric_values: MetricValues = []
+
+        # The Validator object used for metric calculation purposes.
+        validator: "Validator" = self.get_validator(
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
 
         metric_value: MetricValue
         batch_id: str

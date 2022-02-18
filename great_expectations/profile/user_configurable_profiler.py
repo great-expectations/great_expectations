@@ -9,6 +9,7 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.exceptions import ProfilerError
@@ -21,7 +22,6 @@ from great_expectations.expectations.metrics.util import attempt_allowing_relati
 from great_expectations.profile.base import (
     OrderedProfilerCardinality,
     ProfilerSemanticTypes,
-    ProfilerTypeMapping,
     profiler_data_types_with_mapping,
 )
 from great_expectations.util import is_nan
