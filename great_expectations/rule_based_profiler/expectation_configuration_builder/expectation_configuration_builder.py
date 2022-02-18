@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import Dict, Optional
 
@@ -7,6 +8,9 @@ from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
 )
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class ExpectationConfigurationBuilder(Builder, ABC):
@@ -20,6 +24,12 @@ class ExpectationConfigurationBuilder(Builder, ABC):
         """
         for k, v in kwargs.items():
             setattr(self, k, v)
+            logger.debug(
+                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
+                k,
+                v,
+                self.__class__.__name__,
+            )
 
     def build_expectation_configuration(
         self,

@@ -99,8 +99,8 @@ class DomainBuilderConfig(DictDot):
         self.batch_request = batch_request
         for k, v in kwargs.items():
             setattr(self, k, v)
-            logger.warning(
-                'Setting unknown kwarg (%s, %s) provided to config as attr in "%s".',
+            logger.debug(
+                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
                 k,
                 v,
                 self.__class__.__name__,
@@ -143,8 +143,8 @@ class ParameterBuilderConfig(DictDot):
         self.batch_request = batch_request
         for k, v in kwargs.items():
             setattr(self, k, v)
-            logger.warning(
-                'Setting unknown kwarg (%s, %s) provided to config as attr in "%s".',
+            logger.debug(
+                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
                 k,
                 v,
                 self.__class__.__name__,
@@ -191,8 +191,8 @@ class ExpectationConfigurationBuilderConfig(DictDot):
         self.meta = meta
         for k, v in kwargs.items():
             setattr(self, k, v)
-            logger.warning(
-                'Setting unknown kwarg (%s, %s) provided to config as attr in "%s".',
+            logger.debug(
+                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
                 k,
                 v,
                 self.__class__.__name__,
