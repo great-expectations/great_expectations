@@ -44,7 +44,7 @@ attribute_name = Word(alphas, alphanums + "_.") + ZeroOrMore(
     )
     ^ (
         Suppress(Literal("["))
-        + Word(nums).setParseAction(lambda s, l, t: [int(t[0])])
+        + Word(nums + "-").setParseAction(lambda s, l, t: [int(t[0])])
         + Suppress(Literal("]"))
     )
 )

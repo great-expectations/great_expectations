@@ -17,23 +17,23 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     parameter_name-to-parameter_fully_qualified_parameter_name map (name-value pairs supplied in the kwargs dictionary).
     """
 
-    include_field_names: Set[str] = {
-        "expectation_type",
+    exclude_field_names: Set[str] = {
+        "kwargs",
     }
 
     def __init__(
         self,
         expectation_type: str,
         meta: Optional[Dict[str, Any]] = None,
-        success_on_last_run: Optional[bool] = None,
         **kwargs,
     ):
-        super().__init__(expectation_type=expectation_type)
+        super().__init__(expectation_type=expectation_type, **kwargs)
 
-        self._expectation_kwargs = kwargs
+        self._kwargs = kwargs
 
         if meta is None:
             meta = {}
+
         if not isinstance(meta, dict):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{meta}" in "{self.__class__.__name__}" must be of type "dictionary" \
@@ -42,7 +42,18 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             )
 
         self._meta = meta
-        self._success_on_last_run = success_on_last_run
+
+    @property
+    def expectation_type(self) -> str:
+        return self._expectation_type
+
+    @property
+    def kwargs(self) -> dict:
+        return self._kwargs
+
+    @property
+    def meta(self) -> dict:
+        return self._meta
 
     def _build_expectation_configuration(
         self,
@@ -60,18 +71,17 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                 variables=variables,
                 parameters=parameters,
             )
-            for parameter_name, fully_qualified_parameter_name in self._expectation_kwargs.items()
+            for parameter_name, fully_qualified_parameter_name in self.kwargs.items()
         }
         meta: Dict[str, Any] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._meta,
+            parameter_reference=self.meta,
             expected_return_type=dict,
             variables=variables,
             parameters=parameters,
         )
         return ExpectationConfiguration(
-            expectation_type=self._expectation_type,
+            expectation_type=self.expectation_type,
             kwargs=expectation_kwargs,
             meta=meta,
-            success_on_last_run=self._success_on_last_run,
         )
