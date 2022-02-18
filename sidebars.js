@@ -233,13 +233,6 @@ module.exports = {
                 //'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
               ]
             },
-            //{
-            //  type: 'category',
-            //  label: 'Contributing',
-            //  items: [
-            //    'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations'
-            //  ]
-            //},
             {
               type: 'category',
               label: 'Advanced',
@@ -250,6 +243,13 @@ module.exports = {
                 'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
                 'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
                 'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
+              ]
+            },
+            {
+              type: 'category',
+              label: "Contributing",
+              items: [
+                  'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations'
               ]
             }
           ]
