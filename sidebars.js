@@ -214,7 +214,7 @@ module.exports = {
                 'guides/expectations/creating_custom_expectations/overview',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
                 'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
+                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
                 //'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
               ]
@@ -227,7 +227,7 @@ module.exports = {
                 'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation',
-                'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
+                // 'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
                 // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
                 //'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
