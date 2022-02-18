@@ -13,6 +13,11 @@ class ExpectationConfigurationBuilder(Builder, ABC):
     def __init__(self, expectation_type: str, **kwargs):
         self._expectation_type = expectation_type
 
+        """
+        Since ExpectationConfigurationBuilderConfigSchema allow arbitrary fields (as ExpectationConfiguration kwargs)
+        to be provided, they must be all converted to public property accessors and/or public fields in order for all
+        provisions by Builder, SerializableDictDot, and DictDot to operate properly in compliance with their interfaces.
+        """
         for k, v in kwargs.items():
             setattr(self, k, v)
 

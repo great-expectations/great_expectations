@@ -126,6 +126,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
+        # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
         if reduce_scalar_metric and metric_values.shape[1] == 1:
             metric_values = metric_values[:, 0]
 
