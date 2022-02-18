@@ -94,7 +94,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "meta": {
                         "details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -107,7 +107,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "meta": {
                         "details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -147,7 +147,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "meta": {
                         "details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -158,7 +158,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "meta": {
                         "details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -186,7 +186,7 @@ def test_reconcile_profiler_rules_new_rule_override(
                     "meta": {
                         "details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -254,7 +254,7 @@ def test_reconcile_profiler_rules_existing_rule_domain_builder_override(
                     "meta": {
                         "details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -342,7 +342,7 @@ def test_reconcile_profiler_rules_existing_rule_parameter_builder_overrides(
                     "meta": {
                         "details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -384,7 +384,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "meta": {
                         "details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -397,7 +397,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "meta": {
                         "details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -429,7 +429,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "meta": {
                         "details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -440,7 +440,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "meta": {
                         "details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -500,7 +500,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override(
                     "meta": {
                         "details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -513,7 +513,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override(
                     "meta": {
                         "details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -555,7 +555,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override(
                     "meta": {
                         "details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },
@@ -566,7 +566,7 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override(
                     "meta": {
                         "details": {
                             "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
-                            "note": "Important remarks about estimation algoirithm.",
+                            "note": "Important remarks about estimation algorithm.",
                         },
                     },
                 },

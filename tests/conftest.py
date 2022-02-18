@@ -5097,7 +5097,7 @@ def profiler_config_with_placeholder_args(
                         "meta": {
                             "details": {
                                 "my_parameter_estimator": "$parameter.my_parameter.details",
-                                "note": "Important remarks about estimation algoirithm.",
+                                "note": "Important remarks about estimation algorithm.",
                             },
                         },
                     },
