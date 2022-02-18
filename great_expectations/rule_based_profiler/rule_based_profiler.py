@@ -876,13 +876,13 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         for rule in rules:
             domain_builder = rule.domain_builder
             if domain_builder.domain_type == MetricDomainTypes.COLUMN:
-                domain_builder.batch_request = copy.deepcopy(batch_request)
+                domain_builder.batch_request = batch_request
                 domain_builder.batch_request["data_connector_query"] = {"index": -1}
 
             parameter_builders = rule.parameter_builders
             if parameter_builders:
                 for parameter_builder in parameter_builders:
-                    parameter_builder.batch_request = copy.deepcopy(batch_request)
+                    parameter_builder.batch_request = batch_request
 
             resulting_rules[rule.name] = rule.to_dict()
 
