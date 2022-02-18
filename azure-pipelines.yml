@@ -446,21 +446,21 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
             displayName: 'Configure mssql'
 
-          - task: DownloadSecureFile@1
-            name: gcp_authkey
-            displayName: 'Download Google Service Account'
-            inputs:
-              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
-              retryCount: '2'
+#         - task: DownloadSecureFile@1
+#           name: gcp_authkey
+#           displayName: 'Download Google Service Account'
+#           inputs:
+#             secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+#             retryCount: '2'
 
           - bash: python ./build_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
-            env:
-              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
-              GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
-              GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
+#           env:
+#             GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+#             GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+#             GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+#             GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
 
           - bash: python ./build_package_gallery.py
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/

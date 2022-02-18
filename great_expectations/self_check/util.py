@@ -1507,7 +1507,7 @@ def generate_expectation_tests(
                 dialects_to_include = {
                     dialect: True
                     for dialect in SQL_DIALECT_NAMES
-                    # if dialect != "bigquery"
+                    if dialect != "bigquery"
                 }
 
         # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
