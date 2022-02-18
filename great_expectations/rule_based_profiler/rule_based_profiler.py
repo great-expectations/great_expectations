@@ -44,6 +44,7 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     build_parameter_container_for_variables,
 )
+from great_expectations.types import safe_deep_copy
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
@@ -850,6 +851,22 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
     def _generate_rule_overrides_from_batch_request(
         self, batch_request: Union[dict, BatchRequest, RuntimeBatchRequest]
     ) -> Dict[str, Dict[str, Any]]:
+        """Iterates through the profiler's builder attributes and generates a set of
+        Rules that contain overrides from the input batch request. This only applies to
+        ParameterBuilder and any DomainBuilder with a COLUMN MetricDomainType.
+
+        Note that we are passing ALL batches to the parameter builder. If not used carefully,
+        a bias may creep in to the resulting estimates computed by these objects.
+
+        Users of this override should be aware that a batch request should either have no
+        notion of "current/active" batch or it is excluded.
+
+        Args:
+            batch_request: Data used to override builder attributes
+
+        Returns:
+            The dictionary representation of the Rules used as runtime arguments to `run()`
+        """
         rules: List[Rule] = self.rules
         if not isinstance(batch_request, dict):
             batch_request = get_batch_request_as_dict(batch_request)
@@ -860,13 +877,13 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         for rule in rules:
             domain_builder = rule.domain_builder
             if domain_builder.domain_type == MetricDomainTypes.COLUMN:
-                domain_builder.batch_request = copy.deepcopy(batch_request)
+                domain_builder.batch_request = safe_deep_copy(batch_request)
                 domain_builder.batch_request["data_connector_query"] = {"index": -1}
 
             parameter_builders = rule.parameter_builders
             if parameter_builders:
                 for parameter_builder in parameter_builders:
-                    parameter_builder.batch_request = copy.deepcopy(batch_request)
+                    parameter_builder.batch_request = safe_deep_copy(batch_request)
 
             resulting_rules[rule.name] = rule.to_dict()
 
