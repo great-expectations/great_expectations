@@ -99,15 +99,6 @@ _TEST_DEFS_DIR = os.path.join(
     "test_definitions",
 )
 
-################################
-# (For CI/CD debugging)                                                         # <----- DELETE before merging
-print("\n\n&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&")
-print(f"_TEST_DEFS_DIR -> {_TEST_DEFS_DIR}")
-print(f"os.getcwd() -> {os.getcwd()}")
-print(f"os.path.isdir(_TEST_DEFS_DIR) -> {os.path.isdir(_TEST_DEFS_DIR)}")
-print("&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&%&\n\n")
-################################
-
 
 def camel_to_snake(name):
     name = p1.sub(r"\1_\2", name)
