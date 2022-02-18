@@ -267,41 +267,18 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
 
         # build the string, parameter by parameter
         if (params["min_value"] is None) and (params["max_value"] is None):
-            template_str = "values may have any length."
+            template_str = "maximum value may have any numerical value."
         else:
-            at_least_str = (
-                "greater than"
-                if params.get("strict_min") is True
-                else "greater than or equal to"
-            )
-            at_most_str = (
-                "less than"
-                if params.get("strict_max") is True
-                else "less than or equal to"
-            )
+            at_least_str, at_most_str = handle_strict_min_max(params)
 
-            if params["mostly"] is not None:
-                params["mostly_pct"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
-                )
-
-                if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
-
-                elif params["min_value"] is None:
-                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
-
-                elif params["max_value"] is None:
-                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
+            if params["min_value"] is not None and params["max_value"] is not None:
+                template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
+            elif params["min_value"] is None:
+                template_str = f"maximum value must be {at_most_str} $max_value."
+            elif params["max_value"] is None:
+                template_str = f"maximum value must be {at_least_str} $min_value."
             else:
-                if params["min_value"] is not None and params["max_value"] is not None:
-                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
-
-                elif params["min_value"] is None:
-                    template_str = f"values must always be {at_most_str} $max_value characters long."
-
-                elif params["max_value"] is None:
-                    template_str = f"values must always be {at_least_str} $min_value characters long."
+                template_str = ""
 
         if include_column_name:
             template_str = "$column " + template_str
@@ -314,8 +291,18 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
-        # return completed string
-        return [Template(template_str).substitute(params)]
+        return [
+            RenderedStringTemplateContent(
+                **{
+                    "content_block_type": "string_template",
+                    "string_template": {
+                        "template": template_str,
+                        "params": params,
+                        "styling": styling,
+                    },
+                }
+            )
+        ]
 
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
