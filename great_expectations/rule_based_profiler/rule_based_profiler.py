@@ -44,7 +44,6 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     build_parameter_container_for_variables,
 )
-from great_expectations.types import safe_deep_copy
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
@@ -877,13 +876,13 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         for rule in rules:
             domain_builder = rule.domain_builder
             if domain_builder.domain_type == MetricDomainTypes.COLUMN:
-                domain_builder.batch_request = safe_deep_copy(batch_request)
+                domain_builder.batch_request = copy.deepcopy(batch_request)
                 domain_builder.batch_request["data_connector_query"] = {"index": -1}
 
             parameter_builders = rule.parameter_builders
             if parameter_builders:
                 for parameter_builder in parameter_builders:
-                    parameter_builder.batch_request = safe_deep_copy(batch_request)
+                    parameter_builder.batch_request = copy.deepcopy(batch_request)
 
             resulting_rules[rule.name] = rule.to_dict()
 
