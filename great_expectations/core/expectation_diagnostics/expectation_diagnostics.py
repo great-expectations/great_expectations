@@ -57,7 +57,13 @@ class ExpectationDiagnostics(SerializableDictDot):
     maturity_checklist: ExpectationDiagnosticMaturityMessages
 
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=asdict(self))
+        result = convert_to_json_serializable(data=asdict(self))
+        result["execution_engines_list"] = sorted([
+            engine
+            for engine, _bool in result["execution_engines"].items()
+            if _bool is True
+        ])
+        return result
 
     def generate_checklist(self) -> str:
         """Generates the checklist in CLI-appropriate string format."""
