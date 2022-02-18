@@ -18,8 +18,8 @@ These Execution Engines provide the computing resources used to calculate the [M
 
 If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Execution Engines that it supports.
 
-We will add SQLAlchemy support for the Custom Expectations implemented in [How to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
-and [How to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
+We will add SQLAlchemy support for the Custom Expectations implemented in our guides on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
+and [how to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
 
 ## Steps
 
@@ -62,7 +62,7 @@ To do this, we use one of the `@column_*_partial` decorators:
 - `@column_pair_condition_partial` for Column Pair Map Expectations
 - `@multicolumn_condition_partial` for Multicolumn Map Expectations
 
-These decorators expect an appropriate `engine=` argument. In this case, we'll pass our `SqlAlchemyExecutionEngine`. 
+These decorators expect an appropriate `engine` argument. In this case, we'll pass our `SqlAlchemyExecutionEngine`. 
 The decorated method takes in an SQLAlchemy `Column` object and will either return a `sqlalchemy.sql.functions.Function` or a `sqlalchemy.sql.expression.ColumnOperator` that Great Expectations will use to generate the appropriate SQL queries. 
   
 For our Custom Column Map Expectation `ExpectColumnValuesToEqualThree`, we're going to leverage SQLAlchemy's `in_` ColumnOperator and the `@column_condition_partial` decorator.
@@ -104,7 +104,7 @@ specifying the type of value we're computing (`AGGREGATE_VALUE`) and the domain 
 ```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L46-L58
 ```
 
-The decorated method takes in a valid [Execution Engine](../../../reference/execution_engine.md) and relevant `kwargs`,
+The decorated method takes in a valid [Execution Engine](../../../reference/execution_engine.md) and relevant key word arguments,
 and will return a computed value.
 
 To do this, we need to access our Compute Domain directly:
@@ -129,7 +129,7 @@ giving us the flexibility to not have write that targeted code ourselves!
 
 ### 3. Verifying your implementation
 
-If you now run your file, `print_diagnostic_checklist` will attempt to execute your example cases using this new backend.
+If you now run your file, `print_diagnostic_checklist()` will attempt to execute your example cases using this new backend.
 
 If your implementation is correctly defined, and the rest of the core logic in your Custom Expectation is already complete,
 you will see the following in your Diagnostic Checklist:
@@ -139,7 +139,7 @@ you will see the following in your Diagnostic Checklist:
 ```
 
 If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../creating_custom_expectations/overview.md) 
-and the Spark backend covered in [How to add Spark support for Custom Expectations](./how_to_add_spark_support_for_an_expectation.md), 
+and the Spark backend covered in our guide on [how to add Spark support for Custom Expectations](./how_to_add_spark_support_for_an_expectation.md), 
 you should see the following in your Diagnostic Checklist:
 
 ```console

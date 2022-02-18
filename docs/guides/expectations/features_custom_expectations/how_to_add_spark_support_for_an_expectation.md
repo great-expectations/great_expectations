@@ -18,8 +18,8 @@ These Execution Engines provide the computing resources used to calculate the [M
 
 If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Execution Engines that it supports.
 
-We will add Spark support for the Custom Expectations implemented in [How to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
-and [How to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
+We will add Spark support for the Custom Expectations implemented in our guides on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
+and [how to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
 
 ## Steps
 
@@ -40,7 +40,7 @@ If not specified, Great Expectations will attempt to determine the implemented b
 
 ### 2. Implement the Spark logic for your Custom Expectation
 
-Great Expectations provides a variety of ways to implement an Expectation in SQLAlchemy. Two of the most common include: 
+Great Expectations provides a variety of ways to implement an Expectation in Spark. Two of the most common include: 
 1.  Defining a partial function that takes a Spark DataFrame column as input
 2.  Directly executing queries on Spark DataFrames to determine the value of your Expectation's metric directly 
 
@@ -61,7 +61,7 @@ To do this, we use one of the `@column_*_partial` decorators:
 - `@column_pair_condition_partial` for Column Pair Map Expectations
 - `@multicolumn_condition_partial` for Multicolumn Map Expectations
 
-These decorators expect an appropriate `engine=` argument. In this case, we'll pass our `SparkDFExecutionEngine`.
+These decorators expect an appropriate `engine` argument. In this case, we'll pass our `SparkDFExecutionEngine`.
 The decorated method takes in a Spark `Column` object and will either return a `pyspark.sql.functions.function` or a `pyspark.sql.Column.function` that Great Expectations will use to generate the appropriate SQL queries.
 
 For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to leverage PySpark's `max` SQL Function and the `@column_aggregate_partial` decorator.
@@ -77,6 +77,7 @@ allows us to access these functions even when PySpark is not installed.
 <summary>Applying Python Functions</summary>
 <code>F.udf</code> allows us to use a Python function as a Spark User Defined Function for Column Map Expectations, 
 giving us the ability to define custom functions and apply them to our data.
+
 
 Here is an example of <code>F.udf</code> applied to <code>ExpectColumnValuesToEqualThree</code>:
 
@@ -130,7 +131,7 @@ This allows us to build and return a query to be executed, providing the result 
 ```
 
 :::note
-Because in Spark we are implementing the window function directly, we have to return the *unexpected* condition -- `False` when `column == 3`, otherwise `True`.
+Because in Spark we are implementing the window function directly, we have to return the *unexpected* condition: `False` when `column == 3`, otherwise `True`.
 :::
 
 </TabItem>
@@ -138,7 +139,7 @@ Because in Spark we are implementing the window function directly, we have to re
 
 ### 3. Verifying your implementation
 
-If you now run your file, `print_diagnostic_checklist` will attempt to execute your example cases using this new backend.
+If you now run your file, `print_diagnostic_checklist()` will attempt to execute your example cases using this new backend.
 
 If your implementation is correctly defined, and the rest of the core logic in your Custom Expectation is already complete,
 you will see the following in your Diagnostic Checklist:
@@ -148,7 +149,7 @@ you will see the following in your Diagnostic Checklist:
 ```
 
 If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../creating_custom_expectations/overview.md) 
-and the SQLAlchemy backend covered in [How to add SQLAlchemy support for Custom Expectations](./how_to_add_sqlalchemy_support_for_an_expectation.md), 
+and the SQLAlchemy backend covered in our guide on [how to add SQLAlchemy support for Custom Expectations](./how_to_add_sqlalchemy_support_for_an_expectation.md), 
 you should see the following in your Diagnostic Checklist:
 
 ```console
