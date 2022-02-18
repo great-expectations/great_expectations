@@ -112,7 +112,7 @@ Congratulations!<br/>&#127881; You've successfully added input validation & type
 
 ### 5. Contribution (Optional)
 
-The method implemented in this guide is an optional feature for Experimental Expectations, and a requirement for [contribution](../../../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at Beta and Production levels.
+The method implemented in this guide is an optional feature for Experimental Expectations, and a requirement for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at Beta and Production levels.
 
 If you would like to contribute your Custom Expectation to the Great Expectations codebase, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pull-requests).
 

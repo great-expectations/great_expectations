@@ -1,7 +1,7 @@
 ---
 title: How to contribute a Custom Expectation to Great Expectations
 ---
-import Prerequisites from '../guides/expectations/creating_custom_expectations/components/prerequisites.jsx'
+import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 
@@ -10,7 +10,7 @@ along with many others developed by data practitioners from around the world as 
 
 <Prerequisites>
 
-  * [Created a Custom Expectation](../guides/expectations/creating_custom_expectations/overview.md)
+  * [Created a Custom Expectation](../creating_custom_expectations/overview.md)
 
 </Prerequisites>
 
@@ -19,7 +19,7 @@ along with many others developed by data practitioners from around the world as 
 ### 1. Verify that your Custom Expectation is ready for contribution
 
 We accept contributions into the Great Expectations codebase at several levels: Experimental, Beta, and Production. The requirements to meet these benchmarks are available in our 
-document on [levels of maturity for Expectations](./contributing_maturity.md).
+document on [levels of maturity for Expectations](../../../contributing/contributing_maturity.md).
 
 If you call the `print_diagnostic_checklist()` method on your Custom Expectation, you should see a checklist similar to this one:
 
@@ -42,9 +42,9 @@ If you call the `print_diagnostic_checklist()` method on your Custom Expectation
 If you've satisified at least the first four checks, you're ready to make a contribution!
 
 :::info
-Not quite there yet? See our guides on [creating Custom Expectations](../guides/expectations/creating_custom_expectations/overview.md) for help!
+Not quite there yet? See our guides on [creating Custom Expectations](../creating_custom_expectations/overview.md) for help!
 
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](./contributing_maturity.md#contributing-expectations) for Expectations.
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 :::
 
 ### 2. Double-check your Library Metadata
@@ -60,7 +60,7 @@ Ensure that your Custom Expectation's `library_metadata` has correct information
 
 <details>
 <summary>Packages?</summary>
-If you're interested in learning more about Custom Expectation Packages, see our <a href="./contributing_package">guide on packaging your Custom Expectations</a>.
+If you're interested in learning more about Custom Expectation Packages, see our <a href="../../../contributing/contributing_package.md">guide on packaging your Custom Expectations</a>.
 <br/><br/>
 Not contributing to a specifc package? Your Custom Expectation will be automatically published in the <a href="https://pypi.org/project/great-expectations-experimental/">PyPI package <inlineCode>great-expectations-experimental</inlineCode></a>. 
 This package contains all of our Experimental community-contributed Custom Expectations, and is separate from the core <inlineCode>great-expectations</inlineCode> package.
@@ -72,7 +72,7 @@ You're ready to open a [Pull Request](https://github.com/great-expectations/grea
 
 As a part of this process, we ask you to:
 
-- Sign our [Contributor License Agreement (CLA)](./contributing_misc.md#contributor-license-agreement-cla)
+- Sign our [Contributor License Agreement (CLA)](../../../contributing/contributing_misc.md#contributor-license-agreement-cla)
 - Provide some information for our reviewers to expedite your contribution process, including:
   - A `[CONTRIB]` tag in your title
   - Titleing your Pull Request with the name of your Custom Expectation
@@ -88,6 +88,12 @@ Congratulations!<br/>&#127881; You've submitted a Custom Expectation for contrib
 </b></p>  
 </div>
 
+:::info
+Contributing as a part of a Great Expectations Hackathon?
+
+Submit your PR with a `[HACKATHON]` tag in your title instead of `[CONTRIB]`, and be sure to call out your 
+participation in the Hackathon in the text of your PR as well!
+:::
 
 ### 4. Stay involved!
 
@@ -104,6 +110,6 @@ will be included in the next release of Great Expectations.
 Keep an eye out for an acknowledgement in our release notes, and welcome to the community!
 
 :::note
-If you’ve included your (physical) mailing address in the [Contributor License Agreement](./contributing_misc.md#contributor-license-agreement-cla), 
+If you’ve included your (physical) mailing address in the [Contributor License Agreement](../../../contributing/contributing_misc.md#contributor-license-agreement-cla), 
 we’ll send you a personalized Great Expectations mug once your first PR is merged!
 :::

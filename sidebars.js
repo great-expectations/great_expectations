@@ -244,6 +244,13 @@ module.exports = {
                 'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
                 'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
               ]
+            },
+            {
+              type: 'category',
+              label: "Contributing",
+              items: [
+                  'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations'
+              ]
             }
           ]
         },
@@ -381,7 +388,6 @@ module.exports = {
         { type: 'doc', id: 'contributing/contributing_maturity' },
         { type: 'doc', id: 'contributing/contributing_misc' },
         { type: 'doc', id: 'contributing/contributing_package'},
-        { type: 'doc', id: 'contributing/how_to_contribute_a_custom_expectation_to_great_expectations'},
         {
           type: 'category',
           label: 'Style guides',

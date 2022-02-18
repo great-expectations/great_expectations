@@ -154,7 +154,7 @@ Congratulations!<br/>&#127881; You've successfully implemented SQLAlchemy suppor
 
 ### 4. Contribution (Optional)
 
-This guide will leave you with core functionality sufficient for [contribution](../../../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+This guide will leave you with core functionality sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
 
 If you're interested in having your contribution accepted at a Beta level, your Custom Expectation will need to support SQLAlchemy, Spark, and Pandas.
 
