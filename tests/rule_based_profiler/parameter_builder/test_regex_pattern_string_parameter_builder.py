@@ -1,4 +1,4 @@
-from typing import Set
+from typing import List, Set
 
 import pytest
 
@@ -36,8 +36,8 @@ def test_regex_pattern_string_parameter_builder_instantiation_with_defaults():
         )
     )
 
-    assert regex_pattern_string_parameter._threshold == 1.0
-    assert regex_pattern_string_parameter._candidate_regexes == candidate_regexes
+    assert regex_pattern_string_parameter.threshold == 1.0
+    assert regex_pattern_string_parameter.candidate_regexes == candidate_regexes
     assert regex_pattern_string_parameter.CANDIDATE_REGEX == candidate_regexes
 
 
@@ -52,29 +52,9 @@ def test_regex_pattern_string_parameter_builder_instantiation_override_defaults(
             threshold=0.5,
         )
     )
-    assert regex_pattern_string_parameter._threshold == 0.5
-    assert regex_pattern_string_parameter._candidate_regexes == candidate_regexes
+    assert regex_pattern_string_parameter.threshold == 0.5
+    assert regex_pattern_string_parameter.candidate_regexes == candidate_regexes
     assert regex_pattern_string_parameter.CANDIDATE_REGEX != candidate_regexes
-
-
-def test_regex_pattern_string_parameter_builder_zero_batch_id_error():
-    regex_pattern_string_parameter: RegexPatternStringParameterBuilder = (
-        RegexPatternStringParameterBuilder(
-            name="my_simple_regex_string_parameter_builder",
-        )
-    )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(domain_type=MetricDomainTypes.COLUMN)
-
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
-        regex_pattern_string_parameter.build_parameters(
-            parameter_container=parameter_container, domain=domain
-        )
-
-    assert (
-        str(e.value)
-        == "RegexPatternStringParameterBuilder was not able to get Validator using domain, variables and parameters provided."
-    )
 
 
 def test_regex_pattern_string_parameter_builder_alice(
@@ -87,11 +67,11 @@ def test_regex_pattern_string_parameter_builder_alice(
         "data_asset_name": "alice_columnar_table_single_batch_data_asset",
     }
 
-    candidate_regexes: Set[str] = {
+    candidate_regexes: List[str] = [
         r"^\d{1}$",
         r"^\d{2}$",
         r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
-    }
+    ]
     metric_domain_kwargs = {"column": "id"}
 
     regex_pattern_string_parameter: RegexPatternStringParameterBuilder = (
@@ -113,7 +93,6 @@ def test_regex_pattern_string_parameter_builder_alice(
     regex_pattern_string_parameter._build_parameters(
         parameter_container=parameter_container, domain=domain
     )
-
     fully_qualified_parameter_name_for_value: str = "$parameter.my_regex"
     expected_value: dict = {
         "value": r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
@@ -136,11 +115,11 @@ def test_regex_pattern_string_parameter_builder_bobby(
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
     metric_domain_kwargs: dict = {"column": "VendorID"}
-    candidate_regexes: Set[str] = {
+    candidate_regexes: List[str] = [
         r"^\d{1}$",
         r"^\d{3}$",  # won't match
         r"^\d{4}$",  # won't match
-    }
+    ]
     threshold: float = 0.9
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -161,8 +140,8 @@ def test_regex_pattern_string_parameter_builder_bobby(
     )
 
     assert regex_parameter.CANDIDATE_REGEX != candidate_regexes
-    assert regex_parameter._candidate_regexes == candidate_regexes
-    assert regex_parameter._threshold == 0.9
+    assert regex_parameter.candidate_regexes == candidate_regexes
+    assert regex_parameter.threshold == 0.9
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(

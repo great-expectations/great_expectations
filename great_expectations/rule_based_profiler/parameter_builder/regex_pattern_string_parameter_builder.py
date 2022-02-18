@@ -49,8 +49,8 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        threshold: float = 1.0,
-        candidate_regexes: Optional[Union[str, dict]] = None,
+        threshold: Union[float, str] = 1.0,
+        candidate_regexes: Optional[Union[Iterable[str], str]] = None,
         data_context: Optional["DataContext"] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
@@ -76,10 +76,30 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         self._threshold = threshold
 
-        if candidate_regexes is not None:
-            self._candidate_regexes = set(candidate_regexes)
-        else:
-            self._candidate_regexes = RegexPatternStringParameterBuilder.CANDIDATE_REGEX
+        self._candidate_regexes = candidate_regexes
+
+    @property
+    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
+        return self._metric_domain_kwargs
+
+    @property
+    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
+        return self._metric_value_kwargs
+
+    @property
+    def threshold(self) -> Union[str, float]:
+        return self._threshold
+
+    @property
+    def candidate_regexes(
+        self,
+    ) -> Union[
+        str,
+        Union[
+            Set[str], List[str], "RegexPatternStringParameterBuilder.CANDIDATE_REGEX"
+        ],
+    ]:  # noqa: F821
+        return self._candidate_regexes
 
     def _build_parameters(
         self,
@@ -94,31 +114,14 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
         """
-        validator: Optional[Validator] = self.get_validator(
-            domain=domain, variables=variables, parameters=parameters
-        )
-        if not validator:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"{self.__class__.__name__} was not able to get Validator using domain, variables and parameters provided."
-            )
-
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
-            domain=domain, variables=variables, parameters=parameters
-        )
-        if not batch_ids:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
-            )
-
         metric_computation_result: MetricComputationResult
 
         metric_values: np.ndarray
 
         metric_computation_result: MetricComputationResult = self.get_metrics(
-            batch_ids=batch_ids,
-            validator=validator,
             metric_name="column_values.nonnull.count",
-            metric_domain_kwargs=self._metric_domain_kwargs,
+            metric_domain_kwargs=self.metric_domain_kwargs,
+            metric_value_kwargs=self.metric_value_kwargs,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -131,10 +134,27 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         regex_string_success_ratios: dict = {}
 
+        # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise
+        candidate_regexes: Union[
+            Set[str],
+            List[str],
+            "RegexPatternStringParameterBuilder.CANDIDATE_REGEX",  # noqa: F821
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.candidate_regexes,
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+        if candidate_regexes is not None and isinstance(candidate_regexes, list):
+            candidate_regexes = set(candidate_regexes)
+        else:
+            candidate_regexes = RegexPatternStringParameterBuilder.CANDIDATE_REGEX
+
         regex_string: str
         match_regex_metric_value_kwargs: dict
-        for regex_string in self._candidate_regexes:
-            if self._metric_value_kwargs:
+        for regex_string in candidate_regexes:
+            if self.metric_value_kwargs:
                 match_regex_metric_value_kwargs: dict = {
                     **self._metric_value_kwargs,
                     **{"regex": regex_string},
@@ -143,10 +163,8 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
                 match_regex_metric_value_kwargs: dict = {"regex": regex_string}
 
             metric_computation_result: MetricComputationResult = self.get_metrics(
-                batch_ids=batch_ids,
-                validator=validator,
                 metric_name="column_values.match_regex.unexpected_count",
-                metric_domain_kwargs=self._metric_domain_kwargs,
+                metric_domain_kwargs=self.metric_domain_kwargs,
                 metric_value_kwargs=match_regex_metric_value_kwargs,
                 domain=domain,
                 variables=variables,
@@ -154,17 +172,17 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             )
             metric_values = metric_computation_result.metric_values
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
-            metric_values = metric_values[:, 0]
 
+            metric_values = metric_values[:, 0]
             match_regex_unexpected_count: int = sum(metric_values)
-            success_ratio = (
+            success_ratio: float = (
                 nonnull_count - match_regex_unexpected_count
             ) / nonnull_count
             regex_string_success_ratios[regex_string] = success_ratio
 
         best_regex_string: Optional[str] = None
         best_ratio: float = 0.0
-
+        # Obtain threshold from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         threshold: float = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self._threshold,
