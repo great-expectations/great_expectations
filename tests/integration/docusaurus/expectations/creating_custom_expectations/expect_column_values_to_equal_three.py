@@ -146,20 +146,6 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
                     },
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
-                },
-            ],
         }
     ]
 
