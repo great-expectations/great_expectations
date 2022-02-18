@@ -6183,7 +6183,10 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "column": "VendorID",
                     "regex": {
                         "value": [r"^\d{1}$"],
-                        "details": {"success_ratio": [1.0]},
+                        "details": {
+                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                            "threshold": 0.9,
+                        },
                     },
                 },
                 "meta": {
@@ -6204,7 +6207,10 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "column": "RatecodeID",
                     "regex": {
                         "value": [r"^\d{1}$"],
-                        "details": {"success_ratio": [1.0]},
+                        "details": {
+                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                            "threshold": 0.9,
+                        },
                     },
                 },
                 "meta": {
@@ -6225,7 +6231,10 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "column": "PULocationID",
                     "regex": {
                         "value": [r"^\d{1}$"],
-                        "details": {"success_ratio": [1.0]},
+                        "details": {
+                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                            "threshold": 0.9,
+                        },
                     },
                 },
                 "meta": {
@@ -6246,7 +6255,10 @@ def bobby_columnar_table_multi_batch(empty_data_context):
                     "column": "DOLocationID",
                     "regex": {
                         "value": [r"^\d{1}$"],
-                        "details": {"success_ratio": [1.0]},
+                        "details": {
+                            "evaluated_regexes": {r"^\d{1}$": 1.0, r"^\d{2}$": 0.0},
+                            "threshold": 0.9,
+                        },
                     },
                 },
                 "meta": {

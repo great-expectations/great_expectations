@@ -99,6 +99,18 @@ def test_regex_pattern_string_parameter_builder_alice(
         "value": [r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$"],
         "details": {"success_ratio": [1.0]},
     }
+    expected_value: dict = {
+        "value": [r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$"],
+        "details": {
+            "evaluated_regexes": {
+                r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$": 1.0,
+                r"^\d{1}$": 0,
+                r"^\d{2}$": 0,
+            },
+            "threshold": 1.0,
+        },
+    }
+
     assert (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
@@ -159,8 +171,15 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
     expected_value: dict = {
-        "value": [r"^\d{1}$", r"^[0-9]{1}$"],
-        "details": {"success_ratio": [1.0, 1.0]},
+        "value": [r"^[0-9]{1}$", r"^\d{1}$"],
+        "details": {
+            "evaluated_regexes": {
+                r"^\d{1}$": 1.0,
+                r"^[0-9]{1}$": 1.0,
+                r"^\d{4}$": 0,
+            },
+            "threshold": 0.9,
+        },
     }
 
     assert (
@@ -274,7 +293,22 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
     )
     expected_value: dict = {
         "value": [],
-        "details": {"success_ratio": []},
+        "details": {
+            "evaluated_regexes": {
+                r"/\d+/": 0,
+                r"/-?\d+/": 0,
+                r"/-?\d+(\.\d*)?/": 0,
+                r"/[A-Za-z0-9\.,;:!?()\"'%\-]+/": 0,
+                r"^\s+/": 0,
+                r"\s+/$": 0,
+                r"/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#()?&//=]*)/": 0,
+                r"/<\/?(?:p|a|b|img)(?: \/)?>/": 0,
+                r"/(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})(?:.(?:25[0-5]|2[0-4]\d|[01]\d{2}|\d{1,2})){3}/": 0,
+                r"/(?:[A-Fa-f0-9]){0,4}(?: ?:? ?(?:[A-Fa-f0-9]){0,4}){0,7}/": 0,
+                r"\b[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}-[0-5][0-9a-fA-F]{3}-[089ab][0-9a-fA-F]{3}-\b[0-9a-fA-F]{12}\b ": 0,
+            },
+            "threshold": 0.9,
+        },
     }
 
     assert (

@@ -182,8 +182,6 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             ) / nonnull_count
             regex_string_success_ratios[regex_string] = success_ratio
 
-        best_regex_string: Optional[str] = None
-        best_ratio: float = 0.0
         # Obtain threshold from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         threshold: float = get_parameter_value_and_validate_return_type(
             domain=domain,
@@ -193,25 +191,55 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        regex_string_list: List[str] = []
-        ratio_list: List[float] = []
-        for regex_string, ratio in regex_string_success_ratios.items():
-            if ratio >= threshold:
-                regex_string_list.append(regex_string)
-                ratio_list.append(ratio)
-        # sort
-        sorted_regex_string_list: List[str] = [
-            x for _, x in sorted(zip(ratio_list, regex_string_list), reverse=True)
-        ]
-        sorted_ratio_list: List[float] = sorted(ratio_list, reverse=True)
+        # get list of regex_strings that match greater than threshold
+        regex_string_success_list: List[
+            str
+        ] = self._get_regex_matched_greater_than_threshold(
+            regex_string_success_ratios, threshold
+        )
+        # sorted regex and ratios for all evaluated candidates
+        sorted_ratio_list, sorted_regex_string_list = self._get_sorted_regex_and_ratios(
+            regex_string_success_ratios
+        )
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.name}": {
-                "value": sorted_regex_string_list,
-                "details": {"success_ratio": sorted_ratio_list},
+                "value": regex_string_success_list,
+                "details": {
+                    "evaluated_regexes": dict(
+                        zip(sorted_regex_string_list, sorted_ratio_list)
+                    ),
+                    "threshold": threshold,
+                },
             },
         }
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )
         return parameter_container
+
+    def _get_regex_matched_greater_than_threshold(
+        self, regex_string_success_ratio_dict: dict, threshold: float
+    ) -> List[str]:
+        """
+        Helper method to calculate which regex_strings match greater than threshold
+        """
+        regex_string_success_list: List[str] = []
+        for regex_string, ratio in regex_string_success_ratio_dict.items():
+            if ratio >= threshold:
+                regex_string_success_list.append(regex_string)
+        return regex_string_success_list
+
+    def _get_sorted_regex_and_ratios(
+        self, regex_string_success_ratio_dict: dict
+    ) -> Tuple[List[float], List[str]]:
+        """
+        Helper method to sort all regexes that were evaluated by their success ratio. Returns Tuple(ratio, sorted_strings)
+        """
+        regex_string = regex_string_success_ratio_dict.keys()
+        ratio = list(regex_string_success_ratio_dict.values())
+        sorted_regex_strings = [
+            i for _, i in sorted(zip(ratio, regex_string), reverse=True)
+        ]
+        ratio.sort(reverse=True)
+        return ratio, sorted_regex_strings
