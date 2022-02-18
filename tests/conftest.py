@@ -3290,7 +3290,6 @@ def titanic_sqlite_db_connection_string(sa):
         raise ValueError("sqlite tests require sqlalchemy to be installed")
 
 
-
 @pytest.fixture
 def titanic_expectation_suite(empty_data_context_stats_enabled):
     data_context: DataContext = empty_data_context_stats_enabled
