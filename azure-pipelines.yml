@@ -394,7 +394,7 @@ stages:
     # condition: and(succeeded(), eq(variables.isMain, true))
     condition: eq(variables.isRefactor, true)
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-18.04'
 #   dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
 
     jobs:
