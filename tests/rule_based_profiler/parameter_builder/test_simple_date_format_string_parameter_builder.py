@@ -14,7 +14,7 @@ from great_expectations.rule_based_profiler.types import (
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 
-default_candidate_strings: Set[str] = {
+DEFAULT_CANDIDATE_STRINGS: Set[str] = {
     "%Y-%m-%d",
     "%Y-%m-%d %H:%M:%S",
     "%m-%d-%Y",
@@ -79,9 +79,9 @@ def test_simple_date_format_parameter_builder_instantiation():
         )
     )
 
-    assert date_format_string_parameter.CANDIDATE_STRINGS == default_candidate_strings
-    assert date_format_string_parameter._candidate_strings == default_candidate_strings
-    assert date_format_string_parameter._threshold == 1.0
+    assert date_format_string_parameter.CANDIDATE_STRINGS == DEFAULT_CANDIDATE_STRINGS
+    assert date_format_string_parameter.threshold == 1.0
+    assert date_format_string_parameter.candidate_strings is None
 
 
 def test_simple_date_format_parameter_builder_zero_batch_id_error():
@@ -126,8 +126,8 @@ def test_simple_date_format_parameter_builder_alice(
         )
     )
 
-    assert date_format_string_parameter.CANDIDATE_STRINGS == default_candidate_strings
-    assert date_format_string_parameter._candidate_strings == default_candidate_strings
+    assert date_format_string_parameter.CANDIDATE_STRINGS == DEFAULT_CANDIDATE_STRINGS
+    assert date_format_string_parameter.candidate_strings is None
     assert date_format_string_parameter._threshold == 1.0
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
@@ -141,6 +141,7 @@ def test_simple_date_format_parameter_builder_alice(
         parameter_container=parameter_container, domain=domain
     )
 
+    # noinspection PyTypeChecker
     assert len(parameter_container.parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_date_format"
