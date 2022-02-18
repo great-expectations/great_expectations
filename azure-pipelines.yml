@@ -426,7 +426,7 @@ stages:
           - script: |
               pip install $(GE_pytest_pip_opts)
               pip install --requirement requirements.txt
-              pip install  .
+              pip install  --editable .
             displayName: 'Install dependencies'
 
           - script: |
