@@ -182,14 +182,15 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         },
     }
 
-    assert (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters={domain.id: parameter_container},
-        )
-        == expected_value
+    results = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters={domain.id: parameter_container},
     )
+
+    assert results is not None
+    assert sorted(results["value"]) == sorted(expected_value["value"])
+    assert results["details"] == expected_value["details"]
 
 
 def test_regex_pattern_string_parameter_builder_bobby_no_match(
@@ -249,6 +250,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
     )
 
 
+# Chetan - 20220219 - This needs to be renamed to prevent a namespace collision
 def test_regex_pattern_string_parameter_builder_bobby_no_match(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
