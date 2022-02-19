@@ -1005,11 +1005,6 @@ def test_stats_mixed_expectations():
     assert expected == actual
 
 
-def test_generate_library_json_from_registered_expectations():
-    library_json = ge.util.generate_library_json_from_registered_expectations()
-    assert len(library_json) > 50
-
-
 class TestIO(unittest.TestCase):
     def test_read_csv(self):
         script_path = os.path.dirname(os.path.realpath(__file__))

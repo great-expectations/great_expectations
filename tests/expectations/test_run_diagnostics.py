@@ -33,6 +33,9 @@ def test_expectation_self_check():
             "maturity": "CONCEPT_ONLY",
             "tags": [],
             "contributors": [],
+            "requirements": [],
+            "has_full_test_suite": False,
+            "manually_reviewed_code": False,
             "library_metadata_passed_checks": False,
             "package": None,
         },
@@ -114,11 +117,40 @@ def test_expectation_self_check():
         "tests": [],
         "errors": [],
         "maturity_checklist": {
-            "beta": [],
+            "beta": [
+                {
+                    "doc_url": None,
+                    "message": "Has basic input validation and type checking",
+                    "passed": False,
+                    "sub_messages": [
+                        {
+                            "message": "No example found to get kwargs for ExpectationConfiguration",
+                            "passed": False,
+                        },
+                    ],
+                },
+                {
+                    "doc_url": None,
+                    "message": "Has both statement Renderers: prescriptive and diagnostic",
+                    "passed": True,
+                    "sub_messages": [],
+                },
+                {
+                    "doc_url": None,
+                    "message": "Has core logic that passes tests for all applicable Execution Engines and SQL dialects",
+                    "passed": False,
+                    "sub_messages": [
+                        {
+                            "message": "There are no test results",
+                            "passed": False,
+                        }
+                    ],
+                },
+            ],
             "experimental": [
                 {
                     "doc_url": None,
-                    "message": "library_metadata object exists",
+                    "message": "Has a library_metadata object",
                     "passed": False,
                     "sub_messages": [],
                 },
@@ -136,12 +168,36 @@ def test_expectation_self_check():
                 },
                 {
                     "doc_url": None,
-                    "message": "Core logic exists and passes tests on at least one Execution Engine",
-                    "passed": True,
+                    "message": "Has core logic and passes tests on at least one Execution Engine",
+                    "passed": False,
+                    "sub_messages": [
+                        {
+                            "message": "There are no test results",
+                            "passed": False,
+                        }
+                    ],
+                },
+            ],
+            "production": [
+                {
+                    "doc_url": None,
+                    "message": "Passes all linting checks",
+                    "passed": False,
+                    "sub_messages": [],
+                },
+                {
+                    "doc_url": None,
+                    "message": "Has a full suite of tests, as determined by a code owner",
+                    "passed": False,
+                    "sub_messages": [],
+                },
+                {
+                    "doc_url": None,
+                    "message": "Has passed a manual review by a code owner for code standards and style guides",
+                    "passed": False,
                     "sub_messages": [],
                 },
             ],
-            "production": [],
         },
     }
 
@@ -159,6 +215,7 @@ def test_include_in_gallery_flag():
         "input": {"column": "mostly_threes", "mostly": 0.6},
         "include_in_gallery": False,
         "suppress_test_for": [],
+        "only_for": None,
         "output": {
             "success": True,
             "unexpected_index_list": [6, 7],

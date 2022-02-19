@@ -340,7 +340,7 @@ Congratulations!<br/>&#127881; You've successfully implemented a Diagnostic Rend
 
 ### 5. Contribution (Optional)
 
-Renderers are not a requirement for for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+Renderers are not a requirement for for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
 
 Implementing at least one Prescriptive and Diagnostic Renderer from this guide is required for contribution back to Great Expectations at a Beta or Production level.
 

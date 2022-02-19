@@ -1,6 +1,8 @@
+from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import List, Tuple
 
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
     ExpectationTestDataCases,
 )
@@ -55,7 +57,15 @@ class ExpectationDiagnostics(SerializableDictDot):
     maturity_checklist: ExpectationDiagnosticMaturityMessages
 
     def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(data=asdict(self))
+        result = convert_to_json_serializable(data=asdict(self))
+        result["execution_engines_list"] = sorted(
+            [
+                engine
+                for engine, _bool in result["execution_engines"].items()
+                if _bool is True
+            ]
+        )
+        return result
 
     def generate_checklist(self) -> str:
         """Generates the checklist in CLI-appropriate string format."""
@@ -72,7 +82,7 @@ class ExpectationDiagnostics(SerializableDictDot):
         """Check whether the Expectation has a library_metadata object"""
 
         return ExpectationDiagnosticCheckMessage(
-            message="library_metadata object exists",
+            message="Has a library_metadata object",
             passed=library_metadata.library_metadata_passed_checks,
         )
 
@@ -132,26 +142,113 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_core_logic_for_at_least_one_execution_engine(
-        execution_engines: ExpectationExecutionEngineDiagnostics,
+        test_results: List[ExpectationTestDiagnostics],
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether core logic for this Expectation exists and passes tests on at least one Execution Engine"""
 
-        message = "Core logic exists and passes tests on at least one Execution Engine"
-        successful_execution_engines = 0
-        for k, v in execution_engines.items():
-            if v is True:
-                successful_execution_engines += 1
+        sub_messages = []
+        backends_passing_all_tests = []
+        backend_results = defaultdict(list)
+        passed = False
+        message = "Has core logic and passes tests on at least one Execution Engine"
 
-        if successful_execution_engines > 0:
-            return ExpectationDiagnosticCheckMessage(
-                message=message,
-                passed=True,
+        for test_result in test_results:
+            backend_results[test_result.backend].append(test_result.test_passed)
+
+        for backend in backend_results:
+            if all(backend_results[backend]):
+                backends_passing_all_tests.append(backend)
+
+        if len(backends_passing_all_tests) > 0:
+            passed = True
+            backend = backends_passing_all_tests[0]
+            sub_messages.append(
+                {
+                    "message": f"All {len(backend_results[backend])} tests for {backend} are passing",
+                    "passed": True,
+                }
             )
-        else:
-            return ExpectationDiagnosticCheckMessage(
-                message=message,
-                passed=False,
+
+        if not test_results:
+            sub_messages.append(
+                {
+                    "message": "There are no test results",
+                    "passed": False,
+                }
             )
+
+        return ExpectationDiagnosticCheckMessage(
+            message=message,
+            passed=passed,
+            sub_messages=sub_messages,
+        )
+
+    @staticmethod
+    def _check_core_logic_for_all_applicable_execution_engines(
+        test_results: List[ExpectationTestDiagnostics],
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check whether core logic for this Expectation exists and passes tests on all applicable Execution Engines"""
+
+        sub_messages = []
+        backends_passing_all_tests = []
+        backends_failing_any_tests = []
+        failing_names = []
+        backend_results = defaultdict(list)
+        passed = False
+        message = "Has core logic that passes tests for all applicable Execution Engines and SQL dialects"
+        for test_result in test_results:
+            backend_results[test_result.backend].append(test_result.test_passed)
+            if test_result.test_passed is False:
+                failing_names.append(test_result.test_title)
+
+        for backend in backend_results:
+            if all(backend_results[backend]):
+                backends_passing_all_tests.append(backend)
+            else:
+                backends_failing_any_tests.append(backend)
+
+        if len(backends_passing_all_tests) > 0 and len(backends_failing_any_tests) == 0:
+            passed = True
+
+        for backend in backends_passing_all_tests:
+            sub_messages.append(
+                {
+                    "message": f"All {len(backend_results[backend])} tests for {backend} are passing",
+                    "passed": True,
+                }
+            )
+
+        for backend in backends_failing_any_tests:
+            num_tests = len(backend_results[backend])
+            num_passing = backend_results[backend].count(True)
+            sub_messages.append(
+                {
+                    "message": f"Only {num_passing} / {num_tests} tests for {backend} are passing",
+                    "passed": False,
+                }
+            )
+
+        if len(failing_names) > 0:
+            sub_messages.append(
+                {
+                    "message": f"Failing: {', '.join(failing_names)}",
+                    "passed": False,
+                }
+            )
+
+        if not test_results:
+            sub_messages.append(
+                {
+                    "message": "There are no test results",
+                    "passed": False,
+                }
+            )
+
+        return ExpectationDiagnosticCheckMessage(
+            message=message,
+            passed=passed,
+            sub_messages=sub_messages,
+        )
 
     @staticmethod
     def _count_positive_and_negative_example_cases(
@@ -164,11 +261,11 @@ class ExpectationDiagnostics(SerializableDictDot):
 
         for test_data_cases in examples:
             for test in test_data_cases["tests"]:
-                if test["output"]["success"] is True:
+                success = test["output"].get("success")
+                if success is True:
                     positive_cases += 1
-                elif test["output"]["success"] is False:
+                elif success is False:
                     negative_cases += 1
-
         return positive_cases, negative_cases
 
     @staticmethod
@@ -215,3 +312,86 @@ class ExpectationDiagnostics(SerializableDictDot):
         output_message += "\n"
 
         return output_message
+
+    @staticmethod
+    def _check_input_validation(
+        expectation_instance,
+        examples: List[ExpectationTestDataCases],
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check that the validate_configuration method returns True"""
+        passed = False
+        sub_messages = []
+        try:
+            first_test = examples[0]["tests"][0]
+        except IndexError:
+            sub_messages.append(
+                {
+                    "message": "No example found to get kwargs for ExpectationConfiguration",
+                    "passed": False,
+                }
+            )
+        else:
+            expectation_config = ExpectationConfiguration(
+                expectation_type=expectation_instance.expectation_type,
+                kwargs=first_test.input,
+            )
+            passed = expectation_instance.validate_configuration(expectation_config)
+
+        return ExpectationDiagnosticCheckMessage(
+            message="Has basic input validation and type checking",
+            passed=passed,
+            sub_messages=sub_messages,
+        )
+
+    @staticmethod
+    def _check_renderer_methods(
+        expectation_instance,
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check if all statment renderers are defined"""
+        passed = False
+        # For now, don't include the "question" and "descriptive" types since they are so
+        # sparsely implemented
+        # all_renderer_types = {"diagnostic", "prescriptive", "question", "descriptive"}
+        all_renderer_types = {"diagnostic", "prescriptive"}
+        renderer_names = [
+            name
+            for name in dir(expectation_instance)
+            if name.endswith("renderer") and name.startswith("_")
+        ]
+        renderer_types = {name.split("_")[1] for name in renderer_names}
+        if renderer_types - {"question", "descriptive"} == all_renderer_types:
+            passed = True
+        return ExpectationDiagnosticCheckMessage(
+            # message="Has all four statement Renderers: question, descriptive, prescriptive, diagnostic",
+            message="Has both statement Renderers: prescriptive and diagnostic",
+            passed=passed,
+        )
+
+    @staticmethod
+    def _check_linting(expectation_instance) -> ExpectationDiagnosticCheckMessage:
+        """Check if linting checks pass for Expectation"""
+        # TODO: Perform linting checks instead of just giving thumbs down
+        return ExpectationDiagnosticCheckMessage(
+            message="Passes all linting checks",
+            passed=False,
+        )
+
+    @staticmethod
+    def _check_full_test_suite(
+        library_metadata: AugmentedLibraryMetadata,
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check library_metadata to see if Expectation has a full test suite"""
+        return ExpectationDiagnosticCheckMessage(
+            message="Has a full suite of tests, as determined by a code owner",
+            passed=library_metadata.has_full_test_suite,
+        )
+
+    @staticmethod
+    def _check_manual_code_review(
+        library_metadata: AugmentedLibraryMetadata,
+    ) -> ExpectationDiagnosticCheckMessage:
+        """Check library_metadata to see if a manual code review has been performed"""
+        return ExpectationDiagnosticCheckMessage(
+            message="Has passed a manual review by a code owner for code standards and style guides",
+            passed=library_metadata.manually_reviewed_code,
+        )

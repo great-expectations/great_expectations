@@ -77,7 +77,10 @@ edr = ExpectationDiagnostics(
                 "flows",
             ],
             "contributors": ["@shinnyshinshin", "@abegong"],
+            "requirements": [],
             "library_metadata_passed_checks": True,
+            "has_full_test_suite": False,
+            "manually_reviewed_code": False,
         }
     ),
     renderers=[
@@ -234,81 +237,6 @@ def test__count_positive_and_negative_example_cases():
     assert edr._count_positive_and_negative_example_cases(
         [expectation_test_data_case]
     ) == (1, 1)
-
-
-def test__check_core_logic_for_at_least_one_execution_engine__with_all_execution_engines():
-    assert ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
-        execution_engines=ExpectationExecutionEngineDiagnostics(
-            PandasExecutionEngine=True,
-            SparkDFExecutionEngine=True,
-            SqlAlchemyExecutionEngine=True,
-        ),
-    ) == ExpectationDiagnosticCheckMessage(
-        **{
-            "message": "Core logic exists and passes tests on at least one Execution Engine",
-            "passed": True,
-        }
-    )
-
-
-def test__check_core_logic_for_at_least_one_execution_engine__with_no_execution_engines():
-    assert ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
-        execution_engines=ExpectationExecutionEngineDiagnostics(
-            PandasExecutionEngine=False,
-            SparkDFExecutionEngine=False,
-            SqlAlchemyExecutionEngine=False,
-        ),
-    ) == ExpectationDiagnosticCheckMessage(
-        **{
-            "message": "Core logic exists and passes tests on at least one Execution Engine",
-            "passed": False,
-        }
-    )
-
-
-def test__check_core_logic_for_at_least_one_execution_engine__with_only_pandas():
-    assert ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
-        execution_engines=ExpectationExecutionEngineDiagnostics(
-            PandasExecutionEngine=True,
-            SparkDFExecutionEngine=False,
-            SqlAlchemyExecutionEngine=False,
-        ),
-    ) == ExpectationDiagnosticCheckMessage(
-        **{
-            "message": "Core logic exists and passes tests on at least one Execution Engine",
-            "passed": True,
-        }
-    )
-
-
-def test__check_core_logic_for_at_least_one_execution_engine__with_only_sql():
-    assert ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
-        execution_engines=ExpectationExecutionEngineDiagnostics(
-            PandasExecutionEngine=False,
-            SparkDFExecutionEngine=True,
-            SqlAlchemyExecutionEngine=False,
-        ),
-    ) == ExpectationDiagnosticCheckMessage(
-        **{
-            "message": "Core logic exists and passes tests on at least one Execution Engine",
-            "passed": True,
-        }
-    )
-
-
-def test__check_core_logic_for_at_least_one_execution_engine__with_only_spark():
-    assert ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
-        execution_engines=ExpectationExecutionEngineDiagnostics(
-            PandasExecutionEngine=False,
-            SparkDFExecutionEngine=False,
-            SqlAlchemyExecutionEngine=True,
-        ),
-    ) == ExpectationDiagnosticCheckMessage(
-        **{
-            "message": "Core logic exists and passes tests on at least one Execution Engine",
-            "passed": True,
-        }
-    )
 
 
 def test__check_example_cases__with_enough_test_cases_but_all_failing():

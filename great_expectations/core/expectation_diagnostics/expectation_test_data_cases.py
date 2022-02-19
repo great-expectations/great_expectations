@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from great_expectations.types import SerializableDictDot
@@ -7,6 +8,15 @@ from great_expectations.types import SerializableDictDot
 class TestData(dict):
     __test__ = False  # Tell pytest not to try to collect this class as a test
     pass
+
+
+class Backend(Enum):
+    """Backends with some level of testing and support"""
+
+    BIGQUERY = "CONCEPT_ONLY"
+    MSSQL = "EXPERIMENTAL"
+    SQLITE = "BETA"
+    PYSPARK = "PRODUCTION"
 
 
 @dataclass
@@ -19,6 +29,7 @@ class ExpectationTestCase(SerializableDictDot):
     exact_match_out: bool
     suppress_test_for: List[str] = field(default_factory=list)
     include_in_gallery: bool = False
+    only_for: Optional[List[str]] = None
 
 
 class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
@@ -45,6 +56,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
             output=out,
             exact_match_out=exact_match_out,
             suppress_test_for=suppress_test_for,
+            only_for=kwargs.get("only_for"),
         )
 
 
@@ -54,5 +66,5 @@ class ExpectationTestDataCases(SerializableDictDot):
 
     data: TestData
     tests: List[ExpectationTestCase]
-    schemas: Optional[Dict] = None
-    # test_backends: Optional[List[Dict]] = field(default_factory=list)
+    schemas: Dict[Backend, Dict[str, str]] = field(default_factory=dict)
+    test_backends: Optional[List[Dict]] = field(default_factory=list)
