@@ -1,7 +1,5 @@
 from ruamel import yaml
 
-yaml = yaml.YAML(typ="safe")
-
 from great_expectations import DataContext
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
