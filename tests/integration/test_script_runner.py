@@ -10,6 +10,7 @@ from typing import List, Optional, Tuple
 
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from assets.scripts.build_gallery import execute_shell_command
 from great_expectations.data_context.util import file_relative_path
 
@@ -367,7 +368,7 @@ cloud_gcp_tests = [
     IntegrationTestFixture(
         name="gcp_deployment_patterns_file_gcs_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_context_dir="tests/integration/fixtures/gcp_deployment/great_expectations",
         extra_backend_dependencies=BackendDependencies.GCS,
     ),
     IntegrationTestFixture(
@@ -712,9 +713,10 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
     workdir = os.getcwd()
     try:
         base_dir = file_relative_path(__file__, "../../")
-        os.chdir(tmp_path)
         # Ensure GE is installed in our environment
+        os.chdir(base_dir)
         execute_shell_command("pip install .")
+        os.chdir(tmp_path)
 
         #
         # Build test state
@@ -774,6 +776,7 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
         loader.exec_module(test_script_module)
     except Exception as e:
         logger.error(str(e))
+        raise
     finally:
         os.chdir(workdir)
 

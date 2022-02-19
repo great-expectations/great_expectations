@@ -14,26 +14,6 @@ config_version: 3.0
 # You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
 datasources:
-  my_taxi_datasource:
-    execution_engine:
-      module_name: great_expectations.execution_engine
-      class_name: PandasExecutionEngine
-    module_name: great_expectations.datasource
-    class_name: Datasource
-    data_connectors:
-      default_inferred_data_connector_name:
-        module_name: great_expectations.datasource.data_connector
-        default_regex:
-          group_names:
-            - data_asset_name
-          pattern: (.*)
-        base_directory: <PATH TO YOUR LOCAL DATA>
-        class_name: InferredAssetFilesystemDataConnector
-      default_runtime_data_connector_name:
-        module_name: great_expectations.datasource.data_connector
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-          - default_identifier_name
   my_gcs_datasource:
     execution_engine:
       module_name: great_expectations.execution_engine
