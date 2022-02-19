@@ -22,7 +22,6 @@ trigger:
     include:
     - pre_pr-* # Can be used to test both `great_expectations` and `dependency_graph` pipelines
     - main
-    - feature/refactor_generate_expectation_tests
     exclude:
     - develop
 
@@ -55,7 +54,6 @@ resources:
 # The pipeline is run under two primary conditions: if merging into main or as scheduled by the above cron job.
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
-  isRefactor: $[eq(variables['Build.SourceBranch'], 'refs/heads/feature/refactor_generate_expectation_tests')]
   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
@@ -391,11 +389,10 @@ stages:
             displayName: 'pytest'
 
   - stage: deploy_gallery
-    # condition: and(succeeded(), eq(variables.isMain, true))
-    condition: eq(variables.isRefactor, true)
+    condition: and(succeeded(), eq(variables.isMain, true))
     pool:
       vmImage: 'ubuntu-18.04'
-#   dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
+    dependsOn: [required, lint, db_integration, usage_stats_integration, cli_integration]
 
     jobs:
       - job: build_gallery
