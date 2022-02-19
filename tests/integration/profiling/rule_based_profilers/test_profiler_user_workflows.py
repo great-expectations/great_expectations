@@ -108,7 +108,6 @@ def test_alice_profiler_user_workflow_single_batch(
         ],
         include_citation=True,
     )
-
     assert (
         expectation_suite
         == alice_columnar_table_single_batch["expected_expectation_suite"]
