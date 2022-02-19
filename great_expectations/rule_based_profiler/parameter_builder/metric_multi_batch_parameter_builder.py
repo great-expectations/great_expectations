@@ -1,8 +1,7 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 import numpy as np
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     MetricComputationDetails,
@@ -17,7 +16,6 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.validator.validator import Validator
 
 
 class MetricMultiBatchParameterBuilder(ParameterBuilder):
@@ -106,30 +104,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
         ptional details
         """
-        validator: Validator = self.get_validator(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        if not batch_ids:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
-            )
-
         metric_computation_result: MetricComputationResult = self.get_metrics(
-            batch_ids=batch_ids,
-            validator=validator,
-            metric_name=self._metric_name,
-            metric_domain_kwargs=self._metric_domain_kwargs,
-            metric_value_kwargs=self._metric_value_kwargs,
-            enforce_numeric_metric=self._enforce_numeric_metric,
-            replace_nan_with_zero=self._replace_nan_with_zero,
+            metric_name=self.metric_name,
+            metric_domain_kwargs=self.metric_domain_kwargs,
+            metric_value_kwargs=self.metric_value_kwargs,
+            enforce_numeric_metric=self.enforce_numeric_metric,
+            replace_nan_with_zero=self.replace_nan_with_zero,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -140,13 +120,14 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         # Obtain reduce_scalar_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         reduce_scalar_metric: bool = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._reduce_scalar_metric,
+            parameter_reference=self.reduce_scalar_metric,
             expected_return_type=bool,
             variables=variables,
             parameters=parameters,
         )
 
-        if reduce_scalar_metric and metric_values.shape[0] == 1:
+        # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
+        if reduce_scalar_metric and metric_values.shape[1] == 1:
             metric_values = metric_values[:, 0]
 
         parameter_values: Dict[str, Any] = {

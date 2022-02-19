@@ -1,4 +1,5 @@
 import copy
+import logging
 import uuid
 from typing import Any, Dict, List, Optional, Union
 
@@ -7,6 +8,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
     batch_request_contains_batch_data,
+    get_batch_request_as_dict,
 )
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -18,7 +20,11 @@ from great_expectations.data_context.types.resource_identifiers import (
     GeCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.config.base import (
+    DomainBuilderConfig,
+    ExpectationConfigurationBuilderConfig,
+    ParameterBuilderConfig,
     RuleBasedProfilerConfig,
     domainBuilderConfigSchema,
     expectationConfigurationBuilderConfigSchema,
@@ -39,6 +45,8 @@ from great_expectations.rule_based_profiler.types import (
     build_parameter_container_for_variables,
 )
 from great_expectations.util import filter_properties_dict
+
+logger = logging.getLogger(__name__)
 
 
 def _validate_builder_override_config(builder_config: dict):
@@ -352,7 +360,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if rules is None:
             rules = {}
 
-        effective_rules: Dict[str, Rule] = self.get_rules_as_dict()
+        effective_rules: Dict[str, Rule] = self._get_rules_as_dict()
 
         rule_name: str
         rule_config: dict
@@ -466,11 +474,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         domain_builder_as_dict["class_name"] = domain_builder.__class__.__name__
         domain_builder_as_dict["module_name"] = domain_builder.__class__.__module__
 
-        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-        deserialized_config: dict = domainBuilderConfigSchema.load(
+        # Roundtrip through schema validation to add/or restore any missing fields.
+        deserialized_config: DomainBuilderConfig = domainBuilderConfigSchema.load(
             domain_builder_as_dict
         )
-        serialized_config: dict = domainBuilderConfigSchema.dump(deserialized_config)
+        serialized_config: dict = deserialized_config.to_dict()
 
         effective_domain_builder_config: dict = serialized_config
         if domain_builder_config:
@@ -522,13 +530,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 "module_name"
             ] = parameter_builder.__class__.__module__
 
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-            deserialized_config: dict = parameterBuilderConfigSchema.load(
-                parameter_builder_as_dict
+            # Roundtrip through schema validation to add/or restore any missing fields.
+            deserialized_config: ParameterBuilderConfig = (
+                parameterBuilderConfigSchema.load(parameter_builder_as_dict)
             )
-            serialized_config: dict = parameterBuilderConfigSchema.dump(
-                deserialized_config
-            )
+            serialized_config: dict = deserialized_config.to_dict()
 
             effective_parameter_builder_configs[
                 parameter_builder_name
@@ -597,15 +603,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 "module_name"
             ] = expectation_configuration_builder.__class__.__module__
 
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-            deserialized_config: dict = (
+            # Roundtrip through schema validation to add/or restore any missing fields.
+            deserialized_config: ExpectationConfigurationBuilderConfig = (
                 expectationConfigurationBuilderConfigSchema.load(
                     expectation_configuration_builder_as_dict
                 )
             )
-            serialized_config: dict = expectationConfigurationBuilderConfigSchema.dump(
-                deserialized_config
-            )
+            serialized_config: dict = deserialized_config.to_dict()
 
             effective_expectation_configuration_builder_configs[
                 expectation_configuration_builder_name
@@ -627,9 +631,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return list(effective_expectation_configuration_builder_configs.values())
 
-    def get_rules_as_dict(self) -> Dict[str, Rule]:
+    def _get_rules_as_dict(self) -> Dict[str, Rule]:
         rule: Rule
-        return {rule.name: rule for rule in self._rules}
+        return {rule.name: rule for rule in self.rules}
 
     def self_check(self, pretty_print=True) -> dict:
         """
@@ -814,6 +818,75 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         )
 
         return result
+
+    @staticmethod
+    def run_profiler_on_data(
+        data_context: "DataContext",  # noqa: F821
+        profiler_store: ProfilerStore,
+        batch_request: Union[dict, BatchRequest, RuntimeBatchRequest],
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        include_citation: bool = True,
+    ) -> ExpectationSuite:
+        profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
+            data_context=data_context,
+            profiler_store=profiler_store,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
+        rules: Dict[
+            str, Dict[str, Any]
+        ] = profiler._generate_rule_overrides_from_batch_request(batch_request)
+
+        result: ExpectationSuite = profiler.run(
+            rules=rules,
+            expectation_suite_name=expectation_suite_name,
+            include_citation=include_citation,
+        )
+        return result
+
+    def _generate_rule_overrides_from_batch_request(
+        self, batch_request: Union[dict, BatchRequest, RuntimeBatchRequest]
+    ) -> Dict[str, Dict[str, Any]]:
+        """Iterates through the profiler's builder attributes and generates a set of
+        Rules that contain overrides from the input batch request. This only applies to
+        ParameterBuilder and any DomainBuilder with a COLUMN MetricDomainType.
+
+        Note that we are passing ALL batches to the parameter builder. If not used carefully,
+        a bias may creep in to the resulting estimates computed by these objects.
+
+        Users of this override should be aware that a batch request should either have no
+        notion of "current/active" batch or it is excluded.
+
+        Args:
+            batch_request: Data used to override builder attributes
+
+        Returns:
+            The dictionary representation of the Rules used as runtime arguments to `run()`
+        """
+        rules: List[Rule] = self.rules
+        if not isinstance(batch_request, dict):
+            batch_request = get_batch_request_as_dict(batch_request)
+            logger.info("Converted batch request to dictionary: %s", batch_request)
+
+        resulting_rules: Dict[str, Dict[str, Any]] = {}
+
+        for rule in rules:
+            domain_builder = rule.domain_builder
+            if domain_builder.domain_type == MetricDomainTypes.COLUMN:
+                domain_builder.batch_request = batch_request
+                domain_builder.batch_request["data_connector_query"] = {"index": -1}
+
+            parameter_builders = rule.parameter_builders
+            if parameter_builders:
+                for parameter_builder in parameter_builders:
+                    parameter_builder.batch_request = batch_request
+
+            resulting_rules[rule.name] = rule.to_dict()
+
+        return resulting_rules
 
     @staticmethod
     def add_profiler(

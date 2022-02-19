@@ -70,7 +70,9 @@ class ExpectTableColumnCountToEqual(TableExpectation):
 
     """ A Metric Decorator for the Column Count"""
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
