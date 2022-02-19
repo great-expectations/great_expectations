@@ -130,7 +130,7 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
     metric_domain_kwargs: dict = {"column": "VendorID"}
     candidate_regexes: List[str] = [
         r"^\d{1}$",  # will match
-        r"^[0-9]{1}$",  # will match
+        r"^[12]{1}$",  # will match 0.9941111111 of the time
         r"^\d{4}$",  # won't match
     ]
     threshold: float = 0.9
@@ -171,11 +171,11 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
     expected_value: dict = {
-        "value": [r"^[0-9]{1}$", r"^\d{1}$"],
+        "value": [r"^[12]{1}$", r"^\d{1}$"],
         "details": {
             "evaluated_regexes": {
                 r"^\d{1}$": 1.0,
-                r"^[0-9]{1}$": 1.0,
+                r"^[12]{1}$": 0.9941111111111111,
                 r"^\d{4}$": 0,
             },
             "threshold": 0.9,
