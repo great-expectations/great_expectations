@@ -18,23 +18,29 @@ This style guide will be enforced for all incoming PRs. However, certain legacy 
 
 * **Docstrings are highly recommended.** We use the Sphinx’s [Napoleon extension](http://www.sphinx-doc.org/en/master/ext/napoleon.html) to build documentation from Google-style docstrings.
 
-* **Lint your code.** Our CI system will check using `black`, `isort`, `flake8` and `pyupgrade`. - Linting with `isort` MUST occur from a virtual environment that has all required packages installed, and pre-commit uses the virtual environment from which it was installed, whether or not that environment is active when making the commit. So, **before running ``pre-commit install`` ensure you have activated a virtual environment that has all development requirements installed.**
+### Linting
 
-````console
+Our CI system will check using `black`, `isort`, `flake8` and `pyupgrade`. 
+
+Linting with `isort` MUST occur from a virtual environment that has all required packages installed, and pre-commit uses the virtual environment from which it was installed, whether or not that environment is active when making the commit. 
+
+This means you must ensure you have activated a virtual environment that has all development requirements installed **before running `pre-commit install`**.
+
+```console
 pre-commit uninstall
 # ACTIVATE ENV, e.g.: conda activate pre_commit_env OR source pre_commit_env/bin/activate
 pip install -r requirements-dev.txt
 pre-commit install --install-hooks
-````
+```
 
-	* If you have already committed files but are seeing errors during the continuous integration tests, you can run tests manually:
+If you have already committed files but are seeing errors during the continuous integration tests, you can run tests manually:
 
-````console
-black .
-isort . --check-only --skip docs
-flake8 great_expectations/core
-pyupgrade --py3-plus
-````
+```console
+black <PATH/TO/YOUR/CHANGES>
+isort <PATH/TO/YOUR/CHANGES> --check-only --skip docs
+flake8 <PATH/TO/YOUR/CHANGES>
+pyupgrade <PATH/TO/YOUR/CHANGES> --py3-plus
+```
 
 ### Expectations
 

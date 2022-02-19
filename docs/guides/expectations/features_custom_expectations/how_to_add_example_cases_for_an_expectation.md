@@ -18,13 +18,13 @@ Example cases in Great Expectations serve a dual purpose:
 
 If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will render these examples.
 
-We will explain the structure of these tests using the Custom Expectation implemented in [How to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
+We will explain the structure of these tests using the Custom Expectation implemented in our guide on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md).
 
 ## Steps
 
 ### 1. Decide which tests you want to implement
 
-Expectations can have a robust variety of possible applications. We want to create tests that demonstrate -- and verify -- the capabilities and limitations of our Custom Expectation.
+Expectations can have a robust variety of possible applications. We want to create tests that demonstrate (and verify) the capabilities and limitations of our Custom Expectation.
 
 <details>
   <summary>What kind of tests can I create?</summary>
@@ -89,12 +89,12 @@ In our example, `data` will have two columns, "x" and "y", each with five rows.
 If you define multiple columns, make sure that they have the same number of rows. 
 When possible, include test data and tests that includes null values (`None` in the Python test definition).
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L77
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L88
 ```
 
 :::note
 When you define data in your examples, we will mostly guess the type of the columns. 
-Sometimes you need to specify the precise type of the columns for each backend. Then you use the `schema` attribute (on the same level as `data` and `tests` in the dictionary):
+Sometimes you need to specify the precise type of the columns for each backend. Then you use the `schemas` attribute (on the same level as `data` and `tests` in the dictionary):
 
 ```console
 "schemas": {
@@ -112,14 +112,14 @@ Sometimes you need to specify the precise type of the columns for each backend. 
 In our example, `tests` will be a list containing dictionaries defining each test. 
 
 You will need to:
-1. Title your tests (`title`).
-2. Define the input for your tests (`in`).
-3. Decide how precisely you want to test the output of your tests (`exact_match_out`).
-4. Define the expected output for your tests (`out`).
+1. Title your tests (`title`)
+2. Define the input for your tests (`in`)
+3. Decide how precisely you want to test the output of your tests (`exact_match_out`)
+4. Define the expected output for your tests (`out`)
 
 If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publically displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L75-L121
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L89-L116
 ```
 
 <details>
@@ -137,7 +137,7 @@ For example:
 
 ### 4. Verifying our tests
 
-If you now run your file, `print_diagnostic_checklist` will attempt to execute these example cases.
+If you now run your file, `print_diagnostic_checklist()` will attempt to execute these example cases.
 
 If the tests are correctly defined, and the rest of the logic in your Custom Expectation is already complete,
 you will see the following in your Diagnostic Checklist:
@@ -154,7 +154,7 @@ Congratulations!<br/>&#127881; You've successfully created example cases & tests
 
 ### 5. Contribution (Optional)
 
-This guide will leave you with test coverage sufficient for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.  
+This guide will leave you with test coverage sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.  
 
 If you're interested in having your contribution accepted at a Beta level, these tests will need to pass for all supported backends (Pandas, Spark, & SQLAlchemy).
 

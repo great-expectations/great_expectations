@@ -7,6 +7,7 @@ import random
 import string
 import tempfile
 import threading
+import warnings
 from functools import wraps
 from types import ModuleType
 from typing import Dict, List, Optional, Union
@@ -106,60 +107,90 @@ except (ImportError, KeyError):
     sqliteDialect = None
     SQLITE_TYPES = {}
 
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
-    import pybigquery.sqlalchemy_bigquery
-    import pybigquery.sqlalchemy_bigquery as BigQueryDialect
+    import sqlalchemy_bigquery as sqla_bigquery
+    import sqlalchemy_bigquery as BigQueryDialect
 
-    ###
-    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-    # to define an attribute "dialect". A PR has been submitted to fix this upstream
-    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-    # fix isn't present, add this "dialect" attribute here:
-    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
-        pybigquery.sqlalchemy_bigquery.dialect = (
-            pybigquery.sqlalchemy_bigquery.BigQueryDialect
-        )
-
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    sqlalchemy.dialects.registry.register(
-        "bigquery", "pybigquery.sqlalchemy_bigquery", "dialect"
-    )
-    try:
-        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
-        bigquery_types_tuple = {}
-        BIGQUERY_TYPES = {
-            "INTEGER": pybigquery.sqlalchemy_bigquery.INTEGER,
-            "NUMERIC": pybigquery.sqlalchemy_bigquery.NUMERIC,
-            "STRING": pybigquery.sqlalchemy_bigquery.STRING,
-            "BIGNUMERIC": pybigquery.sqlalchemy_bigquery.BIGNUMERIC,
-            "BYTES": pybigquery.sqlalchemy_bigquery.BYTES,
-            "BOOL": pybigquery.sqlalchemy_bigquery.BOOL,
-            "BOOLEAN": pybigquery.sqlalchemy_bigquery.BOOLEAN,
-            "TIMESTAMP": pybigquery.sqlalchemy_bigquery.TIMESTAMP,
-            "TIME": pybigquery.sqlalchemy_bigquery.TIME,
-            "FLOAT": pybigquery.sqlalchemy_bigquery.FLOAT,
-            "DATE": pybigquery.sqlalchemy_bigquery.DATE,
-            "DATETIME": pybigquery.sqlalchemy_bigquery.DATETIME,
-        }
-    except AttributeError:
-        # In older versions of the pybigquery driver, types were not exported, so we use a hack
-        logger.warning(
-            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-        )
-        from collections import namedtuple
-
-        BigQueryTypes = namedtuple(
-            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
-        )
-        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-        BIGQUERY_TYPES = {}
-
-except (ImportError, AttributeError):
+    sqlalchemy.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     bigquery_types_tuple = None
-    BigQueryDialect = None
-    pybigquery = None
-    BIGQUERY_TYPES = {}
+    BIGQUERY_TYPES = {
+        "INTEGER": sqla_bigquery.INTEGER,
+        "NUMERIC": sqla_bigquery.NUMERIC,
+        "STRING": sqla_bigquery.STRING,
+        "BIGNUMERIC": sqla_bigquery.BIGNUMERIC,
+        "BYTES": sqla_bigquery.BYTES,
+        "BOOL": sqla_bigquery.BOOL,
+        "BOOLEAN": sqla_bigquery.BOOLEAN,
+        "TIMESTAMP": sqla_bigquery.TIMESTAMP,
+        "TIME": sqla_bigquery.TIME,
+        "FLOAT": sqla_bigquery.FLOAT,
+        "DATE": sqla_bigquery.DATE,
+        "DATETIME": sqla_bigquery.DATETIME,
+    }
+    try:
+        from sqlalchemy_bigquery import GEOGRAPHY
+
+        BIGQUERY_TYPES["GEOGRAPHY"] = GEOGRAPHY
+    except ImportError:
+        # BigQuery GEOGRAPHY support is optional
+        pass
+except ImportError:
+    try:
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
+        import pybigquery.sqlalchemy_bigquery as BigQueryDialect
+
+        warnings.warn(
+            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            DeprecationWarning,
+        )
+        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
+        ###
+        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+        # to define an attribute "dialect". A PR has been submitted to fix this upstream
+        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+        # fix isn't present, add this "dialect" attribute here:
+        if not hasattr(sqla_bigquery, "dialect"):
+            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
+
+        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        sqlalchemy.dialects.registry.register(
+            "bigquery", _BIGQUERY_MODULE_NAME, "dialect"
+        )
+        try:
+            getattr(sqla_bigquery, "INTEGER")
+            bigquery_types_tuple = {}
+            BIGQUERY_TYPES = {
+                "INTEGER": sqla_bigquery.INTEGER,
+                "NUMERIC": sqla_bigquery.NUMERIC,
+                "STRING": sqla_bigquery.STRING,
+                "BIGNUMERIC": sqla_bigquery.BIGNUMERIC,
+                "BYTES": sqla_bigquery.BYTES,
+                "BOOL": sqla_bigquery.BOOL,
+                "BOOLEAN": sqla_bigquery.BOOLEAN,
+                "TIMESTAMP": sqla_bigquery.TIMESTAMP,
+                "TIME": sqla_bigquery.TIME,
+                "FLOAT": sqla_bigquery.FLOAT,
+                "DATE": sqla_bigquery.DATE,
+                "DATETIME": sqla_bigquery.DATETIME,
+            }
+        except AttributeError:
+            # In older versions of the pybigquery driver, types were not exported, so we use a hack
+            logger.warning(
+                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+            )
+            from collections import namedtuple
+
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
+            BIGQUERY_TYPES = {}
+
+    except (ImportError, AttributeError):
+        bigquery_types_tuple = None
+        BigQueryDialect = None
+        pybigquery = None
+        BIGQUERY_TYPES = {}
 
 
 try:
@@ -940,7 +971,7 @@ def build_sa_validator_with_data(
         "postgresql": postgresqltypes.dialect,
         "mysql": mysqltypes.dialect,
         "mssql": mssqltypes.dialect,
-        "bigquery": pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+        "bigquery": sqla_bigquery.BigQueryDialect,
     }
     dialect_types = {
         "sqlite": SQLITE_TYPES,

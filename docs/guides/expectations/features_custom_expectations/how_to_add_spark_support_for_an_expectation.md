@@ -18,8 +18,8 @@ These Execution Engines provide the computing resources used to calculate the [M
 
 If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Execution Engines that it supports.
 
-We will add Spark support for the Custom Expectations implemented in [How to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
-and [How to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
+We will add Spark support for the Custom Expectations implemented in our guides on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
+and [how to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
 
 ## Steps
 
@@ -29,7 +29,7 @@ To avoid surprises and help clearly define your Custom Expectation, it can be he
 
 Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. Add entries corresponding to the functionality you want to add: 
     
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L106-L119
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L117-L132
 ```
 
 :::note
@@ -40,7 +40,7 @@ If not specified, Great Expectations will attempt to determine the implemented b
 
 ### 2. Implement the Spark logic for your Custom Expectation
 
-Great Expectations provides a variety of ways to implement an Expectation in SQLAlchemy. Two of the most common include: 
+Great Expectations provides a variety of ways to implement an Expectation in Spark. Two of the most common include: 
 1.  Defining a partial function that takes a Spark DataFrame column as input
 2.  Directly executing queries on Spark DataFrames to determine the value of your Expectation's metric directly 
 
@@ -61,12 +61,12 @@ To do this, we use one of the `@column_*_partial` decorators:
 - `@column_pair_condition_partial` for Column Pair Map Expectations
 - `@multicolumn_condition_partial` for Multicolumn Map Expectations
 
-These decorators expect an appropriate `engine=` argument. In this case, we'll pass our `SparkDFExecutionEngine`.
+These decorators expect an appropriate `engine` argument. In this case, we'll pass our `SparkDFExecutionEngine`.
 The decorated method takes in a Spark `Column` object and will either return a `pyspark.sql.functions.function` or a `pyspark.sql.Column.function` that Great Expectations will use to generate the appropriate SQL queries.
 
 For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to leverage PySpark's `max` SQL Function and the `@column_aggregate_partial` decorator.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L65-L68
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L76-L79
 ```
 
 If we need a builtin function from `pyspark.sql.functions`, usually aliased to `F`, the import logic in 
@@ -77,6 +77,7 @@ allows us to access these functions even when PySpark is not installed.
 <summary>Applying Python Functions</summary>
 <code>F.udf</code> allows us to use a Python function as a Spark User Defined Function for Column Map Expectations, 
 giving us the ability to define custom functions and apply them to our data.
+
 
 Here is an example of <code>F.udf</code> applied to <code>ExpectColumnValuesToEqualThree</code>:
 
@@ -108,7 +109,7 @@ While this approach can result in extra roundtrips to your database, it can also
 For our Custom Column Map Expectation `ExpectColumnValuesToEqualThree`, we're going to implement the `@metric_partial` decorator, 
 specifying the type of value we're computing (`MAP_CONDITION_FN`) and the domain over which we're computing (`COLUMN`):
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L43-L47
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L53-L65
 ```
 
 The decorated method takes in a valid [Execution Engine](../../../reference/execution_engine.md) and relevant `kwargs`,
@@ -121,24 +122,24 @@ These will be used to execute our query and compute the results of our metric.
 
 To do this, we need to access our Compute Domain directly:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L48-L65
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L66-L75
 ```
 
 This allows us to build and return a query to be executed, providing the result of our metric:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L67-L69
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L77-L79
 ```
 
 :::note
-Because in Spark we are implementing the window function directly, we have to return the *unexpected* condition -- `False` when `column == 3`, otherwise `True`.
+Because in Spark we are implementing the window function directly, we have to return the *unexpected* condition: `False` when `column == 3`, otherwise `True`.
 :::
 
 </TabItem>
 </Tabs>
 
-### 3. Verifying our implementation
+### 3. Verifying your implementation
 
-If you now run your file, `print_diagnostic_checklist` will attempt to execute your example cases using this new backend.
+If you now run your file, `print_diagnostic_checklist()` will attempt to execute your example cases using this new backend.
 
 If your implementation is correctly defined, and the rest of the core logic in your Custom Expectation is already complete,
 you will see the following in your Diagnostic Checklist:
@@ -148,7 +149,7 @@ you will see the following in your Diagnostic Checklist:
 ```
 
 If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../creating_custom_expectations/overview.md) 
-and the SQLAlchemy backend covered in [How to add SQLAlchemy support for Custom Expectations](./how_to_add_sqlalchemy_support_for_an_expectation.md), 
+and the SQLAlchemy backend covered in our guide on [how to add SQLAlchemy support for Custom Expectations](./how_to_add_sqlalchemy_support_for_an_expectation.md), 
 you should see the following in your Diagnostic Checklist:
 
 ```console
@@ -163,7 +164,7 @@ Congratulations!<br/>&#127881; You've successfully implemented Spark support for
 
 ### 4. Contribution (Optional)
 
-This guide will leave you with core functionality sufficient for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+This guide will leave you with core functionality sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
 
 If you're interested in having your contribution accepted at a Beta level, your Custom Expectation will need to support SQLAlchemy, Spark, and Pandas.
 

@@ -1,10 +1,10 @@
 import logging
 
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.profile.base import (
     DatasetProfiler,
     ProfilerCardinality,
     ProfilerDataType,
-    ProfilerTypeMapping,
 )
 
 try:

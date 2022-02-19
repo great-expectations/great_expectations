@@ -18,8 +18,8 @@ These Execution Engines provide the computing resources used to calculate the [M
 
 If you decide to contribute your Expectation, its entry in the [Expectations Gallery](https://greatexpectations.io/expectations/) will reflect the Execution Engines that it supports.
 
-We will add SQLAlchemy support for the Custom Expectations implemented in [How to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
-and [How to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
+We will add SQLAlchemy support for the Custom Expectations implemented in our guides on [how to create Custom Column Aggregate Expectations](../creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md) 
+and [how to create Custom Column Map Expectations](../creating_custom_expectations/how_to_create_custom_column_map_expectations.md).
 
 ## Steps
 
@@ -30,7 +30,7 @@ To avoid surprises, it can be helpful to determine beforehand what backends and 
 
 Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. Add entries corresponding to the functionality you want to add: 
     
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L106-L119
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L117-L130
 ```
 
 :::note
@@ -62,12 +62,12 @@ To do this, we use one of the `@column_*_partial` decorators:
 - `@column_pair_condition_partial` for Column Pair Map Expectations
 - `@multicolumn_condition_partial` for Multicolumn Map Expectations
 
-These decorators expect an appropriate `engine=` argument. In this case, we'll pass our `SqlAlchemyExecutionEngine`. 
+These decorators expect an appropriate `engine` argument. In this case, we'll pass our `SqlAlchemyExecutionEngine`. 
 The decorated method takes in an SQLAlchemy `Column` object and will either return a `sqlalchemy.sql.functions.Function` or a `sqlalchemy.sql.expression.ColumnOperator` that Great Expectations will use to generate the appropriate SQL queries. 
   
 For our Custom Column Map Expectation `ExpectColumnValuesToEqualThree`, we're going to leverage SQLAlchemy's `in_` ColumnOperator and the `@column_condition_partial` decorator.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L71-L73
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L81-L83
 ```
 
 <details>
@@ -101,20 +101,20 @@ While this approach can result in extra roundtrips to your database, it can also
 For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to implement the `@metric_value` decorator, 
 specifying the type of value we're computing (`AGGREGATE_VALUE`) and the domain over which we're computing (`COLUMN`):
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L35-L39
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L46-L58
 ```
 
-The decorated method takes in a valid [Execution Engine](../../../reference/execution_engine.md) and relevant `kwargs`,
+The decorated method takes in a valid [Execution Engine](../../../reference/execution_engine.md) and relevant key word arguments,
 and will return a computed value.
 
 To do this, we need to access our Compute Domain directly:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L40-L58
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L59-L69
 ```
 
 This allows us to build a query and use our Execution Engine to execute that query against our data to return the actual value we're looking for, instead of returning a query to find that value:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L60-L63
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L71-L74
 ```
 
 <details>
@@ -127,9 +127,9 @@ giving us the flexibility to not have write that targeted code ourselves!
 </TabItem>
 </Tabs>
 
-### 3. Verifying our implementation
+### 3. Verifying your implementation
 
-If you now run your file, `print_diagnostic_checklist` will attempt to execute your example cases using this new backend.
+If you now run your file, `print_diagnostic_checklist()` will attempt to execute your example cases using this new backend.
 
 If your implementation is correctly defined, and the rest of the core logic in your Custom Expectation is already complete,
 you will see the following in your Diagnostic Checklist:
@@ -139,7 +139,7 @@ you will see the following in your Diagnostic Checklist:
 ```
 
 If you've already implemented the Pandas backend covered in our How-To guides for creating [Custom Expectations](../creating_custom_expectations/overview.md) 
-and the Spark backend covered in [How to add Spark support for Custom Expectations](./how_to_add_spark_support_for_an_expectation.md), 
+and the Spark backend covered in our guide on [how to add Spark support for Custom Expectations](./how_to_add_spark_support_for_an_expectation.md), 
 you should see the following in your Diagnostic Checklist:
 
 ```console
@@ -154,7 +154,7 @@ Congratulations!<br/>&#127881; You've successfully implemented SQLAlchemy suppor
 
 ### 4. Contribution (Optional)
 
-This guide will leave you with core functionality sufficient for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+This guide will leave you with core functionality sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
 
 If you're interested in having your contribution accepted at a Beta level, your Custom Expectation will need to support SQLAlchemy, Spark, and Pandas.
 

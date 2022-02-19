@@ -3,9 +3,9 @@ title: How to create a Custom Column Map Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
-**ColumnMapExpectations** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
+**`ColumnMapExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). They are evaluated for a single column and ask a yes/no question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
-This guide will walk you through the process of creating a custom ColumnMapExpectation.
+This guide will walk you through the process of creating a custom `ColumnMapExpectation`.
 
 <Prerequisites>
 
@@ -28,10 +28,10 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom ColumnMapExpectation [here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
+You can find the template file for a custom [`ColumnMapExpectation` here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_map_expectation_template.py). Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash
-mv column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_equal_three.py
+cp column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_equal_three.py
 ```
 
 <details>
@@ -60,7 +60,7 @@ Once you've copied and renamed the template file, you can execute it as follows.
 python expect_column_values_to_equal_three.py
 ```
 
-The template file is set up so that this will run the Expectation's `generate_diagnostic_checklist` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
+The template file is set up so that this will run the Expectation's `print_diagnostic_checklist()` method. This will run a diagnostic script on your new Expectation, and return a checklist of steps to get it to full production readiness.
 
 ```
 Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
@@ -69,9 +69,9 @@ Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
     Has at least one positive and negative example case, and all test cases pass
     Has core logic and passes tests on at least one Execution Engine
     Has basic input validation and type checking
-    Has all three statement Renderers: descriptive, prescriptive, diagnostic
+    Has both Statement Renderers: prescriptive and diagnostic
     Has core logic that passes tests for all applicable Execution Engines
-  âœ” Passes all linting checks
+    Passes all linting checks
     Has a robust suite of tests, as determined by a code owner
     Has passed a manual review by a code owner for code standards and style guides
 ```
@@ -80,14 +80,14 @@ When in doubt, the next step to implement is the first one that doesn't have a â
 
 ### 4. Change the Expectation class name and add a docstring
 
-Let's start by updating your Expectations's name and docstring.
+Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
 ```python file=../../../../examples/expectations/column_map_expectation_template.py#L43-L45
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L108
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L118
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
@@ -95,7 +95,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L109
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L119
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
@@ -104,7 +104,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L176
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L378
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -133,7 +133,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L113-L138
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L123-L150
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -161,22 +161,22 @@ Completeness checklist for ExpectColumnValuesToEqualThree:
 
 :::note
 For more information on tests and example cases, <br/>
-see our guide [How to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
+see our guide on [how to create example cases for a Custom Expectation](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
 :::
 
 ### 6. Implement your Metric and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation.   
 To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your Expectation.  
-By the time your Expectation is complete, your Metric will have functions for all three Execution Engines supported by Great Expectations. For now, we're only going to define one.  
+By the time your Expectation is complete, your Metric will have functions for all three Execution Engines (Pandas, Spark, & SQLAlchemy) supported by Great Expectations. For now, we're only going to define one.  
   
 :::note  
 Metrics answer questions about your data posed by your Expectation, <br/> and allow your Expectation to judge whether your data meets ***your*** expectations.  
 :::
 
-Your Metric function will have the `@column_condition_partial` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate whether values equal 3 using the PandasExecutionEngine.
+Your Metric function will have the `@column_condition_partial` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate whether values equal 3 using the `PandasExecutionEngine`.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L39-L41
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L49-L51
 ```
 
 This is all that you need to define for now. The `ColumnMapMetricProvider` and `ColumnMapExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
@@ -197,7 +197,7 @@ An example of Expectation Parameters is shown below (notice that we are now in a
   </div>
 </details>
 
-Next, choose a Metric Identifier for your Metric. By convention, Metric Identifiers for Column Map Expectations start with `column_values.`. The remainder of the Metric Identifier simply describes what the Metric compute, in snake case. For this example, we'll use `column_values.equal_three`.
+Next, choose a Metric Identifier for your Metric. By convention, Metric Identifiers for Column Map Expectations start with `column_values.`. The remainder of the Metric Identifier simply describes what the Metric computes, in snake case. For this example, we'll use `column_values.equal_three`.
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
@@ -206,7 +206,7 @@ You'll need to substitute this metric into two places in the code. First, in the
 
 with
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L36
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L46
 ```
 
 Second, in the Expectation class, replace
@@ -216,7 +216,7 @@ Second, in the Expectation class, replace
 
 with
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L158
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L154
 ```
 
 It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
@@ -230,7 +230,7 @@ For example, replace:
 
 with 
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L33
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L43
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -259,7 +259,7 @@ Column Map Expectations come with that functionality built in; no extra `_valida
 
 ### 7. Contribution (Optional)
 
-This guide will leave you with a Custom Expectation sufficient for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+This guide will leave you with a Custom Expectation sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
@@ -268,7 +268,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L169-L172
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L371-L374
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

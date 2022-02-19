@@ -1,5 +1,5 @@
 ---
-title: How to add Input Validation and Type Checking for a Custom Expectation 
+title: How to add input validation and type checking for a Custom Expectation 
 ---
 
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
@@ -10,7 +10,8 @@ import Prerequisites from '../creating_custom_expectations/components/prerequisi
 
 </Prerequisites>
 
-[Expectations](../../../reference/expectations/expectations.md) will typically be configured using input parameters which the Expectation's code will require to fulfill some criteria in order to be used or provide relevant results. Ensuring that these requirements are fulfilled is the purpose of Type Checking and validating your input parameters.
+[Expectations](../../../reference/expectations/expectations.md) will typically be configured using input parameters. These parameters are required to provide your Custom Expectation with the context it needs to validate your data. 
+Ensuring that these requirements are fulfilled is the purpose of type checking and validating your input parameters.
 
 For example, we might expect the fraction of null values to be `mostly=.05`, in which case any value above 1 would indicate an impossible fraction of a single whole (since a value above one indicates more than a single whole), and should throw an error. Another example would be if we want to indicate that the the mean of a row adheres to a minimum value bound, such as `min_value=5`. In this case, attempting to pass in a non numerical value should clearly throw an error!
 
@@ -36,13 +37,13 @@ Great Expectations implicitly handles the validation of certain parameters unive
 
 ### 2. Defining the validation method
 
-We define the `validate_configuration` method of our Custom Expectation class to ensure that the input parameters constitute a valid configuration, 
+We define the `validate_configuration(...)` method of our Custom Expectation class to ensure that the input parameters constitute a valid configuration, 
 and doesn't contain illogical or incorrect values. For example, if `min_value` is greater than `max_value`, `max_value=True`, or `strict_min=Joe`, we want to throw an exception.
 To do this, we're going to write a series of `assert` statements to catch invalid values for our parameters.
 
-To begin with, we want to create our `validate_configuration` method and ensure that a configuration is set:
+To begin with, we want to create our `validate_configuration(...)` method and ensure that a configuration is set:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L138-L152
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L149-L163
 ```
 
 Next, we're going to implement the logic for validating the four parameters we identified above.
@@ -51,52 +52,52 @@ Next, we're going to implement the logic for validating the four parameters we i
 
 First we need to access the parameters to be evaluated:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L154-L157
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L165-L168
 ```
 
 Now we can begin writing the assertions to validate these parameters. 
 
 We're going to ensure that at least one of `min_value` or `max_value` is set:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L160-L163
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L171-L174
 ```
 
 Check that `min_value` and `max_value` are of the correct type:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L164-L166
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L175-L177
 ```
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L167-L169
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L178-L180
 ```
 
 Verify that, if both `min_value` and `max_value` are set, `min_value` does not exceed `max_value`:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L170-L173
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L181-L184
 ```
 
 And assert that `strict_min` and `strict_max`, if provided, are of the correct type:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L174-L176
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L185-L187
 ```
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L177-L179
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L188-L190
 ```
 
 If any of these fail, we raise an exception:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L180-L181
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L191-L192
 ```
 
 Finally, if no exception is raised, we return `True`, indicating a valid Expectation Configuration. 
 
-Putting this all together, our `validate_configuration` method looks like:
+Putting this all together, our `validate_configuration(...)` method looks like:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L138-L183
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L149-L194
 ```
 
 ### 4. Verifying our method
 
-If you now run your file, `print_diagnostic_checklist` will attempt to execute the `validate_configuration` using the input provided in your [Example Cases](./how_to_add_example_cases_for_an_expectation.md).
+If you now run your file, `print_diagnostic_checklist()` will attempt to execute the `validate_configuration(...)` using the input provided in your [Example Cases](./how_to_add_example_cases_for_an_expectation.md).
 
 If your input is successfully validated, and the rest the logic in your Custom Expectation is already complete, you will see the following in your Diagnostic Checklist:
 
@@ -112,7 +113,7 @@ Congratulations!<br/>&#127881; You've successfully added input validation & type
 
 ### 5. Contribution (Optional)
 
-The method implemented in this guide is an optional feature for Experimental Expectations, and a requirement for [contribution](../contributing/how_to_contribute_a_new_expectation_to_great_expectations.md) back to Great Expectations at Beta and Production levels.
+The method implemented in this guide is an optional feature for Experimental Expectations, and a requirement for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at Beta and Production levels.
 
 If you would like to contribute your Custom Expectation to the Great Expectations codebase, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pull-requests).
 
