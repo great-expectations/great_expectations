@@ -774,6 +774,7 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
         loader.exec_module(test_script_module)
     except Exception as e:
         logger.error(str(e))
+        raise
     finally:
         os.chdir(workdir)
 
