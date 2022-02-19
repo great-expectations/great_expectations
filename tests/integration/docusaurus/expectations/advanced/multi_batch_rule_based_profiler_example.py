@@ -39,7 +39,8 @@ rules:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        value_range: $parameter.row_count_range.value.value_range
+        min_value: $parameter.row_count_range.value.value_range[0]
+        max_value: $parameter.row_count_range.value.value_range[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.row_count_range.details
@@ -85,7 +86,8 @@ column_ranges_rule:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        value_range: $parameter.row_count_range.value.value_range
+        min_value: $parameter.row_count_range.value.value_range[0]
+        max_value: $parameter.row_count_range.value.value_range[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.min_range.details
@@ -93,7 +95,8 @@ column_ranges_rule:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        value_range: $parameter.row_count_range.value.value_range
+        min_value: $parameter.row_count_range.value.value_range[0]
+        max_value: $parameter.row_count_range.value.value_range[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.max_range.details
