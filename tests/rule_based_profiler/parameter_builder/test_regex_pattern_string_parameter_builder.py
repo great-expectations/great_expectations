@@ -237,64 +237,6 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
     )
     expected_value: dict = {
         "value": [],
-        "details": {"success_ratio": []},
-    }
-
-    assert (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters={domain.id: parameter_container},
-        )
-        == expected_value
-    )
-
-
-# Chetan - 20220219 - This needs to be renamed to prevent a namespace collision
-def test_regex_pattern_string_parameter_builder_bobby_no_match(
-    bobby_columnar_table_multi_batch_deterministic_data_context,
-):
-    data_context: DataContext = (
-        bobby_columnar_table_multi_batch_deterministic_data_context
-    )
-    metric_domain_kwargs: dict = {"column": "VendorID"}
-    candidate_regexes: Set[str] = {
-        r"^\d{3}$",  # won't match
-    }
-    threshold: float = 0.9
-    batch_request: dict = {
-        "datasource_name": "taxi_pandas",
-        "data_connector_name": "monthly",
-        "data_asset_name": "my_reports",
-        "data_connector_query": {"index": -1},
-    }
-
-    regex_parameter: RegexPatternStringParameterBuilder = (
-        RegexPatternStringParameterBuilder(
-            name="my_regex_pattern_string_parameter_builder",
-            metric_domain_kwargs=metric_domain_kwargs,
-            candidate_regexes=candidate_regexes,
-            threshold=threshold,
-            data_context=data_context,
-            batch_request=batch_request,
-        )
-    )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    domain: Domain = Domain(
-        domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
-    )
-
-    assert parameter_container.parameter_nodes is None
-
-    regex_parameter._build_parameters(
-        parameter_container=parameter_container, domain=domain
-    )
-
-    fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_regex_pattern_string_parameter_builder"
-    )
-    expected_value: dict = {
-        "value": [],
         "details": {
             "evaluated_regexes": {
                 r"/\d+/": 0,
