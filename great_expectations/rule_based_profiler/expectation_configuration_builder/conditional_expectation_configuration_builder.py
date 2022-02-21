@@ -1,9 +1,8 @@
 from typing import Any, Dict, Optional, Set
 
-import numpy as np
+from pyparsing import And, Literal
+from pyparsing import Optional as ppOptional
 from pyparsing import (
-    And,
-    Literal,
     Or,
     ParseException,
     ParseResults,
@@ -26,6 +25,7 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
+    get_parameter_value,
     get_parameter_value_and_validate_return_type,
 )
 
@@ -34,9 +34,9 @@ def operands_map(n1, n2):
     return 10, 20
 
 
-var = Literal("$") + Word(alphas + "._", alphanums + "._") + Literal("[0]")
 text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
 integer = Word(nums).setParseAction(lambda t: int(t[0]))
+var = Word("$" + alphas, alphanums + "_.") + ppOptional("[0]")
 operator = oneOf(">= <= != > < ==")
 # comparison = (var + operator + (integer | text)).setParseAction(lambda t: operands_map[t[1]](t[0], t[2]))
 # comparison = (var + operator + (integer | text)).setParseAction(lambda t: [t[0], t[1], t[2]])
@@ -165,19 +165,16 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
         )
         parsed_condition: ParseResults = self._parse_condition()
 
-        parameter: Dict[str, Any] = get_parameter_value_and_validate_return_type(
+        parameter: Dict[str, Any] = get_parameter_value(
             domain=domain,
-            parameter_reference=parsed_condition[0]
-            + parsed_condition[1]
-            + parsed_condition[2],
-            expected_return_type=np.int64,
+            parameter_reference=parsed_condition[0],
             variables=variables,
             parameters=parameters,
         )
 
         condition = False
-        if parsed_condition[3] == ">":
-            condition = parameter > parsed_condition[4]
+        if parsed_condition[1] == ">":
+            condition = parameter > parsed_condition[2]
 
         if condition:
             return ExpectationConfiguration(
