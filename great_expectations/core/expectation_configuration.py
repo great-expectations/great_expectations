@@ -1379,8 +1379,14 @@ class ExpectationConfigurationSchema(Schema):
             "required": "expectation_type missing in expectation configuration"
         },
     )
-    kwargs = fields.Dict()
-    meta = fields.Dict()
+    kwargs = fields.Dict(
+        required=False,
+        allow_none=True,
+    )
+    meta = fields.Dict(
+        required=False,
+        allow_none=True,
+    )
     ge_cloud_id = fields.UUID(required=False, allow_none=True)
     expectation_context = fields.Nested(
         lambda: ExpectationContextSchema, required=False, allow_none=True

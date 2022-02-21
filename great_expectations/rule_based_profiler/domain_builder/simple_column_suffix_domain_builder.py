@@ -35,6 +35,10 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         self._column_name_suffixes = column_name_suffixes
 
     @property
+    def domain_type(self) -> Union[str, MetricDomainTypes]:
+        return MetricDomainTypes.COLUMN
+
+    @property
     def column_name_suffixes(self) -> Optional[List[str]]:
         return self._column_name_suffixes
 
@@ -47,7 +51,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         """
         column_name_suffixes: Union[
             str, Iterable, List[str]
-        ] = self._column_name_suffixes
+        ] = self.column_name_suffixes
         if isinstance(column_name_suffixes, str):
             column_name_suffixes = [column_name_suffixes]
         else:
@@ -82,7 +86,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         column_name: str
         domains: List[Domain] = [
             Domain(
-                domain_type=MetricDomainTypes.COLUMN,
+                domain_type=self.domain_type,
                 domain_kwargs={
                     "column": column_name,
                 },

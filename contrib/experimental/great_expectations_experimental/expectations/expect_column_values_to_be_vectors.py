@@ -1,7 +1,5 @@
 import json
-
-import geopandas
-from shapely.geometry import Point, Polygon
+import re
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
@@ -33,39 +31,32 @@ from great_expectations.validator.validator import Validator
 
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
-# To learn about the relationship between Metrics and Expectations, please visit {some doc}.
-class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
+# To learn about the relationship between Metrics and Expectations, please visit
+# https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
+class ColumnValuesToContainVector(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
-    # Please see {some doc} for information on how to choose an id string for your Metric.
-    condition_metric_name = "column_values.point_within_geo_region"
-    condition_value_keys = ("country_iso_a3", "polygon_points")
-    world = geopandas.read_file(geopandas.datasets.get_path("naturalearth_lowres"))
+    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
+    # for information on how to choose an id string for your Metric.
+    condition_metric_name = "column_values.is_vector"
 
     # This method defines the business logic for evaluating your metric when using a PandasExecutionEngine
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, country_iso_a3, polygon_points, **kwargs):
+    def _pandas(cls, column, **kwargs):
+        def matches_vector(x):
+            """Checks if the row is a list containing only numbers with length
+            greater than 1. If a string uses regular expression to check
+            Returns true for such rows"""
+            VECTOR_REGEX = r"\[\d+\.*\d*,\s*\d+\.*\d*(,\s*\d+\.*\d*)*]"
+            if isinstance(x, str) and re.match(VECTOR_REGEX, str(x)):
+                return True
+            elif isinstance(x, list) and len(x) > 1:
+                return all(isinstance(listobject, (int, float)) for listobject in x)
+            else:
+                return False
 
-        # Check if the parameter are None
-        if polygon_points is not None:
-            polygon = Polygon(polygon_points)
-
-        elif country_iso_a3 is not None:
-            country_shapes = cls.world[["geometry", "iso_a3"]]
-            country_shapes = country_shapes[country_shapes["iso_a3"] == country_iso_a3]
-            country_shapes.reset_index(drop=True, inplace=True)
-
-            if country_shapes.empty:
-                raise Exception("This ISO country code is not supported.")
-
-            polygon = country_shapes["geometry"][0]
-        else:
-            raise Exception("Specify country_iso_a3 or polygon_points")
-
-        points = geopandas.GeoSeries(column.apply(Point))
-
-        return points.within(polygon)
+        return column.apply(lambda x: matches_vector(x))
 
 
 # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
@@ -81,132 +72,62 @@ class ColumnValuesPointWithinGeoRegion(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
-    """This expectation will check a (longitude, latitude) tuple to see if it falls within a country input by the
-    user or a polygon specified by user input points. To do this geo calculation, it leverages the Geopandas library. So for now it only supports the countries
-    that are in the Geopandas world database. Importantly, countries are defined by their iso_a3 country code, not their
-    full name."""
+class ExpectColumnValuesToBeVector(ColumnMapExpectation):
+    """Expect column values to be vectors"""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
         {
             "data": {
-                "mostly_points_within_geo_region_PER": [
-                    (-77.0428, -12.0464),
-                    (-72.545128, -13.163068),
-                    (-75.01515, -9.18997),
-                    (-3.435973, 55.378051),
+                "mostly_vectors_and_numbers_strings_scalars": [
+                    [1.1, 4, 5],
+                    "[2, 3.4,6]",
+                    [3, 9, 7],
+                    [2, 2, 2],
+                    [6, 7, 9],
+                    6,
+                    [9, 4],
+                    "five",
+                    [0],
                     None,
                 ],
-                "mostly_points_within_geo_region_GBR": [
-                    (-77.0428, -12.0464),
-                    (-72.545128, -13.163068),
-                    (2.2426, 53.4808),
-                    (-3.435973, 55.378051),
-                    None,
-                ],
-                "mostly_points_within_geo_region_US": [
-                    (-116.884380, 33.570321),
-                    (-117.063457, 32.699316),
-                    (-117.063457, 32.699316),
-                    (-117.721397, 33.598757),
-                    None,
+                "all_valid_vectors": [
+                    [2.1, 3, 4],
+                    [9, 5, 4],
+                    "[0, 0, 2]",
+                    [9, 1, 4],
+                    [8, 7, 8],
+                    [2, 6, 0],
+                    [1, 2, 9],
+                    [8, 7, 4],
+                    [2, 3, 6],
+                    [6, 7, 2],
                 ],
             },
             "tests": [
                 {
-                    "title": "positive_test_with_mostly_iso_country_code",
+                    "title": "vectors_and_nonvectors",
                     "exact_match_out": False,
                     "include_in_gallery": True,
                     "in": {
-                        "column": "mostly_points_within_geo_region_PER",
-                        "country_iso_a3": "PER",
-                        "polygon_points": None,
-                        "mostly": 0.5,
+                        "column": "mostly_vectors_and_numbers_strings_scalars",
+                        "mostly": 0.6,
                     },
                     "out": {
                         "success": True,
-                        "unexpected_index_list": [3],
-                        "unexpected_list": [(-3.435973, 55.378051)],
+                        "unexpected_index_list": [5, 7, 8],
+                        "unexpected_list": [6, "five", [0]],
                     },
                 },
                 {
-                    "title": "negative_test_with_mostly_iso_country_code",
+                    "title": "valid_vectors",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {
-                        "column": "mostly_points_within_geo_region_GBR",
-                        "country_iso_a3": "PER",
-                        "polygon_points": None,
-                        "mostly": 0.9,
-                    },
-                    "out": {
-                        "success": False,
-                        "unexpected_index_list": [2, 3],
-                        "unexpected_list": [(2.2426, 53.4808), (-3.435973, 55.378051)],
-                    },
-                },
-                {
-                    "title": "positive_test_with_mostly_input_points",
-                    "exact_match_out": False,
-                    "include_in_gallery": True,
-                    "in": {
-                        "column": "mostly_points_within_geo_region_PER",
-                        "country_iso_a3": None,
-                        "polygon_points": [
-                            (-80.397, -5.267),
-                            (-73.534, -8.908),
-                            (-70.500, -17.582),
-                            (-81.490, -14.627),
-                        ],
-                        "mostly": 0.5,
-                    },
-                    "out": {
-                        "success": True,
-                        "unexpected_index_list": [3],
-                        "unexpected_list": [(-3.435973, 55.378051)],
-                    },
-                },
-                {
-                    "title": "positive_test_with_mostly_input_points_usa",
-                    "exact_match_out": False,
-                    "include_in_gallery": True,
-                    "in": {
-                        "column": "mostly_points_within_geo_region_US",
-                        "country_iso_a3": None,
-                        "polygon_points": [
-                            (-117.012247, 32.580302),
-                            (-109.352, 41.258),
-                            (-121.426414, 36.346576),
-                            (-122.724666, 29.921319),
-                        ],
-                        "mostly": 1.0,
-                    },
+                    "in": {"column": "all_valid_vectors", "mostly": 1},
                     "out": {
                         "success": True,
                         "unexpected_index_list": [],
                         "unexpected_list": [],
-                    },
-                },
-                {
-                    "title": "negative_test_with_mostly_input_points",
-                    "exact_match_out": False,
-                    "include_in_gallery": True,
-                    "in": {
-                        "column": "mostly_points_within_geo_region_GBR",
-                        "country_iso_a3": None,
-                        "polygon_points": [
-                            (-80.397, -5.267),
-                            (-73.534, -8.908),
-                            (-70.500, -17.582),
-                            (-81.490, -14.627),
-                        ],
-                        "mostly": 0.9,
-                    },
-                    "out": {
-                        "success": False,
-                        "unexpected_index_list": [2, 3],
-                        "unexpected_list": [(2.2426, 53.4808), (-3.435973, 55.378051)],
                     },
                 },
             ],
@@ -216,33 +137,27 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",  # "experimental", "beta", or "production"
-        "tags": ["experimental"],  # Tags for this Expectation in the gallery
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            "@DXcarlos",
-            "@Rxmeez",
-            "@ryanlindeborg",  # Don't forget to add your github handle here!
-        ],
+        "tags": ["experimental", "datatypes", "column map expectation"],
+        "contributors": ["@manyshapes"],
         "package": "experimental_expectations",
-        "requirements": ["geopandas"],
+        "requirements": [],
     }
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.point_within_geo_region"
+    map_metric = "column_values.is_vector"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    # Please see {some doc} for more information about domain and success keys, and other arguments to Expectations
-    success_keys = (
-        "country_iso_a3",
-        "polygon_points",
-        "mostly",
-    )
+    # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/expectations/expectations.html#expectation-concepts-domain-and-success-keys
+    # for more information about domain and success keys, and other arguments to Expectations
+    success_keys = ("mostly",)
 
     # This dictionary contains default values for any parameters that should have default values
     default_kwarg_values = {}
 
     # This method defines a question Renderer
-    # For more info on Renderers, see {some doc}
+    # For more info on Renderers, see
+    # https://docs.greatexpectations.io/en/latest/guides/how_to_guides/configuring_data_docs/how_to_create_renderers_for_custom_expectations.html
     #!!! This example renderer should render RenderedStringTemplateContent, not just a string
 
 
@@ -330,5 +245,5 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesPointWithinGeoRegion().run_diagnostics()
+    diagnostics_report = ExpectColumnValuesToBeVector().run_diagnostics()
     print(json.dumps(diagnostics_report, indent=2))
