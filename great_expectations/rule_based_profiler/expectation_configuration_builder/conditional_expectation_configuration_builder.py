@@ -1,7 +1,10 @@
 from typing import Any, Dict, Optional, Set
 
+import numpy as np
 from pyparsing import (
+    And,
     Literal,
+    Or,
     ParseException,
     ParseResults,
     Suppress,
@@ -9,7 +12,11 @@ from pyparsing import (
     ZeroOrMore,
     alphanums,
     alphas,
+    infixNotation,
     nums,
+    oneOf,
+    opAssoc,
+    operatorPrecedence,
 )
 
 import great_expectations.exceptions as ge_exceptions
@@ -22,25 +29,45 @@ from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
 
-condition_parser = Word(alphas, alphanums + "_.") + ZeroOrMore(
-    (
-        (
-            Suppress(Literal('["'))
-            + Word(alphas, alphanums + "_.")
-            + Suppress(Literal('"]'))
-        )
-        ^ (
-            Suppress(Literal("['"))
-            + Word(alphas, alphanums + "_.")
-            + Suppress(Literal("']"))
-        )
-    )
-    ^ (
-        Suppress(Literal("["))
-        + Word(nums).setParseAction(lambda s, l, t: [int(t[0])])
-        + Suppress(Literal("]"))
-    )
-)
+
+def operands_map(n1, n2):
+    return 10, 20
+
+
+var = Literal("$") + Word(alphas + "._", alphanums + "._") + Literal("[0]")
+text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
+integer = Word(nums).setParseAction(lambda t: int(t[0]))
+operator = oneOf(">= <= != > < ==")
+# comparison = (var + operator + (integer | text)).setParseAction(lambda t: operands_map[t[1]](t[0], t[2]))
+# comparison = (var + operator + (integer | text)).setParseAction(lambda t: [t[0], t[1], t[2]])
+
+# expr = operatorPrecedence(infixNotation, [
+#         ("|", 2, opAssoc.LEFT, lambda t: Or(t)),
+#         ("&", 2, opAssoc.LEFT, lambda t: And(t))
+#     ]
+# )
+
+condition_parser = var + operator + integer
+
+# condition_parser = Word(alphas, alphanums + "_.") + ZeroOrMore(
+#     (
+#         (
+#             Suppress(Literal('["'))
+#             + Word(alphas, alphanums + "_.")
+#             + Suppress(Literal('"]'))
+#         )
+#         ^ (
+#             Suppress(Literal("['"))
+#             + Word(alphas, alphanums + "_.")
+#             + Suppress(Literal("']"))
+#         )
+#     )
+#     ^ (
+#         Suppress(Literal("["))
+#         + Word(nums).setParseAction(lambda s, l, t: [int(t[0])])
+#         + Suppress(Literal("]"))
+#     )
+# )
 
 
 class ExpectationConfigurationConditionParserError(
@@ -103,15 +130,13 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
         Extendability: Readily extensible to include "slice" and other standard accessors (as long as no dynamic elements).
         """
 
-        if self._condition:
-            try:
-                return condition_parser.parseString(self._condition)
-            except ParseException:
-                raise ExpectationConfigurationConditionParserError(
-                    f'Unable to parse Expectation Configuration Condition: "{self._condition}".'
-                )
-        else:
-            return True
+        try:
+            return condition_parser.parseString(self._condition)
+        except ParseException as e:
+            print(str(e.value))
+            raise ExpectationConfigurationConditionParserError(
+                f'Unable to parse Expectation Configuration Condition: "{self._condition}".'
+            )
 
     def _build_expectation_configuration(
         self,
@@ -139,12 +164,30 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
             parameters=parameters,
         )
         parsed_condition: ParseResults = self._parse_condition()
-        return ExpectationConfiguration(
-            expectation_type=self._expectation_type,
-            kwargs=expectation_kwargs,
-            meta=meta,
-            success_on_last_run=self._success_on_last_run,
+
+        parameter: Dict[str, Any] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=parsed_condition[0]
+            + parsed_condition[1]
+            + parsed_condition[2],
+            expected_return_type=np.int64,
+            variables=variables,
+            parameters=parameters,
         )
+
+        condition = False
+        if parsed_condition[3] == ">":
+            condition = parameter > parsed_condition[4]
+
+        if condition:
+            return ExpectationConfiguration(
+                expectation_type=self._expectation_type,
+                kwargs=expectation_kwargs,
+                meta=meta,
+                success_on_last_run=self._success_on_last_run,
+            )
+        else:
+            return None
 
     @property
     def condition(self) -> str:
