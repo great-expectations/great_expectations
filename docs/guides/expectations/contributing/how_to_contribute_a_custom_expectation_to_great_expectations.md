@@ -60,7 +60,7 @@ Ensure that your Custom Expectation's `library_metadata` has correct information
 
 <details>
 <summary>Packages?</summary>
-If you're interested in learning more about Custom Expectation Packages, see our <a href="../../../contributing/contributing_package.md">guide on packaging your Custom Expectations</a>.
+If you're interested in learning more about Custom Expectation Packages, see our <a href='/docs/contributing/contributing_package'>guide on packaging your Custom Expectations</a>.
 <br/><br/>
 Not contributing to a specifc package? Your Custom Expectation will be automatically published in the <a href="https://pypi.org/project/great-expectations-experimental/">PyPI package <inlineCode>great-expectations-experimental</inlineCode></a>. 
 This package contains all of our Experimental community-contributed Custom Expectations, and is separate from the core <inlineCode>great-expectations</inlineCode> package.

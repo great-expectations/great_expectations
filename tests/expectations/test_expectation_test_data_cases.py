@@ -41,6 +41,7 @@ def test_basic_instantiation_of_ExpectationTestCase():
         "suppress_test_for",
         "exact_match_out",
         "include_in_gallery",
+        "only_for",
     }
 
     assert my_test_case.input == {"column": "a", "regex": "^a", "mostly": 0.9}

@@ -1,4 +1,7 @@
+import glob
+import json
 import logging
+import os
 import re
 import traceback
 import warnings
@@ -64,8 +67,11 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.types import (
     CollapseContent,
     RenderedAtomicContent,
+    RenderedContentBlockContainer,
+    RenderedGraphContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
+    ValueListContent,
     renderedAtomicValueSchema,
 )
 from great_expectations.render.util import num_to_str
@@ -82,6 +88,15 @@ logger = logging.getLogger(__name__)
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")
+
+
+_TEST_DEFS_DIR = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "..",
+    "tests",
+    "test_definitions",
+)
 
 
 def camel_to_snake(name):
@@ -897,7 +912,10 @@ class Expectation(metaclass=MetaExpectation):
             meta=meta,
         )
 
-    def run_diagnostics(self) -> ExpectationDiagnostics:
+    def run_diagnostics(
+        self,
+        raise_exceptions_for_backends: bool = False,
+    ) -> ExpectationDiagnostics:
         """Produce a diagnostic report about this Expectation.
 
         The current uses for this method's output are
@@ -961,6 +979,7 @@ class Expectation(metaclass=MetaExpectation):
             expectation_type=description_diagnostics.snake_name,
             test_data_cases=examples,
             execution_engine_diagnostics=introspected_execution_engines,
+            raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
 
         maturity_checklist: ExpectationDiagnosticMaturityMessages = (
@@ -999,30 +1018,58 @@ class Expectation(metaclass=MetaExpectation):
 
         return checklist
 
+    def _get_examples_from_json(self):
+        """Only meant to be called by self._get_examples"""
+        results = []
+        found = glob.glob(
+            os.path.join(_TEST_DEFS_DIR, "**", f"{self.expectation_type}.json"),
+            recursive=True,
+        )
+        if found:
+            with open(found[0], "r") as fp:
+                data = json.load(fp)
+            results = data["datasets"]
+        return results
+
     def _get_examples(
         self, return_only_gallery_examples: bool = True
     ) -> List[ExpectationTestDataCases]:
         """
         Get a list of examples from the object's `examples` member variable.
 
+        For core expectations, the examples are found in tests/test_definitions/
+
         :param return_only_gallery_examples: if True, include only test examples where `include_in_gallery` is true
         :return: list of examples or [], if no examples exist
         """
+        is_core_expectation = False
         try:
+            # Currently, only community contrib expectations have an examples attribute
             all_examples = self.examples
         except AttributeError:
-            return []
+            all_examples = self._get_examples_from_json()
+            is_core_expectation = True
+            if all_examples == []:
+                return []
 
         included_examples = []
         for example in all_examples:
 
             included_test_cases = []
+            # As of commit 7766bb5caa4e0 on 1/28/22, only_for does not need to be applied to individual tests
+            # See:
+            #   - https://github.com/great-expectations/great_expectations/blob/7766bb5caa4e0e5b22fa3b3a5e1f2ac18922fdeb/tests/test_definitions/column_map_expectations/expect_column_values_to_be_unique.json#L174
+            #   - https://github.com/great-expectations/great_expectations/pull/4073
+            top_level_only_for = example.get("only_for")
             for test in example["tests"]:
                 if (
                     test.get("include_in_gallery") == True
                     or return_only_gallery_examples == False
+                    or is_core_expectation == True
                 ):
                     copied_test = deepcopy(test)
+                    if top_level_only_for and "only_for" not in copied_test:
+                        copied_test["only_for"] = top_level_only_for
                     included_test_cases.append(
                         ExpectationLegacyTestCaseAdapter(**copied_test)
                     )
@@ -1032,7 +1079,8 @@ class Expectation(metaclass=MetaExpectation):
             if len(included_test_cases) > 0:
                 copied_example = deepcopy(example)
                 copied_example["tests"] = included_test_cases
-                copied_example.pop("test_backends", None)
+                copied_example.pop("_notes", None)
+                copied_example.pop("only_for", None)
                 included_examples.append(ExpectationTestDataCases(**copied_example))
 
         return included_examples
@@ -1169,6 +1217,7 @@ class Expectation(metaclass=MetaExpectation):
         expectation_type: str,
         test_data_cases: List[ExpectationTestDataCases],
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
+        raise_exceptions_for_backends: bool = False,
     ) -> List[ExpectationTestDiagnostics]:
         """Generate test results. This is an internal method for run_diagnostics."""
         test_results = []
@@ -1177,6 +1226,7 @@ class Expectation(metaclass=MetaExpectation):
             snake_name=expectation_type,
             test_data_cases=test_data_cases,
             execution_engine_diagnostics=execution_engine_diagnostics,
+            raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
 
         for exp_test in exp_tests:
@@ -1215,31 +1265,16 @@ class Expectation(metaclass=MetaExpectation):
         snake_name: str,
         test_data_cases: List[ExpectationTestDataCases],
         execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
+        raise_exceptions_for_backends: bool = False,
     ):
         """This is a placeholder method to adapt the typed objects used to build ExpectationDiagnostics with the untyped dictionaries used in generate_expectation_tests"""
-        retrofitted_examples = []
-        for test_data_cases in test_data_cases:
-            retro_test_data_case = test_data_cases.to_dict()
-
-            retro_test_cases = []
-            for test_case in test_data_cases.tests:
-                retro_test_case = test_case.to_dict()
-                retro_test_case["in"] = retro_test_case["input"]
-                retro_test_case["out"] = retro_test_case["output"]
-                del retro_test_case["input"]
-                del retro_test_case["output"]
-
-                retro_test_cases.append(retro_test_case)
-
-            retro_test_data_case["tests"] = retro_test_cases
-
-            retrofitted_examples.append(retro_test_data_case)
-
-        return generate_expectation_tests(
+        parameterized_tests = generate_expectation_tests(
             expectation_type=snake_name,
-            examples_config=retrofitted_examples,
-            expectation_execution_engines_dict=execution_engine_diagnostics.to_dict(),
+            test_data_cases=test_data_cases,
+            execution_engine_diagnostics=execution_engine_diagnostics,
+            raise_exceptions_for_backends=raise_exceptions_for_backends,
         )
+        return parameterized_tests
 
     def _get_rendered_result_as_string(self, rendered_result) -> str:
         """Convenience method to get rendered results as strings."""
@@ -1263,13 +1298,35 @@ class Expectation(metaclass=MetaExpectation):
             return rendered_result.__str__()
 
         elif isinstance(rendered_result, RenderedAtomicContent):
-            return rendered_result.__str__()
+            return "(RenderedAtomicContent) " + repr(rendered_result.to_json_dict())
+
+        elif isinstance(rendered_result, RenderedContentBlockContainer):
+            return "(RenderedContentBlockContainer) " + repr(
+                rendered_result.to_json_dict()
+            )
+
+        elif isinstance(rendered_result, RenderedTableContent):
+            return "(RenderedTableContent) " + repr(rendered_result.to_json_dict())
+
+        elif isinstance(rendered_result, RenderedGraphContent):
+            return "(RenderedGraphContent) " + repr(rendered_result.to_json_dict())
+
+        elif isinstance(rendered_result, ValueListContent):
+            return "(ValueListContent) " + repr(rendered_result.to_json_dict())
+
+        elif isinstance(rendered_result, dict):
+            return "(dict) " + repr(rendered_result)
+
+        elif isinstance(rendered_result, int):
+            return repr(rendered_result)
+
+        elif rendered_result == None:
+            return ""
 
         else:
             raise TypeError(
                 f"Expectation._get_rendered_result_as_string can't render type {type(rendered_result)} as a string."
             )
-            # print(type(rendered_result))
 
     def _get_renderer_diagnostics(
         self,
@@ -1364,11 +1421,19 @@ class Expectation(metaclass=MetaExpectation):
         for provider in execution_engine_names:
             all_true = True
             for metric_diagnostics in metric_diagnostics_list:
-                has_provider = (
-                    provider in registered_metrics[metric_diagnostics.name]["providers"]
-                )
-                if not has_provider:
-                    all_true = False
+                try:
+                    has_provider = (
+                        provider
+                        in registered_metrics[metric_diagnostics.name]["providers"]
+                    )
+                    if not has_provider:
+                        all_true = False
+                except KeyError:
+                    # https://github.com/great-expectations/great_expectations/blob/abd8f68a162eaf9c33839d2c412d8ba84f5d725b/great_expectations/expectations/core/expect_table_row_count_to_equal_other_table.py#L174-L181
+                    # expect_table_row_count_to_equal_other_table does tricky things and replaces
+                    # registered metric "table.row_count" with "table.row_count.self" and "table.row_count.other"
+                    if "table.row_count" in metric_diagnostics.name:
+                        continue
 
             execution_engines[provider] = all_true
 
@@ -1409,7 +1474,10 @@ class Expectation(metaclass=MetaExpectation):
             "maturity": "CONCEPT_ONLY",
             "tags": [],
             "contributors": [],
+            "requirements": [],
             "library_metadata_passed_checks": False,
+            "has_full_test_suite": False,
+            "manually_reviewed_code": False,
         }
 
         if hasattr(self, "library_metadata"):
@@ -1417,10 +1485,22 @@ class Expectation(metaclass=MetaExpectation):
 
             keys = self.library_metadata.keys()
             has_all_required_keys = all(
-                [key in keys for key in {"tags", "contributors"}]
+                (key in keys for key in {"maturity", "tags", "contributors"})
             )
             has_no_forbidden_keys = all(
-                [key in {"tags", "contributors", "package"} for key in keys]
+                (
+                    key
+                    in {
+                        "maturity",
+                        "tags",
+                        "contributors",
+                        "requirements",
+                        "package",
+                        "has_full_test_suite",
+                        "manually_reviewed_code",
+                    }
+                    for key in keys
+                )
             )
             if has_all_required_keys and has_no_forbidden_keys:
                 augmented_library_metadata["library_metadata_passed_checks"] = True
@@ -1449,8 +1529,26 @@ class Expectation(metaclass=MetaExpectation):
         )
         experimental_checks.append(
             ExpectationDiagnostics._check_core_logic_for_at_least_one_execution_engine(
-                execution_engines
+                tests
             )
+        )
+
+        beta_checks.append(
+            ExpectationDiagnostics._check_input_validation(self, examples)
+        )
+        beta_checks.append(ExpectationDiagnostics._check_renderer_methods(self))
+        beta_checks.append(
+            ExpectationDiagnostics._check_core_logic_for_all_applicable_execution_engines(
+                tests
+            )
+        )
+
+        production_checks.append(ExpectationDiagnostics._check_linting(self))
+        production_checks.append(
+            ExpectationDiagnostics._check_full_test_suite(library_metadata)
+        )
+        production_checks.append(
+            ExpectationDiagnostics._check_manual_code_review(library_metadata)
         )
 
         return ExpectationDiagnosticMaturityMessages(
