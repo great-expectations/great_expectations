@@ -45,7 +45,7 @@ class ColumnValuesToContainVector(ColumnMapMetricProvider):
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         def matches_vector(x):
-            """ Checks if the row is a list containing only numbers with length
+            """Checks if the row is a list containing only numbers with length
             greater than 1. If a string uses regular expression to check
             Returns true for such rows"""
             VECTOR_REGEX = r"\[\d+\.*\d*,\s*\d+\.*\d*(,\s*\d+\.*\d*)*]"
