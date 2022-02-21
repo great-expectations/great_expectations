@@ -373,7 +373,7 @@ Steps
 
             * Implement the computation of the Metric in your new Metric Provider class for at least one of the three backends (Execution Engines) that Great Expectations supports: pandas, sqlalchemy, spark. Most contributors find starting with Pandas is the easiest and fastest way to build.
 
-                The parent class of your Metric Provider class is ``ColumnMetricProvider``. It uses Python Decorators to hide most of the complexity from you and give you a clear and simple API to implement one method per backend that computes the metric.
+                The parent class of your Metric Provider class is ``ColumnAggregateMetricProvider``. It uses Python Decorators to hide most of the complexity from you and give you a clear and simple API to implement one method per backend that computes the metric.
 
                 .. admonition:: Note:
 

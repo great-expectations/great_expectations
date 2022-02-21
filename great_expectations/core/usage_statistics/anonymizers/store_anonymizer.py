@@ -9,6 +9,7 @@ from great_expectations.data_context.store import (
     ExpectationsStore,
     HtmlSiteStore,
     MetricStore,
+    ProfilerStore,
     Store,
     ValidationsStore,
 )
@@ -19,6 +20,7 @@ class StoreAnonymizer(Anonymizer):
         super().__init__(salt=salt)
         # ordered bottom up in terms of inheritance order
         self._ge_classes = [
+            ProfilerStore,
             CheckpointStore,
             ValidationsStore,
             ExpectationsStore,
@@ -31,7 +33,7 @@ class StoreAnonymizer(Anonymizer):
         self._store_backend_anonymizer = StoreBackendAnonymizer(salt=salt)
 
     def anonymize_store_info(self, store_name, store_obj):
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self.anonymize(store_name)
         store_backend_obj = store_obj.store_backend
 

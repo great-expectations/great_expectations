@@ -84,8 +84,12 @@ def test_batch__str__method():
     "data_asset_name": "my_data_asset_name",
     "batch_identifiers": {}
   },
-  "batch_spec": "{'path': '/some/path/some.file'}",
-  "batch_markers": "{'ge_load_time': 'FAKE_LOAD_TIME'}"
+  "batch_spec": {
+    "path": "/some/path/some.file"
+  },
+  "batch_markers": {
+    "ge_load_time": "FAKE_LOAD_TIME"
+  }
 }"""
     )
 

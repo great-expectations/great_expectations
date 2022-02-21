@@ -24,16 +24,16 @@ This will allow you to validate and explore your data.
 
 <WhereToRunCode />
 
-### 2. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 2. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py#L1-L4
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L3-L7
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py#L6
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L8
 ```
 
 ### 3. Configure your Datasource
@@ -45,27 +45,27 @@ Using this example configuration, add in your S3 bucket and path to a directory 
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py#L8-L26
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L9-L28
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py#L37
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L39
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_python_example.py#L8-L27
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py#L9-L28
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_python_example.py#L38
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py#L40
 ```
 
 </TabItem>
@@ -84,17 +84,17 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py#L39
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L41
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_python_example.py#L40
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py#L42
 ```
 
 </TabItem>
@@ -114,10 +114,10 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
 
 Add the S3 path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py#L42-L48
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L42-L50
 ```
 Then load data into the `Validator`.
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py#L56-L62
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L58-L64
 ```
 
   </TabItem>
@@ -125,10 +125,10 @@ Then load data into the `Validator`.
 
 Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py#L68-L72
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L76-L81
 ```
 Then load data into the `Validator`.
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py#L80-L86
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py#L88-L94
 ```
 
   </TabItem>
@@ -147,8 +147,8 @@ If you are working with nonstandard CSVs, read one of these guides:
 
 To view the full scripts used in this page, see them on GitHub:
 
-- [pandas_s3_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_yaml_example.py)
-- [pandas_s3_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/pandas_s3_python_example.py)
+- [pandas_s3_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py)
+- [pandas_s3_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py)
 
 ## Next Steps
 

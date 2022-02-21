@@ -286,7 +286,7 @@ def test_validation_operator_list_with_zero_validation_operators(
 
     result = runner.invoke(
         cli,
-        "validation-operator list -d {}".format(project_dir),
+        f"validation-operator list -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -314,7 +314,7 @@ def test_validation_operator_list_with_one_validation_operator(
 
     result = runner.invoke(
         cli,
-        "validation-operator list -d {}".format(project_dir),
+        f"validation-operator list -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -372,7 +372,7 @@ def test_validation_operator_list_with_multiple_validation_operators(
 
     result = runner.invoke(
         cli,
-        "validation-operator list -d {}".format(project_dir),
+        f"validation-operator list -d {project_dir}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0

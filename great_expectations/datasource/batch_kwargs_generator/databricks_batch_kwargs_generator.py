@@ -34,11 +34,11 @@ class DatabricksTableBatchKwargsGenerator(BatchKwargsGenerator):
             logger.warning("No sparkSession available to query for tables.")
             return {"names": []}
 
-        tables = self.spark.sql("show tables in {}".format(self.database))
+        tables = self.spark.sql(f"show tables in {self.database}")
         return {"names": [(row.tableName, "table") for row in tables.collect()]}
 
     def _get_iterator(self, data_asset_name, **kwargs):
-        query = "select * from {}.{}".format(self.database, data_asset_name)
+        query = f"select * from {self.database}.{data_asset_name}"
         if kwargs.get("partition"):
             if not kwargs.get("date_field"):
                 raise Exception("Must specify date_field when using partition.")

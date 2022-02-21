@@ -1,8 +1,15 @@
-import inspect
 import logging
 import os
+import re
+import tempfile
 from mimetypes import guess_type
+from zipfile import ZipFile, is_zipfile
 
+from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.data_context.store.ge_cloud_store_backend import (
+    GeCloudStoreBackend,
+)
+from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     SiteSectionIdentifier,
@@ -18,9 +25,6 @@ from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
 )
-
-from ...core.data_context_key import DataContextKey
-from .tuple_store_backend import TupleStoreBackend
 
 logger = logging.getLogger(__name__)
 
@@ -107,9 +111,9 @@ class HtmlSiteStore:
         store_class = load_class(store_backend_class_name, store_backend_module_name)
 
         # Store Class was loaded successfully; verify that it is of a correct subclass.
-        if not issubclass(store_class, TupleStoreBackend):
+        if not issubclass(store_class, (TupleStoreBackend, GeCloudStoreBackend)):
             raise DataContextError(
-                "Invalid configuration: HtmlSiteStore needs a TupleStoreBackend"
+                "Invalid configuration: HtmlSiteStore needs a TupleStoreBackend or GeCloudStoreBackend"
             )
         if "filepath_template" in store_backend or (
             "fixed_length_key" in store_backend
@@ -123,17 +127,23 @@ class HtmlSiteStore:
         # One thing to watch for is reversibility of keys.
         # If several types are being written to overlapping directories, we could get collisions.
         module_name = "great_expectations.data_context.store"
-        filepath_prefix = "expectations"
         filepath_suffix = ".html"
+        is_ge_cloud_store = store_backend["class_name"] == "GeCloudStoreBackend"
+        expectation_config_defaults = {
+            "module_name": module_name,
+            "filepath_prefix": "expectations",
+            "filepath_suffix": filepath_suffix,
+            "suppress_store_backend_id": True,
+        }
+        if is_ge_cloud_store:
+            expectation_config_defaults = {
+                "module_name": module_name,
+                "suppress_store_backend_id": True,
+            }
         expectation_suite_identifier_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": module_name,
-                "filepath_prefix": filepath_prefix,
-                "filepath_suffix": filepath_suffix,
-                "suppress_store_backend_id": True,
-            },
+            config_defaults=expectation_config_defaults,
         )
         if not expectation_suite_identifier_obj:
             raise ClassInstantiationError(
@@ -142,16 +152,22 @@ class HtmlSiteStore:
                 class_name=store_backend["class_name"],
             )
 
-        filepath_prefix = "validations"
+        validation_result_config_defaults = {
+            "module_name": module_name,
+            "filepath_prefix": "validations",
+            "filepath_suffix": filepath_suffix,
+            "suppress_store_backend_id": True,
+        }
+        if is_ge_cloud_store:
+            validation_result_config_defaults = {
+                "module_name": module_name,
+                "suppress_store_backend_id": True,
+            }
+
         validation_result_idendifier_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": module_name,
-                "filepath_prefix": filepath_prefix,
-                "filepath_suffix": filepath_suffix,
-                "suppress_store_backend_id": True,
-            },
+            config_defaults=validation_result_config_defaults,
         )
         if not validation_result_idendifier_obj:
             raise ClassInstantiationError(
@@ -161,14 +177,21 @@ class HtmlSiteStore:
             )
 
         filepath_template = "index.html"
+        index_page_config_defaults = {
+            "module_name": module_name,
+            "filepath_template": filepath_template,
+            "suppress_store_backend_id": True,
+        }
+        if is_ge_cloud_store:
+            index_page_config_defaults = {
+                "module_name": module_name,
+                "suppress_store_backend_id": True,
+            }
+
         index_page_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": module_name,
-                "filepath_template": filepath_template,
-                "suppress_store_backend_id": True,
-            },
+            config_defaults=index_page_config_defaults,
         )
         if not index_page_obj:
             raise ClassInstantiationError(
@@ -177,15 +200,20 @@ class HtmlSiteStore:
                 class_name=store_backend["class_name"],
             )
 
-        filepath_template = None
+        static_assets_config_defaults = {
+            "module_name": module_name,
+            "filepath_template": None,
+            "suppress_store_backend_id": True,
+        }
+        if is_ge_cloud_store:
+            static_assets_config_defaults = {
+                "module_name": module_name,
+                "suppress_store_backend_id": True,
+            }
         static_assets_obj = instantiate_class_from_config(
             config=store_backend,
             runtime_environment=runtime_environment,
-            config_defaults={
-                "module_name": module_name,
-                "filepath_template": filepath_template,
-                "suppress_store_backend_id": True,
-            },
+            config_defaults=static_assets_config_defaults,
         )
         if not static_assets_obj:
             raise ClassInstantiationError(
@@ -258,7 +286,7 @@ class HtmlSiteStore:
         else:
             # this method does not support getting the URL of static assets
             raise ValueError(
-                "Cannot get URL for resource {:s}".format(str(resource_identifier))
+                f"Cannot get URL for resource {str(resource_identifier):s}"
             )
 
         # <WILL> : this is a hack for Taylor. Change this back. 20200924
@@ -292,7 +320,7 @@ class HtmlSiteStore:
     def _validate_key(self, key):
         if not isinstance(key, SiteSectionIdentifier):
             raise TypeError(
-                "key: {!r} must a SiteSectionIdentifier, not {!r}".format(
+                "key: {!r} must be a SiteSectionIdentifier, not {!r}".format(
                     key,
                     type(key),
                 )
@@ -302,6 +330,7 @@ class HtmlSiteStore:
             try:
                 if isinstance(key.resource_identifier, key_class):
                     return
+
             except TypeError:
                 # it's ok to have a key that is not a type (e.g. the string "index_page")
                 continue
@@ -359,6 +388,15 @@ class HtmlSiteStore:
                 __file__, os.path.join("..", "..", "render", "view", "static")
             )
 
+        # If `static_assets_source_absdir` contains the string ".zip", then we try to extract (unzip)
+        # the static files. If the unzipping is successful, that means that Great Expectations is
+        # installed into a zip file (see PEP 273) and we need to run this function again
+        if ".zip" in static_assets_source_dir.lower():
+            unzip_destdir = tempfile.mkdtemp()
+            unzipped_ok = self._unzip_assets(static_assets_source_dir, unzip_destdir)
+            if unzipped_ok:
+                return self.copy_static_assets(unzip_destdir)
+
         for item in os.listdir(static_assets_source_dir):
             # Directory
             if os.path.isdir(os.path.join(static_assets_source_dir, item)):
@@ -392,13 +430,58 @@ class HtmlSiteStore:
                             )
                             content_type = "text/html; charset=utf8"
 
-                    self.store_backends["static_assets"].set(
-                        store_key,
-                        f.read(),
-                        content_encoding=content_encoding,
-                        content_type=content_type,
-                    )
+                    if not isinstance(
+                        self.store_backends["static_assets"], GeCloudStoreBackend
+                    ):
+                        self.store_backends["static_assets"].set(
+                            store_key,
+                            f.read(),
+                            content_encoding=content_encoding,
+                            content_type=content_type,
+                        )
+
+    def _unzip_assets(self, assets_full_path: str, unzip_directory: str) -> bool:
+        """
+        This function receives an `assets_full_path` parameter,
+        (e.g. "/home/joe/libs/my_python_libs.zip/great_expectations/render/view/static")
+        and an `unzip_directory` parameter (e.g. "/tmp/extract_statics_here")
+
+        If `assets_full_path` is a folder inside a zip, then said folder is extracted
+        (unzipped) to the `unzip_directory` and this function returns True.
+        Otherwise, this function returns False
+        """
+
+        static_assets_source_absdir = os.path.abspath(assets_full_path)
+
+        zip_re = re.match(
+            f"(.+[.]zip){re.escape(os.sep)}(.+)",
+            static_assets_source_absdir,
+            flags=re.IGNORECASE,
+        )
+
+        if zip_re:
+            zip_filename = zip_re.groups()[0]  # e.g.: /home/joe/libs/my_python_libs.zip
+            path_in_zip = zip_re.groups()[1]  # great_expectations/render/view/static
+            if is_zipfile(zip_filename):
+                with ZipFile(zip_filename) as zipfile:
+                    static_files_to_extract = [
+                        file
+                        for file in zipfile.namelist()
+                        if file.startswith(path_in_zip)
+                    ]
+                    zipfile.extractall(unzip_directory, static_files_to_extract)
+                return True
+
+        return False
 
     @property
     def config(self) -> dict:
         return self._config
+
+    def self_check(self, pretty_print: bool = True) -> dict:
+        report_object = self._config
+
+        # Chetan - 20200126 - The actual pretty printing and self check mechanism is
+        # open to implement. This is simply added to adhere to `test_test_yaml_config_supported_types_have_self_check`
+
+        return report_object

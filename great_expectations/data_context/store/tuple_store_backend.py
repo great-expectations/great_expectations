@@ -5,6 +5,7 @@ import random
 import re
 import shutil
 from abc import ABCMeta
+from typing import List, Tuple
 
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
@@ -200,7 +201,7 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 [random.choice(list("ABCDEF0123456789")) for _ in range(size)]
             )
 
-        key = tuple([get_random_hex() for _ in range(self.key_length)])
+        key = tuple(get_random_hex() for _ in range(self.key_length))
         filepath = self._convert_key_to_filepath(key)
         new_key = self._convert_filepath_to_key(filepath)
         if key != new_key:
@@ -341,7 +342,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
         return False
 
-    def list_keys(self, prefix=()):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         key_list = []
         for root, dirs, files in os.walk(
             os.path.join(self.full_base_directory, *prefix)
@@ -412,7 +413,7 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
             raise StoreBackendError(
-                f"""Error: No base_public_path was configured!
+                """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the TupleFilesystemStoreBackend
                 """
             )
@@ -444,6 +445,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
         bucket,
         prefix="",
         boto3_options=None,
+        s3_put_options=None,
         filepath_template=None,
         filepath_prefix=None,
         filepath_suffix=None,
@@ -480,6 +482,9 @@ class TupleS3StoreBackend(TupleStoreBackend):
         if boto3_options is None:
             boto3_options = {}
         self._boto3_options = boto3_options
+        if s3_put_options is None:
+            s3_put_options = {}
+        self.s3_put_options = s3_put_options
         self.endpoint_url = endpoint_url
         # Initialize with store_backend_id if not part of an HTMLSiteStore
         if not self._suppress_store_backend_id:
@@ -491,6 +496,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
             "bucket": bucket,
             "prefix": prefix,
             "boto3_options": boto3_options,
+            "s3_put_options": s3_put_options,
             "filepath_template": filepath_template,
             "filepath_prefix": filepath_prefix,
             "filepath_suffix": filepath_suffix,
@@ -543,7 +549,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
         )
 
     def _set(
-        self, key, value, content_encoding="utf-8", content_type="application/json"
+        self,
+        key,
+        value,
+        content_encoding="utf-8",
+        content_type="application/json",
+        **kwargs,
     ):
         s3_object_key = self._build_s3_object_key(key)
 
@@ -556,9 +567,12 @@ class TupleS3StoreBackend(TupleStoreBackend):
                     Body=value.encode(content_encoding),
                     ContentEncoding=content_encoding,
                     ContentType=content_type,
+                    **self.s3_put_options,
                 )
             else:
-                result_s3.put(Body=value, ContentType=content_type)
+                result_s3.put(
+                    Body=value, ContentType=content_type, **self.s3_put_options
+                )
         except s3.meta.client.exceptions.ClientError as e:
             logger.debug(str(e))
             raise StoreBackendError("Unable to set object in s3.")
@@ -581,7 +595,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
         s3.Object(self.bucket, source_filepath).delete()
 
-    def list_keys(self):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature
         s3 = self._create_client()
         paginator = s3.get_paginator("list_objects_v2")
 
@@ -654,7 +669,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
             raise StoreBackendError(
-                f"""Error: No base_public_path was configured!
+                """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the
                 """
             )
@@ -667,33 +682,18 @@ class TupleS3StoreBackend(TupleStoreBackend):
         return public_url
 
     def remove_key(self, key):
-        from botocore.exceptions import ClientError
 
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
         s3 = self._create_resource()
         s3_object_key = self._build_s3_object_key(key)
-        s3.Object(self.bucket, s3_object_key).delete()
-        if s3_object_key:
-            try:
-                #
-                objects_to_delete = s3.meta.client.list_objects_v2(
-                    Bucket=self.bucket, Prefix=self.prefix
-                )
 
-                delete_keys = {
-                    "Objects": [
-                        {"Key": k}
-                        for k in [
-                            obj["Key"] for obj in objects_to_delete.get("Contents", [])
-                        ]
-                    ]
-                }
-                s3.meta.client.delete_objects(Bucket=self.bucket, Delete=delete_keys)
-                return True
-            except ClientError as e:
-                return False
+        # Check if the object exists
+        if self.has_key(key):
+            # This implementation deletes the object if non-versioned or adds a delete marker if versioned
+            s3.Object(self.bucket, s3_object_key).delete()
+            return True
         else:
             return False
 
@@ -814,16 +814,13 @@ class TupleGCSStoreBackend(TupleStoreBackend):
                 gcs_object_key = self._convert_key_to_filepath(key)
         return gcs_object_key
 
-    def _move(self, source_key, dest_key, **kwargs):
-        pass
-
     def _get(self, key):
         gcs_object_key = self._build_gcs_object_key(key)
 
         from google.cloud import storage
 
         gcs = storage.Client(project=self.project)
-        bucket = gcs.get_bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
             raise InvalidKeyError(
@@ -833,14 +830,19 @@ class TupleGCSStoreBackend(TupleStoreBackend):
             return gcs_response_object.download_as_string().decode("utf-8")
 
     def _set(
-        self, key, value, content_encoding="utf-8", content_type="application/json"
+        self,
+        key,
+        value,
+        content_encoding="utf-8",
+        content_type="application/json",
+        **kwargs,
     ):
         gcs_object_key = self._build_gcs_object_key(key)
 
         from google.cloud import storage
 
         gcs = storage.Client(project=self.project)
-        bucket = gcs.get_bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
 
         if isinstance(value, str):
@@ -856,7 +858,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         from google.cloud import storage
 
         gcs = storage.Client(project=self.project)
-        bucket = gcs.get_bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
 
         source_filepath = self._convert_key_to_filepath(source_key)
         if not source_filepath.startswith(self.prefix):
@@ -868,7 +870,8 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         blob = bucket.blob(source_filepath)
         _ = bucket.rename_blob(blob, dest_filepath)
 
-    def list_keys(self):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
         from google.cloud import storage
@@ -909,7 +912,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def get_public_url_for_key(self, key, protocol=None):
         if not self.base_public_path:
             raise StoreBackendError(
-                f"""Error: No base_public_path was configured!
+                """Error: No base_public_path was configured!
                     - A public URL was requested base_public_path was not configured for the
                 """
             )
@@ -936,7 +939,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         from google.cloud.exceptions import NotFound
 
         gcs = storage.Client(project=self.project)
-        bucket = gcs.get_bucket(self.bucket)
+        bucket = gcs.bucket(self.bucket)
         try:
             bucket.delete_blobs(blobs=list(bucket.list_blobs(prefix=self.prefix)))
         except NotFound:
@@ -1042,7 +1045,8 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             )
         return az_blob_key
 
-    def list_keys(self):
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
+        # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
         for obj in self._get_container_client().list_blobs(
@@ -1095,7 +1099,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         if copy_properties.status != "success":
             dest_blob.abort_copy(copy_properties.id)
             raise StoreBackendError(
-                f"Unable to copy blob %s with status %s"
+                "Unable to copy blob %s with status %s"
                 % (source_blob_path, copy_properties.status)
             )
         source_blob.delete_blob()

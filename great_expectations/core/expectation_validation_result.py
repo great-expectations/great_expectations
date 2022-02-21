@@ -1,6 +1,8 @@
 import json
 import logging
 from copy import deepcopy
+from typing import Optional
+from uuid import UUID
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.expectation_configuration import (
@@ -77,6 +79,16 @@ class ExpectationValidationResult(SerializableDictDot):
             # Delegate comparison to the other instance's __eq__.
             return NotImplemented
         try:
+            if self.result and other.result:
+                common_keys = set(self.result.keys()) & other.result.keys()
+                result_dict = self.to_json_dict()["result"]
+                other_result_dict = other.to_json_dict()["result"]
+                contents_equal = all(
+                    [result_dict[k] == other_result_dict[k] for k in common_keys]
+                )
+            else:
+                contents_equal = False
+
             return all(
                 (
                     self.success == other.success,
@@ -93,8 +105,7 @@ class ExpectationValidationResult(SerializableDictDot):
                     # Result is a dictionary allowed to have nested dictionaries that are still of complex types (e.g.
                     # numpy) consequently, series' comparison can persist. Wrapping in all() ensures comparison is
                     # handled appropriately.
-                    (self.result is None and other.result is None)
-                    or (all(self.result) == all(other.result)),
+                    not (self.result or other.result) or contents_equal,
                     self.meta == other.meta,
                     self.exception_info == other.exception_info,
                 )
@@ -237,7 +248,10 @@ class ExpectationValidationResultSchema(Schema):
     @pre_dump
     def convert_result_to_serializable(self, data, **kwargs):
         data = deepcopy(data)
-        data.result = convert_to_json_serializable(data.result)
+        if isinstance(data, ExpectationValidationResult):
+            data.result = convert_to_json_serializable(data.result)
+        elif isinstance(data, dict):
+            data["result"] = convert_to_json_serializable(data.get("result"))
         return data
 
     # # noinspection PyUnusedLocal
@@ -264,6 +278,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         evaluation_parameters=None,
         statistics=None,
         meta=None,
+        ge_cloud_id: Optional[UUID] = None,
     ):
         self.success = success
         if results is None:
@@ -356,6 +371,33 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
             )
         )
 
+    def get_failed_validation_results(self) -> "ExpectationSuiteValidationResult":
+        validation_results = [result for result in self.results if not result.success]
+
+        successful_expectations = sum(exp.success for exp in validation_results)
+        evaluated_expectations = len(validation_results)
+        unsuccessful_expectations = evaluated_expectations - successful_expectations
+        success = successful_expectations == evaluated_expectations
+        try:
+            success_percent = successful_expectations / evaluated_expectations * 100
+        except ZeroDivisionError:
+            success_percent = None
+        statistics = {
+            "successful_expectations": successful_expectations,
+            "evaluated_expectations": evaluated_expectations,
+            "unsuccessful_expectations": unsuccessful_expectations,
+            "success_percent": success_percent,
+            "success": success,
+        }
+
+        return ExpectationSuiteValidationResult(
+            success=success,
+            results=validation_results,
+            evaluation_parameters=self.evaluation_parameters,
+            statistics=statistics,
+            meta=self.meta,
+        )
+
 
 class ExpectationSuiteValidationResultSchema(Schema):
     success = fields.Bool()
@@ -363,12 +405,16 @@ class ExpectationSuiteValidationResultSchema(Schema):
     evaluation_parameters = fields.Dict()
     statistics = fields.Dict()
     meta = fields.Dict(allow_none=True)
+    ge_cloud_id = fields.UUID(required=False, allow_none=True)
 
     # noinspection PyUnusedLocal
     @pre_dump
     def prepare_dump(self, data, **kwargs):
         data = deepcopy(data)
-        data.meta = convert_to_json_serializable(data.meta)
+        if isinstance(data, ExpectationSuiteValidationResult):
+            data.meta = convert_to_json_serializable(data.meta)
+        elif isinstance(data, dict):
+            data["meta"] = convert_to_json_serializable(data.get("meta"))
         return data
 
     # noinspection PyUnusedLocal

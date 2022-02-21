@@ -73,7 +73,7 @@ a {
 
 .wy-body-for-nav {
   background-color: #efefef;
-  padding-top: 72px;
+  padding-top: 88px;
 }
 
 .section {
@@ -127,7 +127,7 @@ a {
 
 .wy-nav-side {
   background: #efefef;
-  top: 50px;
+  top: 72px;
 }
 
 /*GE HEADER STYLES*/
@@ -136,7 +136,7 @@ a {
   background-color: #fff;
   position: fixed;
   z-index: 10000;
-  height: 64px;
+  height: 72px;
   width: 100%;
   top: 0;
 }

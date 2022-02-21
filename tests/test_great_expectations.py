@@ -8,6 +8,7 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as ge
+from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
     expectationSuiteSchema,
@@ -54,7 +55,7 @@ def isprime(n):
 
     # range starts with 3 and only needs to go up
     # the square root of n for all odd numbers
-    for x in range(3, int(n ** 0.5) + 1, 2):
+    for x in range(3, int(n**0.5) + 1, 2):
         if n % x == 0:
             return False
 
@@ -748,11 +749,15 @@ def test_base_class_expectation():
 
 
 @freeze_time("11/05/1955")
-def test_validate():
+def test_validate(empty_data_context):
+    context: DataContext = empty_data_context
     with open(
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite: ExpectationSuite = ExpectationSuite(
+            **my_expectation_suite_dict, data_context=context
+        )
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -772,7 +777,7 @@ def test_validate():
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations_version"]
-
+    del results.meta["expectation_suite_meta"]["great_expectations_version"]
     assert results.to_json_dict() == expected_results.to_json_dict()
 
     # Now, change the results and ensure they are no longer equal
@@ -783,13 +788,14 @@ def test_validate():
     # and does not affect the "statistics" field.
     validation_results = my_df.validate(only_return_failures=True)
     del validation_results.meta["great_expectations_version"]
-
+    del validation_results.meta["expectation_suite_meta"]["great_expectations_version"]
     expected_results = ExpectationSuiteValidationResult(
         meta={
             "expectation_suite_name": "titanic",
             "run_id": {"run_name": None, "run_time": "1955-11-05T00:00:00+00:00"},
             "validation_time": "19551105T000000.000000Z",
             "batch_kwargs": {"ge_batch_id": "1234"},
+            "expectation_suite_meta": {},
             "batch_markers": {},
             "batch_parameters": {},
         },
@@ -831,11 +837,15 @@ def test_validate():
     "great_expectations.core.ExpectationValidationResult.validate_result_dict",
     return_value=False,
 )
-def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dict):
+def test_validate_with_invalid_result_catch_exceptions_false(empty_data_context):
+    context: DataContext = empty_data_context
     with open(
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite: ExpectationSuite = ExpectationSuite(
+            **my_expectation_suite_dict, data_context=context
+        )
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -855,11 +865,15 @@ def test_validate_with_invalid_result_catch_exceptions_false(validate_result_dic
     "great_expectations.core.ExpectationValidationResult.validate_result_dict",
     return_value=False,
 )
-def test_validate_with_invalid_result(validate_result_dict):
+def test_validate_with_invalid_result(empty_data_context):
+    context: DataContext = empty_data_context
     with open(
         file_relative_path(__file__, "./test_sets/titanic_expectations.json")
     ) as f:
-        my_expectation_suite = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
+        my_expectation_suite: ExpectationSuite = ExpectationSuite(
+            **my_expectation_suite_dict, data_context=context
+        )
 
     with mock.patch("uuid.uuid1") as uuid:
         uuid.return_value = "1234"
@@ -880,6 +894,7 @@ def test_validate_with_invalid_result(validate_result_dict):
         expected_results = expectationSuiteValidationResultSchema.loads(f.read())
 
     del results.meta["great_expectations_version"]
+    del results.meta["expectation_suite_meta"]["great_expectations_version"]
 
     for result in results.results:
         result.exception_info.pop("exception_traceback")
@@ -887,7 +902,8 @@ def test_validate_with_invalid_result(validate_result_dict):
     assert results.to_json_dict() == expected_results.to_json_dict()
 
 
-def test_validate_catch_non_existent_expectation():
+def test_validate_catch_non_existent_expectation(empty_data_context):
+    context: DataContext = empty_data_context
     df = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
 
     validation_config_non_existent_expectation = ExpectationSuite(
@@ -898,6 +914,7 @@ def test_validate_catch_non_existent_expectation():
                 expectation_type="non_existent_expectation", kwargs={"column": "x"}
             )
         ],
+        data_context=context,
     )
 
     results = df.validate(expectation_suite=validation_config_non_existent_expectation)
@@ -908,7 +925,8 @@ def test_validate_catch_non_existent_expectation():
     )
 
 
-def test_validate_catch_invalid_parameter():
+def test_validate_catch_invalid_parameter(empty_data_context):
+    context: DataContext = empty_data_context
     df = ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5]})
 
     validation_config_invalid_parameter = ExpectationSuite(
@@ -920,6 +938,7 @@ def test_validate_catch_invalid_parameter():
                 kwargs={"column": "x", "min_value": 6, "max_value": 5},
             )
         ],
+        data_context=context,
     )
 
     result = df.validate(expectation_suite=validation_config_invalid_parameter)
@@ -1096,6 +1115,15 @@ class TestIO(unittest.TestCase):
         script_path = os.path.dirname(os.path.realpath(__file__))
         df = ge.read_pickle(
             script_path + "/test_sets/Titanic.pkl",
+        )
+        assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
+        assert isinstance(df, PandasDataset)
+
+    def test_read_sas(self):
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        df = ge.read_sas(
+            script_path + "/test_sets/Titanic.sas7bdat",
+            encoding="latin-1",
         )
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)

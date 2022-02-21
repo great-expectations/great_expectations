@@ -55,7 +55,7 @@ class CustomPageRenderer(Renderer):
                     ),
                 ],
                 "styling": {
-                    "classes": ["col-{}".format(col)],
+                    "classes": [f"col-{col}"],
                     "styles": {"margin-top": "20px"},
                 },
             }
@@ -80,7 +80,7 @@ class CustomPageRenderer(Renderer):
                     ["row_2", "crayon", "derby"],
                 ],
                 "styling": {
-                    "classes": ["col-{}".format(col), "table-responsive"],
+                    "classes": [f"col-{col}", "table-responsive"],
                     "styles": {"margin-top": "20px"},
                     "body": {"classes": ["table", "table-sm"]},
                 },
@@ -107,7 +107,7 @@ class CustomPageRenderer(Renderer):
                 "subheader": subheader,
                 "graph": chart,
                 "styling": {
-                    "classes": ["col-{}".format(col)],
+                    "classes": [f"col-{col}"],
                     "styles": {"margin-top": "20px"},
                 },
             }
@@ -188,7 +188,7 @@ class CustomPageRenderer(Renderer):
                     }
                     for value in ["Andrew", "Elijah", "Matthew", "Cindy", "Pam"]
                 ],
-                "styling": {"classes": ["col-{}".format(col)]},
+                "styling": {"classes": [f"col-{col}"]},
             }
         )
 

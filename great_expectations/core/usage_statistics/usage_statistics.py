@@ -1,22 +1,33 @@
 import atexit
+import copy
 import datetime
+import enum
 import json
 import logging
 import platform
 import signal
 import sys
 import threading
+import time
 from functools import wraps
 from queue import Queue
-from typing import Optional
+from types import FrameType
+from typing import Callable, Optional
 
 import jsonschema
 import requests
 
 from great_expectations import __version__ as ge_version
+from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
     BatchAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
+    BatchRequestAnonymizer,
+)
+from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
+    CheckpointRunAnonymizer,
 )
 from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
     DataDocsSiteAnonymizer,
@@ -33,11 +44,14 @@ from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anon
 from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
     StoreAnonymizer,
 )
+from great_expectations.core.usage_statistics.anonymizers.types.base import (
+    CLISuiteInteractiveFlagCombinations,
+)
 from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
     ValidationOperatorAnonymizer,
 )
 from great_expectations.core.usage_statistics.schemas import (
-    usage_statistics_record_schema,
+    anonymized_usage_statistics_record_schema,
 )
 from great_expectations.core.util import nested_update
 
@@ -45,11 +59,21 @@ STOP_SIGNAL = object()
 
 logger = logging.getLogger(__name__)
 
-_anonymizers = dict()
+_anonymizers = {}
+
+
+class UsageStatsExceptionPrefix(enum.Enum):
+    EMIT_EXCEPTION = "UsageStatsException"
+    INVALID_MESSAGE = "UsageStatsInvalidMessage"
 
 
 class UsageStatisticsHandler:
-    def __init__(self, data_context, data_context_id, usage_statistics_url):
+    def __init__(
+        self,
+        data_context: "DataContext",  # noqa: F821
+        data_context_id: str,
+        usage_statistics_url: str,
+    ):
         self._url = usage_statistics_url
 
         self._data_context_id = data_context_id
@@ -67,8 +91,10 @@ class UsageStatisticsHandler:
             data_context_id
         )
         self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
+        self._batch_request_anonymizer = BatchRequestAnonymizer(data_context_id)
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
+        self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
         try:
             self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
         except ValueError:
@@ -82,18 +108,18 @@ class UsageStatisticsHandler:
 
         atexit.register(self._close_worker)
 
-    def _teardown(self, signum: int, frame):
+    def _teardown(self, signum: int, frame: Optional[FrameType]) -> None:
         self._close_worker()
         if signum == signal.SIGTERM and self._sigterm_handler:
             self._sigterm_handler(signum, frame)
         if signum == signal.SIGINT and self._sigint_handler:
             self._sigint_handler(signum, frame)
 
-    def _close_worker(self):
+    def _close_worker(self) -> None:
         self._message_queue.put(STOP_SIGNAL)
         self._worker.join()
 
-    def _requests_worker(self):
+    def _requests_worker(self) -> None:
         session = requests.Session()
         while True:
             message = self._message_queue.get()
@@ -116,20 +142,7 @@ class UsageStatisticsHandler:
             finally:
                 self._message_queue.task_done()
 
-    def send_usage_message(self, event, event_payload=None, success=None):
-        """send a usage statistics message."""
-        try:
-            message = {
-                "event": event,
-                "event_payload": event_payload or {},
-                "success": success,
-            }
-
-            self.emit(message)
-        except Exception:
-            pass
-
-    def build_init_payload(self):
+    def build_init_payload(self) -> dict:
         """Adds information that may be available only after full data context construction, but is useful to
         calculate only one time (for example, anonymization)."""
         expectation_suites = [
@@ -171,47 +184,82 @@ class UsageStatisticsHandler:
             ],
         }
 
-    def build_envelope(self, message):
+    def build_envelope(self, message: dict) -> dict:
         message["version"] = "1.0.0"
+        message["ge_version"] = self._ge_version
+
+        message["data_context_id"] = self._data_context_id
+        message["data_context_instance_id"] = self._data_context_instance_id
+
         message["event_time"] = (
             datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y-%m-%dT%H:%M:%S.%f"
             )[:-3]
             + "Z"
         )
-        message["data_context_id"] = self._data_context_id
-        message["data_context_instance_id"] = self._data_context_instance_id
-        message["ge_version"] = self._ge_version
+
+        event_duration_property_name: str = f'{message["event"]}.duration'.replace(
+            ".", "_"
+        )
+        if hasattr(self, event_duration_property_name):
+            delta_t: int = getattr(self, event_duration_property_name)
+            message["event_duration"] = delta_t
+
         return message
 
-    def validate_message(self, message, schema):
+    @staticmethod
+    def validate_message(message: dict, schema: dict) -> bool:
         try:
             jsonschema.validate(message, schema=schema)
             return True
         except jsonschema.ValidationError as e:
-            logger.debug("invalid message: " + str(e))
+            logger.debug(
+                f"{UsageStatsExceptionPrefix.INVALID_MESSAGE.value} invalid message: "
+                + str(e)
+            )
             return False
 
-    def emit(self, message):
+    def send_usage_message(
+        self,
+        event: str,
+        event_payload: Optional[dict] = None,
+        success: Optional[bool] = None,
+    ) -> None:
+        """send a usage statistics message."""
+        # noinspection PyBroadException
+        try:
+            message: dict = {
+                "event": event,
+                "event_payload": event_payload or {},
+                "success": success,
+            }
+            self.emit(message)
+        except Exception:
+            pass
+
+    def emit(self, message: dict) -> None:
         """
         Emit a message.
         """
         try:
             if message["event"] == "data_context.__init__":
                 message["event_payload"] = self.build_init_payload()
-            message = self.build_envelope(message)
+            message = self.build_envelope(message=message)
             if not self.validate_message(
-                message, schema=usage_statistics_record_schema
+                message, schema=anonymized_usage_statistics_record_schema
             ):
                 return
             self._message_queue.put(message)
         # noinspection PyBroadException
         except Exception as e:
             # We *always* tolerate *any* error in usage statistics
-            logger.debug(e)
+            log_message: str = (
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}"
+            )
+            logger.debug(log_message)
 
 
-def get_usage_statistics_handler(args_array):
+def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHandler]:
     try:
         # If the object is usage_statistics-capable, then it will have a usage_statistics_handler
         handler = getattr(args_array[0], "_usage_statistics_handler", None)
@@ -237,8 +285,11 @@ def get_usage_statistics_handler(args_array):
 
 
 def usage_statistics_enabled_method(
-    func=None, event_name=None, args_payload_fn=None, result_payload_fn=None
-):
+    func: Optional[Callable] = None,
+    event_name: Optional[str] = None,
+    args_payload_fn: Optional[Callable] = None,
+    result_payload_fn: Optional[Callable] = None,
+) -> Callable:
     """
     A decorator for usage statistics which defaults to the less detailed payload schema.
     """
@@ -255,31 +306,39 @@ def usage_statistics_enabled_method(
             # Set event_payload now so it can be updated below
             event_payload = {}
             message = {"event_payload": event_payload, "event": event_name}
-            handler = None
+            result = None
+            time_begin: int = int(round(time.time() * 1000))
             try:
                 if args_payload_fn is not None:
                     nested_update(event_payload, args_payload_fn(*args, **kwargs))
+
                 result = func(*args, **kwargs)
-                # We try to get the handler only now, so that it *could* be initialized in func, e.g. if it is an
-                # __init__ method
-                handler = get_usage_statistics_handler(args)
-                if result_payload_fn is not None:
-                    nested_update(event_payload, result_payload_fn(result))
                 message["success"] = True
-                if handler is not None:
-                    handler.emit(message)
-            # except Exception:
             except Exception:
                 message["success"] = False
+                raise
+            finally:
+                if not ((result is None) or (result_payload_fn is None)):
+                    nested_update(event_payload, result_payload_fn(result))
+
+                time_end: int = int(round(time.time() * 1000))
+                delta_t: int = time_end - time_begin
+
                 handler = get_usage_statistics_handler(args)
                 if handler:
+                    event_duration_property_name: str = (
+                        f"{event_name}.duration".replace(".", "_")
+                    )
+                    setattr(handler, event_duration_property_name, delta_t)
                     handler.emit(message)
-                raise
+                    delattr(handler, event_duration_property_name)
+
             return result
 
         return usage_statistics_wrapped_method
     else:
 
+        # noinspection PyShadowingNames
         def usage_statistics_wrapped_method_partial(func):
             return usage_statistics_enabled_method(
                 func,
@@ -291,13 +350,13 @@ def usage_statistics_enabled_method(
         return usage_statistics_wrapped_method_partial
 
 
+# noinspection PyUnusedLocal
 def run_validation_operator_usage_statistics(
-    data_context,  # self
-    validation_operator_name,
-    assets_to_validate,
-    run_id=None,
-    **kwargs
-):
+    data_context: "DataContext",  # noqa: F821
+    validation_operator_name: str,
+    assets_to_validate: list,
+    **kwargs,
+) -> dict:
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -311,27 +370,34 @@ def run_validation_operator_usage_statistics(
         payload["anonymized_operator_name"] = anonymizer.anonymize(
             validation_operator_name
         )
-    except TypeError:
+    except TypeError as e:
         logger.debug(
-            "run_validation_operator_usage_statistics: Unable to create validation_operator_name hash"
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, run_validation_operator_usage_statistics: Unable to create validation_operator_name hash"
         )
     if data_context._usage_statistics_handler:
+        # noinspection PyBroadException
         try:
             batch_anonymizer = data_context._usage_statistics_handler._batch_anonymizer
             payload["anonymized_batches"] = [
                 batch_anonymizer.anonymize_batch_info(batch)
                 for batch in assets_to_validate
             ]
-        except Exception:
+        except Exception as e:
             logger.debug(
-                "run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
             )
+
     return payload
 
 
+# noinspection SpellCheckingInspection
+# noinspection PyUnusedLocal
 def save_expectation_suite_usage_statistics(
-    data_context, expectation_suite, expectation_suite_name=None  # self
-):
+    data_context: "DataContext",  # noqa: F821
+    expectation_suite: ExpectationSuite,
+    expectation_suite_name: Optional[str] = None,
+    **kwargs,
+) -> dict:
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -343,20 +409,90 @@ def save_expectation_suite_usage_statistics(
     payload = {}
 
     if expectation_suite_name is None:
-        expectation_suite_name = expectation_suite.expectation_suite_name
+        if isinstance(expectation_suite, ExpectationSuite):
+            expectation_suite_name = expectation_suite.expectation_suite_name
+        elif isinstance(expectation_suite, dict):
+            expectation_suite_name = expectation_suite.get("expectation_suite_name")
 
+    # noinspection PyBroadException
     try:
         payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
             expectation_suite_name
         )
-    except Exception:
+    except Exception as e:
         logger.debug(
-            "save_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, save_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
         )
+
     return payload
 
 
-def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name):
+def edit_expectation_suite_usage_statistics(
+    data_context: "DataContext",  # noqa: F821
+    expectation_suite_name: str,
+    interactive_mode: Optional[CLISuiteInteractiveFlagCombinations] = None,
+) -> dict:
+    try:
+        data_context_id = data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+    anonymizer = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
+
+    if interactive_mode is None:
+        payload = {}
+    else:
+        payload = copy.deepcopy(interactive_mode.value)
+
+    # noinspection PyBroadException
+    try:
+        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
+            expectation_suite_name
+        )
+    except Exception as e:
+        logger.debug(
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
+        )
+
+    return payload
+
+
+def add_datasource_usage_statistics(
+    data_context: "DataContext", name: str, **kwargs  # noqa: F821
+) -> dict:
+    if not data_context._usage_statistics_handler:
+        return {}
+    try:
+        data_context_id = data_context.data_context_id
+    except AttributeError:
+        data_context_id = None
+
+    # noinspection PyBroadException
+    try:
+        datasource_anonymizer = (
+            data_context._usage_statistics_handler._datasource_anonymizer
+        )
+    except Exception:
+        datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+
+    payload = {}
+    # noinspection PyBroadException
+    try:
+        payload = datasource_anonymizer.anonymize_datasource_info(name, kwargs)
+    except Exception as e:
+        logger.debug(
+            f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"
+        )
+
+    return payload
+
+
+# noinspection SpellCheckingInspection
+def get_batch_list_usage_statistics(
+    data_context: "DataContext", *args, **kwargs  # noqa: F821
+) -> dict:
     try:
         data_context_id = data_context.data_context_id
     except AttributeError:
@@ -367,49 +503,72 @@ def edit_expectation_suite_usage_statistics(data_context, expectation_suite_name
         _anonymizers[data_context_id] = anonymizer
     payload = {}
 
-    try:
-        payload["anonymized_expectation_suite_name"] = anonymizer.anonymize(
-            expectation_suite_name
-        )
-    except Exception:
-        logger.debug(
-            "edit_expectation_suite_usage_statistics: Unable to create anonymized_expectation_suite_name payload field"
-        )
+    if data_context._usage_statistics_handler:
+        # noinspection PyBroadException
+        try:
+            batch_request_anonymizer: BatchRequestAnonymizer = (
+                data_context._usage_statistics_handler._batch_request_anonymizer
+            )
+            payload = batch_request_anonymizer.anonymize_batch_request(*args, **kwargs)
+        except Exception as e:
+            logger.debug(
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_batch_request payload field"
+            )
+
     return payload
 
 
-def add_datasource_usage_statistics(data_context, name, **kwargs):
-    if not data_context._usage_statistics_handler:
-        return dict()
+# noinspection PyUnusedLocal
+def get_checkpoint_run_usage_statistics(
+    checkpoint: "Checkpoint",  # noqa: F821
+    *args,
+    **kwargs,
+) -> dict:
+    data_context_id: Optional[str] = None
     try:
-        data_context_id = data_context.data_context_id
+        data_context_id = checkpoint.data_context.data_context_id
     except AttributeError:
         data_context_id = None
 
-    try:
-        datasource_anonymizer = (
-            data_context._usage_statistics_handler._datasource_anonymizer
-        )
-    except Exception:
-        datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+    anonymizer: Anonymizer = _anonymizers.get(data_context_id, None)
+    if anonymizer is None:
+        anonymizer = Anonymizer(data_context_id)
+        _anonymizers[data_context_id] = anonymizer
 
-    payload = {}
-    try:
-        payload = datasource_anonymizer.anonymize_datasource_info(name, kwargs)
-    except Exception:
-        logger.debug(
-            "add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"
-        )
+    payload: dict = {}
+
+    if checkpoint._usage_statistics_handler:
+        # noinspection PyBroadException
+        try:
+            checkpoint_run_anonymizer: CheckpointRunAnonymizer = (
+                checkpoint._usage_statistics_handler._checkpoint_run_anonymizer
+            )
+
+            resolved_runtime_kwargs: dict = (
+                checkpoint_run_anonymizer.resolve_config_using_acceptable_arguments(
+                    *(checkpoint,), **kwargs
+                )
+            )
+
+            payload = checkpoint_run_anonymizer.anonymize_checkpoint_run(
+                *(checkpoint,), **resolved_runtime_kwargs
+            )
+        except Exception as e:
+            logger.debug(
+                f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
+            )
+
     return payload
 
 
 def send_usage_message(
-    data_context,
+    data_context: "DataContext",  # noqa: F821
     event: str,
     event_payload: Optional[dict] = None,
     success: Optional[bool] = None,
-):
+) -> None:
     """send a usage statistics message."""
+    # noinspection PyBroadException
     try:
         handler: UsageStatisticsHandler = getattr(
             data_context, "_usage_statistics_handler", None

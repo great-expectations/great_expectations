@@ -24,7 +24,7 @@ This will allow you to validate and explore your data.
 
 <WhereToRunCode />
 
-### 2. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 2. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
@@ -46,7 +46,7 @@ Using this example configuration we configure a `RuntimeDataConnector` as part o
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
@@ -86,7 +86,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 

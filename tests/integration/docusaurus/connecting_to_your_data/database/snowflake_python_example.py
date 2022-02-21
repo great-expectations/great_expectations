@@ -14,15 +14,6 @@ sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
 
 CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}"
 
-# This utility is not for general use. It is only to support testing.
-from util import load_data_into_database
-
-load_data_into_database(
-    table_name="taxi_data",
-    csv_path="./data/yellow_trip_data_sample_2019-01.csv",
-    connection_string=CONNECTION_STRING,
-)
-
 context = ge.get_context()
 
 datasource_config = {
@@ -39,7 +30,7 @@ datasource_config = {
         },
         "default_inferred_data_connector_name": {
             "class_name": "InferredAssetSqlDataConnector",
-            "name": "whole_table",
+            "include_schema_name": True,
         },
     },
 }
@@ -57,8 +48,10 @@ batch_request = RuntimeBatchRequest(
     datasource_name="my_snowflake_datasource",
     data_connector_name="default_runtime_data_connector_name",
     data_asset_name="default_name",  # this can be anything that identifies this data
-    runtime_parameters={"query": "SELECT * from taxi_data LIMIT 10"},
-    batch_identifiers={"default_identifier_name": "something_something"},
+    runtime_parameters={
+        "query": f"SELECT * from {sfSchema.lower()}.taxi_data LIMIT 10"
+    },
+    batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
 context.create_expectation_suite(
@@ -76,7 +69,7 @@ assert isinstance(validator, ge.validator.validator.Validator)
 batch_request = BatchRequest(
     datasource_name="my_snowflake_datasource",
     data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
+    data_asset_name=f"{sfSchema.lower()}.taxi_data",  # this is the name of the table you want to retrieve
 )
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -89,9 +82,9 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_snowflake_datasource"]
-assert "taxi_data" in set(
+assert f"{sfSchema.lower()}.taxi_data" in set(
     context.get_available_data_asset_names()["my_snowflake_datasource"][
         "default_inferred_data_connector_name"
     ]
 )
-validator.execution_engine.engine.close()
+validator.execution_engine.close()

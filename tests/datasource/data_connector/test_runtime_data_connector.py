@@ -1,3 +1,4 @@
+import datetime
 from typing import List
 
 import pandas as pd
@@ -6,8 +7,8 @@ from ruamel.yaml import YAML
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
+    Batch,
     BatchDefinition,
-    BatchRequest,
     BatchSpec,
     RuntimeBatchRequest,
 )
@@ -30,14 +31,16 @@ def test_self_check(basic_datasource):
     assert test_runtime_data_connector.self_check() == {
         "class_name": "RuntimeDataConnector",
         "data_asset_count": 0,
-        "example_data_asset_names": [],
         "data_assets": {},
-        "unmatched_data_reference_count": 0,
+        "example_data_asset_names": [],
         "example_unmatched_data_references": [],
+        "note": "RuntimeDataConnector will not have data_asset_names until they are "
+        "passed in through RuntimeBatchRequest",
+        "unmatched_data_reference_count": 0,
     }
 
 
-def test_error_checking(basic_datasource):
+def test_error_checking_unknown_datasource(basic_datasource):
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     test_runtime_data_connector: RuntimeDataConnector = (
@@ -55,8 +58,17 @@ def test_error_checking(basic_datasource):
                 data_connector_name="test_runtime_data_connector",
                 data_asset_name="my_data_asset",
                 runtime_parameters={"batch_data": test_df},
+                batch_identifiers={"airflow_run_id": "first"},
             )
         )
+
+
+def test_error_checking_unknown_data_connector(basic_datasource):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     # Test for an unknown data_connector
     with pytest.raises(ValueError):
@@ -69,12 +81,19 @@ def test_error_checking(basic_datasource):
                 data_connector_name="non_existent_data_connector",
                 data_asset_name="my_data_asset",
                 runtime_parameters={"batch_data": test_df},
+                batch_identifiers={"airflow_run_id": "first"},
             )
         )
 
+
+def test_error_checking_missing_runtime_parameters(basic_datasource):
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
+
     # test for missing runtime_parameters arg
-    with pytest.raises(ge_exceptions.DataConnectorError):
-        # noinspection PyUnusedLocal
+    with pytest.raises(TypeError):
+        # noinspection PyUnusedLocal, PyArgumentList
         batch_definition_list: List[
             BatchDefinition
         ] = test_runtime_data_connector.get_batch_definition_list_from_batch_request(
@@ -85,6 +104,14 @@ def test_error_checking(basic_datasource):
                 batch_identifiers={"pipeline_stage_name": "munge"},
             )
         )
+
+
+def test_error_checking_too_many_runtime_parameters(basic_datasource):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
 
     # test for too many runtime_parameters keys
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
@@ -166,7 +193,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
         "runtime_parameters": {"batch_data": test_df},
         "batch_identifiers": batch_identifiers,
     }
-    batch_request: BatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
@@ -192,7 +219,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_keys(
         "runtime_parameters": {"batch_data": test_df},
         "batch_identifiers": batch_identifiers,
     }
-    batch_request: BatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     with pytest.raises(ge_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
@@ -487,6 +514,7 @@ def test_get_batch_definition_list_from_batch_request_with_and_without_data_asse
         "batch_identifiers": batch_identifiers,
     }
     with pytest.raises(TypeError):
+        # noinspection PyUnusedLocal
         batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     # test that name can be set as "my_data_asset"
@@ -544,7 +572,7 @@ def test__generate_batch_spec_parameters_from_batch_definition(
         basic_datasource.data_connectors["test_runtime_data_connector"]
     )
 
-    expected_batch_spec_parameters: dict = {}
+    expected_batch_spec_parameters: dict = {"data_asset_name": "my_data_asset"}
 
     # noinspection PyProtectedMember
     batch_spec_parameters: dict = test_runtime_data_connector._generate_batch_spec_parameters_from_batch_definition(
@@ -583,7 +611,7 @@ def test__build_batch_spec(basic_datasource):
         },
     )
     assert type(batch_spec) == RuntimeDataBatchSpec
-    assert set(batch_spec.keys()) == {"batch_data"}
+    assert set(batch_spec.keys()) == {"batch_data", "data_asset_name"}
     assert batch_spec["batch_data"].shape == (10, 1)
 
     batch_spec: BatchSpec = test_runtime_data_connector.build_batch_spec(
@@ -645,3 +673,46 @@ def test__get_data_reference_name(basic_datasource):
         test_runtime_data_connector._get_data_reference_name(batch_identifiers)
         == "1234567890-1111111111"
     )
+
+
+def test_batch_identifiers_datetime(
+    basic_datasource,
+):
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    batch_identifiers: dict
+
+    batch_identifiers = {
+        "pipeline_stage_name": "core_processing",
+        "airflow_run_id": 1234567890,
+        "custom_key_0": datetime.datetime.utcnow(),
+    }
+
+    test_runtime_data_connector: RuntimeDataConnector = (
+        basic_datasource.data_connectors["test_runtime_data_connector"]
+    )
+
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers
+    batch_request: dict = {
+        "datasource_name": basic_datasource.name,
+        "data_connector_name": test_runtime_data_connector.name,
+        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+        "runtime_parameters": {"batch_data": test_df},
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+
+    batch_definition = (
+        test_runtime_data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )[0]
+    )
+
+    batch = Batch(
+        data=test_df, batch_request=batch_request, batch_definition=batch_definition
+    )
+
+    try:
+        _ = batch.id
+    except TypeError:
+        pytest.fail()

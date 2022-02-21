@@ -4,22 +4,22 @@
 # Otherwise (i.e., if/when you are not concerned with running tests), please ignore these comments.
 
 altair>=4.0.0,<5  # package
-# black==20.8b1  # package optional dependency, please install manually if desired
 Click>=7.1.2  # package
 importlib-metadata>=1.7.0 # package (included in Python 3.8 by default.)
 ipywidgets>=7.5.1  # package
 jinja2>=2.10  # package
 jsonpatch>=1.22  # package
 jsonschema>=2.5.1  # package
-mistune>=0.8.4  # package
+mistune>=0.8.4,<2.0.0  # package
 numpy>=1.14.1  # package
 pandas>=0.23.0  # package
 pyparsing>=2.4,<3  # package
 python-dateutil>=2.8.1  # package
 pytz>=2015.6  # package
 requests>=2.20  # package
-ruamel.yaml>=0.16  # package
+ruamel.yaml>=0.16,<0.17.18  # package
 scipy>=0.19.0  # package
 termcolor>=1.1.0  # package
-tqdm>=4.59.0
+tqdm>=4.59.0  # package
+typing-extensions>=3.10.0.0 # Leverage type annotations from recent Python releases
 tzlocal>=1.2  # package

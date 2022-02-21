@@ -26,8 +26,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     This allows more fine-tuning, but also requires more setup.
 
     *Note*: ConfiguredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently
-    ConfiguredAssetFilesystemDataConnector and ConfiguredAssetS3DataConnector are subclasses of
-    ConfiguredAssetFilePathDataConnector.
+    ConfiguredAssetFilesystemDataConnector, ConfiguredAssetS3DataConnector, ConfiguredAssetAzureDataConnector, and
+    ConfiguredAssetGCSDataConnector are subclasses of ConfiguredAssetFilePathDataConnector.
 
     """
 
@@ -152,10 +152,8 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             number of data_references known by this DataConnector.
         """
         total_references: int = sum(
-            [
-                len(self._data_references_cache[data_asset_name])
-                for data_asset_name in self._data_references_cache
-            ]
+            len(self._data_references_cache[data_asset_name])
+            for data_asset_name in self._data_references_cache
         )
 
         return total_references

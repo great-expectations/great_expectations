@@ -5,17 +5,18 @@ const remarkCodeImport = require('remark-code-import')
 module.exports = {
   title: 'Great Expectations',
   tagline: 'Always know what to expect from your data.',
-  // TODO update for proper hosting URL once decisions are made
-  url: 'https://knoxpod.netlify.com', // Url to your site with no trailing slash
+  url: 'https://docs.greatexpectations.io', // Url to your site with no trailing slash
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.ico',
+  favicon: 'https://greatexpectations.io/favicon.ico',
   organizationName: 'great-expectations',
   projectName: 'great_expectations',
   plugins: [
-    'plugin-image-zoom'
+    // ["plugin-image-zoom"],
+    require.resolve('@cmfcmf/docusaurus-search-local')
   ],
+
   themeConfig: {
     prism: {
       theme: require('prism-react-renderer/themes/vsDark')
@@ -23,44 +24,67 @@ module.exports = {
     colorMode: {
       disableSwitch: true
     },
+    gtag: {
+      // You can also use your "G-" Measurement ID here.
+      trackingID: 'UA-138955219-1',
+      // Optional fields.
+      anonymizeIP: true // Should IPs be anonymized?
+    },
     zoomSelector: '.markdown :not(em) > img',
-    // announcementBar: {
-    //   id: 'RTD_docs', // Link to RTD Docs
-    //   content:
-    //     '🔄 Older Documentation for Great Expectations can be found at the <a href="file:///Users/work/Development/great_expectations/docs_rtd/build/html/index.html">Read the Docs site</a> 🔄',
-    //   backgroundColor: '#32a852', // Defaults to `#fff`.
-    //   textColor: '#091E42', // Defaults to `#000`.
-    //   isCloseable: false, // Defaults to `true`.
-    // },
+    announcementBar: {
+      id: 'RTD_docs', // Link to RTD Docs
+      content:
+                '🔄 Older Documentation for Great Expectations can be found at the <a href="https://legacy.docs.greatexpectations.io">legacy.docs.greatexpectations.io</a> 🔄',
+      // backgroundColor: '#32a852', // Defaults to `#fff`.
+      backgroundColor: '#143556', // Defaults to `#fff`.
+      textColor: '#ffffff', // Defaults to `#000`.
+      isCloseable: false // Defaults to `true`.
+    },
     navbar: {
-      title: 'great_expectations',
       logo: {
         alt: 'Great Expectations',
-        src: 'img/logo.svg'
+        src: 'img/great-expectations-logo-full-size.png',
+        href: 'https://greatexpectations.io'
       },
       items: [
+        {
+          label: 'Community',
+          position: 'right',
+          items: [
+            {
+              label: 'Slack',
+              href: 'https://greatexpectations.io/slack'
+            },
+            {
+              label: 'Github',
+              href: 'https://github.com/great-expectations/great_expectations'
+            },
+            {
+              label: 'Discuss',
+              href: 'https://discuss.greatexpectations.io/'
+            },
+            {
+              label: 'Newsletter',
+              href: 'https://greatexpectations.io/newsletter'
+            }
+          ]
+        },
+        {
+          label: 'Expectations',
+          position: 'right',
+          href: 'https://greatexpectations.io/expectations'
+        },
         {
           label: 'Documentation',
           position: 'right',
           items: [
             {
-              label: '0.13.10',
-              to: 'docs/'
-              // activeBasePath: 'docs',
-            },
-            {
-              label: '0.13.9',
-              to: 'docs/'
-              // activeBasePath: 'docs',
-            },
-            {
-              label: '0.13.8',
-              href: 'https://docs.greatexpectations.io/en/0.13.8/'
+              label: 'V2 Documentation',
+              href: 'https://legacy.docs.greatexpectations.io/en/latest'
               // activeBasePath: 'docs',
             }
           ]
         },
-
         {
           label: 'Case Studies',
           position: 'right',
@@ -70,45 +94,18 @@ module.exports = {
           label: 'Blog',
           position: 'right',
           href: 'https://greatexpectations.io/blog'
-        },
-
-        {
-          label: 'Community',
-          position: 'right',
-          items: [
-            {
-              label: 'Slack',
-              href: 'https://greatexpectations.io/slack'
-
-            },
-            {
-              label: 'Github',
-              href: 'https://github.com/great-expectations/great_expectations'
-
-            },
-            {
-              label: 'Discuss',
-              href: 'https://discuss.greatexpectations.io/'
-
-            },
-            {
-              label: 'Newsletter',
-              href: 'https://greatexpectations.io/newsletter'
-            }
-          ]
         }
-
       ]
     },
     footer: {
-      style: 'dark',
+      style: 'light',
       links: [
         {
           title: 'Docs',
           items: [
             {
               label: 'Getting Started',
-              to: 'docs/'
+              to: 'docs/tutorials/getting_started/tutorial_overview'
             }
           ]
         },
@@ -147,14 +144,13 @@ module.exports = {
           sidebarPath: require.resolve('./sidebars.js'),
           remarkPlugins: [remarkCodeImport],
           editUrl:
-            'https://github.com/great-expectations/great_expectations/tree/develop/'
+                        'https://github.com/great-expectations/great_expectations/tree/develop/'
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css')
         },
         lastVersion: 'current',
         versions: {
-
           // Example configuration:
           // <WILL> may have to be fixed
           current: {
@@ -169,5 +165,4 @@ module.exports = {
       }
     ]
   ]
-
 }

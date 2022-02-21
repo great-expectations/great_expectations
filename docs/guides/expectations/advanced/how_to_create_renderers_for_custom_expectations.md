@@ -2,6 +2,8 @@
 title: How to Create Renderers for Custom Expectations
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 :::warning
 This guide only applies to Great Expectations versions 0.13 and above, which make use of the new modular Expectation architecture. If you have implemented a custom Expectation but have not yet migrated it using the new modular patterns, you can still use this guide to implement custom renderers for your Expectation.
@@ -19,7 +21,7 @@ This guide will help you implement renderers for your custom Expectations, allow
 - Implemented a [custom Expectation](../../../guides/expectations/creating_custom_expectations/how_to_create_custom_expectations.md).
 - Set up a [Data Docs](../../../tutorials/getting_started/check_out_data_docs.md) site.
 - Configured an [Expectations Suite](../../../tutorials/getting_started/create_your_first_expectations.md) containing your custom Expectation.
-- Generated one Validation Result (from running a [Checkpoint](../../../guides/validation/how_to_validate_data_by_running_a_checkpoint.md) or [Validation Operator](../../../guides/validation/how_to_add_a_validation_operator.md)) containing your custom Expectation
+- Ran one [Checkpoint](../../../guides/validation/how_to_validate_data_by_running_a_checkpoint.md) to validate data.
     
 </Prerequisites>
 
@@ -67,565 +69,581 @@ Steps
 
   In general, renderers receive as input either an ExpectationConfiguration (for prescriptive renderers) or an ExpectationValidationResult (for diagnostic renderers) and return a list of rendered elements. The examples below illustrate different ways you might render your expectation - from simple strings to graphs.
 
-   1. **Simple String**
+<Tabs
+  groupId="renderer-types"
+  defaultValue='simple_string'
+  values={[
+  {label: 'Simple String', value:'simple_string'},
+  {label: 'String Template', value:'string_template'},
+  {label: 'Table', value:'table'},
+  {label: 'Graph', value:'graph'},
+  ]}>
 
-    **Input:**
+<TabItem value="simple_string">
 
-    ```python
-    example_expectation_config = ExpectationConfiguration(**{
-        "expectation_type": "expect_column_value_lengths_to_be_between",
-        "kwargs": {
-            "column": "SSL",
-            "min_value": 1,
-            "max_value": 11,
-            "result_format": "COMPLETE"
-        }
-    })
-    ```
+**Input:**
 
-    **Rendered Output:**
+```python
+example_expectation_config = ExpectationConfiguration(**{
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+        "column": "SSL",
+        "min_value": 1,
+        "max_value": 11,
+        "result_format": "COMPLETE"
+    }
+})
+```
 
-    ![Simple String Example](../../../images/simple_string.png)
+**Rendered Output:**
 
-    **Implementation:**
+![Simple String Example](../../../images/simple_string.png)
 
-    ```python
-    class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
-        ...
+**Implementation:**
 
-        @classmethod
-        @renderer(renderer_type="renderer.prescriptive")
-        @render_evaluation_parameter_string
-        def _prescriptive_renderer(
-                cls,
-                configuration: ExpectationConfiguration = None,
-                result: ExpectationValidationResult = None,
-                language: str = None,
-                runtime_configuration: dict = None,
-                **kwargs,
-        ) -> List[Union[dict, str, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent,
-                        RenderedGraphContent, Any]]:
-            runtime_configuration = runtime_configuration or {}
-            include_column_name = runtime_configuration.get("include_column_name", True)
-            include_column_name = (
-                include_column_name if include_column_name is not None else True
+```python
+class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
+    ...
+
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+            cls,
+            configuration: ExpectationConfiguration = None,
+            result: ExpectationValidationResult = None,
+            language: str = None,
+            runtime_configuration: dict = None,
+            **kwargs,
+    ) -> List[Union[dict, str, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent,
+                    RenderedGraphContent, Any]]:
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        # get params dict with all expected kwargs
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
+
+        # build string template
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "values may have any length."
+        else:
+            at_least_str = (
+                "greater than"
+                if params.get("strict_min") is True
+                else "greater than or equal to"
             )
-            styling = runtime_configuration.get("styling")
-            # get params dict with all expected kwargs
-            params = substitute_none_for_missing(
-                configuration.kwargs,
-                [
-                    "column",
-                    "min_value",
-                    "max_value",
-                    "mostly",
-                    "row_condition",
-                    "condition_parser",
-                    "strict_min",
-                    "strict_max",
-                ],
+            at_most_str = (
+                "less than" if params.get("strict_max") is True else "less than or equal to"
             )
 
-            # build string template
-            if (params["min_value"] is None) and (params["max_value"] is None):
-                template_str = "values may have any length."
+            if params["mostly"] is not None:
+                params["mostly_pct"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+
+                if params["min_value"] is not None and params["max_value"] is not None:
+                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+
+                elif params["min_value"] is None:
+                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+
+                elif params["max_value"] is None:
+                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
             else:
-                at_least_str = (
-                    "greater than"
-                    if params.get("strict_min") is True
-                    else "greater than or equal to"
-                )
-                at_most_str = (
-                    "less than" if params.get("strict_max") is True else "less than or equal to"
-                )
+                if params["min_value"] is not None and params["max_value"] is not None:
+                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
 
-                if params["mostly"] is not None:
-                    params["mostly_pct"] = num_to_str(
-                        params["mostly"] * 100, precision=15, no_scientific=True
-                    )
+                elif params["min_value"] is None:
+                    template_str = f"values must always be {at_most_str} $max_value characters long."
 
-                    if params["min_value"] is not None and params["max_value"] is not None:
-                        template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                elif params["max_value"] is None:
+                    template_str = f"values must always be {at_least_str} $min_value characters long."
 
-                    elif params["min_value"] is None:
-                        template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+        if include_column_name:
+            template_str = "$column " + template_str
 
-                    elif params["max_value"] is None:
-                        template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
-                else:
-                    if params["min_value"] is not None and params["max_value"] is not None:
-                        template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
-                    elif params["min_value"] is None:
-                        template_str = f"values must always be {at_most_str} $max_value characters long."
+        # return simple string
+        return [Template(template_str).substitute(params)]
+```
+</TabItem>
 
-                    elif params["max_value"] is None:
-                        template_str = f"values must always be {at_least_str} $min_value characters long."
+<TabItem value="string_template">
 
-            if include_column_name:
-                template_str = "$column " + template_str
+**Input:**
 
-            if params["row_condition"] is not None:
-                (
-                    conditional_template_str,
-                    conditional_params,
-                ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-                template_str = conditional_template_str + ", then " + template_str
-                params.update(conditional_params)
+```python
+example_expectation_config = ExpectationConfiguration(**{
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+        "column": "SSL",
+        "min_value": 1,
+        "max_value": 11,
+        "result_format": "COMPLETE"
+    }
+})
+```
 
-            # return simple string
-            return [Template(template_str).substitute(params)]
-    ```
+**Rendered Output:**
 
-    2. **String Template**
+![String Template Example](../../../images/string_template.png)
 
-    **Input:**
+**Implementation:**
 
-    ```python
-    example_expectation_config = ExpectationConfiguration(**{
-        "expectation_type": "expect_column_value_lengths_to_be_between",
-        "kwargs": {
-            "column": "SSL",
-            "min_value": 1,
-            "max_value": 11,
-            "result_format": "COMPLETE"
-        }
-    })
-    ```
+```python
+class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
+    ...
 
-    **Rendered Output:**
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+            cls,
+            configuration: ExpectationConfiguration = None,
+            result: ExpectationValidationResult = None,
+            language: str = None,
+            runtime_configuration: dict = None,
+            **kwargs,
+    ) -> List[Union[dict, str, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent,
+                    RenderedGraphContent, Any]]:
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+        styling = runtime_configuration.get("styling")
+        # get params dict with all expected kwargs
+        params = substitute_none_for_missing(
+            configuration.kwargs,
+            [
+                "column",
+                "min_value",
+                "max_value",
+                "mostly",
+                "row_condition",
+                "condition_parser",
+                "strict_min",
+                "strict_max",
+            ],
+        )
 
-    ![String Template Example](../../../images/string_template.png)
-
-    **Implementation:**
-
-    ```python
-    class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
-        ...
-
-        @classmethod
-        @renderer(renderer_type="renderer.prescriptive")
-        @render_evaluation_parameter_string
-        def _prescriptive_renderer(
-                cls,
-                configuration: ExpectationConfiguration = None,
-                result: ExpectationValidationResult = None,
-                language: str = None,
-                runtime_configuration: dict = None,
-                **kwargs,
-        ) -> List[Union[dict, str, RenderedStringTemplateContent, RenderedTableContent, RenderedBulletListContent,
-                        RenderedGraphContent, Any]]:
-            runtime_configuration = runtime_configuration or {}
-            include_column_name = runtime_configuration.get("include_column_name", True)
-            include_column_name = (
-                include_column_name if include_column_name is not None else True
+        # build string template
+        if (params["min_value"] is None) and (params["max_value"] is None):
+            template_str = "values may have any length."
+        else:
+            at_least_str = (
+                "greater than"
+                if params.get("strict_min") is True
+                else "greater than or equal to"
             )
-            styling = runtime_configuration.get("styling")
-            # get params dict with all expected kwargs
-            params = substitute_none_for_missing(
-                configuration.kwargs,
-                [
-                    "column",
-                    "min_value",
-                    "max_value",
-                    "mostly",
-                    "row_condition",
-                    "condition_parser",
-                    "strict_min",
-                    "strict_max",
-                ],
+            at_most_str = (
+                "less than" if params.get("strict_max") is True else "less than or equal to"
             )
 
-            # build string template
-            if (params["min_value"] is None) and (params["max_value"] is None):
-                template_str = "values may have any length."
+            if params["mostly"] is not None:
+                params["mostly_pct"] = num_to_str(
+                    params["mostly"] * 100, precision=15, no_scientific=True
+                )
+
+                if params["min_value"] is not None and params["max_value"] is not None:
+                    template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+
+                elif params["min_value"] is None:
+                    template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+
+                elif params["max_value"] is None:
+                    template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
             else:
-                at_least_str = (
-                    "greater than"
-                    if params.get("strict_min") is True
-                    else "greater than or equal to"
-                )
-                at_most_str = (
-                    "less than" if params.get("strict_max") is True else "less than or equal to"
-                )
+                if params["min_value"] is not None and params["max_value"] is not None:
+                    template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
 
-                if params["mostly"] is not None:
-                    params["mostly_pct"] = num_to_str(
-                        params["mostly"] * 100, precision=15, no_scientific=True
-                    )
+                elif params["min_value"] is None:
+                    template_str = f"values must always be {at_most_str} $max_value characters long."
 
-                    if params["min_value"] is not None and params["max_value"] is not None:
-                        template_str = f"values must be {at_least_str} $min_value and {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+                elif params["max_value"] is None:
+                    template_str = f"values must always be {at_least_str} $min_value characters long."
 
-                    elif params["min_value"] is None:
-                        template_str = f"values must be {at_most_str} $max_value characters long, at least $mostly_pct % of the time."
+        if include_column_name:
+            template_str = "$column " + template_str
 
-                    elif params["max_value"] is None:
-                        template_str = f"values must be {at_least_str} $min_value characters long, at least $mostly_pct % of the time."
-                else:
-                    if params["min_value"] is not None and params["max_value"] is not None:
-                        template_str = f"values must always be {at_least_str} $min_value and {at_most_str} $max_value characters long."
+        if params["row_condition"] is not None:
+            (
+                conditional_template_str,
+                conditional_params,
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            template_str = conditional_template_str + ", then " + template_str
+            params.update(conditional_params)
 
-                    elif params["min_value"] is None:
-                        template_str = f"values must always be {at_most_str} $max_value characters long."
+        # return simple string
+        return [Template(template_str).substitute(params)]
+```
+</TabItem>
 
-                    elif params["max_value"] is None:
-                        template_str = f"values must always be {at_least_str} $min_value characters long."
+<TabItem value="table">
 
-            if include_column_name:
-                template_str = "$column " + template_str
+:::note 
+This example shows how you can render your custom Expectation using different content types.
+:::
 
-            if params["row_condition"] is not None:
-                (
-                    conditional_template_str,
-                    conditional_params,
-                ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-                template_str = conditional_template_str + ", then " + template_str
-                params.update(conditional_params)
+**Input:**
 
-            # return simple string
-            return [Template(template_str).substitute(params)]
-    ```
+  ```python
+  example_expectation_config = ExpectationConfiguration(**{
+      "expectation_type": "expect_column_quantile_values_to_be_between",
+      "kwargs": {
+          "allow_relative_error": False,
+          "column": "OBJECTID",
+          "quantile_ranges": {
+              "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
+              "value_ranges": [
+                  [5358, 5360],
+                  [26788, 26790],
+                  [53576, 53578],
+                  [80365, 80367],
+                  [101795, 101797]
+              ]
+          },
+          "result_format": "COMPLETE"
+      }
+  })
+  ```
 
-    3. **Table**
+  **Rendered Output:**
 
-    :::note 
-    This example shows how you can render your custom Expectation using different content types.
-    :::
+  ![Table Example](../../../images/table.png)
 
-    **Input:**
+  **Implementation:**
 
-      ```python
-      example_expectation_config = ExpectationConfiguration(**{
-          "expectation_type": "expect_column_quantile_values_to_be_between",
-          "kwargs": {
-              "allow_relative_error": False,
-              "column": "OBJECTID",
-              "quantile_ranges": {
-                  "quantiles": [0.05, 0.25, 0.5, 0.75, 0.95],
-                  "value_ranges": [
-                      [5358, 5360],
-                      [26788, 26790],
-                      [53576, 53578],
-                      [80365, 80367],
-                      [101795, 101797]
-                  ]
-              },
-              "result_format": "COMPLETE"
-          }
-      })
-      ```
+  ```python
+  class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
+      ...
 
-      **Rendered Output:**
+      @classmethod
+      @renderer(renderer_type="renderer.prescriptive")
+      @render_evaluation_parameter_string
+      def _prescriptive_renderer(
+          cls,
+          configuration=None,
+          result=None,
+          language=None,
+          runtime_configuration=None,
+          **kwargs
+      ):
+          runtime_configuration = runtime_configuration or {}
+          include_column_name = runtime_configuration.get("include_column_name", True)
+          include_column_name = (
+              include_column_name if include_column_name is not None else True
+          )
+          styling = runtime_configuration.get("styling")
+          # get params dict with all expected kwargs
+          params = substitute_none_for_missing(
+              configuration["kwargs"],
+              ["column", "quantile_ranges", "row_condition", "condition_parser"],
+          )
 
-      ![Table Example](../../../images/table.png)
+          # build string template content
+          template_str = "quantiles must be within the following value ranges."
 
-      **Implementation:**
+          if include_column_name:
+              template_str = "$column " + template_str
 
-      ```python
-      class ExpectColumnQuantileValuesToBeBetween(TableExpectation):
-          ...
-
-          @classmethod
-          @renderer(renderer_type="renderer.prescriptive")
-          @render_evaluation_parameter_string
-          def _prescriptive_renderer(
-              cls,
-              configuration=None,
-              result=None,
-              language=None,
-              runtime_configuration=None,
-              **kwargs
-          ):
-              runtime_configuration = runtime_configuration or {}
-              include_column_name = runtime_configuration.get("include_column_name", True)
-              include_column_name = (
-                  include_column_name if include_column_name is not None else True
+          if params["row_condition"] is not None:
+              (
+                  conditional_template_str,
+                  conditional_params,
+              ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+              template_str = (
+                  conditional_template_str
+                  + ", then "
+                  + template_str[0].lower()
+                  + template_str[1:]
               )
-              styling = runtime_configuration.get("styling")
-              # get params dict with all expected kwargs
-              params = substitute_none_for_missing(
-                  configuration["kwargs"],
-                  ["column", "quantile_ranges", "row_condition", "condition_parser"],
-              )
+              params.update(conditional_params)
 
-              # build string template content
-              template_str = "quantiles must be within the following value ranges."
+          expectation_string_obj = RenderedStringTemplateContent(**{
+              "content_block_type": "string_template",
+              "string_template": {"template": template_str, "params": params},
+          })
 
-              if include_column_name:
-                  template_str = "$column " + template_str
+          # build table content
+          quantiles = params["quantile_ranges"]["quantiles"]
+          value_ranges = params["quantile_ranges"]["value_ranges"]
 
-              if params["row_condition"] is not None:
-                  (
-                      conditional_template_str,
-                      conditional_params,
-                  ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-                  template_str = (
-                      conditional_template_str
-                      + ", then "
-                      + template_str[0].lower()
-                      + template_str[1:]
-                  )
-                  params.update(conditional_params)
+          table_header_row = ["Quantile", "Min Value", "Max Value"]
+          table_rows = []
 
-              expectation_string_obj = RenderedStringTemplateContent(**{
-                  "content_block_type": "string_template",
-                  "string_template": {"template": template_str, "params": params},
-              })
+          quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
 
-              # build table content
-              quantiles = params["quantile_ranges"]["quantiles"]
-              value_ranges = params["quantile_ranges"]["value_ranges"]
-
-              table_header_row = ["Quantile", "Min Value", "Max Value"]
-              table_rows = []
-
-              quantile_strings = {0.25: "Q1", 0.75: "Q3", 0.50: "Median"}
-
-              for quantile, value_range in zip(quantiles, value_ranges):
-                  quantile_string = quantile_strings.get(quantile, "{:3.2f}".format(quantile))
-                  table_rows.append(
-                      [
-                          quantile_string,
-                          str(value_range[0]) if value_range[0] is not None else "Any",
-                          str(value_range[1]) if value_range[1] is not None else "Any",
-                      ]
-                  )
-
-              quantile_range_table = RenderedTableContent(**{
-                  "content_block_type": "table",
-                  "header_row": table_header_row,
-                  "table": table_rows,
-                  "styling": {
-                      "body": {
-                          "classes": [
-                              "table",
-                              "table-sm",
-                              "table-unbordered",
-                              "col-4",
-                              "mt-2",
-                          ],
-                      },
-                      "parent": {"styles": {"list-style-type": "none"}},
-                  },
-              })
-
-              # return both string template and table content
-              return [expectation_string_obj, quantile_range_table]
-      ```
-
-      4. **Graph**
-
-      <Prerequisites>
-
-         - Have installed and are familiarized with [Altair](https://altair-viz.github.io/)
-
-      </Prerequisites>
-
-      **Input:**
-
-      ```python
-      example_expectation_config = ExpectationConfiguration(**{
-          "expectation_type": "expect_column_kl_divergence_to_be_less_than",
-          "kwargs": {
-              "column": "BATHRM",
-              "partition_object": {
-                  "values": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 24.0],
-                  "weights": [
-                      0.000429396884072176,
-                      0.37112959384655597,
-                      0.34935170405219973,
-                      0.18408057725876764,
-                      0.07543383087363596,
-                      0.01257386093141785,
-                      0.004658022720695996,
-                      0.0012135129332474538,
-                      0.0006627647558505326,
-                      0.000214698442036088,
-                      0.00013068600819587966,
-                      6.534300409793983e-05,
-                      2.8004144613402784e-05,
-                      9.33471487113426e-06,
-                      9.33471487113426e-06,
-                      9.33471487113426e-06
-                  ]
-              },
-              "threshold": 0.6,
-              "result_format": "COMPLETE"
-          }
-      })
-      ```
-
-      **Rendered Output:**
-
-      ![Graph Example](../../../images/kl_divergence.png)
-
-      **Implementation:**
-
-      ```python
-      import altair as alt
-
-      class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
-          ...
-
-          @classmethod
-          @renderer(renderer_type="renderer.prescriptive")
-          @render_evaluation_parameter_string
-          def _prescriptive_renderer(
-              cls,
-              configuration=None,
-              result=None,
-              language=None,
-              runtime_configuration=None,
-              **kwargs
-          ):
-              runtime_configuration = runtime_configuration or {}
-              include_column_name = runtime_configuration.get("include_column_name", True)
-              include_column_name = (
-                  include_column_name if include_column_name is not None else True
-              )
-              styling = runtime_configuration.get("styling")
-              # get params dict with all expected kwargs
-              params = substitute_none_for_missing(
-                  configuration.kwargs,
+          for quantile, value_range in zip(quantiles, value_ranges):
+              quantile_string = quantile_strings.get(quantile, "{:3.2f}".format(quantile))
+              table_rows.append(
                   [
-                      "column",
-                      "partition_object",
-                      "threshold",
-                      "row_condition",
-                      "condition_parser",
-                  ],
+                      quantile_string,
+                      str(value_range[0]) if value_range[0] is not None else "Any",
+                      str(value_range[1]) if value_range[1] is not None else "Any",
+                  ]
               )
 
-              expected_distribution = None
-              if not params.get("partition_object"):
-                  template_str = "can match any distribution."
-              else:
-                  template_str = (
-                      "Kullback-Leibler (KL) divergence with respect to the following distribution must be "
-                      "lower than $threshold."
-                  )
-                  # use utility method to generate kl divergence graph
-                  expected_distribution = cls._get_kl_divergence_graph(
-                      params.get("partition_object")
-                  )
+          quantile_range_table = RenderedTableContent(**{
+              "content_block_type": "table",
+              "header_row": table_header_row,
+              "table": table_rows,
+              "styling": {
+                  "body": {
+                      "classes": [
+                          "table",
+                          "table-sm",
+                          "table-unbordered",
+                          "col-4",
+                          "mt-2",
+                      ],
+                  },
+                  "parent": {"styles": {"list-style-type": "none"}},
+              },
+          })
 
-              if include_column_name:
-                  template_str = "$column " + template_str
+          # return both string template and table content
+          return [expectation_string_obj, quantile_range_table]
+  ```
+</TabItem>
 
-              if params["row_condition"] is not None:
-                  (
-                      conditional_template_str,
-                      conditional_params,
-                  ) = parse_row_condition_string_pandas_engine(params["row_condition"])
-                  template_str = conditional_template_str + ", then " + template_str
-                  params.update(conditional_params)
+<TabItem value="graph">
 
-              expectation_string_obj = {
-                  "content_block_type": "string_template",
-                  "string_template": {"template": template_str, "params": params},
-              }
+<Prerequisites>
 
-              if expected_distribution:
-                  return [expectation_string_obj, expected_distribution]
-              else:
-                  return [expectation_string_obj]
+   - Have installed and are familiarized with [Altair](https://altair-viz.github.io/)
 
-          @classmethod
-          def _get_kl_divergence_graph(cls, partition_object, header=None):
-              weights = partition_object["weights"]
+</Prerequisites>
 
-              # determine and set proper graph width
-              graph_pixel_width = (len(weights) / 60.0) * 500
-              if graph_pixel_width < 250:
-                  graph_pixel_width = 250
-              graph_container_col_width = round((len(weights) / 60.0) * 6)
-              if graph_container_col_width < 4:
-                  graph_container_col_width = 4
-              elif graph_container_col_width >= 5:
-                  graph_container_col_width = 6
-              elif graph_container_col_width >= 4:
-                  graph_container_col_width = 5
+**Input:**
 
-              # if single bar, set size
-              mark_bar_args = {}
-              if len(weights) == 1:
-                  mark_bar_args["size"] = 20
+```python
+example_expectation_config = ExpectationConfiguration(**{
+    "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+    "kwargs": {
+        "column": "BATHRM",
+        "partition_object": {
+            "values": [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 24.0],
+            "weights": [
+                0.000429396884072176,
+                0.37112959384655597,
+                0.34935170405219973,
+                0.18408057725876764,
+                0.07543383087363596,
+                0.01257386093141785,
+                0.004658022720695996,
+                0.0012135129332474538,
+                0.0006627647558505326,
+                0.000214698442036088,
+                0.00013068600819587966,
+                6.534300409793983e-05,
+                2.8004144613402784e-05,
+                9.33471487113426e-06,
+                9.33471487113426e-06,
+                9.33471487113426e-06
+            ]
+        },
+        "threshold": 0.6,
+        "result_format": "COMPLETE"
+    }
+})
+```
 
-              # generate graph for continuous distribution
-              if partition_object.get("bins"):
-                  bins = partition_object["bins"]
-                  bins_x1 = [round(value, 1) for value in bins[:-1]]
-                  bins_x2 = [round(value, 1) for value in bins[1:]]
+**Rendered Output:**
 
-                  df = pd.DataFrame(
-                      {"bin_min": bins_x1, "bin_max": bins_x2, "fraction": weights,}
-                  )
+![Graph Example](../../../images/kl_divergence.png)
 
-                  bars = (
-                      alt.Chart(df)
-                      .mark_bar()
-                      .encode(
-                          x="bin_min:O",
-                          x2="bin_max:O",
-                          y="fraction:Q",
-                          tooltip=["bin_min", "bin_max", "fraction"],
-                      )
-                      .properties(width=graph_pixel_width, height=400, autosize="fit")
-                  )
+**Implementation:**
 
-                  graph = bars.to_json()
-              # generate graph for categorical distribution
-              elif partition_object.get("values"):
-                  values = partition_object["values"]
+```python
+import altair as alt
 
-                  df = pd.DataFrame({"values": values, "fraction": weights})
+class ExpectColumnKlDivergenceToBeLessThan(TableExpectation):
+    ...
 
-                  bars = (
-                      alt.Chart(df)
-                      .mark_bar()
-                      .encode(
-                          x="values:N", y="fraction:Q", tooltip=["values", "fraction"]
-                      )
-                      .properties(width=graph_pixel_width, height=400, autosize="fit")
-                  )
-                  graph = bars.to_json()
+    @classmethod
+    @renderer(renderer_type="renderer.prescriptive")
+    @render_evaluation_parameter_string
+    def _prescriptive_renderer(
+        cls,
+        configuration=None,
+        result=None,
+        language=None,
+        runtime_configuration=None,
+        **kwargs
+    ):
+        runtime_configuration = runtime_configuration or {}
+        include_column_name = runtime_configuration.get("include_column_name", True)
+        include_column_name = (
+            include_column_name if include_column_name is not None else True
+        )
+            styling = runtime_configuration.get("styling")
+            # get params dict with all expected kwargs
+            params = substitute_none_for_missing(
+              configuration.kwargs,
+                [
+                    "column",
+                    "partition_object",
+                    "threshold",
+                    "row_condition",
+                    "condition_parser",
+                ],
+            )
 
-              # generate header if present
-              if header:
-                  expected_distribution = RenderedGraphContent(
-                      **{
-                          "content_block_type": "graph",
-                          "graph": graph,
-                          "header": header,
-                          "styling": {
-                              "classes": [
-                                  "col-" + str(graph_container_col_width),
-                                  "mt-2",
-                                  "pl-1",
-                                  "pr-1",
-                              ],
-                              "parent": {"styles": {"list-style-type": "none"}},
-                          },
-                      }
-                  )
-              else:
-                  expected_distribution = RenderedGraphContent(
-                      **{
-                          "content_block_type": "graph",
-                          "graph": graph,
-                          "styling": {
-                              "classes": [
-                                  "col-" + str(graph_container_col_width),
-                                  "mt-2",
-                                  "pl-1",
-                                  "pr-1",
-                              ],
-                              "parent": {"styles": {"list-style-type": "none"}},
-                          },
-                      }
-                  )
-              return expected_distribution
+            expected_distribution = None
+            if not params.get("partition_object"):
+                template_str = "can match any distribution."
+            else:
+                template_str = (
+                    "Kullback-Leibler (KL) divergence with respect to the following distribution must be "
+                    "lower than $threshold."
+                )
+                # use utility method to generate kl divergence graph
+                expected_distribution = cls._get_kl_divergence_graph(
+                    params.get("partition_object")
+                )
+
+            if include_column_name:
+                template_str = "$column " + template_str
+
+            if params["row_condition"] is not None:
+                (
+                    conditional_template_str,
+                    conditional_params,
+                ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+                template_str = conditional_template_str + ", then " + template_str
+                params.update(conditional_params)
+
+            expectation_string_obj = {
+                "content_block_type": "string_template",
+                "string_template": {"template": template_str, "params": params},
+            }
+
+            if expected_distribution:
+                return [expectation_string_obj, expected_distribution]
+            else:
+                return [expectation_string_obj]
+
+        @classmethod
+        def _get_kl_divergence_graph(cls, partition_object, header=None):
+            weights = partition_object["weights"]
+
+            # determine and set proper graph width
+            graph_pixel_width = (len(weights) / 60.0) * 500
+            if graph_pixel_width < 250:
+                graph_pixel_width = 250
+            graph_container_col_width = round((len(weights) / 60.0) * 6)
+            if graph_container_col_width < 4:
+                graph_container_col_width = 4
+            elif graph_container_col_width >= 5:
+                graph_container_col_width = 6
+            elif graph_container_col_width >= 4:
+                graph_container_col_width = 5
+
+            # if single bar, set size
+            mark_bar_args = {}
+            if len(weights) == 1:
+                mark_bar_args["size"] = 20
+
+            # generate graph for continuous distribution
+            if partition_object.get("bins"):
+                bins = partition_object["bins"]
+                bins_x1 = [round(value, 1) for value in bins[:-1]]
+                bins_x2 = [round(value, 1) for value in bins[1:]]
+
+                df = pd.DataFrame(
+                    {"bin_min": bins_x1, "bin_max": bins_x2, "fraction": weights,}
+                )
+
+                bars = (
+                    alt.Chart(df)
+                    .mark_bar()
+                    .encode(
+                        x="bin_min:O",
+                        x2="bin_max:O",
+                        y="fraction:Q",
+                        tooltip=["bin_min", "bin_max", "fraction"],
+                    )
+                    .properties(width=graph_pixel_width, height=400, autosize="fit")
+                )
+
+                graph = bars.to_json()
+            # generate graph for categorical distribution
+            elif partition_object.get("values"):
+                values = partition_object["values"]
+
+                df = pd.DataFrame({"values": values, "fraction": weights})
+
+                bars = (
+                    alt.Chart(df)
+                    .mark_bar()
+                    .encode(
+                        x="values:N", y="fraction:Q", tooltip=["values", "fraction"]
+                    )
+                    .properties(width=graph_pixel_width, height=400, autosize="fit")
+                )
+                graph = bars.to_json()
+
+            # generate header if present
+            if header:
+                expected_distribution = RenderedGraphContent(
+                    **{
+                        "content_block_type": "graph",
+                        "graph": graph,
+                        "header": header,
+                        "styling": {
+                            "classes": [
+                                "col-" + str(graph_container_col_width),
+                                "mt-2",
+                                "pl-1",
+                                "pr-1",
+                            ],
+                            "parent": {"styles": {"list-style-type": "none"}},
+                        },
+                    }
+                )
+            else:
+                expected_distribution = RenderedGraphContent(
+                    **{
+                        "content_block_type": "graph",
+                        "graph": graph,
+                        "styling": {
+                            "classes": [
+                                "col-" + str(graph_container_col_width),
+                                "mt-2",
+                                "pl-1",
+                                "pr-1",
+                            ],
+                            "parent": {"styles": {"list-style-type": "none"}},
+                        },
+                    }
+                )
+            return expected_distribution
+```
+</TabItem>
+</Tabs>
 
 3. **If necessary, implement additional renderer types that override the Great Expectations defaults.**
 
@@ -635,229 +653,243 @@ Steps
   These renderers do not have to have an output for every Expectation.
   :::
 
-    1. **diagnostic.unexpected_statement**
+<Tabs
+  groupId="additional-renderer-types"
+  defaultValue='unexpected_statement'
+  values={[
+  {label: 'diagnostic.unexpected_statement', value:'unexpected_statement'},
+  {label: 'diagnostic.unexpected_table', value:'unexpected_table'},
+  {label: 'diagnostic.observed_value', value:'observed_value'},
+  ]}>
 
-          ```python
-          @classmethod
-          @renderer(renderer_type="renderer.diagnostic.unexpected_statement")
-          def _diagnostic_unexpected_statement_renderer(
-              cls,
-              configuration=None,
-              result=None,
-              language=None,
-              runtime_configuration=None,
-              **kwargs,
-          ):
-              assert result, "Must provide a result object."
-              success = result.success
-              result_dict = result.result
+<TabItem value="unexpected_statement">
 
-              if result.exception_info["raised_exception"]:
-                  exception_message_template_str = (
-                      "\n\n$expectation_type raised an exception:\n$exception_message"
-                  )
+  ```python
+  @classmethod
+  @renderer(renderer_type="renderer.diagnostic.unexpected_statement")
+  def _diagnostic_unexpected_statement_renderer(
+      cls,
+      configuration=None,
+      result=None,
+      language=None,
+      runtime_configuration=None,
+      **kwargs,
+  ):
+      assert result, "Must provide a result object."
+      success = result.success
+      result_dict = result.result
 
-                  exception_message = RenderedStringTemplateContent(
-                      **{
-                          "content_block_type": "string_template",
-                          "string_template": {
-                              "template": exception_message_template_str,
-                              "params": {
-                                  "expectation_type": result.expectation_config.expectation_type,
-                                  "exception_message": result.exception_info[
-                                      "exception_message"
-                                  ],
-                              },
-                              "tag": "strong",
-                              "styling": {
-                                  "classes": ["text-danger"],
-                                  "params": {
-                                      "exception_message": {"tag": "code"},
-                                      "expectation_type": {
-                                          "classes": ["badge", "badge-danger", "mb-2"]
-                                      },
-                                  },
+      if result.exception_info["raised_exception"]:
+          exception_message_template_str = (
+              "\n\n$expectation_type raised an exception:\n$exception_message"
+          )
+
+          exception_message = RenderedStringTemplateContent(
+              **{
+                  "content_block_type": "string_template",
+                  "string_template": {
+                      "template": exception_message_template_str,
+                      "params": {
+                          "expectation_type": result.expectation_config.expectation_type,
+                          "exception_message": result.exception_info[
+                              "exception_message"
+                          ],
+                      },
+                      "tag": "strong",
+                      "styling": {
+                          "classes": ["text-danger"],
+                          "params": {
+                              "exception_message": {"tag": "code"},
+                              "expectation_type": {
+                                  "classes": ["badge", "badge-danger", "mb-2"]
                               },
                           },
-                      }
-                  )
+                      },
+                  },
+              }
+          )
 
-                  exception_traceback_collapse = CollapseContent(
-                      **{
-                          "collapse_toggle_link": "Show exception traceback...",
-                          "collapse": [
-                              RenderedStringTemplateContent(
-                                  **{
-                                      "content_block_type": "string_template",
-                                      "string_template": {
-                                          "template": result.exception_info[
-                                              "exception_traceback"
-                                          ],
-                                          "tag": "code",
-                                      },
-                                  }
-                              )
-                          ],
-                      }
-                  )
-
-                  return [exception_message, exception_traceback_collapse]
-
-              if success or not result_dict.get("unexpected_count"):
-                  return []
-              else:
-                  unexpected_count = num_to_str(
-                      result_dict["unexpected_count"], use_locale=True, precision=20
-                  )
-                  unexpected_percent = (
-                      num_to_str(result_dict["unexpected_percent"], precision=4) + "%"
-                  )
-                  element_count = num_to_str(
-                      result_dict["element_count"], use_locale=True, precision=20
-                  )
-
-                  template_str = (
-                      "\n\n$unexpected_count unexpected values found. "
-                      "$unexpected_percent of $element_count total rows."
-                  )
-
-                  return [
+          exception_traceback_collapse = CollapseContent(
+              **{
+                  "collapse_toggle_link": "Show exception traceback...",
+                  "collapse": [
                       RenderedStringTemplateContent(
                           **{
                               "content_block_type": "string_template",
                               "string_template": {
-                                  "template": template_str,
-                                  "params": {
-                                      "unexpected_count": unexpected_count,
-                                      "unexpected_percent": unexpected_percent,
-                                      "element_count": element_count,
-                                  },
-                                  "tag": "strong",
-                                  "styling": {"classes": ["text-danger"]},
+                                  "template": result.exception_info[
+                                      "exception_traceback"
+                                  ],
+                                  "tag": "code",
                               },
                           }
                       )
-                  ]
-          ```
+                  ],
+              }
+          )
 
-      2. **diagnostic.unexpected_table**
+          return [exception_message, exception_traceback_collapse]
 
-          ```python
-          @classmethod
-          @renderer(renderer_type="renderer.diagnostic.unexpected_table")
-          def _diagnostic_unexpected_table_renderer(
-              cls,
-              configuration=None,
-              result=None,
-              language=None,
-              runtime_configuration=None,
-              **kwargs,
-          ):
-              try:
-                  result_dict = result.result
-              except KeyError:
-                  return None
+      if success or not result_dict.get("unexpected_count"):
+          return []
+      else:
+          unexpected_count = num_to_str(
+              result_dict["unexpected_count"], use_locale=True, precision=20
+          )
+          unexpected_percent = (
+              num_to_str(result_dict["unexpected_percent"], precision=4) + "%"
+          )
+          element_count = num_to_str(
+              result_dict["element_count"], use_locale=True, precision=20
+          )
 
-              if result_dict is None:
-                  return None
+          template_str = (
+              "\n\n$unexpected_count unexpected values found. "
+              "$unexpected_percent of $element_count total rows."
+          )
 
-              if not result_dict.get("partial_unexpected_list") and not result_dict.get(
-                  "partial_unexpected_counts"
-              ):
-                  return None
-
-              table_rows = []
-
-              if result_dict.get("partial_unexpected_counts"):
-                  # We will check to see whether we have *all* of the unexpected values
-                  # accounted for in our count, and include counts if we do. If we do not,
-                  # we will use this as simply a better (non-repeating) source of
-                  # "sampled" unexpected values
-                  total_count = 0
-                  for unexpected_count_dict in result_dict.get("partial_unexpected_counts"):
-                      if not isinstance(unexpected_count_dict, dict):
-                          # handles case: "partial_exception_counts requires a hashable type"
-                          # this case is also now deprecated (because the error is moved to an errors key
-                          # the error also *should have* been updated to "partial_unexpected_counts ..." long ago.
-                          # NOTE: JPC 20200724 - Consequently, this codepath should be removed by approximately Q1 2021
-                          continue
-                      value = unexpected_count_dict.get("value")
-                      count = unexpected_count_dict.get("count")
-                      total_count += count
-                      if value is not None and value != "":
-                          table_rows.append([value, count])
-                      elif value == "":
-                          table_rows.append(["EMPTY", count])
-                      else:
-                          table_rows.append(["null", count])
-
-                  # Check to see if we have *all* of the unexpected values accounted for. If so,
-                  # we show counts. If not, we only show "sampled" unexpected values.
-                  if total_count == result_dict.get("unexpected_count"):
-                      header_row = ["Unexpected Value", "Count"]
-                  else:
-                      header_row = ["Sampled Unexpected Values"]
-                      table_rows = [[row[0]] for row in table_rows]
-              else:
-                  header_row = ["Sampled Unexpected Values"]
-                  sampled_values_set = set()
-                  for unexpected_value in result_dict.get("partial_unexpected_list"):
-                      if unexpected_value:
-                          string_unexpected_value = str(unexpected_value)
-                      elif unexpected_value == "":
-                          string_unexpected_value = "EMPTY"
-                      else:
-                          string_unexpected_value = "null"
-                      if string_unexpected_value not in sampled_values_set:
-                          table_rows.append([unexpected_value])
-                          sampled_values_set.add(string_unexpected_value)
-
-              unexpected_table_content_block = RenderedTableContent(
+          return [
+              RenderedStringTemplateContent(
                   **{
-                      "content_block_type": "table",
-                      "table": table_rows,
-                      "header_row": header_row,
-                      "styling": {
-                          "body": {"classes": ["table-bordered", "table-sm", "mt-3"]}
+                      "content_block_type": "string_template",
+                      "string_template": {
+                          "template": template_str,
+                          "params": {
+                              "unexpected_count": unexpected_count,
+                              "unexpected_percent": unexpected_percent,
+                              "element_count": element_count,
+                          },
+                          "tag": "strong",
+                          "styling": {"classes": ["text-danger"]},
                       },
                   }
               )
+          ]
+  ```
 
-              return unexpected_table_content_block
-        ```
+</TabItem>
+<TabItem value="unexpected_table">
 
-      3. **diagnostic.observed_value**
+  ```python
+  @classmethod
+  @renderer(renderer_type="renderer.diagnostic.unexpected_table")
+  def _diagnostic_unexpected_table_renderer(
+      cls,
+      configuration=None,
+      result=None,
+      language=None,
+      runtime_configuration=None,
+      **kwargs,
+  ):
+      try:
+          result_dict = result.result
+      except KeyError:
+          return None
 
-          ```python
-          @classmethod
-          @renderer(renderer_type="renderer.diagnostic.observed_value")
-          def _diagnostic_observed_value_renderer(
-              cls,
-              configuration=None,
-              result=None,
-              language=None,
-              runtime_configuration=None,
-              **kwargs,
-          ):
-              result_dict = result.result
-              if result_dict is None:
-                  return "--"
+      if result_dict is None:
+          return None
 
-              if result_dict.get("observed_value"):
-                  observed_value = result_dict.get("observed_value")
-                  if isinstance(observed_value, (int, float)) and not isinstance(
-                      observed_value, bool
-                  ):
-                      return num_to_str(observed_value, precision=10, use_locale=True)
-                  return str(observed_value)
-              elif result_dict.get("unexpected_percent") is not None:
-                  return (
-                      num_to_str(result_dict.get("unexpected_percent"), precision=5)
-                      + "% unexpected"
-                  )
+      if not result_dict.get("partial_unexpected_list") and not result_dict.get(
+          "partial_unexpected_counts"
+      ):
+          return None
+
+      table_rows = []
+
+      if result_dict.get("partial_unexpected_counts"):
+          # We will check to see whether we have *all* of the unexpected values
+          # accounted for in our count, and include counts if we do. If we do not,
+          # we will use this as simply a better (non-repeating) source of
+          # "sampled" unexpected values
+          total_count = 0
+          for unexpected_count_dict in result_dict.get("partial_unexpected_counts"):
+              if not isinstance(unexpected_count_dict, dict):
+                  # handles case: "partial_exception_counts requires a hashable type"
+                  # this case is also now deprecated (because the error is moved to an errors key
+                  # the error also *should have* been updated to "partial_unexpected_counts ..." long ago.
+                  # NOTE: JPC 20200724 - Consequently, this codepath should be removed by approximately Q1 2021
+                  continue
+              value = unexpected_count_dict.get("value")
+              count = unexpected_count_dict.get("count")
+              total_count += count
+              if value is not None and value != "":
+                  table_rows.append([value, count])
+              elif value == "":
+                  table_rows.append(["EMPTY", count])
               else:
-                  return "--"
-        ```
+                  table_rows.append(["null", count])
+
+          # Check to see if we have *all* of the unexpected values accounted for. If so,
+          # we show counts. If not, we only show "sampled" unexpected values.
+          if total_count == result_dict.get("unexpected_count"):
+              header_row = ["Unexpected Value", "Count"]
+          else:
+              header_row = ["Sampled Unexpected Values"]
+              table_rows = [[row[0]] for row in table_rows]
+      else:
+          header_row = ["Sampled Unexpected Values"]
+          sampled_values_set = set()
+          for unexpected_value in result_dict.get("partial_unexpected_list"):
+              if unexpected_value:
+                  string_unexpected_value = str(unexpected_value)
+              elif unexpected_value == "":
+                  string_unexpected_value = "EMPTY"
+              else:
+                  string_unexpected_value = "null"
+              if string_unexpected_value not in sampled_values_set:
+                  table_rows.append([unexpected_value])
+                  sampled_values_set.add(string_unexpected_value)
+
+      unexpected_table_content_block = RenderedTableContent(
+          **{
+              "content_block_type": "table",
+              "table": table_rows,
+              "header_row": header_row,
+              "styling": {
+                  "body": {"classes": ["table-bordered", "table-sm", "mt-3"]}
+              },
+          }
+      )
+
+      return unexpected_table_content_block
+  ```
+
+</TabItem>
+<TabItem value="observed_value">
+
+  ```python
+  @classmethod
+  @renderer(renderer_type="renderer.diagnostic.observed_value")
+  def _diagnostic_observed_value_renderer(
+      cls,
+      configuration=None,
+      result=None,
+      language=None,
+      runtime_configuration=None,
+      **kwargs,
+  ):
+      result_dict = result.result
+      if result_dict is None:
+          return "--"
+
+      if result_dict.get("observed_value"):
+          observed_value = result_dict.get("observed_value")
+          if isinstance(observed_value, (int, float)) and not isinstance(
+              observed_value, bool
+          ):
+              return num_to_str(observed_value, precision=10, use_locale=True)
+          return str(observed_value)
+      elif result_dict.get("unexpected_percent") is not None:
+          return (
+              num_to_str(result_dict.get("unexpected_percent"), precision=5)
+              + "% unexpected"
+          )
+      else:
+          return "--"
+```
+
+</TabItem>
+</Tabs>
 
 4. **Lastly, test that your renderers are providing the desired output by building your Data Docs site.**
 

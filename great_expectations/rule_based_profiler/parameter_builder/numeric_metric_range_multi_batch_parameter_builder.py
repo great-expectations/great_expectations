@@ -1,13 +1,18 @@
+import itertools
 from numbers import Number
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
-from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    MetricComputationDetails,
+    MetricComputationResult,
     ParameterBuilder,
+)
+from great_expectations.rule_based_profiler.types import (
+    Domain,
     ParameterContainer,
     build_parameter_container,
 )
@@ -18,7 +23,6 @@ from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.util import is_numeric
-from great_expectations.validator.validator import Validator
 
 MAX_DECIMALS: int = 9
 
@@ -52,25 +56,26 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
 
     def __init__(
         self,
-        parameter_name: str,
+        name: str,
         metric_name: str,
         metric_domain_kwargs: Optional[Union[str, dict]] = None,
         metric_value_kwargs: Optional[Union[str, dict]] = None,
-        sampling_method: Optional[str] = "bootstrap",
-        enforce_numeric_metric: Optional[Union[str, bool]] = True,
-        replace_nan_with_zero: Optional[Union[str, bool]] = True,
-        false_positive_rate: Optional[Union[str, float]] = 5.0e-2,
+        sampling_method: str = "bootstrap",
+        enforce_numeric_metric: Union[str, bool] = True,
+        replace_nan_with_zero: Union[str, bool] = True,
+        reduce_scalar_metric: Union[str, bool] = True,
+        false_positive_rate: Union[str, float] = 5.0e-2,
         num_bootstrap_samples: Optional[Union[str, int]] = None,
         round_decimals: Optional[Union[str, int]] = None,
         truncate_values: Optional[
             Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
         ] = None,
-        data_context: Optional[DataContext] = None,
-        batch_request: Optional[Union[str, dict]] = None,
+        data_context: Optional["DataContext"] = None,  # noqa: F821
+        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
         """
         Args:
-            parameter_name: the name of this parameter -- this is user-specified parameter name (from configuration);
+            name: the name of this parameter -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
             metric_name: the name of a metric used in MetricConfiguration (must be a supported and registered metric)
@@ -80,6 +85,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
             replace_nan_with_zero: if False, then if the computed metric gives NaN, then exception is raised; otherwise,
             if True (default), then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
+            reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
             identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
             num_bootstrap_samples: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
@@ -93,7 +99,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         super().__init__(
-            parameter_name=parameter_name,
+            name=name,
             data_context=data_context,
             batch_request=batch_request,
         )
@@ -107,6 +113,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
         self._enforce_numeric_metric = enforce_numeric_metric
         self._replace_nan_with_zero = replace_nan_with_zero
 
+        self._reduce_scalar_metric = reduce_scalar_metric
+
         self._false_positive_rate = false_positive_rate
 
         self._num_bootstrap_samples = num_bootstrap_samples
@@ -118,31 +126,81 @@ class NumericMetricRangeMultiBatchParameterBuilder(ParameterBuilder):
                 "lower_bound": None,
                 "upper_bound": None,
             }
-        truncate_values_keys: set = set(truncate_values.keys())
-        if (
-            not truncate_values_keys
-            <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
-        ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""Unrecognized truncate_values key(s) in {self.__class__.__name__}:
+        else:
+            if not isinstance(truncate_values, str):
+                truncate_values_keys: set = set(truncate_values.keys())
+                if (
+                    not truncate_values_keys
+                    <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
+                ):
+                    raise ge_exceptions.ProfilerExecutionError(
+                        message=f"""Unrecognized truncate_values key(s) in {self.__class__.__name__}:
 "{str(truncate_values_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS)}" \
 detected.
 """
-            )
+                    )
+
         self._truncate_values = truncate_values
+
+    @property
+    def metric_name(self) -> str:
+        return self._metric_name
+
+    @property
+    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
+        return self._metric_domain_kwargs
+
+    @property
+    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
+        return self._metric_value_kwargs
+
+    @property
+    def sampling_method(self) -> str:
+        return self._sampling_method
+
+    @property
+    def enforce_numeric_metric(self) -> Union[str, bool]:
+        return self._enforce_numeric_metric
+
+    @property
+    def replace_nan_with_zero(self) -> Union[str, bool]:
+        return self._replace_nan_with_zero
+
+    @property
+    def reduce_scalar_metric(self) -> Union[str, bool]:
+        return self._reduce_scalar_metric
+
+    @property
+    def false_positive_rate(self) -> Union[str, float]:
+        return self._false_positive_rate
+
+    @property
+    def num_bootstrap_samples(self) -> Optional[Union[str, int]]:
+        return self._num_bootstrap_samples
+
+    @property
+    def round_decimals(self) -> Optional[Union[str, int]]:
+        return self._round_decimals
+
+    @property
+    def truncate_values(
+        self,
+    ) -> Optional[Union[str, Dict[str, Union[Optional[int], Optional[float]]]]]:
+        return self._truncate_values
 
     def _build_parameters(
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
         """
-         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details.
+         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional
+         details.
 
-         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
+         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
+         ptional details
 
          The algorithm operates according to the following steps:
          1. Obtain batch IDs of interest using DataContext and BatchRequest (unless passed explicitly as argument). Note
@@ -153,7 +211,7 @@ detected.
          4. Perform metric computations and obtain the result in the array-like form (one metric value per each Batch).
          5. Using the configured directives and heuristics, determine whether or not the ranges should be clipped.
          6. Using the configured directives and heuristics, determine if return values should be rounded to an integer.
-         7. Convert the list of floating point metric computation results to a numpy array (for further computations).
+         7. Convert the multi-dimensional metric computation results to a numpy array (for further computations).
          Steps 8 -- 10 are for the "oneshot" sampling method only (the "bootstrap" method achieves same automatically):
          8. Compute the mean and the standard deviation of the metric (aggregated over all the gathered Batch objects).
          9. Compute number of standard deviations (as floating point) needed (around the mean) to achieve the specified
@@ -164,52 +222,30 @@ detected.
         11. Return [low, high] for the desired metric as estimated by the specified sampling method.
         12. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
-        validator: Validator = self.get_validator(
+        metric_computation_result: MetricComputationResult = self.get_metrics(
+            metric_name=self.metric_name,
+            metric_domain_kwargs=self.metric_domain_kwargs,
+            metric_value_kwargs=self.metric_value_kwargs,
+            enforce_numeric_metric=self.enforce_numeric_metric,
+            replace_nan_with_zero=self.replace_nan_with_zero,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
+        metric_values: np.ndarray = metric_computation_result.metric_values
+        details: MetricComputationDetails = metric_computation_result.details
 
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        if not batch_ids:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
-            )
-
-        metric_computation_result: Dict[
-            str, Union[Union[np.ndarray, List[Union[Any, Number]]], Dict[str, Any]]
-        ] = self.get_metrics(
-            batch_ids=batch_ids,
-            validator=validator,
-            metric_name=self._metric_name,
-            metric_domain_kwargs=self._metric_domain_kwargs,
-            metric_value_kwargs=self._metric_value_kwargs,
-            enforce_numeric_metric=self._enforce_numeric_metric,
-            replace_nan_with_zero=self._replace_nan_with_zero,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        metric_values: Union[
-            np.ndarray, List[Union[Any, Number]]
-        ] = metric_computation_result["metric_values"]
-        details: Dict[str, Any] = metric_computation_result["details"]
-
-        # Obtain sampling_method directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain sampling_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         sampling_method: str = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._sampling_method,
+            parameter_reference=self.sampling_method,
             expected_return_type=str,
             variables=variables,
             parameters=parameters,
         )
-        if not (
+        if (
             sampling_method
-            in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
+            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
         ):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""The directive "sampling_method" for {self.__class__.__name__} can be only one of
@@ -217,21 +253,58 @@ detected.
 """
             )
 
-        # Obtain false_positive_rate from rule state (i.e., variables and parameters); from instance variable otherwise.
-        false_positive_rate: Union[
-            Any, str
-        ] = get_parameter_value_and_validate_return_type(
+        estimator: Callable
+        etimator_kwargs: dict
+        if sampling_method == "bootstrap":
+            estimator = self._get_bootstrap_estimate
+            estimator_kwargs = {
+                "false_positive_rate": self.false_positive_rate,
+                "num_bootstrap_samples": self.num_bootstrap_samples,
+            }
+        else:
+            estimator = self._get_deterministic_estimate
+            estimator_kwargs = {
+                "false_positive_rate": self.false_positive_rate,
+            }
+
+        metric_value_range: np.ndarray = self._estimate_metric_value_range(
+            metric_values=metric_values,
+            estimator=estimator,
             domain=domain,
-            parameter_reference=self._false_positive_rate,
-            expected_return_type=float,
             variables=variables,
             parameters=parameters,
+            **estimator_kwargs,
         )
-        if not (0.0 <= false_positive_rate <= 1.0):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
-            )
 
+        parameter_values: Dict[str, Any] = {
+            f"$parameter.{self.name}": {
+                "value": {
+                    "value_range": metric_value_range,
+                },
+                "details": details,
+            },
+        }
+
+        build_parameter_container(
+            parameter_container=parameter_container, parameter_values=parameter_values
+        )
+
+    def _estimate_metric_value_range(
+        self,
+        metric_values: np.ndarray,
+        estimator: Callable,
+        domain: Optional[Domain] = None,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        **kwargs,
+    ) -> np.ndarray:
+        """
+        This method accepts an estimator Callable and data samples in the format "N x R^m", where "N" (most significant
+        dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the multi-dimensional
+        metric, whose values are being estimated.  Thus, for each element in the "R^m" hypercube, an "N"-dimensional
+        vector of sample measurements is constructed and given to the estimator to apply its specific algorithm for
+        computing the range of values in this vector.  Estimator algorithms differ based on their use of data samples.
+        """
         truncate_values: Dict[str, Number] = self._get_truncate_values_using_heuristics(
             metric_values=metric_values,
             domain=domain,
@@ -248,106 +321,109 @@ detected.
             parameters=parameters,
         )
 
-        metric_values = np.array(metric_values, dtype=np.float64)
+        min_value: Number
+        max_value: Number
 
-        lower_quantile: Union[Number, float]
-        upper_quantile: Union[Number, float]
+        lower_quantile: Number
+        upper_quantile: Number
 
-        if np.all(np.isclose(metric_values, metric_values[0])):
-            # Computation is unnecessary if distribution is degenerate.
-            lower_quantile = upper_quantile = metric_values[0]
-        elif sampling_method == "bootstrap":
-            lower_quantile, upper_quantile = self._get_bootstrap_estimate(
-                metric_values=metric_values,
-                false_positive_rate=false_positive_rate,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
-            )
-        else:
-            lower_quantile, upper_quantile = compute_quantiles(
-                metric_values=metric_values,
-                false_positive_rate=false_positive_rate,
-            )
+        # Outer-most dimension is data samples (e.g., one per Batch); the rest are dimensions of the actual metric.
+        metric_value_shape: tuple = metric_values.shape[1:]
 
-        min_value: Union[Number, float]
-        max_value: Union[Number, float]
+        # Generate all permutations of indexes for accessing every element of the multi-dimensional metric.
+        metric_value_shape_idx: int
+        axes: List[np.ndarray] = [
+            np.indices(dimensions=(metric_value_shape_idx,))[0]
+            for metric_value_shape_idx in metric_value_shape
+        ]
+        metric_value_indices: List[tuple] = list(itertools.product(*tuple(axes)))
 
-        if round_decimals == 0:
-            min_value = round(float(lower_quantile))
-            max_value = round(float(upper_quantile))
-        else:
-            min_value = round(float(lower_quantile), round_decimals)
-            max_value = round(float(upper_quantile), round_decimals)
+        # Generate all permutations of indexes for accessing estimates of every element of the multi-dimensional metric.
+        # Prefixing multi-dimensional index with "(slice(None, None, None),)" is equivalent to "[:,]" access.
+        metric_value_idx: tuple
+        metric_value_vector_indices: List[tuple] = [
+            (slice(None, None, None),) + metric_value_idx
+            for metric_value_idx in metric_value_indices
+        ]
 
-        if lower_bound is not None:
-            min_value = max(min_value, lower_bound)
-        if upper_bound is not None:
-            max_value = min(max_value, upper_bound)
+        # Since range includes min and max values, value range estimate contains 2-element least-significant dimension.
+        metric_value_range_shape: tuple = metric_value_shape + (2,)
+        # Initialize value range estimate for multi-dimensional metric to all trivial values (to be updated in situ).
+        metric_value_range: np.ndarray = np.zeros(shape=metric_value_range_shape)
 
-        parameter_values: Dict[str, Any] = {
-            f"$parameter.{self.parameter_name}": {
-                "value": {
-                    "min_value": min_value,
-                    "max_value": max_value,
-                },
-                "details": details,
-            },
-        }
+        metric_value_vector: np.ndarray
+        metric_value_range_min_idx: tuple
+        metric_value_range_max_idx: tuple
+        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
+        for metric_value_idx in metric_value_vector_indices:
+            # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
+            metric_value_vector = metric_values[metric_value_idx]
+            if np.all(np.isclose(metric_value_vector, metric_value_vector[0])):
+                # Computation is unnecessary if distribution is degenerate.
+                lower_quantile = upper_quantile = metric_value_vector[0]
+            else:
+                # Compute low and high estimates for vector of samples for given element of multi-dimensional metric.
+                lower_quantile, upper_quantile = estimator(
+                    metric_values=metric_value_vector,
+                    domain=domain,
+                    variables=variables,
+                    parameters=parameters,
+                    **kwargs,
+                )
 
-        build_parameter_container(
-            parameter_container=parameter_container, parameter_values=parameter_values
-        )
+            if round_decimals == 0:
+                min_value = round(float(cast(float, lower_quantile)))
+                max_value = round(float(cast(float, upper_quantile)))
+            else:
+                min_value = round(float(cast(float, lower_quantile)), round_decimals)
+                max_value = round(float(cast(float, upper_quantile)), round_decimals)
 
-    def _get_bootstrap_estimate(
-        self,
-        metric_values: np.ndarray,
-        false_positive_rate: np.float64,
-        domain: Domain,
-        *,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> tuple:
-        # Obtain num_bootstrap_samples override from rule state (i.e., variables and parameters); from instance variable otherwise.
-        num_bootstrap_samples: Optional[
-            int
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self._num_bootstrap_samples,
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-        n_resamples: int
-        if num_bootstrap_samples is None:
-            n_resamples = DEFAULT_BOOTSTRAP_NUM_RESAMPLES
-        else:
-            n_resamples = num_bootstrap_samples
+            if lower_bound is not None:
+                min_value = max(cast(float, min_value), lower_bound)
 
-        return compute_bootstrap_quantiles(
-            metric_values=metric_values,
-            false_positive_rate=false_positive_rate,
-            n_resamples=n_resamples,
-        )
+            if upper_bound is not None:
+                max_value = min(cast(float, max_value), upper_bound)
+
+            # Obtain index of metric element (by discarding "N"-element samples dimension).
+            metric_value_idx = metric_value_idx[1:]
+
+            # Compute indices for min and max value range estimates.
+            metric_value_range_min_idx = metric_value_idx + (
+                slice(0, 1, None),
+            )  # appends "[0]" element
+            metric_value_range_max_idx = metric_value_idx + (
+                slice(1, 2, None),
+            )  # appends "[0]" element
+
+            # Store computed min and max value estimates into allocated range estimate for multi-dimensional metric.
+            metric_value_range[metric_value_range_min_idx] = min_value
+            metric_value_range[metric_value_range_max_idx] = max_value
+
+        # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
+        if metric_value_range.shape[0] == 1:
+            metric_value_range = metric_value_range[0]
+
+        return metric_value_range
 
     def _get_truncate_values_using_heuristics(
         self,
-        metric_values: Union[np.ndarray, List[Number]],
+        metric_values: np.ndarray,
         domain: Domain,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> Dict[str, Union[Optional[int], Optional[float]]]:
-        # Obtain truncate_values directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain truncate_values directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         truncate_values: Dict[
             str, Optional[Number]
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._truncate_values,
+            parameter_reference=self.truncate_values,
             expected_return_type=dict,
             variables=variables,
             parameters=parameters,
         )
+
         distribution_boundary: Optional[Union[int, float]]
         if not all(
             [
@@ -366,14 +442,11 @@ detected.
 
         lower_bound: Optional[Number] = truncate_values.get("lower_bound")
         upper_bound: Optional[Number] = truncate_values.get("upper_bound")
-        metric_value: Union[Number, np.float64]
-        if lower_bound is None and all(
-            [metric_value > NP_EPSILON for metric_value in metric_values]
-        ):
+
+        if lower_bound is None and np.all(np.greater(metric_values, NP_EPSILON)):
             lower_bound = 0.0
-        if upper_bound is None and all(
-            [metric_value < (-NP_EPSILON) for metric_value in metric_values]
-        ):
+
+        if upper_bound is None and np.all(np.less(metric_values, (-NP_EPSILON))):
             upper_bound = 0.0
 
         return {
@@ -383,37 +456,105 @@ detected.
 
     def _get_round_decimals_using_heuristics(
         self,
-        metric_values: Union[np.ndarray, List[Number]],
+        metric_values: np.ndarray,
         domain: Domain,
         *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> int:
-        # Obtain round_decimals directive from rule state (i.e., variables and parameters); from instance variable otherwise.
+        # Obtain round_decimals directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         round_decimals: Optional[
             Union[Any]
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self._round_decimals,
+            parameter_reference=self.round_decimals,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
         )
         if round_decimals is None:
             round_decimals = MAX_DECIMALS
-        elif not isinstance(round_decimals, int) or (round_decimals < 0):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
+        else:
+            if not isinstance(round_decimals, int) or (round_decimals < 0):
+                raise ge_exceptions.ProfilerExecutionError(
+                    message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
 positive integer, or must be omitted (or set to None).
 """
-            )
-        metric_value: Number
-        if all(
-            [
-                np.issubdtype(type(metric_value), np.integer)
-                for metric_value in metric_values
-            ]
-        ):
+                )
+
+        if np.issubdtype(metric_values.dtype, np.integer):
             round_decimals = 0
 
         return round_decimals
+
+    def _get_bootstrap_estimate(
+        self,
+        metric_values: np.ndarray,
+        domain: Domain,
+        *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        **kwargs,
+    ) -> Tuple[Number, Number]:
+        # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        false_positive_rate: np.float64 = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=kwargs.get("false_positive_rate", 5.0e-2),
+            expected_return_type=(float, np.float64),
+            variables=variables,
+            parameters=parameters,
+        )
+        if not (0.0 <= false_positive_rate <= 1.0):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
+            )
+
+        # Obtain num_bootstrap_samples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        num_bootstrap_samples: Optional[
+            int
+        ] = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=kwargs.get("num_bootstrap_samples"),
+            expected_return_type=None,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        n_resamples: int
+        if num_bootstrap_samples is None:
+            n_resamples = DEFAULT_BOOTSTRAP_NUM_RESAMPLES
+        else:
+            n_resamples = num_bootstrap_samples
+
+        return compute_bootstrap_quantiles(
+            metric_values=metric_values,
+            false_positive_rate=false_positive_rate,
+            n_resamples=n_resamples,
+        )
+
+    def _get_deterministic_estimate(
+        self,
+        metric_values: np.ndarray,
+        domain: Domain,
+        *,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        **kwargs,
+    ) -> Tuple[Number, Number]:
+        # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        false_positive_rate: np.float64 = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=kwargs.get("false_positive_rate", 5.0e-2),
+            expected_return_type=(float, np.float64),
+            variables=variables,
+            parameters=parameters,
+        )
+        if not (0.0 <= false_positive_rate <= 1.0):
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"The confidence level for {self.__class__.__name__} is outside of [0.0, 1.0] closed interval."
+            )
+
+        return compute_quantiles(
+            metric_values=metric_values,
+            false_positive_rate=false_positive_rate,
+        )

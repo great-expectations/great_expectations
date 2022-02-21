@@ -3,7 +3,6 @@ import logging
 from itertools import chain
 
 import ipywidgets as widgets
-from IPython.display import display
 
 logger = logging.getLogger(__name__)
 
@@ -122,8 +121,10 @@ class ExpectationExplorer:
             "expect_column_pair_values_to_be_in_set": [
                 "value_pairs_set",
                 "ignore_row_if",
+                "mostly",
             ],
             "expect_compound_columns_to_be_unique": ["ignore_row_if"],
+            "expect_multicolumn_sum_to_equal": ["sum_total", "ignore_row_if"],
             "expect_select_column_values_to_be_unique_within_record": ["ignore_row_if"],
             "expect_column_values_to_be_of_type": ["type_", "mostly"],
             "expect_column_values_to_be_in_type_list": ["type_list", "mostly"],
@@ -278,9 +279,7 @@ class ExpectationExplorer:
                 continue
             if kwarg_name in ancillary_kwargs:
                 continue
-            elif not hasattr(
-                self, "generate_{kwarg_name}_widget_dict".format(kwarg_name=kwarg_name)
-            ):
+            elif not hasattr(self, f"generate_{kwarg_name}_widget_dict"):
                 expectation_kwargs[kwarg_name] = widget_dict.get("ge_kwarg_value")
             else:
                 expectation_kwargs[kwarg_name] = (
@@ -370,7 +369,7 @@ class ExpectationExplorer:
                         ge_kwarg_name
                     ] = self.generate_expectation_kwarg_fallback_widget_dict(
                         expectation_kwarg_name=ge_kwarg_name,
-                        **new_ge_expectation_kwargs
+                        **new_ge_expectation_kwargs,
                     )
                 else:
                     self.update_kwarg_widget_dict(
@@ -390,12 +389,12 @@ class ExpectationExplorer:
                 widget_dict = (
                     widget_dict_generator(
                         expectation_state=existing_expectation_state,
-                        **new_ge_expectation_kwargs
+                        **new_ge_expectation_kwargs,
                     )
                     if widget_dict_generator
                     else self.generate_expectation_kwarg_fallback_widget_dict(
                         expectation_kwarg_name=ge_kwarg_name,
-                        **new_ge_expectation_kwargs
+                        **new_ge_expectation_kwargs,
                     )
                 )
                 current_expectation_kwarg_dict[ge_kwarg_name] = widget_dict
@@ -602,7 +601,7 @@ class ExpectationExplorer:
         expectation_state,
         output_strftime_format="",
         column=None,
-        **expectation_kwargs
+        **expectation_kwargs,
     ):
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
@@ -1019,9 +1018,9 @@ class ExpectationExplorer:
     def generate_parse_strings_as_datetimes_widget_dict(
         self,
         expectation_state,
-        parse_strings_as_datetimes=None,
+        parse_strings_as_datetimes: bool = False,
         column=None,
-        **expectation_kwargs
+        **expectation_kwargs,
     ):
         data_asset_name = expectation_state["data_asset_name"]
         data_asset = self.state["data_assets"].get(data_asset_name)["data_asset"]
@@ -1072,7 +1071,7 @@ class ExpectationExplorer:
         expectation_type = expectation_state["expectation_type"]
         inc_dec = expectation_type.split("_")[-1]
         strictly_widget = self.generate_boolean_checkbox_widget(
-            value=strictly, description="strictly {inc_dec}".format(inc_dec=inc_dec)
+            value=strictly, description=f"strictly {inc_dec}"
         )
 
         @expectation_feedback_widget.capture(clear_output=True)

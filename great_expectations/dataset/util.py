@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import Any, List
 
 import numpy as np
 import pandas as pd
@@ -302,7 +302,7 @@ def infer_distribution_parameters(data, distribution, params=None):
     """
 
     if params is None:
-        params = dict()
+        params = {}
     elif not isinstance(params, dict):
         raise TypeError(
             "params must be a dictionary object, see great_expectations documentation"

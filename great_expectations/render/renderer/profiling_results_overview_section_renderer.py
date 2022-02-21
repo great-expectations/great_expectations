@@ -1,7 +1,8 @@
 import warnings
 from collections import Counter, defaultdict
 
-from great_expectations.profile.base import ProfilerTypeMapping
+from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.types import (
     CollapseContent,
     RenderedBulletListContent,
@@ -10,8 +11,6 @@ from great_expectations.render.types import (
     RenderedStringTemplateContent,
     RenderedTableContent,
 )
-
-from .renderer import Renderer
 
 
 class ProfilingResultsOverviewSectionRenderer(Renderer):
@@ -305,13 +304,11 @@ class ProfilingResultsOverviewSectionRenderer(Renderer):
         # assume 100.0 missing for columns where ["result"]["unexpected_percent"] is not available
         return "{:.2f}%".format(
             sum(
-                [
-                    evr.result["unexpected_percent"]
-                    if "unexpected_percent" in evr.result
-                    and evr.result["unexpected_percent"] is not None
-                    else 100.0
-                    for evr in expect_column_values_to_not_be_null_evrs
-                ]
+                evr.result["unexpected_percent"]
+                if "unexpected_percent" in evr.result
+                and evr.result["unexpected_percent"] is not None
+                else 100.0
+                for evr in expect_column_values_to_not_be_null_evrs
             )
             / len(columns)
         )

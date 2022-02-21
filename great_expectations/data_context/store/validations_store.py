@@ -1,4 +1,6 @@
 import random
+import uuid
+from typing import Dict
 
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -11,6 +13,7 @@ from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
+    GeCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import load_class
@@ -145,11 +148,31 @@ class ValidationsStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
+    def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
+        """
+        This method takes full json response from GE cloud and outputs a dict appropriate for
+        deserialization into a GE object
+        """
+        ge_cloud_suite_validation_result_id = response_json["data"]["id"]
+        suite_validation_result_dict = response_json["data"]["attributes"]["result"]
+        suite_validation_result_dict[
+            "ge_cloud_id"
+        ] = ge_cloud_suite_validation_result_id
+
+        return suite_validation_result_dict
+
     def serialize(self, key, value):
-        return self._expectationSuiteValidationResultSchema.dumps(value)
+        if self.ge_cloud_mode:
+            return value.to_json_dict()
+        return self._expectationSuiteValidationResultSchema.dumps(
+            value, indent=2, sort_keys=True
+        )
 
     def deserialize(self, key, value):
-        return self._expectationSuiteValidationResultSchema.loads(value)
+        if isinstance(value, dict):
+            return self._expectationSuiteValidationResultSchema.load(value)
+        else:
+            return self._expectationSuiteValidationResultSchema.loads(value)
 
     def self_check(self, pretty_print):
         return_obj = {}
@@ -176,13 +199,19 @@ class ValidationsStore(Store):
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
 
-        test_key = self._key_class(
-            expectation_suite_identifier=ExpectationSuiteIdentifier(
-                expectation_suite_name="temporary_test_suite",
-            ),
-            run_id="temporary_test_run_id",
-            batch_identifier=test_key_name,
-        )
+        if self.ge_cloud_mode:
+            test_key: GeCloudIdentifier = self.key_class(
+                resource_type="contract", ge_cloud_id=str(uuid.uuid4())
+            )
+
+        else:
+            test_key: ValidationResultIdentifier = self.key_class(
+                expectation_suite_identifier=ExpectationSuiteIdentifier(
+                    expectation_suite_name="temporary_test_suite",
+                ),
+                run_id="temporary_test_run_id",
+                batch_identifier=test_key_name,
+            )
         test_value = ExpectationSuiteValidationResult(success=True)
 
         if pretty_print:

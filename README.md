@@ -1,6 +1,7 @@
 [![Build Status](https://dev.azure.com/great-expectations/great_expectations/_apis/build/status/great_expectations?branchName=develop&stageName=required)](https://dev.azure.com/great-expectations/great_expectations/_build/latest?definitionId=1&branchName=develop)
 ![Coverage](https://img.shields.io/azure-devops/coverage/great-expectations/great_expectations/1/main)
 [![Documentation Status](https://readthedocs.org/projects/great-expectations/badge/?version=latest)](http://great-expectations.readthedocs.io/en/latest/?badge=latest)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5683574.svg)](https://doi.org/10.5281/zenodo.5683574)
 
 <!-- <<<Super-quickstart links go here>>> -->
 
@@ -42,7 +43,7 @@ Expectations are assertions for data. They are the workhorse abstraction in Grea
 - `expect_column_values_to_match_strftime_format`
 - `expect_table_row_count_to_be_between`
 - `expect_column_median_to_be_between`
-- ...and [many more](https://docs.greatexpectations.io/en/latest/reference/glossary_of_expectations.html)
+- ...and [many more](https://greatexpectations.io/expectations)
 
 Expectations are <!--[declarative, flexible and extensible]()--> declarative, flexible and extensible.
 <!--To test out Expectations on your own data, check out the [<<step-1 tutorial>>]().-->
@@ -68,11 +69,6 @@ Check out [The Era of DIY Data Validation is Over]() for more details.
 
 ### Tests are docs and docs are tests
 
-```diff
-! This feature is in beta
-```
-
-
 Many data teams struggle to maintain up-to-date data documentation. Great Expectations solves this problem by rendering Expectations directly into clean, human-readable documentation.
 
 Since docs are rendered from tests, and tests are run against new data as it arrives, your documentation is guaranteed to never go stale. Additional renderers allow Great Expectations to generate other type of "documentation", including <!--[slack notifications](), [data dictionaries](), [customized notebooks]()--> slack notifications, data dictionaries, customized notebooks, etc.
@@ -89,12 +85,7 @@ Check out [Down with Documentation Rot!]() for more details.
 
 ### Automated data profiling
 
-```diff
-- This feature is experimental
-```
-
-
-Wouldn't it be great if your tests could write themselves? Run your data through one of Great Expectations' data profilers and it will automatically generate Expectations and data documentation. Profiling provides the double benefit of helping you explore data faster, and capturing knowledge for future documentation and testing.
+Wouldn't it be great if your tests could write themselves? Run your data through one of Great Expectations' data profilers and it will automatically generate Expectations and data documentation. Profiling, a beta feature of Great Expectations, provides the double benefit of helping you explore data faster, and capturing knowledge for future documentation and testing.
 
 <!--
 <<<pretty pics of profiled data>>>
@@ -121,6 +112,11 @@ Recent extensions include:
 * [BigQuery and GCS integration](https://github.com/great-expectations/great_expectations/pull/841)
 * [Notifications to MatterMost](https://github.com/great-expectations/great_expectations/issues/902)
 
+New deployment patterns include:
+* [How to Use Great Expectations with Google Cloud Platform and BigQuery](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery)
+* [How to Use Great Expectations in Databricks](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_databricks/)
+* [How to Use Great Expectations in Flyte](https://docs.greatexpectations.io/docs/deployment_patterns/how_to_use_great_expectations_in_flyte)
+
 We're very excited to see what other plugins the data community comes up with!
 
 Quick start
@@ -128,15 +124,23 @@ Quick start
 
 To see Great Expectations in action on your own data:
 
+You can install it using pip
 ```
-    pip install great_expectations
-    great_expectations init
+pip install great_expectations
+```
+or conda
+```
+conda install -c conda-forge great-expectations
+```
+and then run
 
 ```
+great_expectations init
+```
 
-(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](http://docs.greatexpectations.io/en/latest/reference/supporting_resources.html), which will teach you how to get up and running in minutes.)
+(We recommend deploying within a virtual environment. If you’re not familiar with pip, virtual environments, notebooks, or git, you may want to check out the [Supporting Resources](https://docs.greatexpectations.io/docs/reference/supporting_resources), which will teach you how to get up and running in minutes.)
 
-For full documentation, visit [Great Expectations on readthedocs.io](http://great-expectations.readthedocs.io/en/latest/).
+For full documentation, visit [Great Expectations on readthedocs.io](https://docs.greatexpectations.io/docs/).
 
 If you need help, hop into our [Slack channel](https://greatexpectations.io/slack)&mdash;there are always contributors and other users there.
 
@@ -170,7 +174,7 @@ Great Expectations works with the tools and systems that you're already using wi
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.snowflake.com/wp-content/themes/snowflake/img/snowflake-logo-blue@2x.png" /> </td><td style="width: 200px;">Snowflake                </td><td>Cloud-based data warehouse</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://raw.githubusercontent.com/apache/airflow/master/docs/apache-airflow/img/logos/wordmark_1.png" /></td><td style="width: 200px;">Apache Airflow           </td><td>An open source orchestration engine</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://www.sqlalchemy.org/img/sqla_logo.png" />                                         </td><td style="width: 200px;">Other SQL Relational DBs </td><td>Most RDBMS are supported via SQLalchemy</td></tr>
-		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://jupyter.org/assets/main-logo.svg" />                                             </td><td style="width: 200px;">Jupyter Notebooks        </td><td>The best way to build Expectations</td></tr>
+		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://jupyter.org/assets/logos/rectanglelogo-greytext-orangebody-greymoons.svg" />                                             </td><td style="width: 200px;">Jupyter Notebooks        </td><td>The best way to build Expectations</td></tr>
 		<tr><td style="text-align: center; height=40px;"><img height="40" src="https://cdn.brandfolder.io/5H442O3W/as/pl546j-7le8zk-5guop3/Slack_RGB.png" />            </td><td style="width: 200px;">Slack                    </td><td> Get automatic data quality notifications!</td></tr>
 	</tbody>
 </table>
@@ -201,7 +205,7 @@ What does Great Expectations _not_ do?
 
 **Great Expectations is _not_ a pipeline execution framework.**
 
-We aim to integrate seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), etc. We DON'T execute your pipelines for you.
+We aim to integrate seamlessly with DAG execution tools like [Spark]( https://spark.apache.org/), [Airflow](https://airflow.apache.org/), [dbt]( https://www.getdbt.com/), [prefect](https://www.prefect.io/), [dagster]( https://github.com/dagster-io/dagster), [Kedro](https://github.com/quantumblacklabs/kedro), [Flyte](https://flyte.org/), etc. We DON'T execute your pipelines for you.
 
 **Great Expectations is _not_ a data versioning tool.**
 
@@ -227,4 +231,4 @@ If you'd like hands-on assistance setting up Great Expectations, establishing a 
 Can I contribute to the library?
 --------------------------------------------------------------------------------
 
-Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/en/latest/contributing.html) and please don't be shy with questions.
+Absolutely. Yes, please. Start [here](https://docs.greatexpectations.io/docs/contributing/contributing/) and please don't be shy with questions.

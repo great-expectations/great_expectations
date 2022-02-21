@@ -11,13 +11,13 @@ import SparkAdditionalNotes from '../../components/spark_additional_notes.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you connect to your data stored on AWS S3 using spark.
+This guide will help you connect to your data stored on AWS S3 using Spark.
 This will allow you to validate and explore your data.
 
 <Prerequisites>
 
 - Have access to data on an AWS S3 bucket
-- Have a access to a working spark installation
+- Have access to a working Spark installation
 
 </Prerequisites>
 
@@ -27,11 +27,11 @@ This will allow you to validate and explore your data.
 
 <WhereToRunCode />
 
-### 2. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 2. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py#L1-L4
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L3-L6
 ```
 
 <SparkDataContextNote />
@@ -47,27 +47,27 @@ Using this example configuration, add in your S3 bucket and path to a directory 
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py#L20-L39
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L23-L42
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py#L50
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L52
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_python_example.py#L21-L40
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py#L21-L42
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_python_example.py#L51
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py#L53
 ```
 
 </TabItem>
@@ -86,17 +86,17 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py#L52
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L54
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_python_example.py#L53
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py#L55
 ```
 
 </TabItem>
@@ -114,12 +114,12 @@ Verify your new Datasource by loading data from it into a `Validator` using a `B
   ]}>
   <TabItem value="runtime_batch_request">
 
-Add the S3 path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
+Add the S3 path to your CSV in the `path` key under `runtime_parameters` in your `RuntimeBatchRequest`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py#L55-L61
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L57-L63
 ```
 Then load data into the `Validator`.
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py#L69-L75
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L71-L77
 ```
 
   </TabItem>
@@ -127,10 +127,10 @@ Then load data into the `Validator`.
 
 Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py#L81-L85
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L83-L88
 ```
 Then load data into the `Validator`.
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py#L93-L99
+```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L96-L102
 ```
 
   </TabItem>
@@ -145,8 +145,8 @@ Then load data into the `Validator`.
 
 To view the full scripts used in this page, see them on GitHub:
 
-- [spark_s3_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_yaml_example.py)
-- [spark_s3_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/spark_s3_python_example.py)
+- [spark_s3_yaml_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py)
+- [spark_s3_python_example.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py)
 
 ## Next Steps
 

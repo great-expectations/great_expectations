@@ -165,8 +165,8 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "mssql", "spark"],
-          "_comment": "postgresql, mssql, and spark will not allow coercing the boolean type to an average"
+          "suppress_test_for": ["postgresql", "mssql", "spark", "bigquery"],
+          "_comment": "postgresql, mssql, bigquery, and spark will not allow coercing the boolean type to an average"
         },
         {
           "title": "coerced_types_true_false_and_null",
@@ -180,8 +180,8 @@
             "success": true,
             "observed_value": 0.5
           },
-          "suppress_test_for": ["postgresql", "mssql", "spark"],
-          "_comment": "postgresql, mssql, and spark will not allow coercing the boolean type to an average"
+          "suppress_test_for": ["postgresql", "mssql", "bigquery","spark"],
+          "_comment": "postgresql, mssql, bigquery and spark will not allow coercing the boolean type to an average"
         },
         {
           "title": "catch_exceptions___non_number_min_value",
@@ -192,7 +192,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "must be a number"
+            "traceback_substring": "must be a datetime (for datetime columns) or number"
           }
         },
         {
@@ -204,7 +204,7 @@
             "catch_exceptions": true
           },
           "out": {
-            "traceback_substring": "must be a number"
+            "traceback_substring": "must be a datetime (for datetime columns) or number"
           }
         }]},
     {

@@ -7,12 +7,12 @@ we introduced `project check-config` to sanity check your config files. From you
 project directory, run:
 
 ```bash
-great_expectations --v3-api project check-config
+great_expectations project check-config
 ```
 
 This can be used at any time and will grow more robust and helpful as our
 internal config typing system improves.
 
 You will most likely be prompted to install a new template. Rest assured that
-your original yaml file will be archived automatically for you. Even so, it's
+your original YAML file will be archived automatically for you. Even so, it's
 in your source control system already, right? ;-)

@@ -1,27 +1,19 @@
 import click
 
-from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
+from great_expectations.core.usage_statistics.util import send_usage_message
 
 
 @click.group()
 @click.pass_context
 def store(ctx):
     """Store operations"""
-    directory: str = toolkit.parse_cli_config_file_location(
-        config_file_location=ctx.obj.config_file_location
-    ).get("directory")
-    context: DataContext = toolkit.load_data_context_with_error_handling(
-        directory=directory,
-        from_cli_upgrade_command=False,
-    )
-    # TODO consider moving this all the way up in to the CLIState constructor
-    ctx.obj.data_context = context
+    ctx.obj.data_context = ctx.obj.get_data_context_from_config_file()
 
     usage_stats_prefix = f"cli.store.{ctx.invoked_subcommand}"
-    toolkit.send_usage_message(
-        data_context=context,
+    send_usage_message(
+        data_context=ctx.obj.data_context,
         event=f"{usage_stats_prefix}.begin",
         success=True,
     )
@@ -41,8 +33,10 @@ def store_list(ctx):
             cli_message("")
             cli_message_dict(store)
 
-        toolkit.send_usage_message(
-            data_context=context, event=usage_event_end, success=True
+        send_usage_message(
+            data_context=context,
+            event=usage_event_end,
+            success=True,
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(

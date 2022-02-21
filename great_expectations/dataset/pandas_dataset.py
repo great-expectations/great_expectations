@@ -16,13 +16,12 @@ from scipy import stats
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
+from great_expectations.dataset.dataset import Dataset
 from great_expectations.dataset.util import (
     _scipy_distribution_positional_args_from_dict,
     is_valid_continuous_partition_object,
     validate_distribution_parameters,
 )
-
-from .dataset import Dataset
 
 logger = logging.getLogger(__name__)
 
@@ -186,7 +185,7 @@ class MetaPandasDataset(Dataset):
                 result_format = self.default_expectation_args["result_format"]
 
             if row_condition:
-                self = self.query(row_condition).reset_index(drop=True)
+                self = self.query(row_condition)
 
             series_A = self[column_A]
             series_B = self[column_B]
@@ -195,7 +194,14 @@ class MetaPandasDataset(Dataset):
                 boolean_mapped_null_values = series_A.isnull() & series_B.isnull()
             elif ignore_row_if == "either_value_is_missing":
                 boolean_mapped_null_values = series_A.isnull() | series_B.isnull()
+            # elif ignore_row_if == "neither":
             elif ignore_row_if == "never":
+                """
+                TODO: <Alex>Note: The value of the "ignore_row_if" directive in the commented out line above is correct.
+                However, fixing the error would constitute a breaking change.  Hence, the documentation is updated now
+                (8/16/2021), while the implementation is corrected as part of the Expectations V3 API release.
+                </Alex>
+                """
                 boolean_mapped_null_values = series_A.map(lambda x: False)
             else:
                 raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
@@ -290,7 +296,7 @@ class MetaPandasDataset(Dataset):
                 result_format = self.default_expectation_args["result_format"]
 
             if row_condition:
-                self = self.query(row_condition).reset_index(drop=True)
+                self = self.query(row_condition)
 
             test_df = self[column_list]
 
@@ -426,9 +432,7 @@ Notes:
                 " and must be 'python' or 'pandas'"
             )
         else:
-            return self.query(row_condition, parser=condition_parser).reset_index(
-                drop=True
-            )
+            return self.query(row_condition, parser=condition_parser)
 
     def get_row_count(self):
         return self.shape[0]
@@ -608,7 +612,7 @@ Notes:
                     other_values = sorted(value_counts.index[n_bins:])
                     replace = {value: "(other)" for value in other_values}
             else:
-                replace = dict()
+                replace = {}
                 for x in bins:
                     replace.update({value: ", ".join(x) for value in x})
             return (
@@ -1865,7 +1869,8 @@ Notes:
     ):
         """ Multi-Column Map Expectation
 
-        Expects that sum of all rows for a set of columns is equal to a specific value
+        Expects that the sum of row values is the same for each row, summing only values in columns specified in
+        column_list, and equal to the specific value, sum_total.
 
         Args:
             column_list (List[str]): \

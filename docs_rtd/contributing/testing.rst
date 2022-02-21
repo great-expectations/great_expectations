@@ -21,7 +21,7 @@ If you did not configure optional backends for testing, tests against these back
 You can suppress these tests by adding the following flags:
 
 - ``--no-postgresql`` will skip postgres tests
-- ``--no-spark`` will skip spark tests 
+- ``--no-spark`` will skip spark tests
 - ``--no-sqlalchemy`` will skip all tests using sqlalchemy (i.e. all database backends)
 
 For example, you can run ``pytest --no-spark --no-sqlalchemy`` to skip all local backend tests (with the exception of the pandas backend). Please note that these tests will still be run by the CI as soon as you open a PR, so some tests might fail if your code changes affected them.
@@ -34,6 +34,27 @@ Note: as of early 2020, the tests generate many warnings. Most of these are gene
 
 .. _contributing_testing__writing_unit_tests:
 
+Running BigQuery tests
+----------------------
+
+In order to run BigQuery tests, you first need to go through the following steps:
+
+1. `Select or create a Cloud Platform project.`_
+2. `Setup Authentication.`_
+3. `In your project, create a BigQuery dataset (e.g. named "test_ci")`_ and `set the dataset default table expiration to .1 days`_
+
+.. _Select or create a Cloud Platform project.: https://console.cloud.google.com/project
+.. _Setup Authentication.: https://googleapis.dev/python/google-api-core/latest/auth.html
+.. _`In your project, create a BigQuery dataset (e.g. named "test_ci")`: https://cloud.google.com/bigquery/docs/datasets
+.. _`set the dataset default table expiration to .1 days`: https://cloud.google.com/bigquery/docs/updating-datasets#table-expiration
+
+After setting up authentication, you can run with your project using the environment variables `GE_TEST_BIGQUERY_PROJECT` and `GE_TEST_BIGQUERY_DATASET`, e.g.
+
+.. code-block::
+
+    GE_TEST_BIGQUERY_PROJECT=<YOUR_GOOGLE_CLOUD_PROJECT> GE_TEST_BIGQUERY_DATASET=test_ci pytest tests/test_definitions/test_expectations_cfe.py --bigquery --no-spark --no-postgresql -k bigquery
+
+
 Writing unit and integration tests
 ----------------------------------
 
@@ -43,7 +64,7 @@ Experimental code in Great Expectations need only be tested lightly. We are movi
 
 Most of Great Expectations' integration testing is in the CLI, which naturally exercises most of the core code paths. Because integration tests require a lot of developer time to maintain, most contributions should *not* include new integration tests, unless they change the CLI itself.
 
-Note: we do not currently test Great Expectations against all types of SQL database. CI test coverage for SQL is limited to postgresql and sqlite. We have observed some bugs because of unsupported features or differences in SQL dialects, and we are actively working to improve dialect-specific support and testing.
+Note: we do not currently test Great Expectations against all types of SQL database. CI test coverage for SQL is limited to postgresql, sqlite, mssql, and BigQuery. We have observed some bugs because of unsupported features or differences in SQL dialects, and we are actively working to improve dialect-specific support and testing.
 
 
 Unit tests for Expectations
@@ -113,7 +134,7 @@ Each item under ``datasets`` includes three entries: ``data``, ``schemas``, and 
 **tests**
 
     ...define the tests to be executed against the dataframe. Each item in ``tests`` must have ``title``, ``exact_match_out``, ``in``, and ``out``. The test runner will execute the named Expectation once for each item, with the values in ``in`` supplied as kwargs.
-    
+
     The test passes if the values in the expectation validation result correspond with the values in ``out``. If ``exact_match_out`` is true, then every field in the Expectation output must have a corresponding, matching field in ``out``. If it's false, then only the fields specified in ``out`` need to match. For most use cases, false is a better fit, because it allows narrower targeting of the relevant output.
 
     ``suppress_test_for`` is an optional parameter to disable an Expectation for a specific list of backends.

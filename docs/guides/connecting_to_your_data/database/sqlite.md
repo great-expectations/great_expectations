@@ -45,7 +45,7 @@ sqlite:///<PATH_TO_DB_FILE>
 For more details on different ways to specify database files and information on how to connect to an in-memory SQLite database, please refer to the documentation on [SQLAlchemy](https://docs.sqlalchemy.org/en/14/core/engines.html#sqlite).
 
 
-### 4. `[🍏 CORE SKILL ICON]` Instantiate your project's DataContext
+### 4. Instantiate your project's DataContext
 
 Import these necessary packages and modules.
 
@@ -64,7 +64,7 @@ Load your DataContext into memory using the `get_context()` method.
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 
@@ -103,7 +103,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
   defaultValue='yaml'
   values={[
   {label: 'YAML', value:'yaml'},
-  {label: 'python', value:'python'},
+  {label: 'Python', value:'python'},
   ]}>
   <TabItem value="yaml">
 

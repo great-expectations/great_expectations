@@ -10,8 +10,8 @@ def build_docs(
     context: DataContext,
     usage_stats_event: str,
     site_names: Optional[List[str]] = None,
-    view: Optional[bool] = True,
-    assume_yes: Optional[bool] = False,
+    view: bool = True,
+    assume_yes: bool = False,
 ):
     """Build documentation in a context"""
     logger.debug("Starting cli.datasource.build_docs")
@@ -22,8 +22,8 @@ def build_docs(
 
     msg: str = "\nThe following Data Docs sites will be built:\n\n"
     for site_name, index_page_locator_info in index_page_locator_infos.items():
-        msg += " - <cyan>{}:</cyan> ".format(site_name)
-        msg += "{}\n".format(index_page_locator_info)
+        msg += f" - <cyan>{site_name}:</cyan> "
+        msg += f"{index_page_locator_info}\n"
 
     cli_message(msg)
     if not assume_yes:

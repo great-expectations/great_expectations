@@ -15,8 +15,12 @@
     "lint": "standard --fix"
   },
   "dependencies": {
-    "@docusaurus/core": "^2.0.0-beta.1",
-    "@docusaurus/preset-classic": "^2.0.0-beta.1",
+    "@cmfcmf/docusaurus-search-local": "^0.6.5",
+    "@docusaurus/core": "^2.0.0-beta.4",
+    "@docusaurus/plugin-google-gtag": "^2.0.0-beta.4",
+    "@docusaurus/plugin-sitemap": "^2.0.0-beta.4",
+    "@docusaurus/preset-classic": "^2.0.0-beta.4",
+    "@docusaurus/theme-search-algolia": "^2.0.0-beta.4",
     "@mdx-js/react": "^1.6.21",
     "clsx": "^1.1.1",
     "plugin-image-zoom": "ataft/plugin-image-zoom",

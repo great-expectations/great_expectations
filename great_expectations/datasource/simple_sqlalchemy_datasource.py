@@ -21,6 +21,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         engine=None,  # sqlalchemy.engine.Engine
         introspection: dict = None,
         tables: dict = None,
+        **kwargs
     ):
         introspection = introspection or {}
         tables = tables or {}
@@ -32,6 +33,8 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
             "credentials": credentials,
             "engine": engine,
         }
+
+        self._execution_engine_config.update(**kwargs)
 
         super().__init__(name=name, execution_engine=self._execution_engine_config)
 

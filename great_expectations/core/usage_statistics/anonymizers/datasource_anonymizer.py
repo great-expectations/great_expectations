@@ -41,7 +41,7 @@ class DatasourceAnonymizer(Anonymizer):
         self._data_connector_anonymizer = DataConnectorAnonymizer(salt=salt)
 
     def anonymize_datasource_info(self, name, config):
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self.anonymize(name)
 
         # Legacy Datasources (<= v0.12 v2 BatchKwargs API)
@@ -79,7 +79,7 @@ class DatasourceAnonymizer(Anonymizer):
         """
         SimpleSqlalchemyDatasource requires a separate anonymization scheme.
         """
-        anonymized_info_dict = dict()
+        anonymized_info_dict = {}
         anonymized_info_dict["anonymized_name"] = self.anonymize(name)
         if config.get("module_name") is None:
             config["module_name"] = "great_expectations.datasource"

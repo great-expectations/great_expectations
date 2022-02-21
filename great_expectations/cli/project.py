@@ -1,4 +1,5 @@
 import sys
+from typing import Optional
 
 import click
 
@@ -6,8 +7,10 @@ from great_expectations import DataContext
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
-from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
 from great_expectations.cli.toolkit import load_data_context_with_error_handling
+from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
+from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
 
 
@@ -25,15 +28,19 @@ def project_check_config(ctx):
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
+
     is_config_ok, error_message, context = do_config_check(directory)
-    if context:
-        toolkit.send_usage_message(
-            data_context=context, event="cli.project.check_config", success=True
-        )
-    if not is_config_ok:
+
+    if not (is_config_ok and context):
         cli_message("Unfortunately, your config appears to be invalid:\n")
-        cli_message("<red>{}</red>".format(error_message))
+        cli_message(f"<red>{error_message}</red>")
         sys.exit(1)
+
+    send_usage_message(
+        data_context=context,
+        event="cli.project.check_config",
+        success=True,
+    )
 
     cli_message("<green>Your config file appears valid!</green>")
 
@@ -47,31 +54,60 @@ def project_upgrade(ctx):
     directory = toolkit.parse_cli_config_file_location(
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
+
     if load_data_context_with_error_handling(
         directory=directory, from_cli_upgrade_command=True
     ):
-        up_to_date_message = (
-            "Your project is up-to-date - no further upgrade is necessary.\n"
-        )
-        cli_message(f"<green>{up_to_date_message}</green>")
         sys.exit(0)
+    else:
+        failure_message = "Error: Your project could not be upgraded.\n"
+        cli_message(f"<red>{failure_message}</red>")
+        sys.exit(1)
 
 
 def do_config_check(target_directory):
+    is_config_ok: bool = True
+    upgrade_message: str = ""
+    context: Optional[DataContext]
     try:
-        context: DataContext = DataContext(context_root_dir=target_directory)
+        context = DataContext(context_root_dir=target_directory)
         ge_config_version: int = context.get_config().config_version
         if int(ge_config_version) < CURRENT_GE_CONFIG_VERSION:
-            upgrade_message: str = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.
-Please consult the 0.13.x migration guide ttps://docs.greatexpectations.io/en/latest/guides/how_to_guides/migrating_versions.html and
+            is_config_ok = False
+            upgrade_message = f"""The config_version of your great_expectations.yml -- {float(ge_config_version)} -- is outdated.
+Please consult the V3 API migration guide https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and
 upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFIG_VERSION)} in order to take advantage of the latest capabilities.
-            """
-            return (
-                False,
-                upgrade_message,
-                None,
+"""
+            context = None
+        elif int(ge_config_version) > CURRENT_GE_CONFIG_VERSION:
+            raise ge_exceptions.UnsupportedConfigVersionError(
+                f"""Invalid config version ({ge_config_version}).\n    The maximum valid version is \
+{CURRENT_GE_CONFIG_VERSION}.
+"""
             )
-        return True, None, context
+        else:
+            upgrade_helper_class = GE_UPGRADE_HELPER_VERSION_MAP.get(
+                int(ge_config_version)
+            )
+            if upgrade_helper_class:
+                upgrade_helper = upgrade_helper_class(
+                    data_context=context, update_version=False
+                )
+                manual_steps_required = upgrade_helper.manual_steps_required()
+                if manual_steps_required:
+                    (
+                        upgrade_overview,
+                        confirmation_required,
+                    ) = upgrade_helper.get_upgrade_overview()
+                    upgrade_overview = cli_colorize_string(upgrade_overview)
+                    cli_message(string=upgrade_overview)
+                    is_config_ok = False
+                    upgrade_message = """The configuration of your great_expectations.yml is outdated.  Please \
+consult the V3 API migration guide \
+https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#migrating-to-the-batch-request-v3-api and upgrade your \
+Great Expectations configuration in order to take advantage of the latest capabilities.
+"""
+                    context = None
     except (
         ge_exceptions.InvalidConfigurationYamlError,
         ge_exceptions.InvalidTopLevelConfigKeyError,
@@ -83,4 +119,12 @@ upgrade your Great Expectations configuration to version {float(CURRENT_GE_CONFI
         ge_exceptions.PluginModuleNotFoundError,
         ge_exceptions.GreatExpectationsError,
     ) as err:
-        return False, err.message, None
+        is_config_ok = False
+        upgrade_message = err.message
+        context = None
+
+    return (
+        is_config_ok,
+        upgrade_message,
+        context,
+    )

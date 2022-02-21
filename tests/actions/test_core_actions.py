@@ -1,5 +1,7 @@
+import json
 import logging
 from unittest import mock
+from urllib.parse import urljoin
 
 import pytest
 from freezegun import freeze_time
@@ -16,6 +18,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.validation_operators import (
+    CloudNotificationAction,
     EmailAction,
     MicrosoftTeamsNotificationAction,
     OpsgenieAlertAction,
@@ -33,6 +36,20 @@ class MockTeamsResponse:
         self.text = "test_text"
 
 
+class MockSlackResponse:
+    def __init__(self, status_code):
+        self.status_code = status_code
+        self.text = "test_text"
+        self.content = json.dumps({"ok": "True"})
+
+
+class MockCloudResponse:
+    def __init__(self, status_code):
+        self.status_code = status_code
+        self.text = "test_text"
+        self.content = json.dumps({"ok": "True"})
+
+
 @freeze_time("09/26/2019 13:42:41")
 def test_StoreAction():
     fake_in_memory_store = ValidationsStore(
@@ -43,7 +60,7 @@ def test_StoreAction():
     stores = {"fake_in_memory_store": fake_in_memory_store}
 
     class Object:
-        pass
+        ge_cloud_mode = False
 
     data_context = Object()
     data_context.stores = stores
@@ -59,7 +76,7 @@ def test_StoreAction():
             expectation_suite_identifier=ExpectationSuiteIdentifier(
                 expectation_suite_name="default_expectations"
             ),
-            run_id="prod_20190801",
+            run_id=RunIdentifier(run_name="prod_20190801"),
             batch_identifier="1234",
         ),
         validation_result_suite=ExpectationSuiteValidationResult(
@@ -81,20 +98,18 @@ def test_StoreAction():
     )
     assert stored_identifier.run_id == expected_run_id
 
-    assert (
-        fake_in_memory_store.get(
-            ValidationResultIdentifier(
-                expectation_suite_identifier=ExpectationSuiteIdentifier(
-                    expectation_suite_name="default_expectations"
-                ),
-                run_id=expected_run_id,
-                batch_identifier="1234",
-            )
+    assert fake_in_memory_store.get(
+        ValidationResultIdentifier(
+            expectation_suite_identifier=ExpectationSuiteIdentifier(
+                expectation_suite_name="default_expectations"
+            ),
+            run_id=expected_run_id,
+            batch_identifier="1234",
         )
-        == ExpectationSuiteValidationResult(success=False, results=[])
-    )
+    ) == ExpectationSuiteValidationResult(success=False, results=[])
 
 
+@mock.patch.object(Session, "post", return_value=MockSlackResponse(200))
 def test_SlackNotificationAction(
     data_context_parameterized_expectation_suite,
     validation_result_suite,
@@ -105,8 +120,11 @@ def test_SlackNotificationAction(
         "class_name": "SlackRenderer",
     }
     slack_webhook = "https://hooks.slack.com/services/test/slack/webhook"
+    slack_token = "test"
+    slack_channel = "test"
     notify_on = "all"
 
+    # test with just web_hook set; expect pass
     slack_action = SlackNotificationAction(
         data_context=data_context_parameterized_expectation_suite,
         renderer=renderer,
@@ -114,15 +132,100 @@ def test_SlackNotificationAction(
         notify_on=notify_on,
     )
 
-    # TODO: improve this test - currently it is verifying a failed call to Slack. It returns a "empty" payload
-    assert (
-        slack_action.run(
-            validation_result_suite_identifier=validation_result_suite_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
-        )
-        == {"slack_notification_result": None}
+    assert slack_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"slack_notification_result": "Slack notification succeeded."}
+
+    # Test with slack_token and slack_channel set; expect pass
+    slack_action = SlackNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        slack_token=slack_token,
+        slack_channel=slack_channel,
+        notify_on=notify_on,
     )
+
+    assert slack_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"slack_notification_result": "Slack notification succeeded."}
+
+    # Test with just slack_token set; expect fail
+    with pytest.raises(AssertionError):
+        SlackNotificationAction(
+            data_context=data_context_parameterized_expectation_suite,
+            renderer=renderer,
+            slack_token=slack_token,
+            notify_on=notify_on,
+        )
+
+    # Test with just slack_channel set; expect fail
+    with pytest.raises(AssertionError):
+        slack_action = SlackNotificationAction(
+            data_context=data_context_parameterized_expectation_suite,
+            renderer=renderer,
+            slack_channel=slack_channel,
+            notify_on=notify_on,
+        )
+
+    # Test with slack_channel, slack_token, and slack_webhook set; expect fail
+    with pytest.raises(AssertionError):
+        SlackNotificationAction(
+            data_context=data_context_parameterized_expectation_suite,
+            renderer=renderer,
+            slack_channel=slack_channel,
+            slack_token=slack_token,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+        )
+
+    # test notify on with failed run; expect pass
+    notify_on = "failure"
+    slack_action = SlackNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        slack_webhook=slack_webhook,
+        notify_on=notify_on,
+    )
+
+    assert slack_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=ExpectationSuiteValidationResult(
+            success=False,
+            results=[],
+            statistics={
+                "successful_expectations": [],
+                "evaluated_expectations": [],
+            },
+        ),
+        data_asset=None,
+    ) == {"slack_notification_result": "Slack notification succeeded."}
+
+    # test notify on with successful run; expect pass
+    notify_on = "failure"
+    validation_result_suite.success = False
+    slack_action = SlackNotificationAction(
+        data_context=data_context_parameterized_expectation_suite,
+        renderer=renderer,
+        slack_webhook=slack_webhook,
+        notify_on=notify_on,
+    )
+
+    assert slack_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=ExpectationSuiteValidationResult(
+            success=True,
+            results=[],
+            statistics={
+                "successful_expectations": [],
+                "evaluated_expectations": [],
+            },
+        ),
+        data_asset=None,
+    ) == {"slack_notification_result": "none required"}
 
 
 @mock.patch("pypd.EventV2")
@@ -143,26 +246,20 @@ def test_PagerdutyAlertAction(
     # Make sure the alert is sent by default when the validation has success = False
     validation_result_suite.success = False
 
-    assert (
-        pagerduty_action.run(
-            validation_result_suite_identifier=validation_result_suite_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
-        )
-        == {"pagerduty_alert_result": "success"}
-    )
+    assert pagerduty_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"pagerduty_alert_result": "success"}
 
     # Make sure the alert is not sent by default when the validation has success = True
     validation_result_suite.success = True
 
-    assert (
-        pagerduty_action.run(
-            validation_result_suite_identifier=validation_result_suite_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
-        )
-        == {"pagerduty_alert_result": "none sent"}
-    )
+    assert pagerduty_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"pagerduty_alert_result": "none sent"}
 
 
 def test_OpsgenieAlertAction(
@@ -187,26 +284,20 @@ def test_OpsgenieAlertAction(
     # Make sure the alert is sent by default when the validation has success = False
     validation_result_suite.success = False
 
-    assert (
-        opsgenie_action.run(
-            validation_result_suite_identifier=validation_result_suite_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
-        )
-        == {"opsgenie_alert_result": "error"}
-    )
+    assert opsgenie_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"opsgenie_alert_result": "error"}
 
     # Make sure the alert is not sent by default when the validation has success = True
     validation_result_suite.success = True
 
-    assert (
-        opsgenie_action.run(
-            validation_result_suite_identifier=validation_result_suite_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
-        )
-        == {"opsgenie_alert_result": "error"}
-    )
+    assert opsgenie_action.run(
+        validation_result_suite_identifier=validation_result_suite_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"opsgenie_alert_result": "error"}
 
 
 @mock.patch.object(Session, "post", return_value=MockTeamsResponse(200))
@@ -264,14 +355,11 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
-    assert (
-        teams_action.run(
-            validation_result_suite_identifier=validation_result_suite_extended_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
-        )
-        == {"microsoft_teams_notification_result": None}
-    )
+    assert teams_action.run(
+        validation_result_suite_identifier=validation_result_suite_extended_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"microsoft_teams_notification_result": None}
 
     validation_result_suite.success = True
     notify_on = "success"
@@ -315,14 +403,11 @@ def test_MicrosoftTeamsNotificationAction_good_request(
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
-    assert (
-        teams_action.run(
-            validation_result_suite_identifier=validation_result_suite_extended_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
-        )
-        == {"microsoft_teams_notification_result": None}
-    )
+    assert teams_action.run(
+        validation_result_suite_identifier=validation_result_suite_extended_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"microsoft_teams_notification_result": None}
 
 
 @mock.patch.object(Session, "post", return_value=MockTeamsResponse(400))
@@ -347,14 +432,11 @@ def test_MicrosoftTeamsNotificationAction_bad_request(
         microsoft_teams_webhook=teams_webhook,
         notify_on=notify_on,
     )
-    assert (
-        teams_action.run(
-            validation_result_suite_identifier=validation_result_suite_extended_id,
-            validation_result_suite=validation_result_suite,
-            data_asset=None,
-        )
-        == {"microsoft_teams_notification_result": None}
-    )
+    assert teams_action.run(
+        validation_result_suite_identifier=validation_result_suite_extended_id,
+        validation_result_suite=validation_result_suite,
+        data_asset=None,
+    ) == {"microsoft_teams_notification_result": None}
 
     assert (
         "Request to Microsoft Teams webhook at http://testing returned error 400"
@@ -486,14 +568,11 @@ def test_EmailAction(
             use_ssl=use_ssl,
         )
         assert email_action.sender_login != email_action.sender_alias
-        assert (
-            email_action.run(
-                validation_result_suite_identifier=validation_result_suite_id,
-                validation_result_suite=validation_result_suite,
-                data_asset=None,
-            )
-            == {"email_result": expected}
-        )
+        assert email_action.run(
+            validation_result_suite_identifier=validation_result_suite_id,
+            validation_result_suite=validation_result_suite,
+            data_asset=None,
+        ) == {"email_result": expected}
 
 
 # def test_ExtractAndStoreEvaluationParamsAction():
@@ -533,3 +612,77 @@ def test_EmailAction(
 #         from_string="ValidationResultIdentifier.my_db.default_generator.my_table.default_expectations.prod_20190801"
 #     )) == {}
 #
+
+
+@mock.patch.object(Session, "post", return_value=MockCloudResponse(200))
+def test_cloud_notification_action(
+    mock_post_method,
+    cloud_data_context_with_datasource_pandas_engine,
+    validation_result_suite_with_ge_cloud_id,
+    validation_result_suite_ge_cloud_identifier,
+    checkpoint_ge_cloud_id,
+    ge_cloud_access_token,
+):
+    cloud_action: CloudNotificationAction = CloudNotificationAction(
+        data_context=cloud_data_context_with_datasource_pandas_engine,
+        checkpoint_ge_cloud_id=checkpoint_ge_cloud_id,
+    )
+    expected_ge_cloud_url = urljoin(
+        cloud_action.data_context.ge_cloud_config.base_url,
+        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/contracts/"
+        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
+    )
+    expected_headers = {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {ge_cloud_access_token}",
+    }
+
+    assert cloud_action.run(
+        validation_result_suite=validation_result_suite_with_ge_cloud_id,
+        validation_result_suite_identifier=validation_result_suite_ge_cloud_identifier,
+        data_asset=None,
+    ) == {"cloud_notification_result": "Cloud notification succeeded."}
+    mock_post_method.assert_called_with(
+        url=expected_ge_cloud_url, headers=expected_headers
+    )
+
+
+@mock.patch.object(Session, "post", return_value=MockCloudResponse(418))
+def test_cloud_notification_action_bad_response(
+    mock_post_method,
+    cloud_data_context_with_datasource_pandas_engine,
+    validation_result_suite_with_ge_cloud_id,
+    validation_result_suite_ge_cloud_identifier,
+    checkpoint_ge_cloud_id,
+    ge_cloud_access_token,
+):
+    cloud_action: CloudNotificationAction = CloudNotificationAction(
+        data_context=cloud_data_context_with_datasource_pandas_engine,
+        checkpoint_ge_cloud_id=checkpoint_ge_cloud_id,
+    )
+    expected_ge_cloud_url = urljoin(
+        cloud_action.data_context.ge_cloud_config.base_url,
+        f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/contracts/"
+        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
+    )
+    expected_headers = {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {ge_cloud_access_token}",
+    }
+    expected_result = {
+        "cloud_notification_result": "Cloud Notification request at "
+        "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392-bcd1-f1e87ad5a79c/contracts/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/suite-validation-results/bfe7dc64-5320-49b0-91c1-2e8029e06c4d/notification-actions "
+        "returned error 418: test_text"
+    }
+
+    assert (
+        cloud_action.run(
+            validation_result_suite=validation_result_suite_with_ge_cloud_id,
+            validation_result_suite_identifier=validation_result_suite_ge_cloud_identifier,
+            data_asset=None,
+        )
+        == expected_result
+    )
+    mock_post_method.assert_called_with(
+        url=expected_ge_cloud_url, headers=expected_headers
+    )

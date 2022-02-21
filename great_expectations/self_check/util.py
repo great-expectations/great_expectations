@@ -7,6 +7,7 @@ import random
 import string
 import tempfile
 import threading
+import warnings
 from functools import wraps
 from types import ModuleType
 from typing import Dict, List, Optional, Union
@@ -99,6 +100,92 @@ except (ImportError, KeyError):
     sqliteDialect = None
     SQLITE_TYPES = {}
 
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
+try:
+    import sqlalchemy_bigquery as sqla_bigquery
+    import sqlalchemy_bigquery as BigQueryDialect
+
+    sqlalchemy.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+    bigquery_types_tuple = None
+    BIGQUERY_TYPES = {
+        "INTEGER": sqla_bigquery.INTEGER,
+        "NUMERIC": sqla_bigquery.NUMERIC,
+        "STRING": sqla_bigquery.STRING,
+        "BIGNUMERIC": sqla_bigquery.BIGNUMERIC,
+        "BYTES": sqla_bigquery.BYTES,
+        "BOOL": sqla_bigquery.BOOL,
+        "BOOLEAN": sqla_bigquery.BOOLEAN,
+        "TIMESTAMP": sqla_bigquery.TIMESTAMP,
+        "TIME": sqla_bigquery.TIME,
+        "FLOAT": sqla_bigquery.FLOAT,
+        "DATE": sqla_bigquery.DATE,
+        "DATETIME": sqla_bigquery.DATETIME,
+    }
+    try:
+        from sqlalchemy_bigquery import GEOGRAPHY
+
+        BIGQUERY_TYPES["GEOGRAPHY"] = GEOGRAPHY
+    except ImportError:
+        # BigQuery GEOGRAPHY support is optional
+        pass
+except ImportError:
+    try:
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
+        import pybigquery.sqlalchemy_bigquery as BigQueryDialect
+
+        warnings.warn(
+            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            DeprecationWarning,
+        )
+        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
+        ###
+        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+        # to define an attribute "dialect". A PR has been submitted to fix this upstream
+        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+        # fix isn't present, add this "dialect" attribute here:
+        if not hasattr(sqla_bigquery, "dialect"):
+            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
+
+        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        sqlalchemy.dialects.registry.register(
+            "bigquery", _BIGQUERY_MODULE_NAME, "dialect"
+        )
+        try:
+            getattr(sqla_bigquery, "INTEGER")
+            bigquery_types_tuple = {}
+            BIGQUERY_TYPES = {
+                "INTEGER": sqla_bigquery.INTEGER,
+                "NUMERIC": sqla_bigquery.NUMERIC,
+                "STRING": sqla_bigquery.STRING,
+                "BIGNUMERIC": sqla_bigquery.BIGNUMERIC,
+                "BYTES": sqla_bigquery.BYTES,
+                "BOOL": sqla_bigquery.BOOL,
+                "BOOLEAN": sqla_bigquery.BOOLEAN,
+                "TIMESTAMP": sqla_bigquery.TIMESTAMP,
+                "TIME": sqla_bigquery.TIME,
+                "FLOAT": sqla_bigquery.FLOAT,
+                "DATE": sqla_bigquery.DATE,
+                "DATETIME": sqla_bigquery.DATETIME,
+            }
+        except AttributeError:
+            # In older versions of the pybigquery driver, types were not exported, so we use a hack
+            logger.warning(
+                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+            )
+            from collections import namedtuple
+
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
+            BIGQUERY_TYPES = {}
+
+    except (ImportError, AttributeError):
+        bigquery_types_tuple = None
+        BigQueryDialect = None
+        pybigquery = None
+        BIGQUERY_TYPES = {}
+
+
 try:
     import sqlalchemy.dialects.postgresql as postgresqltypes
     from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
@@ -187,7 +274,7 @@ except (ImportError, KeyError):
 class SqlAlchemyConnectionManager:
     def __init__(self):
         self.lock = threading.Lock()
-        self._connections = dict()
+        self._connections = {}
 
     def get_engine(self, connection_string):
         if sqlalchemy is not None:
@@ -249,7 +336,7 @@ def get_dataset(
     table_name=None,
     sqlite_db_path=None,
 ):
-    """Utility to create datasets for json-formatted tests."""
+    """Utility to create datasets for json-formatted tests"""
     df = pd.DataFrame(data)
     if dataset_type == "PandasDataset":
         if schemas and "pandas" in schemas:
@@ -466,6 +553,30 @@ def get_dataset(
         return SqlAlchemyDataset(
             custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
         )
+    elif dataset_type == "bigquery":
+        if not create_engine:
+            return None
+        engine = _create_bigquery_engine()
+        schema = None
+        if schemas and dataset_type in schemas:
+            schema = schemas[dataset_type]
+            # BigQuery does not allow for column names to have spaces
+            schema = {k.replace(" ", "_"): v for k, v in schema.items()}
+
+        df.columns = df.columns.str.replace(" ", "_")
+
+        if table_name is None:
+            table_name = generate_test_table_name()
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            if_exists="replace",
+        )
+        custom_sql = f"SELECT * FROM {_bigquery_dataset()}.{table_name}"
+        return SqlAlchemyDataset(
+            custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
+        )
 
     elif dataset_type == "mssql":
         if not create_engine:
@@ -559,7 +670,7 @@ def get_dataset(
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
-            zip(*[v for _, v in data.items()])
+            zip(*(v for _, v in data.items()))
         )  # create a list of rows
         if schemas and "spark" in schemas:
             schema = schemas["spark"]
@@ -609,7 +720,7 @@ def get_dataset(
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
-                    zip(*[v for _, v in data.items()])
+                    zip(*(v for _, v in data.items()))
                 )  # create a list of rows
                 spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:
@@ -639,7 +750,6 @@ def get_dataset(
             columns = list(data.keys())
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
-
     else:
         raise ValueError("Unknown dataset_type " + str(dataset_type))
 
@@ -677,6 +787,7 @@ def get_test_validator_with_data(
                 try:
                     type_ = np.dtype(value)
                 except TypeError:
+                    # noinspection PyUnresolvedReferences
                     type_ = getattr(pd.core.dtypes.dtypes, value)
                     # If this raises AttributeError it's okay: it means someone built a bad test
                 pandas_schema[key] = type_
@@ -689,7 +800,7 @@ def get_test_validator_with_data(
 
         return build_pandas_validator_with_data(df=df)
 
-    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql"]:
+    elif execution_engine in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
         if not create_engine:
             return None
         return build_sa_validator_with_data(
@@ -727,7 +838,7 @@ def get_test_validator_with_data(
         # We need to allow null values in some column types that do not support them natively, so we skip
         # use of df in this case.
         data_reshaped = list(
-            zip(*[v for _, v in data.items()])
+            zip(*(v for _, v in data.items()))
         )  # create a list of rows
         if schemas and "spark" in schemas:
             schema = schemas["spark"]
@@ -777,7 +888,7 @@ def get_test_validator_with_data(
                         data[col] = vals
                 # Do this again, now that we have done type conversion using the provided schema
                 data_reshaped = list(
-                    zip(*[v for _, v in data.items()])
+                    zip(*(v for _, v in data.items()))
                 )  # create a list of rows
                 spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:
@@ -822,7 +933,12 @@ def build_pandas_validator_with_data(
     batch_definition: Optional[BatchDefinition] = None,
 ) -> Validator:
     batch: Batch = Batch(data=df, batch_definition=batch_definition)
-    return Validator(execution_engine=PandasExecutionEngine(), batches=(batch,))
+    return Validator(
+        execution_engine=PandasExecutionEngine(),
+        batches=[
+            batch,
+        ],
+    )
 
 
 def build_sa_validator_with_data(
@@ -839,12 +955,14 @@ def build_sa_validator_with_data(
         "postgresql": postgresqltypes.dialect,
         "mysql": mysqltypes.dialect,
         "mssql": mssqltypes.dialect,
+        "bigquery": sqla_bigquery.BigQueryDialect,
     }
     dialect_types = {
         "sqlite": SQLITE_TYPES,
         "postgresql": POSTGRESQL_TYPES,
         "mysql": MYSQL_TYPES,
         "mssql": MSSQL_TYPES,
+        "bigquery": BIGQUERY_TYPES,
     }
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
@@ -861,6 +979,8 @@ def build_sa_validator_with_data(
             "for SQL Server&charset=utf8&autocommit=true",
             # echo=True,
         )
+    elif sa_engine_name == "bigquery":
+        engine = _create_bigquery_engine()
     else:
         engine = None
 
@@ -870,6 +990,15 @@ def build_sa_validator_with_data(
 
     # Add the data to the database as a new table
 
+    if sa_engine_name == "bigquery":
+        schema = None
+        if schemas and sa_engine_name in schemas:
+            schema = schemas[sa_engine_name]
+            # bigquery does not allow column names to have spaces
+            schema = {k.replace(" ", "_"): v for k, v in schema.items()}
+
+        df.columns = df.columns.str.replace(" ", "_")
+
     sql_dtypes = {}
     if (
         schemas
@@ -877,6 +1006,7 @@ def build_sa_validator_with_data(
         and isinstance(engine.dialect, dialect_classes.get(sa_engine_name))
     ):
         schema = schemas[sa_engine_name]
+
         sql_dtypes = {
             col: dialect_types.get(sa_engine_name)[dtype]
             for (col, dtype) in schema.items()
@@ -984,8 +1114,8 @@ def build_sa_engine(
     df: pd.DataFrame,
     sa: ModuleType,
     schema: Optional[str] = None,
-    if_exists: Optional[str] = "fail",
-    index: Optional[bool] = False,
+    if_exists: str = "fail",
+    index: bool = False,
     dtype: Optional[dict] = None,
 ) -> SqlAlchemyExecutionEngine:
     table_name: str = "test"
@@ -1070,53 +1200,17 @@ def candidate_getter_is_on_temporary_notimplemented_list(context, getter):
 
 
 def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql"]:
-        return expectation_type in [
-            # "expect_column_to_exist",
-            # "expect_table_row_count_to_be_between",
-            # "expect_table_row_count_to_equal",
-            # "expect_table_columns_to_match_ordered_list",
-            # "expect_table_columns_to_match_set",
-            # "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
-            # "expect_column_values_to_be_null",
-            # "expect_column_values_to_be_of_type",
-            # "expect_column_values_to_be_in_type_list",
-            # "expect_column_values_to_be_in_set",
-            # "expect_column_values_to_not_be_in_set",
-            # "expect_column_distinct_values_to_be_in_set",
-            # "expect_column_distinct_values_to_equal_set",
-            # "expect_column_distinct_values_to_contain_set",
-            # "expect_column_values_to_be_between",
+    if context in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
+        expectations_not_implemented_v2_sql = [
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            # "expect_column_values_to_match_regex",
-            # "expect_column_values_to_not_match_regex",
-            # "expect_column_values_to_match_regex_list",
-            # "expect_column_values_to_not_match_regex_list",
-            # "expect_column_values_to_match_like_pattern",
-            # "expect_column_values_to_not_match_like_pattern",
-            # "expect_column_values_to_match_like_pattern_list",
-            # "expect_column_values_to_not_match_like_pattern_list",
             "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
-            # "expect_column_mean_to_be_between",
-            # "expect_column_median_to_be_between",
-            # "expect_column_quantile_values_to_be_between",
             "expect_column_stdev_to_be_between",
-            # "expect_column_unique_value_count_to_be_between",
-            # "expect_column_proportion_of_unique_values_to_be_between",
             "expect_column_most_common_value_to_be_in_set",
-            # "expect_column_sum_to_be_between",
-            # "expect_column_min_to_be_between",
-            # "expect_column_max_to_be_between",
-            # "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
-            # "expect_column_kl_divergence_to_be_less_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
             "expect_column_pair_values_to_be_equal",
             "expect_column_pair_values_A_to_be_greater_than_B",
@@ -1125,62 +1219,48 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
             "expect_compound_columns_to_be_unique",
             "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
-            # "expect_table_row_count_to_equal_other_table",
             "expect_multicolumn_sum_to_equal",
         ]
+        if context in ["bigquery"]:
+            ###
+            # NOTE: 202201 - Will: Expectations below are temporarily not being tested
+            # with BigQuery in V2 API
+            ###
+            expectations_not_implemented_v2_sql.append(
+                "expect_column_kl_divergence_to_be_less_than"
+            )  # TODO: unique to bigquery  -- https://github.com/great-expectations/great_expectations/issues/3261
+            expectations_not_implemented_v2_sql.append(
+                "expect_column_chisquare_test_p_value_to_be_greater_than"
+            )  # TODO: unique to bigquery  -- https://github.com/great-expectations/great_expectations/issues/3261
+            expectations_not_implemented_v2_sql.append(
+                "expect_column_values_to_be_between"
+            )  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            expectations_not_implemented_v2_sql.append(
+                "expect_column_values_to_be_in_set"
+            )  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            expectations_not_implemented_v2_sql.append(
+                "expect_column_values_to_be_in_type_list"
+            )  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            expectations_not_implemented_v2_sql.append(
+                "expect_column_values_to_be_of_type"
+            )  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            expectations_not_implemented_v2_sql.append(
+                "expect_column_values_to_match_like_pattern_list"
+            )  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+            expectations_not_implemented_v2_sql.append(
+                "expect_column_values_to_not_match_like_pattern_list"
+            )  # TODO: error unique to bigquery -- https://github.com/great-expectations/great_expectations/issues/3261
+        return expectation_type in expectations_not_implemented_v2_sql
+
     if context == "SparkDFDataset":
         return expectation_type in [
-            # "expect_column_to_exist",
-            # "expect_table_row_count_to_be_between",
-            # "expect_table_row_count_to_equal",
-            # "expect_table_columns_to_match_ordered_list",
-            # "expect_table_columns_to_match_set",
-            # "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
-            # "expect_column_values_to_be_null",
-            # "expect_column_values_to_be_of_type",
-            # "expect_column_values_to_be_in_type_list",
-            # "expect_column_values_to_be_in_set",
-            # "expect_column_values_to_not_be_in_set",
-            # "expect_column_distinct_values_to_be_in_set",
-            # "expect_column_distinct_values_to_equal_set",
-            # "expect_column_distinct_values_to_contain_set",
-            # "expect_column_values_to_be_between",
-            # "expect_column_values_to_be_increasing",
-            # "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            # "expect_column_values_to_match_regex",
-            # "expect_column_values_to_not_match_regex",
-            # "expect_column_values_to_match_regex_list",
-            # "expect_column_values_to_not_match_regex_list",
-            # "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
-            # "expect_column_values_to_match_json_schema",
-            # "expect_column_mean_to_be_between",
-            # "expect_column_median_to_be_between",
-            # "expect_column_quantile_values_to_be_between",
-            # "expect_column_stdev_to_be_between",
-            # "expect_column_unique_value_count_to_be_between",
-            # "expect_column_proportion_of_unique_values_to_be_between",
-            # "expect_column_most_common_value_to_be_in_set",
-            # "expect_column_sum_to_be_between",
-            # "expect_column_min_to_be_between",
-            # "expect_column_max_to_be_between",
-            # "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
-            # "expect_column_kl_divergence_to_be_less_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-            # "expect_column_pair_values_to_be_equal",
-            # "expect_column_pair_values_A_to_be_greater_than_B",
-            # "expect_column_pair_values_to_be_in_set",
-            # "expect_select_column_values_to_be_unique_within_record",
             "expect_compound_columns_to_be_unique",
-            # "expect_multicolumn_values_to_be_unique",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
             "expect_table_row_count_to_equal_other_table",
-            # "expect_multicolumn_sum_to_equal",
         ]
     if context == "PandasDataset":
         return expectation_type in [
@@ -1190,186 +1270,66 @@ def candidate_test_is_on_temporary_notimplemented_list(context, expectation_type
 
 
 def candidate_test_is_on_temporary_notimplemented_list_cfe(context, expectation_type):
-    if context in ["sqlite", "postgresql", "mysql", "mssql"]:
-        return expectation_type in [
-            "expect_select_column_values_to_be_unique_within_record",
-            # "expect_table_columns_to_match_set",
-            # "expect_table_column_count_to_be_between",
-            # "expect_table_column_count_to_equal",
-            # "expect_column_to_exist",
-            # "expect_table_columns_to_match_ordered_list",
-            # "expect_table_row_count_to_be_between",
-            # "expect_table_row_count_to_equal",
-            # "expect_table_row_count_to_equal_other_table",
-            # "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
-            # "expect_column_values_to_be_null",
-            # "expect_column_values_to_be_of_type",
-            # "expect_column_values_to_be_in_type_list",
-            # "expect_column_values_to_be_in_set",
-            # "expect_column_values_to_not_be_in_set",
-            # "expect_column_values_to_be_between",
+    if context in ["sqlite", "postgresql", "mysql", "mssql", "bigquery"]:
+        expectations_not_implemented_v3_sql = [
             "expect_column_values_to_be_increasing",
             "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            # "expect_column_values_to_match_regex",
-            # "expect_column_values_to_not_match_regex",
-            # "expect_column_values_to_match_regex_list",
-            # "expect_column_values_to_not_match_regex_list",
-            # "expect_column_values_to_match_like_pattern",
-            # "expect_column_values_to_not_match_like_pattern",
-            # "expect_column_values_to_match_like_pattern_list",
-            # "expect_column_values_to_not_match_like_pattern_list",
             "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
             "expect_column_values_to_be_json_parseable",
             "expect_column_values_to_match_json_schema",
-            # "expect_column_distinct_values_to_be_in_set",
-            # "expect_column_distinct_values_to_contain_set",
-            # "expect_column_distinct_values_to_equal_set",
-            # "expect_column_mean_to_be_between",
-            # "expect_column_median_to_be_between",
-            # "expect_column_quantile_values_to_be_between",
             "expect_column_stdev_to_be_between",
-            # "expect_column_unique_value_count_to_be_between",
-            # "expect_column_proportion_of_unique_values_to_be_between",
-            # "expect_column_most_common_value_to_be_in_set",
-            # "expect_column_max_to_be_between",
-            # "expect_column_min_to_be_between",
-            # "expect_column_sum_to_be_between",
-            "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_equal",
-            "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
-            "expect_multicolumn_sum_to_equal",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
-            # "expect_column_kl_divergence_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-            "expect_compound_columns_to_be_unique",
         ]
+        if context in ["bigquery"]:
+            ###
+            # NOTE: 20210729 - jdimatteo: Below are temporarily not being tested
+            # with BigQuery. For each disabled test below, please include a link to
+            # a github issue tracking adding the test with BigQuery.
+            ###
+            expectations_not_implemented_v3_sql.append(
+                "expect_column_kl_divergence_to_be_less_than"  # TODO: will collect for over 60 minutes, and will not completes
+            )
+            expectations_not_implemented_v3_sql.append(
+                "expect_column_quantile_values_to_be_between"  # TODO: will run but will add about 1hr to pipeline.
+            )
+        return expectation_type in expectations_not_implemented_v3_sql
+
     if context == "spark":
         return expectation_type in [
-            "expect_select_column_values_to_be_unique_within_record",
-            # "expect_table_columns_to_match_set",
-            # "expect_table_column_count_to_be_between",
-            # "expect_table_column_count_to_equal",
-            # "expect_column_to_exist",
-            # "expect_table_columns_to_match_ordered_list",
-            # "expect_table_row_count_to_be_between",
-            # "expect_table_row_count_to_equal",
             "expect_table_row_count_to_equal_other_table",
-            # "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
-            # "expect_column_values_to_be_null",
-            # "expect_column_values_to_be_of_type",
-            # "expect_column_values_to_be_in_type_list",
             "expect_column_values_to_be_in_set",
             "expect_column_values_to_not_be_in_set",
-            # "expect_column_values_to_be_between",
-            # "expect_column_values_to_be_increasing",
-            # "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            # "expect_column_values_to_match_regex",
-            # "expect_column_values_to_not_match_regex",
-            # "expect_column_values_to_match_regex_list",
             "expect_column_values_to_not_match_regex_list",
             "expect_column_values_to_match_like_pattern",
             "expect_column_values_to_not_match_like_pattern",
             "expect_column_values_to_match_like_pattern_list",
             "expect_column_values_to_not_match_like_pattern_list",
-            # "expect_column_values_to_match_strftime_format",
             "expect_column_values_to_be_dateutil_parseable",
-            # "expect_column_values_to_be_json_parseable",
-            # "expect_column_values_to_match_json_schema",
-            # "expect_column_distinct_values_to_be_in_set",
-            # "expect_column_distinct_values_to_contain_set",
-            # "expect_column_distinct_values_to_equal_set",
-            # "expect_column_mean_to_be_between",
-            # "expect_column_median_to_be_between",
-            # "expect_column_quantile_values_to_be_between",
-            # "expect_column_stdev_to_be_between",
-            # "expect_column_unique_value_count_to_be_between",
-            # "expect_column_proportion_of_unique_values_to_be_between",
-            # "expect_column_most_common_value_to_be_in_set",
-            # "expect_column_max_to_be_between",
-            # "expect_column_min_to_be_between",
-            # "expect_column_sum_to_be_between",
-            "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_equal",
-            "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
-            "expect_multicolumn_sum_to_equal",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
-            # "expect_column_kl_divergence_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-            "expect_compound_columns_to_be_unique",
         ]
     if context == "pandas":
         return expectation_type in [
-            # "expect_table_columns_to_match_set",
-            "expect_select_column_values_to_be_unique_within_record",
-            # "expect_table_column_count_to_be_between",
-            # "expect_table_column_count_to_equal",
-            # "expect_column_to_exist",
-            # "expect_table_columns_to_match_ordered_list",
-            # "expect_table_row_count_to_be_between",
-            # "expect_table_row_count_to_equal",
             "expect_table_row_count_to_equal_other_table",
-            # "expect_column_values_to_be_unique",
-            # "expect_column_values_to_not_be_null",
-            # "expect_column_values_to_be_null",
-            # "expect_column_values_to_be_of_type",
-            # "expect_column_values_to_be_in_type_list",
-            # "expect_column_values_to_be_in_set",
-            # "expect_column_values_to_not_be_in_set",
-            # "expect_column_values_to_be_between",
-            # "expect_column_values_to_be_increasing",
-            # "expect_column_values_to_be_decreasing",
-            # "expect_column_value_lengths_to_be_between",
-            # "expect_column_value_lengths_to_equal",
-            # "expect_column_values_to_match_regex",
-            # "expect_column_values_to_not_match_regex",
-            # "expect_column_values_to_match_regex_list",
-            # "expect_column_values_to_not_match_regex_list",
             "expect_column_values_to_match_like_pattern",
             "expect_column_values_to_not_match_like_pattern",
             "expect_column_values_to_match_like_pattern_list",
             "expect_column_values_to_not_match_like_pattern_list",
-            # "expect_column_values_to_match_strftime_format",
-            # "expect_column_values_to_be_dateutil_parseable",
-            # "expect_column_values_to_be_json_parseable",
-            # "expect_column_values_to_match_json_schema",
-            # "expect_column_distinct_values_to_be_in_set",
-            # "expect_column_distinct_values_to_contain_set",
-            # "expect_column_distinct_values_to_equal_set",
-            # "expect_column_mean_to_be_between",
-            # "expect_column_median_to_be_between",
-            # "expect_column_quantile_values_to_be_between",
-            # "expect_column_stdev_to_be_between",
-            # "expect_column_unique_value_count_to_be_between",
-            # "expect_column_proportion_of_unique_values_to_be_between",
-            # "expect_column_most_common_value_to_be_in_set",
-            # "expect_column_max_to_be_between",
-            # "expect_column_min_to_be_between",
-            # "expect_column_sum_to_be_between",
-            "expect_column_pair_values_A_to_be_greater_than_B",
-            "expect_column_pair_values_to_be_equal",
-            "expect_column_pair_values_to_be_in_set",
             "expect_multicolumn_values_to_be_unique",
-            "expect_multicolumn_sum_to_equal",
             "expect_column_pair_cramers_phi_value_to_be_less_than",
-            # "expect_column_kl_divergence_to_be_less_than",
             "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
             "expect_column_chisquare_test_p_value_to_be_greater_than",
             "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
-            "expect_compound_columns_to_be_unique",
         ]
+
     return False
 
 
@@ -1377,9 +1337,11 @@ def build_test_backends_list(
     include_pandas=True,
     include_spark=True,
     include_sqlalchemy=True,
+    include_sqlite=True,
     include_postgresql=False,
     include_mysql=False,
     include_mssql=False,
+    include_bigquery=False,
 ):
     test_backends = []
 
@@ -1403,7 +1365,8 @@ def build_test_backends_list(
                 "sqlalchemy tests are requested, but sqlalchemy in not installed"
             )
 
-        test_backends += ["sqlite"]
+        if include_sqlite:
+            test_backends += ["sqlite"]
 
         if include_postgresql:
             ###
@@ -1453,6 +1416,17 @@ def build_test_backends_list(
                 )
             test_backends += ["mssql"]
 
+        if include_bigquery:
+            try:
+                engine = _create_bigquery_engine()
+                conn = engine.connect()
+                conn.close()
+            except (ImportError, sa.exc.SQLAlchemyError) as e:
+                raise ImportError(
+                    "bigquery tests are requested, but unable to connect"
+                ) from e
+            test_backends += ["bigquery"]
+
     return test_backends
 
 
@@ -1475,28 +1449,56 @@ def generate_expectation_tests(
     """
     parametrized_tests = []
 
-    # use the expectation_execution_engines_dict (if provided) to request only the appropriate backends
-    if expectation_execution_engines_dict is not None:
-        backends = build_test_backends_list(
-            include_pandas=expectation_execution_engines_dict.get(
-                "PandasExecutionEngine"
+    # If Expectation.examples defines "test_backends", use that to determine backends and dialects to use.
+    # Otherwise, use the introspected expectation_execution_engines_dict.
+    for d in examples_config:
+        d = copy.deepcopy(d)
+        if expectation_execution_engines_dict is not None:
+            example_backends_is_defined = "test_backends" in d
+            example_backends = [
+                backend_dict.get("backend")
+                for backend_dict in d.get("test_backends", [])
+            ]
+            example_sqlalchemy_dialects = [
+                dialect
+                for backend_dict in d.get("test_backends", {})
+                if (backend_dict.get("backend") == "sqlalchemy")
+                for dialect in backend_dict.get("dialects", [])
+            ]
+            include_sqlalchemy = (
+                ("sqlalchemy" in example_backends)
+                if example_backends_is_defined
+                else (
+                    expectation_execution_engines_dict.get("SqlAlchemyExecutionEngine")
+                    == True
+                )
             )
-            == True,
-            include_spark=expectation_execution_engines_dict.get(
-                "SparkDFExecutionEngine"
+            backends = build_test_backends_list(
+                include_pandas=("pandas" in example_backends)
+                if example_backends_is_defined
+                else (
+                    expectation_execution_engines_dict.get("PandasExecutionEngine")
+                    == True
+                ),
+                include_spark=("spark" in example_backends)
+                if example_backends_is_defined
+                else (
+                    expectation_execution_engines_dict.get("SparkDFExecutionEngine")
+                    == True
+                ),
+                include_sqlalchemy=include_sqlalchemy,
+                include_sqlite=("sqlite" in example_sqlalchemy_dialects)
+                if example_backends_is_defined
+                else include_sqlalchemy,
+                include_postgresql=("postgresql" in example_sqlalchemy_dialects),
+                include_mysql=("mysql" in example_sqlalchemy_dialects),
+                include_mssql=("mssql" in example_sqlalchemy_dialects),
             )
-            == True,
-            include_sqlalchemy=expectation_execution_engines_dict.get(
-                "SqlAlchemyExecutionEngine"
-            )
-            == True,
-        )
-    else:
-        backends = build_test_backends_list()
+        else:
+            backends = build_test_backends_list()
 
-    for c in backends:
-        for d in examples_config:
-            d = copy.deepcopy(d)
+        for c in backends:
+
             datasets = []
             if candidate_test_is_on_temporary_notimplemented_list_cfe(
                 c, expectation_type
@@ -1740,6 +1742,30 @@ def generate_expectation_tests(
     return parametrized_tests
 
 
+def sort_unexpected_values(test_value_list, result_value_list):
+    # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
+    if (isinstance(test_value_list, list)) & (len(test_value_list) >= 1):
+        # __lt__ is not implemented for python dictionaries making sorting trickier
+        # in our case, we will sort on the values for each key sequentially
+        if isinstance(test_value_list[0], dict):
+            test_value_list = sorted(
+                test_value_list,
+                key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
+            )
+            result_value_list = sorted(
+                result_value_list,
+                key=lambda x: tuple(x[k] for k in list(test_value_list[0].keys())),
+            )
+        # if python built-in class has __lt__ then sorting can always work this way
+        elif type(test_value_list[0].__lt__(test_value_list[0])) != type(
+            NotImplemented
+        ):
+            test_value_list = sorted(test_value_list, key=lambda x: str(x))
+            result_value_list = sorted(result_value_list, key=lambda x: str(x))
+
+    return test_value_list, result_value_list
+
+
 def evaluate_json_test(data_asset, expectation_type, test):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
@@ -1814,7 +1840,9 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
     :return: None. asserts correctness of results.
     """
-    expectation_suite = ExpectationSuite("json_test_suite")
+    expectation_suite = ExpectationSuite(
+        "json_test_suite", data_context=validator._data_context
+    )
     # noinspection PyProtectedMember
     validator._initialize_expectations(expectation_suite=expectation_suite)
     # validator.set_default_expectation_argument("result_format", "COMPLETE")
@@ -1852,6 +1880,45 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
 
 
 def check_json_test_result(test, result, data_asset=None):
+    # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
+    if "unexpected_list" in result["result"]:
+        if ("result" in test["out"]) and ("unexpected_list" in test["out"]["result"]):
+            (
+                test["out"]["result"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["result"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            )
+        elif "unexpected_list" in test["out"]:
+            (
+                test["out"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["unexpected_list"],
+                result["result"]["unexpected_list"],
+            )
+
+    if "partial_unexpected_list" in result["result"]:
+        if ("result" in test["out"]) and (
+            "partial_unexpected_list" in test["out"]["result"]
+        ):
+            (
+                test["out"]["result"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["result"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            )
+        elif "partial_unexpected_list" in test["out"]:
+            (
+                test["out"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            ) = sort_unexpected_values(
+                test["out"]["partial_unexpected_list"],
+                result["result"]["partial_unexpected_list"],
+            )
+
     # Check results
     if test["exact_match_out"] is True:
         assert result == expectationValidationResultSchema.load(test["out"])
@@ -1860,6 +1927,7 @@ def check_json_test_result(test, result, data_asset=None):
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
         # representations, serializations, and objects should interact and how much of that is shown to the user.
         result = result.to_json_dict()
+        # print(result)
         for key, value in test["out"].items():
             # Apply our great expectations-specific test logic
 
@@ -1901,19 +1969,19 @@ def check_json_test_result(test, result, data_asset=None):
                     assert result["result"]["unexpected_index_list"] == value
 
             elif key == "unexpected_list":
-                # check if value can be sorted; if so, sort so arbitrary ordering of results does not cause failure
-                if (isinstance(value, list)) & (len(value) >= 1):
-                    if type(value[0].__lt__(value[0])) != type(NotImplemented):
-                        value = sorted(value, key=lambda x: str(x))
-                        result["result"]["unexpected_list"] = sorted(
-                            result["result"]["unexpected_list"], key=lambda x: str(x)
-                        )
-
                 assert result["result"]["unexpected_list"] == value, (
                     "expected "
                     + str(value)
                     + " but got "
                     + str(result["result"]["unexpected_list"])
+                )
+
+            elif key == "partial_unexpected_list":
+                assert result["result"]["partial_unexpected_list"] == value, (
+                    "expected "
+                    + str(value)
+                    + " but got "
+                    + str(result["result"]["partial_unexpected_list"])
                 )
 
             elif key == "details":
@@ -1998,9 +2066,27 @@ def check_json_test_result(test, result, data_asset=None):
 
 
 def generate_test_table_name(
-    default_table_name_prefix: Optional[str] = "test_data_",
+    default_table_name_prefix: str = "test_data_",
 ) -> str:
     table_name: str = default_table_name_prefix + "".join(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
     )
     return table_name
+
+
+def _create_bigquery_engine() -> Engine:
+    gcp_project = os.getenv("GE_TEST_GCP_PROJECT")
+    if not gcp_project:
+        raise ValueError(
+            "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery expectation tests"
+        )
+    return create_engine(f"bigquery://{gcp_project}/{_bigquery_dataset()}")
+
+
+def _bigquery_dataset() -> str:
+    dataset = os.getenv("GE_TEST_BIGQUERY_DATASET")
+    if not dataset:
+        raise ValueError(
+            "Environment Variable GE_TEST_BIGQUERY_DATASET is required to run BigQuery expectation tests"
+        )
+    return dataset

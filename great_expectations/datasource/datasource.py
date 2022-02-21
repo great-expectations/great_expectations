@@ -10,7 +10,6 @@ from great_expectations.data_context.util import (
     verify_dynamic_loading_support,
 )
 from great_expectations.exceptions import ClassInstantiationError
-from great_expectations.types import ClassConfig
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -233,7 +232,7 @@ class LegacyDatasource:
         kwargs["class_name"] = class_name
         generator = self._build_batch_kwargs_generator(**kwargs)
         if "batch_kwargs_generators" not in self._datasource_config:
-            self._datasource_config["batch_kwargs_generators"] = dict()
+            self._datasource_config["batch_kwargs_generators"] = {}
         self._datasource_config["batch_kwargs_generators"][name] = kwargs
 
         return generator
@@ -257,7 +256,7 @@ class LegacyDatasource:
         return generator
 
     def get_batch_kwargs_generator(self, name):
-        """Get the (named) BatchKwargGenerator from a datasource)
+        """Get the (named) BatchKwargGenerator from a datasource
 
         Args:
             name (str): name of BatchKwargGenerator (default value is 'default')
@@ -320,7 +319,7 @@ class LegacyDatasource:
         if dataset_options is not None:
             # Then update with any locally-specified reader options
             if not batch_kwargs.get("dataset_options"):
-                batch_kwargs["dataset_options"] = dict()
+                batch_kwargs["dataset_options"] = {}
             batch_kwargs["dataset_options"].update(dataset_options)
 
         return batch_kwargs
