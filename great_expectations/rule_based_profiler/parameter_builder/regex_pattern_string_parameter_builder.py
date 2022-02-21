@@ -3,7 +3,6 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     MetricComputationResult,
@@ -17,7 +16,6 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +85,10 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     @property
     def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
         return self._metric_value_kwargs
+
+    @metric_value_kwargs.setter
+    def metric_value_kwargs(self, value: Optional[Union[str, dict]]):
+        self._metric_value_kwargs = value
 
     @property
     def threshold(self) -> Union[str, float]:

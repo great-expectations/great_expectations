@@ -3,7 +3,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Union
 
 import numpy as np
 
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     MetricComputationResult,
     ParameterBuilder,
@@ -92,6 +92,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         threshold: Union[float, str] = 1.0,
         candidate_strings: Optional[Union[Iterable[str], str]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
         """
@@ -105,11 +106,13 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             threshold: the ratio of values that must match a format string for it to be accepted
             candidate_strings: a list of candidate date format strings that will replace the default
             data_context: DataContext
+            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         super().__init__(
             name=name,
             data_context=data_context,
+            batch_list=batch_list,
             batch_request=batch_request,
         )
 
@@ -127,6 +130,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     @property
     def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
         return self._metric_value_kwargs
+
+    @metric_value_kwargs.setter
+    def metric_value_kwargs(self, value: Optional[Union[str, dict]]):
+        self._metric_value_kwargs = value
 
     @property
     def threshold(self) -> Union[str, float]:

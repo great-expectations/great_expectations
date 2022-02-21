@@ -1,8 +1,8 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     MetricComputationDetails,
     MetricComputationResult,
@@ -34,6 +34,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         replace_nan_with_zero: Union[str, bool] = False,
         reduce_scalar_metric: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
         """
@@ -49,11 +50,13 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             data_context: DataContext
+            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         super().__init__(
             name=name,
             data_context=data_context,
+            batch_list=batch_list,
             batch_request=batch_request,
         )
 
@@ -77,6 +80,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     @property
     def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
         return self._metric_value_kwargs
+
+    @metric_value_kwargs.setter
+    def metric_value_kwargs(self, value: Optional[Union[str, dict]]):
+        self._metric_value_kwargs = value
 
     @property
     def enforce_numeric_metric(self) -> Union[str, bool]:
