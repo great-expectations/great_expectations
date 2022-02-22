@@ -1,21 +1,16 @@
-from typing import Any, Dict, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
-from pyparsing import And, Literal
+from pyparsing import Combine
 from pyparsing import Optional as ppOptional
 from pyparsing import (
-    Or,
     ParseException,
     ParseResults,
     Suppress,
     Word,
-    ZeroOrMore,
     alphanums,
     alphas,
-    infixNotation,
     nums,
     oneOf,
-    opAssoc,
-    operatorPrecedence,
 )
 
 import great_expectations.exceptions as ge_exceptions
@@ -29,45 +24,20 @@ from great_expectations.rule_based_profiler.util import (
     get_parameter_value_and_validate_return_type,
 )
 
-
-def operands_map(n1, n2):
-    return 10, 20
-
-
 text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
 integer = Word(nums).setParseAction(lambda t: int(t[0]))
-var = Word("$" + alphas, alphanums + "_.") + ppOptional("[0]")
-operator = oneOf(">= <= != > < ==")
-# comparison = (var + operator + (integer | text)).setParseAction(lambda t: operands_map[t[1]](t[0], t[2]))
-# comparison = (var + operator + (integer | text)).setParseAction(lambda t: [t[0], t[1], t[2]])
+var = Combine(Word("$" + alphas, alphanums + "_.") + ppOptional("[0]"))
+comparison_operator = oneOf(">= <= != > < ==")
+bitwise_operator = oneOf("~ & |")
 
-# expr = operatorPrecedence(infixNotation, [
-#         ("|", 2, opAssoc.LEFT, lambda t: Or(t)),
-#         ("&", 2, opAssoc.LEFT, lambda t: And(t))
-#     ]
-# )
+condition_parser = (
+    var
+    + comparison_operator
+    + integer
+    + ppOptional(bitwise_operator + var + comparison_operator + integer)
+)
 
-condition_parser = var + operator + integer
-
-# condition_parser = Word(alphas, alphanums + "_.") + ZeroOrMore(
-#     (
-#         (
-#             Suppress(Literal('["'))
-#             + Word(alphas, alphanums + "_.")
-#             + Suppress(Literal('"]'))
-#         )
-#         ^ (
-#             Suppress(Literal("['"))
-#             + Word(alphas, alphanums + "_.")
-#             + Suppress(Literal("']"))
-#         )
-#     )
-#     ^ (
-#         Suppress(Literal("["))
-#         + Word(nums).setParseAction(lambda s, l, t: [int(t[0])])
-#         + Suppress(Literal("]"))
-#     )
-# )
+term_parser = integer + comparison_operator + integer
 
 
 class ExpectationConfigurationConditionParserError(
@@ -132,11 +102,52 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
 
         try:
             return condition_parser.parseString(self._condition)
-        except ParseException as e:
-            print(str(e.value))
+        except ParseException:
             raise ExpectationConfigurationConditionParserError(
                 f'Unable to parse Expectation Configuration Condition: "{self._condition}".'
             )
+
+    def _evaluate_condition(
+        self,
+        parsed_condition: ParseResults,
+        domain: Domain,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -> bool:
+        substituted_parameters_condition: ParseResults = parsed_condition.copy()
+        token: str
+        boolean_condition: List[bool, str] = []
+        term_count: int = 1
+        for i, token in enumerate(parsed_condition):
+            if isinstance(token, str) and token.startswith("$"):
+                substituted_parameters_condition[i]: Dict[
+                    str, Any
+                ] = get_parameter_value(
+                    domain=domain,
+                    parameter_reference=token,
+                    variables=variables,
+                    parameters=parameters,
+                )
+
+            bitwise_operator_offset: int = i + term_count
+            if (i > 0) and (bitwise_operator_offset % 4 == 3):
+                term: List[str, int, float] = substituted_parameters_condition[
+                    bitwise_operator_offset - 3 : bitwise_operator_offset
+                ]
+                term_str: str = "".join([str(t) for t in term])
+                term_boolean = eval(term_str)
+                boolean_condition.append(term_boolean)
+                try:
+                    # check to see if there is a bitwise operator after the boolean expression
+                    term_bitwise: bitwise_operator = substituted_parameters_condition[
+                        bitwise_operator_offset
+                    ]
+                    boolean_condition.append(term_bitwise)
+                    term_count += 1
+                except:
+                    pass
+
+        return eval("".join([str(t) for t in boolean_condition]))
 
     def _build_expectation_configuration(
         self,
@@ -163,18 +174,14 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
             variables=variables,
             parameters=parameters,
         )
-        parsed_condition: ParseResults = self._parse_condition()
 
-        parameter: Dict[str, Any] = get_parameter_value(
+        parsed_condition: ParseResults = self._parse_condition()
+        condition: bool = self._evaluate_condition(
+            parsed_condition=parsed_condition,
             domain=domain,
-            parameter_reference=parsed_condition[0],
             variables=variables,
             parameters=parameters,
         )
-
-        condition = False
-        if parsed_condition[1] == ">":
-            condition = parameter > parsed_condition[2]
 
         if condition:
             return ExpectationConfiguration(
