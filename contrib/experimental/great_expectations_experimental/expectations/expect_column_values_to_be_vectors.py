@@ -245,5 +245,4 @@ class ExpectColumnValuesToBeVector(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToBeVector().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToBeVector().print_diagnostic_checklist()
