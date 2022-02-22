@@ -22,7 +22,6 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 )
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.rule_based_profiler.util import (
-    get_parameter_value,
     get_parameter_value_and_validate_return_type,
 )
 
@@ -30,14 +29,14 @@ text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
 integer = Word(nums).setParseAction(lambda t: int(t[0]))
 var = Combine(Word("$" + alphas, alphanums + "_.") + ppOptional("[" + integer + "]"))
 comparison_operator = oneOf(">= <= != > < ==")
-bitwise_operator = oneOf("~ & |")
+binary_operator = oneOf("~ & |")
 operand = text | integer | var
 
 expr = infixNotation(
     operand,
     [
         (comparison_operator, 2, opAssoc.LEFT),
-        (bitwise_operator, 2, opAssoc.LEFT),
+        (binary_operator, 2, opAssoc.LEFT),
     ],
 )
 
@@ -173,9 +172,12 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         token: Union[str, ParseResults]
         for idx, token in enumerate(term_list):
             if isinstance(token, str) and token.startswith("$"):
-                term_list[idx]: Dict[str, Any] = get_parameter_value(
+                term_list[idx]: Dict[
+                    str, Any
+                ] = get_parameter_value_and_validate_return_type(
                     domain=domain,
                     parameter_reference=token,
+                    expected_return_type=None,
                     variables=variables,
                     parameters=parameters,
                 )
@@ -188,14 +190,14 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                 )
         return term_list
 
-    def _build_bitwise_list(
+    def _build_binary_list(
         self,
         substituted_term_list: Union[str, ParseResults],
     ) -> ParseResults:
-        """Recursively build bitwise list from substituted terms
+        """Recursively build binary list from substituted terms
 
         Given a list of substituted terms created by parsing a provided condition and substituting parameters and
-        variables, recursively build bitwise condition ParseResults object, regardless of depth of groupings.
+        variables, recursively build binary condition ParseResults object, regardless of depth of groupings.
 
         Example:
             substituted_term_list = [[
@@ -208,7 +210,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                                         [397433, '<', 0]
                                      ]]
 
-            This method will then take that term list and recursively evaluate the terms between the top-level bitwise
+            This method will then take that term list and recursively evaluate the terms between the top-level binary
             conditions and return this ParseResults object:
                 return [True, '&' True]
 
@@ -217,7 +219,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                                                               self._substitute_parameters_and_variables
 
         Returns:
-            ParseResults: a ParseResults object with all terms evaluated except for bitwise operations.
+            ParseResults: a ParseResults object with all terms evaluated except for binary operations.
 
         """
         idx: int
@@ -228,29 +230,29 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             ) > 1:
                 substituted_term_list[idx] = eval("".join([str(t) for t in token]))
             elif isinstance(token, ParseResults):
-                self._build_bitwise_list(substituted_term_list=token)
+                self._build_binary_list(substituted_term_list=token)
 
         return substituted_term_list
 
     def _build_boolean_result(
         self,
-        bitwise_list: List[Union[bool, str]],
+        binary_list: List[Union[bool, str]],
     ) -> bool:
-        """Recursively build boolean result from bitwise list
+        """Recursively build boolean result from binary list
 
-        Given a list of bitwise terms created by parsing a provided condition, substituting parameters and
-        variables, and building bitwise condition ParseResults object, recursively evaluate remaining conditions and
+        Given a list of binary terms created by parsing a provided condition, substituting parameters and
+        variables, and building binary condition ParseResults object, recursively evaluate remaining conditions and
         return boolean result of condition.
 
         Example:
-            bitwise_list = [True, '&' True]
+            binary_list = [True, '&' True]
 
             This method will then take that term list and recursively evaluate the remaining and return a boolean result
             for the provided condition:
                 return True
 
         Args:
-            bitwise_list (List[Union[bool, str]]): the ParseResults object returned from
+            binary_list (List[Union[bool, str]]): the ParseResults object returned from
                                                    self._substitute_parameters_and_variables
 
         Returns:
@@ -259,18 +261,18 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         """
         idx: int
         token: Union[str, list]
-        for idx, token in enumerate(bitwise_list):
+        for idx, token in enumerate(binary_list):
             if (
                 (not isinstance(token, bool))
                 and (not any([isinstance(t, ParseResults) for t in token]))
                 and (len(token) > 1)
             ):
-                bitwise_list[idx] = eval("".join([str(t) for t in token]))
-                return self._build_boolean_result(bitwise_list=bitwise_list)
+                binary_list[idx] = eval("".join([str(t) for t in token]))
+                return self._build_boolean_result(binary_list=binary_list)
             elif isinstance(token, ParseResults):
-                return self._build_boolean_result(bitwise_list=token)
+                return self._build_boolean_result(binary_list=token)
 
-        return eval("".join([str(t) for t in bitwise_list]))
+        return eval("".join([str(t) for t in binary_list]))
 
     def _evaluate_condition(
         self,
@@ -287,10 +289,10 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             parameters=parameters,
         )
 
-        bitwise_list: ParseResults = self._build_bitwise_list(
+        binary_list: ParseResults = self._build_binary_list(
             substituted_term_list=substituted_term_list
         )
-        boolean_result: bool = self._build_boolean_result(bitwise_list=bitwise_list)
+        boolean_result: bool = self._build_boolean_result(binary_list=binary_list)
 
         return boolean_result
 
