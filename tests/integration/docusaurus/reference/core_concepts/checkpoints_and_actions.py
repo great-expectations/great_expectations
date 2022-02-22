@@ -80,7 +80,7 @@ validation_result_id = results.run_results[[k for k in results.run_results.keys(
 assert (
     type(validation_result_id["validation_result"]) == ExpectationSuiteValidationResult
 )
-assert isinstance(results.checkpoint_config, dict)
+assert isinstance(results.checkpoint_config, CheckpointConfig)
 
 typed_results = {
     "run_id": run_id_type,
