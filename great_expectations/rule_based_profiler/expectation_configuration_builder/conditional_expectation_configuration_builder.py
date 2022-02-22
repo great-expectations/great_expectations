@@ -114,7 +114,7 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> ParseResults:
-        """Recursively substitute all parameters and variables"""
+        """Recursively substitute all parameters and variables in term list"""
         token: Union[str, ParseResults]
         for i, token in enumerate(term_list):
             if isinstance(token, str) and token.startswith("$"):
