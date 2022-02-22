@@ -712,9 +712,10 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
     workdir = os.getcwd()
     try:
         base_dir = file_relative_path(__file__, "../../")
-        os.chdir(tmp_path)
+        os.chdir(base_dir)
         # Ensure GE is installed in our environment
         execute_shell_command("pip install .")
+        os.chdir(tmp_path)
 
         #
         # Build test state
@@ -774,6 +775,7 @@ def _execute_integration_test(integration_test_fixture, tmp_path):
         loader.exec_module(test_script_module)
     except Exception as e:
         logger.error(str(e))
+        raise
     finally:
         os.chdir(workdir)
 
