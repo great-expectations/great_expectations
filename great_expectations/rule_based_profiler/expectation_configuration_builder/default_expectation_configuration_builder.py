@@ -91,6 +91,22 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         self._condition = condition
         self._meta = meta
 
+    @property
+    def expectation_type(self) -> str:
+        return self._expectation_type
+
+    @property
+    def condition(self) -> str:
+        return self._condition
+
+    @property
+    def meta(self) -> dict:
+        return self._meta
+
+    @property
+    def kwargs(self) -> dict:
+        return self._kwargs
+
     def _parse_condition(self) -> ParseResults:
         """
         Using the grammer defined by "condition", provides the parsing
@@ -240,19 +256,3 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                 kwargs=expectation_kwargs,
                 meta=meta,
             )
-
-    @property
-    def expectation_type(self) -> str:
-        return self._expectation_type
-
-    @property
-    def condition(self) -> str:
-        return self._condition
-
-    @property
-    def meta(self) -> dict:
-        return self._meta
-
-    @property
-    def kwargs(self) -> dict:
-        return self._kwargs
