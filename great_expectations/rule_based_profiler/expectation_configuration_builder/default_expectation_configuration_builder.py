@@ -130,10 +130,11 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> ParseResults:
         """Recursively substitute all parameters and variables in term list"""
+        idx: int
         token: Union[str, ParseResults]
-        for i, token in enumerate(term_list):
+        for idx, token in enumerate(term_list):
             if isinstance(token, str) and token.startswith("$"):
-                term_list[i]: Dict[str, Any] = get_parameter_value(
+                term_list[idx]: Dict[str, Any] = get_parameter_value(
                     domain=domain,
                     parameter_reference=token,
                     variables=variables,
@@ -153,12 +154,13 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         substituted_terms: Union[str, list],
     ) -> ParseResults:
         """Recursively build bitwise list from substituted terms"""
+        idx: int
         token: Union[str, list]
-        for i, token in enumerate(substituted_terms):
+        for idx, token in enumerate(substituted_terms):
             if (not any([isinstance(t, ParseResults) for t in token])) and len(
                 token
             ) > 1:
-                substituted_terms[i] = eval("".join([str(t) for t in token]))
+                substituted_terms[idx] = eval("".join([str(t) for t in token]))
             elif isinstance(token, ParseResults):
                 self._build_bitwise_list(substituted_terms=token)
 
@@ -169,14 +171,15 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         bitwise_list: List[Union[bool, str]],
     ) -> bool:
         """Recursively build boolean result from bitwise list"""
+        idx: int
         token: Union[str, list]
-        for i, token in enumerate(bitwise_list):
+        for idx, token in enumerate(bitwise_list):
             if (
                 (not isinstance(token, bool))
                 and (not any([isinstance(t, ParseResults) for t in token]))
                 and (len(token) > 1)
             ):
-                bitwise_list[i] = eval("".join([str(t) for t in token]))
+                bitwise_list[idx] = eval("".join([str(t) for t in token]))
                 return self._build_boolean_result(bitwise_list=bitwise_list)
             elif isinstance(token, ParseResults):
                 return self._build_boolean_result(bitwise_list=token)
