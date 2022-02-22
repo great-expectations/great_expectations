@@ -26,7 +26,7 @@ from great_expectations.rule_based_profiler.util import (
 
 text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
 integer = Word(nums).setParseAction(lambda t: int(t[0]))
-var = Combine(Word("$" + alphas, alphanums + "_.") + ppOptional("[0]"))
+var = Combine(Word("$" + alphas, alphanums + "_.") + ppOptional("[" + integer + "]"))
 comparison_operator = oneOf(">= <= != > < ==")
 bitwise_operator = oneOf("~ & |")
 
