@@ -20,35 +20,8 @@ import requests
 from great_expectations import __version__ as ge_version
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
-    BatchAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
-    BatchRequestAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
-    CheckpointRunAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
-    DataDocsSiteAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
-    DatasourceAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.execution_engine_anonymizer import (
-    ExecutionEngineAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
-    ExpectationSuiteAnonymizer,
-)
-from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
-    StoreAnonymizer,
-)
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
-)
-from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
-    ValidationOperatorAnonymizer,
 )
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_usage_statistics_record_schema,
@@ -84,6 +57,22 @@ class UsageStatisticsHandler:
         self._message_queue = Queue()
         self._worker = threading.Thread(target=self._requests_worker, daemon=True)
         self._worker.start()
+
+        # As usage stats are central to many core GE features, dynamically importing at runtime reduces
+        # the risk of cyclic import issues. If these anonymizers have been imported at any earlier point
+        # in the program's lifetime, retrieval of the import will be O(1) and not impact performance.
+        from great_expectations.core.usage_statistics.anonymizers import (
+            BatchAnonymizer,
+            BatchRequestAnonymizer,
+            CheckpointRunAnonymizer,
+            DataDocsSiteAnonymizer,
+            DatasourceAnonymizer,
+            ExecutionEngineAnonymizer,
+            ExpectationSuiteAnonymizer,
+            StoreAnonymizer,
+            ValidationOperatorAnonymizer,
+        )
+
         self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
         self._execution_engine_anonymizer = ExecutionEngineAnonymizer(data_context_id)
         self._store_anonymizer = StoreAnonymizer(data_context_id)
@@ -95,6 +84,7 @@ class UsageStatisticsHandler:
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
         self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
+
         try:
             self._sigterm_handler = signal.signal(signal.SIGTERM, self._teardown)
         except ValueError:
@@ -475,6 +465,10 @@ def add_datasource_usage_statistics(
             data_context._usage_statistics_handler._datasource_anonymizer
         )
     except Exception:
+        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
+            DatasourceAnonymizer,
+        )
+
         datasource_anonymizer = DatasourceAnonymizer(data_context_id)
 
     payload = {}
@@ -506,7 +500,7 @@ def get_batch_list_usage_statistics(
     if data_context._usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            batch_request_anonymizer: BatchRequestAnonymizer = (
+            batch_request_anonymizer: "BatchRequestAnonymizer" = (  # noqa: F821
                 data_context._usage_statistics_handler._batch_request_anonymizer
             )
             payload = batch_request_anonymizer.anonymize_batch_request(*args, **kwargs)
@@ -540,7 +534,7 @@ def get_checkpoint_run_usage_statistics(
     if checkpoint._usage_statistics_handler:
         # noinspection PyBroadException
         try:
-            checkpoint_run_anonymizer: CheckpointRunAnonymizer = (
+            checkpoint_run_anonymizer: "CheckpointRunAnonymizer" = (  # noqa: F821
                 checkpoint._usage_statistics_handler._checkpoint_run_anonymizer
             )
 
