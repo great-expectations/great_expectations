@@ -18,9 +18,12 @@ A Datasource provides a standard API for accessing and interacting with data fro
 
 ### Features and promises
 
-Datasources provide a unified API across multiple backends: the Datasource API remains the same for PostgreSQL, MongoDB, CSV Filesystems, and all other supported data backends.  
+Datasources provide a unified API across multiple backends: the Datasource API remains the same for PostgreSQL, CSV Filesystems, and all other supported data backends.  
+:::note Important: 
 
 Datasources do not modify your data.
+
+:::
 
 ### Relationship to other objects
 
@@ -30,7 +33,7 @@ Datasources function by bringing together a way of interacting with Data (an <Te
 
 <ConnectHeader/>
 
-When connecting to data the Datasource is your go-to.  At this stage, you will create Datasources to define how Great Expectations can find and access your <TechnicalTag relative="../" tag="data_asset" text="Data Assets." />.  From that point forward you will be able to operate with the Datasource's API rather than needing a different API for each possible data backend you may be working with.
+When connecting to data the Datasource is primary tool.  At this stage, you will create Datasources to define how Great Expectations can find and access your <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.  Under the hood, each Datasource must have an Execution Engine and one or more Data Connectors configured.  Once a Datasource is configured you will be able to operate with the Datasource's API rather than needing a different API for each possible data backend you may be working with.
 
 <CreateHeader/>
 
@@ -66,6 +69,12 @@ datasource = context.get_datasource("my_datasource_name")
 ### How to create and configure
 
 Creating a Datasource is quick and easy, and can be done from the <TechnicalTag relative="../" tag="cli" text="CLI" /> or through Python code.  Configuring the Datasource may differ between backends, according to the given backend's requirements, but the process of creating one will remain the same.
+
+To create a new  Datasource through the CLI, run `great_expectations datasource new`.
+
+To create a new Datasource through Python code, obtain a data context and call its `add_datasource` method.
+
+Advanced users may also create a Datasource directly through a YAML config file.
 
 For detailed instructions on how to create Datasources that are configured for various backends, see [our documentation on Connecting to Data](../guides/connecting_to_your_data/index.md).
 
