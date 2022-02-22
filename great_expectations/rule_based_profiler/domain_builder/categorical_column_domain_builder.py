@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.core.metric import BatchMetric
 from great_expectations.exceptions import ProfilerConfigurationError
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
@@ -98,6 +97,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             a passthrough if supplied as CardinalityMode.
 
         """
+        # TODO AJB 20220222: Add error handling, test
         if self._cardinality_limit is None:
             return CardinalityMode.VERY_FEW.value
         elif isinstance(self._cardinality_limit, str):
@@ -123,30 +123,14 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             List of domains that match the desired cardinality.
         """
 
-        batch_ids = self._get_batch_ids(variables=variables)
+        batch_ids: List[str] = self._get_batch_ids(variables=variables)
         validator: Validator = self.get_validator(variables=variables)
-
-        latest_batch_id: str = batch_ids[0]
 
         # Here we use a single get_metric call to get column names to build the
         # rest of the metrics.
-        table_column_names: List[str] = validator.get_metric(
-            metric=MetricConfiguration(
-                metric_name="table.columns",
-                metric_domain_kwargs={
-                    "batch_id": latest_batch_id,
-                },
-                metric_value_kwargs=None,
-                metric_dependencies=None,
-            )
+        table_column_names: List[str] = self._get_table_column_names_from_first_batch(
+            variables=variables
         )
-
-        if self._exclude_columns is not None:
-            table_column_names = [
-                colname
-                for colname in table_column_names
-                if colname not in self._exclude_columns
-            ]
 
         metrics_for_cardinality_check: List[
             Dict[str, List[MetricConfiguration]]
@@ -212,6 +196,49 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         )
 
         return column_domains
+
+    def _get_table_column_names_from_first_batch(
+        self,
+        variables: Optional[ParameterContainer] = None,
+    ):
+        """Retrieve table column names from the first loaded batch.
+
+        Args:
+            variables: Optional passthrough variables
+
+        Returns:
+            List of column names from the first loaded batch.
+        """
+
+        batch_ids: List[str] = self._get_batch_ids(variables=variables)
+
+        if len(batch_ids) == 0:
+            raise ProfilerConfigurationError(
+                "No batch_ids were available, please check your configuration."
+            )
+
+        first_batch_id: str = batch_ids[0]
+
+        validator: Validator = self.get_validator(variables=variables)
+        table_column_names: List[str] = validator.get_metric(
+            metric=MetricConfiguration(
+                metric_name="table.columns",
+                metric_domain_kwargs={
+                    "batch_id": first_batch_id,
+                },
+                metric_value_kwargs=None,
+                metric_dependencies=None,
+            )
+        )
+
+        if self._exclude_columns is not None:
+            table_column_names = [
+                colname
+                for colname in table_column_names
+                if colname not in self._exclude_columns
+            ]
+
+        return table_column_names
 
     def _generate_metric_configurations_to_check_cardinality(
         self,

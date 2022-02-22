@@ -72,6 +72,14 @@ def test_excluded_columns():
     raise NotImplementedError
 
 
+def test_single_batch_provided():
+    raise NotImplementedError
+
+
+def test_no_batches_provided_raises_error():
+    raise NotImplementedError
+
+
 def test_multi_batch_very_few_cardinality(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
