@@ -7,6 +7,9 @@ import logging
 import os
 import pstats
 import re
+import warnings
+from dataclasses import dataclass
+
 import time
 import uuid
 from collections import OrderedDict
@@ -26,7 +29,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, Optional, Set, Union
+from typing import Any, Callable, Optional, Set, Union, Tuple, Dict
 
 from dateutil.parser import parse
 from packaging import version
@@ -1358,3 +1361,140 @@ def import_make_url():
     else:
         from sqlalchemy.engine import make_url
     return make_url
+
+@dataclass
+class SQLABigQuery:
+    """
+    This dataclass acts as a wrapper for whichever module is providing
+    dialect support for BigQuery. Additionally, it exposes a couple of
+    useful attributes specific to BigQuery.
+
+    module: the module itself, if any
+    geo_support: boolean indicating if sqlalchemy_bigquery.GEOGRAPHY package is installed
+    module_name: str for importing the module
+    types_tuple: (deprecated) a tuple of available types -- supports legacy pybigquery
+    """
+
+    def __init__(
+        self,
+        module: Optional[Any] = None,
+        geo_support: bool = False,
+        module_name: str = "sqlalchemy_bigquery",
+        types_tuple: Optional[Tuple] = None
+    ):
+        self.module = module  # this will be sqlalchemy-bigquery, pybigquery, or None
+        self.geo_support = geo_support
+        self.module_name = module_name
+        self.types_tuple = types_tuple
+        self.types: Dict = {}
+        if module:
+            self.set_module(module)
+
+    def set_module(self, module):
+        self.module = module
+        # make module attributes available on this class
+        for attribute in module.__all__:
+            setattr(self, attribute, getattr(module, attribute))
+
+
+def import_sqla_bigquery() -> SQLABigQuery:
+    """
+    Because of legacy issues with BigQuery drivers, we create an alias
+    `sqla_bigquery`, which could be either sqlalchemy-bigquery or pybigquery.
+    This function attempts to gracefully import sqlalchemy-bigquery
+    while maintaining compatability with pybigquery.
+    """
+
+    sqla_bigquery = SQLABigQuery()
+
+    try:
+        from sqlalchemy.dialects import registry
+    except ImportError:
+        # Case 0: SQLAlchemy isn't in the environment, return
+        return sqla_bigquery
+
+    try:
+        # case 1: sqlalchemy_bigquery is installed, use it, and check for GEO support.
+        import sqlalchemy_bigquery as sqla_bigquery_module
+        sqla_bigquery.set_module(sqla_bigquery_module)
+
+        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in
+        # Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        registry.register("bigquery", sqla_bigquery.module_name, "BigQueryDialect")
+        try:
+            from sqlalchemy_bigquery import GEOGRAPHY
+
+            sqla_bigquery.geo_support = True
+        except ImportError:
+            sqla_bigquery.geo_support = False
+            GEOGRAPHY = None
+
+        sqla_bigquery.types = {
+            "INTEGER": sqla_bigquery_module.INTEGER,
+            "NUMERIC": sqla_bigquery_module.NUMERIC,
+            "STRING": sqla_bigquery_module.STRING,
+            "BIGNUMERIC": sqla_bigquery_module.BIGNUMERIC,
+            "BYTES": sqla_bigquery_module.BYTES,
+            "BOOL": sqla_bigquery_module.BOOL,
+            "BOOLEAN": sqla_bigquery_module.BOOLEAN,
+            "TIMESTAMP": sqla_bigquery_module.TIMESTAMP,
+            "TIME": sqla_bigquery_module.TIME,
+            "FLOAT": sqla_bigquery_module.FLOAT,
+            "DATE": sqla_bigquery_module.DATE,
+            "DATETIME": sqla_bigquery_module.DATETIME,
+        }
+        if sqla_bigquery.geo_support:
+            sqla_bigquery.types["GEOGRAPHY"] = GEOGRAPHY
+
+    except ImportError:
+        # case 2: try to fallback on legacy package pybigquery,
+        # which requires some extra legwork
+        try:
+            import pybigquery.sqlalchemy_bigquery as pybigquery_module
+
+            warnings.warn(
+                "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+                DeprecationWarning,
+            )
+            sqla_bigquery.module_name = "pybigquery.sqlalchemy_bigquery"
+            ###
+            # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+            # to define an attribute "dialect". A PR has been submitted to fix this upstream
+            # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+            # fix isn't present, add this "dialect" attribute here:
+            if not hasattr(pybigquery_module, "dialect"):
+                pybigquery_module.dialect = pybigquery_module.BigQueryDialect
+
+            sqla_bigquery.set_module(pybigquery_module)
+            registry.register("bigquery", pybigquery_module.module_name, "dialect")
+            try:
+                getattr(pybigquery_module, "INTEGER")
+                sqla_bigquery.types = {
+                    "INTEGER": pybigquery_module.INTEGER,
+                    "NUMERIC": pybigquery_module.NUMERIC,
+                    "STRING": pybigquery_module.STRING,
+                    "BIGNUMERIC": pybigquery_module.BIGNUMERIC,
+                    "BYTES": pybigquery_module.BYTES,
+                    "BOOL": pybigquery_module.BOOL,
+                    "BOOLEAN": pybigquery_module.BOOLEAN,
+                    "TIMESTAMP": pybigquery_module.TIMESTAMP,
+                    "TIME": pybigquery_module.TIME,
+                    "FLOAT": pybigquery_module.FLOAT,
+                    "DATE": pybigquery_module.DATE,
+                    "DATETIME": pybigquery_module.DATETIME,
+                }
+            except AttributeError:
+                # In older versions of the pybigquery driver, types were not exported, so we use a hack
+                logger.warning(
+                    "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+                )
+                from collections import namedtuple
+
+                BigQueryTypes = namedtuple("BigQueryTypes", sorted(pybigquery_module._type_map))
+                sqla_bigquery.types_tuple = BigQueryTypes(**pybigquery_module._type_map)
+        except ImportError:
+            # case 3: no package to support BigQuery is installed
+            pass  # module is None by default
+
+        return sqla_bigquery
