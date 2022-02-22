@@ -21,7 +21,7 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         data_context=data_context,
         batch_request=batch_request,
-        cardinality_limit="very_few",
+        cardinality_limit_mode="very_few",
     )
     domains: List[Domain] = domain_builder.get_domains()
 
@@ -68,6 +68,10 @@ def test_cardinality_limit_specified_as_object():
     raise NotImplementedError
 
 
+def test_cardinality_checker_unsupported_cardinality_limit_type():
+    raise NotImplementedError
+
+
 def test_excluded_columns():
     raise NotImplementedError
 
@@ -104,11 +108,9 @@ def test_multi_batch_very_few_cardinality(
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         data_context=data_context,
         batch_request=batch_request,
-        cardinality_limit="very_few",
+        cardinality_limit_mode="very_few",
     )
     observed_domains: List[Domain] = domain_builder.get_domains()
-
-    assert len(observed_domains) == 10
 
     expected_domains: List[Domain] = [
         Domain(
@@ -144,19 +146,7 @@ def test_multi_batch_very_few_cardinality(
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
-                "column": "extra",
-            },
-        ),
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
                 "column": "mta_tax",
-            },
-        ),
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
-                "column": "tolls_amount",
             },
         ),
         Domain(
@@ -174,3 +164,5 @@ def test_multi_batch_very_few_cardinality(
     ]
 
     assert observed_domains == expected_domains
+
+    assert len(observed_domains) == 8

@@ -15,7 +15,7 @@ from great_expectations.validator.validator import Validator
 
 
 @dataclass
-class ProportionalCardinalityLimit:
+class RelativeCardinalityLimit:
     name: str
     max_proportion_unique: float
 
@@ -26,29 +26,83 @@ class AbsoluteCardinalityLimit:
     max_unique_values: int
 
 
-class CardinalityMode(enum.Enum):
+class CardinalityLimitMode(enum.Enum):
     """Used to determine appropriate Expectation configurations based on data.
 
-    Defines relative and absolute number of records (table rows) that
+    Defines relative (ratio) and absolute number of records (table rows) that
     correspond to each cardinality category.
-
     """
 
     ONE = AbsoluteCardinalityLimit("one", 1)
-    VERY_FEW = AbsoluteCardinalityLimit("very_few", 60)
-    # TODO AJB 20220216: add further implementation
-    # raise NotImplementedError
+    TWO = AbsoluteCardinalityLimit("two", 2)
+    VERY_FEW = AbsoluteCardinalityLimit("very_few", 10)
+    FEW = AbsoluteCardinalityLimit("few", 100)
+    SOME = AbsoluteCardinalityLimit("some", 1000)
+    MANY = AbsoluteCardinalityLimit("many", 10000)
+    VERY_MANY = AbsoluteCardinalityLimit("very_many", 100000)
+    UNIQUE = RelativeCardinalityLimit("unique", 1.0)
+    ABS_10 = AbsoluteCardinalityLimit("abs_10", 10)
+    ABS_100 = AbsoluteCardinalityLimit("abs_100", 100)
+    ABS_1000 = AbsoluteCardinalityLimit("abs_1000", 1000)
+    ABS_10_000 = AbsoluteCardinalityLimit("abs_10_000", int(1e4))
+    ABS_100_000 = AbsoluteCardinalityLimit("abs_100_000", int(1e5))
+    ABS_1_000_000 = AbsoluteCardinalityLimit("abs_1_000_000", int(1e6))
+    ABS_10_000_000 = AbsoluteCardinalityLimit("abs_10_000_000", int(1e7))
+    ABS_100_000_000 = AbsoluteCardinalityLimit("abs_100_000_000", int(1e8))
+    ABS_1_000_000_000 = AbsoluteCardinalityLimit("abs_1_000_000_000", int(1e9))
+    REL_001 = RelativeCardinalityLimit("rel_001", 1e-5)
+    REL_01 = RelativeCardinalityLimit("rel_01", 1e-4)
+    REL_0_1 = RelativeCardinalityLimit("rel_0_1", 1e-3)
+    REL_1 = RelativeCardinalityLimit("rel_1", 1e-2)
+    REL_10 = RelativeCardinalityLimit("rel_10", 0.10)
+    REL_25 = RelativeCardinalityLimit("rel_25", 0.25)
+    REL_50 = RelativeCardinalityLimit("rel_50", 0.50)
+    REL_75 = RelativeCardinalityLimit("rel_75", 0.75)
+    ONE_PCT = RelativeCardinalityLimit("one_pct", 0.01)
+    TEN_PCT = RelativeCardinalityLimit("ten_pct", 0.10)
 
 
-class zz__CardinalityModeProcessor:
-    """Check cardinality"""
+class CardinalityChecker:
+    """Handles cardinality checking given cardinality limit mode and measured value.
 
-    # TODO AJB 20220218: add further implementation, factor this out and test separately, change name
-    def __init__(self, mode, limit):
-        raise NotImplementedError
+    Attributes:
+        cardinality_limit_mode: CardinalityLimitMode defining the maximum
+            allowable cardinality.
+    """
 
-    def cardinality_within_limit(self):
-        raise NotImplementedError
+    def __init__(self, cardinality_limit_mode: CardinalityLimitMode):
+        self.supported_cardinality_limit_modes = (
+            AbsoluteCardinalityLimit,
+            RelativeCardinalityLimit,
+        )
+        self.supported_cardinality_limit_mode_names = (
+            mode.__name__ for mode in self.supported_cardinality_limit_modes
+        )
+        self._cardinality_limit_mode = cardinality_limit_mode
+        if not isinstance(
+            self._cardinality_limit_mode, self.supported_cardinality_limit_modes
+        ):
+            raise ProfilerConfigurationError(
+                f"Please specify a supported cardinality limit type, supported types are {','.join(self.supported_cardinality_limit_mode_names)}"
+            )
+
+    def cardinality_within_limit(self, metric_value: Union[int, float]):
+        self._validate_metric_value(metric_value=metric_value)
+        if isinstance(self._cardinality_limit_mode, AbsoluteCardinalityLimit):
+            return metric_value <= self._cardinality_limit_mode.max_unique_values
+        elif isinstance(self._cardinality_limit_mode, RelativeCardinalityLimit):
+            return metric_value <= self._cardinality_limit_mode.max_proportion_unique
+
+    @staticmethod
+    def _validate_metric_value(metric_value: Union[int, float]):
+        if not isinstance(metric_value, (int, float)):
+            raise ProfilerConfigurationError(
+                f"Value of measured cardinality must be of type int or float, you provided {type(metric_value)}"
+            )
+        if metric_value < 0.00:
+            raise ProfilerConfigurationError(
+                f"Value of cardinality (number of rows or percent unique) should be greater than 0.00, your value is {metric_value}"
+            )
 
 
 class CategoricalColumnDomainBuilder(DomainBuilder):
@@ -58,16 +112,16 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         self,
         data_context: "DataContext",  # noqa: F821
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
-        cardinality_limit: Optional[Union[CardinalityMode, str]] = None,
+        cardinality_limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         exclude_columns: Optional[List[str]] = None,
     ):
-        """Filter columns with unique values no greater than cardinality_limit.
+        """Filter columns with unique values no greater than cardinality_limit_mode.
 
         Args:
             data_context: DataContext associated with this profiler.
             batch_request: BatchRequest to be optionally used to define batches
                 to consider for this domain builder.
-            cardinality_limit: CardinalityMode to use when filtering columns.
+            cardinality_limit_mode: CardinalityLimitMode to use when filtering columns.
             exclude_columns: If provided, exclude columns from consideration.
         """
 
@@ -76,10 +130,13 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             batch_request=batch_request,
         )
 
-        if cardinality_limit is None:
-            cardinality_limit = CardinalityMode.VERY_FEW.value
+        if cardinality_limit_mode is None:
+            cardinality_limit_mode = CardinalityLimitMode.VERY_FEW.value
 
-        self._cardinality_limit = cardinality_limit
+        self._cardinality_limit_mode = cardinality_limit_mode
+        self._cardinality_checker = CardinalityChecker(
+            cardinality_limit_mode=self.cardinality_limit_mode
+        )
 
         self._exclude_columns = exclude_columns
 
@@ -88,28 +145,28 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         return MetricDomainTypes.COLUMN
 
     @property
-    def cardinality_limit(self) -> CardinalityMode:
-        """Process cardinality_limit which is passed as a string from config.
+    def cardinality_limit_mode(self) -> CardinalityLimitMode:
+        """Process cardinality_limit_mode which is passed as a string from config.
 
         Returns:
-            CardinalityMode default if no cardinality_limit is set,
-            the corresponding CardinalityMode if passed as a string or
-            a passthrough if supplied as CardinalityMode.
+            CardinalityLimitMode default if no cardinality_limit_mode is set,
+            the corresponding CardinalityLimitMode if passed as a string or
+            a passthrough if supplied as CardinalityLimitMode.
 
         """
         # TODO AJB 20220222: Add error handling, test
-        if self._cardinality_limit is None:
-            return CardinalityMode.VERY_FEW.value
-        elif isinstance(self._cardinality_limit, str):
-            return CardinalityMode[self._cardinality_limit.upper()].value
+        if self._cardinality_limit_mode is None:
+            return CardinalityLimitMode.VERY_FEW.value
+        elif isinstance(self._cardinality_limit_mode, str):
+            return CardinalityLimitMode[self._cardinality_limit_mode.upper()].value
         else:
-            return self._cardinality_limit.value
+            return self._cardinality_limit_mode.value
 
     def _get_domains(
         self,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
-        """Return domains matching the selected cardinality_limit.
+        """Return domains matching the selected cardinality_limit_mode.
 
         Cardinality categories define a maximum number of unique items that
         can be contained in a given domain. If this number is exceeded, the
@@ -208,15 +265,15 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             List of dicts of the form [{column_name: List[MetricConfiguration]},...]
         """
 
-        cardinality_limit: CardinalityMode = self.cardinality_limit
+        cardinality_limit_mode: CardinalityLimitMode = self.cardinality_limit_mode
 
-        if isinstance(cardinality_limit, AbsoluteCardinalityLimit):
+        if isinstance(cardinality_limit_mode, AbsoluteCardinalityLimit):
             metric_name: str = "column.distinct_values.count"
-        elif isinstance(cardinality_limit, ProportionalCardinalityLimit):
+        elif isinstance(cardinality_limit_mode, RelativeCardinalityLimit):
             metric_name: str = "column.unique_proportion"
         else:
             raise ProfilerConfigurationError(
-                f"Unrecognized cardinality_limit: {cardinality_limit}"
+                f"Unrecognized cardinality_limit_mode: {cardinality_limit_mode}"
             )
 
         metric_configurations: List[Dict[str, List[MetricConfiguration]]] = []
@@ -257,17 +314,10 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         Returns:
 
         """
+        candidate_column_names: List[str] = table_column_names.copy()
 
         # TODO AJB 20220218: Remove loops and refactor into single call to validator.get_metrics()
         #  by first building up MetricConfigurations to compute see GREAT-584
-        computed_metrics_for_cardinality_check: List[
-            Dict[str, List[Tuple[MetricConfiguration, Any]]]
-        ] = []
-
-        candidate_column_names: List[str] = table_column_names.copy()
-
-        cardinality_limit: CardinalityMode = self.cardinality_limit
-
         for metric_for_cardinality_check in metrics_for_cardinality_check:
             for (
                 column_name,
@@ -276,16 +326,18 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
                 if column_name not in candidate_column_names:
                     continue
                 else:
-                    column_inclusion: bool = True
                     for metric_config in metric_config_batch_list:
+
                         metric_value = validator.get_metric(metric=metric_config)
-                        if metric_config.metric_name == "column.distinct_values.count":
-                            if metric_value > cardinality_limit.max_unique_values:
-                                column_inclusion = False
-                        elif metric_config.metric_name == "column.unique_proportion":
-                            if metric_value > cardinality_limit.max_proportion_unique:
-                                column_inclusion = False
-                    if column_inclusion == False:
-                        candidate_column_names.remove(column_name)
+
+                        batch_cardinality_within_limit: bool = (
+                            self._cardinality_checker.cardinality_within_limit(
+                                metric_value=metric_value
+                            )
+                        )
+
+                        if batch_cardinality_within_limit is False:
+                            candidate_column_names.remove(column_name)
+                            break
 
         return candidate_column_names
