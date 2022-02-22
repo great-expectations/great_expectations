@@ -385,6 +385,7 @@ module.exports = {
             'terms/expectation_suite',
             'terms/plugin',
             'terms/supporting_resource',
+            'terms/validator',
             'terms/validation_result'
           ]
         },

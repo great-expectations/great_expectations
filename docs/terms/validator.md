@@ -8,13 +8,13 @@ import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
 
-<UniversalMap setup='inactive' connect='inactive' create='active' validate='active'/> 
+<UniversalMap setup='inactive' connect='active' create='active' validate='active'/> 
 
 ## Overview
 
 ### Definition
 
-A Validator is the object responsible for running an Expectation Suite against data.
+A Validator is the object responsible for running an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> against data.
 
 ### Features and promises
 
@@ -22,13 +22,13 @@ The Validator is the core functional component of Great Expectations.
 
 ### Relationship to other objects
 
-Validators are responsible for running an Expectation Suite against a Batch Request.  Checkpoints, in particular, use them for this purpose.  However, you can also use your Data Context to get a Validator to use outside a Checkpoint. 
+Validators are responsible for running an Expectation Suite against a <TechnicalTag relative="../" tag="batch_request" text="Batch Request" />.  <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />, in particular, use them for this purpose.  However, you can also use your <TechnicalTag relative="../" tag="data_context" text="Data Context" /> to get a Validator to use outside a Checkpoint. 
 
 ## Use cases
 
 <ConnectHeader/>
 
-When connecting to Data, it is often useful to verify that you have configured your Datasource correctly.  To verify a new Datasource, you can load data from it into a Validator using a Batch Request.  There are examples of this workflow at the end of most of [our guides on how to connect to specific source data systems](../guides/connecting_to_your_data/index.md#database).
+When connecting to Data, it is often useful to verify that you have configured your <TechnicalTag relative="../" tag="datasource" text="Datasource" /> correctly.  To verify a new Datasource, you can load data from it into a Validator using a Batch Request.  There are examples of this workflow at the end of most of [our guides on how to connect to specific source data systems](../guides/connecting_to_your_data/index.md#database).
 
 
 <CreateHeader/>
