@@ -56,7 +56,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     ExpectationConfigurations can be optionally filtered if a supplied condition is met.
     """
 
-    include_field_names: Set[str] = {
+    exclude_field_names: Set[str] = {
         "kwargs",
     }
 
@@ -90,7 +90,6 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 
         self._condition = condition
         self._meta = meta
-        self._success_on_last_run = success_on_last_run
 
     def _parse_condition(self) -> ParseResults:
         """
