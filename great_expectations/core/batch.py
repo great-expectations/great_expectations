@@ -605,13 +605,37 @@ class Batch(SerializableDictDot):
         return self._data.execution_engine.resolve_metrics((metric,))[metric.id]
 
 
+def materialize_batch_request(
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+) -> Union[BatchRequest, RuntimeBatchRequest]:
+    effective_batch_request: dict = get_batch_request_as_dict(
+        batch_request=batch_request
+    )
+
+    batch_request_class: type
+    if batch_request_contains_runtime_parameters(batch_request=effective_batch_request):
+        batch_request_class = RuntimeBatchRequest
+    else:
+        batch_request_class = BatchRequest
+
+    return batch_request_class(**effective_batch_request)
+
+
 def batch_request_contains_batch_data(
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
+) -> bool:
+    return (
+        batch_request_contains_runtime_parameters(batch_request=batch_request)
+        and batch_request["runtime_parameters"].get("batch_data") is not None
+    )
+
+
+def batch_request_contains_runtime_parameters(
     batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
 ) -> bool:
     return (
         batch_request is not None
         and batch_request.get("runtime_parameters") is not None
-        and batch_request["runtime_parameters"].get("batch_data") is not None
     )
 
 
