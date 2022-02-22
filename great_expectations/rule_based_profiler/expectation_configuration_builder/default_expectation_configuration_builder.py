@@ -100,12 +100,12 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         return self._condition
 
     @property
-    def meta(self) -> dict:
-        return self._meta
-
-    @property
     def kwargs(self) -> dict:
         return self._kwargs
+
+    @property
+    def meta(self) -> dict:
+        return self._meta
 
     def _parse_condition(self) -> ParseResults:
         """
