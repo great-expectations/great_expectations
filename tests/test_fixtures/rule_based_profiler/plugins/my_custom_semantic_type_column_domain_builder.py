@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 
 from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.types import (
@@ -20,7 +20,8 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     def __init__(
         self,
         data_context: DataContext,
-        batch_request: Union[BatchRequest, dict],
+        batch: Optional[Batch] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
@@ -28,6 +29,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     ):
         super().__init__(
             data_context=data_context,
+            batch=batch,
             batch_request=batch_request,
         )
 
