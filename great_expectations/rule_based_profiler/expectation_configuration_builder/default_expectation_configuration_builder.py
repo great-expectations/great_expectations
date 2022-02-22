@@ -129,7 +129,46 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> ParseResults:
-        """Recursively substitute all parameters and variables in term list"""
+        """Recursively substitute all parameters and variables in term list
+
+        Given a list of terms created by parsing a provided condition, recursively substitute all parameters and
+        variables in the term list, regardless of depth of groupings.
+
+        Example:
+            condition: "($variables.max_user_id>0 & $variables.answer==42) | $parameter.my_min_user_id.value[0]<0" will
+            return the following term list from self._parse_condition:
+                parsed_condition = [[
+                                      [
+                                        ['$variables.max_user_id', '>', 0],
+                                        '&',
+                                        ['$variables.answer', '==', 42]
+                                      ],
+                                      '|',
+                                      ['$parameter.my_min_user_id.value[0]', '<', 0]
+                                   ]]
+
+            This method will then take that term list and recursively search for parameters and variables that need to
+            be substituted and return this ParseResults object:
+                return [[
+                          [
+                             [999999999999, '>', 0],
+                             '&',
+                             [42, '==', 42]
+                          ],
+                          '|',
+                          [397433, '<', 0]
+                       ]]
+
+        Args:
+            term_list (Union[str, ParseResults): the ParseResults object returned from self._parse_condition
+            domain (Domain): The domain of the ExpectationConfiguration
+            variables (Optional[ParameterContainer]): The variables set for this ExpectationConfiguration
+            parameters (Optional[Dict[str, ParameterContainer]]): The parameters set for this ExpectationConfiguration
+
+        Returns:
+            ParseResults: a ParseResults object identical to the one returned by self._parse_condition except with
+                          substituted parameters and variables.
+        """
         idx: int
         token: Union[str, ParseResults]
         for idx, token in enumerate(term_list):
