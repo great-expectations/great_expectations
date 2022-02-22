@@ -117,8 +117,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 
         try:
             return expr.parseString(self._condition)
-        except ParseException as e:
-            print(str(e))
+        except ParseException:
             raise ExpectationConfigurationConditionParserError(
                 f'Unable to parse Expectation Configuration Condition: "{self._condition}".'
             )
