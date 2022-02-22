@@ -33,7 +33,8 @@ from great_expectations.validator.validator import Validator
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit
 # https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
-class ColumnValuesToContainVector(ColumnMapMetricProvider):
+class ColumnValuesIsVector(ColumnMapMetricProvider):
+    VECTOR_REGEX = r"\[\d+\.*\d*,\s*\d+\.*\d*(,\s*\d+\.*\d*)*]"
 
     # This is the id string that will be used to reference your metric.
     # Please see https://docs.greatexpectations.io/en/latest/reference/core_concepts/metrics.html#metrics
@@ -48,8 +49,9 @@ class ColumnValuesToContainVector(ColumnMapMetricProvider):
             """Checks if the row is a list containing only numbers with length
             greater than 1. If a string uses regular expression to check
             Returns true for such rows"""
-            VECTOR_REGEX = r"\[\d+\.*\d*,\s*\d+\.*\d*(,\s*\d+\.*\d*)*]"
-            if isinstance(x, str) and re.match(VECTOR_REGEX, str(x)):
+            if isinstance(x, str) and re.match(
+                ColumnValuesIsVector.VECTOR_REGEX, str(x)
+            ):
                 return True
             elif isinstance(x, list) and len(x) > 1:
                 return all(isinstance(listobject, (int, float)) for listobject in x)
