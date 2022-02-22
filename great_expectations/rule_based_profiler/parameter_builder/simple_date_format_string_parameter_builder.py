@@ -151,13 +151,12 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ):
+    ) -> ParameterContainer:
         """
         Check the percentage of values matching each string, and return the best fit, or None if no
         string exceeds the configured threshold.
 
-        :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
-        ptional details
+        :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and optional details
         """
         metric_computation_result: MetricComputationResult
 
@@ -200,16 +199,16 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         match_strftime_metric_value_kwargs: dict
         for fmt_string in candidate_strings:
             if self.metric_value_kwargs:
-                match_strftime_metric_value_kwargs = {
+                match_strftime_metric_value_kwargs: dict = {
                     **self.metric_value_kwargs,
                     **{"strftime_format": fmt_string},
                 }
             else:
-                match_strftime_metric_value_kwargs = {
+                match_strftime_metric_value_kwargs: dict = {
                     "strftime_format": fmt_string,
                 }
 
-            metric_computation_result = self.get_metrics(
+            metric_computation_result: MetricComputationResult = self.get_metrics(
                 metric_name="column_values.match_strftime_format.unexpected_count",
                 metric_domain_kwargs=self.metric_domain_kwargs,
                 metric_value_kwargs=match_strftime_metric_value_kwargs,
@@ -222,9 +221,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             metric_values = metric_values[:, 0]
 
             match_strftime_unexpected_count: int = sum(metric_values)
-            format_string_success_ratios[fmt_string] = (
+            success_ratio: float = (
                 nonnull_count - match_strftime_unexpected_count
             ) / nonnull_count
+            format_string_success_ratios[fmt_string] = success_ratio
 
         best_fmt_string: Optional[str] = None
         best_ratio: float = 0.0
@@ -255,3 +255,4 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         build_parameter_container(
             parameter_container=parameter_container, parameter_values=parameter_values
         )
+        return parameter_container
