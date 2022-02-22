@@ -173,15 +173,22 @@ def pytest_generate_tests(metafunc):
                                 validator_with_data.execution_engine.active_batch_data,
                                 PandasBatchData,
                             ):
+                                major, minor, *_ = pd.__version__.split(".")
                                 if "pandas" in only_for:
                                     generate_test = True
                                 if (
-                                    "pandas_022" in only_for or "pandas_023" in only_for
-                                ) and int(pd.__version__.split(".")[1]) in [22, 23]:
+                                    (
+                                        "pandas_022" in only_for
+                                        or "pandas_023" in only_for
+                                    )
+                                    and major == "0"
+                                    and minor in ["22", "23"]
+                                ):
                                     generate_test = True
-                                if ("pandas>=24" in only_for) and int(
-                                    pd.__version__.split(".")[1]
-                                ) > 24:
+                                if ("pandas>=24" in only_for) and (
+                                    (major == "0" and int(minor) >= 24)
+                                    or int(major) >= 1
+                                ):
                                     generate_test = True
                             elif validator_with_data and isinstance(
                                 validator_with_data.execution_engine.active_batch_data,
