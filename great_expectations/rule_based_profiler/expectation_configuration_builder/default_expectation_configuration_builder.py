@@ -62,7 +62,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     def __init__(
         self,
         expectation_type: str,
-        condition: Optional[str],
+        condition: Optional[str] = None,
         meta: Optional[Dict[str, Any]] = None,
         success_on_last_run: Optional[bool] = None,
         **kwargs,
@@ -80,7 +80,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 """
             )
 
-        if not isinstance(condition, str):
+        if condition and (not isinstance(condition, str)):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{condition}" in "{self.__class__.__name__}" must be of type "string" \
 (value of type "{str(type(condition))}" was encountered).
@@ -217,23 +217,31 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             parameters=parameters,
         )
 
-        parsed_condition: ParseResults = self._parse_condition()
-        condition: bool = self._evaluate_condition(
-            parsed_condition=parsed_condition,
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
+        if self._condition:
+            parsed_condition: ParseResults = self._parse_condition()
+            condition: bool = self._evaluate_condition(
+                parsed_condition=parsed_condition,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
+            )
 
-        if condition:
+            if condition:
+                return ExpectationConfiguration(
+                    expectation_type=self._expectation_type,
+                    kwargs=expectation_kwargs,
+                    meta=meta,
+                    success_on_last_run=self._success_on_last_run,
+                )
+            else:
+                return None
+        else:
             return ExpectationConfiguration(
                 expectation_type=self._expectation_type,
                 kwargs=expectation_kwargs,
                 meta=meta,
                 success_on_last_run=self._success_on_last_run,
             )
-        else:
-            return None
 
     @property
     def condition(self) -> str:

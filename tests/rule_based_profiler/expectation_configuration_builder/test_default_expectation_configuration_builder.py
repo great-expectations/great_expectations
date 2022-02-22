@@ -175,18 +175,20 @@ def test_default_expectation_configuration_builder_alice_null_condition(
     condition = None
     max_user_id: int = 999999999999
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
-        DefaultExpectationConfigurationBuilder(
-            expectation_type="expect_column_values_to_be_between",
-            condition=condition,
-            min_value=value.value[0],
-            max_value=max_user_id,
-        )
-
-    assert (
-        str(e.value)
-        == 'Argument "None" in "DefaultExpectationConfigurationBuilder" must be of type "string" (value of type "<class \'NoneType\'>" was encountered).\n'
+    default_expectation_configuration_builder = DefaultExpectationConfigurationBuilder(
+        expectation_type="expect_column_values_to_be_between",
+        condition=condition,
+        min_value=value.value[0],
+        max_value=max_user_id,
     )
+
+    expectation_configuration: Optional[
+        ExpectationConfiguration
+    ] = default_expectation_configuration_builder._build_expectation_configuration(
+        domain=domain, parameters={domain.id: parameter_container}
+    )
+
+    assert expectation_configuration.kwargs["min_value"] == 397433
 
 
 def test_default_expectation_configuration_builder_alice_single_term_parameter_condition_true(

@@ -44,7 +44,7 @@ rules:
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_values_to_be_between
-        class_name: ConditionalExpectationConfigurationBuilder
+        class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         min_value: $parameter.my_min_user_id.value[0]
         max_value: $variables.max_user_id
