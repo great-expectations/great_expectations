@@ -579,7 +579,7 @@ def _get_dialect_type_module(
             and bigquery_types_tuple is not None
         ):
             return bigquery_types_tuple
-    except (TypeError, AttributeError, NameError):
+    except (TypeError, AttributeError):
         pass
 
     # Teradata types module
