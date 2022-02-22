@@ -9,6 +9,7 @@ variables:
     - 2.5e-1
     - 5.0e-1
     - 7.5e-1
+  allow_relative_error: linear
   num_bootstrap_samples: 9139
 
   # BatchRequest yielding thirty five (35) batches (January, 2018 -- November, 2020 trip data)
@@ -42,7 +43,7 @@ rules:
         metric_domain_kwargs: $domain.domain_kwargs
         metric_value_kwargs:
           quantiles: $variables.quantiles
-          allow_relative_error: linear
+          allow_relative_error: $variables.allow_relative_error
         false_positive_rate: $variables.false_positive_rate
         num_bootstrap_samples: $variables.num_bootstrap_samples
     expectation_configuration_builders:
@@ -50,7 +51,9 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        quantiles: $variables.quantiles
-        value_ranges: $parameter.quantile_value_ranges.value.value_range
+        quantile_ranges:
+          quantiles: $variables.quantiles
+          value_ranges: $parameter.quantile_value_ranges.value.value_range
+        allow_relative_error: $variables.allow_relative_error
         meta:
           profiler_details: $parameter.quantile_value_ranges.details
