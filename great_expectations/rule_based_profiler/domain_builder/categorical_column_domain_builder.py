@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.metric import BatchMetric
 from great_expectations.exceptions import ProfilerConfigurationError
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
@@ -68,7 +69,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             batch_request: BatchRequest to be optionally used to define batches
                 to consider for this domain builder.
             cardinality_limit: CardinalityMode to use when filtering columns.
-            exclude_columns: If provided, exclude from consideration.
+            exclude_columns: If provided, exclude columns from consideration.
         """
 
         super().__init__(
@@ -159,16 +160,33 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             Dict[str, List[Tuple[MetricConfiguration, Any]]]
         ] = []
 
+        candidate_column_names: List[str] = table_column_names.copy()
+
+        cardinality_limit: CardinalityMode = self.cardinality_limit
+
+        print("cardinality_limit", cardinality_limit)
+
         for metric_for_cardinality_check in metrics_for_cardinality_check:
-            computed_metrics_for_cardinality_check.append(
-                {
-                    column_name: [
-                        (metric_config, validator.get_metric(metric=metric_config))
-                        for metric_config in metric_config_batch_list
-                    ]
-                    for column_name, metric_config_batch_list in metric_for_cardinality_check.items()
-                }
-            )
+            for (
+                column_name,
+                metric_config_batch_list,
+            ) in metric_for_cardinality_check.items():
+                if column_name not in candidate_column_names:
+                    continue
+                else:
+                    column_inclusion: bool = True
+                    for metric_config in metric_config_batch_list:
+                        metric_value = validator.get_metric(metric=metric_config)
+                        if metric_config.metric_name == "column.distinct_values.count":
+                            if metric_value > cardinality_limit.max_unique_values:
+                                column_inclusion = False
+                        elif metric_config.metric_name == "column.unique_proportion":
+                            if metric_value > cardinality_limit.max_proportion_unique:
+                                column_inclusion = False
+                    if column_inclusion == False:
+                        candidate_column_names.remove(column_name)
+
+        print(candidate_column_names)
 
         print("breakpoint")
         # column_names_meeting_cardinality_limit: List[
@@ -189,7 +207,11 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         #     column_names_meeting_cardinality_limit
         # )
 
-        # return column_domains
+        column_domains: List[Domain] = build_domains_from_column_names(
+            candidate_column_names
+        )
+
+        return column_domains
 
     def _generate_metric_configurations_to_check_cardinality(
         self,
