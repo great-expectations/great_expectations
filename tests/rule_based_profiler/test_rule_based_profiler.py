@@ -16,6 +16,10 @@ from great_expectations.exceptions.exceptions import InvalidConfigError
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule import Rule
+from great_expectations.rule_based_profiler.rule_based_profiler import (
+    ReconciliationDirectives,
+    ReconciliationStrategy,
+)
 from great_expectations.rule_based_profiler.types import ParameterContainer
 from great_expectations.util import deep_filter_properties_iterable
 
@@ -425,9 +429,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
                     "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
-                    "my_arg": "$parameter.my_parameter.value[0]",
                     "my_one_arg": "$parameter.my_parameter.value[0]",
-                    "my_other_arg": "$parameter.my_parameter.value[1]",
                     "meta": {
                         "details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
@@ -468,7 +470,7 @@ def test_reconcile_profiler_rules_existing_rule_expectation_configuration_builde
     assert effective_rule_configs_actual == effective_rule_configs_expected
 
 
-def test_reconcile_profiler_rules_existing_rule_full_rule_override(
+def test_reconcile_profiler_rules_existing_rule_full_rule_override_nested_update(
     profiler_with_placeholder_args,
 ):
     rules: Dict[str, Dict[str, Any]] = {
@@ -552,8 +554,231 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override(
                     "column_A": "$domain.domain_kwargs.column_A",
                     "column_B": "$domain.domain_kwargs.column_B",
                     "my_arg": "$parameter.my_parameter.value[0]",
-                    "my_one_arg": "$parameter.my_parameter.value[0]",
                     "my_other_arg": "$parameter.my_parameter.value[1]",
+                    "my_one_arg": "$parameter.my_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+                {
+                    "expectation_type": "expect_column_min_to_be_between",
+                    "column": "$domain.domain_kwargs.column",
+                    "my_another_arg": "$parameter.my_other_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+            ],
+        },
+    ]
+
+    effective_rules: List[
+        Rule
+    ] = profiler_with_placeholder_args.reconcile_profiler_rules(
+        rules=rules,
+        reconciliation_directives=ReconciliationDirectives(
+            domain_builder=ReconciliationStrategy.UPDATE,
+            parameter_builder=ReconciliationStrategy.UPDATE,
+            expectation_configuration_builder=ReconciliationStrategy.NESTED_UPDATE,
+        ),
+    )
+
+    rule: Rule
+    effective_rule_configs_actual: dict = {
+        rule.name: rule.to_json_dict() for rule in effective_rules
+    }
+    deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
+
+    rule_config: dict
+    effective_rule_configs_expected: dict = {
+        rule_config["name"]: rule_config for rule_config in expected_rules
+    }
+
+    assert effective_rule_configs_actual == effective_rule_configs_expected
+
+
+def test_reconcile_profiler_rules_existing_rule_full_rule_override_replace(
+    profiler_with_placeholder_args,
+):
+    rules: Dict[str, Dict[str, Any]] = {
+        "rule_1": {
+            "domain_builder": {
+                "class_name": "ColumnDomainBuilder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder",
+            },
+            "parameter_builders": [
+                {
+                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                    "name": "my_other_parameter",
+                    "metric_name": "my_other_metric",
+                },
+            ],
+            "expectation_configuration_builders": [
+                {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "expectation_type": "expect_column_min_to_be_between",
+                    "column": "$domain.domain_kwargs.column",
+                    "my_another_arg": "$parameter.my_other_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+            ],
+        },
+    }
+
+    expected_rules: List[dict] = [
+        {
+            "name": "rule_1",
+            "domain_builder": {},
+            "parameter_builders": [
+                {
+                    "name": "my_other_parameter",
+                    "metric_name": "my_other_metric",
+                    "sampling_method": "bootstrap",
+                    "enforce_numeric_metric": True,
+                    "replace_nan_with_zero": True,
+                    "reduce_scalar_metric": True,
+                    "false_positive_rate": 0.05,
+                    "truncate_values": {},
+                },
+            ],
+            "expectation_configuration_builders": [
+                {
+                    "expectation_type": "expect_column_min_to_be_between",
+                    "column": "$domain.domain_kwargs.column",
+                    "my_another_arg": "$parameter.my_other_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+            ],
+        },
+    ]
+
+    effective_rules: List[
+        Rule
+    ] = profiler_with_placeholder_args.reconcile_profiler_rules(
+        rules=rules,
+        reconciliation_directives=ReconciliationDirectives(
+            domain_builder=ReconciliationStrategy.UPDATE,
+            parameter_builder=ReconciliationStrategy.REPLACE,
+            expectation_configuration_builder=ReconciliationStrategy.REPLACE,
+        ),
+    )
+
+    rule: Rule
+    effective_rule_configs_actual: dict = {
+        rule.name: rule.to_json_dict() for rule in effective_rules
+    }
+    deep_filter_properties_iterable(effective_rule_configs_actual, inplace=True)
+
+    rule_config: dict
+    effective_rule_configs_expected: dict = {
+        rule_config["name"]: rule_config for rule_config in expected_rules
+    }
+
+    assert effective_rule_configs_actual == effective_rule_configs_expected
+
+
+def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
+    profiler_with_placeholder_args,
+):
+    rules: Dict[str, Dict[str, Any]] = {
+        "rule_1": {
+            "domain_builder": {
+                "class_name": "ColumnDomainBuilder",
+                "module_name": "great_expectations.rule_based_profiler.domain_builder",
+            },
+            "parameter_builders": [
+                {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                    "name": "my_parameter",
+                    "metric_name": "my_metric",
+                },
+                {
+                    "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                    "name": "my_other_parameter",
+                    "metric_name": "my_other_metric",
+                },
+            ],
+            "expectation_configuration_builders": [
+                {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_one_arg": "$parameter.my_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_parameter_estimator": "$parameter.my_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+                {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                    "expectation_type": "expect_column_min_to_be_between",
+                    "column": "$domain.domain_kwargs.column",
+                    "my_another_arg": "$parameter.my_other_parameter.value[0]",
+                    "meta": {
+                        "details": {
+                            "my_other_parameter_estimator": "$parameter.my_other_parameter.details",
+                            "note": "Important remarks about estimation algorithm.",
+                        },
+                    },
+                },
+            ],
+        },
+    }
+
+    expected_rules: List[dict] = [
+        {
+            "name": "rule_1",
+            "domain_builder": {},
+            "parameter_builders": [
+                {
+                    "name": "my_parameter",
+                    "metric_name": "my_metric",
+                    "enforce_numeric_metric": False,
+                    "replace_nan_with_zero": False,
+                    "reduce_scalar_metric": True,
+                },
+                {
+                    "name": "my_other_parameter",
+                    "metric_name": "my_other_metric",
+                    "sampling_method": "bootstrap",
+                    "enforce_numeric_metric": True,
+                    "replace_nan_with_zero": True,
+                    "reduce_scalar_metric": True,
+                    "false_positive_rate": 0.05,
+                    "truncate_values": {},
+                },
+            ],
+            "expectation_configuration_builders": [
+                {
+                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    "column_A": "$domain.domain_kwargs.column_A",
+                    "column_B": "$domain.domain_kwargs.column_B",
+                    "my_one_arg": "$parameter.my_parameter.value[0]",
                     "meta": {
                         "details": {
                             "my_parameter_estimator": "$parameter.my_parameter.details",
@@ -678,7 +903,11 @@ def test_run_profiler_on_data_emits_appropriate_logging(
         data_asset_name="my_data_asset",
     )
 
-    with caplog.at_level(logging.INFO):
+    caplog.set_level(
+        logging.DEBUG,
+        logger="great_expectations.rule_based_profiler.rule_based_profiler",
+    )
+    with caplog.at_level(logging.DEBUG):
         RuleBasedProfiler.run_profiler_on_data(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,

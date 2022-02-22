@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.types import (
     Builder,
@@ -24,10 +24,12 @@ class DomainBuilder(Builder, ABC):
 
     exclude_field_names: Set[str] = {
         "data_context",
+        "batch",
     }
 
     def __init__(
         self,
+        batch: Optional[Batch] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
@@ -44,6 +46,8 @@ class DomainBuilder(Builder, ABC):
 
         self._data_context = data_context
         self._batch_request = batch_request
+
+        self._batch = batch
 
     def get_domains(
         self,
@@ -64,9 +68,23 @@ class DomainBuilder(Builder, ABC):
     def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
         return self._batch_request
 
+    @batch_request.setter
+    def batch_request(
+        self, value: Union[BatchRequest, RuntimeBatchRequest, dict]
+    ) -> None:
+        self._batch_request = value
+
     @property
     def data_context(self) -> "DataContext":  # noqa: F821
         return self._data_context
+
+    @property
+    def batch(self) -> Optional[Batch]:
+        return self._batch
+
+    @batch.setter
+    def batch(self, value: Batch) -> None:
+        self._batch = value
 
     @abstractmethod
     def _get_domains(
@@ -86,6 +104,7 @@ class DomainBuilder(Builder, ABC):
         return get_validator_using_batch_list_or_batch_request(
             purpose="domain_builder",
             data_context=self.data_context,
+            batch_list=[self.batch],
             batch_request=self.batch_request,
             domain=None,
             variables=variables,
@@ -98,6 +117,7 @@ class DomainBuilder(Builder, ABC):
     ) -> Optional[List[str]]:
         return get_batch_ids_from_batch_list_or_batch_request(
             data_context=self.data_context,
+            batch_list=[self.batch],
             batch_request=self.batch_request,
             domain=None,
             variables=variables,
