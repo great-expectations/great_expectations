@@ -71,6 +71,8 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     success_keys = (
         "min_value",
         "max_value",
+        "auto",
+        "profiler_config",
     )
     default_kwarg_values = {
         "min_value": None,
@@ -79,6 +81,47 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
+        "auto": False,
+        "profiler_config": {
+            "name": "expect_table_row_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
+            "config_version": 1.0,
+            "variables": {
+                "false_positive_rate": 0.05,
+            },
+            "rules": {
+                "row_count_range_rule": {
+                    "domain_builder": {
+                        "class_name": "TableDomainBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                    },
+                    "parameter_builders": [
+                        {
+                            "name": "row_count_range",
+                            "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                            "metric_name": "table.row_count",
+                            "false_positive_rate": "$variables.false_positive_rate",
+                            "truncate_values": {
+                                "lower_bound": 0,
+                            },
+                            "round_decimals": 0,
+                        }
+                    ],
+                    "expectation_configuration_builders": [
+                        {
+                            "expectation_type": "expect_table_row_count_to_be_between",
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                            "meta": {
+                                "profiler_details": "$parameter.row_count_range.details",
+                            },
+                            "max_value": "$parameter.row_count_range.value.value_range[1]",
+                            "min_value": "$parameter.row_count_range.value.value_range[0]",
+                        }
+                    ],
+                }
+            },
+        },
     }
     args_keys = (
         "min_value",

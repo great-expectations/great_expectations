@@ -91,6 +91,8 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "allow_cross_type_comparisons",
         "mostly",
         "parse_strings_as_datetimes",
+        "auto",
+        "profiler_config",
     )
 
     default_kwarg_values = {
@@ -107,6 +109,60 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
+        "auto": False,
+        "profiler_config": {
+            "name": "expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+            "config_version": 1.0,
+            "variables": {
+                "mostly": 1.0,
+                "strict_min": False,
+                "strict_max": False,
+            },
+            "rules": {
+                "default_column_values_between_rule": {
+                    "domain_builder": {
+                        "class_name": "ColumnDomainBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                    },
+                    "parameter_builders": [
+                        {
+                            "name": "my_min_estimator",
+                            "class_name": "MetricMultiBatchParameterBuilder",
+                            "metric_name": "column.min",
+                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                            "enforce_numeric_metric": True,
+                            "replace_nan_with_zero": True,
+                        },
+                        {
+                            "name": "my_max_estimator",
+                            "class_name": "MetricMultiBatchParameterBuilder",
+                            "metric_name": "column.max",
+                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                            "enforce_numeric_metric": True,
+                            "replace_nan_with_zero": True,
+                        },
+                    ],
+                    "expectation_configuration_builders": [
+                        {
+                            "expectation_type": "expect_column_values_to_be_between",
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "column": "$domain.domain_kwargs.column",
+                            "min_value": "$parameter.my_min_estimator.value[0]",
+                            "max_value": "$parameter.my_max_estimator.value[0]",
+                            "mostly": "$variables.mostly",
+                            "strict_min": "$variables.strict_min",
+                            "strict_max": "$variables.strict_max",
+                            "meta": {
+                                "details": {
+                                    "my_min_estimator": "$parameter.my_min_estimator.details",
+                                    "my_max_estimator": "$parameter.my_max_estimator.details",
+                                },
+                            },
+                        },
+                    ],
+                },
+            },
+        },
     }
     args_keys = (
         "column",

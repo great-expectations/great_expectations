@@ -131,16 +131,70 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     success_keys = (
         "quantile_ranges",
         "allow_relative_error",
+        "auto",
+        "profiler_config",
     )
     default_kwarg_values = {
         "row_condition": None,
-        "allow_relative_error": None,
         "condition_parser": None,
         "quantile_ranges": None,
         "result_format": "BASIC",
         "allow_relative_error": False,
         "include_config": True,
         "catch_exceptions": False,
+        "meta": None,
+        "auto": False,
+        "profiler_config": {
+            "name": "expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+            "config_version": 1.0,
+            "variables": {
+                "quantiles": [0.25, 0.5, 0.75],
+                "allow_relative_error": "linear",
+                "num_bootstrap_samples": 9139,
+                "false_positive_rate": 0.05,
+                "round_decimals": 1,
+            },
+            "rules": {
+                "column_quantiles_rule": {
+                    "domain_builder": {
+                        "class_name": "ColumnDomainBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                    },
+                    "parameter_builders": [
+                        {
+                            "name": "quantile_value_ranges",
+                            "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                            "metric_name": "column.quantile_values",
+                            "metric_domain_kwargs": "$domain.domain_kwargs",
+                            "metric_value_kwargs": {
+                                "quantiles": "$variables.quantiles",
+                                "allow_relative_error": "$variables.allow_relative_error",
+                            },
+                            "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                            "false_positive_rate": "$variables.false_positive_rate",
+                            "round_decimals": "$variables.round_decimals",
+                        }
+                    ],
+                    "expectation_configuration_builders": [
+                        {
+                            "expectation_type": "expect_column_quantile_values_to_be_between",
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                            "column": "$domain.domain_kwargs.column",
+                            "quantile_ranges": {
+                                "quantiles": "$variables.quantiles",
+                                "value_ranges": "$parameter.quantile_value_ranges.value.value_range",
+                            },
+                            "allow_relative_error": "$variables.allow_relative_error",
+                            "meta": {
+                                "profiler_details": "$parameter.quantile_value_ranges.details"
+                            },
+                        }
+                    ],
+                }
+            },
+        },
     }
     args_keys = (
         "column",
@@ -159,6 +213,14 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
             assert isinstance(
                 configuration.kwargs["quantile_ranges"], dict
             ), "quantile_ranges should be a dictionary"
+
+            if isinstance(
+                configuration.kwargs["quantile_ranges"]["value_ranges"], np.ndarray
+            ):
+                configuration.kwargs["quantile_ranges"][
+                    "value_ranges"
+                ] = configuration.kwargs["quantile_ranges"]["value_ranges"].tolist()
+
             assert all(
                 [
                     True if None in x or x == sorted(x) else False
