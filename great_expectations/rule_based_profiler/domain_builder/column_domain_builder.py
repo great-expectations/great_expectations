@@ -34,6 +34,11 @@ class ColumnDomainBuilder(DomainBuilder):
     def domain_type(self) -> Union[str, MetricDomainTypes]:
         return MetricDomainTypes.COLUMN
 
+    """
+    All DomainBuilder classes, whose "domain_type" property equals "MetricDomainTypes.COLUMN", must extend present class
+    (ColumnDomainBuilder) in order to provide full getter/setter accessor for "column_names" property (as override).
+    """
+
     @property
     def column_names(self) -> List[str]:
         return self._column_names

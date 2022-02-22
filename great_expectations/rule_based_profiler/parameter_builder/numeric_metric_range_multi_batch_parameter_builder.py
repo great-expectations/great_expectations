@@ -145,6 +145,10 @@ detected.
 
         self._truncate_values = truncate_values
 
+    """
+    Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
+    """
+
     @property
     def metric_name(self) -> str:
         return self._metric_name

@@ -123,6 +123,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         self._candidate_strings = candidate_strings
 
+    """
+    Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
+    """
+
     @property
     def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
         return self._metric_domain_kwargs
