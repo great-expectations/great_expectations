@@ -100,6 +100,10 @@ class ParameterBuilder(Builder, ABC):
     def name(self) -> str:
         return self._name
 
+    """
+    Full getter/setter accessors for "batch_request" and "batch_list" are for configuring ParameterBuilder dynamically.
+    """
+
     @property
     def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
         return self._batch_request
@@ -111,16 +115,16 @@ class ParameterBuilder(Builder, ABC):
         self._batch_request = value
 
     @property
-    def data_context(self) -> "DataContext":  # noqa: F821
-        return self._data_context
-
-    @property
     def batch_list(self) -> Optional[List[Batch]]:
         return self._batch_list
 
     @batch_list.setter
     def batch_list(self, value: List[Batch]) -> None:
         self._batch_list = value
+
+    @property
+    def data_context(self) -> "DataContext":  # noqa: F821
+        return self._data_context
 
     @abstractmethod
     def _build_parameters(

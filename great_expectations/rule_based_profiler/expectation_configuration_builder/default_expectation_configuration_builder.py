@@ -37,7 +37,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         if not isinstance(meta, dict):
             raise ge_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{meta}" in "{self.__class__.__name__}" must be of type "dictionary" \
-(value of type "{str(type())}" was encountered).
+(value of type "{str(type(meta))}" was encountered).
 """
             )
 
