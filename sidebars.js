@@ -372,18 +372,19 @@ module.exports = {
           items: [
             'terms/action',
             'terms/custom_expectation',
+            'terms/checkpoint',
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
             'terms/data_docs',
-            'terms/checkpoint',
             'terms/execution_engine',
+            'terms/expectation',
+            'terms/expectation_suite',
             'terms/metric',
             'terms/plugin',
             'terms/profiler',
-            'terms/expectation',
-            'terms/expectation_suite',
             'terms/plugin',
+            'terms/renderer',
             'terms/supporting_resource',
             'terms/validation_result'
           ]
