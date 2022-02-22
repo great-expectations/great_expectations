@@ -33,9 +33,28 @@ Data Connectors provide Batches to <TechnicalTag relative="../" tag="expectation
 
 <ConnectHeader/>
 
-The only time when you will need to explicitly work with a Data Connector is when you specify one in the configuration of a Datasource.  There are several types of Data Connectors in Great Expectations, such as the `ConfiguredAssetFilesystemDataConnector`, `DatabaseDataConnector`, and `RuntimeDataConnector`.
+The only time when you will need to explicitly work with a Data Connector is when you specify one in the configuration of a Datasource.
 
 Each Data Connector holds configuration for connecting to a different type of external data source, and can connect to and inspect that data source.
+
+Great Expectations provides a variety of Data Connectors, depending on the type of external data source and your specific access pattern. The simplest type is the RuntimeDataConnector, which can be used to connect to in-memory data, such as a Pandas or Spark dataframe. The remaining Data Connectors can be categorized as being either an SQL Data Connector (for databases) or File Path Data Connector (for accessing filesystem-like data, which includes files on disk, but also S3 and GCS). Furthermore, these Data Connectors are either Inferred, and are capable of introspecting their external data source and returning any available Data Assets, or Configured, and only connect to Data Assets specified in their configuration.
+
+| Class Name | FilePath/SQL | Configured/Inferred | Datasource Backend | 
+| --- | --- | --- | --- |
+| RuntimeDataConnector | N/A | N/A | N/A |
+| ConfiguredAssetAzureDataConnector | FilePath | Configured | Microsoft Azure |
+| InferredAssetAzureDataConnector | FilePath | Inferred | Microsoft Azure |
+| ConfiguredAssetDBFSDataConnector | FilePath | Configured | Databricks |
+| InferredAssetDBFSDataConnector | FilePath | Inferred | Databricks |
+| ConfiguredAssetFilesystemDataConnector | FilePath | Configured | Arbitrary Filesystem |
+| InferredAssetFilesystemDataConnector | FilePath | Inferred | Arbitrary Filesystem |
+| ConfiguredAssetGCSDataConnector | FilePath | Configured | Google Cloud Storage |
+| InferredAssetGCSDataConnector | FilePath | Inferred | Google Cloud Storage |
+| ConfiguredAssetS3DataConnector | FilePath | Configured | Amazon S3 |
+| InferredAssetS3DataConnector | FilePath | Inferred | Amazon S3 |
+| ConfiguredAssetSqlDataConnector | SQL | Configured | Database |
+| InferredAssetSqlDataConnector | SQL | Inferred | Database |
+
 
 **For example**, a `ConfiguredAssetFilesystemDataConnector` could be configured with the root directory for files on a filesystem or bucket and prefix used to access files from a cloud storage environment. In contrast, the simplest `RuntimeDataConnector` may simply store lookup information about Data Assets to facilitate running in a pipeline where you already have a DataFrame in memory or available in a cluster.
 
