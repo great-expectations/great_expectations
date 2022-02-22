@@ -93,10 +93,7 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
 
     def _parse_condition(self) -> ParseResults:
         """
-        Using the grammer defined by "condition", provides the parsing of collection (list, dictionary) access syntax:
-        List: variable[index: int]
-        Dictionary: variable[key: str]
-        Nested List/Dictionary: variable[index_0: int][key_0: str][index_1: int][key_1: str][key_2: str][index_2: int]...
+        Using the grammer defined by "condition", provides the parsing
 
         Applicability: To be used as part of configuration (e.g., YAML-based files or text strings).
         Extendability: Readily extensible to include "slice" and other standard accessors (as long as no dynamic elements).
@@ -198,7 +195,8 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> ExpectationConfiguration:
+    ) -> Union[ExpectationConfiguration, None]:
+        """Returns either and ExpectationConfiguration object or None depending on evaluation of condition"""
         parameter_name: str
         fully_qualified_parameter_name: str
         expectation_kwargs: Dict[str, Any] = {
