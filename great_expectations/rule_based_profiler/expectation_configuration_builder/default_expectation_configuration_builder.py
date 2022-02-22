@@ -231,7 +231,6 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                     expectation_type=self._expectation_type,
                     kwargs=expectation_kwargs,
                     meta=meta,
-                    success_on_last_run=self._success_on_last_run,
                 )
             else:
                 return None
@@ -240,7 +239,6 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                 expectation_type=self._expectation_type,
                 kwargs=expectation_kwargs,
                 meta=meta,
-                success_on_last_run=self._success_on_last_run,
             )
 
     @property
