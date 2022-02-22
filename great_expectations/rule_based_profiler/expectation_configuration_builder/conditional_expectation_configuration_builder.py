@@ -7,6 +7,7 @@ from pyparsing import (
     ParseResults,
     Suppress,
     Word,
+    ZeroOrMore,
     alphanums,
     alphas,
     nums,
@@ -29,13 +30,17 @@ integer = Word(nums).setParseAction(lambda t: int(t[0]))
 var = Combine(Word("$" + alphas, alphanums + "_.") + ppOptional("[" + integer + "]"))
 comparison_operator = oneOf(">= <= != > < ==")
 bitwise_operator = oneOf("~ & |")
+parentheses = oneOf("( )")
 
-condition_parser = (
-    var
+condition_term = (
+    ppOptional(parentheses)
+    + var
     + comparison_operator
     + integer
-    + ppOptional(bitwise_operator + var + comparison_operator + integer)
+    + ppOptional(parentheses)
 )
+
+condition_parser = condition_term + ZeroOrMore(bitwise_operator + condition_term)
 
 term_parser = integer + comparison_operator + integer
 
@@ -102,7 +107,8 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
 
         try:
             return condition_parser.parseString(self._condition)
-        except ParseException:
+        except ParseException as e:
+            print(str(e))
             raise ExpectationConfigurationConditionParserError(
                 f'Unable to parse Expectation Configuration Condition: "{self._condition}".'
             )
@@ -118,7 +124,14 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
         token: str
         boolean_condition: List[bool, str] = []
         term_count: int = 1
+        parentheses_count: int = 0
         for i, token in enumerate(parsed_condition):
+            try:
+                parentheses.parseString(token)
+                parentheses_count += 1
+            except:
+                parentheses_count += 0
+
             if isinstance(token, str) and token.startswith("$"):
                 substituted_parameters_condition[i]: Dict[
                     str, Any
@@ -147,7 +160,8 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
                 except:
                     pass
 
-        return eval("".join([str(t) for t in boolean_condition]))
+        boolean_str: str = "".join([str(t) for t in boolean_condition])
+        return eval(boolean_str)
 
     def _build_expectation_configuration(
         self,
