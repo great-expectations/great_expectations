@@ -280,7 +280,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> bool:
         """Evaluates the parsed condition to True/False and returns the boolean result"""
-        substituted_terms: ParseResults = self._substitute_parameters_and_variables(
+        substituted_term_list: ParseResults = self._substitute_parameters_and_variables(
             term_list=parsed_condition,
             domain=domain,
             variables=variables,
@@ -288,7 +288,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         )
 
         bitwise_list: ParseResults = self._build_bitwise_list(
-            substituted_terms=substituted_terms
+            substituted_term_list=substituted_term_list
         )
         boolean_result: bool = self._build_boolean_result(bitwise_list=bitwise_list)
 
