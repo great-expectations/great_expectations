@@ -371,6 +371,7 @@ module.exports = {
           label: 'Technical Terms',
           items: [
             'terms/action',
+            'terms/custom_expectation',
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
