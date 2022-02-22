@@ -62,60 +62,44 @@ class UsageStatisticsHandler:
         # the risk of cyclic import issues. If these anonymizers have been imported at any earlier point
         # in the program's lifetime, retrieval of the import will be O(1) and not impact performance.
 
+        from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
+            BatchAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
+            BatchRequestAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
+            CheckpointRunAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
+            DataDocsSiteAnonymizer,
+        )
         from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
             DatasourceAnonymizer,
         )
-
-        self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
-
         from great_expectations.core.usage_statistics.anonymizers.execution_engine_anonymizer import (
             ExecutionEngineAnonymizer,
         )
-
-        self._execution_engine_anonymizer = ExecutionEngineAnonymizer(data_context_id)
-
+        from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
+            ExpectationSuiteAnonymizer,
+        )
         from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
             StoreAnonymizer,
         )
-
-        self._store_anonymizer = StoreAnonymizer(data_context_id)
-
         from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
             ValidationOperatorAnonymizer,
         )
 
+        self._datasource_anonymizer = DatasourceAnonymizer(data_context_id)
+        self._execution_engine_anonymizer = ExecutionEngineAnonymizer(data_context_id)
+        self._store_anonymizer = StoreAnonymizer(data_context_id)
         self._validation_operator_anonymizer = ValidationOperatorAnonymizer(
             data_context_id
         )
-
-        from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
-            DataDocsSiteAnonymizer,
-        )
-
         self._data_docs_sites_anonymizer = DataDocsSiteAnonymizer(data_context_id)
-
-        from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
-            BatchRequestAnonymizer,
-        )
-
         self._batch_request_anonymizer = BatchRequestAnonymizer(data_context_id)
-
-        from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
-            BatchAnonymizer,
-        )
-
         self._batch_anonymizer = BatchAnonymizer(data_context_id)
-
-        from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
-            ExpectationSuiteAnonymizer,
-        )
-
         self._expectation_suite_anonymizer = ExpectationSuiteAnonymizer(data_context_id)
-
-        from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
-            CheckpointRunAnonymizer,
-        )
-
         self._checkpoint_run_anonymizer = CheckpointRunAnonymizer(data_context_id)
 
         try:
