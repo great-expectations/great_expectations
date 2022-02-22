@@ -68,15 +68,15 @@ class DomainBuilder(Builder, ABC):
     def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
         return self._batch_request
 
+    """
+    Full getter/setter accessors for "batch_request" and "batch" are for configuring DomainBuilder dynamically.
+    """
+
     @batch_request.setter
     def batch_request(
         self, value: Union[BatchRequest, RuntimeBatchRequest, dict]
     ) -> None:
         self._batch_request = value
-
-    @property
-    def data_context(self) -> "DataContext":  # noqa: F821
-        return self._data_context
 
     @property
     def batch(self) -> Optional[Batch]:
@@ -85,6 +85,10 @@ class DomainBuilder(Builder, ABC):
     @batch.setter
     def batch(self, value: Batch) -> None:
         self._batch = value
+
+    @property
+    def data_context(self) -> "DataContext":  # noqa: F821
+        return self._data_context
 
     @abstractmethod
     def _get_domains(
