@@ -445,7 +445,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         existing_rules: Dict[str, Rule],
         rule_name: str,
         rule_config: dict,
-        reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
+        reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
     ) -> Dict[str, Any]:
         """
         A "rule configuration" reconciliation is the process of combining the configuration of a single candidate
@@ -619,28 +619,21 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 parameter_builder_name
             ] = serialized_config
 
+        parameter_builder_configs_override: Dict[str, dict] = {
+            parameter_builder_config["name"]: parameter_builder_config
+            for parameter_builder_config in parameter_builder_configs
+        }
         if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
             effective_parameter_builder_configs = nested_update(
                 effective_parameter_builder_configs,
-                {
-                    parameter_builder_config[
-                        "expectation_type"
-                    ]: parameter_builder_config
-                    for parameter_builder_config in parameter_builder_configs
-                },
+                parameter_builder_configs_override,
                 dedup=True,
             )
         elif reconciliation_strategy == ReconciliationStrategy.REPLACE:
-            effective_parameter_builder_configs = {
-                parameter_builder_config["name"]: parameter_builder_config
-                for parameter_builder_config in parameter_builder_configs
-            }
+            effective_parameter_builder_configs = parameter_builder_configs_override
         elif reconciliation_strategy == ReconciliationStrategy.UPDATE:
             effective_parameter_builder_configs.update(
-                {
-                    parameter_builder_config["name"]: parameter_builder_config
-                    for parameter_builder_config in parameter_builder_configs
-                }
+                parameter_builder_configs_override
             )
 
         if not effective_parameter_builder_configs:
@@ -712,32 +705,25 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 expectation_configuration_builder_name
             ] = serialized_config
 
+        expectation_configuration_builder_configs_override: Dict[str, dict] = {
+            expectation_configuration_builder_config[
+                "expectation_type"
+            ]: expectation_configuration_builder_config
+            for expectation_configuration_builder_config in expectation_configuration_builder_configs
+        }
         if reconciliation_strategy == ReconciliationStrategy.NESTED_UPDATE:
             effective_expectation_configuration_builder_configs = nested_update(
                 effective_expectation_configuration_builder_configs,
-                {
-                    expectation_configuration_builder_config[
-                        "expectation_type"
-                    ]: expectation_configuration_builder_config
-                    for expectation_configuration_builder_config in expectation_configuration_builder_configs
-                },
+                expectation_configuration_builder_configs_override,
                 dedup=True,
             )
         elif reconciliation_strategy == ReconciliationStrategy.REPLACE:
-            effective_expectation_configuration_builder_configs = {
-                expectation_configuration_builder_config[
-                    "expectation_type"
-                ]: expectation_configuration_builder_config
-                for expectation_configuration_builder_config in expectation_configuration_builder_configs
-            }
+            effective_expectation_configuration_builder_configs = (
+                expectation_configuration_builder_configs_override
+            )
         elif reconciliation_strategy == ReconciliationStrategy.UPDATE:
             effective_expectation_configuration_builder_configs.update(
-                {
-                    expectation_configuration_builder_config[
-                        "expectation_type"
-                    ]: expectation_configuration_builder_config
-                    for expectation_configuration_builder_config in expectation_configuration_builder_configs
-                }
+                expectation_configuration_builder_configs_override
             )
 
         if not effective_expectation_configuration_builder_configs:

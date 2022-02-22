@@ -132,7 +132,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         return self._metric_value_kwargs
 
     @metric_value_kwargs.setter
-    def metric_value_kwargs(self, value: Optional[Union[str, dict]]):
+    def metric_value_kwargs(self, value: Optional[Union[str, dict]]) -> None:
         self._metric_value_kwargs = value
 
     @property

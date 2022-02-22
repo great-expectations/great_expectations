@@ -21,7 +21,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         self,
         data_context: DataContext,
         batch: Optional[Batch] = None,
-        batch_request: Union[BatchRequest, dict] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
