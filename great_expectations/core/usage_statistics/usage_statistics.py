@@ -61,15 +61,32 @@ class UsageStatisticsHandler:
         # As usage stats are central to many core GE features, dynamically importing at runtime reduces
         # the risk of cyclic import issues. If these anonymizers have been imported at any earlier point
         # in the program's lifetime, retrieval of the import will be O(1) and not impact performance.
-        from great_expectations.core.usage_statistics.anonymizers import (
+
+        from great_expectations.core.usage_statistics.anonymizers.batch_anonymizer import (
             BatchAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
             BatchRequestAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
             CheckpointRunAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.data_docs_site_anonymizer import (
             DataDocsSiteAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
             DatasourceAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.execution_engine_anonymizer import (
             ExecutionEngineAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.expectation_suite_anonymizer import (
             ExpectationSuiteAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
             StoreAnonymizer,
+        )
+        from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
             ValidationOperatorAnonymizer,
         )
 
