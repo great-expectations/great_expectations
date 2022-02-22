@@ -25,9 +25,9 @@ A Data Connector facilitates access to an external source data system, such as a
 
 ### Relationship to other objects
 
-A Data Connector is an integral element of a Datasource.  When a Batch Request is passed to a Datasource, the Datasource's <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" /> will pass the <TechnicalTag relative="../" tag="batch_request" text="Batch Request" /> to its Data Connector, which will then query the source data system it is configured for.  This will result in the return of a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
+A Data Connector is an integral element of a Datasource.  When a <TechnicalTag relative="../" tag="batch_request" text="Batch Request" /> is passed to a Datasource, the Datasource will use its Data Connector to build a **Batch Spec**, which the Datasource's <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" /> will use to return of a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
 
-Data Connectors provide Batches to <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, <TechnicalTag relative="../" tag="profiler" text="Profilers" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.
+Data Connectors work alongside Execution Engines to provide Batches to <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, <TechnicalTag relative="../" tag="profiler" text="Profilers" />, and <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" />.
 
 ## Use cases
 
@@ -136,6 +136,8 @@ like `some_bucket/(\d{4})/(\d{2})/(\d{2})/log_file_\d+.txt.gz`.
 
 
 The Wildcard Data Reference is how Data Connectors deal with that problem, making it easy to search external stores and understand data.
+
+When defining a Data Connector for your Datasource, you may include wildcard Data References as part of the configuration for the Datasource.  This is done by including wildcards in the default regex defined in the Data Connector's portion of the Datasource's configuration.  Typically, you will see this used for `InferredAssetFilesystemDataConnector`s in Datasources connecting to a filesystem.  For an example of this, please see [our guide on how to connect to data on a filesystem using Pandas](../guides/connecting_to_your_data/filesystem/pandas.md).
 
 Under the hood, when processing a Batch Request, the Data Connector may find multiple matching Batches. Generally, the Data Connector will simply return a list of all matching Batch Identifiers.
 
