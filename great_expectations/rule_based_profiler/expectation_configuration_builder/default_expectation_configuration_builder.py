@@ -190,26 +190,73 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 
     def _build_bitwise_list(
         self,
-        substituted_terms: Union[str, list],
+        substituted_term_list: Union[str, ParseResults],
     ) -> ParseResults:
-        """Recursively build bitwise list from substituted terms"""
+        """Recursively build bitwise list from substituted terms
+
+        Given a list of substituted terms created by parsing a provided condition and substituting parameters and
+        variables, recursively build bitwise condition ParseResults object, regardless of depth of groupings.
+
+        Example:
+            substituted_term_list = [[
+                                        [
+                                            [999999999999, '>', 0],
+                                            '&',
+                                            [42, '==', 42]
+                                        ],
+                                        '|',
+                                        [397433, '<', 0]
+                                     ]]
+
+            This method will then take that term list and recursively evaluate the terms between the top-level bitwise
+            conditions and return this ParseResults object:
+                return [True, '&' True]
+
+        Args:
+            substituted_term_list (Union[str, ParseResults]): the ParseResults object returned from
+                                                              self._substitute_parameters_and_variables
+
+        Returns:
+            bool: a boolean representing the evaluation of the entire provided condition.
+
+        """
         idx: int
         token: Union[str, list]
-        for idx, token in enumerate(substituted_terms):
+        for idx, token in enumerate(substituted_term_list):
             if (not any([isinstance(t, ParseResults) for t in token])) and len(
                 token
             ) > 1:
-                substituted_terms[idx] = eval("".join([str(t) for t in token]))
+                substituted_term_list[idx] = eval("".join([str(t) for t in token]))
             elif isinstance(token, ParseResults):
-                self._build_bitwise_list(substituted_terms=token)
+                self._build_bitwise_list(substituted_term_list=token)
 
-        return substituted_terms
+        return substituted_term_list
 
     def _build_boolean_result(
         self,
         bitwise_list: List[Union[bool, str]],
     ) -> bool:
-        """Recursively build boolean result from bitwise list"""
+        """Recursively build boolean result from bitwise list
+
+        Given a list of bitwise terms created by parsing a provided condition, substituting parameters and
+        variables, and building bitwise condition ParseResults object, recursively evaluate remaining conditions and
+        return boolean result of condition.
+
+        Example:
+            bitwise_list = [True, '&' True]
+
+            This method will then take that term list and recursively evaluate the remaining and return a boolean result
+            for the provided condition:
+                return True
+
+        Args:
+            bitwise_list (List[Union[bool, str]]): the ParseResults object returned from
+                                                   self._substitute_parameters_and_variables
+
+        Returns:
+            ParseResults: a ParseResults object with all terms evaluated except for bitwise operations.
+
+        """
         idx: int
         token: Union[str, list]
         for idx, token in enumerate(bitwise_list):
