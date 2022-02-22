@@ -217,7 +217,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                                                               self._substitute_parameters_and_variables
 
         Returns:
-            bool: a boolean representing the evaluation of the entire provided condition.
+            ParseResults: a ParseResults object with all terms evaluated except for bitwise operations.
 
         """
         idx: int
@@ -254,7 +254,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
                                                    self._substitute_parameters_and_variables
 
         Returns:
-            ParseResults: a ParseResults object with all terms evaluated except for bitwise operations.
+            bool: a boolean representing the evaluation of the entire provided condition.
 
         """
         idx: int
