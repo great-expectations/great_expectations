@@ -121,6 +121,42 @@ rules:
             format: markdown
             content:
               - "### This expectation confirms that fields ending in _datetime are of the format detected by parameter builder SimpleDateFormatStringParameterBuilder"
+  rule_for_regex:
+    domain_builder:
+      class_name: SimpleColumnSuffixDomainBuilder
+      # BatchRequest yielding exactly one batch (March, 2019 trip data)
+      batch_request:
+        datasource_name: taxi_pandas
+        data_connector_name: monthly
+        data_asset_name: my_reports
+        data_connector_query:
+          index: -1
+      column_name_suffixes:
+        - ID
+    parameter_builders:
+      - name: my_regex
+        class_name: RegexPatternStringParameterBuilder
+        module_name: great_expectations.rule_based_profiler.parameter_builder
+        batch_request: $variables.jan_feb_2019_monthly_tripdata_batch_request
+        # Note this parameter builder computes parameters only on the provided domain:
+        metric_domain_kwargs:
+          column: VendorID
+        # candidate regexes are loaded as string, and need to be fully delimited.
+        candidate_regexes:
+          - "^\\d{1}$"
+          - "^\\d{2}$"
+        threshold: 0.9
+    expectation_configuration_builders:
+      - expectation_type: expect_column_values_to_match_regex
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        regex: $parameter.my_regex
+        meta:
+          notes:
+            format: markdown
+            content:
+              - "### This expectation confirms that fields ending in ID are of the format detected by parameter builder RegexPatternStringParameterBuilder"
   my_rule_for_pickup_location_id:
     domain_builder:
       class_name: CategoricalColumnDomainBuilder
