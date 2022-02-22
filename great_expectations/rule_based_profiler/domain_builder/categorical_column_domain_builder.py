@@ -129,7 +129,8 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         # Here we use a single get_metric call to get column names to build the
         # rest of the metrics.
         table_column_names: List[str] = self._get_table_column_names_from_first_batch(
-            variables=variables
+            validator=validator,
+            batch_ids=batch_ids,
         )
 
         metrics_for_cardinality_check: List[
@@ -138,58 +139,11 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             batch_ids=batch_ids, column_names=table_column_names
         )
 
-        # TODO AJB 20220218: Remove loops and refactor into single call to validator.get_metrics()
-        #  by first building up MetricConfigurations to compute see GREAT-584
-        computed_metrics_for_cardinality_check: List[
-            Dict[str, List[Tuple[MetricConfiguration, Any]]]
-        ] = []
-
-        candidate_column_names: List[str] = table_column_names.copy()
-
-        cardinality_limit: CardinalityMode = self.cardinality_limit
-
-        print("cardinality_limit", cardinality_limit)
-
-        for metric_for_cardinality_check in metrics_for_cardinality_check:
-            for (
-                column_name,
-                metric_config_batch_list,
-            ) in metric_for_cardinality_check.items():
-                if column_name not in candidate_column_names:
-                    continue
-                else:
-                    column_inclusion: bool = True
-                    for metric_config in metric_config_batch_list:
-                        metric_value = validator.get_metric(metric=metric_config)
-                        if metric_config.metric_name == "column.distinct_values.count":
-                            if metric_value > cardinality_limit.max_unique_values:
-                                column_inclusion = False
-                        elif metric_config.metric_name == "column.unique_proportion":
-                            if metric_value > cardinality_limit.max_proportion_unique:
-                                column_inclusion = False
-                    if column_inclusion == False:
-                        candidate_column_names.remove(column_name)
-
-        print(candidate_column_names)
-
-        print("breakpoint")
-        # column_names_meeting_cardinality_limit: List[
-        #     str
-        # ] = self._columns_meeting_cardinality_limit(
-        #     computed_metrics_for_cardinality_check
-        # )
-
-        # column_names_meeting_cardinality_limit: List[str] = [
-        #     column_name
-        #     for column_name in table_column_names
-        #     if self._column_cardinality_within_limit(
-        #         column=column_name, variables=variables
-        #     )
-        # ]
-
-        # column_domains: List[Domain] = build_domains_from_column_names(
-        #     column_names_meeting_cardinality_limit
-        # )
+        candidate_column_names: List[str] = self._columns_meeting_cardinality_limit(
+            validator=validator,
+            table_column_names=table_column_names,
+            metrics_for_cardinality_check=metrics_for_cardinality_check,
+        )
 
         column_domains: List[Domain] = build_domains_from_column_names(
             candidate_column_names
@@ -199,18 +153,18 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
 
     def _get_table_column_names_from_first_batch(
         self,
-        variables: Optional[ParameterContainer] = None,
+        validator: Validator,
+        batch_ids: List[str],
     ):
         """Retrieve table column names from the first loaded batch.
 
         Args:
-            variables: Optional passthrough variables
+            validator: Validator to use in retrieving columns.
+            batch_ids: Batches used in this profiler rule.
 
         Returns:
             List of column names from the first loaded batch.
         """
-
-        batch_ids: List[str] = self._get_batch_ids(variables=variables)
 
         if len(batch_ids) == 0:
             raise ProfilerConfigurationError(
@@ -219,7 +173,6 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
 
         first_batch_id: str = batch_ids[0]
 
-        validator: Validator = self.get_validator(variables=variables)
         table_column_names: List[str] = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
@@ -289,53 +242,50 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         return metric_configurations
 
     def _columns_meeting_cardinality_limit(
-        self, computed_metrics: List[Tuple[MetricConfiguration, Any]]
-    ) -> List[str]:
-
-        for computed_metric in computed_metrics:
-            pass
-
-        # TODO AJB 20220218: Implement, incl params
-        raise NotImplementedError
-
-    def _column_cardinality_within_limit(
         self,
-        column: str,
-        variables: Optional[ParameterContainer] = None,
-    ) -> bool:
+        validator: Validator,
+        table_column_names: List[str],
+        metrics_for_cardinality_check: List[Dict[str, List[MetricConfiguration]]],
+    ) -> List[str]:
+        """
 
-        validator: Validator = self.get_validator(variables=variables)
+        Args:
+            validator: Validator used to compute column cardinality.
+            table_column_names:
+            metrics_for_cardinality_check:
 
-        batch_id: str = self.get_batch_id(variables=variables)
+        Returns:
+
+        """
+
+        # TODO AJB 20220218: Remove loops and refactor into single call to validator.get_metrics()
+        #  by first building up MetricConfigurations to compute see GREAT-584
+        computed_metrics_for_cardinality_check: List[
+            Dict[str, List[Tuple[MetricConfiguration, Any]]]
+        ] = []
+
+        candidate_column_names: List[str] = table_column_names.copy()
 
         cardinality_limit: CardinalityMode = self.cardinality_limit
 
-        if isinstance(cardinality_limit, AbsoluteCardinalityLimit):
+        for metric_for_cardinality_check in metrics_for_cardinality_check:
+            for (
+                column_name,
+                metric_config_batch_list,
+            ) in metric_for_cardinality_check.items():
+                if column_name not in candidate_column_names:
+                    continue
+                else:
+                    column_inclusion: bool = True
+                    for metric_config in metric_config_batch_list:
+                        metric_value = validator.get_metric(metric=metric_config)
+                        if metric_config.metric_name == "column.distinct_values.count":
+                            if metric_value > cardinality_limit.max_unique_values:
+                                column_inclusion = False
+                        elif metric_config.metric_name == "column.unique_proportion":
+                            if metric_value > cardinality_limit.max_proportion_unique:
+                                column_inclusion = False
+                    if column_inclusion == False:
+                        candidate_column_names.remove(column_name)
 
-            column_distinct_values_count: int = validator.get_metric(
-                metric=MetricConfiguration(
-                    metric_name="column.distinct_values.count",
-                    metric_domain_kwargs={
-                        "batch_id": batch_id,
-                        "column": column,
-                    },
-                    metric_value_kwargs=None,
-                    metric_dependencies=None,
-                )
-            )
-            return column_distinct_values_count <= cardinality_limit.max_unique_values
-
-        elif isinstance(cardinality_limit, ProportionalCardinalityLimit):
-
-            column_unique_proportion = validator.get_metric(
-                metric=MetricConfiguration(
-                    metric_name="column.unique_proportion",
-                    metric_domain_kwargs={
-                        "batch_id": batch_id,
-                        "column": column,
-                    },
-                    metric_value_kwargs=None,
-                    metric_dependencies=None,
-                )
-            )
-            return column_unique_proportion <= cardinality_limit.max_proportion_unique
+        return candidate_column_names
