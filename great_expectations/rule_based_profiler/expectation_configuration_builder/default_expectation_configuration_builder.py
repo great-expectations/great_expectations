@@ -109,7 +109,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
 
     def _parse_condition(self) -> ParseResults:
         """
-        Using the grammer defined by "condition", provides the parsing
+        Using the grammer defined by expr, provides the condition to the parser.
 
         Applicability: To be used as part of configuration (e.g., YAML-based files or text strings).
         Extendability: Readily extensible to include "slice" and other standard accessors (as long as no dynamic elements).
