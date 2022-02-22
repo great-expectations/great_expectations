@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Union
 
 from pyparsing import Combine
 from pyparsing import Optional as ppOptional
@@ -7,11 +7,12 @@ from pyparsing import (
     ParseResults,
     Suppress,
     Word,
-    ZeroOrMore,
     alphanums,
     alphas,
+    infixNotation,
     nums,
     oneOf,
+    opAssoc,
 )
 
 import great_expectations.exceptions as ge_exceptions
@@ -30,19 +31,15 @@ integer = Word(nums).setParseAction(lambda t: int(t[0]))
 var = Combine(Word("$" + alphas, alphanums + "_.") + ppOptional("[" + integer + "]"))
 comparison_operator = oneOf(">= <= != > < ==")
 bitwise_operator = oneOf("~ & |")
-parentheses = oneOf("( )")
+operand = text | integer | var
 
-condition_term = (
-    ppOptional(parentheses)
-    + var
-    + comparison_operator
-    + integer
-    + ppOptional(parentheses)
+expr = infixNotation(
+    operand,
+    [
+        (comparison_operator, 2, opAssoc.LEFT),
+        (bitwise_operator, 2, opAssoc.LEFT),
+    ],
 )
-
-condition_parser = condition_term + ZeroOrMore(bitwise_operator + condition_term)
-
-term_parser = integer + comparison_operator + integer
 
 
 class ExpectationConfigurationConditionParserError(
@@ -106,12 +103,73 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
         """
 
         try:
-            return condition_parser.parseString(self._condition)
+            return expr.parseString(self._condition)
         except ParseException as e:
             print(str(e))
             raise ExpectationConfigurationConditionParserError(
                 f'Unable to parse Expectation Configuration Condition: "{self._condition}".'
             )
+
+    def _substitute_parameters_and_variables(
+        self,
+        term_list: Union[str, ParseResults],
+        domain: Domain,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -> ParseResults:
+        """Recursively substitute all parameters and variables"""
+        token: Union[str, ParseResults]
+        for i, token in enumerate(term_list):
+            if isinstance(token, str) and token.startswith("$"):
+                term_list[i]: Dict[str, Any] = get_parameter_value(
+                    domain=domain,
+                    parameter_reference=token,
+                    variables=variables,
+                    parameters=parameters,
+                )
+            elif isinstance(token, ParseResults):
+                self._substitute_parameters_and_variables(
+                    term_list=token,
+                    domain=domain,
+                    variables=variables,
+                    parameters=parameters,
+                )
+        return term_list
+
+    def _build_bitwise_list(
+        self,
+        substituted_terms: Union[str, list],
+    ) -> ParseResults:
+        """Recursively build bitwise list from substituted terms"""
+        token: Union[str, list]
+        for i, token in enumerate(substituted_terms):
+            if (not any([isinstance(t, ParseResults) for t in token])) and len(
+                token
+            ) > 1:
+                substituted_terms[i] = eval("".join([str(t) for t in token]))
+            elif isinstance(token, ParseResults):
+                self._build_bitwise_list(substituted_terms=token)
+
+        return substituted_terms
+
+    def _build_boolean_result(
+        self,
+        bitwise_list: List[Union[bool, str]],
+    ) -> bool:
+        """Recursively build boolean result from bitwise list"""
+        token: Union[str, list]
+        for i, token in enumerate(bitwise_list):
+            if (
+                (not isinstance(token, bool))
+                and (not any([isinstance(t, ParseResults) for t in token]))
+                and (len(token) > 1)
+            ):
+                bitwise_list[i] = eval("".join([str(t) for t in token]))
+                return self._build_boolean_result(bitwise_list=bitwise_list)
+            elif isinstance(token, ParseResults):
+                return self._build_boolean_result(bitwise_list=token)
+
+        return eval("".join([str(t) for t in bitwise_list]))
 
     def _evaluate_condition(
         self,
@@ -120,48 +178,20 @@ class ConditionalExpectationConfigurationBuilder(ExpectationConfigurationBuilder
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> bool:
-        substituted_parameters_condition: ParseResults = parsed_condition.copy()
-        token: str
-        boolean_condition: List[bool, str] = []
-        term_count: int = 1
-        parentheses_count: int = 0
-        for i, token in enumerate(parsed_condition):
-            try:
-                parentheses.parseString(token)
-                parentheses_count += 1
-            except:
-                parentheses_count += 0
+        """Evaluates the parsed condition to True/False and returns the boolean result"""
+        substituted_terms: ParseResults = self._substitute_parameters_and_variables(
+            term_list=parsed_condition,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
 
-            if isinstance(token, str) and token.startswith("$"):
-                substituted_parameters_condition[i]: Dict[
-                    str, Any
-                ] = get_parameter_value(
-                    domain=domain,
-                    parameter_reference=token,
-                    variables=variables,
-                    parameters=parameters,
-                )
+        bitwise_list: ParseResults = self._build_bitwise_list(
+            substituted_terms=substituted_terms
+        )
+        boolean_result: bool = self._build_boolean_result(bitwise_list=bitwise_list)
 
-            bitwise_operator_offset: int = i + term_count
-            if (i > 0) and (bitwise_operator_offset % 4 == 3):
-                term: List[str, int, float] = substituted_parameters_condition[
-                    bitwise_operator_offset - 3 : bitwise_operator_offset
-                ]
-                term_str: str = "".join([str(t) for t in term])
-                term_boolean = eval(term_str)
-                boolean_condition.append(term_boolean)
-                try:
-                    # check to see if there is a bitwise operator after the boolean expression
-                    term_bitwise: bitwise_operator = substituted_parameters_condition[
-                        bitwise_operator_offset
-                    ]
-                    boolean_condition.append(term_bitwise)
-                    term_count += 1
-                except:
-                    pass
-
-        boolean_str: str = "".join([str(t) for t in boolean_condition])
-        return eval(boolean_str)
+        return boolean_result
 
     def _build_expectation_configuration(
         self,
