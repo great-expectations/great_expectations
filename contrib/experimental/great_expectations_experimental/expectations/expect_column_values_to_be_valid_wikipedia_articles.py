@@ -225,7 +225,4 @@ class ExpectColumnValuesToBeValidWikipediaArticles(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = (
-        ExpectColumnValuesToBeValidWikipediaArticles().run_diagnostics()
-    )
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToBeValidWikipediaArticles().print_diagnostic_checklist()
