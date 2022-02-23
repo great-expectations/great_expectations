@@ -56,6 +56,7 @@ class ProfilerRunAnonymizer(Anonymizer):
         for name, rule in rules.items():
             anonymized_rule: dict = self._anonymize_rule(name, rule)
             anonymized_rules.append(anonymized_rule)
+            logger.debug("Anonymized rule %s", name)
 
         return anonymized_rules
 
@@ -96,6 +97,7 @@ class ProfilerRunAnonymizer(Anonymizer):
             ] = self._batch_request_anonymizer.anonymize_batch_request(
                 *(), **batch_request
             )
+            logger.debug("Anonymized batch request in DomainBuilder")
 
         return anonymized_domain_builder
 
@@ -128,6 +130,7 @@ class ProfilerRunAnonymizer(Anonymizer):
             ] = self._batch_request_anonymizer.anonymize_batch_request(
                 *(), **batch_request
             )
+            logger.debug("Anonymized batch request in ParameterBuilder")
 
         return anonymized_parameter_builder
 
@@ -165,6 +168,7 @@ class ProfilerRunAnonymizer(Anonymizer):
             anonymized_expectation_configuration_builder[
                 "anonymized_condition"
             ] = self.anonymize(condition)
+            logger.debug("Anonymized condition in ExpectationConfigurationBuilder")
 
         return anonymized_expectation_configuration_builder
 
@@ -183,10 +187,12 @@ class ProfilerRunAnonymizer(Anonymizer):
         if rules:
             runtime_config["rules"] = rules
 
+        # Ensure that the list of rules contains all relevant information (including rule names)
         resolved_rules: List[dict] = []
         for name, rule in runtime_config["rules"].items():
             rule["name"] = name
             resolved_rules.append(rule)
+
         runtime_config["rules"] = resolved_rules
 
         runtime_config["variable_count"] = len(runtime_config["variables"])
@@ -194,5 +200,6 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         for attr in ("class_name", "module_name", "variables"):
             runtime_config.pop(attr)
+            logger.debug("Removed unnecessary attr %s from profiler config", attr)
 
         return runtime_config
