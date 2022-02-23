@@ -187,14 +187,6 @@ class ProfilerRunAnonymizer(Anonymizer):
         if rules:
             runtime_config["rules"] = rules
 
-        # Ensure that the list of rules contains all relevant information (including rule names)
-        resolved_rules: List[dict] = []
-        for name, rule in runtime_config["rules"].items():
-            rule["name"] = name
-            resolved_rules.append(rule)
-
-        runtime_config["rules"] = resolved_rules
-
         runtime_config["variable_count"] = len(runtime_config["variables"])
         runtime_config["rule_count"] = len(runtime_config["rules"])
 

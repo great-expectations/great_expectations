@@ -292,7 +292,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
         profiler=profiler_with_placeholder_args, rules=rules
     )
 
-    assert len(config["rules"]) == 1 and rule_name == config["rules"][0]["name"]
+    assert len(config["rules"]) == 1 and rule_name in config["rules"]
 
 
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(
@@ -321,7 +321,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
         for attr in ("name", "config_version", "rules", "variable_count", "rule_count")
     )
 
-    domain_builder: dict = config["rules"][0]["domain_builder"]
+    domain_builder: dict = config["rules"]["rule_1"]["domain_builder"]
     converted_batch_request: dict = domain_builder["batch_request"]
     assert converted_batch_request["datasource_name"] == datasource_name
     assert converted_batch_request["data_connector_name"] == data_connector_name
