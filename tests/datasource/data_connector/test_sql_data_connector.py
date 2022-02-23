@@ -13,9 +13,10 @@ try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
     sqlalchemy = None
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.validator.validator import Validator
 
-yaml = YAML()
+yaml = YAML(typ="safe")
 
 
 # TODO: <Alex>ALEX -- Some methods in this module are misplaced and/or provide no action; this must be repaired.</Alex>
@@ -1101,6 +1102,109 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector(
         "unmatched_data_reference_count": 0,
         "example_unmatched_data_references": [],
     }
+
+
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "ConfiguredAssetSqlDataConnector",
+            "name": "my_sql_data_connector",
+            "assets": {
+                "table_partitioned_by_date_column__A": {
+                    "splitter_method": "_split_on_column_value",
+                    "splitter_kwargs": {"column_name": "date"},
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                },
+            },
+        },
+        runtime_environment={
+            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
+            "datasource_name": "my_test_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+    assert "main.table_partitioned_by_date_column__A" in my_data_connector.assets
+
+    # schema_name given by missing the include_schema_name flag
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        my_data_connector = instantiate_class_from_config(
+            config={
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "name": "my_sql_data_connector",
+                "assets": {
+                    "table_partitioned_by_date_column__A": {
+                        "splitter_method": "_split_on_column_value",
+                        "splitter_kwargs": {"column_name": "date"},
+                        "schema_name": "main",
+                    },
+                },
+            },
+            runtime_environment={
+                "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
+                "datasource_name": "my_test_datasource",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
+
+
+def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix(
+    test_cases_for_sql_data_connector_sqlite_execution_engine,
+):
+    my_data_connector = instantiate_class_from_config(
+        config={
+            "class_name": "ConfiguredAssetSqlDataConnector",
+            "name": "my_sql_data_connector",
+            "assets": {
+                "table_partitioned_by_date_column__A": {
+                    "splitter_method": "_split_on_column_value",
+                    "splitter_kwargs": {"column_name": "date"},
+                    "include_schema_name": True,
+                    "schema_name": "main",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
+                },
+            },
+        },
+        runtime_environment={
+            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
+            "datasource_name": "my_test_datasource",
+        },
+        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
+    )
+    assert (
+        "taxi__main.table_partitioned_by_date_column__A__asset"
+        in my_data_connector.assets
+    )
+
+    # schema_name but missing the include_schema_name flag
+    with pytest.raises(ge_exceptions.DataConnectorError):
+        my_data_connector = instantiate_class_from_config(
+            config={
+                "class_name": "ConfiguredAssetSqlDataConnector",
+                "name": "my_sql_data_connector",
+                "assets": {
+                    "table_partitioned_by_date_column__A": {
+                        "splitter_method": "_split_on_column_value",
+                        "splitter_kwargs": {"column_name": "date"},
+                        "schema_name": "main",
+                        "data_asset_name_prefix": "taxi__",
+                        "data_asset_name_suffix": "__asset",
+                    },
+                },
+            },
+            runtime_environment={
+                "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
+                "datasource_name": "my_test_datasource",
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
 
 
 # TODO

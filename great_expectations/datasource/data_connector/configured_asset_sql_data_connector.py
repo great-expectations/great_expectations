@@ -1,6 +1,7 @@
 from copy import deepcopy
 from typing import Dict, List, Optional, cast
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -43,9 +44,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         assets: Optional[Dict[str, dict]] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
-        if assets is None:
-            assets = {}
-        self._assets = assets
+        self._assets = {}
+        if assets:
+            for asset_name, config in assets.items():
+                self.add_data_asset(asset_name, config)
 
         super().__init__(
             name=name,
@@ -60,13 +62,38 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
     def add_data_asset(
         self,
-        name: str,
-        config: dict,
+        data_asset_name: str,
+        data_asset_config: dict,
     ):
         """
         Add data_asset to DataConnector using data_asset name as key, and data_asset configuration as value.
         """
-        self._assets[name] = config
+        data_asset_name = self._update_data_asset_name_from_config(
+            data_asset_name, data_asset_config
+        )
+        self._assets[data_asset_name] = data_asset_config
+
+    def _update_data_asset_name_from_config(
+        self, data_asset_name: str, data_asset_config: dict
+    ) -> str:
+
+        data_asset_name_prefix = data_asset_config.pop("data_asset_name_prefix", "")
+        data_asset_name_suffix = data_asset_config.pop("data_asset_name_suffix", "")
+        schema_name = data_asset_config.pop("schema_name", "")
+
+        if schema_name and not data_asset_config["include_schema_name"]:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"{self.__class__.__name__} ran into an error while initializing Asset names. Schema {schema_name} was specified, but 'include_schema_name' flag was not set to True."
+            )
+            raise ge_exceptions.DataConnectorError(f"{self.__class__}")
+
+        if schema_name:
+            data_asset_name = schema_name + "." + data_asset_name
+        data_asset_name = (
+            data_asset_name_prefix + data_asset_name + data_asset_name_suffix
+        )
+
+        return data_asset_name
 
     def _get_batch_identifiers_list_from_data_asset_config(
         self,
