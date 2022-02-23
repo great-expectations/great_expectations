@@ -98,7 +98,7 @@ class ColumnRuleFollowers(ColumnMapMetricProvider):
 #         return column.isin([3])
 
 
-class expect_column_values_to_follow_rule(ColumnMapExpectation):
+class ExpectColumnValuesToFollowRule(ColumnMapExpectation):
     """This expectation compares all rows of a column against a given input expression."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -277,5 +277,4 @@ class expect_column_values_to_follow_rule(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = expect_column_values_to_follow_rule().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToFollowRule().print_diagnostic_checklist()
