@@ -8,6 +8,10 @@ from great_expectations.rule_based_profiler.parameter_builder.simple_date_format
     SimpleDateFormatStringParameterBuilder,
 )
 
+from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder import (  # isort:skip
+    ValueSetMultiBatchParameterBuilder,
+)
+
 from great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder import (  # isort:skip
     MetricMultiBatchParameterBuilder,
 )
