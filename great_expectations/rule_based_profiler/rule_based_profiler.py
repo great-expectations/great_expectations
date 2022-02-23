@@ -16,10 +16,6 @@ from great_expectations.core.batch import (
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.core.usage_statistics.usage_statistics import (
-    get_profiler_run_usage_statistics,
-    usage_statistics_enabled_method,
-)
 from great_expectations.core.util import convert_to_json_serializable, nested_update
 from great_expectations.data_context.store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
@@ -124,7 +120,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self,
         profiler_config: RuleBasedProfilerConfig,
         data_context: Optional["DataContext"] = None,  # noqa: F821
-    ) -> None:
+    ):
         """
         Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
 
@@ -162,11 +158,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
             variables_configs=variables
         )
         self._variables = _variables
-
-        if data_context:
-            self._usage_statistics_handler = data_context._usage_statistics_handler
-        else:
-            self._usage_statistics_handler = None
 
         self._data_context = data_context
 
@@ -315,10 +306,6 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
         return expectation_configuration_builder
 
-    @usage_statistics_enabled_method(
-        event_name="profiler.run",
-        args_payload_fn=get_profiler_run_usage_statistics,
-    )
     def run(
         self,
         variables: Optional[Dict[str, Any]] = None,
@@ -1014,6 +1001,10 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         domain_builder: DomainBuilder
         parameter_builders: Optional[List[ParameterBuilder]]
         parameter_builder: ParameterBuilder
+        expectation_configuration_builders: Optional[
+            List[ExpectationConfigurationBuilder]
+        ]
+        expectation_configuration_builder: ExpectationConfigurationBuilder
         for rule in rules:
             domain_builder = rule.domain_builder
             if domain_builder.domain_type == MetricDomainTypes.COLUMN:
