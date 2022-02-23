@@ -1026,7 +1026,7 @@ class Expectation(metaclass=MetaExpectation):
             recursive=True,
         )
         if found:
-            with open(found[0], "r") as fp:
+            with open(found[0]) as fp:
                 data = json.load(fp)
             results = data["datasets"]
         return results
@@ -1484,23 +1484,19 @@ class Expectation(metaclass=MetaExpectation):
             augmented_library_metadata.update(self.library_metadata)
 
             keys = self.library_metadata.keys()
-            has_all_required_keys = all(
-                (key in keys for key in {"maturity", "tags", "contributors"})
-            )
+            has_all_required_keys = all(key in keys for key in {"tags", "contributors"})
             has_no_forbidden_keys = all(
-                (
-                    key
-                    in {
-                        "maturity",
-                        "tags",
-                        "contributors",
-                        "requirements",
-                        "package",
-                        "has_full_test_suite",
-                        "manually_reviewed_code",
-                    }
-                    for key in keys
-                )
+                key
+                in {
+                    "maturity",
+                    "tags",
+                    "contributors",
+                    "requirements",
+                    "package",
+                    "has_full_test_suite",
+                    "manually_reviewed_code",
+                }
+                for key in keys
             )
             if has_all_required_keys and has_no_forbidden_keys:
                 augmented_library_metadata["library_metadata_passed_checks"] = True
