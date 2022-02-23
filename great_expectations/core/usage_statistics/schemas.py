@@ -751,19 +751,36 @@ anonymized_legacy_profiler_build_suite_payload_schema = {
 }
 
 
+"""
+name
+config_version
+variables
+rules
+  - ParameterBuilders
+    - anonymized_name
+    - class_name
+    - batch_request
+  - DomainBuilders
+    - class_name
+    - batch_request
+  - ExpectationConfigurationBuilders
+    - class_name
+    - expectation_type
+"""
+
 anonymized_rule_based_profiler_run_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "anonymized-checkpoint-run-payload",
+    "title": "anonymized-rule-based-profiler-run-payload",
     "definitions": {
         "empty_payload": empty_payload_schema,
         "anonymized_string": anonymized_string_schema,
-        "anonymized_datasource_name": anonymized_datasource_name_schema,
-        "anonymized_run_time": anonymized_run_time_schema,
+        # "anonymized_datasource_name": anonymized_datasource_name_schema,
+        # "anonymized_run_time": anonymized_run_time_schema,
         "anonymized_batch_request": anonymized_batch_request_schema,
-        "anonymized_action": anonymized_action_schema,
-        "anonymized_action_list": anonymized_action_list_schema,
-        "anonymized_validation": anonymized_validation_schema,
-        "anonymized_validations": anonymized_validations_list_schema,
+        # "anonymized_action": anonymized_action_schema,
+        # "anonymized_action_list": anonymized_action_list_schema,
+        # "anonymized_validation": anonymized_validation_schema,
+        # "anonymized_validations": anonymized_validations_list_schema,
     },
     "oneOf": [
         {
@@ -771,10 +788,6 @@ anonymized_rule_based_profiler_run_schema = {
             "properties": {
                 "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
                 "config_version": {"type": "number", "minimum": 1},
-                "anonymized_template_name": {"$ref": "#/definitions/anonymized_string"},
-                "anonymized_run_name_template": {
-                    "$ref": "#/definitions/anonymized_string"
-                },
                 "anonymized_expectation_suite_name": {
                     "$ref": "#/definitions/anonymized_string"
                 },
