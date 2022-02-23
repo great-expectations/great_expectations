@@ -13,6 +13,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
     get_batch_request_as_dict,
+    materialize_batch_request,
 )
 from great_expectations.core.util import nested_update
 
@@ -266,17 +267,6 @@ def get_substituted_batch_request(
         batch_request=substituted_runtime_batch_request
     )
 
-    effective_batch_request: dict = dict(
-        **substituted_runtime_batch_request, **validation_batch_request
-    )
-
-    batch_request_class: type
-
-    if "runtime_parameters" in effective_batch_request:
-        batch_request_class = RuntimeBatchRequest
-    else:
-        batch_request_class = BatchRequest
-
     for key, value in validation_batch_request.items():
         substituted_value = substituted_runtime_batch_request.get(key)
         if value is not None and substituted_value is not None:
@@ -284,7 +274,11 @@ def get_substituted_batch_request(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )
 
-    return batch_request_class(**effective_batch_request)
+    effective_batch_request: dict = dict(
+        **substituted_runtime_batch_request, **validation_batch_request
+    )
+
+    return materialize_batch_request(batch_request=effective_batch_request)
 
 
 def substitute_template_config(source_config: dict, template_config: dict) -> dict:
