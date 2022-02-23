@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Union
 
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -7,8 +7,10 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
-    build_parameter_container,
     get_parameter_value_by_fully_qualified_parameter_name,
+)
+from great_expectations.rule_based_profiler.types.parameter_container import (
+    ParameterNode,
 )
 
 
@@ -76,6 +78,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> ParameterContainer:
 
+        # Build the list of unique values for each batch
         super()._build_parameters(
             parameter_container=parameter_container,
             domain=domain,
@@ -83,19 +86,36 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             parameters=parameters,
         )
 
-        # TODO 20220222 AJB: Overwrite the parameter container value with the
-        #  unique items.
-        fully_qualified_parameter_name_for_value: str = f"$parameter.{self.name}"
-        parameter_value = get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters={domain.id: parameter_container},
+        # Retrieve and replace the list of unique values for each batch with
+        # the set of unique values for all batches in the given domain.
+        fully_qualified_parameter_name: str = f"$parameter.{self.name}"
+        parameter_value_node: ParameterNode = (
+            get_parameter_value_by_fully_qualified_parameter_name(
+                fully_qualified_parameter_name=fully_qualified_parameter_name,
+                domain=domain,
+                parameters={domain.id: parameter_container},
+            )
         )
 
-        unique_parameter_values = set().union(*parameter_value["value"])
+        unique_parameter_values: Set[
+            Any
+        ] = _get_unique_values_from_iterable_of_iterables(parameter_value_node["value"])
 
-        build_parameter_container(
-            parameter_container=parameter_container,
-            parameter_values=unique_parameter_values,
-        )
+        parameter_value_node.value = unique_parameter_values
+
         return parameter_container
+
+
+def _get_unique_values_from_iterable_of_iterables(
+    iterable: Iterable[Iterable[Any]],
+) -> Set[Any]:
+    """Get unique values from an iterable of iterables e.g. a list of sets.
+
+    Args:
+        iterable: List, Set containing iterables of values.
+
+    Returns:
+        Single flattened set containing unique values.
+    """
+
+    return set().union(*iterable)

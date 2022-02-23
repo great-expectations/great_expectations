@@ -6,7 +6,7 @@
 # Test single batch (alice) exceeds cardinality limit
 # Test multi batch (bobby)
 # Test multi batch (bobby) exceeds cardinality limit
-from typing import List
+from typing import Set
 
 from great_expectations import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
@@ -57,10 +57,18 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch(
     assert len(parameter_container.parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_user_agent_value_set"
-    expected_value: dict = {
-        "value_set": [
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-        ],
+    expected_value_set: Set[str] = {
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    }
+    expected_parameter_value: dict = {
+        "value": expected_value_set,
+        "details": {
+            "metric_configuration": {
+                "domain_kwargs": {"column": "user_agent"},
+                "metric_name": "column.distinct_values",
+            },
+            "num_batches": 1,
+        },
     }
 
     assert (
@@ -69,7 +77,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch(
             domain=domain,
             parameters={domain.id: parameter_container},
         )
-        == expected_value
+        == expected_parameter_value
     )
 
 
@@ -80,24 +88,25 @@ def test_value_set_multi_batch_parameter_builder_bobby(
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
-    metric_domain_kwargs: dict = {"column": "passenger_count"}
-    metric_domain_kwargs_for_parameter_builder: str = "$domain.domain_kwargs"
-
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
         "data_connector_name": "monthly",
         "data_asset_name": "my_reports",
     }
 
-    value_set_multi_batch_parameter_builder: ValueSetMultiBatchParameterBuilder = ValueSetMultiBatchParameterBuilder(
-        name="my_passenger_count_value_set",
-        metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
-        # metric_domain_kwargs=metric_domain_kwargs,
-        data_context=data_context,
-        batch_request=batch_request,
+    metric_domain_kwargs_for_parameter_builder: str = "$domain.domain_kwargs"
+    value_set_multi_batch_parameter_builder: ValueSetMultiBatchParameterBuilder = (
+        ValueSetMultiBatchParameterBuilder(
+            name="my_passenger_count_value_set",
+            metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
+            data_context=data_context,
+            batch_request=batch_request,
+        )
     )
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+
+    metric_domain_kwargs: dict = {"column": "passenger_count"}
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.COLUMN, domain_kwargs=metric_domain_kwargs
     )
@@ -114,9 +123,16 @@ def test_value_set_multi_batch_parameter_builder_bobby(
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_passenger_count_value_set"
     )
-    expected_value_set: List[int] = [0, 1, 2, 3, 4, 5, 6]
-    expected_value: dict = {
+    expected_value_set: Set[int] = {0, 1, 2, 3, 4, 5, 6}
+    expected_parameter_value: dict = {
         "value": expected_value_set,
+        "details": {
+            "metric_configuration": {
+                "metric_name": "column.distinct_values",
+                "domain_kwargs": {"column": "passenger_count"},
+            },
+            "num_batches": 3,
+        },
     }
 
     assert (
@@ -125,5 +141,9 @@ def test_value_set_multi_batch_parameter_builder_bobby(
             domain=domain,
             parameters={domain.id: parameter_container},
         )
-        == expected_value
+        == expected_parameter_value
     )
+
+
+def test__get_unique_values_from_iterable_of_iterables():
+    raise NotImplementedError
