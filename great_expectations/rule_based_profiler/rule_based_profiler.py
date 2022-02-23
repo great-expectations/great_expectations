@@ -381,7 +381,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :return: reconciled variables in their canonical ParameterContainer object form
         """
         effective_variables: ParameterContainer
-        if variables is not None and isinstance(variables, dict):
+        if variables and isinstance(variables, dict):
             variables_configs: dict = self.variables.to_dict()["parameter_nodes"][
                 "variables"
             ]["variables"]
