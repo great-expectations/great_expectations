@@ -13,7 +13,7 @@ class CardinalityLimit(abc.ABC):
 
 @dataclass
 class RelativeCardinalityLimit(CardinalityLimit):
-    max_proportion_unique: float
+    max_proportion_unique: Union[int, float]
     related_metric_name: str = "column.unique_proportion"
 
 
@@ -30,33 +30,35 @@ class CardinalityLimitMode(enum.Enum):
     correspond to each cardinality category.
     """
 
-    ONE = AbsoluteCardinalityLimit("one", 1)
-    TWO = AbsoluteCardinalityLimit("two", 2)
-    VERY_FEW = AbsoluteCardinalityLimit("very_few", 10)
-    FEW = AbsoluteCardinalityLimit("few", 100)
-    SOME = AbsoluteCardinalityLimit("some", 1000)
-    MANY = AbsoluteCardinalityLimit("many", 10000)
-    VERY_MANY = AbsoluteCardinalityLimit("very_many", 100000)
-    UNIQUE = RelativeCardinalityLimit("unique", 1.0)
-    ABS_10 = AbsoluteCardinalityLimit("abs_10", 10)
-    ABS_100 = AbsoluteCardinalityLimit("abs_100", 100)
-    ABS_1000 = AbsoluteCardinalityLimit("abs_1000", 1000)
-    ABS_10_000 = AbsoluteCardinalityLimit("abs_10_000", int(1e4))
-    ABS_100_000 = AbsoluteCardinalityLimit("abs_100_000", int(1e5))
-    ABS_1_000_000 = AbsoluteCardinalityLimit("abs_1_000_000", int(1e6))
-    ABS_10_000_000 = AbsoluteCardinalityLimit("abs_10_000_000", int(1e7))
-    ABS_100_000_000 = AbsoluteCardinalityLimit("abs_100_000_000", int(1e8))
-    ABS_1_000_000_000 = AbsoluteCardinalityLimit("abs_1_000_000_000", int(1e9))
-    REL_001 = RelativeCardinalityLimit("rel_001", 1e-5)
-    REL_01 = RelativeCardinalityLimit("rel_01", 1e-4)
-    REL_0_1 = RelativeCardinalityLimit("rel_0_1", 1e-3)
-    REL_1 = RelativeCardinalityLimit("rel_1", 1e-2)
-    REL_10 = RelativeCardinalityLimit("rel_10", 0.10)
-    REL_25 = RelativeCardinalityLimit("rel_25", 0.25)
-    REL_50 = RelativeCardinalityLimit("rel_50", 0.50)
-    REL_75 = RelativeCardinalityLimit("rel_75", 0.75)
-    ONE_PCT = RelativeCardinalityLimit("one_pct", 0.01)
-    TEN_PCT = RelativeCardinalityLimit("ten_pct", 0.10)
+    ZERO = AbsoluteCardinalityLimit("ZERO", 0)
+    ONE = AbsoluteCardinalityLimit("ONE", 1)
+    TWO = AbsoluteCardinalityLimit("TWO", 2)
+    VERY_FEW = AbsoluteCardinalityLimit("VERY_FEW", 10)
+    FEW = AbsoluteCardinalityLimit("FEW", 100)
+    SOME = AbsoluteCardinalityLimit("SOME", 1000)
+    MANY = AbsoluteCardinalityLimit("MANY", 10000)
+    VERY_MANY = AbsoluteCardinalityLimit("VERY_MANY", 100000)
+    UNIQUE = RelativeCardinalityLimit("UNIQUE", 1.0)
+    ABS_10 = AbsoluteCardinalityLimit("ABS_10", 10)
+    ABS_100 = AbsoluteCardinalityLimit("ABS_100", 100)
+    ABS_1000 = AbsoluteCardinalityLimit("ABS_1000", 1000)
+    ABS_10_000 = AbsoluteCardinalityLimit("ABS_10_000", int(1e4))
+    ABS_100_000 = AbsoluteCardinalityLimit("ABS_100_000", int(1e5))
+    ABS_1_000_000 = AbsoluteCardinalityLimit("ABS_1_000_000", int(1e6))
+    ABS_10_000_000 = AbsoluteCardinalityLimit("ABS_10_000_000", int(1e7))
+    ABS_100_000_000 = AbsoluteCardinalityLimit("ABS_100_000_000", int(1e8))
+    ABS_1_000_000_000 = AbsoluteCardinalityLimit("ABS_1_000_000_000", int(1e9))
+    REL_0 = RelativeCardinalityLimit("REL_0", 0.0)
+    REL_001 = RelativeCardinalityLimit("REL_001", 1e-5)
+    REL_01 = RelativeCardinalityLimit("REL_01", 1e-4)
+    REL_0_1 = RelativeCardinalityLimit("REL_0_1", 1e-3)
+    REL_1 = RelativeCardinalityLimit("REL_1", 1e-2)
+    REL_10 = RelativeCardinalityLimit("REL_10", 0.10)
+    REL_25 = RelativeCardinalityLimit("REL_25", 0.25)
+    REL_50 = RelativeCardinalityLimit("REL_50", 0.50)
+    REL_75 = RelativeCardinalityLimit("REL_75", 0.75)
+    ONE_PCT = RelativeCardinalityLimit("ONE_PCT", 0.01)
+    TEN_PCT = RelativeCardinalityLimit("TEN_PCT", 0.10)
 
 
 class CardinalityChecker:
@@ -79,9 +81,9 @@ class CardinalityChecker:
 
     def __init__(
         self,
-        cardinality_limit_mode: Optional[CardinalityLimitMode] = None,
+        cardinality_limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         cardinality_max_rows: Optional[int] = None,
-        cardinality_max_proportion_unique: Optional[int] = None,
+        cardinality_max_proportion_unique: Optional[Union[int, float]] = None,
     ):
         self.supported_cardinality_limit_mode_class_names = (
             mode.__name__ for mode in self.SUPPORTED_CARDINALITY_LIMIT_MODE_CLASSES
@@ -129,9 +131,9 @@ class CardinalityChecker:
 
     def _convert_to_cardinality_mode(
         self,
-        cardinality_limit_mode: Optional[CardinalityLimitMode] = None,
+        cardinality_limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         cardinality_max_rows: Optional[int] = None,
-        cardinality_max_proportion_unique: Optional[int] = None,
+        cardinality_max_proportion_unique: Optional[Union[int, float]] = None,
     ):
 
         self._validate_input_parameters(
@@ -142,17 +144,22 @@ class CardinalityChecker:
 
         if cardinality_limit_mode is not None:
             if isinstance(cardinality_limit_mode, str):
-                return CardinalityLimitMode[cardinality_limit_mode.upper()].value
+                try:
+                    return CardinalityLimitMode[cardinality_limit_mode.upper()].value
+                except KeyError:
+                    raise ProfilerConfigurationError(
+                        f"Please specify a supported cardinality mode. Supported cardinality modes are {[member.name for member in CardinalityLimitMode]}"
+                    )
             else:
-                return cardinality_limit_mode
+                return cardinality_limit_mode.value
         if cardinality_max_rows is not None:
             return AbsoluteCardinalityLimit(
-                name=f"custom_abs_{cardinality_max_rows}",
+                name=f"CUSTOM_ABS_{cardinality_max_rows}",
                 max_unique_values=cardinality_max_rows,
             )
         if cardinality_max_proportion_unique is not None:
             return RelativeCardinalityLimit(
-                name=f"custom_rel_{cardinality_max_proportion_unique}",
+                name=f"CUSTOM_REL_{cardinality_max_proportion_unique}",
                 max_proportion_unique=cardinality_max_proportion_unique,
             )
 
@@ -174,11 +181,21 @@ class CardinalityChecker:
             )
 
         if cardinality_limit_mode is not None:
-            if isinstance(cardinality_limit_mode, CardinalityLimit) or isinstance(
+            if isinstance(cardinality_limit_mode, CardinalityLimitMode) or isinstance(
                 cardinality_limit_mode, str
             ):
                 pass
             else:
                 raise ProfilerConfigurationError(
                     f"Please specify a supported cardinality limit type, supported classes are {','.join(self.supported_cardinality_limit_mode_class_names)} and supported strings are {','.join(self.SUPPORTED_CARDINALITY_LIMIT_MODE_STRINGS)}"
+                )
+        if cardinality_max_rows is not None:
+            if not isinstance(cardinality_max_rows, int):
+                raise ProfilerConfigurationError(
+                    f"Please specify an int, you specified a {type(cardinality_max_rows)}"
+                )
+        if cardinality_max_proportion_unique is not None:
+            if not isinstance(cardinality_max_proportion_unique, (float, int)):
+                raise ProfilerConfigurationError(
+                    f"Please specify a float or int, you specified a {type(cardinality_max_proportion_unique)}"
                 )
