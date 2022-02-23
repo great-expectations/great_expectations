@@ -1,10 +1,7 @@
-import datetime
 import logging
 from numbers import Number
 from typing import Any, Dict, List, Optional, Union
 
-from great_expectations.core import RunIdentifier
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
     BatchRequestAnonymizer,
@@ -19,39 +16,39 @@ class ProfilerRunAnonymizer(Anonymizer):
         super().__init__(salt=salt)
 
         self._salt = salt
+        self._batch_request_anonymizer = BatchRequestAnonymizer(self._salt)
 
-    def anonymize_profiler_run(
-        self, *args: List[Any], **kwargs: dict
-    ) -> Dict[str, List[str]]:
+    def anonymize_profiler_run(self, *args: List[Any], **kwargs: dict) -> dict:
         """
         Traverse the entire RuleBasedProfiler configuration structure (as per its formal, validated Marshmallow schema) and
         anonymize every field that can be customized by a user (public fields are recorded as their original names).
         """
-        batch_request_anonymizer: BatchRequestAnonymizer = BatchRequestAnonymizer(
-            self._salt
-        )
 
         name: Optional[str] = kwargs.get("name")
         anonymized_name: Optional[str] = self.anonymize(name)
 
         config_version: Union[Number, str] = kwargs.get("config_version", 1.0)
-        rules: Dict[str, dict] = kwargs.get("rules", {})
+        variable_count: Number = kwargs.get("variable_count", 0)
+        rule_count: Number = kwargs.get("rule_count", 0)
 
+        rules: Dict[str, dict] = kwargs.get("rules", {})
         anonymized_rules: List[dict] = self._anonymize_rules(rules)
 
-        anonymized_profiler_run_properties_dict: Dict[str, List[str]] = {
+        anonymized_profiler_run_properties_dict: dict = {
             "anonymized_name": anonymized_name,
             "config_version": config_version,
+            "variable_count": variable_count,
+            "rule_count": rule_count,
             "anonymized_rules": anonymized_rules,
         }
 
         deep_filter_properties_iterable(
-            properties=anonymized_checkpoint_run_properties_dict,
+            properties=anonymized_profiler_run_properties_dict,
             clean_falsy=True,
             inplace=True,
         )
 
-        return anonymized_checkpoint_run_properties_dict
+        return anonymized_profiler_run_properties_dict
 
     def _anonymize_rules(self, rules: Dict[str, dict]) -> List[dict]:
         anonymized_rules: List[dict] = []
@@ -89,43 +86,78 @@ class ProfilerRunAnonymizer(Anonymizer):
         return anonymized_rule
 
     def _anonymize_domain_builder(self, domain_builder: dict) -> dict:
-        pass
+        anonymized_domain_builder: dict = {}
+        anonymized_domain_builder["anonymized_name"] = self.anonymize(
+            domain_builder["name"]
+        )
+        anonymized_domain_builder["class_name"] = domain_builder["class_name"]
+
+        batch_request: Optional[dict] = domain_builder.get("batch_request")
+        if batch_request:
+            anonymized_domain_builder[
+                "anonymized_batch_request"
+            ] = self._batch_request_anonymizer.anonymize(batch_request)
+
+        return anonymized_domain_builder
 
     def _anonymize_parameter_builders(
         self, parameter_builders: List[dict]
     ) -> List[dict]:
-        pass
+        anonymized_parameter_builders: List[dict] = []
 
-    def _anonymize_parameter_builder(self, parameter_builder: dict) -> dict:
-        pass
+        for parameter_builder in parameter_builders:
+            anonymized_parameter_builder: dict = {}
+
+            anonymized_parameter_builder["class_name"] = parameter_builder["class_name"]
+
+            batch_request: Optional[dict] = parameter_builder.get("batch_request")
+            if batch_request:
+                anonymized_parameter_builder[
+                    "anonymized_batch_request"
+                ] = self._batch_request_anonymizer.anonymize(batch_request)
+
+            anonymized_parameter_builders.append(anonymized_parameter_builder)
+
+        return anonymized_parameter_builders
 
     def _anonymize_expectation_configuration_builders(
         self, expectation_configuration_builders: List[dict]
     ) -> List[dict]:
-        pass
+        anonymized_expectation_configuration_builders: List[dict] = []
 
-    def _anonymize_expectation_configuration_builder(
-        self, expectation_configuration_builder: dict
-    ) -> dict:
-        pass
+        for expectation_configuration_builder in expectation_configuration_builders:
+            anonymized_expectation_configuration_builder: dict = {}
+
+            anonymized_expectation_configuration_builder[
+                "class_name"
+            ] = expectation_configuration_builder["class_name"]
+            anonymized_expectation_configuration_builder[
+                "expectation_type"
+            ] = expectation_configuration_builder["expectation_type"]
+
+            anonymized_expectation_configuration_builders.append(
+                anonymized_expectation_configuration_builder
+            )
+
+        return anonymized_expectation_configuration_builders
 
     # noinspection PyUnusedLocal,PyUnresolvedReferences
     @staticmethod
     def resolve_config_using_acceptable_arguments(
         profiler: "RuleBasedProfiler",  # noqa: F821
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        variables: Optional[Dict[str, Any]] = None,
+        rules: Optional[Dict[str, Dict[str, Any]]] = None,
     ) -> dict:
-        return profiler.config.to_dict()
+        runtime_config = profiler.config.to_dict()
+        if variables:
+            runtime_config["variables"] = variables
+        if rules:
+            runtime_config["rules"] = rules
+
+        for attr in ("class_name", "module_name"):
+            runtime_config.pop(attr)
+
+        runtime_config["variable_count"] = len(runtime_config["variables"])
+        runtime_config["rule_count"] = len(runtime_config["rules"])
+
+        return runtime_config

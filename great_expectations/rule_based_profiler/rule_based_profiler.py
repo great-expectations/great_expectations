@@ -1008,10 +1008,6 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         domain_builder: DomainBuilder
         parameter_builders: Optional[List[ParameterBuilder]]
         parameter_builder: ParameterBuilder
-        expectation_configuration_builders: Optional[
-            List[ExpectationConfigurationBuilder]
-        ]
-        expectation_configuration_builder: ExpectationConfigurationBuilder
         for rule in rules:
             domain_builder = rule.domain_builder
             if domain_builder.domain_type == MetricDomainTypes.COLUMN:
