@@ -751,23 +751,6 @@ anonymized_legacy_profiler_build_suite_payload_schema = {
 }
 
 
-"""
-name
-config_version
-variables
-rules
-  - ParameterBuilders
-    - anonymized_name
-    - class_name
-    - batch_request
-  - DomainBuilders
-    - class_name
-    - batch_request
-  - ExpectationConfigurationBuilders
-    - class_name
-    - expectation_type
-"""
-
 anonymized_rule_based_profiler_run_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-rule-based-profiler-run-payload",

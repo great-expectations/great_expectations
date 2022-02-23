@@ -4,6 +4,7 @@ import pytest
 from great_expectations.core.usage_statistics.schemas import (
     anonymized_datasource_schema,
     anonymized_init_payload_schema,
+    anonymized_rule_based_profiler_run_schema,
     anonymized_string_schema,
     anonymized_usage_statistics_record_schema,
 )
@@ -138,3 +139,7 @@ def test_run_val_op_message():
         "ge_version": "0.9.7+203.ge3a97f44.dirty",
     }
     jsonschema.validate(message, anonymized_usage_statistics_record_schema)
+
+
+def test_anonymized_rule_based_profiler_validation():
+    anonymized_rule_based_profiler_run_schema,
