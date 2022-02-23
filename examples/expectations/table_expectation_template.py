@@ -239,5 +239,4 @@ class ExpectAlphabeticalColumnNameCountToEqual4(TableExpectation):
 
 
 if __name__ == "__main__":
-    diagnostics = ExpectAlphabeticalColumnNameCountToEqual4().run_diagnostics()
-    print(json.dumps(diagnostics, indent=2))
+    ExpectAlphabeticalColumnNameCountToEqual4().print_diagnostic_checklist()
