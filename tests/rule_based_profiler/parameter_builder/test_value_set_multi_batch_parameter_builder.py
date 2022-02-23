@@ -1,23 +1,32 @@
-# TODO AJB 20220216 Add tests for the following conditions:
-# Test instantiation
-# Test error states
-# Integration tests:
-# Test single batch (alice)
-# Test single batch (alice) exceeds cardinality limit
-# Test multi batch (bobby)
-# Test multi batch (bobby) exceeds cardinality limit
 from typing import Set
+
+import pytest
 
 from great_expectations import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder import (
     ValueSetMultiBatchParameterBuilder,
+    _get_unique_values_from_iterable_of_iterables,
 )
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
+
+
+def test_instantiation_value_set_multi_batch_parameter_builder():
+    _: ValueSetMultiBatchParameterBuilder = ValueSetMultiBatchParameterBuilder(
+        name="my_name",
+    )
+
+
+def test_instantiation_value_set_multi_batch_parameter_builder_no_name():
+    with pytest.raises(TypeError) as excinfo:
+        _: ValueSetMultiBatchParameterBuilder = ValueSetMultiBatchParameterBuilder()
+    assert "__init__() missing 1 required positional argument: 'name'" in str(
+        excinfo.value
+    )
 
 
 def test_value_set_multi_batch_parameter_builder_alice_single_batch(
@@ -145,5 +154,18 @@ def test_value_set_multi_batch_parameter_builder_bobby(
     )
 
 
-def test__get_unique_values_from_iterable_of_iterables():
-    raise NotImplementedError
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        [[[1, 2, 3], [1, 4, 5]], {1, 2, 3, 4, 5}],
+        [[{1, 2, 3}, {1, 4, 5}], {1, 2, 3, 4, 5}],
+        [[[1], [2, 3]], {1, 2, 3}],
+        [[{1}, {2, 3}], {1, 2, 3}],
+        [[[1], [1, 2]], {1, 2}],
+        [[{1}, {1, 2}], {1, 2}],
+        [[[1], [1]], {1}],
+        [[{1}, {1}], {1}],
+    ],
+)
+def test__get_unique_values_from_iterable_of_iterables(test_input, expected):
+    assert _get_unique_values_from_iterable_of_iterables(test_input) == expected
