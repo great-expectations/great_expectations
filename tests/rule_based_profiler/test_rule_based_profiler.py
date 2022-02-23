@@ -819,10 +819,6 @@ def test_reconcile_profiler_rules_existing_rule_full_rule_override_update(
     assert effective_rule_configs_actual == effective_rule_configs_expected
 
 
-def test_run_emits_proper_usage_stats():
-    pass
-
-
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )

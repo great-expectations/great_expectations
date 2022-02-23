@@ -118,7 +118,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         self,
         profiler_config: RuleBasedProfilerConfig,
         data_context: Optional["DataContext"] = None,  # noqa: F821
-    ):
+    ) -> None:
         """
         Create a new RuleBasedProfilerBase using configured rules (as captured in the RuleBasedProfilerConfig object).
 
