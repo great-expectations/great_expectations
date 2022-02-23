@@ -1624,7 +1624,7 @@ def generate_expectation_tests(
                             or "pandas_023" in test["only_for"]
                         ) and int(pd.__version__.split(".")[1]) in [22, 23]:
                             generate_test = True
-                        if ("pandas>=24" in test["only_for"]) and int(
+                        if ("pandas>=024" in test["only_for"]) and int(
                             pd.__version__.split(".")[1]
                         ) > 24:
                             generate_test = True
