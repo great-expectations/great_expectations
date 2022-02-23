@@ -80,7 +80,8 @@ def test_value_set_multi_batch_parameter_builder_bobby(
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
 
-    metric_domain_kwargs: dict = {"column": "pickup_location_id"}
+    metric_domain_kwargs: dict = {"column": "passenger_count"}
+    metric_domain_kwargs_for_parameter_builder: str = "$domain.domain_kwargs"
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -88,13 +89,12 @@ def test_value_set_multi_batch_parameter_builder_bobby(
         "data_asset_name": "my_reports",
     }
 
-    value_set_multi_batch_parameter_builder: ValueSetMultiBatchParameterBuilder = (
-        ValueSetMultiBatchParameterBuilder(
-            name="my_pickup_location_id_value_set",
-            metric_domain_kwargs=metric_domain_kwargs,
-            data_context=data_context,
-            batch_request=batch_request,
-        )
+    value_set_multi_batch_parameter_builder: ValueSetMultiBatchParameterBuilder = ValueSetMultiBatchParameterBuilder(
+        name="my_passenger_count_value_set",
+        metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
+        # metric_domain_kwargs=metric_domain_kwargs,
+        data_context=data_context,
+        batch_request=batch_request,
     )
 
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
@@ -104,18 +104,19 @@ def test_value_set_multi_batch_parameter_builder_bobby(
 
     assert parameter_container.parameter_nodes is None
 
-    value_set_multi_batch_parameter_builder._build_parameters(
-        parameter_container=parameter_container, domain=domain
+    value_set_multi_batch_parameter_builder.build_parameters(
+        parameter_container=parameter_container,
+        domain=domain,
     )
 
     assert len(parameter_container.parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = (
-        "$parameter.my_pickup_location_id_value_set"
+        "$parameter.my_passenger_count_value_set"
     )
-    expected_value_set: List[str] = ["please", "fill", "with", "data"]
+    expected_value_set: List[int] = [0, 1, 2, 3, 4, 5, 6]
     expected_value: dict = {
-        "value_set": expected_value_set,
+        "value": expected_value_set,
     }
 
     assert (
