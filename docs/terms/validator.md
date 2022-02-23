@@ -57,4 +57,4 @@ You can create a Validator through the `get_validator(...)` command of a Data Co
 
 ### Configuration
 
-Creating a Validator with the `get_validator(...)` method will require you to provide and Expectation Suite and a Batch Request.  Other than these parameters, there is no configuration needed for Validators.
+Creating a Validator with the `get_validator(...)` method will require you to provide an Expectation Suite and a Batch Request.  Other than these parameters, there is no configuration needed for Validators.
