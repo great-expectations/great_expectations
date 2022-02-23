@@ -345,6 +345,4 @@ class ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode(
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = (
-        ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode().run_diagnostics()
-    )
+    ExpectColumnValuesToBeUSZipcodeWithinMileRadiusOfGivenZipcode().print_diagnostic_checklist()
