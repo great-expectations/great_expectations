@@ -3,7 +3,7 @@ from ruamel import yaml
 from great_expectations import DataContext
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
-profiler_config = """
+profiler_config = r"""
 # This profiler is meant to be used on the NYC taxi data (yellow_tripdata_sample_<YEAR>-<MONTH>.csv)
 # located in tests/test_sets/taxi_yellow_tripdata_samples/
 
@@ -37,8 +37,8 @@ rules:
       - expectation_type: expect_table_row_count_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        min_value: $parameter.row_count_range.value.min_value
-        max_value: $parameter.row_count_range.value.max_value
+        min_value: $parameter.row_count_range.value.value_range[0]
+        max_value: $parameter.row_count_range.value.value_range[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.row_count_range.details
@@ -84,8 +84,8 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        min_value: $parameter.min_range.value.min_value
-        max_value: $parameter.min_range.value.max_value
+        min_value: $parameter.min_range.value.value_range[0]
+        max_value: $parameter.min_range.value.value_range[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.min_range.details
@@ -93,8 +93,8 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-        min_value: $parameter.max_range.value.min_value
-        max_value: $parameter.max_range.value.max_value
+        min_value: $parameter.max_range.value.value_range[0]
+        max_value: $parameter.max_range.value.value_range[1]
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.max_range.details

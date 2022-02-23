@@ -1,6 +1,6 @@
 import datetime
 from numbers import Number
-from typing import Any, Dict, List, cast
+from typing import Any, Dict, List, Tuple, cast
 
 import numpy as np
 import pandas as pd
@@ -108,7 +108,6 @@ def test_alice_profiler_user_workflow_single_batch(
         ],
         include_citation=True,
     )
-
     assert (
         expectation_suite
         == alice_columnar_table_single_batch["expected_expectation_suite"]
@@ -362,7 +361,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column: Dict[
         str, List[List[Number]]
     ] = {
-        column_name: expectation_kwargs["value_ranges"]
+        column_name: expectation_kwargs["quantile_ranges"]["value_ranges"]
         for column_name, expectation_kwargs in expect_column_quantile_values_to_be_between_expectation_configurations_kwargs_dict.items()
     }
 
@@ -380,7 +379,7 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
     rtol: float = 1.0e-7
     atol: float = 5.0e-2
 
-    value_range: List[Number]
+    value_ranges: List[Tuple[Tuple[float, float]]]
     paired_quantiles: zip
     column_quantiles: List[List[Number]]
     idx: int
@@ -396,12 +395,12 @@ def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
                 "expect_column_quantile_values_to_be_between_quantile_ranges_by_column"
             ][column_name],
         )
-        for value_range in list(paired_quantiles):
+        for value_ranges in list(paired_quantiles):
             for idx in range(2):
                 np.testing.assert_allclose(
-                    actual=value_range[0][idx],
-                    desired=value_range[1][idx],
+                    actual=value_ranges[0][idx],
+                    desired=value_ranges[1][idx],
                     rtol=rtol,
                     atol=atol,
-                    err_msg=f"Actual value of {value_range[0][idx]} differs from expected value of {value_range[1][idx]} by more than {atol + rtol * abs(value_range[1][idx])} tolerance.",
+                    err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {atol + rtol * abs(value_ranges[1][idx])} tolerance.",
                 )

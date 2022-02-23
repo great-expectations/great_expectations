@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.types import (
     Builder,
     Domain,
@@ -54,11 +54,13 @@ class ParameterBuilder(Builder, ABC):
 
     exclude_field_names: Set[str] = {
         "data_context",
+        "batch_list",
     }
 
     def __init__(
         self,
         name: str,
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         data_context: Optional["DataContext"] = None,  # noqa: F821
     ):
@@ -69,6 +71,7 @@ class ParameterBuilder(Builder, ABC):
             name: the name of this parameter builder -- this is user-specified parameter name (from configuration);
             it is not the fully-qualified parameter name; a fully-qualified parameter name must start with "$parameter."
             and may contain one or more subsequent parts (e.g., "$parameter.<my_param_from_config>.<metric_name>").
+            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
             data_context: DataContext
         """
@@ -76,6 +79,8 @@ class ParameterBuilder(Builder, ABC):
         self._name = name
         self._batch_request = batch_request
         self._data_context = data_context
+
+        self._batch_list = batch_list
 
     def build_parameters(
         self,
@@ -95,13 +100,27 @@ class ParameterBuilder(Builder, ABC):
     def name(self) -> str:
         return self._name
 
+    """
+    Full getter/setter accessors for "batch_request" and "batch_list" are for configuring ParameterBuilder dynamically.
+    """
+
     @property
     def batch_request(self) -> Optional[Union[BatchRequest, RuntimeBatchRequest, dict]]:
         return self._batch_request
 
     @batch_request.setter
-    def batch_request(self, batch_request: dict) -> None:
-        self._batch_request = batch_request
+    def batch_request(
+        self, value: Union[BatchRequest, RuntimeBatchRequest, dict]
+    ) -> None:
+        self._batch_request = value
+
+    @property
+    def batch_list(self) -> Optional[List[Batch]]:
+        return self._batch_list
+
+    @batch_list.setter
+    def batch_list(self, value: List[Batch]) -> None:
+        self._batch_list = value
 
     @property
     def data_context(self) -> "DataContext":  # noqa: F821
@@ -126,6 +145,7 @@ class ParameterBuilder(Builder, ABC):
         return get_validator_using_batch_list_or_batch_request(
             purpose="parameter_builder",
             data_context=self.data_context,
+            batch_list=self.batch_list,
             batch_request=self.batch_request,
             domain=domain,
             variables=variables,
@@ -140,6 +160,7 @@ class ParameterBuilder(Builder, ABC):
     ) -> Optional[List[str]]:
         return get_batch_ids_from_batch_list_or_batch_request(
             data_context=self.data_context,
+            batch_list=self.batch_list,
             batch_request=self.batch_request,
             domain=domain,
             variables=variables,
@@ -208,7 +229,7 @@ class ParameterBuilder(Builder, ABC):
         metric_values: MetricValues = []
 
         # The Validator object used for metric calculation purposes.
-        validator: "Validator" = self.get_validator(
+        validator: "Validator" = self.get_validator(  # noqa: F821
             domain=domain,
             variables=variables,
             parameters=parameters,
