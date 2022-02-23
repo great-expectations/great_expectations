@@ -139,7 +139,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "condition_parser": None,
         "quantile_ranges": None,
         "result_format": "BASIC",
-        "allow_relative_error": None,
+        "allow_relative_error": False,
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
