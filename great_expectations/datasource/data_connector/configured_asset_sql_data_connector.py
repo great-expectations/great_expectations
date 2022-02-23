@@ -81,11 +81,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         data_asset_name_suffix = data_asset_config.pop("data_asset_name_suffix", "")
         schema_name = data_asset_config.pop("schema_name", "")
 
-        if schema_name and not data_asset_config["include_schema_name"]:
-            raise ge_exceptions.ProfilerExecutionError(
+        if schema_name and not data_asset_config.get("include_schema_name"):
+            raise ge_exceptions.DataConnectorError(
                 message=f"{self.__class__.__name__} ran into an error while initializing Asset names. Schema {schema_name} was specified, but 'include_schema_name' flag was not set to True."
             )
-            raise ge_exceptions.DataConnectorError(f"{self.__class__}")
 
         if schema_name:
             data_asset_name = schema_name + "." + data_asset_name
