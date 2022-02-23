@@ -86,9 +86,13 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "name": "expect_table_row_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
             "config_version": 1.0,
             "variables": {
-                "num_bootstrap_samples": 9139,
+                "num_bootstrap_samples": 9999,
                 "false_positive_rate": 0.05,
-                "round_decimals": 1,
+                "truncate_values": {
+                    "lower_bound": None,
+                    "upper_bound": None,
+                },
+                "round_decimals": 0,
             },
             "rules": {
                 "row_count_range_rule": {
@@ -103,10 +107,8 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                             "module_name": "great_expectations.rule_based_profiler.parameter_builder",
                             "metric_name": "table.row_count",
                             "false_positive_rate": "$variables.false_positive_rate",
-                            "truncate_values": {
-                                "lower_bound": 0,
-                            },
-                            "round_decimals": 0,
+                            "truncate_values": "$variables.truncate_values",
+                            "round_decimals": "$variables.round_decimals",
                         }
                     ],
                     "expectation_configuration_builders": [

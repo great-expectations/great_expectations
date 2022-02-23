@@ -285,8 +285,8 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.success
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
-        "min_value": -52.0,
-        "max_value": 3004.0,
+        "min_value": -22.5,
+        "max_value": 250.0,
         "strict_min": False,
         "strict_max": False,
         "mostly": 1.0,
@@ -309,7 +309,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
         "min_value": 0.0,
-        "max_value": 3004.0,
+        "max_value": 250.0,
         "strict_min": False,
         "strict_max": False,
         "mostly": 1.0,
@@ -333,7 +333,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     assert result.expectation_config["kwargs"] == {
         "column": "fare_amount",
         "min_value": 0.0,
-        "max_value": 3004.0,
+        "max_value": 250.0,
         "strict_min": False,
         "strict_max": False,
         "mostly": 8.75e-1,
