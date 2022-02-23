@@ -69,6 +69,7 @@ def usage_stats_profiler_config_multiple_rules(
         ],
     }
     usage_stats_profiler_config["rules"]["rule_2"] = rule
+    usage_stats_profiler_config["rule_count"] += 1
     return usage_stats_profiler_config
 
 
@@ -110,7 +111,6 @@ def test_anonymize_profiler_run_multiple_rules(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
     usage_stats_profiler_config_multiple_rules: dict,
 ):
-
     anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
         **usage_stats_profiler_config_multiple_rules
     )
@@ -151,7 +151,7 @@ def test_anonymize_profiler_run_multiple_rules(
             },
         ],
         "config_version": 1.0,
-        "rule_count": 1,
+        "rule_count": 2,
         "variable_count": 1,
     }
 
