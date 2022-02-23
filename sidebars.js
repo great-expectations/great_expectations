@@ -371,10 +371,12 @@ module.exports = {
           label: 'Technical Terms',
           items: [
             'terms/action',
+            'terms/custom_expectation',
             'terms/checkpoint',
-            'terms/data_asset',
-            'terms/data_context',
             'terms/datasource',
+            'terms/data_context',
+            'terms/data_asset',
+            'terms/data_docs',
             'terms/evaluation_parameter',
             'terms/execution_engine',
             'terms/expectation',
@@ -382,7 +384,10 @@ module.exports = {
             'terms/metric',
             'terms/plugin',
             'terms/profiler',
+            'terms/plugin',
+            'terms/renderer',
             'terms/supporting_resource',
+            'terms/validator',
             'terms/validation_result'
           ]
         },
