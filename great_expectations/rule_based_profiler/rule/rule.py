@@ -152,6 +152,10 @@ class Rule(SerializableDictDot):
     def name(self) -> str:
         return self._name
 
+    @name.setter
+    def name(self, value: str) -> None:
+        self._name = value
+
     def _get_parameter_builders_as_dict(self) -> Dict[str, ParameterBuilder]:
         parameter_builders: List[ParameterBuilder] = self.parameter_builders
         if parameter_builders is None:

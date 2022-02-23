@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
@@ -12,6 +12,7 @@ class ColumnDomainBuilder(DomainBuilder):
     def __init__(
         self,
         data_context: "DataContext",  # noqa: F821
+        batch: Optional[Batch] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         column_names: Optional[List[str]] = None,
     ):
@@ -23,6 +24,7 @@ class ColumnDomainBuilder(DomainBuilder):
 
         super().__init__(
             data_context=data_context,
+            batch=batch,
             batch_request=batch_request,
         )
 
@@ -31,6 +33,11 @@ class ColumnDomainBuilder(DomainBuilder):
     @property
     def domain_type(self) -> Union[str, MetricDomainTypes]:
         return MetricDomainTypes.COLUMN
+
+    """
+    All DomainBuilder classes, whose "domain_type" property equals "MetricDomainTypes.COLUMN", must extend present class
+    (ColumnDomainBuilder) in order to provide full getter/setter accessor for "column_names" property (as override).
+    """
 
     @property
     def column_names(self) -> List[str]:
