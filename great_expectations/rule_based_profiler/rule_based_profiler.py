@@ -4,7 +4,7 @@ import logging
 import uuid
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import (
@@ -96,19 +96,25 @@ class ReconciliationDirectives(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
-DEFAULT_RECONCILATION_DIRECTIVES: ReconciliationDirectives = ReconciliationDirectives(
-    variables=ReconciliationStrategy.UPDATE,
-    domain_builder=ReconciliationStrategy.UPDATE,
-    parameter_builder=ReconciliationStrategy.UPDATE,
-    expectation_configuration_builder=ReconciliationStrategy.UPDATE,
-)
-
-
 class BaseRuleBasedProfiler(ConfigPeer):
     """
     BaseRuleBasedProfiler class is initialized from RuleBasedProfilerConfig typed object and contains all functionality
     in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
     """
+
+    DEFAULT_RECONCILATION_DIRECTIVES: ReconciliationDirectives = (
+        ReconciliationDirectives(
+            variables=ReconciliationStrategy.UPDATE,
+            domain_builder=ReconciliationStrategy.UPDATE,
+            parameter_builder=ReconciliationStrategy.UPDATE,
+            expectation_configuration_builder=ReconciliationStrategy.UPDATE,
+        )
+    )
+
+    EXPECTATION_SUCCESS_KEYS: Set[str] = {
+        "auto",
+        "profiler_config",
+    }
 
     def __init__(
         self,
@@ -375,7 +381,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         :return: reconciled variables in their canonical ParameterContainer object form
         """
         effective_variables: ParameterContainer
-        if variables is not None and isinstance(variables, dict):
+        if variables and isinstance(variables, dict):
             variables_configs: dict = self.variables.to_dict()["parameter_nodes"][
                 "variables"
             ]["variables"]
