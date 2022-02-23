@@ -317,5 +317,4 @@ class ExpectValueAtIndex(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectValueAtIndex().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectValueAtIndex().print_diagnostic_checklist()
