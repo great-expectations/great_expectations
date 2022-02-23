@@ -6307,6 +6307,31 @@ def bobby_columnar_table_multi_batch(empty_data_context):
             }
         ),
     ]
+
+    my_rule_for_very_few_cardinality_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_be_in_set",
+                "kwargs": {
+                    "column": "VendorID",
+                    "value_set": [1, 2, 4],
+                },
+                "meta": {},
+            }
+        ),
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_be_in_set",
+                "kwargs": {
+                    "column": "passenger_count",
+                    "value_set": [0, 1, 2, 3, 4, 5, 6],
+                },
+                "meta": {},
+            }
+        ),
+    ]
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(
@@ -6321,6 +6346,9 @@ def bobby_columnar_table_multi_batch(empty_data_context):
 
     expectation_configurations.extend(
         my_column_regex_rule_expectation_configurations_oneshot_sampling_method
+    )
+    expectation_configurations.extend(
+        my_rule_for_very_few_cardinality_expectation_configurations
     )
     expectation_suite_name_oneshot_sampling_method: str = (
         "bobby_columnar_table_multi_batch_oneshot_sampling_method"

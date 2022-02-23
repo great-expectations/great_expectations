@@ -252,7 +252,7 @@ class ParameterBuilder(Builder, ABC):
 
             metric_values.append(metric_value)
 
-        metric_values = np.array(metric_values, dtype=object)
+        metric_values = np.array(metric_values)
 
         self._sanitize_metric_computation(
             metric_name=metric_name,
