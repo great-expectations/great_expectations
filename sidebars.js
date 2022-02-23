@@ -373,6 +373,7 @@ module.exports = {
             'terms/action',
             'terms/batch',
             'terms/batch_request',
+            'terms/custom_expectation',
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
@@ -386,6 +387,7 @@ module.exports = {
             'terms/expectation_suite',
             'terms/plugin',
             'terms/supporting_resource',
+            'terms/validator',
             'terms/validation_result'
           ]
         },
