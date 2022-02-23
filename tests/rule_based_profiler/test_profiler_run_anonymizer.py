@@ -47,6 +47,31 @@ def usage_stats_profiler_config() -> dict:
     return config
 
 
+@pytest.fixture
+def usage_stats_profiler_config_multiple_rules(
+    usage_stats_profiler_config: dict,
+) -> dict:
+    rule: dict = {
+        "domain_builder": {"class_name": "TableDomainBuilder"},
+        "expectation_configuration_builders": [
+            {
+                "class_name": "DefaultExpectationConfigurationBuilder",
+                "expectation_type": "expect_column_values_to_be_between",
+                "meta": {"details": {"note": "Here's another rule"}},
+            }
+        ],
+        "parameter_builders": [
+            {
+                "class_name": "MetricMultiBatchParameterBuilder",
+                "metric_name": "my_other_metric",
+                "name": "my_additional_parameter",
+            }
+        ],
+    }
+    usage_stats_profiler_config["rules"]["rule_2"] = rule
+    return usage_stats_profiler_config
+
+
 def test_anonymize_profiler_run(
     profiler_run_anonymizer: ProfilerRunAnonymizer,
     usage_stats_profiler_config: dict,
@@ -78,6 +103,56 @@ def test_anonymize_profiler_run(
         ],
         "variable_count": 1,
         "rule_count": 1,
+    }
+
+
+def test_anonymize_profiler_run_multiple_rules(
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
+    usage_stats_profiler_config_multiple_rules: dict,
+):
+
+    anonymized_result: dict = profiler_run_anonymizer.anonymize_profiler_run(
+        **usage_stats_profiler_config_multiple_rules
+    )
+    assert anonymized_result == {
+        "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
+        "anonymized_rules": [
+            {
+                "anonymized_domain_builder": {"class_name": "TableDomainBuilder"},
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    }
+                ],
+                "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                    }
+                ],
+            },
+            {
+                "anonymized_domain_builder": {"class_name": "TableDomainBuilder"},
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "expectation_type": "expect_column_values_to_be_between",
+                    }
+                ],
+                "anonymized_name": "0bac2cecbb0cf8bb704e86710941434e",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_name": "b7719efec76c6ebe30230fc1ec023beb",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                    }
+                ],
+            },
+        ],
+        "config_version": 1.0,
+        "rule_count": 1,
+        "variable_count": 1,
     }
 
 
