@@ -25,7 +25,7 @@ This guide will help you implement renderers for your custom Expectations, allow
     
 </Prerequisites>
 
-See also this [complete custom expectation with renderer example](https://github.com/superconductive/ge_tutorials/tree/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/custom_column_max_example.py).
+See also this [complete custom expectation with renderer example](https://github.com/superconductive/ge_tutorials/blob/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py).
 
 Steps
 -----

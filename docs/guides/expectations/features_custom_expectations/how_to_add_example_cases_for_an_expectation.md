@@ -159,7 +159,7 @@ This guide will leave you with test coverage sufficient for [contribution](../co
 If you're interested in having your contribution accepted at a Beta level, these tests will need to pass for all supported backends (Pandas, Spark, & SQLAlchemy).
 
 For full acceptance into the Great Expectations codebase at a Production level, we require a more robust test suite. 
-If you believe your Custom Expectation is otherwise ready for contribution at a Production level, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pull-requests), and we will work with you to ensure adequate testing.
+If you believe your Custom Expectation is otherwise ready for contribution at a Production level, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pulls), and we will work with you to ensure adequate testing.
 
 :::note
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.

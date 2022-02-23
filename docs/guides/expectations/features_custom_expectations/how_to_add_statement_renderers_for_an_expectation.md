@@ -344,7 +344,7 @@ Renderers are not a requirement for for [contribution](../contributing/how_to_co
 
 Implementing at least one Prescriptive and Diagnostic Renderer from this guide is required for contribution back to Great Expectations at a Beta or Production level.
 
-If you believe your Custom Expectation is ready for contribution, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pull-requests), and we will work with you to ensure your Custom Expectation meets these standards.
+If you believe your Custom Expectation is ready for contribution, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pulls), and we will work with you to ensure your Custom Expectation meets these standards.
 
 :::note
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
