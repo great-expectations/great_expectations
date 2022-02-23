@@ -89,10 +89,13 @@ class ProfilerRunAnonymizer(Anonymizer):
         anonymized_domain_builder: dict = {}
         anonymized_domain_builder["class_name"] = domain_builder.get("class_name")
 
-        batch_request: dict = domain_builder.get("batch_request", {})
-        anonymized_domain_builder[
-            "anonymized_batch_request"
-        ] = self._batch_request_anonymizer.anonymize_batch_request(*(), **batch_request)
+        batch_request: Optional[dict] = domain_builder.get("batch_request")
+        if batch_request:
+            anonymized_domain_builder[
+                "anonymized_batch_request"
+            ] = self._batch_request_anonymizer.anonymize_batch_request(
+                *(), **batch_request
+            )
 
         return anonymized_domain_builder
 
@@ -118,10 +121,13 @@ class ProfilerRunAnonymizer(Anonymizer):
 
         anonymized_parameter_builder["class_name"] = parameter_builder.get("class_name")
 
-        batch_request: dict = parameter_builder.get("batch_request", {})
-        anonymized_parameter_builder[
-            "anonymized_batch_request"
-        ] = self._batch_request_anonymizer.anonymize_batch_request(*(), **batch_request)
+        batch_request: Optional[dict] = parameter_builder.get("batch_request")
+        if batch_request:
+            anonymized_parameter_builder[
+                "anonymized_batch_request"
+            ] = self._batch_request_anonymizer.anonymize_batch_request(
+                *(), **batch_request
+            )
 
         return anonymized_parameter_builder
 
@@ -153,6 +159,12 @@ class ProfilerRunAnonymizer(Anonymizer):
         anonymized_expectation_configuration_builder[
             "expectation_type"
         ] = expectation_configuration_builder.get("expectation_type")
+
+        condition: Optional[str] = expectation_configuration_builder.get("condition")
+        if condition:
+            anonymized_expectation_configuration_builder[
+                "anonymized_condition"
+            ] = self.anonymize(condition)
 
         return anonymized_expectation_configuration_builder
 
