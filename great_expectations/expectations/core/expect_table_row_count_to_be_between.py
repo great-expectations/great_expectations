@@ -86,7 +86,9 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
             "name": "expect_table_row_count_to_be_between",  # Convention: use "expectation_type" as profiler name.
             "config_version": 1.0,
             "variables": {
+                "num_bootstrap_samples": 9139,
                 "false_positive_rate": 0.05,
+                "round_decimals": 1,
             },
             "rules": {
                 "row_count_range_rule": {
