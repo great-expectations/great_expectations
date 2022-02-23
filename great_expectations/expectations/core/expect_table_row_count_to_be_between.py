@@ -89,7 +89,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                 "num_bootstrap_samples": 9999,
                 "false_positive_rate": 0.05,
                 "truncate_values": {
-                    "lower_bound": None,
+                    "lower_bound": 0,
                     "upper_bound": None,
                 },
                 "round_decimals": 0,
