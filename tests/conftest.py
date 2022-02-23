@@ -5351,10 +5351,30 @@ def alice_columnar_table_single_batch(empty_data_context):
             ]
         )
 
+    my_rule_for_one_cardinality_expectation_configurations: List[
+        ExpectationConfiguration
+    ] = [
+        ExpectationConfiguration(
+            **{
+                "expectation_type": "expect_column_values_to_be_in_set",
+                "kwargs": {
+                    "column": "user_agent",
+                    "value_set": [
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+                    ],
+                },
+                "meta": {},
+            }
+        ),
+    ]
+
     expectation_configurations: List[ExpectationConfiguration] = []
 
     expectation_configurations.extend(my_rule_for_user_ids_expectation_configurations)
     expectation_configurations.extend(my_rule_for_timestamps_expectation_configurations)
+    expectation_configurations.extend(
+        my_rule_for_one_cardinality_expectation_configurations
+    )
 
     expectation_suite_name: str = "alice_columnar_table_single_batch"
     expected_expectation_suite: ExpectationSuite = ExpectationSuite(
