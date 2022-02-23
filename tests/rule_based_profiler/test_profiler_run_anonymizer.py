@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict
 
 import pytest
 
@@ -91,7 +91,8 @@ def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
         "data_asset_name": "my_data_asset",
     }
 
-    rule = usage_stats_profiler_config["rules"]["rule_1"]
+    rules = usage_stats_profiler_config["rules"]
+    rule = rules["rule_1"]
     rule["domain_builder"]["batch_request"] = batch_request
     rule["parameter_builders"][0]["batch_request"] = batch_request
 
@@ -181,55 +182,36 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
         profiler=profiler_with_placeholder_args, rules=rules
     )
 
-    assert len(config["rules"]) == 1 and rule_name in config["rules"][0]
+    assert len(config["rules"]) == 1 and rule_name == config["rules"][0]["name"]
 
 
-def test_resolve_config_using_acceptable_arguments_with_runtime_overides_with_batch_requests(
+def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(
     profiler_with_placeholder_args: RuleBasedProfiler, usage_stats_profiler_config: dict
 ):
-    batch_request = BatchRequest(
-        datasource_name="my_datasource",
-        data_connector_name="my_basic_data_connector",
-        data_asset_name="my_data_asset",
+    datasource_name = "my_datasource"
+    data_connector_name = "my_basic_data_connector"
+    data_asset_name = "my_data_asset"
+
+    batch_request: BatchRequest = BatchRequest(
+        datasource_name=datasource_name,
+        data_connector_name=data_connector_name,
+        data_asset_name=data_asset_name,
     )
 
-    rules: Dict[str, dict] = usage_stats_profiler_config["rules"]["rule_1"]
-    rules["domain_builder"]["batch_request"] = batch_request
+    rules: Dict[str, dict] = usage_stats_profiler_config["rules"]
+    rules["rule_1"]["domain_builder"]["batch_request"] = batch_request
 
     config: dict = ProfilerRunAnonymizer.resolve_config_using_acceptable_arguments(
         profiler=profiler_with_placeholder_args, rules=rules
     )
 
-    # TODO(cdkini): Ensure this assert is deterministic!
-    assert config == {
-        "name": "my_first_profiler",
-        "config_version": 1.0,
-        "rules": [
-            {
-                "domain_builder": {
-                    "batch_request": {
-                        "data_asset_name": "my_data_asset",
-                        "data_connector_name": "my_basic_data_connector",
-                        "datasource_name": "my_datasource",
-                    },
-                    "class_name": "TableDomainBuilder",
-                },
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                        "meta": {"details": {"note": "Hello " "World"}},
-                    }
-                ],
-                "parameter_builders": [
-                    {
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "metric_name": "my_metric",
-                        "name": "my_parameter",
-                    }
-                ],
-            }
-        ],
-        "variable_count": 1,
-        "rule_count": 1,
-    }
+    assert all(
+        attr in config
+        for attr in ("name", "config_version", "rules", "variable_count", "rule_count")
+    )
+
+    domain_builder: dict = config["rules"][0]["domain_builder"]
+    converted_batch_request: dict = domain_builder["batch_request"]
+    assert converted_batch_request["datasource_name"] == datasource_name
+    assert converted_batch_request["data_connector_name"] == data_connector_name
+    assert converted_batch_request["data_asset_name"] == data_asset_name

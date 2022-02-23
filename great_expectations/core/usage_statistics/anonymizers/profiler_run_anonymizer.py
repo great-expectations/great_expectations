@@ -87,15 +87,12 @@ class ProfilerRunAnonymizer(Anonymizer):
 
     def _anonymize_domain_builder(self, domain_builder: dict) -> dict:
         anonymized_domain_builder: dict = {}
-        anonymized_domain_builder["class_name"] = domain_builder["class_name"]
+        anonymized_domain_builder["class_name"] = domain_builder.get("class_name")
 
-        batch_request: Optional[dict] = domain_builder.get("batch_request")
-        if batch_request:
-            anonymized_domain_builder[
-                "anonymized_batch_request"
-            ] = self._batch_request_anonymizer.anonymize_batch_request(
-                *(), **batch_request
-            )
+        batch_request: dict = domain_builder.get("batch_request", {})
+        anonymized_domain_builder[
+            "anonymized_batch_request"
+        ] = self._batch_request_anonymizer.anonymize_batch_request(*(), **batch_request)
 
         return anonymized_domain_builder
 
@@ -105,25 +102,28 @@ class ProfilerRunAnonymizer(Anonymizer):
         anonymized_parameter_builders: List[dict] = []
 
         for parameter_builder in parameter_builders:
-            anonymized_parameter_builder: dict = {}
-
-            anonymized_parameter_builder["anonymized_name"] = self.anonymize(
-                parameter_builder["name"]
+            anonymized_parameter_builder: dict = self._anonymize_parameter_builder(
+                parameter_builder
             )
-
-            anonymized_parameter_builder["class_name"] = parameter_builder["class_name"]
-
-            batch_request: Optional[dict] = parameter_builder.get("batch_request")
-            if batch_request:
-                anonymized_parameter_builder[
-                    "anonymized_batch_request"
-                ] = self._batch_request_anonymizer.anonymize_batch_request(
-                    *(), **batch_request
-                )
-
             anonymized_parameter_builders.append(anonymized_parameter_builder)
 
         return anonymized_parameter_builders
+
+    def _anonymize_parameter_builder(self, parameter_builder: dict) -> dict:
+        anonymized_parameter_builder: dict = {}
+
+        anonymized_parameter_builder["anonymized_name"] = self.anonymize(
+            parameter_builder.get("name")
+        )
+
+        anonymized_parameter_builder["class_name"] = parameter_builder.get("class_name")
+
+        batch_request: dict = parameter_builder.get("batch_request", {})
+        anonymized_parameter_builder[
+            "anonymized_batch_request"
+        ] = self._batch_request_anonymizer.anonymize_batch_request(*(), **batch_request)
+
+        return anonymized_parameter_builder
 
     def _anonymize_expectation_configuration_builders(
         self, expectation_configuration_builders: List[dict]
@@ -131,20 +131,30 @@ class ProfilerRunAnonymizer(Anonymizer):
         anonymized_expectation_configuration_builders: List[dict] = []
 
         for expectation_configuration_builder in expectation_configuration_builders:
-            anonymized_expectation_configuration_builder: dict = {}
-
-            anonymized_expectation_configuration_builder[
-                "class_name"
-            ] = expectation_configuration_builder["class_name"]
-            anonymized_expectation_configuration_builder[
-                "expectation_type"
-            ] = expectation_configuration_builder["expectation_type"]
-
+            anonymized_expectation_configuration_builder: dict = (
+                self._anonymize_expectation_configuration_builder(
+                    expectation_configuration_builder
+                )
+            )
             anonymized_expectation_configuration_builders.append(
                 anonymized_expectation_configuration_builder
             )
 
         return anonymized_expectation_configuration_builders
+
+    def _anonymize_expectation_configuration_builder(
+        self, expectation_configuration_builder: dict
+    ) -> dict:
+        anonymized_expectation_configuration_builder: dict = {}
+
+        anonymized_expectation_configuration_builder[
+            "class_name"
+        ] = expectation_configuration_builder.get("class_name")
+        anonymized_expectation_configuration_builder[
+            "expectation_type"
+        ] = expectation_configuration_builder.get("expectation_type")
+
+        return anonymized_expectation_configuration_builder
 
     # noinspection PyUnusedLocal,PyUnresolvedReferences
     @staticmethod
@@ -153,13 +163,19 @@ class ProfilerRunAnonymizer(Anonymizer):
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
     ) -> dict:
-        runtime_config = profiler.config.to_dict()
+        runtime_config: dict = profiler.config.to_dict()
+
+        # If applicable, override config attributes with runtime args
         if variables:
             runtime_config["variables"] = variables
         if rules:
-            runtime_config["rules"] = [rules]
-        else:
-            runtime_config["rules"] = [runtime_config["rules"]]
+            runtime_config["rules"] = rules
+
+        resolved_rules: List[dict] = []
+        for name, rule in runtime_config["rules"].items():
+            rule["name"] = name
+            resolved_rules.append(rule)
+        runtime_config["rules"] = resolved_rules
 
         runtime_config["variable_count"] = len(runtime_config["variables"])
         runtime_config["rule_count"] = len(runtime_config["rules"])
