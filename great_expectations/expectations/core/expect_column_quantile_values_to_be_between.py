@@ -74,11 +74,11 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
            <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
 
            Args:
-               column (str): \
+               :column (str): \
                    The column name.
-               quantile_ranges (dictionary): \
+               :quantile_ranges (dictionary): \
                    Quantiles and associated value ranges for the column. See above for details.
-               allow_relative_error (boolean): \
+               :allow_relative_error (boolean or string): \
                    Whether to allow relative error in quantile communications on backends that support or require it.
 
            Other Parameters:
@@ -139,7 +139,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "condition_parser": None,
         "quantile_ranges": None,
         "result_format": "BASIC",
-        "allow_relative_error": False,
+        "allow_relative_error": None,
         "include_config": True,
         "catch_exceptions": False,
         "meta": None,
@@ -238,10 +238,6 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         quantile_ranges = configuration.kwargs["quantile_ranges"]
         quantiles = quantile_ranges["quantiles"]
         quantile_value_ranges = quantile_ranges["value_ranges"]
-        if "allow_relative_error" in configuration.kwargs:
-            allow_relative_error = configuration.kwargs["allow_relative_error"]
-        else:
-            allow_relative_error = False
 
         if len(quantiles) != len(quantile_value_ranges):
             raise ValueError(
