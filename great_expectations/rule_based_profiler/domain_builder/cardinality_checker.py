@@ -1,3 +1,4 @@
+import abc
 import enum
 from dataclasses import dataclass
 from typing import Optional, Tuple, Union
@@ -6,15 +7,18 @@ from great_expectations.exceptions import ProfilerConfigurationError
 
 
 @dataclass
-class RelativeCardinalityLimit:
+class CardinalityLimit(abc.ABC):
     name: str
+
+
+@dataclass
+class RelativeCardinalityLimit(CardinalityLimit):
     max_proportion_unique: float
     related_metric_name: str = "column.unique_proportion"
 
 
 @dataclass
-class AbsoluteCardinalityLimit:
-    name: str
+class AbsoluteCardinalityLimit(CardinalityLimit):
     max_unique_values: int
     related_metric_name: str = "column.distinct_values.count"
 
@@ -170,9 +174,9 @@ class CardinalityChecker:
             )
 
         if cardinality_limit_mode is not None:
-            if isinstance(
-                cardinality_limit_mode, self.SUPPORTED_CARDINALITY_LIMIT_MODE_CLASSES
-            ) or isinstance(cardinality_limit_mode, str):
+            if isinstance(cardinality_limit_mode, CardinalityLimit) or isinstance(
+                cardinality_limit_mode, str
+            ):
                 pass
             else:
                 raise ProfilerConfigurationError(
