@@ -750,6 +750,84 @@ anonymized_legacy_profiler_build_suite_payload_schema = {
     "additionalProperties": False,
 }
 
+
+"""
+name
+config_version
+variables
+rules
+  - ParameterBuilders
+    - anonymized_name
+    - class_name
+    - batch_request
+  - DomainBuilders
+    - class_name
+    - batch_request
+  - ExpectationConfigurationBuilders
+    - class_name
+    - expectation_type
+"""
+
+anonymized_rule_based_profiler_run_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-rule-based-profiler-run-payload",
+    "definitions": {
+        "empty_payload": empty_payload_schema,
+        "anonymized_string": anonymized_string_schema,
+        # "anonymized_datasource_name": anonymized_datasource_name_schema,
+        # "anonymized_run_time": anonymized_run_time_schema,
+        "anonymized_batch_request": anonymized_batch_request_schema,
+        # "anonymized_action": anonymized_action_schema,
+        # "anonymized_action_list": anonymized_action_list_schema,
+        # "anonymized_validation": anonymized_validation_schema,
+        # "anonymized_validations": anonymized_validations_list_schema,
+    },
+    "oneOf": [
+        {
+            "type": "object",
+            "properties": {
+                "anonymized_name": {"$ref": "#/definitions/anonymized_string"},
+                "config_version": {"type": "number", "minimum": 1},
+                "anonymized_expectation_suite_name": {
+                    "$ref": "#/definitions/anonymized_string"
+                },
+                "anonymized_batch_request": {
+                    "$ref": "#/definitions/anonymized_batch_request"
+                },
+                "anonymized_action_list": {
+                    "$ref": "#/definitions/anonymized_action_list"
+                },
+                "anonymized_validations": {
+                    "$ref": "#/definitions/anonymized_validations"
+                },
+                "anonymized_run_id": {"$ref": "#/definitions/anonymized_string"},
+                "anonymized_run_name": {"$ref": "#/definitions/anonymized_run_name"},
+                "anonymized_run_time": {"$ref": "#/definitions/anonymized_run_time"},
+                "anonymized_expectation_suite_ge_cloud_id": {
+                    "$ref": "#/definitions/anonymized_string"
+                },
+                "checkpoint_optional_top_level_keys": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "evaluation_parameters",
+                            "runtime_configuration",
+                            "profilers",
+                        ],
+                    },
+                    "uniqueItems": True,
+                },
+            },
+            "required": ["anonymized_name", "config_version"],
+            "additionalProperties": False,
+        },
+        {"$ref": "#/definitions/empty_payload"},
+    ],
+}
+
 anonymized_usage_statistics_record_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "title": "anonymized-usage-statistics-record",
@@ -781,6 +859,7 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_validations": anonymized_validations_list_schema,
         "anonymized_checkpoint_run": anonymized_checkpoint_run_schema,
         "anonymized_legacy_profiler_build_suite_payload": anonymized_legacy_profiler_build_suite_payload_schema,
+        "anonymized_rule_based_profiler_run": anonymized_rule_based_profiler_run_schema,
     },
     "type": "object",
     "properties": {
@@ -930,6 +1009,17 @@ anonymized_usage_statistics_record_schema = {
                 },
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_legacy_profiler_build_suite_payload"
+                },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "enum": ["profiler.run"],
+                },
+                "event_payload": {
+                    "$ref": "#/definitions/anonymized_rule_based_profiler_run"
                 },
             },
         },
