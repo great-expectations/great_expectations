@@ -750,13 +750,45 @@ anonymized_legacy_profiler_build_suite_payload_schema = {
     "additionalProperties": False,
 }
 
-anonymized_domain_builder_schema = {}
+anonymized_domain_builder_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-domain-builder",
+    "definitions": {},
+    "oneOf": [
+        {},
+        {"$ref": "#/definitions/empty_payload"},
+    ],
+}
 
-anonymized_parameter_builders_schema = {}
+anonymized_parameter_builders_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-parameter-builders",
+    "definitions": {},
+    "oneOf": [
+        {},
+        {"$ref": "#/definitions/empty_payload"},
+    ],
+}
 
-anonymized_expectation_configuration_builders_schema = {}
+anonymized_expectation_configuration_builders_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-expectation-configuration-builders",
+    "definitions": {},
+    "oneOf": [
+        {},
+        {"$ref": "#/definitions/empty_payload"},
+    ],
+}
 
-anonymized_rules_schema = {}
+anonymized_rules_schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "anonymized-rules",
+    "definitions": {},
+    "oneOf": [
+        {},
+        {"$ref": "#/definitions/empty_payload"},
+    ],
+}
 
 anonymized_rule_based_profiler_run_schema = {
     "$schema": "http://json-schema.org/draft-04/schema#",
