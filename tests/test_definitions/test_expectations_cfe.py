@@ -185,7 +185,7 @@ def pytest_generate_tests(metafunc):
                                     and minor in ["22", "23"]
                                 ):
                                     generate_test = True
-                                if ("pandas>=24" in only_for) and (
+                                if ("pandas>=024" in only_for) and (
                                     (major == "0" and int(minor) >= 24)
                                     or int(major) >= 1
                                 ):
