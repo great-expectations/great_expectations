@@ -40,7 +40,7 @@ Most workflows for creating Expectations automatically bundle them into an Expec
 
 <ValidateHeader/>
 
-When Validating Data it is possible to have Checkpoints configured to require an Expectation Suite as a parameter, or to have an Expectation Suite pre-defined in the Checkpoint's configuration.  In either case, your Expectation Store will be used behind the scenes to retriev the Expectation Suite in question (unless you are providing an Expectation Suite that still exists in memory from the Create Expectations step).
+When Validating Data it is possible to have Checkpoints configured to require an Expectation Suite as a parameter, or to have an Expectation Suite pre-defined in the Checkpoint's configuration.  In either case, your Expectation Store will be used behind the scenes to retrieve the Expectation Suite in question (unless you are providing an Expectation Suite that still exists in memory from the Create Expectations step).
 
 ## API basics
 
