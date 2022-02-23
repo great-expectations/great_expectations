@@ -1,6 +1,6 @@
 import enum
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.exceptions import ProfilerConfigurationError
@@ -70,23 +70,49 @@ class CardinalityChecker:
             allowable cardinality.
     """
 
-    def __init__(self, cardinality_limit_mode: CardinalityLimitMode):
-        self.supported_cardinality_limit_modes = (
-            AbsoluteCardinalityLimit,
-            RelativeCardinalityLimit,
-        )
-        self.supported_cardinality_limit_mode_names = (
-            mode.__name__ for mode in self.supported_cardinality_limit_modes
-        )
-        self._cardinality_limit_mode = cardinality_limit_mode
-        if not isinstance(
-            self._cardinality_limit_mode, self.supported_cardinality_limit_modes
-        ):
-            raise ProfilerConfigurationError(
-                f"Please specify a supported cardinality limit type, supported types are {','.join(self.supported_cardinality_limit_mode_names)}"
-            )
+    SUPPORTED_CARDINALITY_LIMIT_MODE_CLASSES: Tuple[
+        Union[AbsoluteCardinalityLimit, RelativeCardinalityLimit]
+    ] = (
+        AbsoluteCardinalityLimit,
+        RelativeCardinalityLimit,
+    )
+    SUPPORTED_CARDINALITY_LIMIT_MODE_STRINGS: Tuple[str] = (
+        mode.name for mode in CardinalityLimitMode
+    )
 
-    def cardinality_within_limit(self, metric_value: Union[int, float]):
+    def __init__(
+        self,
+        cardinality_limit_mode: Optional[CardinalityLimitMode] = None,
+        cardinality_max_rows: Optional[int] = None,
+        cardinality_max_proportion_unique: Optional[int] = None,
+    ):
+        self.supported_cardinality_limit_mode_class_names = (
+            mode.__name__ for mode in self.SUPPORTED_CARDINALITY_LIMIT_MODE_CLASSES
+        )
+
+        self._cardinality_limit_mode = self._convert_to_cardinality_mode(
+            cardinality_limit_mode=cardinality_limit_mode,
+            cardinality_max_rows=cardinality_max_rows,
+            cardinality_max_proportion_unique=cardinality_max_proportion_unique,
+        )
+
+    @property
+    def cardinality_limit_mode(self) -> CardinalityLimitMode:
+        return self._cardinality_limit_mode
+
+    def cardinality_within_limit(self, metric_value: Union[int, float]) -> bool:
+        """Determine if the cardinality is within configured limit.
+
+        The metric_value supplied should be either a proportion of unique values
+        or number of unique values based on the configured cardinality limit.
+
+        Args:
+            metric_value: int if number of unique values, float if proportion
+                of unique values.
+
+        Returns:
+            boolean of whether the cardinality is within the configured limit
+        """
         self._validate_metric_value(metric_value=metric_value)
         if isinstance(self._cardinality_limit_mode, AbsoluteCardinalityLimit):
             return metric_value <= self._cardinality_limit_mode.max_unique_values
@@ -104,6 +130,62 @@ class CardinalityChecker:
                 f"Value of cardinality (number of rows or percent unique) should be greater than 0.00, your value is {metric_value}"
             )
 
+    def _convert_to_cardinality_mode(
+        self,
+        cardinality_limit_mode: Optional[CardinalityLimitMode] = None,
+        cardinality_max_rows: Optional[int] = None,
+        cardinality_max_proportion_unique: Optional[int] = None,
+    ):
+
+        self._validate_input_parameters(
+            cardinality_limit_mode=cardinality_limit_mode,
+            cardinality_max_rows=cardinality_max_rows,
+            cardinality_max_proportion_unique=cardinality_max_proportion_unique,
+        )
+
+        if cardinality_limit_mode is not None:
+            if isinstance(cardinality_limit_mode, str):
+                return CardinalityLimitMode[cardinality_limit_mode.upper()].value
+            else:
+                return cardinality_limit_mode
+        if cardinality_max_rows is not None:
+            return AbsoluteCardinalityLimit(
+                name=f"custom_abs_{cardinality_max_rows}",
+                max_unique_values=cardinality_max_rows,
+            )
+        if cardinality_max_proportion_unique is not None:
+            return RelativeCardinalityLimit(
+                name=f"custom_rel_{cardinality_max_proportion_unique}",
+                max_proportion_unique=cardinality_max_proportion_unique,
+            )
+
+    def _validate_input_parameters(
+        self,
+        cardinality_limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
+        cardinality_max_rows: Optional[int] = None,
+        cardinality_max_proportion_unique: Optional[int] = None,
+    ):
+        params = (
+            cardinality_limit_mode,
+            cardinality_max_rows,
+            cardinality_max_proportion_unique,
+        )
+        num_params: int = sum([0 if param is None else 1 for param in params])
+        if num_params != 1:
+            raise ProfilerConfigurationError(
+                f"Please pass ONE of the following parameters: cardinality_limit_mode, cardinality_max_rows, cardinality_max_proportion_unique, you passed {num_params} parameters."
+            )
+
+        if cardinality_limit_mode is not None:
+            if isinstance(
+                cardinality_limit_mode, self.SUPPORTED_CARDINALITY_LIMIT_MODE_CLASSES
+            ) or isinstance(cardinality_limit_mode, str):
+                pass
+            else:
+                raise ProfilerConfigurationError(
+                    f"Please specify a supported cardinality limit type, supported classes are {','.join(self.supported_cardinality_limit_mode_class_names)} and supported strings are {','.join(self.SUPPORTED_CARDINALITY_LIMIT_MODE_STRINGS)}"
+                )
+
 
 class CategoricalColumnDomainBuilder(DomainBuilder):
     """ """
@@ -113,6 +195,8 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         data_context: "DataContext",  # noqa: F821
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         cardinality_limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
+        cardinality_max_rows: Optional[int] = None,
+        cardinality_max_proportion_unique: Optional[int] = None,
         exclude_columns: Optional[List[str]] = None,
     ):
         """Filter columns with unique values no greater than cardinality_limit_mode.
@@ -130,12 +214,10 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             batch_request=batch_request,
         )
 
-        if cardinality_limit_mode is None:
-            cardinality_limit_mode = CardinalityLimitMode.VERY_FEW.value
-
-        self._cardinality_limit_mode = cardinality_limit_mode
         self._cardinality_checker = CardinalityChecker(
-            cardinality_limit_mode=self.cardinality_limit_mode
+            cardinality_limit_mode=cardinality_limit_mode,
+            cardinality_max_rows=cardinality_max_rows,
+            cardinality_max_proportion_unique=cardinality_max_proportion_unique,
         )
 
         self._exclude_columns = exclude_columns
@@ -143,24 +225,6 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
     @property
     def domain_type(self) -> Union[str, MetricDomainTypes]:
         return MetricDomainTypes.COLUMN
-
-    @property
-    def cardinality_limit_mode(self) -> CardinalityLimitMode:
-        """Process cardinality_limit_mode which is passed as a string from config.
-
-        Returns:
-            CardinalityLimitMode default if no cardinality_limit_mode is set,
-            the corresponding CardinalityLimitMode if passed as a string or
-            a passthrough if supplied as CardinalityLimitMode.
-
-        """
-        # TODO AJB 20220222: Add error handling, test
-        if self._cardinality_limit_mode is None:
-            return CardinalityLimitMode.VERY_FEW.value
-        elif isinstance(self._cardinality_limit_mode, str):
-            return CardinalityLimitMode[self._cardinality_limit_mode.upper()].value
-        else:
-            return self._cardinality_limit_mode.value
 
     def _get_domains(
         self,
@@ -265,7 +329,9 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             List of dicts of the form [{column_name: List[MetricConfiguration]},...]
         """
 
-        cardinality_limit_mode: CardinalityLimitMode = self.cardinality_limit_mode
+        cardinality_limit_mode: CardinalityLimitMode = (
+            self._cardinality_checker.cardinality_limit_mode
+        )
 
         if isinstance(cardinality_limit_mode, AbsoluteCardinalityLimit):
             metric_name: str = "column.distinct_values.count"
