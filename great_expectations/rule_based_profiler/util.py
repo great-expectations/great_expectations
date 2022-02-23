@@ -132,8 +132,8 @@ def build_batch_request(
         variables=variables,
         parameters=parameters,
     )
-    materialized_batch_request: Union[
-        BatchRequest, RuntimeBatchRequest
+    materialized_batch_request: Optional[
+        Union[BatchRequest, RuntimeBatchRequest]
     ] = materialize_batch_request(batch_request=effective_batch_request)
 
     return materialized_batch_request

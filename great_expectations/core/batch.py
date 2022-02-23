@@ -607,10 +607,13 @@ class Batch(SerializableDictDot):
 
 def materialize_batch_request(
     batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None
-) -> Union[BatchRequest, RuntimeBatchRequest]:
+) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     effective_batch_request: dict = get_batch_request_as_dict(
         batch_request=batch_request
     )
+
+    if not effective_batch_request:
+        return None
 
     batch_request_class: type
     if batch_request_contains_runtime_parameters(batch_request=effective_batch_request):
