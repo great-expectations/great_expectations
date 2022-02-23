@@ -222,11 +222,16 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
                 configuration.kwargs["quantile_ranges"], dict
             ), "quantile_ranges should be a dictionary"
 
+            if isinstance(
+                configuration.kwargs["quantile_ranges"]["value_ranges"], np.ndarray
+            ):
+                configuration.kwargs["quantile_ranges"][
+                    "value_ranges"
+                ] = configuration.kwargs["quantile_ranges"]["value_ranges"].tolist()
+
             assert all(
                 [
-                    True
-                    if isinstance(x, np.ndarray) or None in x or x == sorted(x)
-                    else False
+                    True if None in x or x == sorted(x) else False
                     for x in configuration.kwargs["quantile_ranges"]["value_ranges"]
                 ]
             ), "quantile_ranges must consist of ordered pairs"
