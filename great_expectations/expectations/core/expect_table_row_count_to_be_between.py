@@ -119,8 +119,8 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
                             "meta": {
                                 "profiler_details": "$parameter.row_count_range.details",
                             },
-                            "max_value": "$parameter.row_count_range.value.value_range[1]",
                             "min_value": "$parameter.row_count_range.value.value_range[0]",
+                            "max_value": "$parameter.row_count_range.value.value_range[1]",
                         }
                     ],
                 }
