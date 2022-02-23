@@ -87,16 +87,15 @@ class ProfilerRunAnonymizer(Anonymizer):
 
     def _anonymize_domain_builder(self, domain_builder: dict) -> dict:
         anonymized_domain_builder: dict = {}
-        anonymized_domain_builder["anonymized_name"] = self.anonymize(
-            domain_builder["name"]
-        )
         anonymized_domain_builder["class_name"] = domain_builder["class_name"]
 
         batch_request: Optional[dict] = domain_builder.get("batch_request")
         if batch_request:
             anonymized_domain_builder[
                 "anonymized_batch_request"
-            ] = self._batch_request_anonymizer.anonymize(batch_request)
+            ] = self._batch_request_anonymizer.anonymize_batch_request(
+                *(), **batch_request
+            )
 
         return anonymized_domain_builder
 
@@ -108,13 +107,19 @@ class ProfilerRunAnonymizer(Anonymizer):
         for parameter_builder in parameter_builders:
             anonymized_parameter_builder: dict = {}
 
+            anonymized_parameter_builder["anonymized_name"] = self.anonymize(
+                parameter_builder["name"]
+            )
+
             anonymized_parameter_builder["class_name"] = parameter_builder["class_name"]
 
             batch_request: Optional[dict] = parameter_builder.get("batch_request")
             if batch_request:
                 anonymized_parameter_builder[
                     "anonymized_batch_request"
-                ] = self._batch_request_anonymizer.anonymize(batch_request)
+                ] = self._batch_request_anonymizer.anonymize_batch_request(
+                    *(), **batch_request
+                )
 
             anonymized_parameter_builders.append(anonymized_parameter_builder)
 
@@ -152,12 +157,14 @@ class ProfilerRunAnonymizer(Anonymizer):
         if variables:
             runtime_config["variables"] = variables
         if rules:
-            runtime_config["rules"] = rules
-
-        for attr in ("class_name", "module_name"):
-            runtime_config.pop(attr)
+            runtime_config["rules"] = [rules]
+        else:
+            runtime_config["rules"] = [runtime_config["rules"]]
 
         runtime_config["variable_count"] = len(runtime_config["variables"])
         runtime_config["rule_count"] = len(runtime_config["rules"])
+
+        for attr in ("class_name", "module_name", "variables"):
+            runtime_config.pop(attr)
 
         return runtime_config
