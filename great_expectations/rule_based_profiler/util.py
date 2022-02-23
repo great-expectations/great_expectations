@@ -7,7 +7,12 @@ import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
-from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    RuntimeBatchRequest,
+    materialize_batch_request,
+)
 from great_expectations.rule_based_profiler.types import (
     Domain,
     ParameterContainer,
@@ -113,21 +118,23 @@ def build_batch_request(
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[BatchRequest]:
+) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     if batch_request is None:
         return None
 
     # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-    materialized_batch_request: Optional[
-        Union[BatchRequest, dict]
+    effective_batch_request: Optional[
+        Union[BatchRequest, RuntimeBatchRequest, dict]
     ] = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=batch_request,
-        expected_return_type=dict,
+        expected_return_type=(BatchRequest, RuntimeBatchRequest, dict),
         variables=variables,
         parameters=parameters,
     )
-    materialized_batch_request = BatchRequest(**materialized_batch_request)
+    materialized_batch_request: Optional[
+        Union[BatchRequest, RuntimeBatchRequest]
+    ] = materialize_batch_request(batch_request=effective_batch_request)
 
     return materialized_batch_request
 
