@@ -301,11 +301,13 @@ class Validator:
                         f"Invalid positional argument: {arg}"
                     )
 
-            configuration = self._build_expectation_configuration(
-                expectation_type=name,
-                expectation_kwargs=expectation_kwargs,
-                meta=meta,
-                expectation_impl=expectation_impl,
+            configuration: ExpectationConfiguration = (
+                self._build_expectation_configuration(
+                    expectation_type=name,
+                    expectation_kwargs=expectation_kwargs,
+                    meta=meta,
+                    expectation_impl=expectation_impl,
+                )
             )
 
             exception_info: ExceptionInfo
@@ -385,11 +387,13 @@ class Validator:
         success_keys: Tuple[str] = (
             expectation_impl.success_keys
             if hasattr(expectation_impl, "success_keys")
-            else None
-        ) or tuple()
+            else tuple()
+        )
         arg_keys: Tuple[str] = (
-            expectation_impl.arg_keys if hasattr(expectation_impl, "arg_keys") else None
-        ) or tuple()
+            expectation_impl.arg_keys
+            if hasattr(expectation_impl, "arg_keys")
+            else tuple()
+        )
         runtime_keys: Tuple[str] = (
             expectation_impl.runtime_keys
             if hasattr(expectation_impl, "runtime_keys")
@@ -537,6 +541,10 @@ class Validator:
             ]
         ] = None,
     ) -> BaseRuleBasedProfiler:
+        assert (
+            profiler_config.name == expectation_type
+        ), "The name of profiler used to build an ExpectationConfiguration must equal to expectation_type of the expectation being invoked."
+
         profiler: BaseRuleBasedProfiler = BaseRuleBasedProfiler(
             profiler_config=profiler_config,
             data_context=self.data_context,
