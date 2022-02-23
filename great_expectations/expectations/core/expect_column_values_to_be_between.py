@@ -126,7 +126,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                     },
                     "parameter_builders": [
                         {
-                            "name": "my_min_estimator",
+                            "name": "min_estimator",
                             "class_name": "MetricMultiBatchParameterBuilder",
                             "metric_name": "column.min",
                             "metric_domain_kwargs": "$domain.domain_kwargs",
@@ -134,7 +134,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                             "replace_nan_with_zero": True,
                         },
                         {
-                            "name": "my_max_estimator",
+                            "name": "max_estimator",
                             "class_name": "MetricMultiBatchParameterBuilder",
                             "metric_name": "column.max",
                             "metric_domain_kwargs": "$domain.domain_kwargs",
@@ -147,15 +147,15 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                             "expectation_type": "expect_column_values_to_be_between",
                             "class_name": "DefaultExpectationConfigurationBuilder",
                             "column": "$domain.domain_kwargs.column",
-                            "min_value": "$parameter.my_min_estimator.value[-1]",
-                            "max_value": "$parameter.my_max_estimator.value[-1]",
+                            "min_value": "$parameter.min_estimator.value[-1]",
+                            "max_value": "$parameter.max_estimator.value[-1]",
                             "mostly": "$variables.mostly",
                             "strict_min": "$variables.strict_min",
                             "strict_max": "$variables.strict_max",
                             "meta": {
                                 "details": {
-                                    "my_min_estimator": "$parameter.my_min_estimator.details",
-                                    "my_max_estimator": "$parameter.my_max_estimator.details",
+                                    "min_estimator": "$parameter.min_estimator.details",
+                                    "max_estimator": "$parameter.max_estimator.details",
                                 },
                             },
                         },
