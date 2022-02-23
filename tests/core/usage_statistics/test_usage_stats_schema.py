@@ -67,6 +67,7 @@ def test_comprehensive_list_of_messages():
         "checkpoint.run",
         "expectation_suite.add_expectation",
         "legacy_profiler.build_suite",
+        "profiler.run",
     }
 
 
@@ -356,4 +357,16 @@ def test_usage_stats_cli_payload_messages():
 
 
 def test_rule_based_profiler_run_message():
-    pass
+    usage_stats_records_messages = [
+        "profiler.run",
+    ]
+    for message_type in usage_stats_records_messages:
+        for message in valid_usage_statistics_messages[message_type]:
+            jsonschema.validate(
+                message,
+                anonymized_usage_statistics_record_schema,
+            )
+            jsonschema.validate(
+                message["event_payload"],
+                anonymized_rule_based_profiler_run_schema,
+            )
