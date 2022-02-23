@@ -328,5 +328,4 @@ class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnValuesToBeNormallyDistributed().run_diagnostics()
-    print(json.dumps(self_check_report, indent=2))
+    ExpectColumnValuesToBeNormallyDistributed().print_diagnostic_checklist()
