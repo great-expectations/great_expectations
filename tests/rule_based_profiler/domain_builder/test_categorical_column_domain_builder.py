@@ -48,10 +48,6 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
     assert domains == alice_all_column_domains
 
 
-def test_exhaustively_all_supported_cardinality_limits():
-    raise NotImplementedError
-
-
 def test_unsupported_cardinality_limit():
     raise NotImplementedError
 
