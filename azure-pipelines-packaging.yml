@@ -38,11 +38,13 @@ schedules:
 
 stages:
   - stage: linux
+    dependsOn: []
     pool:
       vmImage: 'ubuntu-latest'
 
     jobs:
       - job: pip_install
+        dependsOn: []
         strategy:
           matrix:
             py3.7:
@@ -69,6 +71,7 @@ stages:
             displayName: 'Confirm installation'
 
       - job: conda_install
+        dependsOn: [pip_install]
         strategy:
           matrix:
             py3.7:
@@ -94,6 +97,7 @@ stages:
           #   displayName: 'Confirm installation'
 
       - job: dev_env_lightweight
+        dependsOn: [pip_install, conda_install]
         strategy:
           matrix:
             py3.7:
@@ -112,6 +116,7 @@ stages:
             displayName: 'Use Python $(pythonVersion)'
 
       - job: dev_env_full
+        dependsOn: [pip_install, conda_install, dev_env_lightweight]
         strategy:
           matrix:
             py3.7:
@@ -130,11 +135,13 @@ stages:
             displayName: 'Use Python $(pythonVersion)'
 
   - stage: macOS
+    dependsOn: []
     pool:
       vmImage: 'macOS-latest'
 
     jobs:
       - job: pip_install
+        dependsOn: []
         strategy:
           matrix:
             py3.7:
@@ -161,6 +168,7 @@ stages:
             displayName: 'Confirm installation'
 
       - job: conda_install
+        dependsOn: [pip_install]
         strategy:
           matrix:
             py3.7:
@@ -186,6 +194,7 @@ stages:
           #   displayName: 'Confirm installation'
 
       - job: dev_env_lightweight
+        dependsOn: [pip_install, conda_install]
         strategy:
           matrix:
             py3.7:
@@ -204,6 +213,7 @@ stages:
             displayName: 'Use Python $(pythonVersion)'
 
       - job: dev_env_full
+        dependsOn: [pip_install, conda_install, dev_env_lightweight]
         strategy:
           matrix:
             py3.7:
@@ -222,11 +232,13 @@ stages:
             displayName: 'Use Python $(pythonVersion)'
 
   - stage: windows
+    dependsOn: []
     pool:
       vmImage: 'windows-latest'
 
     jobs:
       - job: pip_install
+        dependsOn: []
         strategy:
           matrix:
             py3.7:
@@ -253,6 +265,7 @@ stages:
             displayName: 'Confirm installation'
 
       - job: conda_install
+        dependsOn: [pip_install]
         strategy:
           matrix:
             py3.7:
@@ -278,6 +291,7 @@ stages:
           #   displayName: 'Confirm installation'
 
       - job: dev_env_lightweight
+        dependsOn: [pip_install, conda_install]
         strategy:
           matrix:
             py3.7:
@@ -296,6 +310,7 @@ stages:
             displayName: 'Use Python $(pythonVersion)'
 
       - job: dev_env_full
+        dependsOn: [pip_install, conda_install, dev_env_lightweight]
         strategy:
           matrix:
             py3.7:
