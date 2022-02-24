@@ -329,7 +329,10 @@ def compute_bootstrap_quantiles(
     See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
     """
     data = (metric_values,)
+    lower_quantile_pct = false_positive_rate / 2
+    upper_quantile_pct = 1.0 - (false_positive_rate / 2)
     axis = 1
+    interpolation = "linear"
 
     # "method" parameter tells scipy.stats.bootstrap whether to return the ‘percentile’ bootstrap confidence interval
     # ('percentile'), the ‘reverse’ or the bias - corrected and accelerated bootstrap confidence interval ('BCa').
@@ -340,13 +343,23 @@ def compute_bootstrap_quantiles(
 
     bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
         data=data,
-        statistic=lambda x, axis=axis: np.quantile(
-            x, q=[false_positive_rate / 2, 1.0 - (false_positive_rate / 2)], axis=axis
+        statistic=lambda data, axis=axis: np.quantile(
+            a=data,
+            q=[lower_quantile_pct, upper_quantile_pct],
+            axis=axis,
+            interpolation=interpolation,
         ),
         n_resamples=n_resamples,
         method=method,
     )
     lower_ci, upper_ci = bootstrap_result.confidence_interval
-    lower_quantile, upper_quantile = np.mean(lower_ci), np.mean(upper_ci)
+
+    # Since the stats.bootstrap method will only return a confidence interval for each of the quantiles we seek to
+    # estimate, we need to back out the mean of the quantile statistics for use with GE. This can be achieved by relying
+    # on the Central Limit Theorem, which states that the distribution of the computed sample quantiles should be
+    # approximately normal (https://en.wikipedia.org/wiki/Central_limit_theorem). With the knowledge that our confidence
+    # intervals were calculated from a symmetrical normal distribution, we can simply return the mid-point between the
+    # lower and upper confidence intervals.
+    lower_quantile, upper_quantile = (lower_ci + upper_ci) / 2
 
     return lower_quantile, upper_quantile
