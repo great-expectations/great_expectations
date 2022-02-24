@@ -99,6 +99,7 @@ stages:
           - script: |
               echo "##vso[task.prependpath]$CONDA/bin"
               conda create --yes --name ge_venv
+              conda init bash
               conda activate ge_venv
               conda install --yes --name venv -c conda-forge great-expectations
             displayName: Set up conda
