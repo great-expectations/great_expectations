@@ -36,132 +36,62 @@ schedules:
 # dev install
 # dev-lite install
 
-strategy:
-  matrix:
-    linux-py3.6-pip:
-      imageName: 'ubuntu-latest'
-      pythonVersion: '3.6'
-      runner: 'pip'
-    linux-py3.7-pip:
-      imageName: 'ubuntu-latest'
-      pythonVersion: '3.7'
-      runner: 'pip'
-    linux-py3.8-pip:
-      imageName: 'ubuntu-latest'
-      pythonVersion: '3.8'
-      runner: 'pip'
-    linux-py3.9-pip:
-      imageName: 'ubuntu-latest'
-      pythonVersion: '3.9'
-      runner: 'pip'
-    linux-py3.10-pip:
-      imageName: 'ubuntu-latest'
-      pythonVersion: '3.10'
-      runner: 'pip'
-    mac-py3.7-pip:
-      imageName: 'macOS-latest'
-      pythonVersion: '3.7'
-      runner: 'pip'
-    mac-py3.8-pip:
-      imageName: 'macOS-latest'
-      pythonVersion: '3.8'
-      runner: 'pip'
-    mac-py3.9-pip:
-      imageName: 'macOS-latest'
-      pythonVersion: '3.9'
-      runner: 'pip'
-    mac-py3.10-pip:
-      imageName: 'macOS-latest'
-      pythonVersion: '3.10'
-      runner: 'pip'
-    windows-py3.7-pip:
-      imageName: 'windows-latest'
-      pythonVersion: '3.7'
-      runner: 'pip'
-    windows-py3.8-pip:
-      imageName: 'windows-latest'
-      pythonVersion: '3.8'
-      runner: 'pip'
-    windows-py3.9-pip:
-      imageName: 'windows-latest'
-      pythonVersion: '3.9'
-      runner: 'pip'
-    windows-py3.10-pip:
-      imageName: 'windows-latest'
-      pythonVersion: '3.10'
-      runner: 'pip'
-    linux-py3.6-conda:
-      imageName: 'ubuntu-latest'
-      pythonVersion: '3.6'
-      runner: 'conda'
-    linux-py3.7-conda:
-      imageName: 'ubuntu-latest'
-      pythonVersion: '3.7'
-      runner: 'conda'
-    linux-py3.8-conda:
-      imageName: 'ubuntu-latest'
-      pythonVersion: '3.8'
-      runner: 'conda'
-    linux-py3.9-conda:
-      imageName: 'ubuntu-latest'
-      pythonVersion: '3.9'
-      runner: 'conda'
-    linux-py3.10-conda:
-      imageName: 'ubuntu-latest'
-      pythonVersion: '3.9'
-      runner: 'conda'
-    mac-py3.7-conda:
-      imageName: 'macOS-latest'
-      pythonVersion: '3.7'
-      runner: 'conda'
-    mac-py3.8-conda:
-      imageName: 'macOS-latest'
-      pythonVersion: '3.8'
-      runner: 'conda'
-    mac-py3.9-conda:
-      imageName: 'macOS-latest'
-      pythonVersion: '3.9'
-      runner: 'conda'
-    mac-py3.10-conda:
-      imageName: 'macOS-latest'
-      pythonVersion: '3.10'
-      runner: 'conda'
-    windows-py3.7-conda:
-      imageName: 'windows-latest'
-      pythonVersion: '3.7'
-      runner: 'conda'
-    windows-py3.8-conda:
-      imageName: 'windows-latest'
-      pythonVersion: '3.8'
-      runner: 'conda'
-    windows-py3.9-conda:
-      imageName: 'windows-latest'
-      pythonVersion: '3.9'
-      runner: 'conda'
-    windows-py3.10-conda:
-      imageName: 'windows-latest'
-      pythonVersion: '3.10'
-      runner: 'conda'
+stages:
+  - stage: linux
+    pool:
+      vmImage: 'ubuntu-latest'
 
-pool:
-  vmImage: $(imageName)
+    jobs:
+      - job: installation
+        strategy:
+          matrix:
+            py3.6-pip:
+              version: '3.6'
+              runner: 'pip'
+            py3.7-pip:
+              version: '3.7'
+              runner: 'pip'
+            py3.8-pip:
+              version: '3.8'
+              runner: 'pip'
+            py3.9-pip:
+              version: '3.9'
+              runner: 'pip'
+            py3.10-pip:
+              version: '3.10'
+              runner: 'pip'
+            py3.6-conda:
+              version: '3.6'
+              runner: 'conda'
+            py3.7-conda:
+              version: '3.7'
+              runner: 'conda'
+            py3.8-conda:
+              version: '3.8'
+              runner: 'conda'
+            py3.9-conda:
+              version: '3.9'
+              runner: 'conda'
+            py3.10-conda:
+              version: '3.10'
+              runner: 'conda'
 
-steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(pythonVersion)'
-    displayName: 'Use Python $(pythonVersion)'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(pythonVersion)'
+            displayName: 'Use Python $(pythonVersion)'
 
-  - script: |
-      python -m pip install --upgrade pip==21.3.1
-      pip install great_expectations
-    condition: eq(variables['runner'], 'pip')
-    displayName: 'pip'
+          - script: |
+              python -m pip install --upgrade pip==21.3.1
+              pip install great_expectations
+            condition: eq(variables['runner'], 'pip')
+            displayName: 'pip install'
 
-  - script: |
-      echo 'Hello conda'
-    condition: eq(variables['runner'], 'conda')
-    displayName: 'conda'
+          - script: |
+              echo 'Hello conda'
+            condition: eq(variables['runner'], 'conda')
+            displayName: 'conda install'
 
-  - bash: great_expectations --version
-    displayName: 'Confirm installation'
+          - bash: great_expectations --version
+            displayName: 'Confirm installation'
