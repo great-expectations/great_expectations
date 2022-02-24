@@ -234,6 +234,14 @@ local_tests = [
         data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
+    IntegrationTestFixture(
+        name="expect_column_max_to_be_between_custom",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py",
+    ),
+    IntegrationTestFixture(
+        name="expect_column_values_to_equal_three",
+        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py",
+    ),
 ]
 
 

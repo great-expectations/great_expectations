@@ -232,5 +232,4 @@ class ExpectColumnValuesToBeValidUrls(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToBeValidUrls().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToBeValidUrls().print_diagnostic_checklist()
