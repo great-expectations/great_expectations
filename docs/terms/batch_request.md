@@ -55,7 +55,7 @@ When passing `RuntimeBatchRequest`s to a Checkpoint, you will not be pairing Exp
 
 For examples of how to pass `RuntimeBatchRequest`s to a Checkpoint, see the examples used to test your Datasource configurations in [our documentation on how to connect to data](../guides/connecting_to_your_data/index.md).  `RuntimeBatchRequest`s are typically used when you need to pass in a DataFrame at runtime.
 
-For a good example if you don't have a specific source data system in mind right now, check out [Example 2 of our guide on how to pass an in memory dataframe to a checkpoint](../guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md#example-2-pass-a-complete-runtimebatchrequest-at-runtime).
+For a good example if you don't have a specific source data system in mind right now, check out [Example 2 of our guide on how to pass an in memory dataframe to a Checkpoint](../guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md#example-2-pass-a-complete-runtimebatchrequest-at-runtime).
 
 ## Features
 
