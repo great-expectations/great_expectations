@@ -179,15 +179,19 @@ class CardinalityChecker:
         max_unique_values: Optional[int] = None,
         max_proportion_unique: Optional[int] = None,
     ) -> None:
-        params = (
-            limit_mode,
-            max_unique_values,
-            max_proportion_unique,
+        num_supplied_params: int = sum(
+            [
+                0 if param is None else 1
+                for param in (
+                    limit_mode,
+                    max_unique_values,
+                    max_proportion_unique,
+                )
+            ]
         )
-        num_params: int = sum([0 if param is None else 1 for param in params])
-        if num_params != 1:
+        if num_supplied_params != 1:
             raise ProfilerConfigurationError(
-                f"Please pass ONE of the following parameters: limit_mode, max_unique_values, max_proportion_unique, you passed {num_params} parameters."
+                f"Please pass ONE of the following parameters: limit_mode, max_unique_values, max_proportion_unique, you passed {num_supplied_params} parameters."
             )
 
         if limit_mode is not None:
