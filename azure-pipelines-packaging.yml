@@ -71,7 +71,7 @@ stages:
             displayName: 'Confirm installation'
 
       - job: conda
-        dependsOn: [pip]
+        dependsOn: []
         strategy:
           matrix:
             py3.7:
@@ -121,8 +121,33 @@ stages:
               versionSpec: '$(pythonVersion)'
             displayName: 'Use Python $(pythonVersion)'
 
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - script: |
+              pip install  --requirement requirements-dev.txt --constraint constraints-dev.txt
+              pip install  .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            displayName: 'pytest'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
       - job: full
-        dependsOn: [lightweight]
+        dependsOn: []
         strategy:
           matrix:
             py3.7:
@@ -139,3 +164,28 @@ stages:
             inputs:
               versionSpec: '$(pythonVersion)'
             displayName: 'Use Python $(pythonVersion)'
+
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
+
+          - script: |
+              pip install  --requirement requirements-dev.txt --constraint constraints-dev.txt
+              pip install  .
+            displayName: 'Install dependencies'
+
+          - script: |
+              pip install pytest pytest-cov pytest-azurepipelines
+              pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+            displayName: 'pytest'
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFiles: '**/test-*.xml'
+              testRunTitle: 'Publish test results for Python $(python.version)'
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+              reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
