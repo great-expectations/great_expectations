@@ -38,85 +38,109 @@ schedules:
 
 strategy:
   matrix:
-    linux-py36-pip:
+    linux-py3.6-pip:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.6'
       runner: 'pip'
-    linux-py37-pip:
+    linux-py3.7-pip:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.7'
       runner: 'pip'
-    linux-py38-pip:
+    linux-py3.8-pip:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.8'
       runner: 'pip'
-    linux-py39-pip:
+    linux-py3.9-pip:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.9'
       runner: 'pip'
-    mac-py37-pip:
+    linux-py3.10-pip:
+      imageName: 'ubuntu-latest'
+      pythonVersion: '3.10'
+      runner: 'pip'
+    mac-py3.7-pip:
       imageName: 'macOS-latest'
       pythonVersion: '3.7'
       runner: 'pip'
-    mac-py38-pip:
+    mac-py3.8-pip:
       imageName: 'macOS-latest'
       pythonVersion: '3.8'
       runner: 'pip'
-    mac-py39-pip:
+    mac-py3.9-pip:
       imageName: 'macOS-latest'
       pythonVersion: '3.9'
       runner: 'pip'
-    windows-py37-pip:
+    mac-py3.10-pip:
+      imageName: 'macOS-latest'
+      pythonVersion: '3.10'
+      runner: 'pip'
+    windows-py3.7-pip:
       imageName: 'windows-latest'
       pythonVersion: '3.7'
       runner: 'pip'
-    windows-py38-pip:
+    windows-py3.8-pip:
       imageName: 'windows-latest'
       pythonVersion: '3.8'
       runner: 'pip'
-    windows-py39-pip:
+    windows-py3.9-pip:
       imageName: 'windows-latest'
       pythonVersion: '3.9'
       runner: 'pip'
-    linux-py36-conda:
+    windows-py3.10-pip:
+      imageName: 'windows-latest'
+      pythonVersion: '3.10'
+      runner: 'pip'
+    linux-py3.6-conda:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.6'
       runner: 'conda'
-    linux-py37-conda:
+    linux-py3.7-conda:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.7'
       runner: 'conda'
-    linux-py38-conda:
+    linux-py3.8-conda:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.8'
       runner: 'conda'
-    linux-py39-conda:
+    linux-py3.9-conda:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.9'
       runner: 'conda'
-    mac-py37-conda:
+    linux-py3.10-conda:
+      imageName: 'ubuntu-latest'
+      pythonVersion: '3.9'
+      runner: 'conda'
+    mac-py3.7-conda:
       imageName: 'macOS-latest'
       pythonVersion: '3.7'
       runner: 'conda'
-    mac-py38-conda:
+    mac-py3.8-conda:
       imageName: 'macOS-latest'
       pythonVersion: '3.8'
       runner: 'conda'
-    mac-py39-conda:
+    mac-py3.9-conda:
       imageName: 'macOS-latest'
       pythonVersion: '3.9'
       runner: 'conda'
-    windows-py37-conda:
+    mac-py3.10-conda:
+      imageName: 'macOS-latest'
+      pythonVersion: '3.10'
+      runner: 'conda'
+    windows-py3.7-conda:
       imageName: 'windows-latest'
       pythonVersion: '3.7'
       runner: 'conda'
-    windows-py38-conda:
+    windows-py3.8-conda:
       imageName: 'windows-latest'
       pythonVersion: '3.8'
       runner: 'conda'
-    windows-py39-conda:
+    windows-py3.9-conda:
       imageName: 'windows-latest'
       pythonVersion: '3.9'
+      runner: 'conda'
+    windows-py3.10-conda:
+      imageName: 'windows-latest'
+      pythonVersion: '3.10'
       runner: 'conda'
 
 pool:
@@ -139,5 +163,5 @@ steps:
     condition: eq(variables['runner'], 'conda')
     displayName: 'conda'
 
-  - bash: great_expectations
+  - bash: great_expectations --version
     displayName: 'Confirm installation'
