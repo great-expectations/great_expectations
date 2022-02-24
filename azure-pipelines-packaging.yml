@@ -71,7 +71,7 @@ stages:
             displayName: 'Confirm installation'
 
       - job: conda
-        dependsOn: [pip_install]
+        dependsOn: [pip]
         strategy:
           matrix:
             py3.7:
