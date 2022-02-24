@@ -254,7 +254,7 @@ def compute_quantiles(
     return lower_quantile, upper_quantile
 
 
-def compute_bootstrap_quantiles(
+def compute_bootstrap_quantiles_legacy(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
@@ -268,8 +268,8 @@ def compute_bootstrap_quantiles(
     does not handle multi-dimensional statistics (unlike "scipy.stats.bootstrap", which corrects for bias and is
     vectorized, thus having the ability to accept a multi-dimensional statistic function and process all dimensions).
 
-    This implementation will be replaced by "scipy.stats.bootstrap" when Great Expectations can be upgraded to use a
-    more up-to-date version of the "scipy" Python package (the currently used version does not have "bootstrap").
+    This implementation has been replaced by "scipy.stats.bootstrap" now that Great Expectations can be upgraded to use a
+    more up-to-date version of the "scipy" Python package.
 
     Additional future direction (potentially as a contribution submission to the "SciPy" community) include developing
     enhancements to bootstrapped estimator based on theory presented in "http://dido.econ.yale.edu/~dwka/pub/p1001.pdf":
@@ -319,12 +319,15 @@ def compute_bootstrap_quantiles(
     return lower_quantile, upper_quantile
 
 
-def compute_bootstrap_quantiles_scipy(
+def compute_bootstrap_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
 ) -> Tuple[Number, Number]:
-
+    """
+    SciPy implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
+    See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+    """
     data = (metric_values,)
     axis = 1
 
