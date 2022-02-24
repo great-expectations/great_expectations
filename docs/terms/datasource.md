@@ -12,33 +12,36 @@ import TechnicalTag from '../term_tags/_tag.mdx';
 
 <UniversalMap setup='inactive' connect='active' create='active' validate='active'/>
 
-#### Definition
+### Definition
 
 A Datasource provides a standard API for accessing and interacting with data from a wide variety of source systems.
 
-#### Core Promises
+### Features and promises
 
-Datasources provide a unified API across multiple backends: the Datasource API remains the same for PostgreSQL, MongoDB, CSV Filesystems, and all other supported data backends.  
+Datasources provide a unified API across multiple backends: the Datasource API remains the same for PostgreSQL, CSV Filesystems, and all other supported data backends.  
+:::note Important: 
 
 Datasources do not modify your data.
 
-#### Related Concepts
+:::
 
-Datasources function by bringing together a way of interacting with Data (an <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" />) with a way of accessing that data (a <TechnicalTag relative="../" tag="data_connector" text="Data Connector." />).
+### Relationship to other objects
+
+Datasources function by bringing together a way of interacting with Data (an <TechnicalTag relative="../" tag="execution_engine" text="Execution Engine" />) with a way of accessing that data (a <TechnicalTag relative="../" tag="data_connector" text="Data Connector." />).  <TechnicalTag relative="../" tag="batch_request" text="Batch Requests" /> utilize Datasources in order to return a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
 
 ## Use Cases
 
 <ConnectHeader/>
 
-When connecting to data the Datasource is your go-to.  At this stage, you will create Datasources to define how Great Expectations can find and access your <TechnicalTag relative="../" tag="data_asset" text="Data Assets." />.  From that point forward you will be able to operate with the Datasource's API rather than needing a different API for each possible data backend you may be working with.
+When connecting to data the Datasource is your primary tool.  At this stage, you will create Datasources to define how Great Expectations can find and access your <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.  Under the hood, each Datasource must have an Execution Engine and one or more Data Connectors configured.  Once a Datasource is configured you will be able to operate with the Datasource's API rather than needing a different API for each possible data backend you may be working with.
 
 <CreateHeader/>
 
-When creating <TechnicalTag relative="../" tag="expectation" text="Expectations" />, you will use your Datasources to obtain <TechnicalTag relative="../" tag="batch" text="Batches" /> for <TechnicalTag relative="../" tag="profiler" text="Profilers" /> to analyze.
+When creating <TechnicalTag relative="../" tag="expectation" text="Expectations" /> you will use your Datasources to obtain <TechnicalTag relative="../" tag="batch" text="Batches" /> for <TechnicalTag relative="../" tag="profiler" text="Profilers" /> to analyze.  Datasources also provide Batches for  <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />, such as when you use [the interactive workflow](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md) to create new Expectations.
 
 <ValidateHeader/>
 
-Datasources are also used to obtain Batches for <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" /> and <TechnicalTag relative="../" tag="validator" text="Validators" /> to run against when you are validating data.
+Datasources are also used to obtain Batches for <TechnicalTag relative="../" tag="validator" text="Validators" /> to run against when you are validating data.
 
 ## Features
 
@@ -48,18 +51,13 @@ Datasources support connecting to a variety of different data backends.  No matt
 
 ### No Unexpected Modifications
 
-Datasources do not modify your data during profiling or validation, but they may create temporary artifacts to optimize computing Metrics and Validation
+Datasources do not modify your data during profiling or validation, but they may create temporary artifacts to optimize computing Metrics and Validation.  This behaviour can be configured at the Data Connector level.
 
+### API Basics
 
-## Creating a Datasource
+### How to access
 
-Creating a Datasource is quick and easy, and can be done from the <TechnicalTag relative="../" tag="cli" text="CLI" /> or through Python code.  Configuring the Datasource may differ between backends, according to the given backend's requirements, but the process of creating one is the same.
-
-For detailed instructions on how to create Datasources for various backends, see our documentation on Connecting to Data.
-
-## Accessing your Datasource
-
-You will typically only access your Datasource directly through Python code, which can be executed from a script, a Python console, or a Jupyter Notebook.  To access a Datasource all you need is a <TechnicalTag relative="../" tag="data_context" text="Data Context." /> and the name of the Datasource you want to access, as shown below:
+You will typically only access your Datasource directly through Python code, which can be executed from a script, a Python console, or a Jupyter Notebook.  To access a Datasource all you need is a <TechnicalTag relative="../" tag="data_context" text="Data Context" /> and the name of the Datasource you want to access, as shown below:
 
 ```python title="Python console:"
 import great_expectations as ge
@@ -68,11 +66,15 @@ context = ge.get_context()
 datasource = context.get_datasource("my_datasource_name")
 ```
 
-<!---
+### How to create and configure
 
-NOTES: TEMPORARY
------------------
-Provides a unified API for using a Data Connector and an Execution Engine to access data, regardless of the native methods required to access the data associated with the Data Connector.
-Brings together a way of interacting with data (an Execution Engine) and a way of accessing that data (a Data Connector). Data Assets live within a Datasource; Datasources are used to obtain Batches for Validators, Expectation Suites, and Profilers.
+Creating a Datasource is quick and easy, and can be done from the <TechnicalTag relative="../" tag="cli" text="CLI" /> or through Python code.  Configuring the Datasource may differ between backends, according to the given backend's requirements, but the process of creating one will remain the same.
 
--->
+To create a new  Datasource through the CLI, run `great_expectations datasource new`.
+
+To create a new Datasource through Python code, obtain a data context and call its `add_datasource` method.
+
+Advanced users may also create a Datasource directly through a YAML config file.
+
+For detailed instructions on how to create Datasources that are configured for various backends, see [our documentation on Connecting to Data](../guides/connecting_to_your_data/index.md).
+
