@@ -97,7 +97,7 @@ stages:
           - bash: great_expectations --version
             displayName: 'Confirm installation'
 
-      - job: local environment (full)
+      - job: dev env full install
         strategy:
           matrix:
             py3.6:
@@ -117,7 +117,7 @@ stages:
               versionSpec: '$(pythonVersion)'
             displayName: 'Use Python $(pythonVersion)'
 
-      - job: local environment (lightweight)
+      - job: dev env lightweight install
         strategy:
           matrix:
             py3.6:
