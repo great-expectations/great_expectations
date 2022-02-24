@@ -23,18 +23,18 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         self,
         data_context: "DataContext",  # noqa: F821
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
-        cardinality_limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
-        cardinality_max_rows: Optional[int] = None,
-        cardinality_max_proportion_unique: Optional[int] = None,
+        limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
+        max_unique_values: Optional[int] = None,
+        max_proportion_unique: Optional[int] = None,
         exclude_columns: Optional[List[str]] = None,
     ):
-        """Filter columns with unique values no greater than cardinality_limit_mode.
+        """Filter columns with unique values no greater than limit_mode.
 
         Args:
             data_context: DataContext associated with this profiler.
             batch_request: BatchRequest to be optionally used to define batches
                 to consider for this domain builder.
-            cardinality_limit_mode: CardinalityLimitMode to use when filtering columns.
+            limit_mode: CardinalityLimitMode to use when filtering columns.
             exclude_columns: If provided, exclude columns from consideration.
         """
 
@@ -44,9 +44,9 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         )
 
         self._cardinality_checker = CardinalityChecker(
-            cardinality_limit_mode=cardinality_limit_mode,
-            cardinality_max_rows=cardinality_max_rows,
-            cardinality_max_proportion_unique=cardinality_max_proportion_unique,
+            limit_mode=limit_mode,
+            max_unique_values=max_unique_values,
+            max_proportion_unique=max_proportion_unique,
         )
 
         self._exclude_columns = exclude_columns
@@ -59,7 +59,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
         self,
         variables: Optional[ParameterContainer] = None,
     ) -> List[Domain]:
-        """Return domains matching the selected cardinality_limit_mode.
+        """Return domains matching the selected limit_mode.
 
         Cardinality categories define a maximum number of unique items that
         can be contained in a given domain. If this number is exceeded, the
@@ -158,11 +158,9 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             List of dicts of the form [{column_name: List[MetricConfiguration]},...]
         """
 
-        cardinality_limit_mode: CardinalityLimitMode = (
-            self._cardinality_checker.cardinality_limit_mode
-        )
+        limit_mode: CardinalityLimitMode = self._cardinality_checker.limit_mode
 
-        metric_name: str = cardinality_limit_mode.related_metric_name
+        metric_name: str = limit_mode.related_metric_name
 
         metric_configurations: List[Dict[str, List[MetricConfiguration]]] = []
 

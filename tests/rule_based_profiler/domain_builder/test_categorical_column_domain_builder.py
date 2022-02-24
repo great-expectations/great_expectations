@@ -27,7 +27,7 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         data_context=data_context,
         batch_request=batch_request,
-        cardinality_limit_mode="very_few",
+        limit_mode="very_few",
     )
     domains: List[Domain] = domain_builder.get_domains()
 
@@ -67,7 +67,7 @@ def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context)
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         data_context=data_context,
         batch_request=batch_request,
-        cardinality_limit_mode="ONE",
+        limit_mode="ONE",
     )
     domains: List[Domain] = domain_builder.get_domains()
 
@@ -98,7 +98,7 @@ def test_unsupported_cardinality_limit(
         _: DomainBuilder = CategoricalColumnDomainBuilder(
             data_context=mock_data_context,
             batch_request=mock_batch_request,
-            cardinality_limit_mode="&*#$&INVALID&*#$*&",
+            limit_mode="&*#$&INVALID&*#$*&",
         )
     assert "specify a supported cardinality mode" in str(excinfo.value)
     assert "REL_1" in str(excinfo.value)
@@ -133,7 +133,7 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         data_context=data_context,
         batch_request=batch_request,
-        cardinality_limit_mode="VERY_FEW",
+        limit_mode="VERY_FEW",
         exclude_columns=[
             "id",
             "event_type",
@@ -175,7 +175,7 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         data_context=data_context,
         batch_request=batch_request,
-        cardinality_limit_mode="VERY_FEW",
+        limit_mode="VERY_FEW",
         exclude_columns=[],
     )
     domains: List[Domain] = domain_builder.get_domains()
@@ -219,7 +219,7 @@ def test_multi_batch_very_few_cardinality(
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         data_context=data_context,
         batch_request=batch_request,
-        cardinality_limit_mode="very_few",
+        limit_mode="very_few",
     )
     observed_domains: List[Domain] = domain_builder.get_domains()
 
@@ -295,7 +295,7 @@ def test_multi_batch_one_cardinality(
     domain_builder: DomainBuilder = CategoricalColumnDomainBuilder(
         data_context=data_context,
         batch_request=batch_request,
-        cardinality_limit_mode="ONE",
+        limit_mode="ONE",
     )
     observed_domains: List[Domain] = domain_builder.get_domains()
 
