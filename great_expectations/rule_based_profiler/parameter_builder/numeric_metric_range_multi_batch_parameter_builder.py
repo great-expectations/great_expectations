@@ -3,6 +3,8 @@ from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
 import numpy as np
+import scipy
+from packaging import version
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
@@ -19,6 +21,7 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.rule_based_profiler.util import (
     NP_EPSILON,
     compute_bootstrap_quantiles,
+    compute_bootstrap_quantiles_legacy,
     compute_quantiles,
     get_parameter_value_and_validate_return_type,
 )
@@ -535,11 +538,18 @@ positive integer, or must be omitted (or set to None).
         else:
             n_resamples = num_bootstrap_samples
 
-        return compute_bootstrap_quantiles(
-            metric_values=metric_values,
-            false_positive_rate=false_positive_rate,
-            n_resamples=n_resamples,
-        )
+        if version.parse(scipy.__version__) < version.parse("1.7"):
+            return compute_bootstrap_quantiles_legacy(
+                metric_values=metric_values,
+                false_positive_rate=false_positive_rate,
+                n_resamples=n_resamples,
+            )
+        else:
+            return compute_bootstrap_quantiles(
+                metric_values=metric_values,
+                false_positive_rate=false_positive_rate,
+                n_resamples=n_resamples,
+            )
 
     def _get_deterministic_estimate(
         self,
