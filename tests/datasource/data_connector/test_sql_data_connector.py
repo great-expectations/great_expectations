@@ -1128,7 +1128,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
     )
     assert "main.table_partitioned_by_date_column__A" in my_data_connector.assets
 
-    # schema_name given by missing the include_schema_name flag
+    # schema_name given but include_schema_name is set to False
     with pytest.raises(ge_exceptions.DataConnectorError):
         my_data_connector = instantiate_class_from_config(
             config={
@@ -1182,7 +1182,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
         in my_data_connector.assets
     )
 
-    # schema_name but missing the include_schema_name flag
+    # schema_name provided, but include_schema_name is set to False
     with pytest.raises(ge_exceptions.DataConnectorError):
         my_data_connector = instantiate_class_from_config(
             config={

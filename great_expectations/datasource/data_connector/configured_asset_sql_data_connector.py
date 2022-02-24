@@ -62,8 +62,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
     def add_data_asset(
         self,
-        data_asset_name: str,
-        data_asset_config: dict,
+        name: str,
+        config: dict,
     ):
         """
         Add data_asset to DataConnector using data_asset name as key, and data_asset configuration as value.
@@ -283,22 +283,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self, batch_definition: BatchDefinition
     ) -> str:
         """
-        assets:
-                    my_first_data_asset:
-                        table_name: table_1
-                    my_second_data_asset:
-                        include_schema_name: true
-                        schema_name: main
-                        table_name: table_2
-                    table_1: {{}}
-                    table_2:
-                        schema_name: main
+            Helper method called by _get_batch_identifiers_list_from_data_asset_config() to parse table_name from data_asset_name in cases
+            where schema is included.
 
-        Args:
-            batch_definition ():
-        Returns:
+            data_asset_name in those cases are [schema].[table_name].
+
+        function will split data_asset_name on [schema]. and return the resulting table_name.
         """
-        # by default it is the, but only if there is a schema, then you will have a situation like this:
         table_name: str = batch_definition.data_asset_name
         if "schema_name" in self.assets[batch_definition.data_asset_name]:
             schema_name_str: str = self.assets[batch_definition.data_asset_name][
