@@ -32,7 +32,7 @@ as the time the batch was constructed, or hash of an in-memory DataFrame.
 
 Let's follow the outline in this diagram to follow the journey from BatchRequest to Batch list:
 
-![Image](https://lucid.app/publicSegments/view/6098d036-463a-4c18-acaa-8b886edef2d6/image.png)
+![Image](https://lucid.app/publicSegments/view/e70e54b6-60af-4a30-8626-f61dc3b3c3ee/image.png)
 
 1. A Datasource's `get_batch_list_from_batch_request` method is passed a BatchRequest.
     * A BatchRequest can include `data_connector_query` params with values relative to the latest Batch (e.g. the "latest" slice).
