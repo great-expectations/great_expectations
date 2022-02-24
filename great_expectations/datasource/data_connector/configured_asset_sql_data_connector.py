@@ -44,7 +44,7 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         assets: Optional[Dict[str, dict]] = None,
         batch_spec_passthrough: Optional[dict] = None,
     ):
-        self._assets = {}
+        self._assets: dict = {}
         if assets:
             for asset_name, config in assets.items():
                 self.add_data_asset(asset_name, config)
@@ -62,8 +62,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
     def add_data_asset(
         self,
-        name: str,
-        config: dict,
+        data_asset_name: str,
+        data_asset_config: dict,
     ):
         """
         Add data_asset to DataConnector using data_asset name as key, and data_asset configuration as value.

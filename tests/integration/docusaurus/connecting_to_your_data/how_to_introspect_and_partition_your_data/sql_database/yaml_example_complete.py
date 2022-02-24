@@ -143,7 +143,6 @@ batch_request = BatchRequest(
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "main.yellow_tripdata_sample_2019_01"
-# THIS IS WHERE THE PROBLEM IS
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert 24 <= len(batch_list) <= 744  # number of hours in a 31-day month
 
