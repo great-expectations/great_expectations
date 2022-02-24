@@ -80,9 +80,10 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         data_asset_name_prefix = data_asset_config.get("data_asset_name_prefix", "")
         data_asset_name_suffix = data_asset_config.get("data_asset_name_suffix", "")
         schema_name = data_asset_config.get("schema_name", "")
-        if schema_name and not data_asset_config.get("include_schema_name"):
+        include_schema_name = data_asset_config.get("include_schema_name", "")
+        if schema_name and include_schema_name is False:
             raise ge_exceptions.DataConnectorError(
-                message=f"{self.__class__.__name__} ran into an error while initializing Asset names. Schema {schema_name} was specified, but 'include_schema_name' flag was not set to True."
+                message=f"{self.__class__.__name__} ran into an error while initializing Asset names. Schema {schema_name} was specified, but 'include_schema_name' flag was set to False."
             )
 
         if schema_name:
@@ -270,12 +271,40 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             dict built from batch_definition
         """
         data_asset_name: str = batch_definition.data_asset_name
+        table_name: str = self._get_table_name_from_batch_definition(batch_definition)
         return {
             "data_asset_name": data_asset_name,
-            "table_name": data_asset_name,
+            "table_name": table_name,
             "batch_identifiers": batch_definition.batch_identifiers,
             **self.assets[data_asset_name],
         }
+
+    def _get_table_name_from_batch_definition(
+        self, batch_definition: BatchDefinition
+    ) -> str:
+        """
+        assets:
+                    my_first_data_asset:
+                        table_name: table_1
+                    my_second_data_asset:
+                        include_schema_name: true
+                        schema_name: main
+                        table_name: table_2
+                    table_1: {{}}
+                    table_2:
+                        schema_name: main
+
+        Args:
+            batch_definition ():
+        Returns:
+        """
+        # by default it is the, but only if there is a schema, then you will have a situation like this:
+        table_name: str = batch_definition.data_asset_name
+        if "schema_name" in self.assets[batch_definition.data_asset_name]:
+            table_name = table_name.split(
+                self.assets[batch_definition.data_asset_name]["schema_name"] + "."
+            )[1]
+        return table_name
 
     # Splitter methods for listing partitions
 
