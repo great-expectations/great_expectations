@@ -115,10 +115,6 @@ stages:
 
         strategy:
           matrix:
-            Python36:
-              python.version: '3.6'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '"pyspark<3.0.0" --requirement requirements-dev.txt --constraint constraints-dev.txt'
             Python37:
               python.version: '3.7'
               pandas.version: 'latest'
