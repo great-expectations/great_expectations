@@ -385,7 +385,7 @@ def get_dataset(
         return PandasDataset(df, profiler=profiler, caching=caching)
 
     elif dataset_type == "sqlite":
-        if not create_engine:
+        if not create_engine or not SQLITE_TYPES:
             return None
 
         engine = create_engine(get_sqlite_connection_url(sqlite_db_path=sqlite_db_path))
@@ -445,7 +445,7 @@ def get_dataset(
         )
 
     elif dataset_type == "postgresql":
-        if not create_engine:
+        if not create_engine or not POSTGRESQL_TYPES:
             return None
 
         # Create a new database
@@ -508,7 +508,7 @@ def get_dataset(
         )
 
     elif dataset_type == "mysql":
-        if not create_engine:
+        if not create_engine or not MYSQL_TYPES:
             return None
 
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
@@ -596,7 +596,7 @@ def get_dataset(
         )
 
     elif dataset_type == "mssql":
-        if not create_engine:
+        if not create_engine or not MSSQL_TYPES:
             return None
 
         db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
@@ -967,20 +967,34 @@ def build_sa_validator_with_data(
     sqlite_db_path=None,
     batch_definition: Optional[BatchDefinition] = None,
 ):
-    dialect_classes = {
-        "sqlite": sqlitetypes.dialect,
-        "postgresql": postgresqltypes.dialect,
-        "mysql": mysqltypes.dialect,
-        "mssql": mssqltypes.dialect,
-        "bigquery": sqla_bigquery.BigQueryDialect,
-    }
-    dialect_types = {
-        "sqlite": SQLITE_TYPES,
-        "postgresql": POSTGRESQL_TYPES,
-        "mysql": MYSQL_TYPES,
-        "mssql": MSSQL_TYPES,
-        "bigquery": BIGQUERY_TYPES,
-    }
+    dialect_classes = {}
+    dialect_types = {}
+    try:
+        dialect_classes["sqlite"] = sqlitetypes.dialect
+        dialect_types["sqlite"] = SQLITE_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["postgresql"] = postgresqltypes.dialect
+        dialect_types["postgresql"] = POSTGRESQL_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["mysql"] = mysqltypes.dialect
+        dialect_types["mysql"] = MYSQL_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["mssql"] = mssqltypes.dialect
+        dialect_types["mssql"] = MSSQL_TYPES
+    except AttributeError:
+        pass
+    try:
+        dialect_classes["bigquery"] = sqla_bigquery.BigQueryDialect
+        dialect_types["bigquery"] = BIGQUERY_TYPES
+    except AttributeError:
+        pass
+
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
         engine = create_engine(get_sqlite_connection_url(sqlite_db_path))

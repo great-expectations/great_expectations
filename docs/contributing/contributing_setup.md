@@ -47,6 +47,31 @@ In order to contribute to Great Expectations, you will need the following:
 
 ### Install Python dependencies
 
+#### (Easy version of steps 5-7 below)
+
+Create a virtual environment in your locally cloned repo, use the same version of `pip` that we use in our CI/CD pipelines (for Python 3.6 - 3.9), and install the fewest dependencies needed for a dev environment (to minimize potential setup headaches).
+
+```
+python3 -m venv ge_dev
+
+source ge_dev/bin/activate
+
+pip install --upgrade pip==21.3.1
+
+pip install -r requirements-dev-lite.txt -c constraints-dev.txt -e .
+```
+
+Confirm that tests are passing (only against pandas and sqlalchemy with sqlite), without the need for running any Docker containers.
+
+```
+ulimit -n 4096
+
+pytest -v --no-spark --no-postgresql
+```
+
+> In your `~/.zshrc` or `~/.bashrc` file, you will want to add `ulimit -n 4096` so that it is already set for future runs. **You WILL eventually see many tests failing with `OSError: [Errno 24] Too many open files`** if you do not set it!
+
+
 #### 5. Create a new virtual environment
 
 * Make a new virtual environment (e.g. using virtualenv or conda), name it “great_expectations_dev” or similar.
