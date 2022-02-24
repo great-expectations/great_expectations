@@ -36,26 +36,55 @@ schedules:
 # dev install
 # dev-lite install
 
-stages:
-  - stage: linux
-    pool:
+strategy:
+  matrix:
+    linux-py3.6:
       vmImage: 'ubuntu-latest'
+      pythonVersion: '3.6'
+    linux-py3.7:
+      vmImage: 'ubuntu-latest'
+      pythonVersion: '3.7'
+    linux-py3.8:
+      vmImage: 'ubuntu-latest'
+      pythonVersion: '3.8'
+    linux-py3.9:
+      vmImage: 'ubuntu-latest'
+      pythonVersion: '3.9'
+    linux-py3.10:
+      vmImage: 'ubuntu-latest'
+      pythonVersion: '3.10'
+    macOS-py3.7:
+      vmImage: 'macOS-latest'
+      pythonVersion: '3.7'
+    macOS-py3.8:
+      vmImage: 'macOS-latest'
+      pythonVersion: '3.8'
+    macOS-py3.9:
+      vmImage: 'macOS-latest'
+      pythonVersion: '3.9'
+    macOS-py3.10:
+      vmImage: 'macOS-latest'
+      pythonVersion: '3.10'
+    windows-py3.7:
+      vmImage: 'windows-latest'
+      pythonVersion: '3.7'
+    windows-py3.8:
+      vmImage: 'windows-latest'
+      pythonVersion: '3.8'
+    windows-py3.9:
+      vmImage: 'windows-latest'
+      pythonVersion: '3.9'
+    windows-py3.10:
+      vmImage: 'windows-latest'
+      pythonVersion: '3.10'
+
+stages:
+  - stage: install
+    pool:
+      vmImage: '$(vmImage)'
 
     jobs:
-      - job: pip_install
-        strategy:
-          matrix:
-            py3.6:
-              pythonVersion: '3.6'
-            py3.7:
-              pythonVersion: '3.7'
-            py3.8:
-              pythonVersion: '3.8'
-            py3.9:
-              pythonVersion: '3.9'
-            py3.10:
-              pythonVersion: '3.10'
-
+      - job: pip
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -70,69 +99,69 @@ stages:
           - bash: great_expectations --version
             displayName: 'Confirm installation'
 
-      - job: conda_install
-        strategy:
-          matrix:
-            py3.6:
-              pythonVersion: '3.6'
-            py3.7:
-              pythonVersion: '3.7'
-            py3.8:
-              pythonVersion: '3.8'
-            py3.9:
-              pythonVersion: '3.9'
-            py3.10:
-              pythonVersion: '3.10'
+      # - job: conda_install
+      #   strategy:
+      #     matrix:
+      #       py3.6:
+      #         pythonVersion: '3.6'
+      #       py3.7:
+      #         pythonVersion: '3.7'
+      #       py3.8:
+      #         pythonVersion: '3.8'
+      #       py3.9:
+      #         pythonVersion: '3.9'
+      #       py3.10:
+      #         pythonVersion: '3.10'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python $(pythonVersion)'
+      #   steps:
+      #     - task: UsePythonVersion@0
+      #       inputs:
+      #         versionSpec: '$(pythonVersion)'
+      #       displayName: 'Use Python $(pythonVersion)'
 
-          - script: |
-              echo "Hello, conda!"
-            displayName: 'Install'
+      #     - script: |
+      #         echo "Hello, conda!"
+      #       displayName: 'Install'
 
-          - bash: great_expectations --version
-            displayName: 'Confirm installation'
+      #     - bash: great_expectations --version
+      #       displayName: 'Confirm installation'
 
-      - job: dev_env_full
-        strategy:
-          matrix:
-            py3.6:
-              pythonVersion: '3.6'
-            py3.7:
-              pythonVersion: '3.7'
-            py3.8:
-              pythonVersion: '3.8'
-            py3.9:
-              pythonVersion: '3.9'
-            py3.10:
-              pythonVersion: '3.10'
+      # - job: dev_env_full
+      #   strategy:
+      #     matrix:
+      #       py3.6:
+      #         pythonVersion: '3.6'
+      #       py3.7:
+      #         pythonVersion: '3.7'
+      #       py3.8:
+      #         pythonVersion: '3.8'
+      #       py3.9:
+      #         pythonVersion: '3.9'
+      #       py3.10:
+      #         pythonVersion: '3.10'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python $(pythonVersion)'
+      #   steps:
+      #     - task: UsePythonVersion@0
+      #       inputs:
+      #         versionSpec: '$(pythonVersion)'
+      #       displayName: 'Use Python $(pythonVersion)'
 
-      - job: dev_env_lightweight
-        strategy:
-          matrix:
-            py3.6:
-              pythonVersion: '3.6'
-            py3.7:
-              pythonVersion: '3.7'
-            py3.8:
-              pythonVersion: '3.8'
-            py3.9:
-              pythonVersion: '3.9'
-            py3.10:
-              pythonVersion: '3.10'
+      # - job: dev_env_lightweight
+      #   strategy:
+      #     matrix:
+      #       py3.6:
+      #         pythonVersion: '3.6'
+      #       py3.7:
+      #         pythonVersion: '3.7'
+      #       py3.8:
+      #         pythonVersion: '3.8'
+      #       py3.9:
+      #         pythonVersion: '3.9'
+      #       py3.10:
+      #         pythonVersion: '3.10'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(pythonVersion)'
-            displayName: 'Use Python $(pythonVersion)'
+      #   steps:
+      #     - task: UsePythonVersion@0
+      #       inputs:
+      #         versionSpec: '$(pythonVersion)'
+      #       displayName: 'Use Python $(pythonVersion)'
