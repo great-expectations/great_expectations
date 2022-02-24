@@ -536,17 +536,17 @@ positive integer, or must be omitted (or set to None).
         else:
             n_resamples = num_bootstrap_samples
 
-        test_case = compute_bootstrap_quantiles_scipy(
+        bootstrap_quantiles = compute_bootstrap_quantiles_scipy(
             metric_values=metric_values,
             false_positive_rate=false_positive_rate,
             n_resamples=n_resamples,
         )
 
-        bootstrap_quantiles = compute_bootstrap_quantiles(
-            metric_values=metric_values,
-            false_positive_rate=false_positive_rate,
-            n_resamples=n_resamples,
-        )
+        # bootstrap_quantiles = compute_bootstrap_quantiles(
+        #     metric_values=metric_values,
+        #     false_positive_rate=false_positive_rate,
+        #     n_resamples=n_resamples,
+        # )
 
         return bootstrap_quantiles
 
