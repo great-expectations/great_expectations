@@ -7,6 +7,7 @@ import random
 import string
 import tempfile
 import threading
+import warnings
 from functools import wraps
 from types import ModuleType
 from typing import Dict, List, Optional, Union
@@ -24,6 +25,13 @@ from great_expectations.core import (
     ExpectationValidationResultSchema,
 )
 from great_expectations.core.batch import Batch, BatchDefinition
+from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
+    ExpectationTestCase,
+    ExpectationTestDataCases,
+)
+from great_expectations.core.expectation_diagnostics.supporting_types import (
+    ExpectationExecutionEngineDiagnostics,
+)
 from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
@@ -99,60 +107,91 @@ except (ImportError, KeyError):
     sqliteDialect = None
     SQLITE_TYPES = {}
 
+_BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
-    import pybigquery.sqlalchemy_bigquery
-    import pybigquery.sqlalchemy_bigquery as BigQueryDialect
+    import sqlalchemy_bigquery as sqla_bigquery
+    import sqlalchemy_bigquery as BigQueryDialect
 
-    ###
-    # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
-    # to define an attribute "dialect". A PR has been submitted to fix this upstream
-    # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
-    # fix isn't present, add this "dialect" attribute here:
-    if not hasattr(pybigquery.sqlalchemy_bigquery, "dialect"):
-        pybigquery.sqlalchemy_bigquery.dialect = (
-            pybigquery.sqlalchemy_bigquery.BigQueryDialect
-        )
-
-    # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
-    # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-    sqlalchemy.dialects.registry.register(
-        "bigquery", "pybigquery.sqlalchemy_bigquery", "dialect"
-    )
-    try:
-        getattr(pybigquery.sqlalchemy_bigquery, "INTEGER")
-        bigquery_types_tuple = {}
-        BIGQUERY_TYPES = {
-            "INTEGER": pybigquery.sqlalchemy_bigquery.INTEGER,
-            "NUMERIC": pybigquery.sqlalchemy_bigquery.NUMERIC,
-            "STRING": pybigquery.sqlalchemy_bigquery.STRING,
-            "BIGNUMERIC": pybigquery.sqlalchemy_bigquery.BIGNUMERIC,
-            "BYTES": pybigquery.sqlalchemy_bigquery.BYTES,
-            "BOOL": pybigquery.sqlalchemy_bigquery.BOOL,
-            "BOOLEAN": pybigquery.sqlalchemy_bigquery.BOOLEAN,
-            "TIMESTAMP": pybigquery.sqlalchemy_bigquery.TIMESTAMP,
-            "TIME": pybigquery.sqlalchemy_bigquery.TIME,
-            "FLOAT": pybigquery.sqlalchemy_bigquery.FLOAT,
-            "DATE": pybigquery.sqlalchemy_bigquery.DATE,
-            "DATETIME": pybigquery.sqlalchemy_bigquery.DATETIME,
-        }
-    except AttributeError:
-        # In older versions of the pybigquery driver, types were not exported, so we use a hack
-        logger.warning(
-            "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
-        )
-        from collections import namedtuple
-
-        BigQueryTypes = namedtuple(
-            "BigQueryTypes", sorted(pybigquery.sqlalchemy_bigquery._type_map)
-        )
-        bigquery_types_tuple = BigQueryTypes(**pybigquery.sqlalchemy_bigquery._type_map)
-        BIGQUERY_TYPES = {}
-
-except (ImportError, AttributeError):
+    sqlalchemy.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     bigquery_types_tuple = None
-    BigQueryDialect = None
-    pybigquery = None
-    BIGQUERY_TYPES = {}
+    BIGQUERY_TYPES = {
+        "INTEGER": sqla_bigquery.INTEGER,
+        "NUMERIC": sqla_bigquery.NUMERIC,
+        "STRING": sqla_bigquery.STRING,
+        "BIGNUMERIC": sqla_bigquery.BIGNUMERIC,
+        "BYTES": sqla_bigquery.BYTES,
+        "BOOL": sqla_bigquery.BOOL,
+        "BOOLEAN": sqla_bigquery.BOOLEAN,
+        "TIMESTAMP": sqla_bigquery.TIMESTAMP,
+        "TIME": sqla_bigquery.TIME,
+        "FLOAT": sqla_bigquery.FLOAT,
+        "DATE": sqla_bigquery.DATE,
+        "DATETIME": sqla_bigquery.DATETIME,
+    }
+    try:
+        from sqlalchemy_bigquery import GEOGRAPHY
+
+        BIGQUERY_TYPES["GEOGRAPHY"] = GEOGRAPHY
+    except ImportError:
+        # BigQuery GEOGRAPHY support is optional
+        pass
+except ImportError:
+    try:
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
+        import pybigquery.sqlalchemy_bigquery as BigQueryDialect
+
+        warnings.warn(
+            "The pybigquery package is obsolete, please use sqlalchemy-bigquery",
+            DeprecationWarning,
+        )
+        _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
+        ###
+        # NOTE: 20210816 - jdimatteo: A convention we rely on is for SqlAlchemy dialects
+        # to define an attribute "dialect". A PR has been submitted to fix this upstream
+        # with https://github.com/googleapis/python-bigquery-sqlalchemy/pull/251. If that
+        # fix isn't present, add this "dialect" attribute here:
+        if not hasattr(sqla_bigquery, "dialect"):
+            sqla_bigquery.dialect = sqla_bigquery.BigQueryDialect
+
+        # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
+        # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
+        sqlalchemy.dialects.registry.register(
+            "bigquery", _BIGQUERY_MODULE_NAME, "dialect"
+        )
+        try:
+            getattr(sqla_bigquery, "INTEGER")
+            bigquery_types_tuple = {}
+            BIGQUERY_TYPES = {
+                "INTEGER": sqla_bigquery.INTEGER,
+                "NUMERIC": sqla_bigquery.NUMERIC,
+                "STRING": sqla_bigquery.STRING,
+                "BIGNUMERIC": sqla_bigquery.BIGNUMERIC,
+                "BYTES": sqla_bigquery.BYTES,
+                "BOOL": sqla_bigquery.BOOL,
+                "BOOLEAN": sqla_bigquery.BOOLEAN,
+                "TIMESTAMP": sqla_bigquery.TIMESTAMP,
+                "TIME": sqla_bigquery.TIME,
+                "FLOAT": sqla_bigquery.FLOAT,
+                "DATE": sqla_bigquery.DATE,
+                "DATETIME": sqla_bigquery.DATETIME,
+            }
+        except AttributeError:
+            # In older versions of the pybigquery driver, types were not exported, so we use a hack
+            logger.warning(
+                "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
+            )
+            from collections import namedtuple
+
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
+            BIGQUERY_TYPES = {}
+
+    except (ImportError, AttributeError):
+        sqla_bigquery = None
+        bigquery_types_tuple = None
+        BigQueryDialect = None
+        pybigquery = None
+        BIGQUERY_TYPES = {}
 
 
 try:
@@ -238,6 +277,15 @@ except (ImportError, KeyError):
     mssqltypes = None
     mssqlDialect = None
     MSSQL_TYPES = {}
+
+
+SQL_DIALECT_NAMES = (
+    "sqlite",
+    "postgresql",
+    "mysql",
+    "mssql",
+    "bigquery",
+)
 
 
 class SqlAlchemyConnectionManager:
@@ -924,7 +972,7 @@ def build_sa_validator_with_data(
         "postgresql": postgresqltypes.dialect,
         "mysql": mysqltypes.dialect,
         "mssql": mssqltypes.dialect,
-        "bigquery": pybigquery.sqlalchemy_bigquery.BigQueryDialect,
+        "bigquery": sqla_bigquery.BigQueryDialect,
     }
     dialect_types = {
         "sqlite": SQLITE_TYPES,
@@ -1311,7 +1359,10 @@ def build_test_backends_list(
     include_mysql=False,
     include_mssql=False,
     include_bigquery=False,
-):
+    raise_exceptions_for_backends: bool = True,
+) -> List[str]:
+    """Attempts to identify supported backends by checking which imports are available."""
+
     test_backends = []
 
     if include_pandas:
@@ -1322,17 +1373,31 @@ def build_test_backends_list(
             import pyspark
             from pyspark.sql import SparkSession
         except ImportError:
-            raise ValueError("spark tests are requested, but pyspark is not installed")
-        test_backends += ["spark"]
+            if raise_exceptions_for_backends is True:
+                raise ValueError(
+                    "spark tests are requested, but pyspark is not installed"
+                )
+            else:
+                logger.warning(
+                    "spark tests are requested, but pyspark is not installed"
+                )
+        else:
+            test_backends += ["spark"]
 
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if include_sqlalchemy:
 
         sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
         if sa is None:
-            raise ImportError(
-                "sqlalchemy tests are requested, but sqlalchemy in not installed"
-            )
+            if raise_exceptions_for_backends is True:
+                raise ImportError(
+                    "sqlalchemy tests are requested, but sqlalchemy in not installed"
+                )
+            else:
+                logger.warning(
+                    "sqlalchemy tests are requested, but sqlalchemy in not installed"
+                )
+            return test_backends
 
         if include_sqlite:
             test_backends += ["sqlite"]
@@ -1351,10 +1416,16 @@ def build_test_backends_list(
             if checker.is_valid() is True:
                 test_backends += ["postgresql"]
             else:
-                raise ValueError(
-                    f"backend-specific tests are requested, but unable to connect to the database at "
-                    f"{connection_string}"
-                )
+                if raise_exceptions_for_backends is True:
+                    raise ValueError(
+                        f"backend-specific tests are requested, but unable to connect to the database at "
+                        f"{connection_string}"
+                    )
+                else:
+                    logger.warning(
+                        f"backend-specific tests are requested, but unable to connect to the database at "
+                        f"{connection_string}"
+                    )
 
         if include_mysql:
             try:
@@ -1362,11 +1433,18 @@ def build_test_backends_list(
                 conn = engine.connect()
                 conn.close()
             except (ImportError, SQLAlchemyError):
-                raise ImportError(
-                    "mysql tests are requested, but unable to connect to the mysql database at "
-                    f"'mysql+pymysql://root@{db_hostname}/test_ci'"
-                )
-            test_backends += ["mysql"]
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "mysql tests are requested, but unable to connect to the mysql database at "
+                        f"'mysql+pymysql://root@{db_hostname}/test_ci'"
+                    )
+                else:
+                    logger.warning(
+                        "mysql tests are requested, but unable to connect to the mysql database at "
+                        f"'mysql+pymysql://root@{db_hostname}/test_ci'"
+                    )
+            else:
+                test_backends += ["mysql"]
 
         if include_mssql:
             try:
@@ -1378,35 +1456,52 @@ def build_test_backends_list(
                 conn = engine.connect()
                 conn.close()
             except (ImportError, sa.exc.SQLAlchemyError):
-                raise ImportError(
-                    "mssql tests are requested, but unable to connect to the mssql database at "
-                    f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
-                    "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
-                )
-            test_backends += ["mssql"]
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "mssql tests are requested, but unable to connect to the mssql database at "
+                        f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+                        "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
+                    )
+                else:
+                    logger.warning(
+                        "mssql tests are requested, but unable to connect to the mssql database at "
+                        f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
+                        "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
+                    )
+            else:
+                test_backends += ["mssql"]
 
         if include_bigquery:
             try:
                 engine = _create_bigquery_engine()
                 conn = engine.connect()
                 conn.close()
-            except (ImportError, sa.exc.SQLAlchemyError) as e:
-                raise ImportError(
-                    "bigquery tests are requested, but unable to connect"
-                ) from e
-            test_backends += ["bigquery"]
+            except (ImportError, ValueError, sa.exc.SQLAlchemyError) as e:
+                if raise_exceptions_for_backends is True:
+                    raise ImportError(
+                        "bigquery tests are requested, but unable to connect"
+                    ) from e
+                else:
+                    logger.warning(
+                        f"bigquery tests are requested, but unable to connect; {repr(e)}"
+                    )
+            else:
+                test_backends += ["bigquery"]
 
     return test_backends
 
 
 def generate_expectation_tests(
-    expectation_type, examples_config, expectation_execution_engines_dict=None
+    expectation_type: str,
+    test_data_cases: List[ExpectationTestDataCases],
+    execution_engine_diagnostics: ExpectationExecutionEngineDiagnostics,
+    raise_exceptions_for_backends: bool = False,
 ):
     """
 
     :param expectation_type: snake_case name of the expectation type
     :param examples_config: a dictionary that defines the data and test cases for the expectation
-    :param expectation_execution_engines_dict: (optional) a dictionary that shows which backends/execution engines the
+    :param expectation_execution_engines_dict: shows which backends/execution engines the
             expectation is implemented for. It can be obtained from the output of the expectation's self_check method
             Example:
             {
@@ -1418,297 +1513,125 @@ def generate_expectation_tests(
     """
     parametrized_tests = []
 
-    # If Expectation.examples defines "test_backends", use that to determine backends and dialects to use.
-    # Otherwise, use the introspected expectation_execution_engines_dict.
-    for d in examples_config:
+    for d in test_data_cases:
         d = copy.deepcopy(d)
-        if expectation_execution_engines_dict is not None:
-            example_backends_is_defined = "test_backends" in d
-            example_backends = [
-                backend_dict.get("backend")
-                for backend_dict in d.get("test_backends", [])
-            ]
-            example_sqlalchemy_dialects = [
-                dialect
-                for backend_dict in d.get("test_backends", {})
-                if (backend_dict.get("backend") == "sqlalchemy")
-                for dialect in backend_dict.get("dialects", [])
-            ]
-            include_sqlalchemy = (
-                ("sqlalchemy" in example_backends)
-                if example_backends_is_defined
-                else (
-                    expectation_execution_engines_dict.get("SqlAlchemyExecutionEngine")
-                    == True
-                )
-            )
-            backends = build_test_backends_list(
-                include_pandas=("pandas" in example_backends)
-                if example_backends_is_defined
-                else (
-                    expectation_execution_engines_dict.get("PandasExecutionEngine")
-                    == True
-                ),
-                include_spark=("spark" in example_backends)
-                if example_backends_is_defined
-                else (
-                    expectation_execution_engines_dict.get("SparkDFExecutionEngine")
-                    == True
-                ),
-                include_sqlalchemy=include_sqlalchemy,
-                include_sqlite=("sqlite" in example_sqlalchemy_dialects)
-                if example_backends_is_defined
-                else include_sqlalchemy,
-                include_postgresql=("postgresql" in example_sqlalchemy_dialects),
-                include_mysql=("mysql" in example_sqlalchemy_dialects),
-                include_mssql=("mssql" in example_sqlalchemy_dialects),
-            )
+        dialects_to_include = {}
+
+        # Some Expectations (mostly contrib) explicitly list test_backends/dialects to test with
+        if d.test_backends:
+            for tb in d.test_backends:
+                if tb["backend"] == "sqlalchemy":
+                    for dialect in tb["dialects"]:
+                        dialects_to_include[dialect] = True
         else:
-            backends = build_test_backends_list()
+            if (
+                execution_engine_diagnostics.SqlAlchemyExecutionEngine is True
+                and raise_exceptions_for_backends is False
+            ):
+                dialects_to_include = {
+                    dialect: True
+                    for dialect in SQL_DIALECT_NAMES
+                    if dialect != "bigquery"
+                }
+
+        # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
+        if (
+            execution_engine_diagnostics.SqlAlchemyExecutionEngine is True
+            and not dialects_to_include
+        ):
+            dialects_to_include["sqlite"] = True
+
+        backends = build_test_backends_list(
+            include_pandas=execution_engine_diagnostics.PandasExecutionEngine,
+            include_spark=execution_engine_diagnostics.SparkDFExecutionEngine,
+            include_sqlalchemy=execution_engine_diagnostics.SqlAlchemyExecutionEngine,
+            include_sqlite=dialects_to_include.get("sqlite", False),
+            include_postgresql=dialects_to_include.get("postgresql", False),
+            include_mysql=dialects_to_include.get("mysql", False),
+            include_mssql=dialects_to_include.get("mssql", False),
+            include_bigquery=dialects_to_include.get("bigquery", False),
+            raise_exceptions_for_backends=raise_exceptions_for_backends,
+        )
 
         for c in backends:
 
-            datasets = []
-            if candidate_test_is_on_temporary_notimplemented_list_cfe(
-                c, expectation_type
-            ):
-                skip_expectation = True
-                schemas = validator_with_data = None
-            else:
-                skip_expectation = False
-                if isinstance(d["data"], list):
-                    sqlite_db_path = os.path.abspath(
-                        os.path.join(
-                            tmp_dir,
-                            "sqlite_db"
-                            + "".join(
-                                [
-                                    random.choice(string.ascii_letters + string.digits)
-                                    for _ in range(8)
-                                ]
-                            )
-                            + ".db",
-                        )
-                    )
-                    for dataset in d["data"]:
-                        datasets.append(
-                            get_test_validator_with_data(
-                                c,
-                                dataset["data"],
-                                dataset.get("schemas"),
-                                table_name=dataset.get("dataset_name"),
-                                sqlite_db_path=sqlite_db_path,
-                            )
-                        )
-                    validator_with_data = datasets[0]
-                else:
-                    schemas = d["schemas"] if "schemas" in d else None
-                    validator_with_data = get_test_validator_with_data(
-                        c, d["data"], schemas=schemas
-                    )
+            try:
+                validator_with_data = get_test_validator_with_data(
+                    c, d["data"], d["schemas"]
+                )
+            except Exception as e:
+                continue
 
             for test in d["tests"]:
-
-                # use the expectation_execution_engines_dict of the expectation
-                # to exclude unimplemented backends from the testing
-                if expectation_execution_engines_dict is not None:
-                    supress_test_for = test.get("suppress_test_for")
-                    if supress_test_for is None:
-                        supress_test_for = []
-                    if not expectation_execution_engines_dict.get(
-                        "PandasExecutionEngine"
-                    ):
-                        supress_test_for.append("pandas")
-                    if not expectation_execution_engines_dict.get(
-                        "SqlAlchemyExecutionEngine"
-                    ):
-                        supress_test_for.append("sqlalchemy")
-                    if not expectation_execution_engines_dict.get(
-                        "SparkDFExecutionEngine"
-                    ):
-                        supress_test_for.append("spark")
-
-                    if len(supress_test_for) > 0:
-                        test["suppress_test_for"] = supress_test_for
-
-                generate_test = True
-                skip_test = False
-                if "only_for" in test:
-                    # if we're not on the "only_for" list, then never even generate the test
-                    generate_test = False
-                    if not isinstance(test["only_for"], list):
-                        raise ValueError("Invalid test specification.")
-
-                    if validator_with_data and isinstance(
-                        validator_with_data.execution_engine.active_batch_data,
-                        SqlAlchemyBatchData,
-                    ):
-                        # Call out supported dialects
-                        if "sqlalchemy" in test["only_for"]:
-                            generate_test = True
-                        elif (
-                            "sqlite" in test["only_for"]
-                            and sqliteDialect is not None
-                            and isinstance(
-                                validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                sqliteDialect,
-                            )
-                        ):
-                            generate_test = True
-                        elif (
-                            "postgresql" in test["only_for"]
-                            and postgresqlDialect is not None
-                            and isinstance(
-                                validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                postgresqlDialect,
-                            )
-                        ):
-                            generate_test = True
-                        elif (
-                            "mysql" in test["only_for"]
-                            and mysqlDialect is not None
-                            and isinstance(
-                                validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                mysqlDialect,
-                            )
-                        ):
-                            generate_test = True
-                        elif (
-                            "mssql" in test["only_for"]
-                            and mssqlDialect is not None
-                            and isinstance(
-                                validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                                mssqlDialect,
-                            )
-                        ):
-                            generate_test = True
-                    elif validator_with_data and isinstance(
-                        validator_with_data.execution_engine.active_batch_data,
-                        pandas_DataFrame,
-                    ):
-                        if "pandas" in test["only_for"]:
-                            generate_test = True
-                        if (
-                            "pandas_022" in test["only_for"]
-                            or "pandas_023" in test["only_for"]
-                        ) and int(pd.__version__.split(".")[1]) in [22, 23]:
-                            generate_test = True
-                        if ("pandas>=24" in test["only_for"]) and int(
-                            pd.__version__.split(".")[1]
-                        ) > 24:
-                            generate_test = True
-                    elif validator_with_data and isinstance(
-                        validator_with_data.execution_engine.active_batch_data,
-                        spark_DataFrame,
-                    ):
-                        if "spark" in test["only_for"]:
-                            generate_test = True
-
-                if not generate_test:
+                if not should_we_generate_this_test(
+                    backend=c,
+                    expectation_test_case=test,
+                ):
                     continue
 
-                if "suppress_test_for" in test and (
-                    (
-                        "sqlalchemy" in test["suppress_test_for"]
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            SqlAlchemyBatchData,
-                        )
-                    )
-                    or (
-                        "sqlite" in test["suppress_test_for"]
-                        and sqliteDialect is not None
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            SqlAlchemyBatchData,
-                        )
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                            sqliteDialect,
-                        )
-                    )
-                    or (
-                        "postgresql" in test["suppress_test_for"]
-                        and postgresqlDialect is not None
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            SqlAlchemyBatchData,
-                        )
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                            postgresqlDialect,
-                        )
-                    )
-                    or (
-                        "mysql" in test["suppress_test_for"]
-                        and mysqlDialect is not None
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            SqlAlchemyBatchData,
-                        )
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                            mysqlDialect,
-                        )
-                    )
-                    or (
-                        "mssql" in test["suppress_test_for"]
-                        and mssqlDialect is not None
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            SqlAlchemyBatchData,
-                        )
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data.sql_engine_dialect,
-                            mssqlDialect,
-                        )
-                    )
-                    or (
-                        "pandas" in test["suppress_test_for"]
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            pandas_DataFrame,
-                        )
-                    )
-                    or (
-                        "spark" in test["suppress_test_for"]
-                        and validator_with_data
-                        and isinstance(
-                            validator_with_data.execution_engine.active_batch_data,
-                            spark_DataFrame,
-                        )
-                    )
-                ):
-                    skip_test = True
                 # Known condition: SqlAlchemy does not support allow_cross_type_comparisons
                 if (
-                    "allow_cross_type_comparisons" in test["in"]
+                    "allow_cross_type_comparisons" in test["input"]
                     and validator_with_data
                     and isinstance(
                         validator_with_data.execution_engine.active_batch_data,
                         SqlAlchemyBatchData,
                     )
                 ):
-                    skip_test = True
+                    continue
 
-                if not skip_test:
-                    parametrized_tests.append(
-                        {
-                            "expectation_type": expectation_type,
-                            "validator_with_data": validator_with_data,
-                            "test": test,
-                            "skip": skip_expectation or skip_test,
-                            "backend": c,
-                        }
-                    )
+                parametrized_tests.append(
+                    {
+                        "expectation_type": expectation_type,
+                        "validator_with_data": validator_with_data,
+                        "test": test,
+                        "backend": c,
+                    }
+                )
 
     return parametrized_tests
+
+
+def should_we_generate_this_test(
+    backend: str,
+    expectation_test_case: ExpectationTestCase,
+):
+
+    # backend will only ever be pandas, spark, or a specific SQL dialect, but sometimes
+    # suppress_test_for or only_for may include "sqlalchemy"
+    #
+    # There is one Expectation (expect_column_values_to_be_of_type) that has some tests that
+    # are only for specific versions of pandas
+    #   - only_for can be any of: pandas, pandas_022, pandas_023, pandas>=024
+    #   - See: https://github.com/great-expectations/great_expectations/blob/7766bb5caa4e0e5b22fa3b3a5e1f2ac18922fdeb/tests/test_definitions/test_expectations_cfe.py#L176-L185
+    if backend in expectation_test_case.suppress_test_for:
+        return False
+    if (
+        "sqlalchemy" in expectation_test_case.suppress_test_for
+        and backend in SQL_DIALECT_NAMES
+    ):
+        return False
+    if expectation_test_case.only_for != None and expectation_test_case.only_for:
+        if not backend in expectation_test_case.only_for:
+            if (
+                "sqlalchemy" in expectation_test_case.only_for
+                and backend in SQL_DIALECT_NAMES
+            ):
+                return True
+            elif "pandas" == backend:
+                major, minor, *_ = pd.__version__.split(".")
+                if (
+                    "pandas_022" in expectation_test_case.only_for
+                    or "pandas_023" in expectation_test_case.only_for
+                ):
+                    if major == "0" and minor in ["22", "23"]:
+                        return True
+                elif "pandas>=024" in expectation_test_case.only_for:
+                    if (major == "0" and int(minor) >= 24) or int(major) >= 1:
+                        return True
+            return False
+
+    return True
 
 
 def sort_unexpected_values(test_value_list, result_value_list):
@@ -1770,18 +1693,28 @@ def evaluate_json_test(data_asset, expectation_type, test):
             "Invalid test configuration detected: 'exact_match_out' is required."
         )
 
-    if "in" not in test:
-        raise ValueError("Invalid test configuration detected: 'in' is required.")
+    if "input" not in test:
+        if "in" in test:
+            test["input"] = test["in"]
+        else:
+            raise ValueError(
+                "Invalid test configuration detected: 'input' is required."
+            )
 
-    if "out" not in test:
-        raise ValueError("Invalid test configuration detected: 'out' is required.")
+    if "output" not in test:
+        if "out" in test:
+            test["output"] = test["out"]
+        else:
+            raise ValueError(
+                "Invalid test configuration detected: 'output' is required."
+            )
 
     # Support tests with positional arguments
-    if isinstance(test["in"], list):
-        result = getattr(data_asset, expectation_type)(*test["in"])
+    if isinstance(test["input"], list):
+        result = getattr(data_asset, expectation_type)(*test["input"])
     # As well as keyword arguments
     else:
-        result = getattr(data_asset, expectation_type)(**test["in"])
+        result = getattr(data_asset, expectation_type)(**test["input"])
 
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
@@ -1825,15 +1758,25 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
             "Invalid test configuration detected: 'exact_match_out' is required."
         )
 
-    if "in" not in test:
-        raise ValueError("Invalid test configuration detected: 'in' is required.")
+    if "input" not in test:
+        if "in" in test:
+            test["input"] = test["in"]
+        else:
+            raise ValueError(
+                "Invalid test configuration detected: 'input' is required."
+            )
 
-    if "out" not in test:
-        raise ValueError("Invalid test configuration detected: 'out' is required.")
+    if "output" not in test:
+        if "out" in test:
+            test["output"] = test["out"]
+        else:
+            raise ValueError(
+                "Invalid test configuration detected: 'output' is required."
+            )
 
-    kwargs = copy.deepcopy(test["in"])
+    kwargs = copy.deepcopy(test["input"])
 
-    if isinstance(test["in"], list):
+    if isinstance(test["input"], list):
         result = getattr(validator, expectation_type)(*kwargs)
     # As well as keyword arguments
     else:
@@ -1851,53 +1794,54 @@ def evaluate_json_test_cfe(validator, expectation_type, test):
 def check_json_test_result(test, result, data_asset=None):
     # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
     if "unexpected_list" in result["result"]:
-        if ("result" in test["out"]) and ("unexpected_list" in test["out"]["result"]):
+        if ("result" in test["output"]) and (
+            "unexpected_list" in test["output"]["result"]
+        ):
             (
-                test["out"]["result"]["unexpected_list"],
+                test["output"]["result"]["unexpected_list"],
                 result["result"]["unexpected_list"],
             ) = sort_unexpected_values(
-                test["out"]["result"]["unexpected_list"],
+                test["output"]["result"]["unexpected_list"],
                 result["result"]["unexpected_list"],
             )
-        elif "unexpected_list" in test["out"]:
+        elif "unexpected_list" in test["output"]:
             (
-                test["out"]["unexpected_list"],
+                test["output"]["unexpected_list"],
                 result["result"]["unexpected_list"],
             ) = sort_unexpected_values(
-                test["out"]["unexpected_list"],
+                test["output"]["unexpected_list"],
                 result["result"]["unexpected_list"],
             )
 
     if "partial_unexpected_list" in result["result"]:
-        if ("result" in test["out"]) and (
-            "partial_unexpected_list" in test["out"]["result"]
+        if ("result" in test["output"]) and (
+            "partial_unexpected_list" in test["output"]["result"]
         ):
             (
-                test["out"]["result"]["partial_unexpected_list"],
+                test["output"]["result"]["partial_unexpected_list"],
                 result["result"]["partial_unexpected_list"],
             ) = sort_unexpected_values(
-                test["out"]["result"]["partial_unexpected_list"],
+                test["output"]["result"]["partial_unexpected_list"],
                 result["result"]["partial_unexpected_list"],
             )
-        elif "partial_unexpected_list" in test["out"]:
+        elif "partial_unexpected_list" in test["output"]:
             (
-                test["out"]["partial_unexpected_list"],
+                test["output"]["partial_unexpected_list"],
                 result["result"]["partial_unexpected_list"],
             ) = sort_unexpected_values(
-                test["out"]["partial_unexpected_list"],
+                test["output"]["partial_unexpected_list"],
                 result["result"]["partial_unexpected_list"],
             )
 
     # Check results
     if test["exact_match_out"] is True:
-        assert result == expectationValidationResultSchema.load(test["out"])
+        assert result == expectationValidationResultSchema.load(test["output"])
     else:
         # Convert result to json since our tests are reading from json so cannot easily contain richer types (e.g. NaN)
         # NOTE - 20191031 - JPC - we may eventually want to change these tests as we update our view on how
         # representations, serializations, and objects should interact and how much of that is shown to the user.
         result = result.to_json_dict()
-        # print(result)
-        for key, value in test["out"].items():
+        for key, value in test["output"].items():
             # Apply our great expectations-specific test logic
 
             if key == "success":
