@@ -331,10 +331,10 @@ def compute_bootstrap_quantiles(
     data = (metric_values,)
     axis = 1
 
-    # Whether to return the ‘percentile’ bootstrap confidence interval ('percentile'), the ‘reverse’ or the bias -
-    # corrected and accelerated bootstrap confidence interval ('BCa'). Note that even though we prefer to use 'BCa',
-    # only 'percentile' and 'basic' support multi-sample statistics as of February 24th, 2022.
-    # For a more complete write-up regarding the available methods, see:
+    # "method" parameter tells scipy.stats.bootstrap whether to return the ‘percentile’ bootstrap confidence interval
+    # ('percentile'), the ‘reverse’ or the bias - corrected and accelerated bootstrap confidence interval ('BCa').
+    # Note that even though we prefer to use 'BCa', only 'percentile' and 'basic' support multi-sample statistics as of
+    # February 24th, 2022. For a more complete write-up regarding the available methods, see:
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html
     method = "basic"
 
