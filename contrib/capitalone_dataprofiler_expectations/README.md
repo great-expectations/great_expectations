@@ -407,5 +407,3 @@ The AAAI-21 Workshop on Knowledge Discovery from Unstructured Data in Financial 
 ```
 
 GE Integration Author: Taylor Turner ([taylorfturner](https://github.com/taylorfturner))
-
-[PyPi Link](https://pypi/python.org/pypi/capitalone_dataprofiler_expectations)
