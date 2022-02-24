@@ -25,6 +25,7 @@ code_owners:
 # Please fill in the details and add more domain experts as you see fit
 domain_experts:
   - full_name: Jeremy Goodsitt
+  - full_name: Austin Walters
     # social_links:
     #   - account_type: ~ # May be one of TWITTER | INSTAGRAM | LINKEDIN | MEDIUM
     #     identifier: ~
