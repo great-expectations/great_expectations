@@ -66,7 +66,7 @@ class CardinalityLimitMode(enum.Enum):
 class CardinalityChecker:
     """Handles cardinality checking given cardinality limit mode and measured value.
 
-    This class validates cardinality limit settings and converts from
+    This class also validates cardinality limit settings and converts from
     various types of settings. You can choose one of the attributes listed
     below to create an instance.
 

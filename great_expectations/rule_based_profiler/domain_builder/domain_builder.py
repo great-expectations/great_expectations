@@ -147,13 +147,13 @@ were retrieved).
 
 
 def build_domains_from_column_names(column_names: List[str]) -> List[Domain]:
-    """Build column type domains from column names
+    """Build column type domains from column names.
 
     Args:
-        column_names: List of columns to convert
+        column_names: List of columns to convert.
 
     Returns:
-        A list of column type Domain objects built from column names
+        A list of column type Domain objects built from column names.
     """
     column_name: str
     domains: List[Domain] = [
