@@ -1,10 +1,14 @@
-# This file is responsible for configuring the `packaging` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+# This file is responsible for configuring the `packaging_and_installation` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
 #
 # The pipeline is run under the following conditions:
 #   - On the main branch when a weekly release is being cut
 #   - On the develop branch as scheduled by the below cron job
 #
-#  `packaging` is meant to test the installation and packaging of Great Expectations in a variety of environments.
+#  `packaging_and_installation` is meant to test the installation and packaging of Great Expectations in a variety of environments.
+#
+#  This includes:
+#  * Linux, MacOS, and Windows
+#  * pip and cond
 
 schedules:
 - cron: 0 0 * * *
@@ -67,7 +71,10 @@ stages:
               pip install great_expectations
             displayName: 'Install Great Expectations'
 
-          - bash: great_expectations --version
+          - script: |
+              great_expectations --version
+              mkdir "tmp" && cd "tmp"
+              great_expectations -y init --no-usage-stats
             displayName: 'Confirm installation'
 
       - job: conda
@@ -89,12 +96,22 @@ stages:
               versionSpec: '$(pythonVersion)'
             displayName: 'Use Python $(pythonVersion)'
 
+          - bash: echo "##vso[task.prependpath]$CONDA/bin"
+            displayName: Add conda to PATH
+
+          - bash: conda create --yes --quiet --name venv
+            displayName: Create Anaconda environment
+
           - script: |
-              echo "Hello, conda!"
+              source activate venv
+              conda install --yes --quiet --name great_expectations
             displayName: 'Install Great Expectations'
 
-          # - bash: great_expectations --version
-          #   displayName: 'Confirm installation'
+          - script: |
+              great_expectations --version
+              mkdir "tmp" && cd "tmp"
+              great_expectations -y init --no-usage-stats
+            displayName: 'Confirm installation'
 
   - stage: linux_dev_install
     dependsOn: [linux_user_install]
@@ -174,8 +191,9 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines
-              pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              echo "This should test!"
+              # pip install pytest pytest-cov pytest-azurepipelines
+              # pytest --no-spark --no-postgresql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html --ignore=tests/cli --ignore=tests/integration/usage_statistics
             displayName: 'pytest'
 
           - task: PublishTestResults@2
