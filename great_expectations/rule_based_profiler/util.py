@@ -300,23 +300,21 @@ def compute_bootstrap_quantiles_legacy(
     bootstraps: np.ndarray = np.random.choice(
         metric_values, size=(n_resamples, metric_values.size)
     )
-    lower_quantile = np.mean(
-        np.quantile(
-            bootstraps,
-            q=false_positive_rate / 2,
-            axis=1,
-            interpolation="linear",  # can be omitted ("linear" is default)
-        )
+    lower_quantiles = np.quantile(
+        bootstraps,
+        q=false_positive_rate / 2,
+        axis=1,
+        interpolation="linear",  # can be omitted ("linear" is default)
     )
-    upper_quantile = np.mean(
-        np.quantile(
-            bootstraps,
-            q=1.0 - (false_positive_rate / 2),
-            axis=1,
-            interpolation="linear",  # can be omitted ("linear" is default)
-        )
+    lower_quantile_mean = np.mean(lower_quantiles)
+    upper_quantiles = np.quantile(
+        bootstraps,
+        q=1.0 - (false_positive_rate / 2),
+        axis=1,
+        interpolation="linear",  # can be omitted ("linear" is default)
     )
-    return lower_quantile, upper_quantile
+    upper_quantile_mean = np.mean(upper_quantiles)
+    return lower_quantile_mean, upper_quantile_mean
 
 
 def compute_bootstrap_quantiles(
@@ -360,6 +358,6 @@ def compute_bootstrap_quantiles(
     # approximately normal (https://en.wikipedia.org/wiki/Central_limit_theorem). With the knowledge that our confidence
     # intervals were calculated from a symmetrical normal distribution, we can simply return the mid-point between the
     # lower and upper confidence intervals.
-    lower_quantile, upper_quantile = (lower_ci + upper_ci) / 2
+    lower_quantile_mean, upper_quantile_mean = (lower_ci + upper_ci) / 2
 
-    return lower_quantile, upper_quantile
+    return lower_quantile_mean, upper_quantile_mean
