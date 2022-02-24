@@ -377,6 +377,7 @@ module.exports = {
             'terms/data_context',
             'terms/data_asset',
             'terms/data_docs',
+            'terms/evaluation_parameter',
             'terms/execution_engine',
             'terms/expectation',
             'terms/expectation_suite',

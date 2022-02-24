@@ -56,7 +56,7 @@
   },
   "evaluation_parameter": {
     "term": "Evaluation Parameter",
-    "definition": "A parameter used during Validation of an Expectation to reference simple expressions or previously generated metrics.",
+    "definition": "A dynamic value used during Validation of an Expectation which is populated by evaluating simple expressions or by referencing previously generated metrics.",
     "url": "terms/evaluation_parameter"
   },
   "evaluation_parameter_store": {
