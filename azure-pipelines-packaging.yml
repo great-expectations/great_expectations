@@ -36,66 +36,66 @@ schedules:
 # dev install
 # dev-lite install
 
-strategy:
-  matrix:
-    linux-py3.6:
-      vmImage: 'ubuntu-latest'
-      pythonVersion: '3.6'
-    linux-py3.7:
-      vmImage: 'ubuntu-latest'
-      pythonVersion: '3.7'
-    linux-py3.8:
-      vmImage: 'ubuntu-latest'
-      pythonVersion: '3.8'
-    linux-py3.9:
-      vmImage: 'ubuntu-latest'
-      pythonVersion: '3.9'
-    linux-py3.10:
-      vmImage: 'ubuntu-latest'
-      pythonVersion: '3.10'
-    macOS-py3.7:
-      vmImage: 'macOS-latest'
-      pythonVersion: '3.7'
-    macOS-py3.8:
-      vmImage: 'macOS-latest'
-      pythonVersion: '3.8'
-    macOS-py3.9:
-      vmImage: 'macOS-latest'
-      pythonVersion: '3.9'
-    macOS-py3.10:
-      vmImage: 'macOS-latest'
-      pythonVersion: '3.10'
-    windows-py3.7:
-      vmImage: 'windows-latest'
-      pythonVersion: '3.7'
-    windows-py3.8:
-      vmImage: 'windows-latest'
-      pythonVersion: '3.8'
-    windows-py3.9:
-      vmImage: 'windows-latest'
-      pythonVersion: '3.9'
-    windows-py3.10:
-      vmImage: 'windows-latest'
-      pythonVersion: '3.10'
+parameters:
+  - name: 'linux-py3.6'
+    vmImage: 'ubuntu-latest'
+    pythonVersion: '3.6'
+  - name: linux-py3.7
+    vmImage: 'ubuntu-latest'
+    pythonVersion: '3.7'
+  - name: linux-py3.8
+    vmImage: 'ubuntu-latest'
+    pythonVersion: '3.8'
+  - name: linux-py3.9
+    vmImage: 'ubuntu-latest'
+    pythonVersion: '3.9'
+  - name: linux-py3.10
+    vmImage: 'ubuntu-latest'
+    pythonVersion: '3.10'
+  - name: macOS-py3.7
+    vmImage: 'macOS-latest'
+    pythonVersion: '3.7'
+  - name: macOS-py3.8
+    vmImage: 'macOS-latest'
+    pythonVersion: '3.8'
+  - name: macOS-py3.9
+    vmImage: 'macOS-latest'
+    pythonVersion: '3.9'
+  - name: macOS-py3.10
+    vmImage: 'macOS-latest'
+    pythonVersion: '3.10'
+  - name: windows-py3.7
+    vmImage: 'windows-latest'
+    pythonVersion: '3.7'
+  - name: windows-py3.8
+    vmImage: 'windows-latest'
+    pythonVersion: '3.8'
+  - name: windows-py3.9
+    vmImage: 'windows-latest'
+    pythonVersion: '3.9'
+  - name: windows-py3.10
+    vmImage: 'windows-latest'
+    pythonVersion: '3.10'
 
-pool:
-  vmImage: '$(vmImage)'
+stages:
+  - stage: lint
+    pool:
+      vmImage: '$(vmImage)'
+    jobs:
+      - job: pip
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(pythonVersion)'
+            displayName: 'Use Python $(pythonVersion)'
 
-jobs:
-  - job: pip
-    steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: '$(pythonVersion)'
-        displayName: 'Use Python $(pythonVersion)'
+          - script: |
+              python -m pip install --upgrade pip==21.3.1
+              pip install great_expectations
+            displayName: 'Install'
 
-      - script: |
-          python -m pip install --upgrade pip==21.3.1
-          pip install great_expectations
-        displayName: 'Install'
-
-      - bash: great_expectations --version
-        displayName: 'Confirm installation'
+          - bash: great_expectations --version
+            displayName: 'Confirm installation'
 
       # - job: conda_install
       #   strategy:
