@@ -42,7 +42,7 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
-      - job: pip install
+      - job: pip_install
         strategy:
           matrix:
             py3.6:
@@ -70,7 +70,7 @@ stages:
           - bash: great_expectations --version
             displayName: 'Confirm installation'
 
-      - job: conda install
+      - job: conda_install
         strategy:
           matrix:
             py3.6:
@@ -97,7 +97,7 @@ stages:
           - bash: great_expectations --version
             displayName: 'Confirm installation'
 
-      - job: dev env full install
+      - job: dev_env_full
         strategy:
           matrix:
             py3.6:
@@ -117,7 +117,7 @@ stages:
               versionSpec: '$(pythonVersion)'
             displayName: 'Use Python $(pythonVersion)'
 
-      - job: dev env lightweight install
+      - job: dev_env_lightweight
         strategy:
           matrix:
             py3.6:
