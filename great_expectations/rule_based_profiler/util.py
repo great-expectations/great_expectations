@@ -300,20 +300,20 @@ def compute_bootstrap_quantiles_legacy(
     bootstraps: np.ndarray = np.random.choice(
         metric_values, size=(n_resamples, metric_values.size)
     )
-    lower_quantiles: float = np.quantile(
+    lower_quantiles: Union[np.nd_array, Number] = np.quantile(
         bootstraps,
         q=false_positive_rate / 2,
         axis=1,
         interpolation="linear",  # can be omitted ("linear" is default)
     )
-    lower_quantile_mean: float = np.mean(lower_quantiles)
-    upper_quantiles: float = np.quantile(
+    lower_quantile_mean: Number = np.mean(lower_quantiles)
+    upper_quantiles: Union[np.nd_array, Number] = np.quantile(
         bootstraps,
         q=1.0 - (false_positive_rate / 2),
         axis=1,
         interpolation="linear",  # can be omitted ("linear" is default)
     )
-    upper_quantile_mean: float = np.mean(upper_quantiles)
+    upper_quantile_mean: Number = np.mean(upper_quantiles)
     return lower_quantile_mean, upper_quantile_mean
 
 
@@ -326,7 +326,7 @@ def compute_bootstrap_quantiles(
     SciPy implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
     See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
     """
-    data: tuple = (metric_values,)
+    data: tuple[np.ndarray] = (metric_values,)
     lower_quantile_pct: float = false_positive_rate / 2
     upper_quantile_pct: float = 1.0 - (false_positive_rate / 2)
     axis: int = 1
@@ -350,8 +350,8 @@ def compute_bootstrap_quantiles(
         n_resamples=n_resamples,
         method=method,
     )
-    lower_ci: np.ndarray
-    upper_ci: np.ndarray
+    lower_ci: Union[np.nd_array, Number]
+    upper_ci: Union[np.nd_array, Number]
     lower_ci, upper_ci = bootstrap_result.confidence_interval
 
     # Since the stats.bootstrap method will only return a confidence interval for each of the quantiles we seek to
@@ -360,8 +360,8 @@ def compute_bootstrap_quantiles(
     # approximately normal (https://en.wikipedia.org/wiki/Central_limit_theorem). With the knowledge that our confidence
     # intervals were calculated from a symmetrical normal distribution, we can simply return the mid-point between the
     # lower and upper confidence intervals.
-    lower_quantile_mean: np.ndarray
-    upper_quantile_mean: np.ndarray
+    lower_quantile_mean: Number
+    upper_quantile_mean: Number
     lower_quantile_mean, upper_quantile_mean = (lower_ci + upper_ci) / 2
 
     return lower_quantile_mean, upper_quantile_mean
