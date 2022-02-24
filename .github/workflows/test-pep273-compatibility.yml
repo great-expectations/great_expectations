@@ -9,7 +9,7 @@ jobs:
     runs-on: '${{ matrix.os }}'
     strategy:
       matrix:
-        python: [ 3.7, 3.9 ]
+        python: [ 3.6, 3.9 ]
         os: [ ubuntu-20.04, windows-2019 ]
         type: [directory, zip]
 
