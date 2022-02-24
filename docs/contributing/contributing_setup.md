@@ -90,6 +90,8 @@ If you want to add support for Spark, you can `pip install pyspark>=2.3.2`
 
 If you want to add support for Arrow, you can `pip install feather-format>=0.4.1 pyarrow>=0.12.0`
 
+> We will try to keep these versions in sync with what we have in the various non-lite dev requirements files: [requirements-dev-base.txt](https://github.com/great-expectations/great_expectations/blob/develop/requirements-dev-base.txt), [requirements-dev-sqlalchemy.txt](https://github.com/great-expectations/great_expectations/blob/develop/requirements-dev-sqlalchemy.txt), and [requirements-dev-spark.txt](https://github.com/great-expectations/great_expectations/blob/develop/requirements-dev-spark.txt)
+
 #### 5. Create a new virtual environment
 
 * Make a new virtual environment (e.g. using virtualenv or conda), name it “great_expectations_dev” or similar.
