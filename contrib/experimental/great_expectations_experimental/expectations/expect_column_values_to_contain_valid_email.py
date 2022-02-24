@@ -317,5 +317,4 @@ class ExpectColumnValuesToContainValidEmail(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToContainValidEmail().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToContainValidEmail().print_diagnostic_checklist()
