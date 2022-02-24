@@ -30,85 +30,91 @@ schedules:
 #   isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
 #   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
+# windows / ubuntu/ macos
+# 3.6 / 3.7 / 3.8 / 3.9
+# conda / pip
+# dev install
+# dev-lite install
+
 strategy:
   matrix:
-    linux-36-pip:
+    linux-py36-pip:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.6'
       runner: 'pip'
-    linux-37-pip:
+    linux-py37-pip:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.7'
       runner: 'pip'
-    linux-38-pip:
+    linux-py38-pip:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.8'
       runner: 'pip'
-    linux-39-pip:
+    linux-py39-pip:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.9'
       runner: 'pip'
-    mac-37-pip:
+    mac-py37-pip:
       imageName: 'macOS-latest'
       pythonVersion: '3.7'
       runner: 'pip'
-    mac-38-pip:
+    mac-py38-pip:
       imageName: 'macOS-latest'
       pythonVersion: '3.8'
       runner: 'pip'
-    mac-39-pip:
+    mac-py39-pip:
       imageName: 'macOS-latest'
       pythonVersion: '3.9'
       runner: 'pip'
-    windows-37-pip:
-      imageName-pip: 'windows-latest'
+    windows-py37-pip:
+      imageName: 'windows-latest'
       pythonVersion: '3.7'
       runner: 'pip'
-    windows-38-pip:
-      imageName-pip: 'windows-latest'
+    windows-py38-pip:
+      imageName: 'windows-latest'
       pythonVersion: '3.8'
       runner: 'pip'
-    windows-39-pip:
+    windows-py39-pip:
       imageName: 'windows-latest'
       pythonVersion: '3.9'
       runner: 'pip'
-    linux-36-conda:
+    linux-py36-conda:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.6'
       runner: 'conda'
-    linux-37-conda:
+    linux-py37-conda:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.7'
       runner: 'conda'
-    linux-38-conda:
+    linux-py38-conda:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.8'
       runner: 'conda'
-    linux-39-conda:
+    linux-py39-conda:
       imageName: 'ubuntu-latest'
       pythonVersion: '3.9'
       runner: 'conda'
-    mac-37-conda:
+    mac-py37-conda:
       imageName: 'macOS-latest'
       pythonVersion: '3.7'
       runner: 'conda'
-    mac-38-conda:
+    mac-py38-conda:
       imageName: 'macOS-latest'
       pythonVersion: '3.8'
       runner: 'conda'
-    mac-39-conda:
+    mac-py39-conda:
       imageName: 'macOS-latest'
       pythonVersion: '3.9'
       runner: 'conda'
-    windows-37-conda:
-      imageName-conda: 'windows-latest'
+    windows-py37-conda:
+      imageName: 'windows-latest'
       pythonVersion: '3.7'
       runner: 'conda'
-    windows-38-conda:
-      imageName-conda: 'windows-latest'
+    windows-py38-conda:
+      imageName: 'windows-latest'
       pythonVersion: '3.8'
       runner: 'conda'
-    windows-39-conda:
+    windows-py39-conda:
       imageName: 'windows-latest'
       pythonVersion: '3.9'
       runner: 'conda'
@@ -122,11 +128,13 @@ steps:
       versionSpec: '$(pythonVersion)'
     displayName: 'Use Python $(pythonVersion)'
 
-  - bash: python -m pip install --upgrade pip==21.3.1
-    displayName: 'Update pip'
+  - script: |
+      python -m pip install --upgrade pip==21.3.1
+      pip install great_expectations
+    condition: eq(variables['runner'], 'pip')
+    displayName: 'pip'
 
-  - bash: pip install --requirement requirements-dev-base.txt --constraint constraints-dev.txt
-    displayName: 'Install dev requirements'
-
-  - bash: pip install .
-    displayName: 'Install core requirements'
+  - script: |
+      echo 'Hello conda'
+    condition: eq(variables['runner'], 'conda')
+    displayName: 'conda'
