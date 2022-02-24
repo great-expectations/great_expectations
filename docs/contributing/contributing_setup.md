@@ -47,7 +47,7 @@ In order to contribute to Great Expectations, you will need the following:
 
 ### Install Python dependencies
 
-#### (Easy version of steps 5-7 below)
+#### (Easy version of steps 5-7 below for Mac/Linux users)
 
 Create a virtual environment in your locally cloned repo, use the same version of `pip` that we use in our CI/CD pipelines (for Python 3.6 - 3.9), and install the fewest dependencies needed for a dev environment (to minimize potential setup headaches).
 
@@ -71,6 +71,24 @@ pytest -v --no-spark --no-postgresql
 
 > In your `~/.zshrc` or `~/.bashrc` file, you will want to add `ulimit -n 4096` so that it is already set for future runs. **You WILL eventually see many tests failing with `OSError: [Errno 24] Too many open files`** if you do not set it!
 
+If you want to slowly add other SQL dialects (instead of adding everything at once via `requirements-dev.txt`), you can `pip install` the following
+
+- postgresql: `psycopg2-binary>=2.7.6`
+- mysql: `PyMySQL>=0.9.3,<0.10`
+- mssql: `pyodbc>=4.0.30` (see step 6 for links on getting the odbc driver on your system first)
+- athena: `pyathena>=1.11`
+- bigquery: `sqlalchemy-bigquery>=1.3.0 google-cloud-secret-manager>=1.0.0 google-cloud-storage>=1.28.0`
+- snowflake: `snowflake-connector-python==2.5.0 snowflake-sqlalchemy>=1.2.3 azure-storage-blob>=12.5.0`
+- redshift: `sqlalchemy-redshift>=0.7.7`
+- teradata: `teradatasqlalchemy==17.0.0.1`
+- oracle: `cx_Oracle`
+- dremio: `sqlalchemy-dremio>=1.2.1 pyarrow>=0.12.0 pyodbc>=4.0.30`
+
+If you want to add support for Spark, you can `pip install pyspark>=2.3.2`
+
+- this also assumes you have Java and Spark installed (see below)
+
+If you want to add support for Arrow, you can `pip install feather-format>=0.4.1 pyarrow>=0.12.0`
 
 #### 5. Create a new virtual environment
 
@@ -156,6 +174,8 @@ Depending on which features of Great Expectations you want to work on, you may w
 * Once you’re done testing, you can shut down your mysql container by running `docker-compose down` from the same directory.
 
 * Caution: If another service is using port 3306, Docker may start the container but silently fail to set up the port.
+
+> If you have a Silicon Mac (M1) this Docker image does not work
 
 #### If you want to develop against local Spark:
 
