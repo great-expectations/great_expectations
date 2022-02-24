@@ -292,11 +292,15 @@ class Validator:
             configuration = ExpectationConfiguration(
                 expectation_type=name, kwargs=expectation_kwargs, meta=meta
             )
-            configuration.process_evaluation_parameters(
-                self._expectation_suite.evaluation_parameters, True, self._data_context
-            )
 
             exception_info: ExceptionInfo
+
+            if self.interactive_evaluation:
+                configuration.process_evaluation_parameters(
+                    self._expectation_suite.evaluation_parameters,
+                    True,
+                    self._data_context,
+                )
 
             try:
                 expectation = expectation_impl(configuration)
@@ -762,6 +766,7 @@ class Validator:
         graph: ValidationGraph,
         metrics: Dict[Tuple[str, str, str], Any],
         runtime_configuration: Optional[dict] = None,
+        min_graph_edges_pbar_enable: int = 0,  # Set to low number (e.g., 3) to suppress progress bar for small graphs.
     ) -> Dict[
         Tuple[str, str, str],
         Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
@@ -808,7 +813,7 @@ class Validator:
                     if "metric_calculations" in progress_bars:
                         disable = not progress_bars["metric_calculations"]
 
-            if len(graph.edges) < 3:
+            if len(graph.edges) < min_graph_edges_pbar_enable:
                 disable = True
 
             if pbar is None:

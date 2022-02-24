@@ -1,11 +1,11 @@
 from typing import Any, Dict, List, Optional, Union
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+import numpy as np
+
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
     MetricComputationDetails,
     MetricComputationResult,
-    MetricComputationValues,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
@@ -13,7 +13,9 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     build_parameter_container,
 )
-from great_expectations.validator.validator import Validator
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
+)
 
 
 class MetricMultiBatchParameterBuilder(ParameterBuilder):
@@ -30,7 +32,9 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         metric_value_kwargs: Optional[Union[str, dict]] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
+        reduce_scalar_metric: Union[str, bool] = True,
         data_context: Optional["DataContext"] = None,  # noqa: F821
+        batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
     ):
         """
@@ -44,12 +48,15 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             enforce_numeric_metric: used in MetricConfiguration to insure that metric computations return numeric values
             replace_nan_with_zero: if False (default), then if the computed metric gives NaN, then exception is raised;
             otherwise, if True, then if the computed metric gives NaN, then it is converted to the 0.0 (float) value.
+            reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             data_context: DataContext
+            batch_list: explicitly passed Batch objects for parameter computation (take precedence over batch_request).
             batch_request: specified in ParameterBuilder configuration to get Batch objects for parameter computation.
         """
         super().__init__(
             name=name,
             data_context=data_context,
+            batch_list=batch_list,
             batch_request=batch_request,
         )
 
@@ -59,6 +66,12 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
 
         self._enforce_numeric_metric = enforce_numeric_metric
         self._replace_nan_with_zero = replace_nan_with_zero
+
+        self._reduce_scalar_metric = reduce_scalar_metric
+
+    """
+    Full getter/setter accessors for needed properties are for configuring MetricMultiBatchParameterBuilder dynamically.
+    """
 
     @property
     def metric_name(self) -> str:
@@ -72,6 +85,10 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
         return self._metric_value_kwargs
 
+    @metric_value_kwargs.setter
+    def metric_value_kwargs(self, value: Optional[Union[str, dict]]) -> None:
+        self._metric_value_kwargs = value
+
     @property
     def enforce_numeric_metric(self) -> Union[str, bool]:
         return self._enforce_numeric_metric
@@ -80,11 +97,14 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
     def replace_nan_with_zero(self) -> Union[str, bool]:
         return self._replace_nan_with_zero
 
+    @property
+    def reduce_scalar_metric(self) -> Union[str, bool]:
+        return self._reduce_scalar_metric
+
     def _build_parameters(
         self,
         parameter_container: ParameterContainer,
         domain: Domain,
-        *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ):
@@ -95,36 +115,31 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         :return: ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and
         ptional details
         """
-        validator: Validator = self.get_validator(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
-            domain=domain,
-            variables=variables,
-            parameters=parameters,
-        )
-        if not batch_ids:
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"Utilizing a {self.__class__.__name__} requires a non-empty list of batch identifiers."
-            )
-
         metric_computation_result: MetricComputationResult = self.get_metrics(
-            batch_ids=batch_ids,
-            validator=validator,
-            metric_name=self._metric_name,
-            metric_domain_kwargs=self._metric_domain_kwargs,
-            metric_value_kwargs=self._metric_value_kwargs,
-            enforce_numeric_metric=self._enforce_numeric_metric,
-            replace_nan_with_zero=self._replace_nan_with_zero,
+            metric_name=self.metric_name,
+            metric_domain_kwargs=self.metric_domain_kwargs,
+            metric_value_kwargs=self.metric_value_kwargs,
+            enforce_numeric_metric=self.enforce_numeric_metric,
+            replace_nan_with_zero=self.replace_nan_with_zero,
             domain=domain,
             variables=variables,
             parameters=parameters,
         )
-        metric_values: MetricComputationValues = metric_computation_result.metric_values
+        metric_values: np.ndarray = metric_computation_result.metric_values
         details: MetricComputationDetails = metric_computation_result.details
+
+        # Obtain reduce_scalar_metric from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        reduce_scalar_metric: bool = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.reduce_scalar_metric,
+            expected_return_type=bool,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        # As a simplification, apply reduction to scalar in case of one-dimensional metric (for convenience).
+        if reduce_scalar_metric and metric_values.shape[1] == 1:
+            metric_values = metric_values[:, 0]
 
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.name}": {

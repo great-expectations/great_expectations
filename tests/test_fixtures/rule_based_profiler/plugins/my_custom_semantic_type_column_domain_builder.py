@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 
 from great_expectations import DataContext
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import Batch, BatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.types import (
@@ -20,7 +20,8 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     def __init__(
         self,
         data_context: DataContext,
-        batch_request: Union[BatchRequest, dict],
+        batch: Optional[Batch] = None,
+        batch_request: Optional[Union[BatchRequest, dict]] = None,
         semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
@@ -28,18 +29,37 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
     ):
         super().__init__(
             data_context=data_context,
+            batch=batch,
             batch_request=batch_request,
         )
 
         if semantic_types is None:
             semantic_types = ["user_id"]
+
         self._semantic_types = semantic_types
 
         if column_name_suffixes is None:
             column_name_suffixes = [
                 "_id",
             ]
+
         self._column_name_suffixes = column_name_suffixes
+
+    @property
+    def domain_type(self) -> Union[str, MetricDomainTypes]:
+        return MetricDomainTypes.COLUMN
+
+    @property
+    def semantic_types(
+        self,
+    ) -> Optional[
+        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+    ]:
+        return self._semantic_types
+
+    @property
+    def column_name_suffixes(self) -> Optional[List[str]]:
+        return self._column_name_suffixes
 
     def _get_domains(
         self,
@@ -66,7 +86,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         candidate_column_names: List[str] = list(
             filter(
                 lambda candidate_column_name: candidate_column_name.endswith(
-                    tuple(self._column_name_suffixes)
+                    tuple(self.column_name_suffixes)
                 ),
                 table_column_names,
             )

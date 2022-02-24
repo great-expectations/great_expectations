@@ -86,7 +86,9 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         "like_pattern",
     )
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration]
+    ) -> bool:
         super().validate_configuration(configuration)
         try:
             assert "like_pattern" in configuration.kwargs, "Must provide like_pattern"

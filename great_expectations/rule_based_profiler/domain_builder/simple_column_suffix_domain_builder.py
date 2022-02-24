@@ -1,6 +1,6 @@
 from typing import Iterable, List, Optional, Union
 
-from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
@@ -15,6 +15,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
     def __init__(
         self,
         data_context: "DataContext",  # noqa: F821
+        batch: Optional[Batch] = None,
         batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict]] = None,
         column_name_suffixes: Optional[List[str]] = None,
     ):
@@ -26,6 +27,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
 
         super().__init__(
             data_context=data_context,
+            batch=batch,
             batch_request=batch_request,
         )
 
@@ -33,6 +35,10 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
             column_name_suffixes = []
 
         self._column_name_suffixes = column_name_suffixes
+
+    @property
+    def domain_type(self) -> Union[str, MetricDomainTypes]:
+        return MetricDomainTypes.COLUMN
 
     @property
     def column_name_suffixes(self) -> Optional[List[str]]:
@@ -47,7 +53,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         """
         column_name_suffixes: Union[
             str, Iterable, List[str]
-        ] = self._column_name_suffixes
+        ] = self.column_name_suffixes
         if isinstance(column_name_suffixes, str):
             column_name_suffixes = [column_name_suffixes]
         else:
@@ -82,7 +88,7 @@ class SimpleColumnSuffixDomainBuilder(DomainBuilder):
         column_name: str
         domains: List[Domain] = [
             Domain(
-                domain_type=MetricDomainTypes.COLUMN,
+                domain_type=self.domain_type,
                 domain_kwargs={
                     "column": column_name,
                 },

@@ -1,5 +1,6 @@
 import datetime
-from typing import Any, Dict, List, cast
+from numbers import Number
+from typing import Any, Dict, List, Tuple, cast
 
 import numpy as np
 import pandas as pd
@@ -107,7 +108,6 @@ def test_alice_profiler_user_workflow_single_batch(
         ],
         include_citation=True,
     )
-
     assert (
         expectation_suite
         == alice_columnar_table_single_batch["expected_expectation_suite"]
@@ -306,3 +306,101 @@ def test_bobster_profiler_user_workflow_multi_batch_row_count_range_rule_bootstr
             "test_configuration_bootstrap_sampling_method"
         ]["expect_table_row_count_to_be_between_max_value_mean_value"]
     )
+
+
+@pytest.mark.skipif(
+    version.parse(np.version.version) < version.parse("1.21.0"),
+    reason="requires numpy version 1.21.0 or newer",
+)
+def test_quentin_profiler_user_workflow_multi_batch_quantiles_value_ranges_rule(
+    quentin_columnar_table_multi_batch_data_context,
+    quentin_columnar_table_multi_batch,
+):
+    # Load data context
+    data_context: DataContext = quentin_columnar_table_multi_batch_data_context
+
+    # Load profiler configs & loop (run tests for each one)
+    yaml_config: str = quentin_columnar_table_multi_batch["profiler_config"]
+
+    # Instantiate Profiler
+    profiler_config: CommentedMap = yaml.load(yaml_config)
+
+    # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+    deserialized_config: dict = ruleBasedProfilerConfigSchema.load(profiler_config)
+    serialized_config: dict = ruleBasedProfilerConfigSchema.dump(deserialized_config)
+
+    # `class_name`/`module_name` are generally consumed through `instantiate_class_from_config`
+    # so we need to manually remove those values if we wish to use the **kwargs instantiation pattern
+    serialized_config.pop("class_name")
+    serialized_config.pop("module_name")
+
+    profiler: RuleBasedProfiler = RuleBasedProfiler(
+        **serialized_config,
+        data_context=data_context,
+    )
+
+    expectation_suite: ExpectationSuite = profiler.run(
+        expectation_suite_name=quentin_columnar_table_multi_batch["test_configuration"][
+            "expectation_suite_name"
+        ],
+    )
+
+    expectation_configuration_dict: dict
+    column_name: str
+    expectation_kwargs: dict
+    expect_column_quantile_values_to_be_between_expectation_configurations_kwargs_dict: Dict[
+        str, dict
+    ] = {
+        expectation_configuration_dict["kwargs"][
+            "column"
+        ]: expectation_configuration_dict["kwargs"]
+        for expectation_configuration_dict in expectation_suite.to_json_dict()[
+            "expectations"
+        ]
+    }
+    expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column: Dict[
+        str, List[List[Number]]
+    ] = {
+        column_name: expectation_kwargs["quantile_ranges"]["value_ranges"]
+        for column_name, expectation_kwargs in expect_column_quantile_values_to_be_between_expectation_configurations_kwargs_dict.items()
+    }
+
+    assert (
+        expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column[
+            "tolls_amount"
+        ]
+        == quentin_columnar_table_multi_batch["test_configuration"][
+            "expect_column_quantile_values_to_be_between_quantile_ranges_by_column"
+        ]["tolls_amount"]
+    )
+
+    # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)
+    # (see "https://numpy.org/doc/stable/reference/generated/numpy.testing.assert_allclose.html" for details).
+    rtol: float = 1.0e-7
+    atol: float = 5.0e-2
+
+    value_ranges: List[Tuple[Tuple[float, float]]]
+    paired_quantiles: zip
+    column_quantiles: List[List[Number]]
+    idx: int
+    for (
+        column_name,
+        column_quantiles,
+    ) in (
+        expect_column_quantile_values_to_be_between_expectation_configurations_value_ranges_by_column.items()
+    ):
+        paired_quantiles = zip(
+            column_quantiles,
+            quentin_columnar_table_multi_batch["test_configuration"][
+                "expect_column_quantile_values_to_be_between_quantile_ranges_by_column"
+            ][column_name],
+        )
+        for value_ranges in list(paired_quantiles):
+            for idx in range(2):
+                np.testing.assert_allclose(
+                    actual=value_ranges[0][idx],
+                    desired=value_ranges[1][idx],
+                    rtol=rtol,
+                    atol=atol,
+                    err_msg=f"Actual value of {value_ranges[0][idx]} differs from expected value of {value_ranges[1][idx]} by more than {atol + rtol * abs(value_ranges[1][idx])} tolerance.",
+                )

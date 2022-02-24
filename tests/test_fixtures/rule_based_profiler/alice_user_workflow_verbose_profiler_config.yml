@@ -16,7 +16,7 @@ rules:
   my_rule_for_user_ids:
     domain_builder: # If placing custom class into the general plugins directory works, remove module_name from config.
       class_name: MyCustomSemanticTypeColumnDomainBuilder
-      module_name: tests.test_fixtures.rule_based_profiler.alpha.plugins
+      module_name: tests.test_fixtures.rule_based_profiler.plugins
       batch_request: $variables.alice_single_batch_data_batch_request
       semantic_types:
         - user_id
@@ -36,13 +36,27 @@ rules:
       - expectation_type: expect_column_values_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        min_value: $parameter.my_min_user_id.value[0]
+        min_value: $parameter.my_min_user_id.value[-1]
         max_value: $variables.max_user_id
         column: $domain.domain_kwargs.column
       - expectation_type: expect_column_values_to_not_be_null
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
+      - expectation_type: expect_column_values_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        min_value: $parameter.my_min_user_id.value[-1]
+        max_value: $variables.max_user_id
+        column: $domain.domain_kwargs.column
+        condition: $parameter.my_min_user_id.value[-1] > 0
+      - expectation_type: expect_column_values_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        min_value: $parameter.my_min_user_id.value[-1]
+        max_value: $variables.max_user_id
+        column: $domain.domain_kwargs.column
+        condition: $parameter.my_min_user_id.value[-1] > 0 & $variables.max_user_id > 0
   my_rule_for_timestamps:
     domain_builder:
       class_name: SimpleColumnSuffixDomainBuilder
@@ -112,7 +126,7 @@ rules:
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
         min_value: $variables.min_timestamp
-        max_value: $parameter.my_max_event_ts.value[0]
+        max_value: $parameter.my_max_event_ts.value[-1]
         meta:
           notes:
             format: markdown
