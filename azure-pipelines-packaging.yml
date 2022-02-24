@@ -104,7 +104,7 @@ stages:
               source activate venv
             displayName: Create Anaconda environment
 
-          - bash: conda install --yes --quiet --name venv great_expectations
+          - bash: conda install --yes --quiet --name venv great-expectations
             displayName: 'Install Great Expectations'
 
           - script: |
