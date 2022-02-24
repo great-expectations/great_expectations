@@ -195,4 +195,4 @@ if __name__ == "__main__":
     diagnostics_report = (
         ExpectColumnsValuesConfidenceForDataLabelToBeGreaterThanOrEqualtoThreshold().run_diagnostics()
     )
-    print(json.dumps(diagnostics_report, indent=2))
+    print(diagnostics_report.generate_checklist())
