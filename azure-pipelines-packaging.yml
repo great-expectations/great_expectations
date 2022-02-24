@@ -108,9 +108,11 @@ stages:
             displayName: 'Install Great Expectations'
 
           - script: |
-              great_expectations --version
-              mkdir "tmp" && cd "tmp"
-              great_expectations -y init --no-usage-stats
+              conda list
+              conda list great-expectations
+              # great_expectations --version
+              # mkdir "tmp" && cd "tmp"
+              # great_expectations -y init --no-usage-stats
             displayName: 'Confirm installation'
 
   - stage: linux_dev_install
