@@ -122,10 +122,10 @@ def test_compare_legacy_and_new_bootstrap_results():
             / df.shape[0]
         )
 
-        new_false_positive_error = abs(
+        new_false_positive_error: float = abs(
             actual_false_positive_rates_new[column] - false_positive_rate
         )
-        legacy_false_positive_error = abs(
+        legacy_false_positive_error: float = abs(
             actual_false_positive_rates_legacy[column] - false_positive_rate
         )
 
