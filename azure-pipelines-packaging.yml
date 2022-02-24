@@ -138,3 +138,6 @@ steps:
       echo 'Hello conda'
     condition: eq(variables['runner'], 'conda')
     displayName: 'conda'
+
+  - bash: great_expectations
+    displayName: 'Confirm installation'
