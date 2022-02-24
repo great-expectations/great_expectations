@@ -170,7 +170,7 @@ Steps
 
     According to this configuration, the locally-specified Expectation Suite ``users.warning`` is run against the ``batch_request`` that employs ``my_data_connector`` with the results processed by the actions specified in the top-level ``action_list``. Similarly, the locally-specified Expectation Suite ``users.error`` is run against the ``batch_request`` that employs ``my_special_data_connector`` with the results also processed by the actions specified in the top-level ``action_list``. In addition, the top-level Expectation Suite ``users.delivery`` is run against the ``batch_request`` that employs ``my_other_data_connector`` with the results processed by the union of actions in the locally-specified ``action_list`` and in the top-level ``action_list``.
 
-Please see [How to configure a new Checkpoint using test_yaml_config](./how_to_add_validations_data_or_suites_to_a_checkpoint.md) for additional Checkpoint configuration examples (including the convenient templating mechanism).
+Please see [How to configure a new Checkpoint using test_yaml_config](./how_to_configure_a_new_checkpoint_using_test_yaml_config) for additional Checkpoint configuration examples (including the convenient templating mechanism).
 
 
 Additional notes
