@@ -301,9 +301,13 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         # by default it is the, but only if there is a schema, then you will have a situation like this:
         table_name: str = batch_definition.data_asset_name
         if "schema_name" in self.assets[batch_definition.data_asset_name]:
-            table_name = table_name.split(
-                self.assets[batch_definition.data_asset_name]["schema_name"] + "."
-            )[1]
+            schema_name_str: str = self.assets[batch_definition.data_asset_name][
+                "schema_name"
+            ]
+            if schema_name_str in table_name:
+                table_name = table_name.split(
+                    self.assets[batch_definition.data_asset_name]["schema_name"] + "."
+                )[1]
         return table_name
 
     # Splitter methods for listing partitions
