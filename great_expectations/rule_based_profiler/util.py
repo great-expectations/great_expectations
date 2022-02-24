@@ -327,7 +327,7 @@ def compute_bootstrap_quantiles_scipy(
 
     data = (metric_values,)
     axis = 1
-    method = "BCa"
+    method = "bca"
 
     # method="bca" (bias-corrected and accelerated bootstrap confidence interval)
     # does not support multi-sample statistics as of February 23, 2022.

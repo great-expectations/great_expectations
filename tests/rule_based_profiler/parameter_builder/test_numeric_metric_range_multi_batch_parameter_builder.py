@@ -1,3 +1,5 @@
+import numpy as np
+
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -34,10 +36,6 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         batch_request=batch_request,
     )
 
-    # assert numeric_metric_range_parameter_builder.CANDIDATE_STRINGS != candidate_strings
-    # assert numeric_metric_range_parameter_builder._candidate_strings == candidate_strings
-    # assert numeric_metric_range_parameter_builder._threshold == 0.9
-
     parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
     domain: Domain = Domain(
         domain_type=MetricDomainTypes.TABLE,
@@ -53,15 +51,24 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
     expected_value: dict = {
-        "value": "%Y-%m-%d %H:%M:%S",
-        "details": {"success_ratio": 1.0},
+        "value": {"value_range": None},
+        "details": {
+            "metric_configuration": {
+                "domain_kwargs": {},
+                "metric_name": "table.row_count",
+            },
+            "num_batches": 3,
+        },
     }
 
-    assert (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters={domain.id: parameter_container},
-        )
-        == expected_value
+    actual_value = get_parameter_value_by_fully_qualified_parameter_name(
+        fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        domain=domain,
+        parameters={domain.id: parameter_container},
     )
+    value = actual_value.pop("value")
+    actual_value["value"] = {"value_range": None}
+
+    assert actual_value == expected_value
+
+    assert type(value["value_range"]) == np.ndarray
