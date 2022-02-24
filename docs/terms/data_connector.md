@@ -169,6 +169,6 @@ For a general overview of this process, please see [our documentation on configu
 
 ### Configuration
 
-A Data Connector is configured as part of a Datasource's configuration.  The specifics of this configuration can vary depending on the requirements for connecting to the source data system that the Data Connector is intended to interface with.  For example, this might be a path to files that might be loaded into the Pandas Execution Engine, or the connection details for a database to be used by the SQL Alchemy Execution Engine.
+A Data Connector is configured as part of a Datasource's configuration.  The specifics of this configuration can vary depending on the requirements for connecting to the source data system that the Data Connector is intended to interface with.  For example, this might be a path to files that might be loaded into the Pandas Execution Engine, or the connection details for a database to be used by the SQLAlchemy Execution Engine.
 
 For specific guidance on how to configure a Data Connector for a given source data system, please see [our how-to guides on connecting to data](../guides/connecting_to_your_data/index.md).
