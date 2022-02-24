@@ -14,13 +14,13 @@ class CardinalityLimit(abc.ABC):
 @dataclass
 class RelativeCardinalityLimit(CardinalityLimit):
     max_proportion_unique: float
-    related_metric_name: str = "column.unique_proportion"
+    metric_name_defining_limit: str = "column.unique_proportion"
 
 
 @dataclass
 class AbsoluteCardinalityLimit(CardinalityLimit):
     max_unique_values: int
-    related_metric_name: str = "column.distinct_values.count"
+    metric_name_defining_limit: str = "column.distinct_values.count"
 
 
 class CardinalityLimitMode(enum.Enum):

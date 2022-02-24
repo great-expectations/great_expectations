@@ -177,8 +177,6 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
 
         limit_mode: CardinalityLimitMode = self._cardinality_checker.limit_mode
 
-        metric_name: str = limit_mode.related_metric_name
-
         metric_configurations: List[Dict[str, List[MetricConfiguration]]] = []
 
         for column_name in column_names:
@@ -186,7 +184,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
                 {
                     column_name: [
                         MetricConfiguration(
-                            metric_name=metric_name,
+                            metric_name=limit_mode.metric_name_defining_limit,
                             metric_domain_kwargs={
                                 "batch_id": batch_id,
                                 "column": column_name,
