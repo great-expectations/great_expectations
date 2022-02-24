@@ -268,8 +268,8 @@ def compute_bootstrap_quantiles_legacy(
     does not handle multi-dimensional statistics (unlike "scipy.stats.bootstrap", which corrects for bias and is
     vectorized, thus having the ability to accept a multi-dimensional statistic function and process all dimensions).
 
-    This implementation has been replaced by "scipy.stats.bootstrap" now that Great Expectations can be upgraded to use a
-    more up-to-date version of the "scipy" Python package.
+    This implementation will be replaced by "scipy.stats.bootstrap" when Great Expectations can be upgraded to use a
+    more up-to-date version of the "scipy" Python package (the currently used version does not have "bootstrap").
 
     Additional future direction (potentially as a contribution submission to the "SciPy" community) include developing
     enhancements to bootstrapped estimator based on theory presented in "http://dido.econ.yale.edu/~dwka/pub/p1001.pdf":
