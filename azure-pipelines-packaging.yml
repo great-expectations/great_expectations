@@ -96,13 +96,12 @@ stages:
               versionSpec: '$(pythonVersion)'
             displayName: 'Use Python $(pythonVersion)'
 
-          - bash: echo "##vso[task.prependpath]$CONDA/bin"
-            displayName: Add conda to PATH
-
           - script: |
-              conda create --yes --quiet --name venv
-              source activate venv
-            displayName: Create Anaconda environment
+              echo "##vso[task.prependpath]$CONDA/bin"
+              conda create --yes --quiet --name ge_venv
+              eval "$(conda shell.bash hook)"
+              conda activate ge_venv
+            displayName: Set up conda
 
           - bash: conda install --yes --name venv -c conda-forge great-expectations
             displayName: 'Install Great Expectations'
@@ -110,7 +109,7 @@ stages:
           - script: |
               conda list
               conda list great-expectations
-              # great_expectations --version
+              great_expectations --version
               # mkdir "tmp" && cd "tmp"
               # great_expectations -y init --no-usage-stats
             displayName: 'Confirm installation'
