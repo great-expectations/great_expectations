@@ -8,10 +8,10 @@ from great_expectations.rule_based_profiler.domain_builder.cardinality_checker i
     CardinalityChecker,
     CardinalityLimitMode,
 )
-from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.types.domain import (
     build_domains_from_column_names,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 

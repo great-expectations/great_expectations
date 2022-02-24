@@ -144,26 +144,3 @@ were retrieved).
             )
 
         return batch_ids[0]
-
-
-def build_domains_from_column_names(column_names: List[str]) -> List[Domain]:
-    """Build column type domains from column names.
-
-    Args:
-        column_names: List of columns to convert.
-
-    Returns:
-        A list of column type Domain objects built from column names.
-    """
-    column_name: str
-    domains: List[Domain] = [
-        Domain(
-            domain_type=MetricDomainTypes.COLUMN,
-            domain_kwargs={
-                "column": column_name,
-            },
-        )
-        for column_name in column_names
-    ]
-
-    return domains
