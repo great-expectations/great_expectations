@@ -4,6 +4,7 @@ from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+from scipy import stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -315,4 +316,30 @@ def compute_bootstrap_quantiles(
             interpolation="linear",  # can be omitted ("linear" is default)
         )
     )
+    return lower_quantile, upper_quantile
+
+
+def compute_bootstrap_quantiles_scipy(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    n_resamples: int,
+) -> Tuple[Number, Number]:
+
+    data = (metric_values,)
+    axis = 1
+    method = "BCa"
+
+    # method="bca" (bias-corrected and accelerated bootstrap confidence interval)
+    # does not support multi-sample statistics as of February 23, 2022.
+    bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
+        data=data,
+        statistic=lambda x, axis=axis: np.quantile(
+            x, q=[false_positive_rate / 2, 1.0 - (false_positive_rate / 2)], axis=axis
+        ),
+        n_resamples=n_resamples,
+        method=method,
+    )
+    lower_ci, upper_ci = bootstrap_result.confidence_interval
+    lower_quantile, upper_quantile = np.mean(lower_ci), np.mean(upper_ci)
+
     return lower_quantile, upper_quantile

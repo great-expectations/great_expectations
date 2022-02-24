@@ -19,6 +19,7 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.rule_based_profiler.util import (
     NP_EPSILON,
     compute_bootstrap_quantiles,
+    compute_bootstrap_quantiles_scipy,
     compute_quantiles,
     get_parameter_value_and_validate_return_type,
 )
@@ -469,7 +470,6 @@ detected.
         self,
         metric_values: np.ndarray,
         domain: Domain,
-        *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> int:
@@ -502,7 +502,6 @@ positive integer, or must be omitted (or set to None).
         self,
         metric_values: np.ndarray,
         domain: Domain,
-        *,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         **kwargs,
@@ -537,11 +536,19 @@ positive integer, or must be omitted (or set to None).
         else:
             n_resamples = num_bootstrap_samples
 
-        return compute_bootstrap_quantiles(
+        test_case = compute_bootstrap_quantiles_scipy(
             metric_values=metric_values,
             false_positive_rate=false_positive_rate,
             n_resamples=n_resamples,
         )
+
+        bootstrap_quantiles = compute_bootstrap_quantiles(
+            metric_values=metric_values,
+            false_positive_rate=false_positive_rate,
+            n_resamples=n_resamples,
+        )
+
+        return bootstrap_quantiles
 
     def _get_deterministic_estimate(
         self,
