@@ -195,11 +195,10 @@ class CardinalityChecker:
             )
 
         if limit_mode is not None:
-            if isinstance(limit_mode, CardinalityLimitMode) or isinstance(
-                limit_mode, str
+            if not (
+                isinstance(limit_mode, CardinalityLimitMode)
+                or isinstance(limit_mode, str)
             ):
-                pass
-            else:
                 raise ProfilerConfigurationError(
                     f"Please specify a supported cardinality limit type, supported classes are {','.join(self.supported_limit_mode_class_names)} and supported strings are {','.join(self.SUPPORTED_CARDINALITY_LIMIT_MODE_STRINGS)}"
                 )
