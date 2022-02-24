@@ -109,7 +109,7 @@ stages:
             displayName: 'Install Great Expectations'
 
           - script: |
-              conda list ge_dev
+              source activate ge_dev
               great_expectations --version
               # mkdir "tmp" && cd "tmp"
               # great_expectations -y init --no-usage-stats
