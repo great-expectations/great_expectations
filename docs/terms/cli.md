@@ -19,7 +19,7 @@ CLI stands for Command Line Interface.
 
 ### Features and promises
 
-The CLI provides useful convenience functions covering all the steps of working with Great Expectations.  CLI commands consist of a noun indicating what you want to operate on, and a verb indicating the operation to perform.  All CLI commands have help documentation that can be accessed by including the `--help` option.
+The CLI provides useful convenience functions covering all the steps of working with Great Expectations.  CLI commands consist of a noun indicating what you want to operate on, and a verb indicating the operation to perform.  All CLI commands have help documentation that can be accessed by including the `--help` option after the command.  Running `great_expectations` without any additional arguments or `great_expectations --help` will display a list of the available commands.
 
 ### Relationship to other objects
 
@@ -66,7 +66,7 @@ great_expectations suite --help
 
 <ValidateHeader/>
 
-To assist you in Validating your data, the CLI provides commands for listing existing Checkpoints, running an existing Checkpoint, creating new Checkpoints, and creating python scripts that will run a Checkpoint.  You can read about these commands in the CLI with the command:
+To assist you in Validating your data, the CLI provides commands for listing existing Checkpoints, running an existing Checkpoint, creating new Checkpoints, and creating Python scripts that will run a Checkpoint.  You can read about these commands in the CLI with the command:
 
 ```bash title="Terminal command"
 great_expectations checkpoint --help
