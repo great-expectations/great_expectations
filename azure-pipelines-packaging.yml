@@ -113,21 +113,20 @@ strategy:
       pythonVersion: '3.9'
       runner: 'conda'
 
-stages:
-  pool:
-    vmImage: $(imageName)
+pool:
+  vmImage: $(imageName)
 
-  steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(pythonVersion)'
-      displayName: 'Use Python $(pythonVersion)'
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(pythonVersion)'
+    displayName: 'Use Python $(pythonVersion)'
 
-    - bash: python -m pip install --upgrade pip==21.3.1
-      displayName: 'Update pip'
+  - bash: python -m pip install --upgrade pip==21.3.1
+    displayName: 'Update pip'
 
-    - bash: pip install --requirement requirements-dev-base.txt --constraint constraints-dev.txt
-      displayName: 'Install dev requirements'
+  - bash: pip install --requirement requirements-dev-base.txt --constraint constraints-dev.txt
+    displayName: 'Install dev requirements'
 
-    - bash: pip install .
-      displayName: 'Install core requirements'
+  - bash: pip install .
+    displayName: 'Install core requirements'
