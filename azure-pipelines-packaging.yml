@@ -76,7 +76,7 @@ steps:
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '$(python.version)'
-    displayName: 'Use Python $(python.version)'
+    displayName: 'Use Python $(pythonVersion)'
 
   - bash: python -m pip install --upgrade pip==21.3.1
     displayName: 'Update pip'
