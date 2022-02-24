@@ -99,12 +99,12 @@ stages:
           - bash: echo "##vso[task.prependpath]$CONDA/bin"
             displayName: Add conda to PATH
 
-          - bash: conda create --yes --quiet --name venv
+          - script: |
+              conda create --yes --quiet --name venv
+              source activate venv
             displayName: Create Anaconda environment
 
-          - script: |
-              source activate venv
-              conda install --yes --quiet --name great_expectations
+          - bash: conda install --yes --quiet --name venv great_expectations
             displayName: 'Install Great Expectations'
 
           - script: |
