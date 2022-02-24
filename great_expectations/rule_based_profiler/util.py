@@ -338,8 +338,6 @@ def compute_bootstrap_quantiles(
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html
     method = "basic"
 
-    # method="bca" (bias-corrected and accelerated bootstrap confidence interval)
-    # does not support multi-sample statistics as of February 23, 2022.
     bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
         data=data,
         statistic=lambda x, axis=axis: np.quantile(

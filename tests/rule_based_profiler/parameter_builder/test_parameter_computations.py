@@ -7,7 +7,10 @@ import scipy.stats as stats
 from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
 )
-from great_expectations.rule_based_profiler.util import compute_bootstrap_quantiles
+from great_expectations.rule_based_profiler.util import (
+    compute_bootstrap_quantiles,
+    compute_bootstrap_quantiles_legacy,
+)
 
 
 def _generate_distribution_samples(size: Optional[int] = 36) -> pd.DataFrame:
@@ -29,7 +32,7 @@ def _generate_distribution_samples(size: Optional[int] = 36) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def test_custom_bootstrap_efficacy():
+def test_legacy_bootstrap_efficacy():
     df: pd.DataFrame = _generate_distribution_samples(size=1000)
     false_positive_rate: np.float64 = np.float64(0.01)
     columns: pd.Index = df.columns
@@ -38,7 +41,7 @@ def test_custom_bootstrap_efficacy():
     upper_quantile: np.float64
     actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
     for column in columns:
-        (lower_quantile, upper_quantile,) = compute_bootstrap_quantiles(
+        (lower_quantile, upper_quantile,) = compute_bootstrap_quantiles_legacy(
             metric_values=df[column],
             false_positive_rate=false_positive_rate,
             n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
@@ -53,3 +56,15 @@ def test_custom_bootstrap_efficacy():
             <= actual_false_positive_rates[column]
             <= false_positive_rate + 0.01
         )
+
+
+def test_bootstrap_efficacy():
+    df: pd.DataFrame = _generate_distribution_samples(size=1000)
+    false_positive_rate: np.float64 = np.float64(0.01)
+    columns: pd.Index = df.columns
+    column: str
+    lower_quantile: np.float64
+    upper_quantile: np.float64
+    actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
+
+    assert True
