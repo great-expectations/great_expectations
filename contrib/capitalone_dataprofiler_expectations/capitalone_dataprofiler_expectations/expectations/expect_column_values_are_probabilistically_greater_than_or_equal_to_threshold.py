@@ -5,6 +5,7 @@ For detailed instructions on how to use it, please see:
 """
 
 import json
+from typing import Any
 
 import dataprofiler as dp
 import numpy as np
@@ -39,7 +40,7 @@ class ColumnValuesConfidenceToBeGreaterThanOrEqualToThreshold(ColumnMapMetricPro
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, threshold, **kwargs):
+    def _pandas(cls: Any, column: str, threshold: float, **kwargs: Any) -> np.ndarray:
         """
         Implement the yes/no question for the expectation
         """
@@ -149,7 +150,13 @@ class ExpectColumnValuesToBeGreaterThanOrEqualToThreshold(ColumnMapExpectation):
     )
 
     # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {}
+    default_kwarg_values = {
+        "threshold": None,
+        "mostly": None,
+        "result_format": "BASIC",
+        "include_config": True,
+        "catch_exceptions": False,
+    }
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
