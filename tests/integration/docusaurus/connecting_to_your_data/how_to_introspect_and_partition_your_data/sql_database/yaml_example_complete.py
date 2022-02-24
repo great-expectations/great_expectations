@@ -13,6 +13,7 @@ connection_string: <CONNECTION_STRING>
 
 introspection:  # Each key in the "introspection" section is an InferredAssetSqlDataConnector
     whole_table:
+        include_schema_name: true
         introspection_directives:
             include_views: true
         skip_inapplicable_tables: true  # skip and continue upon encountering introspection errors
@@ -23,6 +24,7 @@ introspection:  # Each key in the "introspection" section is an InferredAssetSql
         introspection_directives:
             include_views: true
         skip_inapplicable_tables: true  # skip and continue upon encountering introspection errors
+        include_schema_name: true
         included_tables:  # only include tables in this list when inferring data asset_names
             - main.yellow_tripdata_sample_2019_01  # format: schema_name.table_name
         splitter_method: _split_on_converted_datetime
@@ -34,6 +36,7 @@ introspection:  # Each key in the "introspection" section is an InferredAssetSql
         introspection_directives:
             include_views: true
         skip_inapplicable_tables: true
+        include_schema_name: true
         included_tables:  # only include tables in this list when inferring data asset_names
             - main.yellow_tripdata_sample_2019_01  # format: schema_name.table_name
         splitter_method: _split_on_converted_datetime
@@ -42,16 +45,18 @@ introspection:  # Each key in the "introspection" section is an InferredAssetSql
             date_format_string: "%Y-%m-%d %H"
 
 tables:  # Each key in the "tables" section is a table_name (key name "tables" in "SimpleSqlalchemyDatasource" configuration is reserved).
-    # data_asset_name is: concatenate(data_asset_name_prefix, table_name, data_asset_name_suffix)
+    # data_asset_name is: concatenate(data_asset_name_prefix, schema_name, table_name, data_asset_name_suffix)
     yellow_tripdata_sample_2019_01:  # Must match table name exactly.
         partitioners:  # Each key in the "partitioners" sub-section the name of a ConfiguredAssetSqlDataConnector (key name "partitioners" in "SimpleSqlalchemyDatasource" configuration is reserved).
             whole_table:
-                include_schema_name: True
+                include_schema_name: true
+                schema_name: main
                 data_asset_name_prefix: taxi__
                 data_asset_name_suffix: __asset
 
             by_num_riders:
-                include_schema_name: True
+                include_schema_name: true
+                schema_name: main
                 data_asset_name_prefix: taxi__
                 data_asset_name_suffix: __asset
                 splitter_method: _split_on_column_value
@@ -59,7 +64,8 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
                     column_name: passenger_count
 
             by_num_riders_random_sample:
-                include_schema_name: True
+                include_schema_name: true
+                schema_name: main
                 data_asset_name_prefix: taxi__
                 data_asset_name_suffix: __asset
                 splitter_method: _split_on_column_value
@@ -84,7 +90,6 @@ available_data_asset_names = context.datasources[
     "taxi_datasource"
 ].get_available_data_asset_names(data_connector_names="whole_table")["whole_table"]
 assert len(available_data_asset_names) == 2
-
 # Here is a BatchRequest referring to an un-partitioned inferred data_asset.
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
@@ -94,7 +99,7 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = "yellow_tripdata_sample_2019_01"
+batch_request.data_asset_name = "main.yellow_tripdata_sample_2019_01"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -122,7 +127,7 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = "yellow_tripdata_sample_2019_01"
+batch_request.data_asset_name = "main.yellow_tripdata_sample_2019_01"
 
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 31  # number of days in January
@@ -137,8 +142,8 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = "yellow_tripdata_sample_2019_01"
-
+batch_request.data_asset_name = "main.yellow_tripdata_sample_2019_01"
+# THIS IS WHERE THE PROBLEM IS
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert 24 <= len(batch_list) <= 744  # number of hours in a 31-day month
 
@@ -152,7 +157,7 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
-batch_request.data_asset_name = "taxi__yellow_tripdata_sample_2019_01__asset"
+batch_request.data_asset_name = "taxi__main.yellow_tripdata_sample_2019_01__asset"
 
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 6
@@ -169,7 +174,7 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
-batch_request.data_asset_name = "taxi__yellow_tripdata_sample_2019_01__asset"
+batch_request.data_asset_name = "taxi__main.yellow_tripdata_sample_2019_01__asset"
 
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 6  # ride occupancy ranges from 1 passenger to 6 passengers
@@ -183,10 +188,10 @@ assert num_rows < 200
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, ge.validator.validator.Validator)
 assert "taxi_datasource" in [ds["name"] for ds in context.list_datasources()]
-assert "yellow_tripdata_sample_2019_01" in set(
+assert "main.yellow_tripdata_sample_2019_01" in set(
     context.get_available_data_asset_names()["taxi_datasource"]["whole_table"]
 )
-assert "taxi__yellow_tripdata_sample_2019_01__asset" in set(
+assert "taxi__main.yellow_tripdata_sample_2019_01__asset" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
         "by_num_riders_random_sample"
     ]
