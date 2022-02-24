@@ -34,40 +34,34 @@ strategy:
   matrix:
     linux_36:
       imageName: 'ubuntu-latest'
-      pythonVersion: '3.6.15'
-    mac_36:
-      imageName: 'macOS-latest'
-      pythonVersion: '3.6.15'
-    windows_36:
-      imageName: 'windows-latest'
-      pythonVersion: '3.6.15'
+      pythonVersion: '3.6'
     linux_37:
       imageName: 'ubuntu-latest'
-      pythonVersion: '3.7.12'
-    mac_37:
-      imageName: 'macOS-latest'
-      pythonVersion: '3.7.12'
-    windows_37:
-      imageName: 'windows-latest'
-      pythonVersion: '3.7.12'
+      pythonVersion: '3.7'
     linux_38:
       imageName: 'ubuntu-latest'
-      pythonVersion: '3.8.12'
-    mac_38:
-      imageName: 'macOS-latest'
-      pythonVersion: '3.8.12'
-    windows_38:
-      imageName: 'windows-latest'
-      pythonVersion: '3.8.12'
+      pythonVersion: '3.8'
     linux_39:
       imageName: 'ubuntu-latest'
-      pythonVersion: '3.9.10'
+      pythonVersion: '3.9'
+    mac_37:
+      imageName: 'macOS-latest'
+      pythonVersion: '3.7'
+    mac_38:
+      imageName: 'macOS-latest'
+      pythonVersion: '3.8'
     mac_39:
       imageName: 'macOS-latest'
-      pythonVersion: '3.9.10'
+      pythonVersion: '3.9'
+    windows_37:
+      imageName: 'windows-latest'
+      pythonVersion: '3.7'
+    windows_38:
+      imageName: 'windows-latest'
+      pythonVersion: '3.8'
     windows_39:
       imageName: 'windows-latest'
-      pythonVersion: '3.9.10'
+      pythonVersion: '3.9'
 
 pool:
   vmImage: $(imageName)
