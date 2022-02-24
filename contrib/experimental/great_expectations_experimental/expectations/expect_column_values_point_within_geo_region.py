@@ -330,5 +330,4 @@ class ExpectColumnValuesPointWithinGeoRegion(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesPointWithinGeoRegion().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesPointWithinGeoRegion().print_diagnostic_checklist()

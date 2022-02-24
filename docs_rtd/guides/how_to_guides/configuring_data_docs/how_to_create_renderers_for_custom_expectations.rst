@@ -19,7 +19,7 @@ This guide will help you implement renderers for your custom Expectations, allow
     - Configured an :ref:`Expectations Suite <tutorials__getting_started__create_your_first_expectations>` containing your custom Expectation.
     - Generated one Validation Result (from running a :ref:`Checkpoint <how_to_guides__validation__how_to_create_a_new_checkpoint>` or :ref:`Validation Operator <how_to_guides__validation__how_to_add_a_validation_operator>`) containing your custom Expectation
 
-See also this `complete custom expectation with renderer example <https://github.com/superconductive/ge_tutorials/tree/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py>`_.
+See also this `complete custom expectation with renderer example <https://github.com/superconductive/ge_tutorials/blob/main/getting_started_tutorial_final_v3_api/great_expectations/plugins/column_custom_max_expectation.py>`_.
 
 Steps
 -----

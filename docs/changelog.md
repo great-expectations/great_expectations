@@ -3,6 +3,7 @@ title: Changelog
 ---
 
 ### Develop
+* [FEATURE] Add Expectation.generate_diagnostic_checklist to assist with developing custom Expectations (#3906)
 
 ### 0.14.7
 * [FEATURE] Support Multi-Dimensional Metric Computations Generically for Multi-Batch Parameter Builders (#4206)
