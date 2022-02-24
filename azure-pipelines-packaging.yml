@@ -16,13 +16,13 @@ schedules:
     - main
   always: true # As this is run once a day, we always want to run it (regardless of whether or not changes have occurred)
 
-trigger:
-  branches:
-    include:
-    - pre_pr-*
-    - main
-    exclude:
-    - develop
+# trigger:
+#   branches:
+#     include:
+#     - pre_pr-*
+#     - main
+#     exclude:
+#     - develop
 
 # The pipeline is run under two primary conditions: if merging into main or as scheduled by the above cron job.
 variables:
@@ -35,64 +35,40 @@ stages:
     pool:
       vmImage: 'ubuntu-18.04'
 
-    # jobs:
-    #   - job: compatibility_matrix
-    #     condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
-    #     variables:
-    #       GE_pytest_opts: '--no-sqlalchemy --no-spark'
-    #     strategy:
-    #       matrix:
-    #         Python36-Pandas023:
-    #           python.version: '3.6'
-    #           numpy.version: '1.14.1'
-    #           pandas.version: '0.23.4'
-    #           scipy.version: '0.19.0'
-    #           GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
-    #         Python37-Pandas025:
-    #           python.version: '3.7'
-    #           numpy.version: '1.14.1'
-    #           pandas.version: '0.25.3'
-    #           # numpy 1.20 and pandas 0.25.3 do not coexist happily
-    #           scipy.version: '0.19.0'
-    #           GE_pytest_pip_opts: '"numpy<1.20" --requirement requirements-dev-base.txt --constraint constraints-dev.txt'
-    #         Python38-PandasLatest:
-    #           python.version: '3.8'
-    #           numpy.version: 'latest'
-    #           pandas.version: 'latest'
-    #           scipy.version: 'latest'
-    #           GE_pytest_pip_opts: '--requirement requirements-dev-base.txt --constraint constraints-dev.txt'
+    jobs:
+      - job: compatibility_matrix
+        condition: or(eq(variables.isScheduled, true), eq(variables.isMain, true))
+        strategy:
+          matrix:
+            Python36:
+              python.version: '3.6'
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
 
-    #     steps:
-    #       - task: UsePythonVersion@0
-    #         inputs:
-    #           versionSpec: '$(python.version)'
-    #         displayName: 'Use Python $(python.version)'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
 
-    #       - bash: python -m pip install --upgrade pip==21.3.1
-    #         displayName: 'Update pip'
+          - bash: python -m pip install --upgrade pip==21.3.1
+            displayName: 'Update pip'
 
-    #       - bash: pip install numpy
-    #         condition: eq(variables['scipy.version'], 'numpy')
-    #         displayName: 'Install numpy latest'
+          - bash: pip install --requirement requirements-dev-base.txt --constraint constraints-dev.txt
+            displayName: 'Install dev requirements'
 
-    #       - bash: pip install pandas
-    #         condition: eq(variables['pandas.version'], 'latest')
-    #         displayName: 'Install pandas latest'
+          - bash: pip install .
+            displayName: 'Install core requirements'
 
-    #       - bash: pip install scipy
-    #         condition: eq(variables['scipy.version'], 'latest')
-    #         displayName: 'Install scipy latest'
-
-    #       - bash: pip install pandas==$(pandas.version)
-    #         condition: ne(variables['pandas.version'], 'latest')
-    #         displayName: 'Install pandas - $(pandas.version)'
-
-    #       - script: |
-    #           pip install $(GE_pytest_pip_opts)
-    #           pip install  --requirement requirements.txt
-    #           # Consider fragmenting *all* integration tests into separate folder and run
-    #           pip install  .
-    #         displayName: 'Install dependencies'
+          # - script: |
+          #     pip install --requirement requirements-dev-base.txt
+          #     pip install --requirement requirements.txt
+          #     pip install  .
+          #   displayName: 'Install dependencies'
 
     #       - script: |
     #           pip install pytest pytest-cov pytest-azurepipelines
