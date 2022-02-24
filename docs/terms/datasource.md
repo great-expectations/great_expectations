@@ -57,7 +57,7 @@ Datasources do not modify your data during profiling or validation, but they may
 
 ### How to access
 
-You will typically only access your Datasource directly through Python code, which can be executed from a script, a Python console, or a Jupyter Notebook.  To access a Datasource all you need is a <TechnicalTag relative="../" tag="data_context" text="Data Context." /> and the name of the Datasource you want to access, as shown below:
+You will typically only access your Datasource directly through Python code, which can be executed from a script, a Python console, or a Jupyter Notebook.  To access a Datasource all you need is a <TechnicalTag relative="../" tag="data_context" text="Data Context" /> and the name of the Datasource you want to access, as shown below:
 
 ```python title="Python console:"
 import great_expectations as ge
