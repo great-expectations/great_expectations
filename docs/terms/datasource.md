@@ -33,7 +33,7 @@ Datasources function by bringing together a way of interacting with Data (an <Te
 
 <ConnectHeader/>
 
-When connecting to data the Datasource is primary tool.  At this stage, you will create Datasources to define how Great Expectations can find and access your <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.  Under the hood, each Datasource must have an Execution Engine and one or more Data Connectors configured.  Once a Datasource is configured you will be able to operate with the Datasource's API rather than needing a different API for each possible data backend you may be working with.
+When connecting to data the Datasource is your primary tool.  At this stage, you will create Datasources to define how Great Expectations can find and access your <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.  Under the hood, each Datasource must have an Execution Engine and one or more Data Connectors configured.  Once a Datasource is configured you will be able to operate with the Datasource's API rather than needing a different API for each possible data backend you may be working with.
 
 <CreateHeader/>
 
