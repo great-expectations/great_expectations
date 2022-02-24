@@ -187,6 +187,7 @@ except ImportError:
             BIGQUERY_TYPES = {}
 
     except (ImportError, AttributeError):
+        sqla_bigquery = None
         bigquery_types_tuple = None
         BigQueryDialect = None
         pybigquery = None
