@@ -95,9 +95,8 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
 
         # Here we use a single get_metric call to get column names to build the
         # rest of the metrics.
-        table_column_names: List[str] = self._get_table_column_names_from_first_batch(
+        table_column_names: List[str] = self._get_table_column_names_from_active_batch(
             validator=validator,
-            batch_ids=batch_ids,
         )
 
         metrics_for_cardinality_check: List[
@@ -118,33 +117,24 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
 
         return column_domains
 
-    def _get_table_column_names_from_first_batch(
+    def _get_table_column_names_from_active_batch(
         self,
         validator: Validator,
-        batch_ids: List[str],
     ):
-        """Retrieve table column names from the first loaded batch.
+        """Retrieve table column names from the active batch.
 
         Args:
             validator: Validator to use in retrieving columns.
-            batch_ids: Batches used in this profiler rule.
 
         Returns:
-            List of column names from the first loaded batch.
+            List of column names from the active batch.
         """
-
-        if len(batch_ids) == 0:
-            raise ProfilerConfigurationError(
-                "No batch_ids were available, please check your configuration."
-            )
-
-        first_batch_id: str = batch_ids[0]
 
         table_column_names: List[str] = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.columns",
                 metric_domain_kwargs={
-                    "batch_id": first_batch_id,
+                    "batch_id": validator.active_batch_id,
                 },
                 metric_value_kwargs=None,
                 metric_dependencies=None,
