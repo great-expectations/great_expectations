@@ -26,6 +26,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
 from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
@@ -49,9 +50,6 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.marshmallow__shade import ValidationError
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.config.base import (
-    ruleBasedProfilerConfigSchema,
-)
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
@@ -409,6 +407,9 @@ class Validator:
             for key, value in expectation_kwargs.items()
             if key in override_keys
         }
+        expectation_kwargs_overrides = convert_to_json_serializable(
+            data=expectation_kwargs_overrides
+        )
 
         auto: Optional[bool] = expectation_kwargs.get("auto")
         profiler_config: Optional[
@@ -425,20 +426,13 @@ class Validator:
                 ],
             ]
         ] = expectation_kwargs.get("profiler_config")
+        if isinstance(profiler_config, dict):
+            profiler_config = RuleBasedProfilerConfig(**profiler_config)
+
         default_profiler_config: Optional[
-            Union[
-                RuleBasedProfilerConfig,
-                Dict[
-                    str,
-                    Union[
-                        str,
-                        float,
-                        Optional[Dict[str, Any]],
-                        Optional[Dict[str, Dict[str, Any]]],
-                    ],
-                ],
-            ]
+            RuleBasedProfilerConfig
         ] = expectation_impl.default_kwarg_values.get("profiler_config")
+
         if auto and profiler_config is None and default_profiler_config is None:
             raise ValueError(
                 "Automatic Expectation argument estimation requires a Rule-Based Profiler to be provided."
@@ -449,20 +443,7 @@ class Validator:
         if auto:
             # Save custom Rule-Based Profiler configuration for reconciling it with optionally-specified default
             # Rule-Based Profiler configuration as an override argument to "BaseRuleBasedProfiler.run()" method.
-            override_profiler_config: Optional[
-                Union[
-                    RuleBasedProfilerConfig,
-                    Dict[
-                        str,
-                        Union[
-                            str,
-                            float,
-                            Optional[Dict[str, Any]],
-                            Optional[Dict[str, Dict[str, Any]]],
-                        ],
-                    ],
-                ]
-            ]
+            override_profiler_config: Optional[RuleBasedProfilerConfig]
             if default_profiler_config:
                 override_profiler_config = copy.deepcopy(profiler_config)
             else:
@@ -473,15 +454,6 @@ class Validator:
             configuration as override; otherwise, use custom Rule-Based Profiler configuration with no override.
             """
             profiler_config = default_profiler_config or profiler_config
-
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-            validated_profiler_config: dict = ruleBasedProfilerConfigSchema.load(
-                profiler_config
-            )
-            profiler_config = ruleBasedProfilerConfigSchema.dump(
-                validated_profiler_config
-            )
-            profiler_config = RuleBasedProfilerConfig(**profiler_config)
 
             profiler: BaseRuleBasedProfiler = self._build_rule_based_profiler(
                 expectation_type=expectation_type,
@@ -725,7 +697,8 @@ class Validator:
 
     @staticmethod
     def _get_default_domain_kwargs(
-        metric_provider_cls: "MetricProvider", metric_configuration: MetricConfiguration
+        metric_provider_cls: "MetricProvider",  # noqa: F821
+        metric_configuration: MetricConfiguration,
     ) -> None:
         for key in metric_provider_cls.domain_keys:
             if (
@@ -738,7 +711,8 @@ class Validator:
 
     @staticmethod
     def _get_default_value_kwargs(
-        metric_provider_cls: "MetricProvider", metric_configuration: MetricConfiguration
+        metric_provider_cls: "MetricProvider",  # noqa: F821
+        metric_configuration: MetricConfiguration,
     ) -> None:
         for key in metric_provider_cls.value_keys:
             if (

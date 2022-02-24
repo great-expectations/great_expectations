@@ -1322,8 +1322,9 @@ class ExpectationConfiguration(SerializableDictDot):
         dependencies = _deduplicate_evaluation_parameter_dependencies(dependencies)
         return dependencies
 
+    @staticmethod
     def _update_dependencies_with_expectation_suite_urn(
-        self, dependencies: dict, urn: ParseResults
+        dependencies: dict, urn: ParseResults
     ) -> None:
         if not urn.get("metric_kwargs"):
             nested_update(

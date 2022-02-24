@@ -18,9 +18,11 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
+    # noinspection PyUnresolvedReferences
     """Expect specific provided column quantiles to be between provided minimum and maximum values.
 
            ``quantile_ranges`` must be a dictionary with two keys:
@@ -74,11 +76,11 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
            <great_expectations.execution_engine.MetaExecutionEngine.column_aggregate_expectation>`.
 
            Args:
-               :column (str): \
+               column (str): \
                    The column name.
-               :quantile_ranges (dictionary): \
+               quantile_ranges (dictionary): \
                    Quantiles and associated value ranges for the column. See above for details.
-               :allow_relative_error (boolean or string): \
+               allow_relative_error (boolean or string): \
                    Whether to allow relative error in quantile communications on backends that support or require it.
 
            Other Parameters:
@@ -134,6 +136,67 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "auto",
         "profiler_config",
     )
+
+    default_profiler_config: RuleBasedProfilerConfig = RuleBasedProfilerConfig(
+        name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        variables={
+            "quantiles": [
+                0.25,
+                0.5,
+                0.75,
+            ],
+            "allow_relative_error": "linear",
+            "num_bootstrap_samples": 9999,
+            "false_positive_rate": 0.05,
+            "truncate_values": {
+                "lower_bound": None,
+                "upper_bound": None,
+            },
+            "round_decimals": 1,
+        },
+        rules={
+            "column_quantiles_rule": {
+                "domain_builder": {
+                    "class_name": "ColumnDomainBuilder",
+                    "module_name": "great_expectations.rule_based_profiler.domain_builder",
+                },
+                "parameter_builders": [
+                    {
+                        "name": "quantile_value_ranges",
+                        "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.parameter_builder",
+                        "metric_name": "column.quantile_values",
+                        "metric_domain_kwargs": "$domain.domain_kwargs",
+                        "metric_value_kwargs": {
+                            "quantiles": "$variables.quantiles",
+                            "allow_relative_error": "$variables.allow_relative_error",
+                        },
+                        "num_bootstrap_samples": "$variables.num_bootstrap_samples",
+                        "false_positive_rate": "$variables.false_positive_rate",
+                        "round_decimals": "$variables.round_decimals",
+                    }
+                ],
+                "expectation_configuration_builders": [
+                    {
+                        "expectation_type": "expect_column_quantile_values_to_be_between",
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
+                        "column": "$domain.domain_kwargs.column",
+                        "quantile_ranges": {
+                            "quantiles": "$variables.quantiles",
+                            "value_ranges": "$parameter.quantile_value_ranges.value.value_range",
+                        },
+                        "allow_relative_error": "$variables.allow_relative_error",
+                        "meta": {
+                            "profiler_details": "$parameter.quantile_value_ranges.details"
+                        },
+                    }
+                ],
+            },
+        },
+    )
+
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,
@@ -144,65 +207,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
         "meta": None,
         "auto": False,
-        "profiler_config": {
-            "name": "expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-            "config_version": 1.0,
-            "variables": {
-                "quantiles": [
-                    0.25,
-                    0.5,
-                    0.75,
-                ],
-                "allow_relative_error": "linear",
-                "num_bootstrap_samples": 9999,
-                "false_positive_rate": 0.05,
-                "truncate_values": {
-                    "lower_bound": None,
-                    "upper_bound": None,
-                },
-                "round_decimals": 1,
-            },
-            "rules": {
-                "column_quantiles_rule": {
-                    "domain_builder": {
-                        "class_name": "ColumnDomainBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.domain_builder",
-                    },
-                    "parameter_builders": [
-                        {
-                            "name": "quantile_value_ranges",
-                            "class_name": "NumericMetricRangeMultiBatchParameterBuilder",
-                            "module_name": "great_expectations.rule_based_profiler.parameter_builder",
-                            "metric_name": "column.quantile_values",
-                            "metric_domain_kwargs": "$domain.domain_kwargs",
-                            "metric_value_kwargs": {
-                                "quantiles": "$variables.quantiles",
-                                "allow_relative_error": "$variables.allow_relative_error",
-                            },
-                            "num_bootstrap_samples": "$variables.num_bootstrap_samples",
-                            "false_positive_rate": "$variables.false_positive_rate",
-                            "round_decimals": "$variables.round_decimals",
-                        }
-                    ],
-                    "expectation_configuration_builders": [
-                        {
-                            "expectation_type": "expect_column_quantile_values_to_be_between",
-                            "class_name": "DefaultExpectationConfigurationBuilder",
-                            "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder",
-                            "column": "$domain.domain_kwargs.column",
-                            "quantile_ranges": {
-                                "quantiles": "$variables.quantiles",
-                                "value_ranges": "$parameter.quantile_value_ranges.value.value_range",
-                            },
-                            "allow_relative_error": "$variables.allow_relative_error",
-                            "meta": {
-                                "profiler_details": "$parameter.quantile_value_ranges.details"
-                            },
-                        }
-                    ],
-                }
-            },
-        },
+        "profiler_config": default_profiler_config,
     }
     args_keys = (
         "column",
