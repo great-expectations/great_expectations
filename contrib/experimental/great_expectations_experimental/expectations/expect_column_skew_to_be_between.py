@@ -491,6 +491,4 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
 
 
 if __name__ == "__main__":
-    self_check_report = ExpectColumnSkewToBeBetween().run_diagnostics()
-
-    print(json.dumps(self_check_report, indent=2))
+    ExpectColumnSkewToBeBetween().print_diagnostic_checklist()

@@ -76,6 +76,8 @@ class SqlAlchemyQueryStore(Store):
             self.engine = credentials["engine"]
         elif "url" in credentials:
             self.engine = create_engine(credentials["url"])
+        elif "connection_string" in credentials:
+            self.engine = create_engine(credentials["connection_string"])
         else:
             drivername = credentials.pop("drivername")
             options = URL(drivername, **credentials)
