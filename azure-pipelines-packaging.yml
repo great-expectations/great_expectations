@@ -90,8 +90,8 @@ stages:
               echo "Hello, conda!"
             displayName: 'Install'
 
-          - bash: great_expectations --version
-            displayName: 'Confirm installation'
+          # - bash: great_expectations --version
+          #   displayName: 'Confirm installation'
 
       - job: dev_env_lightweight
         strategy:
@@ -182,8 +182,8 @@ stages:
               echo "Hello, conda!"
             displayName: 'Install'
 
-          - bash: great_expectations --version
-            displayName: 'Confirm installation'
+          # - bash: great_expectations --version
+          #   displayName: 'Confirm installation'
 
       - job: dev_env_lightweight
         strategy:
@@ -274,8 +274,8 @@ stages:
               echo "Hello, conda!"
             displayName: 'Install'
 
-          - bash: great_expectations --version
-            displayName: 'Confirm installation'
+          # - bash: great_expectations --version
+          #   displayName: 'Confirm installation'
 
       - job: dev_env_lightweight
         strategy:
