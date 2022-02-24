@@ -13,7 +13,7 @@ class CardinalityLimit(abc.ABC):
 
 @dataclass
 class RelativeCardinalityLimit(CardinalityLimit):
-    max_proportion_unique: Union[int, float]
+    max_proportion_unique: float
     related_metric_name: str = "column.unique_proportion"
 
 
@@ -93,7 +93,7 @@ class CardinalityChecker:
         self,
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[int] = None,
-        max_proportion_unique: Optional[Union[int, float]] = None,
+        max_proportion_unique: Optional[float] = None,
     ):
         self.supported_limit_mode_class_names = (
             mode.__name__ for mode in self.SUPPORTED_CARDINALITY_LIMIT_MODE_CLASSES
@@ -109,7 +109,7 @@ class CardinalityChecker:
     def limit_mode(self) -> CardinalityLimitMode:
         return self._limit_mode
 
-    def cardinality_within_limit(self, metric_value: Union[int, float]) -> bool:
+    def cardinality_within_limit(self, metric_value: float) -> bool:
         """Determine if the cardinality is within configured limit.
 
         The metric_value supplied should be either a proportion of unique values
@@ -129,7 +129,7 @@ class CardinalityChecker:
             return metric_value <= self._limit_mode.max_proportion_unique
 
     @staticmethod
-    def _validate_metric_value(metric_value: Union[int, float]) -> None:
+    def _validate_metric_value(metric_value: float) -> None:
         if not isinstance(metric_value, (int, float)):
             raise ProfilerConfigurationError(
                 f"Value of measured cardinality must be of type int or float, you provided {type(metric_value)}"
@@ -143,7 +143,7 @@ class CardinalityChecker:
         self,
         limit_mode: Optional[Union[CardinalityLimitMode, str]] = None,
         max_unique_values: Optional[int] = None,
-        max_proportion_unique: Optional[Union[int, float]] = None,
+        max_proportion_unique: Optional[float] = None,
     ) -> Union[AbsoluteCardinalityLimit, RelativeCardinalityLimit]:
 
         self._validate_input_parameters(

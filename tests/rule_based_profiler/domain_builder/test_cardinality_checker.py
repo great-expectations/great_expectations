@@ -137,7 +137,7 @@ def test_exhaustively_cardinality_within_limit_for_all_supported_cardinality_lim
     )
 
     # Set up passing and failing cardinality measured values
-    cardinality_limit: Union[int, float]
+    cardinality_limit: float
     limit_mode: Union[
         AbsoluteCardinalityLimit, RelativeCardinalityLimit
     ] = cardinality_checker.limit_mode
