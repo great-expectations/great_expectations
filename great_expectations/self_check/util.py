@@ -1516,16 +1516,21 @@ def generate_expectation_tests(
     for d in test_data_cases:
         d = copy.deepcopy(d)
         dialects_to_include = {}
+        engines_to_include = {}
 
         # Some Expectations (mostly contrib) explicitly list test_backends/dialects to test with
         if d.test_backends:
             for tb in d.test_backends:
+                engines_to_include[tb["backend"]] = True
                 if tb["backend"] == "sqlalchemy":
                     for dialect in tb["dialects"]:
                         dialects_to_include[dialect] = True
         else:
+            engines_to_include["pandas"] = execution_engine_diagnostics.PandasExecutionEngine
+            engines_to_include["spark"] = execution_engine_diagnostics.SparkDFExecutionEngine
+            engines_to_include["sqlalchemy"] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
             if (
-                execution_engine_diagnostics.SqlAlchemyExecutionEngine is True
+                engines_to_include.get("sqlalchemy") is True
                 and raise_exceptions_for_backends is False
             ):
                 dialects_to_include = {
@@ -1536,15 +1541,15 @@ def generate_expectation_tests(
 
         # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
         if (
-            execution_engine_diagnostics.SqlAlchemyExecutionEngine is True
+            engines_to_include.get("sqlalchemy") is True
             and not dialects_to_include
         ):
             dialects_to_include["sqlite"] = True
 
         backends = build_test_backends_list(
-            include_pandas=execution_engine_diagnostics.PandasExecutionEngine,
-            include_spark=execution_engine_diagnostics.SparkDFExecutionEngine,
-            include_sqlalchemy=execution_engine_diagnostics.SqlAlchemyExecutionEngine,
+            include_pandas=engines_to_include.get("pandas", False),
+            include_spark=engines_to_include.get("spark", False),
+            include_sqlalchemy=engines_to_include.get("sqlalchemy", False),
             include_sqlite=dialects_to_include.get("sqlite", False),
             include_postgresql=dialects_to_include.get("postgresql", False),
             include_mysql=dialects_to_include.get("mysql", False),
