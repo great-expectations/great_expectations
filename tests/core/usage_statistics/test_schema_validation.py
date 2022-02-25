@@ -142,4 +142,56 @@ def test_run_val_op_message():
 
 
 def test_anonymized_rule_based_profiler_validation():
-    anonymized_rule_based_profiler_run_schema,
+    message: dict = {
+        "anonymized_name": "5b6c98e19e21e77191fb071bb9e80070",
+        "anonymized_rules": [
+            {
+                "anonymized_domain_builder": {"class_name": "TableDomainBuilder"},
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                    }
+                ],
+                "anonymized_name": "5a83f3728393d6519a197cffdccd50ff",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_name": "9349ed253aba01f4ecf190af61018a11",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                    }
+                ],
+            },
+            {
+                "anonymized_domain_builder": {"class_name": "TableDomainBuilder"},
+                "anonymized_expectation_configuration_builders": [
+                    {
+                        "class_name": "DefaultExpectationConfigurationBuilder",
+                        "expectation_type": "expect_column_values_to_be_between",
+                    }
+                ],
+                "anonymized_name": "0bac2cecbb0cf8bb704e86710941434e",
+                "anonymized_parameter_builders": [
+                    {
+                        "anonymized_name": "b7719efec76c6ebe30230fc1ec023beb",
+                        "class_name": "MetricMultiBatchParameterBuilder",
+                    }
+                ],
+            },
+        ],
+        "config_version": 1.0,
+        "rule_count": 2,
+        "variable_count": 1,
+    }
+
+    # Populated payload (valid)
+    jsonschema.validate(message, anonymized_rule_based_profiler_run_schema)
+
+    # Remove mandatory field (invalid)
+    with pytest.raises(jsonschema.ValidationError) as e:
+        message.pop("variable_count")
+        jsonschema.validate(message, anonymized_rule_based_profiler_run_schema)
+    assert "'variable_count' is a required property" in str(e.value)
+
+    # Empty payload (valid)
+    message.clear()
+    jsonschema.validate(message, anonymized_rule_based_profiler_run_schema)
