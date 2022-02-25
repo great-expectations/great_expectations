@@ -9,7 +9,7 @@ from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_ran
 )
 from great_expectations.rule_based_profiler.util import (
     compute_bootstrap_quantiles,
-    compute_bootstrap_quantiles_legacy,
+    compute_bootstrap_quantiles_mean,
 )
 from tests.conftest import skip_if_python_below_minimum_version
 
@@ -42,7 +42,7 @@ def test_bootstrap_mean_efficacy():
     upper_quantile: np.float64
     actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
     for column in columns:
-        (lower_quantile, upper_quantile,) = compute_bootstrap_quantiles_legacy(
+        (lower_quantile, upper_quantile,) = compute_bootstrap_quantiles_mean(
             metric_values=df[column],
             false_positive_rate=false_positive_rate,
             n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
