@@ -33,6 +33,8 @@ A Metric Store can be referenced by an Expectation Suite to populate values for 
 
 If you intend to use a Metric Store, you can configure it in your `great_expectations.yml` file when you configure other Stores.  A Metric Store is an optional addition to `great_expectations.yml`, and one will not be included by default when you first initialize your Data Context.
 
+For more information, please see [our guide on how to configure a Metric Store](../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md).
+
 
 <CreateHeader/>
 

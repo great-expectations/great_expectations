@@ -20,7 +20,7 @@ A Store is a connector to store and retrieve information about metadata in Great
 
 ### Features and promises
 
-Great Expectations supports a variety of Stores for different purposes, but the most common Stores are Expectation Stores, Validations Stores, Checkpoint Stores, and Evaluation Parameter Stores (or Metric Stores).  Data Docs Stores can also be configured for Data Doc Sites.  Each of these Stores is tailored to a specific type of information.
+Great Expectations supports a variety of Stores for different purposes, but the most common Stores are Expectation Stores, Validations Stores, Checkpoint Stores, Metric Stores, and Evaluation Parameter Stores.  Data Docs Stores can also be configured for Data Doc Sites.  Each of these Stores is tailored to a specific type of information.
 
 - [**Expectation Store:**](./expectation_store.md) a connector to store and retrieve information about collections of verifiable assertions about data.  These are Stores for Expectation Suites.
 - [**Validation Result Store:**](./validation_result_store.md) a connector to store and retrieve information about objects generated when data is Validated against an Expectation Suite.
@@ -34,12 +34,12 @@ Great Expectations supports a variety of Stores for different purposes, but the 
 
 Each type of Store is designed to interact with a specific subset of information, and thus interacts with a specific subset of objects in Great Expectations.  However, all Stores can be listed and modified through your Data Context.  For further information on how a given type of Store relates to other objects, please see the corresponding Store type's technical term page:
 
-- Expectation Store technical term page: Relationship to other objects
-- Checkpoint Store technical term page: Relationship to other objects
-- Validation Result Store technical term page: Relationship to other objects
-- Evaluation Parameter Store (or Metric Store) technical term page: Relationship to other objects
-- Data Docs Store technical term page: Relationship to other objects
-- Metric Store technical term page: Relationship to other objects
+- [Expectation Store technical term page: Relationship to other objects](./expectation_store.md#relationship-to-other-objects)
+- [Checkpoint Store technical term page: Relationship to other objects](./checkpoint_store.md#relationship-to-other-objects)
+- [Validation Result Store technical term page: Relationship to other objects](./validation_result_store.md#relationship-to-other-objects)
+- [Evaluation Parameter Store (or Metric Store) technical term page: Relationship to other objects](./evaluation_parameter_store.md#relationship-to-other-objects)
+- [Data Docs Store technical term page: Relationship to other objects](./data_docs_store.md#relationship-to-other-objects)
+- [Metric Store technical term page: Relationship to other objects](./metric_store.md#relationship-to-other-objects)
 
 ## Use cases
 
@@ -93,24 +93,3 @@ For more information about a specific type of Store, please see the Store type's
 - [Evaluation Parameter Store technical term page](./evaluation_parameter_store.md)
 - [Data Docs Store technical term page](./data_docs_store.md)
 - [Metric Store technical term page](./metric_store.md)
-
-
-
-
-
-
-
-
-
-
-
-
-
-NOTES: TEMPORARY
---------------
-Location where your Data Context stores information about your Expectations, Validation Results, and Metrics.
-A connector to store and retrieve information about metadata in Great Expectations., such as Expectations, Validation Results, and Metrics.
-
-By default, newly profiled Expectations are stored in JSON format in the `expectations/` subdirectory of your great_expectations/ folder.
-
-By default, Validation results are stored in JSON format in the uncommitted/validations/ subdirectory of your great_expectations/ folder. Since Validations may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.
