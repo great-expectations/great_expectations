@@ -431,6 +431,7 @@ module.exports = {
             'terms/renderer',
             'terms/supporting_resource',
             'terms/validator',
+            'terms/validation_operator',
             'terms/validation_result'
           ]
         },

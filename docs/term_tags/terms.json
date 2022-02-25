@@ -140,7 +140,7 @@
   },
   "validation_operator": {
     "term": "Validation Operator",
-    "definition": "Triggers Validation Actions after Validation completes.",
+    "definition": "Triggers Actions after Validation completes.",
     "url": "terms/validation_operator"
   },
   "validation_result": {
