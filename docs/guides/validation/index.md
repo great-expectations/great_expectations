@@ -14,10 +14,10 @@ title: "Validate Data: Index"
 
 ## Validation Actions
 - [How to trigger Email as a Validation Action](../../guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action.md)
+- [How to trigger Slack notifications as a Validation Action](../../guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action.md)
 - [How to collect OpenLineage metadata using a Validation Action](../../guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action.md)
 - [How to trigger Opsgenie notifications as a Validation Action](../../guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action.md)
-- [How to trigger Slack notifications as a Validation Action](../../guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action.md)
-- [How to update Data Docs as a Validation Action](../../guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action.md)
+- [How to update Data Docs after validating a Checkpoint](../../guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action.md)
 
 ## Advanced
 - [How to deploy a scheduled Checkpoint with cron](../../guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron.md)

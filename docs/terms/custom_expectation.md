@@ -49,5 +49,5 @@ We provide extensive documentation on how to create Custom Expectations.  If you
 
 ### How to contribute
 
-Community contributions are a great way to help Great Expectations grow!  If you've created a Custom Expectation that you would like to share with others, we have a [guide on how to contribute a new Expectation to Great Expectations](../guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations.md), just waiting for you!
+Community contributions are a great way to help Great Expectations grow!  If you've created a Custom Expectation that you would like to share with others, we have a [guide on how to contribute a new Expectation to Great Expectations](../guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md), just waiting for you!
 

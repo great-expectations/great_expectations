@@ -32,13 +32,15 @@ title: "Setup: Index"
 - [How to configure a Validation Result store to PostgreSQL](../../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_to_postgresql.md)
 
 ### Metric Stores
-- [How to configure a MetricsStore](../../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)
+- [How to configure and use a MetricStore](../../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)
+- ["Index"](../../guides/setup/configuring_metadata_stores/index.md)
 
 ## Data Docs
 - [How to host and share Data Docs on a filesystem](../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md)
 - [How to host and share Data Docs on Azure Blob Storage](../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md)
 - [How to host and share Data Docs on GCS](../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md)
 - [How to host and share Data Docs on Amazon S3](../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md)
+- ["Index"](../../guides/setup/configuring_data_docs/index.md)
 
 ## Advanced
 - [How to use the project check-config command](../../guides/miscellaneous/how_to_use_the_project_check_config_command.md)
