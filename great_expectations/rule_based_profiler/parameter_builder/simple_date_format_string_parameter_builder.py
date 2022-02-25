@@ -146,7 +146,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     @property
     def candidate_strings(
         self,
-    ) -> Union[str, Union[List[str], Set[str],],]:
+    ) -> Union[str, Union[List[str], Set[str]]]:
         return self._candidate_strings
 
     def _build_parameters(

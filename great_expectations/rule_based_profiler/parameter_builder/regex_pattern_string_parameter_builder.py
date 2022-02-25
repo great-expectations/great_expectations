@@ -101,7 +101,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     @property
     def candidate_regexes(
         self,
-    ) -> Union[str, Union[List[str], Set[str],],]:
+    ) -> Union[str, Union[List[str], Set[str]]]:
         return self._candidate_regexes
 
     def _build_parameters(
