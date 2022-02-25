@@ -415,6 +415,19 @@ module.exports = {
             'terms/plugin',
             'terms/profiler',
             'terms/plugin',
+            {
+              type: 'category',
+              label: 'Stores',
+              items: [
+                'terms/store',
+                'terms/checkpoint_store',
+                'terms/data_docs_store',
+                'terms/evaluation_parameter_store',
+                'terms/expectation_store',
+                'terms/metric_store',
+                'terms/validation_result_store'
+              ]
+            },
             'terms/renderer',
             'terms/supporting_resource',
             'terms/validator',

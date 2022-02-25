@@ -19,6 +19,11 @@
     "definition": "The primary means for validating data in a production deployment of Great Expectations.",
     "url": "terms/checkpoint"
   },
+  "checkpoint_store": {
+    "term": "Checkpoint Store",
+    "definition": "A connector to store and retrieve information about means for validating data in a production deployment of Great Expectations.",
+    "url": "terms/checkpoint_store"
+  },
   "cli": {
     "term": "CLI",
     "definition": "Command Line Interface",
@@ -48,6 +53,10 @@
     "term": "Data Docs",
     "definition": "Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc.",
     "url": "terms/data_docs"
+  },
+  "data_docs_store": {
+    "term": "Data Docs Store",
+    "definition": "A connector to store and retrieve information pertaining to Human readable documentation generated from Great Expectations metadata detailing Expectations, Validation Results, etc."
   },
   "datasource": {
     "term": "Datasource",
