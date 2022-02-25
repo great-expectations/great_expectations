@@ -42,6 +42,7 @@ connection_string: <CONNECTION_STRING>
 
 introspection:  # Each key in the "introspection" section is the name of an InferredAssetSqlDataConnector (key name "introspection" in "SimpleSqlalchemyDatasource" configuration is reserved).
     whole_table:
+        include_schema_name: true
         introspection_directives:
             include_views: true
         skip_inapplicable_tables: true  # skip and continue upon encountering introspection errors
@@ -83,7 +84,8 @@ tables:  # Each key in the "tables" section is a table_name (key name "tables" i
     yellow_tripdata_sample_2019_01:  # Must match table name exactly.
         partitioners:  # Each key in the "partitioners" sub-section the name of a ConfiguredAssetSqlDataConnector (key name "partitioners" in "SimpleSqlalchemyDatasource" configuration is reserved).
             whole_table:
-                include_schema_name: True
+                include_schema_name: true
+                schema_name: main
                 data_asset_name_prefix: taxi__
                 data_asset_name_suffix: __asset
 """
