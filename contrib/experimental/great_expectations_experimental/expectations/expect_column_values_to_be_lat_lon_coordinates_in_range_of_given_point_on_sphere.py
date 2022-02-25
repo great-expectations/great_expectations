@@ -14,7 +14,6 @@ import numpy as np
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -24,13 +23,10 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     MetricDomainTypes,
-    MetricFunctionTypes,
     MetricPartialFunctionTypes,
     column_condition_partial,
-    metric_partial,
-    metric_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa, sparktypes
+from great_expectations.expectations.metrics.import_manager import F, sparktypes
 
 
 # This class defines a Metric to support your Expectation.
@@ -70,111 +66,6 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
                 range = range * 1.609344
 
         return distances.le(range)
-
-    # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
-    # @metric_partial(
-    #     engine=SqlAlchemyExecutionEngine,
-    #     partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
-    #     domain_type=MetricDomainTypes.COLUMN,
-    # )
-    # def _sqlalchemy(
-    #     cls,
-    #     execution_engine: SqlAlchemyExecutionEngine,
-    #     metric_domain_kwargs,
-    #     metric_value_kwargs,
-    #     metrics,
-    #     runtime_configuration,
-    # ):
-    #     (
-    #         selectable,
-    #         compute_domain_kwargs,
-    #         accessor_domain_kwargs,
-    #     ) = execution_engine.get_compute_domain(
-    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
-    #     )
-    #
-    #     column_name = accessor_domain_kwargs["column"]
-    #     column = sa.column(column_name)
-    #     center_point = accessor_domain_kwargs["center_point"]
-    #     unit = accessor_domain_kwargs["unit"]
-    #     range = accessor_domain_kwargs["range"]
-    #     projection = accessor_domain_kwargs["projection"]
-    #
-    #     engine = execution_engine.engine
-    #
-    #     if projection == "fcc":
-    #         if unit == "kilometers":
-    #             points = engine.execute(
-    #                 sa.select(column).select_from(selectable)
-    #             ).collect()
-    #             distances = F.udf(
-    #                 lambda x, y=center_point: cls.fcc_projection(x, y),
-    #                 sparktypes.FloatType(),
-    #             )
-    #         elif unit == "miles":
-    #             distances = F.udf(
-    #                 lambda x, y=center_point: cls.fcc_projection(x, y) * 1.609344,
-    #                 sparktypes.FloatType(),
-    #             )
-    #             range = range * 1.609344
-    #
-    #     return None
-
-    # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    # def _sqlalchemy(cls, column, **kwargs):
-    #     breakpoint()
-    #     distances = cls._sqlalchemy_intermediate_function()
-    #     breakpoint()
-    #     return result["__success"]
-
-    @metric_partial(
-        engine=SqlAlchemyExecutionEngine,
-        partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
-        domain_type=MetricDomainTypes.COLUMN,
-    )
-    def _sqlalchemy(
-        cls,
-        execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
-        metrics: Dict[str, Any],
-        runtime_configuration: Dict,
-    ):
-        (
-            selectable,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
-        ) = execution_engine.get_compute_domain(
-            domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
-        )
-        engine = execution_engine.engine
-
-        column_name = accessor_domain_kwargs["column"]
-        column = sa.column(column_name)
-        center_point = metric_value_kwargs["center_point"]
-        unit = metric_value_kwargs["unit"]
-        range = metric_value_kwargs["range"]
-        projection = metric_value_kwargs["projection"]
-
-        points = engine.execute(sa.select(column).select_from(selectable)).fetchall()
-        points = np.array(points).reshape(-1)
-        points = np.array([eval(x) for x in points])
-
-        if projection == "fcc":
-            if unit == "kilometers":
-                distances = np.apply_along_axis(
-                    lambda x, y=center_point: fcc_projection(x, y), 1, points
-                )
-            elif unit == "miles":
-                distances = (
-                    np.apply_along_axis(
-                        lambda x, y=center_point: fcc_projection(x, y), 1, points
-                    )
-                    * 1.609344
-                )
-                range = range * 1.609344
-
-        return None
 
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
     @column_condition_partial(engine=SparkDFExecutionEngine)
@@ -275,12 +166,69 @@ def pythagorean_projection(loc1, loc2):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPointOnSphere(
+class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPointOnEarth(
     ColumnMapExpectation
 ):
-    """Expect values in a column to be tuples of (latitude, longitude) within a specified range of a given (latitude, longitude) point."""
+    """Expect values in a column to be tuples of degree-decimal (latitude, longitude) within a specified range of a given degree-decimal (latitude, longitude) point.
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    expect_column_values_to_be_lat_lon_coordinates_in_range_of_given_point_on_earth is a :func:`column_map_expectation \
+    <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
+
+    Args:
+        column (str): \
+            The column name.
+
+
+    Keyword Args:
+        center_point (tuple(float, float) or list(float, float)): \
+            The point from which to measure to the column points.
+            Must be a tuple or list of exactly two (2) floats.
+
+        unit (str or None): \
+            The unit of distance with which to measure.
+            Must be one of: [miles, kilometers]
+            Default: kilometers
+
+        range (int or float): \
+            The range in [miles, kilometers] from your specified center_point to measure.
+
+        projection (str or None): \
+            The method by which to calculate distance between points.
+            Must be one of: [fcc, pythagorean]
+            Default: pythagorean
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
+            For more detail, see :ref:`result_format <result_format>`.
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object. \
+            For more detail, see :ref:`include_config`.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see :ref:`catch_exceptions`.
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without
+            modification. For more detail, see :ref:`meta`.
+
+    Returns:
+        An ExpectationSuiteValidationResult
+
+        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
+        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+
+    Projections:
+        fcc: \
+            Calculates the distance in kilometers between two lat/lon points on an ellipsoidal earth
+            projected to a plane. Prescribed by the FCC for distances up to and not exceeding 475km/295mi.
+
+
+        pythagorean: \
+            Application of the pythagorean theorem to calculate the distance in kilometers between two lat/lon points on
+            a spherical earth projected to a plane. Very fast but error increases rapidly as distances increase.
+    """
+
+    def validate_configuration(cls, configuration: Optional[ExpectationConfiguration]):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -294,7 +242,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPointOnSphere(
         # Setting up a configuration
         super().validate_configuration(configuration)
         if configuration is None:
-            configuration = self.configuration
+            configuration = cls.configuration
 
         center_point = configuration.kwargs["center_point"]
         range = configuration.kwargs["range"]
@@ -309,7 +257,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPointOnSphere(
                 isinstance(center_point, tuple) or isinstance(center_point, list)
             ) and all(
                 isinstance(n, float) for n in center_point
-            ), "center_point must be a tuple of lat/lon floats"
+            ), "center_point must be a tuple or list of lat/lon floats"
             assert isinstance(range, (float, int)), "range must be a numeric value"
             assert isinstance(unit, str) and unit in [
                 "miles",
@@ -405,10 +353,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPointOnSphere(
                     "error": {"traceback_substring": "range must be a numeric value"},
                 },
             ],
-            "test_backends": [
-                {"backend": "pandas", "dialects": None},
-                {"backend": "sqlalchemy", "dialects": ["sqlite", "postgresql"]},
-            ],
+            "only_for": "pandas",
         },
         {
             "data": {
@@ -498,5 +443,3 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPointOnSphere(
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPointOnSphere().print_diagnostic_checklist()
-    # out = ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPointOnSphere().run_diagnostics()
-    # breakpoint()
