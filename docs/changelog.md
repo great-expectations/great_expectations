@@ -3,7 +3,6 @@ title: Changelog
 ---
 
 ### Develop
-
 ### 0.14.8
 * [FEATURE] Add `run_profiler_on_data` method to DataContext (#4190)
 * [FEATURE] `RegexPatternStringParameterBuilder` for `RuleBasedProfiler` (#4167)
