@@ -77,19 +77,24 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         self, data_asset_name: str, data_asset_config: dict
     ) -> str:
 
-        data_asset_name_prefix = data_asset_config.get("data_asset_name_prefix", "")
-        data_asset_name_suffix = data_asset_config.get("data_asset_name_suffix", "")
-        schema_name = data_asset_config.get("schema_name", "")
-        include_schema_name = data_asset_config.get("include_schema_name", "")
+        data_asset_name_prefix: str = data_asset_config.get(
+            "data_asset_name_prefix", ""
+        )
+        data_asset_name_suffix: str = data_asset_config.get(
+            "data_asset_name_suffix", ""
+        )
+        schema_name: str = data_asset_config.get("schema_name", "")
+        include_schema_name: bool = data_asset_config.get("include_schema_name", True)
         if schema_name and include_schema_name is False:
             raise ge_exceptions.DataConnectorError(
                 message=f"{self.__class__.__name__} ran into an error while initializing Asset names. Schema {schema_name} was specified, but 'include_schema_name' flag was set to False."
             )
 
         if schema_name:
-            data_asset_name = schema_name + "." + data_asset_name
-        data_asset_name = (
-            data_asset_name_prefix + data_asset_name + data_asset_name_suffix
+            data_asset_name: str = f"{schema_name}.{data_asset_name}"
+
+        data_asset_name: str = (
+            f"{data_asset_name_prefix}{data_asset_name}{data_asset_name_suffix}"
         )
 
         return data_asset_name
@@ -291,14 +296,12 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
         function will split data_asset_name on [schema]. and return the resulting table_name.
         """
         table_name: str = batch_definition.data_asset_name
-        if "schema_name" in self.assets[batch_definition.data_asset_name]:
-            schema_name_str: str = self.assets[batch_definition.data_asset_name][
-                "schema_name"
-            ]
+        data_asset_dict: dict = self.assets[batch_definition.data_asset_name]
+        if "schema_name" in data_asset_dict:
+            schema_name_str: str = data_asset_dict["schema_name"]
             if schema_name_str in table_name:
-                table_name = table_name.split(
-                    self.assets[batch_definition.data_asset_name]["schema_name"] + "."
-                )[1]
+                table_name = table_name.split(schema_name_str + ".")[1]
+
         return table_name
 
     # Splitter methods for listing partitions
@@ -312,7 +315,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         Note: the table_name parameter is a required to keep the signature of this method consistent with other methods.
         """
-
         return sa.select([sa.true()])
 
     def _split_on_column_value(

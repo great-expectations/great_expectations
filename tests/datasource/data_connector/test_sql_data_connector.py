@@ -1107,75 +1107,60 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector(
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    my_data_connector = instantiate_class_from_config(
-        config={
-            "class_name": "ConfiguredAssetSqlDataConnector",
-            "name": "my_sql_data_connector",
-            "assets": {
-                "table_partitioned_by_date_column__A": {
-                    "splitter_method": "_split_on_column_value",
-                    "splitter_kwargs": {"column_name": "date"},
-                    "include_schema_name": True,
-                    "schema_name": "main",
-                },
+    my_data_connector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
+        assets={
+            "table_partitioned_by_date_column__A": {
+                "splitter_method": "_split_on_column_value",
+                "splitter_kwargs": {"column_name": "date"},
+                "include_schema_name": True,
+                "schema_name": "main",
             },
         },
-        runtime_environment={
-            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
-            "datasource_name": "my_test_datasource",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     assert "main.table_partitioned_by_date_column__A" in my_data_connector.assets
 
     # schema_name given but include_schema_name is set to False
-    with pytest.raises(ge_exceptions.DataConnectorError):
-        my_data_connector = instantiate_class_from_config(
-            config={
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "name": "my_sql_data_connector",
-                "assets": {
-                    "table_partitioned_by_date_column__A": {
-                        "splitter_method": "_split_on_column_value",
-                        "splitter_kwargs": {"column_name": "date"},
-                        "schema_name": "main",
-                        "include_schema_name": False,
-                    },
+    with pytest.raises(ge_exceptions.DataConnectorError) as e:
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
+            assets={
+                "table_partitioned_by_date_column__A": {
+                    "splitter_method": "_split_on_column_value",
+                    "splitter_kwargs": {"column_name": "date"},
+                    "include_schema_name": False,
+                    "schema_name": "main",
                 },
             },
-            runtime_environment={
-                "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
-                "datasource_name": "my_test_datasource",
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
         )
+
+    assert (
+        e.value.message
+        == "ConfiguredAssetSqlDataConnector ran into an error while initializing Asset names. Schema main was specified, but 'include_schema_name' flag was set to False."
+    )
 
 
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    my_data_connector = instantiate_class_from_config(
-        config={
-            "class_name": "ConfiguredAssetSqlDataConnector",
-            "name": "my_sql_data_connector",
-            "assets": {
-                "table_partitioned_by_date_column__A": {
-                    "splitter_method": "_split_on_column_value",
-                    "splitter_kwargs": {"column_name": "date"},
-                    "include_schema_name": True,
-                    "schema_name": "main",
-                    "data_asset_name_prefix": "taxi__",
-                    "data_asset_name_suffix": "__asset",
-                },
+    my_data_connector = ConfiguredAssetSqlDataConnector(
+        name="my_sql_data_connector",
+        datasource_name="my_test_datasource",
+        execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
+        assets={
+            "table_partitioned_by_date_column__A": {
+                "splitter_method": "_split_on_column_value",
+                "splitter_kwargs": {"column_name": "date"},
+                "include_schema_name": True,
+                "schema_name": "main",
+                "data_asset_name_prefix": "taxi__",
+                "data_asset_name_suffix": "__asset",
             },
         },
-        runtime_environment={
-            "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
-            "datasource_name": "my_test_datasource",
-        },
-        config_defaults={"module_name": "great_expectations.datasource.data_connector"},
     )
     assert (
         "taxi__main.table_partitioned_by_date_column__A__asset"
@@ -1183,30 +1168,26 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
     )
 
     # schema_name provided, but include_schema_name is set to False
-    with pytest.raises(ge_exceptions.DataConnectorError):
-        my_data_connector = instantiate_class_from_config(
-            config={
-                "class_name": "ConfiguredAssetSqlDataConnector",
-                "name": "my_sql_data_connector",
-                "assets": {
-                    "table_partitioned_by_date_column__A": {
-                        "splitter_method": "_split_on_column_value",
-                        "splitter_kwargs": {"column_name": "date"},
-                        "schema_name": "main",
-                        "include_schema_name": False,
-                        "data_asset_name_prefix": "taxi__",
-                        "data_asset_name_suffix": "__asset",
-                    },
+    with pytest.raises(ge_exceptions.DataConnectorError) as e:
+        ConfiguredAssetSqlDataConnector(
+            name="my_sql_data_connector",
+            datasource_name="my_test_datasource",
+            execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
+            assets={
+                "table_partitioned_by_date_column__A": {
+                    "splitter_method": "_split_on_column_value",
+                    "splitter_kwargs": {"column_name": "date"},
+                    "include_schema_name": False,
+                    "schema_name": "main",
+                    "data_asset_name_prefix": "taxi__",
+                    "data_asset_name_suffix": "__asset",
                 },
             },
-            runtime_environment={
-                "execution_engine": test_cases_for_sql_data_connector_sqlite_execution_engine,
-                "datasource_name": "my_test_datasource",
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
         )
+    assert (
+        e.value.message
+        == "ConfiguredAssetSqlDataConnector ran into an error while initializing Asset names. Schema main was specified, but 'include_schema_name' flag was set to False."
+    )
 
 
 # TODO
