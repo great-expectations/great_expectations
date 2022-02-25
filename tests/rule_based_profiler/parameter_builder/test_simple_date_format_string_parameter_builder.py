@@ -13,6 +13,9 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
+)
 
 DEFAULT_CANDIDATE_STRINGS: Set[str] = {
     "%Y-%m-%d",
@@ -150,14 +153,14 @@ def test_simple_date_format_parameter_builder_alice(
         "details": {"success_ratio": 1.0},
     }
 
-    assert (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters={domain.id: parameter_container},
-        )
-        == expected_value
+    actual_value: dict = get_parameter_value_and_validate_return_type(
+        parameter_reference=fully_qualified_parameter_name_for_value,
+        expected_return_type=dict,
+        domain=domain,
+        parameters={domain.id: parameter_container},
     )
+
+    assert actual_value == expected_value
 
 
 def test_simple_date_format_parameter_builder_bobby(
@@ -215,11 +218,11 @@ def test_simple_date_format_parameter_builder_bobby(
         "details": {"success_ratio": 1.0},
     }
 
-    assert (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
-            domain=domain,
-            parameters={domain.id: parameter_container},
-        )
-        == expected_value
+    actual_value: dict = get_parameter_value_and_validate_return_type(
+        parameter_reference=fully_qualified_parameter_name_for_value,
+        expected_return_type=dict,
+        domain=domain,
+        parameters={domain.id: parameter_container},
     )
+
+    assert actual_value == expected_value
