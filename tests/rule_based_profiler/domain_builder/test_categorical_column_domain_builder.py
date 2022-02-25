@@ -31,7 +31,7 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
     )
     domains: List[Domain] = domain_builder.get_domains()
 
-    alice_all_column_names = [
+    alice_all_column_names: List[str] = [
         "id",
         "event_type",
         "user_id",
@@ -40,7 +40,7 @@ def test_single_batch_very_few_cardinality(alice_columnar_table_single_batch_con
         "device_ts",
         "user_agent",
     ]
-    alice_all_column_domains = [
+    alice_all_column_domains: List[Domain] = [
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
@@ -71,10 +71,10 @@ def test_single_batch_one_cardinality(alice_columnar_table_single_batch_context)
     )
     domains: List[Domain] = domain_builder.get_domains()
 
-    alice_all_column_names = [
+    alice_all_column_names: List[str] = [
         "user_agent",
     ]
-    alice_all_column_domains = [
+    alice_all_column_domains: List[Domain] = [
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
@@ -144,11 +144,11 @@ def test_excluded_columns_single_batch(alice_columnar_table_single_batch_context
     )
     domains: List[Domain] = domain_builder.get_domains()
 
-    alice_all_column_names = [
+    alice_all_column_names: List[str] = [
         "device_ts",
         "user_agent",
     ]
-    alice_all_column_domains = [
+    alice_all_column_domains: List[Domain] = [
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
@@ -180,7 +180,7 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
     )
     domains: List[Domain] = domain_builder.get_domains()
 
-    alice_all_column_names = [
+    alice_all_column_names: List[str] = [
         "id",
         "event_type",
         "user_id",
@@ -189,7 +189,7 @@ def test_excluded_columns_empty_single_batch(alice_columnar_table_single_batch_c
         "device_ts",
         "user_agent",
     ]
-    alice_all_column_domains = [
+    alice_all_column_domains: List[Domain] = [
         Domain(
             domain_type=MetricDomainTypes.COLUMN,
             domain_kwargs={
