@@ -8,10 +8,9 @@ from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_ba
     ValueSetMultiBatchParameterBuilder,
     _get_unique_values_from_iterable_of_iterables,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
-    ParameterContainer,
-    get_parameter_value_by_fully_qualified_parameter_name,
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.util import (
+    get_parameter_value_and_validate_return_type,
 )
 
 
@@ -81,9 +80,10 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch(
     }
 
     assert (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        get_parameter_value_and_validate_return_type(
             domain=domain,
+            parameter_reference=fully_qualified_parameter_name_for_value,
+            expected_return_type=dict,
             parameters={domain.id: parameter_container},
         )
         == expected_parameter_value
@@ -145,9 +145,10 @@ def test_value_set_multi_batch_parameter_builder_bobby(
     }
 
     assert (
-        get_parameter_value_by_fully_qualified_parameter_name(
-            fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
+        get_parameter_value_and_validate_return_type(
             domain=domain,
+            parameter_reference=fully_qualified_parameter_name_for_value,
+            expected_return_type=dict,
             parameters={domain.id: parameter_container},
         )
         == expected_parameter_value
