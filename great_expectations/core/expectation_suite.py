@@ -187,11 +187,12 @@ class ExpectationSuite(SerializableDictDot):
 
         memo[id(self)] = result
 
-        attributes_to_copy = list(ExpectationSuiteSchema().fields.keys())
+        attributes_to_copy = set(ExpectationSuiteSchema().fields.keys())
         for key in attributes_to_copy:
             setattr(result, key, deepcopy(getattr(self, key)))
 
         setattr(result, "_data_context", self._data_context)
+
         return result
 
     def to_json_dict(self):

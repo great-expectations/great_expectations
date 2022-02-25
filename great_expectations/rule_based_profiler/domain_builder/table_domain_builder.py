@@ -1,11 +1,15 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain_builder import Domain, DomainBuilder
-from great_expectations.rule_based_profiler.parameter_builder import ParameterContainer
+from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
 
 
 class TableDomainBuilder(DomainBuilder):
+    @property
+    def domain_type(self) -> Union[str, MetricDomainTypes]:
+        return MetricDomainTypes.TABLE
+
     """
     The interface method of TableDomainBuilder emits a single Domain object, corresponding to the implied Batch (table).
 
@@ -19,7 +23,7 @@ class TableDomainBuilder(DomainBuilder):
     ) -> List[Domain]:
         domains: List[Domain] = [
             Domain(
-                domain_type=MetricDomainTypes.TABLE,
+                domain_type=self.domain_type,
             )
         ]
 

@@ -97,7 +97,9 @@ class BaseDatasource:
         )
         return new_batch
 
-    def get_single_batch_from_batch_request(self, batch_request: BatchRequest) -> Batch:
+    def get_single_batch_from_batch_request(
+        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
+    ) -> Batch:
         batch_list: List[Batch] = self.get_batch_list_from_batch_request(batch_request)
         if len(batch_list) != 1:
             raise ValueError(
@@ -106,14 +108,13 @@ class BaseDatasource:
         return batch_list[0]
 
     def get_batch_definition_list_from_batch_request(
-        self, batch_request: BatchRequest
+        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
     ) -> List[BatchDefinition]:
         """
         Validates batch request and utilizes the classes'
-        Data Connectors' property to get a list of batch definition given
-         a batch request
+        Data Connectors' property to get a list of batch definition given a batch request
         Args:
-            :param batch_request: A BatchRequest object used to request a batch
+            :param batch_request: A BatchRequest or RuntimeBatchRequest object used to request a batch
             :return: A list of batch definitions
         """
         self._validate_batch_request(batch_request=batch_request)
@@ -305,7 +306,7 @@ class BaseDatasource:
         return available_data_asset_names_and_types
 
     def get_available_batch_definitions(
-        self, batch_request: BatchRequest
+        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
     ) -> List[BatchDefinition]:
         self._validate_batch_request(batch_request=batch_request)
 
@@ -330,7 +331,7 @@ class BaseDatasource:
             )
 
         if pretty_print:
-            print(f"Data Connectors:")
+            print("Data Connectors:")
 
         data_connector_list = list(self.data_connectors.keys())
         data_connector_list.sort()
@@ -349,7 +350,9 @@ class BaseDatasource:
 
         return report_object
 
-    def _validate_batch_request(self, batch_request: BatchRequest):
+    def _validate_batch_request(
+        self, batch_request: Union[BatchRequest, RuntimeBatchRequest]
+    ):
         if not (
             batch_request.datasource_name is None
             or batch_request.datasource_name == self.name

@@ -221,3 +221,7 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
                 }
             )
         ]
+
+
+if __name__ == "__main__":
+    ExpectColumnValuesToMatchXmlSchema().print_diagnostic_checklist()

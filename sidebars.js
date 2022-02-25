@@ -235,9 +235,22 @@ module.exports = {
               type: 'category',
               label: 'Creating Custom Expectations',
               items: [
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations',
-                // 'guides/expectations/creating_custom_expectations/how_to_create_custom_expectations_from_a_sql_query',
-                'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations'
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
+                'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
+                {
+                  type: 'category',
+                  label: 'How to add Features to Custom Expectations',
+                  items: [
+                    'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
+                    'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
+                    'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
+                    'guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation',
+                    'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
+                    'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
+                  ]
+                }
               ]
             },
             {
@@ -289,9 +302,9 @@ module.exports = {
               items: [
                 // 'guides/validation/validation_actions/how_to_store_validation_results_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action',
+                'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action',
                 'guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action',
-                'guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action',
                 'guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action'
               ]
             },
@@ -335,14 +348,26 @@ module.exports = {
       label: 'Contributing',
       collapsed: true,
       items: [
-        { type: 'doc', id: 'contributing/contributing', label: 'Introduction' },
-        { type: 'doc', id: 'contributing/contributing_setup' },
-        { type: 'doc', id: 'contributing/contributing_checklist' },
-        { type: 'doc', id: 'contributing/contributing_github' },
-        { type: 'doc', id: 'contributing/contributing_test' },
-        { type: 'doc', id: 'contributing/contributing_maturity' },
-        { type: 'doc', id: 'contributing/contributing_misc' },
-        'guides/expectations/contributing/how_to_contribute_a_new_expectation_to_great_expectations',
+        {
+          type: 'category',
+          label: 'Basics',
+          items: [
+            { type: 'doc', id: 'contributing/contributing', label: 'Introduction' },
+            { type: 'doc', id: 'contributing/contributing_setup' },
+            { type: 'doc', id: 'contributing/contributing_checklist' },
+            { type: 'doc', id: 'contributing/contributing_github' },
+            { type: 'doc', id: 'contributing/contributing_test' },
+            { type: 'doc', id: 'contributing/contributing_maturity' },
+            { type: 'doc', id: 'contributing/contributing_misc' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Expectations',
+          items: [
+            'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations'
+          ]
+        },
         {
           type: 'category',
           label: 'Style guides',
@@ -353,7 +378,8 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
           ]
-        }
+        },
+        'contributing/index'
       ]
     },
     {
@@ -371,16 +397,23 @@ module.exports = {
           label: 'Technical Terms',
           items: [
             'terms/action',
+            'terms/batch',
+            'terms/batch_request',
+            'terms/custom_expectation',
+            'terms/checkpoint',
+            'terms/cli',
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
-            'terms/checkpoint',
+            'terms/data_connector',
+            'terms/data_docs',
+            'terms/evaluation_parameter',
             'terms/execution_engine',
+            'terms/expectation',
+            'terms/expectation_suite',
             'terms/metric',
             'terms/plugin',
             'terms/profiler',
-            'terms/expectation',
-            'terms/expectation_suite',
             'terms/plugin',
             {
               type: 'category',
@@ -395,7 +428,9 @@ module.exports = {
                 'terms/validation_result_store'
               ]
             },
+            'terms/renderer',
             'terms/supporting_resource',
+            'terms/validator',
             'terms/validation_result'
           ]
         },
@@ -405,7 +440,6 @@ module.exports = {
           items: [
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'reference/anonymous_usage_statistics' },
-            { type: 'doc', id: 'reference/supporting_resources' },
             {
               type: 'category',
               label: 'Expectations',

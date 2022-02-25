@@ -7,7 +7,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.usage_statistics.anonymizers.checkpoint_run_anonymizer import (
     CheckpointRunAnonymizer,
 )
-from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.core.util import convert_to_json_serializable
 
 DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000001"
 
@@ -23,8 +23,6 @@ def checkpoint(
             "name": "my_checkpoint",
             "config_version": 1.0,
             "template_name": None,
-            "module_name": "great_expectations.checkpoint",
-            "class_name": "Checkpoint",
             "run_name_template": None,
             "expectation_suite_name": None,
             "batch_request": None,
@@ -80,7 +78,7 @@ def test_resolve_config_using_acceptable_arguments(checkpoint):
     }
 
     # Matching how this is called in usage_statistics.py (parameter style)
-    substituted_runtime_config: CheckpointConfig = (
+    resolved_runtime_kwargs: dict = (
         checkpoint_run_anonymizer.resolve_config_using_acceptable_arguments(
             *(checkpoint,), **kwargs
         )
@@ -88,14 +86,19 @@ def test_resolve_config_using_acceptable_arguments(checkpoint):
 
     # Assertions about important bits of the substituted_runtime_config
 
-    top_level_batch_request = substituted_runtime_config["batch_request"]
-    assert top_level_batch_request == {
-        # "runtime_parameters": {"batch_data": "<class 'pandas.core.frame.DataFrame'>"},
+    expected_top_level_batch_request = {
         "runtime_parameters": {"batch_data": df},
         "batch_identifiers": {"default_identifier_name": "my_simple_df"},
     }
+    expected_top_level_batch_request = convert_to_json_serializable(
+        data=expected_top_level_batch_request
+    )
+    actual_top_level_batch_request = convert_to_json_serializable(
+        data=resolved_runtime_kwargs["batch_request"]
+    )
+    assert actual_top_level_batch_request == expected_top_level_batch_request
 
-    validation_level_batch_request = substituted_runtime_config["validations"][0][
+    validation_level_batch_request = resolved_runtime_kwargs["validations"][0][
         "batch_request"
     ]
 
@@ -105,11 +108,10 @@ def test_resolve_config_using_acceptable_arguments(checkpoint):
             "data_connector_name": "default_runtime_data_connector_name",
             "data_asset_name": "my_data_asset",
             "batch_identifiers": {"default_identifier_name": "my_simple_df"},
-            # "runtime_parameters": {"batch_data": "<class 'pandas.core.frame.DataFrame'>"},
             "runtime_parameters": {"batch_data": df},
         }
     )
     assert (
-        substituted_runtime_config["validations"][0]["expectation_suite_name"]
+        resolved_runtime_kwargs["validations"][0]["expectation_suite_name"]
         == "test_suite"
     )

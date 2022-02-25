@@ -1,7 +1,7 @@
 import warnings
 
-from ..dataset.util import create_multiple_expectations
-from .base import DatasetProfiler
+from great_expectations.dataset.util import create_multiple_expectations
+from great_expectations.profile.base import DatasetProfiler
 
 
 # This particular file should be immune to the new changes

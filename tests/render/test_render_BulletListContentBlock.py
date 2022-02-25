@@ -1,5 +1,7 @@
 import glob
 import json
+import os
+from collections import defaultdict
 
 import pytest
 
@@ -60,22 +62,46 @@ def test_parse_row_condition_string_pandas_engine():
 @pytest.mark.smoketest
 @pytest.mark.rendered_output
 def test_all_expectations_using_test_definitions():
-    test_files = glob.glob("tests/test_definitions/*/expect*.json")
+    # Chetan - 20220129 - During v0.14.4, it was revealed that this test was broken.
+    # The `glob` statement did not pick up any relevant tests, resulting in `test_files` being empty.
+    # Without anything to iterate over, the test gave the impression of passing (when in actuality, it never tested anything).
+    #
+    # After some research, it seems as though this has been broken since the v0.13.0 release.
+    # The 5 Expectations noted below are implemented or updated after v0.13.0 and are incompatible with this test fixture due to
+    # having incomplete render methods.
+    #
+    # As this behavior is implemented, the `UNSUPPORTED_EXPECTATIONS` list will be updated to reflect GE's current capabilities.
 
-    all_true = True
-    failure_count, total_count = 0, 0
-    types = []
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    pattern = os.path.join(
+        dir_path, "..", "..", "tests", "test_definitions", "*", "expect*.json"
+    )
+    test_files = glob.glob(pattern)
+
+    # Historically, collecting all the JSON tests was an issue - this step ensures we actually have test data.
+    assert (
+        len(test_files) == 56
+    ), "Something went wrong when collecting JSON Expectation test fixtures"
+
+    # The following do not work with this parameterized test due to incomplete render methods.
+    UNSUPPORTED_EXPECTATIONS = {
+        "expect_column_values_to_match_like_pattern",
+        "expect_column_values_to_match_like_pattern_list",
+        "expect_column_values_to_not_match_like_pattern",
+        "expect_column_values_to_not_match_like_pattern_list",
+        "expect_multicolumn_sum_to_equal",
+    }
 
     # Loop over all test_files, datasets, and tests:
-    test_results = {}
+    test_results = defaultdict(list)
     for filename in test_files:
         test_definitions = json.load(open(filename))
-        types.append(test_definitions["expectation_type"])
 
-        test_results[test_definitions["expectation_type"]] = []
+        # Chetan -20220129 - To be removed once all expectations are supported
+        if test_definitions["expectation_type"] in UNSUPPORTED_EXPECTATIONS:
+            continue
 
         for dataset in test_definitions["datasets"]:
-
             for test in dataset["tests"]:
                 # Construct an expectation from the test.
                 if type(test["in"]) == dict:
@@ -88,9 +114,12 @@ def test_all_expectations_using_test_definitions():
                     continue
 
                 # Attempt to render it
+                print(fake_expectation)
                 render_result = ExpectationSuiteBulletListContentBlockRenderer.render(
                     [fake_expectation]
-                ).to_json_dict()
+                )
+                assert render_result is not None
+                render_result = render_result.to_json_dict()
 
                 assert isinstance(render_result, dict)
                 assert "content_block_type" in render_result

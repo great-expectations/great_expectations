@@ -113,9 +113,11 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
         metric, execution_engine=PandasExecutionEngine()
     )
 
+    table_column_types_metric: MetricConfiguration = dependencies["table.column_types"]
     table_columns_metric: MetricConfiguration = dependencies["table.columns"]
     table_row_count_metric: MetricConfiguration = dependencies["table.row_count"]
     assert dependencies == {
+        "table.column_types": table_column_types_metric,
         "table.columns": table_columns_metric,
         "table.row_count": table_row_count_metric,
     }

@@ -1,19 +1,23 @@
 import copy
 import uuid
 from numbers import Number
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
-from great_expectations.core.batch import Batch, BatchRequest
-from great_expectations.rule_based_profiler.domain_builder import Domain
-from great_expectations.rule_based_profiler.parameter_builder import (
+from great_expectations.core import ExpectationSuite
+from great_expectations.core.batch import (
+    Batch,
+    BatchRequest,
+    RuntimeBatchRequest,
+    materialize_batch_request,
+)
+from great_expectations.rule_based_profiler.types import (
+    Domain,
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
-from great_expectations.validator.validator import Validator
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 
@@ -21,21 +25,14 @@ NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 def get_validator(
     purpose: str,
     *,
-    data_context: Optional[DataContext] = None,
-    batch_request: Optional[Union[BatchRequest, dict, str]] = None,
+    data_context: Optional["DataContext"] = None,  # noqa: F821
+    batch_list: Optional[List[Batch]] = None,
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Validator]:
-    if batch_request is None:
-        return None
-
-    batch_request = build_batch_request(
-        domain=domain,
-        batch_request=batch_request,
-        variables=variables,
-        parameters=parameters,
-    )
+) -> Optional["Validator"]:  # noqa: F821
+    validator: Optional["Validator"]  # noqa: F821
 
     expectation_suite_name: str = f"tmp.{purpose}"
     if domain is None:
@@ -47,57 +44,97 @@ def get_validator(
             f"{expectation_suite_name}_{domain.id}_suite_{str(uuid.uuid4())[:8]}"
         )
 
-    return data_context.get_validator(
-        batch_request=batch_request,
-        create_expectation_suite_with_name=expectation_suite_name,
-    )
+    batch: Batch
+    if batch_list is None or all([batch is None for batch in batch_list]):
+        if batch_request is None:
+            return None
+
+        batch_request = build_batch_request(
+            domain=domain,
+            batch_request=batch_request,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        validator = data_context.get_validator(
+            batch_request=batch_request,
+            create_expectation_suite_with_name=expectation_suite_name,
+        )
+    else:
+        num_batches: int = len(batch_list)
+        if num_batches == 0:
+            raise ge_exceptions.ProfilerExecutionError(
+                message=f"""{__name__}.get_validator() must utilize at least one Batch ({num_batches} are available).
+"""
+            )
+
+        expectation_suite: ExpectationSuite = data_context.create_expectation_suite(
+            expectation_suite_name=expectation_suite_name
+        )
+        validator = data_context.get_validator_using_batch_list(
+            expectation_suite=expectation_suite,
+            batch_list=batch_list,
+        )
+
+    return validator
 
 
 def get_batch_ids(
-    data_context: Optional[DataContext] = None,
-    batch_request: Optional[Union[BatchRequest, dict, str]] = None,
+    data_context: Optional["DataContext"] = None,  # noqa: F821
+    batch_list: Optional[List[Batch]] = None,
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[List[str]]:
-    if batch_request is None:
-        return None
-
-    batch_request = build_batch_request(
-        domain=domain,
-        batch_request=batch_request,
-        variables=variables,
-        parameters=parameters,
-    )
-
-    batch_list: List[Batch] = data_context.get_batch_list(batch_request=batch_request)
-
     batch: Batch
+    if batch_list is None or all([batch is None for batch in batch_list]):
+        if batch_request is None:
+            return None
+
+        batch_request = build_batch_request(
+            domain=domain,
+            batch_request=batch_request,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        batch_list = data_context.get_batch_list(batch_request=batch_request)
+
     batch_ids: List[str] = [batch.id for batch in batch_list]
+
+    num_batch_ids: int = len(batch_ids)
+    if num_batch_ids == 0:
+        raise ge_exceptions.ProfilerExecutionError(
+            message=f"""{__name__}.get_batch_ids() must return at least one batch_id ({num_batch_ids} were retrieved).
+"""
+        )
 
     return batch_ids
 
 
 def build_batch_request(
-    batch_request: Optional[Union[dict, str]] = None,
+    batch_request: Optional[Union[BatchRequest, RuntimeBatchRequest, dict, str]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[BatchRequest]:
+) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
     if batch_request is None:
         return None
 
-    # Obtain BatchRequest from rule state (i.e., variables and parameters); from instance variable otherwise.
-    materialized_batch_request: Optional[
-        Union[BatchRequest, dict]
+    # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+    effective_batch_request: Optional[
+        Union[BatchRequest, RuntimeBatchRequest, dict]
     ] = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=batch_request,
-        expected_return_type=dict,
+        expected_return_type=(BatchRequest, RuntimeBatchRequest, dict),
         variables=variables,
         parameters=parameters,
     )
-    materialized_batch_request = BatchRequest(**materialized_batch_request)
+    materialized_batch_request: Optional[
+        Union[BatchRequest, RuntimeBatchRequest]
+    ] = materialize_batch_request(batch_request=effective_batch_request)
 
     return materialized_batch_request
 
@@ -109,7 +146,7 @@ def build_metric_domain_kwargs(
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ):
-    # Obtain domain kwargs from rule state (i.e., variables and parameters); from instance variable otherwise.
+    # Obtain domain kwargs from "rule state" (i.e., variables and parameters); from instance variable otherwise.
     metric_domain_kwargs = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=metric_domain_kwargs,
@@ -198,9 +235,9 @@ def get_parameter_value(
 
 
 def compute_quantiles(
-    metric_values: Union[np.ndarray, List[Number]],
+    metric_values: np.ndarray,
     false_positive_rate: np.float64,
-) -> tuple:
+) -> Tuple[Number, Number]:
     lower_quantile = np.quantile(
         metric_values,
         q=(false_positive_rate / 2),
@@ -220,7 +257,45 @@ def compute_bootstrap_quantiles(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
-) -> tuple:
+) -> Tuple[Number, Number]:
+    """
+    Internal implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
+    See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+
+    This implementation is sub-par compared to the one available from the "SciPy" standard library
+    ("https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html"), because it introduces bias and
+    does not handle multi-dimensional statistics (unlike "scipy.stats.bootstrap", which corrects for bias and is
+    vectorized, thus having the ability to accept a multi-dimensional statistic function and process all dimensions).
+
+    This implementation will be replaced by "scipy.stats.bootstrap" when Great Expectations can be upgraded to use a
+    more up-to-date version of the "scipy" Python package (the currently used version does not have "bootstrap").
+
+    Additional future direction (potentially as a contribution submission to the "SciPy" community) include developing
+    enhancements to bootstrapped estimator based on theory presented in "http://dido.econ.yale.edu/~dwka/pub/p1001.pdf":
+    @article{Andrews2000a,
+        added-at = {2008-04-25T10:38:44.000+0200},
+        author = {Andrews, Donald W. K. and Buchinsky, Moshe},
+        biburl = {https://www.bibsonomy.org/bibtex/28e2f0a58cdb95e39659921f989a17bdd/smicha},
+        day = 01,
+        interhash = {778746398daa9ba63bdd95391f1efd37},
+        intrahash = {8e2f0a58cdb95e39659921f989a17bdd},
+        journal = {Econometrica},
+        keywords = {imported},
+        month = Jan,
+        note = {doi: 10.1111/1468-0262.00092},
+        number = 1,
+        pages = {23--51},
+        timestamp = {2008-04-25T10:38:52.000+0200},
+        title = {A Three-step Method for Choosing the Number of Bootstrap Repetitions},
+        url = {http://www.blackwell-synergy.com/doi/abs/10.1111/1468-0262.00092},
+        volume = 68,
+        year = 2000
+    }
+    The article outlines a three-step minimax procedure that relies on the Central Limit Theorem (C.L.T.) along with the
+    bootstrap sampling technique (see https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for background) for
+    computing the stopping criterion, expressed as the optimal number of bootstrap samples, needed to achieve a maximum
+    probability that the value of the statistic of interest will be minimally deviating from its actual (ideal) value.
+    """
     bootstraps: np.ndarray = np.random.choice(
         metric_values, size=(n_resamples, metric_values.size)
     )

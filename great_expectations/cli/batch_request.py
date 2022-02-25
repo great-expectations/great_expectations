@@ -14,6 +14,11 @@ except ImportError:
 
 import click
 
+try:
+    from pybigquery.parse_url import parse_url as parse_bigquery_url
+except (ImportError, ModuleNotFoundError):
+    parse_bigquery_url = None
+
 from great_expectations import exceptions as ge_exceptions
 from great_expectations.datasource import (
     BaseDatasource,
@@ -362,17 +367,26 @@ You have selected a datasource that is a SQL database. How would you like to spe
             else:
                 data_asset_name = table_name
         elif single_or_multiple_data_asset_selection == "2":  # list it all
-            msg_prompt_warning: str = fr"""Warning: If you have a large number of tables in your datasource, this may take a very long time.
+            msg_prompt_warning: str = r"""Warning: If you have a large number of tables in your datasource, this may take a very long time.
 Would you like to continue?"""
             confirmation: str = click.prompt(
                 msg_prompt_warning, type=click.Choice(["y", "n"]), show_choices=True
             )
             if confirmation == "y":
-                data_asset_name = get_data_asset_name_from_data_connector(
+                data_asset_name = _get_data_asset_name_from_data_connector(
                     datasource=datasource,
                     data_connector_name=data_connector_name,
                     msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
                 )
+
+    if (
+        datasource.execution_engine.engine.dialect.name.lower() == "bigquery"
+        and parse_bigquery_url is not None
+    ):
+        # bigquery table needs to contain the project id if it differs from the credentials project
+        if len(data_asset_name.split(".")) < 3:
+            project_id, _, _, _, _, _ = parse_bigquery_url(datasource.engine.url)
+            data_asset_name = "{}.{}".format(project_id, data_asset_name)
 
     return data_asset_name
 
