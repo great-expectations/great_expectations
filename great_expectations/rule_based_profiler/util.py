@@ -5,8 +5,8 @@ from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-import scipy
-import statsmodels
+import statsmodels.api as sm
+from scipy import stats
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -343,7 +343,7 @@ def compute_bootstrap_quantiles(
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html
     method: str = "basic"
 
-    bootstrap_result: scipy.stats.bootstrap.BootstrapResult = scipy.stats.bootstrap(
+    bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
         data=data,
         statistic=lambda data, axis=axis: np.quantile(
             a=data,
@@ -374,10 +374,10 @@ def compute_bootstrap_quantiles(
     upper_quantile_tstat: Number
     lower_quantile_pvalue: float
 
-    lower_quantile_tstat, lower_quantile_pvalue = statsmodels.stats.weightstats.ztest(
+    lower_quantile_tstat, lower_quantile_pvalue = sm.stats.weightstats.ztest(
         x1=data, value=lower_quantile_mean, alternative=alternative
     )
-    upper_quantile_tstat, upper_quantile_pvalue = statsmodels.stats.weightstats.ztest(
+    upper_quantile_tstat, upper_quantile_pvalue = sm.stats.weightstats.ztest(
         x1=data, value=upper_quantile_mean, alternative=alternative
     )
 
