@@ -7,7 +7,9 @@ For detailed instructions on how to use it, please see:
 import json
 import math
 from math import cos, pi, sqrt
-from typing import Optional
+from typing import Any, Dict, Optional
+
+import numpy as np
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -22,9 +24,11 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     MetricDomainTypes,
+    MetricFunctionTypes,
     MetricPartialFunctionTypes,
     column_condition_partial,
     metric_partial,
+    metric_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa, sparktypes
 
@@ -47,30 +51,82 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
 
         if projection == "fcc":
             if unit == "kilometers":
-                distances = column.apply(
-                    lambda x, y=center_point: cls.fcc_projection(x, y)
-                )
+                distances = column.apply(lambda x, y=center_point: fcc_projection(x, y))
             elif unit == "miles":
                 distances = column.apply(
-                    lambda x, y=center_point: cls.fcc_projection(x, y) * 1.609344
+                    lambda x, y=center_point: fcc_projection(x, y) * 1.609344
                 )
                 range = range * 1.609344
 
         elif projection == "pythagorean":
             if unit == "kilometers":
                 distances = column.apply(
-                    lambda x, y=center_point: cls.pythagorean_projection(x, y)
+                    lambda x, y=center_point: pythagorean_projection(x, y)
                 )
             elif unit == "miles":
                 distances = column.apply(
-                    lambda x, y=center_point: cls.pythagorean_projection(x, y)
-                    * 1.609344
+                    lambda x, y=center_point: pythagorean_projection(x, y) * 1.609344
                 )
                 range = range * 1.609344
 
         return distances.le(range)
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
+    # @metric_partial(
+    #     engine=SqlAlchemyExecutionEngine,
+    #     partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
+    #     domain_type=MetricDomainTypes.COLUMN,
+    # )
+    # def _sqlalchemy(
+    #     cls,
+    #     execution_engine: SqlAlchemyExecutionEngine,
+    #     metric_domain_kwargs,
+    #     metric_value_kwargs,
+    #     metrics,
+    #     runtime_configuration,
+    # ):
+    #     (
+    #         selectable,
+    #         compute_domain_kwargs,
+    #         accessor_domain_kwargs,
+    #     ) = execution_engine.get_compute_domain(
+    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
+    #     )
+    #
+    #     column_name = accessor_domain_kwargs["column"]
+    #     column = sa.column(column_name)
+    #     center_point = accessor_domain_kwargs["center_point"]
+    #     unit = accessor_domain_kwargs["unit"]
+    #     range = accessor_domain_kwargs["range"]
+    #     projection = accessor_domain_kwargs["projection"]
+    #
+    #     engine = execution_engine.engine
+    #
+    #     if projection == "fcc":
+    #         if unit == "kilometers":
+    #             points = engine.execute(
+    #                 sa.select(column).select_from(selectable)
+    #             ).collect()
+    #             distances = F.udf(
+    #                 lambda x, y=center_point: cls.fcc_projection(x, y),
+    #                 sparktypes.FloatType(),
+    #             )
+    #         elif unit == "miles":
+    #             distances = F.udf(
+    #                 lambda x, y=center_point: cls.fcc_projection(x, y) * 1.609344,
+    #                 sparktypes.FloatType(),
+    #             )
+    #             range = range * 1.609344
+    #
+    #     return None
+
+    # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
+    # def _sqlalchemy(cls, column, **kwargs):
+    #     breakpoint()
+    #     distances = cls._sqlalchemy_intermediate_function()
+    #     breakpoint()
+    #     return result["__success"]
+
     @metric_partial(
         engine=SqlAlchemyExecutionEngine,
         partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
@@ -79,49 +135,46 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs,
-        metric_value_kwargs,
-        metrics,
-        runtime_configuration,
+        metric_domain_kwargs: Dict,
+        metric_value_kwargs: Dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: Dict,
     ):
         (
             selectable,
             compute_domain_kwargs,
             accessor_domain_kwargs,
         ) = execution_engine.get_compute_domain(
-            metric_domain_kwargs, MetricDomainTypes.COLUMN
+            domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
         )
+        engine = execution_engine.engine
 
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
-        center_point = accessor_domain_kwargs["center_point"]
-        unit = accessor_domain_kwargs["unit"]
-        range = accessor_domain_kwargs["range"]
-        projection = accessor_domain_kwargs["projection"]
+        center_point = metric_value_kwargs["center_point"]
+        unit = metric_value_kwargs["unit"]
+        range = metric_value_kwargs["range"]
+        projection = metric_value_kwargs["projection"]
 
-        engine = execution_engine.engine
-        breakpoint()
+        points = engine.execute(sa.select(column).select_from(selectable)).fetchall()
+        points = np.array(points).reshape(-1)
+        points = np.array([eval(x) for x in points])
+
         if projection == "fcc":
             if unit == "kilometers":
-                points = engine.execute(
-                    sa.select(column).select_from(selectable)
-                ).collect()
-                distances = F.udf(
-                    lambda x, y=center_point: cls.fcc_projection(x, y),
-                    sparktypes.FloatType(),
+                distances = np.apply_along_axis(
+                    lambda x, y=center_point: fcc_projection(x, y), 1, points
                 )
             elif unit == "miles":
-                distances = F.udf(
-                    lambda x, y=center_point: cls.fcc_projection(x, y) * 1.609344,
-                    sparktypes.FloatType(),
+                distances = (
+                    np.apply_along_axis(
+                        lambda x, y=center_point: fcc_projection(x, y), 1, points
+                    )
+                    * 1.609344
                 )
                 range = range * 1.609344
 
         return None
-
-    # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    # def _sqlalchemy(cls, column, _dialect, **kwargs):
-    #     raise NotImplementedError
 
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
     @column_condition_partial(engine=SparkDFExecutionEngine)
@@ -134,12 +187,12 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
         if projection == "fcc":
             if unit == "kilometers":
                 distances = F.udf(
-                    lambda x, y=center_point: cls.fcc_projection(x, y),
+                    lambda x, y=center_point: fcc_projection(x, y),
                     sparktypes.FloatType(),
                 )
             elif unit == "miles":
                 distances = F.udf(
-                    lambda x, y=center_point: cls.fcc_projection(x, y) * 1.609344,
+                    lambda x, y=center_point: fcc_projection(x, y) * 1.609344,
                     sparktypes.FloatType(),
                 )
                 range = range * 1.609344
@@ -151,13 +204,12 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
         elif projection == "pythagorean":
             if unit == "kilometers":
                 distances = F.udf(
-                    lambda x, y=center_point: cls.pythagorean_projection(x, y),
+                    lambda x, y=center_point: pythagorean_projection(x, y),
                     sparktypes.FloatType(),
                 )
             elif unit == "miles":
                 distances = F.udf(
-                    lambda x, y=center_point: cls.pythagorean_projection(x, y)
-                    * 1.609344,
+                    lambda x, y=center_point: pythagorean_projection(x, y) * 1.609344,
                     sparktypes.FloatType(),
                 )
                 range = range * 1.609344
@@ -166,60 +218,60 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
                 F.lit(False)
             )
 
-    @staticmethod
-    def fcc_projection(loc1, loc2):
-        """
-        Calculates the distance in kilometers between two lat/lon points on an ellipsoidal earth
-        projected to a plane, as prescribed by the FCC for distances not exceeding 475km/295mi.
 
-        See https://www.govinfo.gov/content/pkg/CFR-2016-title47-vol4/pdf/CFR-2016-title47-vol4-sec73-208.pdf
+def fcc_projection(loc1, loc2):
+    """
+    Calculates the distance in kilometers between two lat/lon points on an ellipsoidal earth
+    projected to a plane, as prescribed by the FCC for distances not exceeding 475km/295mi.
 
-        :param loc1: A tuple of lat/lon
-        :param loc2: A tuple of lat/lon
-        :return distance: Distance between points in km
-        """
+    See https://www.govinfo.gov/content/pkg/CFR-2016-title47-vol4/pdf/CFR-2016-title47-vol4-sec73-208.pdf
 
-        lat1, lat2 = float(loc1[0]), float(loc2[0])
-        lon1, lon2 = float(loc1[1]), float(loc2[1])
+    :param loc1: A tuple of lat/lon
+    :param loc2: A tuple of lat/lon
+    :return distance: Distance between points in km
+    """
 
-        mean_lat = (lat1 + lat2) / 2
-        delta_lat = lat2 - lat1
-        delta_lon = lon2 - lon1
+    lat1, lat2 = float(loc1[0]), float(loc2[0])
+    lon1, lon2 = float(loc1[1]), float(loc2[1])
 
-        k1 = 111.13209 - (0.56605 * cos(2 * mean_lat)) + (0.0012 * cos(4 * mean_lat))
-        k2 = (
-            (111.41513 * cos(mean_lat))
-            - (0.09455 * cos(3 * mean_lat))
-            + (0.00012 * cos(5 * mean_lat))
-        )
+    mean_lat = (lat1 + lat2) / 2
+    delta_lat = lat2 - lat1
+    delta_lon = lon2 - lon1
 
-        distance = sqrt((k1 * delta_lat) ** 2 + (k2 * delta_lon) ** 2)
+    k1 = 111.13209 - (0.56605 * cos(2 * mean_lat)) + (0.0012 * cos(4 * mean_lat))
+    k2 = (
+        (111.41513 * cos(mean_lat))
+        - (0.09455 * cos(3 * mean_lat))
+        + (0.00012 * cos(5 * mean_lat))
+    )
 
-        return distance
+    distance = sqrt((k1 * delta_lat) ** 2 + (k2 * delta_lon) ** 2)
 
-    @staticmethod
-    def pythagorean_projection(loc1, loc2):
-        """
-        Application of the pythagorean theorem to calculate the distance in kilometers between two lat/lon points on
-        a spherical earth projected to a plane.
+    return distance
 
-        :param loc1: A tuple of lat/lon
-        :param loc2: A tuple of lat/lon
-        :return distance: Distance between points in km
-        """
 
-        lat1, lat2 = float(loc1[0]), float(loc2[0])
-        lon1, lon2 = float(loc1[1]), float(loc2[1])
+def pythagorean_projection(loc1, loc2):
+    """
+    Application of the pythagorean theorem to calculate the distance in kilometers between two lat/lon points on
+    a spherical earth projected to a plane.
 
-        mean_lat = (lat1 + lat2) / 2
-        delta_lat = (lat2 - lat1) * (pi / 180)
-        delta_lon = (lon2 - lon1) * (pi / 180)
+    :param loc1: A tuple of lat/lon
+    :param loc2: A tuple of lat/lon
+    :return distance: Distance between points in km
+    """
 
-        radius = 6371.009
+    lat1, lat2 = float(loc1[0]), float(loc2[0])
+    lon1, lon2 = float(loc1[1]), float(loc2[1])
 
-        distance = radius * sqrt((delta_lat**2) + (cos(mean_lat) * delta_lon) ** 2)
+    mean_lat = (lat1 + lat2) / 2
+    delta_lat = (lat2 - lat1) * (pi / 180)
+    delta_lon = (lon2 - lon1) * (pi / 180)
 
-        return distance
+    radius = 6371.009
+
+    distance = radius * sqrt((delta_lat**2) + (cos(mean_lat) * delta_lon) ** 2)
+
+    return distance
 
 
 # This class defines the Expectation itself
