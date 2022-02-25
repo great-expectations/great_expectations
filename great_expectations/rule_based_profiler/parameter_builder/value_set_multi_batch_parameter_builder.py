@@ -17,8 +17,10 @@ from great_expectations.rule_based_profiler.types.parameter_container import (
 class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     """Build a set of unique values across all specified batches.
 
-    This parameter can be used in building the unique value_set from the
-    filtered domains for use in creating Expectations.
+    This parameter builder can be used to build a unique value_set for each
+    of the domains specified by the DomainBuilder from all of the batches
+    specified. This value_set can be used to create Expectations.
+
     This unique value_set is the unique values from ALL batches accessible
     to the parameter builder. For example, if batch 1 has the unique values
     {1, 4, 8} and batch 2 {2, 8, 10} the unique values returned by this
