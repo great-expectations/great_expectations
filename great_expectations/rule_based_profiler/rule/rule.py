@@ -112,11 +112,25 @@ class Rule(SerializableDictDot):
         }
 
     def to_json_dict(self) -> dict:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        make this refactoring infeasible at the present time.
+        """
         dict_obj: dict = self.to_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
 
     def __repr__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__repr__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
         json_dict: dict = self.to_json_dict()
         deep_filter_properties_iterable(
             properties=json_dict,
@@ -125,20 +139,32 @@ class Rule(SerializableDictDot):
         return json.dumps(json_dict, indent=2)
 
     def __str__(self) -> str:
+        """
+        # TODO: <Alex>2/4/2022</Alex>
+        This implementation of a custom "__str__()" occurs frequently and should ideally serve as the reference
+        implementation in the "SerializableDictDot" class.  However, the circular import dependencies, due to the
+        location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
+        refactoring infeasible at the present time.
+        """
         return self.__repr__()
 
     @property
     def name(self) -> str:
         return self._name
 
+    @name.setter
+    def name(self, value: str) -> None:
+        self._name = value
+
     def _get_parameter_builders_as_dict(self) -> Dict[str, ParameterBuilder]:
-        if self._parameter_builders is None:
-            return {}
+        parameter_builders: List[ParameterBuilder] = self.parameter_builders
+        if parameter_builders is None:
+            parameter_builders = []
 
         parameter_builder: ParameterBuilder
         return {
             parameter_builder.name: parameter_builder
-            for parameter_builder in self._parameter_builders
+            for parameter_builder in parameter_builders
         }
 
     def _get_expectation_configuration_builders_as_dict(
@@ -147,7 +173,7 @@ class Rule(SerializableDictDot):
         expectation_configuration_builder: ExpectationConfigurationBuilder
         return {
             expectation_configuration_builder.expectation_type: expectation_configuration_builder
-            for expectation_configuration_builder in self._expectation_configuration_builders
+            for expectation_configuration_builder in self.expectation_configuration_builders
         }
 
     @property
@@ -156,20 +182,13 @@ class Rule(SerializableDictDot):
 
     @property
     def parameter_builders(self) -> Optional[List[ParameterBuilder]]:
-        parameter_builders: Dict[
-            str, ParameterBuilder
-        ] = self._get_parameter_builders_as_dict()
-
-        if parameter_builders:
-            return list(parameter_builders.values())
-
-        return None
+        return self._parameter_builders
 
     @property
     def expectation_configuration_builders(
         self,
     ) -> List[ExpectationConfigurationBuilder]:
-        return list(self._get_expectation_configuration_builders_as_dict().values())
+        return self._expectation_configuration_builders
 
     @property
     def parameters(self) -> Dict[str, ParameterContainer]:

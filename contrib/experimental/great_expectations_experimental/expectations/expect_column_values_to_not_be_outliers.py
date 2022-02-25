@@ -360,5 +360,4 @@ class ExpectColumnValuesToNotBeOutliers(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToNotBeOutliers().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToNotBeOutliers().print_diagnostic_checklist()

@@ -255,5 +255,4 @@ class ExpectColumnValuesToChangeBetween(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = ExpectColumnValuesToChangeBetween().run_diagnostics()
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesToChangeBetween().print_diagnostic_checklist()

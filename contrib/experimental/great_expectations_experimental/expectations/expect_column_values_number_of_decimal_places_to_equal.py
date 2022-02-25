@@ -231,7 +231,4 @@ class ExpectColumnValuesNumberOfDecimalPlacesToEqual(ColumnMapExpectation):
 #         ]
 
 if __name__ == "__main__":
-    diagnostics_report = (
-        ExpectColumnValuesNumberOfDecimalPlacesToEqual().run_diagnostics()
-    )
-    print(json.dumps(diagnostics_report, indent=2))
+    ExpectColumnValuesNumberOfDecimalPlacesToEqual().print_diagnostic_checklist()

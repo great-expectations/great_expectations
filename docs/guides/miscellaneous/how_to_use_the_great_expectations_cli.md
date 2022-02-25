@@ -69,6 +69,14 @@ Commands:
   new     Add a new Datasource to the data context.
 ```
 
+An existing data context can be provided with the variable `GE_HOME`, for example:
+
+```bash
+export GE_HOME="${HOME}/ge_dir_1/great_expectations"
+great_expectations datasource list
+```
+
+
 ## Shell autocompletion for the CLI
 
 If you want to enable autocompletion for the Great Expectations CLI, you can execute following commands in your shell (or add them to your .bashrc/.zshrc or ~/.config/fish/completions/):

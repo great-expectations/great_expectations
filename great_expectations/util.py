@@ -166,7 +166,9 @@ def profile(func: Callable = None) -> Callable:
     return profile_function_call
 
 
-def measure_execution_time(pretty_print: bool = False) -> Callable:
+def measure_execution_time(
+    pretty_print: bool = False,
+) -> Callable:
     def execution_time_decorator(func: Callable) -> Callable:
         func.execution_duration_milliseconds = 0
 
@@ -179,10 +181,10 @@ def measure_execution_time(pretty_print: bool = False) -> Callable:
                 time_end: int = int(round(time.time() * 1000))
                 delta_t: int = time_end - time_begin
                 func.execution_duration_milliseconds = delta_t
-                bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
-                call_args: OrderedDict = bound_args.arguments
 
                 if pretty_print:
+                    bound_args: BoundArguments = signature(func).bind(*args, **kwargs)
+                    call_args: OrderedDict = bound_args.arguments
                     print(
                         f"Total execution time of function {func.__name__}({str(dict(call_args))}): {delta_t} ms."
                     )
@@ -758,6 +760,50 @@ def read_pickle(
     import pandas as pd
 
     df = pd.read_pickle(filename, *args, **kwargs)
+    if dataset_class is not None:
+        return _convert_to_dataset_class(
+            df=df,
+            dataset_class=dataset_class,
+            expectation_suite=expectation_suite,
+            profiler=profiler,
+        )
+    else:
+        return _load_and_convert_to_dataset_class(
+            df=df,
+            class_name=class_name,
+            module_name=module_name,
+            expectation_suite=expectation_suite,
+            profiler=profiler,
+        )
+
+
+def read_sas(
+    filename,
+    class_name="PandasDataset",
+    module_name="great_expectations.dataset",
+    dataset_class=None,
+    expectation_suite=None,
+    profiler=None,
+    *args,
+    **kwargs,
+):
+    """Read a file using Pandas read_sas and return a great_expectations dataset.
+
+    Args:
+        filename (string): path to file to read
+        class_name (str): class to which to convert resulting Pandas df
+        module_name (str): dataset module from which to try to dynamically load the relevant module
+        dataset_class (Dataset): If specified, the class to which to convert the resulting Dataset object;
+            if not specified, try to load the class named via the class_name and module_name parameters
+        expectation_suite (string): path to great_expectations expectation suite file
+        profiler (Profiler class): profiler to use when creating the dataset (default is None)
+
+    Returns:
+        great_expectations dataset
+    """
+    import pandas as pd
+
+    df = pd.read_sas(filename, *args, **kwargs)
     if dataset_class is not None:
         return _convert_to_dataset_class(
             df=df,

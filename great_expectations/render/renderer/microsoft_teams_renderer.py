@@ -1,11 +1,11 @@
 import logging
 
-from ...core import RunIdentifier
-from ...data_context.types.resource_identifiers import BatchIdentifier
+from great_expectations.core import RunIdentifier
+from great_expectations.data_context.types.resource_identifiers import BatchIdentifier
 
 logger = logging.getLogger(__name__)
 
-from .renderer import Renderer
+from great_expectations.render.renderer.renderer import Renderer
 
 
 class MicrosoftTeamsRenderer(Renderer):

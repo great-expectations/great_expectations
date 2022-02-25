@@ -18,19 +18,18 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.util import AzureUrl, get_or_create_spark_application
-from great_expectations.exceptions import exceptions as ge_exceptions
-from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
-from great_expectations.validator.metric_configuration import MetricConfiguration
-
-from ..exceptions import (
+from great_expectations.exceptions import (
     BatchSpecError,
     ExecutionEngineError,
     GreatExpectationsError,
     ValidationError,
 )
-from ..expectations.row_conditions import parse_condition_to_spark
-from .sparkdf_batch_data import SparkDFBatchData
+from great_expectations.exceptions import exceptions as ge_exceptions
+from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
+from great_expectations.expectations.row_conditions import parse_condition_to_spark
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
@@ -766,7 +765,7 @@ Please check your config."""
         """Split on the hashed value of the named column"""
         try:
             getattr(hashlib, hash_function_name)
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
@@ -834,7 +833,7 @@ Please check your config."""
     ):
         try:
             getattr(hashlib, str(hash_function_name))
-        except (TypeError, AttributeError) as e:
+        except (TypeError, AttributeError):
             raise (
                 ge_exceptions.ExecutionEngineError(
                     f"""The sampling method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.

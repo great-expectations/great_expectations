@@ -1126,7 +1126,7 @@ class CloudNotificationAction(ValidationAction):
 
         ge_cloud_url = urljoin(
             self.data_context.ge_cloud_config.base_url,
-            f"/accounts/{self.data_context.ge_cloud_config.account_id}/contracts/"
+            f"/organizations/{self.data_context.ge_cloud_config.organization_id}/contracts/"
             f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.ge_cloud_id}/notification-actions",
         )
         auth_headers = {

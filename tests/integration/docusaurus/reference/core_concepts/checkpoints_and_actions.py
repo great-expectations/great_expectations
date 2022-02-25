@@ -72,7 +72,7 @@ results = context.run_checkpoint(checkpoint_name="test_checkpoint")
 assert results.success is True
 run_id_type = type(results.run_id)
 assert run_id_type == RunIdentifier
-validation_result_id_type_set = set(type(k) for k in results.run_results.keys())
+validation_result_id_type_set = {type(k) for k in results.run_results.keys()}
 assert len(validation_result_id_type_set) == 1
 validation_result_id_type = next(iter(validation_result_id_type_set))
 assert validation_result_id_type == ValidationResultIdentifier
@@ -80,7 +80,7 @@ validation_result_id = results.run_results[[k for k in results.run_results.keys(
 assert (
     type(validation_result_id["validation_result"]) == ExpectationSuiteValidationResult
 )
-assert isinstance(results.checkpoint_config, dict)
+assert isinstance(results.checkpoint_config, CheckpointConfig)
 
 typed_results = {
     "run_id": run_id_type,
