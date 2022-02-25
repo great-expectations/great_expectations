@@ -11,6 +11,7 @@ from great_expectations.rule_based_profiler.types import (
 )
 from great_expectations.rule_based_profiler.types.parameter_container import (
     ParameterNode,
+    build_parameter_container,
 )
 
 
@@ -108,11 +109,29 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             )
         )
 
+        fully_qualified_parameter_name_details: str = f"$parameter.{self.name}.details"
+        parameter_value_node_details: ParameterNode = (
+            get_parameter_value_by_fully_qualified_parameter_name(
+                fully_qualified_parameter_name=fully_qualified_parameter_name_details,
+                domain=domain,
+                parameters={domain.id: parameter_container},
+            )
+        )
+
         unique_parameter_values: Set[
             Any
         ] = _get_unique_values_from_iterable_of_iterables(parameter_value_node["value"])
 
-        parameter_value_node.value = unique_parameter_values
+        parameter_values: Dict[str, Any] = {
+            fully_qualified_parameter_name: {
+                "value": unique_parameter_values,
+                "details": parameter_value_node_details,
+            },
+        }
+
+        build_parameter_container(
+            parameter_container=parameter_container, parameter_values=parameter_values
+        )
 
         return parameter_container
 
