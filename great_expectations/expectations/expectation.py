@@ -1087,10 +1087,9 @@ class Expectation(metaclass=MetaExpectation):
 
     def _get_docstring_and_short_description(self) -> Tuple[str, str]:
         """Conveninence method to get the Exepctation's docstring and first line"""
-
         if self.__doc__ is not None:
             docstring = self.__doc__
-            short_description = self.__doc__.split("\n")[0]
+            short_description = next(line for line in self.__doc__.split("\n") if line)
         else:
             docstring = ""
             short_description = ""
