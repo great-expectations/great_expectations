@@ -26,7 +26,7 @@ A Validation Operator is an internal part of a Checkpoint.  It runs the Actions 
 
 <ValidateHeader/>
 
-Validation Operators only come into play when a Checkpoint is run.  After Validation completes, the Validation Operator will run any Actions that are configured in the Checkpoint's `action_list`
+Validation Operators only come into play when a Checkpoint is run. After Validation completes, the Validation Operator will run any Actions that are configured in the Checkpoint's `action_list`
 
 ## Features
 
