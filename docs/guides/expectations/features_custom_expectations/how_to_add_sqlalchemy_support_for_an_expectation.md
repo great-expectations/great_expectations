@@ -30,7 +30,7 @@ To avoid surprises, it can be helpful to determine beforehand what backends and 
 
 Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. Add entries corresponding to the functionality you want to add: 
     
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L117-L130
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L86-L130
 ```
 
 :::note
@@ -81,6 +81,8 @@ Here's an example from <a href="https://greatexpectations.io/expectations/expect
 
 ```python file=../../../../great_expectations/expectations/metrics/column_aggregate_metrics/column_sum.py#L21-L23
 ```
+
+For more on <code>func</code> and the <code>func</code>-tionality it provides, see <a href="https://docs.sqlalchemy.org/en/14/core/functions.html">SQLAlchemy's Functions documentation</a>.
 </details>
 
 
@@ -123,6 +125,8 @@ While this approach allows for highly complex queries, here we're taking advanta
 <br/>
 <code>func</code> allows us to pass common generic functions which SQLAlchemy will compile appropriately for the targeted dialect, 
 giving us the flexibility to not have write that targeted code ourselves!
+<br/><br/>
+For more on <code>func</code> and the <code>func</code>-tionality it provides, see <a href="https://docs.sqlalchemy.org/en/14/core/functions.html">SQLAlchemy's Functions documentation</a>.
 </details>
 </TabItem>
 </Tabs>

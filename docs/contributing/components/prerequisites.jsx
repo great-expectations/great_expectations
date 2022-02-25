@@ -35,7 +35,7 @@ export default class Prerequisites extends React.Component {
         <li key={0.1}>
           <li>Completed the <a href='/docs/tutorials/getting_started/tutorial_overview'>Getting Started Tutorial</a></li>
           <li><a href='/docs/contributing/contributing_setup'>Set up your dev environment</a></li>
-          <li>Created a <a href='/docs/expectations/creating_custom_expectations/overview'>Custom Expectation</a></li>
+          <li>Created a <a href='/docs/guides/expectations/creating_custom_expectations/overview'>Custom Expectation</a></li>
       </li>]
   }
 
