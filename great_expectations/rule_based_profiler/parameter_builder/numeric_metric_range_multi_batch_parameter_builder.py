@@ -21,7 +21,7 @@ from great_expectations.rule_based_profiler.types import (
 from great_expectations.rule_based_profiler.util import (
     NP_EPSILON,
     compute_bootstrap_quantiles,
-    compute_bootstrap_quantiles_legacy,
+    compute_bootstrap_quantiles_mean,
     compute_quantiles,
     get_parameter_value_and_validate_return_type,
 )
@@ -539,7 +539,7 @@ positive integer, or must be omitted (or set to None).
             n_resamples = num_bootstrap_samples
 
         if version.parse(scipy.__version__) < version.parse("1.7"):
-            return compute_bootstrap_quantiles_legacy(
+            return compute_bootstrap_quantiles_mean(
                 metric_values=metric_values,
                 false_positive_rate=false_positive_rate,
                 n_resamples=n_resamples,

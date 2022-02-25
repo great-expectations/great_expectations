@@ -1,10 +1,12 @@
 import copy
+import logging
 import uuid
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-from scipy import stats
+import scipy
+import statsmodels
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationSuite
@@ -19,6 +21,8 @@ from great_expectations.rule_based_profiler.types import (
     ParameterContainer,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
+
+logger = logging.getLogger(__name__)
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 
@@ -254,7 +258,7 @@ def compute_quantiles(
     return lower_quantile, upper_quantile
 
 
-def compute_bootstrap_quantiles_legacy(
+def compute_bootstrap_quantiles_mean(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
@@ -335,11 +339,11 @@ def compute_bootstrap_quantiles(
     # "method" parameter tells scipy.stats.bootstrap whether to return the ‘percentile’ bootstrap confidence interval
     # ('percentile'), the ‘reverse’ or the bias - corrected and accelerated bootstrap confidence interval ('BCa').
     # Note that even though we prefer to use 'BCa', only 'percentile' and 'basic' support multi-sample statistics as of
-    # February 24th, 2022. For a more complete write-up regarding the available methods, see:
+    # February 25th, 2022. For a more complete write-up regarding the available methods, see:
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html
     method: str = "basic"
 
-    bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
+    bootstrap_result: scipy.stats.bootstrap.BootstrapResult = scipy.stats.bootstrap(
         data=data,
         statistic=lambda data, axis=axis: np.quantile(
             a=data,
@@ -354,14 +358,30 @@ def compute_bootstrap_quantiles(
     upper_ci: Union[np.nd_array, Number]
     lower_ci, upper_ci = bootstrap_result.confidence_interval
 
-    # Since the stats.bootstrap method will only return a confidence interval for each of the quantiles we seek to
-    # estimate, we need to back out the mean of the quantile statistics for use with GE. This can be achieved by relying
-    # on the Central Limit Theorem, which states that the distribution of the computed sample quantiles should be
-    # approximately normal (https://en.wikipedia.org/wiki/Central_limit_theorem). With the knowledge that our confidence
-    # intervals were calculated from a symmetrical normal distribution, we can simply return the mid-point between the
-    # lower and upper confidence intervals.
-    lower_quantile_mean: Number
-    upper_quantile_mean: Number
-    lower_quantile_mean, upper_quantile_mean = (lower_ci + upper_ci) / 2
+    # compute the mean of the bootstrapped quantile samples
+    lower_quantile_mean, upper_quantile_mean = compute_bootstrap_quantiles_mean(
+        metric_values=metric_values,
+        false_positive_rate=false_positive_rate,
+        n_resamples=n_resamples,
+    )
+
+    # Hypothesis test that the actual quantiles are equal to the computed lower and upper quantile means
+    # The central limit theorem states that the distribution of the bootstrapped sample statistics
+    # will be approximately normal
+    alternative: str = "two-sided"  # alternative hypothesis is that they are not equal
+    lower_quantile_tstat: Number
+    lower_quantile_pvalue: float
+    upper_quantile_tstat: Number
+    lower_quantile_pvalue: float
+
+    lower_quantile_tstat, lower_quantile_pvalue = statsmodels.stats.weightstats.ztest(
+        x1=data, value=lower_quantile_mean, alternative=alternative
+    )
+    upper_quantile_tstat, upper_quantile_pvalue = statsmodels.stats.weightstats.ztest(
+        x1=data, value=upper_quantile_mean, alternative=alternative
+    )
+
+    if lower_quantile_pvalue < 0.05:
+        pass
 
     return lower_quantile_mean, upper_quantile_mean
