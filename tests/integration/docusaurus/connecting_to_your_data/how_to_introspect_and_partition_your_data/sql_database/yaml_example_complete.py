@@ -99,7 +99,7 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = "main.yellow_tripdata_sample_2019_01"
+batch_request.data_asset_name: str = "main.yellow_tripdata_sample_2019_01"
 
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
@@ -127,7 +127,7 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = "main.yellow_tripdata_sample_2019_01"
+batch_request.data_asset_name: str = "main.yellow_tripdata_sample_2019_01"
 
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 31  # number of days in January
@@ -142,7 +142,7 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = "main.yellow_tripdata_sample_2019_01"
+batch_request.data_asset_name: str = "main.yellow_tripdata_sample_2019_01"
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert 24 <= len(batch_list) <= 744  # number of hours in a 31-day month
 
@@ -156,7 +156,7 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
-batch_request.data_asset_name = "taxi__main.yellow_tripdata_sample_2019_01__asset"
+batch_request.data_asset_name: str = "taxi__main.yellow_tripdata_sample_2019_01__asset"
 
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 6
@@ -173,7 +173,7 @@ batch_request = BatchRequest(
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name and other arguments directly in the BatchRequest above.
-batch_request.data_asset_name = "taxi__main.yellow_tripdata_sample_2019_01__asset"
+batch_request.data_asset_name: str = "taxi__main.yellow_tripdata_sample_2019_01__asset"
 
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 6  # ride occupancy ranges from 1 passenger to 6 passengers

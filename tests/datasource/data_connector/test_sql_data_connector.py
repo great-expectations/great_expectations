@@ -1107,7 +1107,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector(
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    my_data_connector = ConfiguredAssetSqlDataConnector(
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
         name="my_sql_data_connector",
         datasource_name="my_test_datasource",
         execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",
@@ -1147,7 +1147,7 @@ def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_s
 def test_more_complex_instantiation_of_ConfiguredAssetSqlDataConnector_include_schema_name_prefix_suffix(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
-    my_data_connector = ConfiguredAssetSqlDataConnector(
+    my_data_connector: ConfiguredAssetSqlDataConnector = ConfiguredAssetSqlDataConnector(
         name="my_sql_data_connector",
         datasource_name="my_test_datasource",
         execution_engine="test_cases_for_sql_data_connector_sqlite_execution_engine",

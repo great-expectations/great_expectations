@@ -62,16 +62,14 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
     def add_data_asset(
         self,
-        data_asset_name: str,
-        data_asset_config: dict,
+        name: str,
+        config: dict,
     ):
         """
-        Add data_asset to DataConnector using data_asset name as key, and data_asset configuration as value.
+        Add data_asset to DataConnector using data_asset name as key, and data_asset config as value.
         """
-        data_asset_name = self._update_data_asset_name_from_config(
-            data_asset_name, data_asset_config
-        )
-        self._assets[data_asset_name] = data_asset_config
+        name = self._update_data_asset_name_from_config(name, config)
+        self._assets[name] = config
 
     def _update_data_asset_name_from_config(
         self, data_asset_name: str, data_asset_config: dict
