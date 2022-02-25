@@ -4,6 +4,29 @@ title: Changelog
 
 ### Develop
 
+### 0.14.8
+* [FEATURE] Add `run_profiler_on_data` method to DataContext (#4190)
+* [FEATURE] `RegexPatternStringParameterBuilder` for `RuleBasedProfiler` (#4167)
+* [FEATURE] experimental column map expectation checking for vectors (#3102) (thanks @manyshapes)
+* [FEATURE] Pre-requisites in Rule-Based Profiler for Self-Estimating Expectations (#4242)
+* [FEATURE] Add optional parameter `condition` to DefaultExpectationConfigurationBuilder (#4246)
+* [BUGFIX] Ensure that test result for `RegexPatternStringParameterBuilder` is deterministic (#4240)
+* [BUGFIX] Remove duplicate RegexPatternStringParameterBuilder test (#4241)
+* [BUGFIX] Improve pandas version checking in test_expectations[_cfe].py files (#4248)
+* [BUGFIX] Ensure `test_script_runner.py` actually raises AssertionErrors correctly (#4239)
+* [BUGFIX] Check for pandas>=024 not pandas>=24 (#4263)
+* [BUGFIX] Add support for SqlAlchemyQueryStore connection_string credentials (#4224) (thanks @davidvanrooij)
+* [BUGFIX] Remove assertion (#4271)
+* [DOCS] Hackathon Contribution Docs (#3897)
+* [MAINTENANCE] Rule-Based Profiler: Fix Circular Imports; Configuration Schema Fixes; Enhanced Unit Tests; Pre-Requisites/Refactoring for Self-Estimating Expectations (#4234)
+* [MAINTENANCE] Reformat contrib expectation with black (#4244)
+* [MAINTENANCE] Resolve cyclic import issue with usage stats (#4251)
+* [MAINTENANCE] Additional refactor to clean up cyclic imports in usage stats (#4256)
+* [MAINTENANCE] Rule-Based Profiler prerequisite: fix quantiles profiler configuration and add comments (#4255)
+* [MAINTENANCE] Introspect Batch Request Dictionary for its kind and instantiate accordingly (#4259)
+* [MAINTENANCE] Minor clean up in style of an RBP test fixture; making variables access more robust (#4261)
+* [MAINTENANCE] define empty sqla_bigquery object (#4249)
+
 ### 0.14.7
 * [FEATURE] Support Multi-Dimensional Metric Computations Generically for Multi-Batch Parameter Builders (#4206)
 * [FEATURE] Add support for sqlalchemy-bigquery while falling back on pybigquery (#4182)

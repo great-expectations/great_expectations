@@ -103,6 +103,7 @@ except ImportError:
             BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
             bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
     except ImportError:
+        sqla_bigquery = None
         bigquery_types_tuple = None
         pybigquery = None
         namedtuple = None
