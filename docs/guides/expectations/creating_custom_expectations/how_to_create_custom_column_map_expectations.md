@@ -45,7 +45,7 @@ cp column_map_expectation_template.py /SOME_DIRECTORY/expect_column_values_to_eq
     </p>
     <p>
         <ul>
-            <li>If you're building a Custom Expectation for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all plugins in the directory available for use.</li>
+            <li>If you're building a Custom Expectation for personal use, you'll need to put it in the <code>great_expectations/plugins/expectations</code> folder of your Great Expectations deployment, and import your Custom Expectation from that directory whenever it will be used. When you instantiate the corresponding <code>DataContext</code>, it will automatically make all plugins in the directory available for use.</li>
             <li>If you're building a Custom Expectation to contribute to the open source project, you'll need to put it in the repo for the Great Expectations library itself. Most likely, this will be within a package within <code>contrib/</code>: <code>great_expectations/contrib/SOME_PACKAGE/SOME_PACKAGE/expectations/</code>. To use these Expectations, you'll need to install the package.</li>
         </ul>
     </p>
@@ -79,6 +79,8 @@ Completeness checklist for ExpectColumnValuesToMatchSomeCriteria:
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first four steps on the checklist.
 
 ### 4. Change the Expectation class name and add a docstring
+
+By convention, your [**Metric**](../../../reference/metrics.md) class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
 
 Let's start by updating your Expectation's name and docstring.
 
@@ -189,7 +191,6 @@ This is all that you need to define for now. The `ColumnMapMetricProvider` and `
     </p>
     <p>
         <b>Expectation Default Kwarg Values</b> (Optional) - Default values for success keys and the defined domain, among other values.
-An example of Expectation Parameters is shown below (notice that we are now in a new Expectation class):
     </p>
     <p>
         <b>Metric Condition Value Keys</b> (Optional) - Contains any additional arguments passed as parameters to compute the Metric.
