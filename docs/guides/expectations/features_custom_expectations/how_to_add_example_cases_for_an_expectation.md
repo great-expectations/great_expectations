@@ -109,10 +109,10 @@ Sometimes you need to specify the precise type of the columns for each backend. 
 While Pandas is fairly flexible in typing, Spark and many SQL dialects are much more strict. 
 
 You may find you wish to use data that is incompatible with a given backend, or write different individual tests for different backends. 
-To do this, you can use the `only_for` attribute, which accepts `pandas`, `spark`, `sqlite` or a SQL dialect:
+To do this, you can use the `only_for` attribute, which can accept `pandas`, `spark`, `sqlite`, a SQL dialect, or a list combining any of the above:
 
 ```console
-"only_for": "spark"
+"only_for": ["spark", "pandas"]
 ```
 
 Passing this attribute on the same level as `data`, `tests`, and `schemas` 
