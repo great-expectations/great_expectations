@@ -1,5 +1,4 @@
 import logging
-from numbers import Number
 from typing import Any, Dict, List, Optional, Union
 
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
@@ -27,9 +26,9 @@ class ProfilerRunAnonymizer(Anonymizer):
         name: Optional[str] = kwargs.get("name")
         anonymized_name: Optional[str] = self.anonymize(name)
 
-        config_version: Union[Number, str] = kwargs.get("config_version", 1.0)
-        variable_count: Number = kwargs.get("variable_count", 0)
-        rule_count: Number = kwargs.get("rule_count", 0)
+        config_version: Union[float, str] = kwargs.get("config_version", 1.0)
+        variable_count: int = kwargs.get("variable_count", 0)
+        rule_count: int = kwargs.get("rule_count", 0)
 
         rules: Dict[str, dict] = kwargs.get("rules", {})
         anonymized_rules: List[dict] = self._anonymize_rules(rules)
