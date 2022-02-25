@@ -382,6 +382,9 @@ def compute_bootstrap_quantiles(
     )
 
     if lower_quantile_pvalue < 0.05:
-        pass
+        logger.warning("lower_quantile_p-value < 0.05")
+
+    if upper_quantile_pvalue < 0.05:
+        logger.warning("upper_quantile_p-value < 0.05")
 
     return lower_quantile_mean, upper_quantile_mean
