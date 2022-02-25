@@ -1526,9 +1526,15 @@ def generate_expectation_tests(
                     for dialect in tb["dialects"]:
                         dialects_to_include[dialect] = True
         else:
-            engines_to_include["pandas"] = execution_engine_diagnostics.PandasExecutionEngine
-            engines_to_include["spark"] = execution_engine_diagnostics.SparkDFExecutionEngine
-            engines_to_include["sqlalchemy"] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
+            engines_to_include[
+                "pandas"
+            ] = execution_engine_diagnostics.PandasExecutionEngine
+            engines_to_include[
+                "spark"
+            ] = execution_engine_diagnostics.SparkDFExecutionEngine
+            engines_to_include[
+                "sqlalchemy"
+            ] = execution_engine_diagnostics.SqlAlchemyExecutionEngine
             if (
                 engines_to_include.get("sqlalchemy") is True
                 and raise_exceptions_for_backends is False
@@ -1540,10 +1546,7 @@ def generate_expectation_tests(
                 }
 
         # Ensure that there is at least 1 SQL dialect if sqlalchemy is used
-        if (
-            engines_to_include.get("sqlalchemy") is True
-            and not dialects_to_include
-        ):
+        if engines_to_include.get("sqlalchemy") is True and not dialects_to_include:
             dialects_to_include["sqlite"] = True
 
         backends = build_test_backends_list(
