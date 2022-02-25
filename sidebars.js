@@ -375,6 +375,7 @@ module.exports = {
             'terms/batch_request',
             'terms/custom_expectation',
             'terms/checkpoint',
+            'terms/cli',
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
