@@ -112,7 +112,7 @@ class ColumnValuesAreLatLonCoordinatesInRange(ColumnMapMetricProvider):
 
 def fcc_projection(loc1, loc2):
     """
-    Calculates the distance in kilometers between two lat/lon points on an ellipsoidal earth
+    Application of the Pythagorean theorem to calculate the distance in kilometers between two lat/lon points on an ellipsoidal earth
     projected to a plane, as prescribed by the FCC for distances not exceeding 475km/295mi.
 
     See https://www.govinfo.gov/content/pkg/CFR-2016-title47-vol4/pdf/CFR-2016-title47-vol4-sec73-208.pdf
@@ -155,8 +155,8 @@ def pythagorean_projection(loc1, loc2):
     lon1, lon2 = float(loc1[1]), float(loc2[1])
 
     mean_lat = (lat1 + lat2) / 2
-    delta_lat = (lat2 - lat1) * (pi / 180)
-    delta_lon = (lon2 - lon1) * (pi / 180)
+    delta_lat = (lat2 - lat1) * (pi / 180)  # converting from degree-decimal to radians
+    delta_lon = (lon2 - lon1) * (pi / 180)  # converting from degree-decimal to radians
 
     radius = 6371.009
 
@@ -220,9 +220,8 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
             Calculates the distance in kilometers between two lat/lon points on an ellipsoidal earth
             projected to a plane. Prescribed by the FCC for distances up to and not exceeding 475km/295mi.
 
-
         pythagorean: \
-            Application of the pythagorean theorem to calculate the distance in kilometers between two lat/lon points on
+            Calculates the distance in kilometers between two lat/lon points on
             a spherical earth projected to a plane. Very fast but error increases rapidly as distances increase.
     """
 
