@@ -11,6 +11,7 @@ from great_expectations.rule_based_profiler.util import (
     compute_bootstrap_quantiles,
     compute_bootstrap_quantiles_legacy,
 )
+from tests.conftest import skip_if_python_below_minimum_version
 
 
 def _generate_distribution_samples(size: Optional[int] = 36) -> pd.DataFrame:
@@ -59,6 +60,8 @@ def test_legacy_bootstrap_efficacy():
 
 
 def test_bootstrap_efficacy():
+    skip_if_python_below_minimum_version()
+
     df: pd.DataFrame = _generate_distribution_samples(size=1000)
     false_positive_rate: np.float64 = np.float64(0.01)
     columns: pd.Index = df.columns
@@ -86,6 +89,8 @@ def test_bootstrap_efficacy():
 
 
 def test_compare_legacy_and_new_bootstrap_results():
+    skip_if_python_below_minimum_version
+
     df: pd.DataFrame = _generate_distribution_samples(size=1000)
     false_positive_rate: np.float64 = np.float64(0.01)
     columns: pd.Index = df.columns
