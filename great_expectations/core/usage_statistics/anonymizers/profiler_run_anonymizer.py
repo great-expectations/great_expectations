@@ -5,6 +5,42 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 from great_expectations.core.usage_statistics.anonymizers.batch_request_anonymizer import (
     BatchRequestAnonymizer,
 )
+from great_expectations.rule_based_profiler.domain_builder.column_domain_builder import (
+    ColumnDomainBuilder,
+)
+from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
+    DomainBuilder,
+)
+from great_expectations.rule_based_profiler.domain_builder.simple_column_suffix_domain_builder import (
+    SimpleColumnSuffixDomainBuilder,
+)
+from great_expectations.rule_based_profiler.domain_builder.simple_semantic_type_domain_builder import (
+    SimpleSemanticTypeColumnDomainBuilder,
+)
+from great_expectations.rule_based_profiler.domain_builder.table_domain_builder import (
+    TableDomainBuilder,
+)
+from great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder import (
+    DefaultExpectationConfigurationBuilder,
+)
+from great_expectations.rule_based_profiler.expectation_configuration_builder.expectation_configuration_builder import (
+    ExpectationConfigurationBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_builder.metric_multi_batch_parameter_builder import (
+    MetricMultiBatchParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_range_multi_batch_parameter_builder import (
+    NumericMetricRangeMultiBatchParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    ParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_builder.regex_pattern_string_parameter_builder import (
+    RegexPatternStringParameterBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
+    SimpleDateFormatStringParameterBuilder,
+)
 from great_expectations.util import deep_filter_properties_iterable
 
 logger = logging.getLogger(__name__)
@@ -13,6 +49,25 @@ logger = logging.getLogger(__name__)
 class ProfilerRunAnonymizer(Anonymizer):
     def __init__(self, salt: Optional[str] = None) -> None:
         super().__init__(salt=salt)
+
+        # ordered bottom up in terms of inheritance order
+        self._ge_classes = [
+            # DomainBuilders
+            ColumnDomainBuilder,
+            SimpleColumnSuffixDomainBuilder,
+            SimpleSemanticTypeColumnDomainBuilder,
+            TableDomainBuilder,
+            DomainBuilder,
+            # ParameterBuilders
+            MetricMultiBatchParameterBuilder,
+            NumericMetricRangeMultiBatchParameterBuilder,
+            RegexPatternStringParameterBuilder,
+            SimpleDateFormatStringParameterBuilder,
+            ParameterBuilder,
+            # ExpectationConfigurationBuilders
+            DefaultExpectationConfigurationBuilder,
+            ExpectationConfigurationBuilder,
+        ]
 
         self._salt = salt
         self._batch_request_anonymizer = BatchRequestAnonymizer(self._salt)
