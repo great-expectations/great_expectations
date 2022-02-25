@@ -353,7 +353,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
                     "error": {"traceback_substring": "range must be a numeric value"},
                 },
             ],
-            "only_for": "pandas",
+            "only_for": ["pandas"],
         },
         {
             "data": {
@@ -410,7 +410,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
                     "error": {"traceback_substring": "range must be a numeric value"},
                 },
             ],
-            "only_for": "spark",
+            "only_for": ["spark"],
         },
     ]
 
