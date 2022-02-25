@@ -5,7 +5,6 @@ from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-import statsmodels.api as sm
 from scipy import stats
 
 import great_expectations.exceptions as ge_exceptions
@@ -366,25 +365,19 @@ def compute_bootstrap_quantiles(
     )
 
     # Hypothesis test that the actual quantiles are equal to the computed lower and upper quantile means
-    # The central limit theorem states that the distribution of the bootstrapped sample statistics
-    # will be approximately normal
-    alternative: str = "two-sided"  # alternative hypothesis is that they are not equal
-    lower_quantile_tstat: Number
-    lower_quantile_pvalue: float
-    upper_quantile_tstat: Number
-    lower_quantile_pvalue: float
+    # We can use the bootstrap confidence interval
+    if not (lower_ci[0] < lower_quantile_mean < lower_ci[1]):
+        logger.warn(
+            """Computed lower quantile mean falls outside of the bootstrap confidence interval.
+We reject the hypothesis that the actual lower quantile statistic is equal to
+the mean of the bootstrapped sample lower quantiles."""
+        )
 
-    lower_quantile_tstat, lower_quantile_pvalue = sm.stats.weightstats.ztest(
-        x1=data, value=lower_quantile_mean, alternative=alternative
-    )
-    upper_quantile_tstat, upper_quantile_pvalue = sm.stats.weightstats.ztest(
-        x1=data, value=upper_quantile_mean, alternative=alternative
-    )
-
-    if lower_quantile_pvalue < 0.05:
-        logger.warning("lower_quantile_p-value < 0.05")
-
-    if upper_quantile_pvalue < 0.05:
-        logger.warning("upper_quantile_p-value < 0.05")
+    if not (upper_ci[0] < upper_quantile_mean < upper_ci[1]):
+        logger.warn(
+            """Computed upper quantile mean falls outside of the bootstrap confidence interval.
+We reject the hypothesis that the actual upper quantile statistic is equal to
+the mean of the bootstrapped sample upper quantiles."""
+        )
 
     return lower_quantile_mean, upper_quantile_mean
