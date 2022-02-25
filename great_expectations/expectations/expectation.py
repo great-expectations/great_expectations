@@ -1090,7 +1090,7 @@ class Expectation(metaclass=MetaExpectation):
 
         if self.__doc__ is not None:
             docstring = self.__doc__
-            short_description = self.__doc__.split("\n")[0]
+            short_description = next(line for line in self.__doc__.split("\n") if line)
         else:
             docstring = ""
             short_description = ""
