@@ -18,9 +18,11 @@ A Data Docs Store is a connector to store and retrieve information pertaining to
 
 ### Features and promises
 
+The Data Docs Store provides an easy way to configure where and how to have your <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> rendered.
+
 ### Relationship to other objects
 
-Your Data Docs Store will be used behind the scenes by any Action that updates your Data Docs.  Great Expectations includes the `UpdateDataDocsAction` subclass of the `ValidationAction` class for this express purpose.  Including the `UpdateDataDocsAction` in the `action_list` of a Checkpoint will cause your Data Docs to be updated accordingly.
+Your Data Docs Store will be used behind the scenes by any Action that updates your Data Docs.  Great Expectations includes the `UpdateDataDocsAction` subclass of the `ValidationAction` class for this express purpose.  Including the `UpdateDataDocsAction` in the `action_list` of a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> will cause your Data Docs to be updated accordingly.
 
 ## Use cases
 
@@ -30,11 +32,11 @@ When you configure your Data Docs, one of the items you will need to include is 
 
 <CreateHeader/>
 
-When Profilers are run to create Expectations their results are made available through Data Docs.  Additionally, most Profiler workflows include a step where the Profiler's generated Expectation Suite is Validated against a Batch of data.  These processes use a Data Docs Store behind the scenes.
+When <TechnicalTag relative="../" tag="profiler" text="Profilers" /> are run to create <TechnicalTag relative="../" tag="expectation" text="Expectations" /> their results are made available through Data Docs.  Additionally, most Profiler workflows include a step where the Profiler's generated <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> is <TechnicalTag relative="../" tag="validation" text="Validated" /> against a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.  These processes use a Data Docs Store behind the scenes.
 
 <ValidateHeader/>
 
-When Checkpoints are run to Validate data, their results are generally updated into Data Docs.  Any Checkpoint that is configured to do so will use a Data Docs Store behind the scenes.  Including the `UpdateDataDocsAction` in the `action_list` of a Checkpoint will cause your Data Docs to be updated accordingly.  This update will only include the Validation Results from the Checkpoint itself and will not re-render all of your existing Data Docs.  If a Checkpoint does not include an `UpdateDataDocsAction` the Validation Results will not be rendered into Data Docs.
+When <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> are run to Validate data, their results are generally updated into Data Docs.  Any Checkpoint that is configured to do so will use a Data Docs Store behind the scenes.  Including the `UpdateDataDocsAction` in the `action_list` of a Checkpoint will cause your Data Docs to be updated accordingly.  This update will only include the <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> from the Checkpoint itself and will not re-render all of your existing Data Docs.  If a Checkpoint does not include an `UpdateDataDocsAction` the Validation Results will not be rendered into Data Docs.
 
 
 ## Features

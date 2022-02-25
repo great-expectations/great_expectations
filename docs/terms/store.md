@@ -49,11 +49,11 @@ Each type of Store is designed to interact with a specific subset of information
 
 <CreateHeader/>
 
-When creating Expectations, you will use **Expectation Stores** to store your Expectation Suites.  You may also use **Validation Result Stores** or **Evaluation Parameter Stores** to configure some Expectations that require Evaluation Parameters as part of their definition, provided you have previously stored relevant Metrics in those Stores and then come back to create a new Expectation Suite that references them.
+When creating Expectations, you will use **Expectation Stores** to store your <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />.  You may also use **Validation Result Stores** or **Evaluation Parameter Stores** to configure some <TechnicalTag relative="../" tag="expectation" text="Expectations" /> that require <TechnicalTag relative="../" tag="evaluation_parameter" text="Evaluation Parameters" /> as part of their definition, provided you have previously stored relevant <TechnicalTag relative="../" tag="metric" text="Metrics" /> in those Stores and then come back to create a new Expectation Suite that references them.
 
 <ValidateHeader/>
 
-When Validating data, you may store new Checkpoints (or retrieve existing ones) from your **Checkpoint Store**.  Checkpoints may also use Expectation Suites retrieved by an **Expectation Store**, and Expectations that are run by a Checkpoint may retrieve Metrics as input (Evaluation Parameters) from Validation Results in a **Validation Results Store**, or from values stored in an **Evaluation Parameter Store**.  Checkpoints may also write information about Validation Results into a **Validation Results Store**, or information about Metrics into an **Evaluation Parameter Store** (which is why they are also known as **Metric Stores**).
+When Validating data, you may store new <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> (or retrieve existing ones) from your **Checkpoint Store**.  Checkpoints may also use Expectation Suites retrieved by an **Expectation Store**, and Expectations that are run by a Checkpoint may retrieve Metrics as input (Evaluation Parameters) from <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> in a **Validation Results Store**, or from values stored in an **Evaluation Parameter Store**.  Checkpoints may also write information about Validation Results into a **Validation Results Store**, or information about Metrics into an **Evaluation Parameter Store** (which is why they are also known as **Metric Stores**).
 
 ## Features
 

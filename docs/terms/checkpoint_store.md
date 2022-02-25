@@ -16,9 +16,9 @@ A Checkpoint Store is a connector to store and retrieve information about means 
 
 ### Features and promises
 
-The Checkpoint Store manages storage and retrieval of Checkpoint configurations for the Data Context.  Checkpoint configurations can be added through the Data Context's `add_checkpoint()` method and retrieved with its `get_checkpoint` method. A configured Checkpoint Store is not required in order to work with Great Expectations, however a local configuration for a Checkpoint Store will be added automatically to `great_expectations.yml` when you store a Checkpoint configuration for the first time.
+The Checkpoint Store manages storage and retrieval of <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> configurations for the <TechnicalTag relative="../" tag="data_context" text="Data Context" />.  Checkpoint configurations can be added through the Data Context's `add_checkpoint()` method and retrieved with its `get_checkpoint` method. A configured Checkpoint Store is not required in order to work with Great Expectations, however a local configuration for a Checkpoint Store will be added automatically to `great_expectations.yml` when you store a Checkpoint configuration for the first time.
 
-Generally speaking, while working with Great Expectations to Validate data you will not need to interact with a Checkpoint Store directly outside configuring the Store.  Instead, your Data Context will use the Checkpoint Store to store and retrieve Checkpoints behind the scenes, and the objects you will directly work with will be those Checkpoints.
+Generally speaking, while working with Great Expectations to <TechnicalTag relative="../" tag="validation" text="Validate" /> data you will not need to interact with a Checkpoint Store directly outside configuring the <TechnicalTag relative="../" tag="store" text="Store" />.  Instead, your Data Context will use the Checkpoint Store to store and retrieve Checkpoints behind the scenes, and the objects you will directly work with will be those Checkpoints.
 
 ### Relationship to other objects
 
@@ -34,6 +34,6 @@ When you save your first Checkpoint, a Checkpoint Store configuration will autom
 
 ### How to access
 
-Your Data Context will handle accessing your Checkpoint Store behind the scenes when you use it to store or retrieve a Checkpoint's configuration.  Rather than interacting with the Checkpoint Store itself, you will generally be interacting with your Data Context and a Checkpoint itself.
+Your Data Context will handle accessing your Checkpoint Store behind the scenes when you use it to store or retrieve a Checkpoint's configuration.  Rather than interacting with the Checkpoint Store itself, you will generally be interacting with your Data Context and a Checkpoint.
 
 

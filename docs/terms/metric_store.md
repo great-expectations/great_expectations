@@ -21,11 +21,11 @@ A Metric Store is a connector to store and retrieve information about computed a
 
 ### Features and promises
 
-The Metric Store differs from an Evaluation Parameter Store in how it formats its data.  Information stored in a Metric Store is kept in a format that more easily converted into tables which can be used for reports or to analyze trends.  It can also be referenced as values for Evaluation Parameters.  
+The Metric Store differs from an <TechnicalTag relative="../" tag="evaluation_parameter_store" text="Evaluation Parameter Store" /> in how it formats its data.  Information stored in a Metric Store is kept in a format that more easily converted into tables which can be used for reports or to analyze trends.  It can also be referenced as values for <TechnicalTag relative="../" tag="evaluation_parameter" text="Evaluation Parameters" />.  
 
 ### Relationship to other objects
 
-A Metric Store can be referenced by an Expectation Suite to populate values for Evaluation Parameters used by Expectations within that suite.  Metric Stores are also used in Checkpoints to store Metrics that are included in the Validation Results which are passed to the Checkpoints' `action_list`.
+A Metric Store can be referenced by an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> to populate values for Evaluation Parameters used by <TechnicalTag relative="../" tag="expectation" text="Expectations" /> within that suite.  Metric Stores are also used in <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> to store <TechnicalTag relative="../" tag="metric" text="Metrics" /> that are included in the <TechnicalTag relative="../" tag="validation_result" text="Validation Results" /> which are passed to the Checkpoints' `action_list`.
 
 ## Use cases
 
@@ -46,7 +46,7 @@ When a Checkpoint is run, it will use a Metric Store to populate values for Eval
 
 ## Features
 
-The Metric Store is tailored for storing and retrieving Metrics.  Although can be used within Great Expectations as a reference to populate Evaluation Parameters when an Expectation Suite is run, the fact that it doesn't include other information found in Validation Results means you can also use it to more easily examine trends in your Metrics over time.  To help with this, a Metric Store will track the `run_id` of a Validation and the Expectation Suite name in addition to the metric name and metric kwargs.
+The Metric Store is tailored for storing and retrieving Metrics.  Although it can be used within Great Expectations as a reference to populate Evaluation Parameters when an Expectation Suite is run, the fact that it doesn't include other information found in Validation Results means you can also use it to more easily examine trends in your Metrics over time.  To help with this, a Metric Store will track the `run_id` of a Validation and the Expectation Suite name in addition to the metric name and metric kwargs.
 
 ## API basics
 

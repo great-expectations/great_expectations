@@ -18,13 +18,13 @@ An Expectation Store is a connector to store and retrieve information about coll
 
 ### Features and promises
 
-Expectation Stores allow you to store and retrieve Expectation Suites.  These Stores can be accessed and configured through the Data Context, but entries are added to them when you save an Expectation Suite (typically through a convenience method available from your Data Context).  A configured Expectation Store is required in order to work with Great Expectations.  A local configuration for an Expectation Store will be added automatically to `great_expectations.yml` when you initialize your Data Context for the first time.
+Expectation Stores allow you to store and retrieve <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />.  These Stores can be accessed and configured through the <TechnicalTag relative="../" tag="data_context" text="Data Context" />, but entries are added to them when you save an Expectation Suite (typically through a convenience method available from your Data Context).  A configured Expectation Store is required in order to work with Great Expectations.  A local configuration for an Expectation Store will be added automatically to `great_expectations.yml` when you initialize your Data Context for the first time.
 
-Generally speaking, while working with Great Expectations to Validate data you will not need to interact with an Expectation Store directly outside configuring the Store.  Instead, your Data Context will use an Expectation Store to store and retrieve Expectation Suites behind the scenes, and the objects you will directly work with will be those suites.
+Generally speaking, while working with Great Expectations to <TechnicalTag relative="../" tag="validation" text="Validate" /> data you will not need to interact with an Expectation Store directly outside configuring the <TechnicalTag relative="../" tag="store" text="Store" />.  Instead, your Data Context will use an Expectation Store to store and retrieve Expectation Suites behind the scenes, and the objects you will directly work with will be those suites.
 
 ### Relationship to other objects
 
-Expectation Stores can be used to store and retrieve Expectation Suites.  This means that Expectation Stores may also come into play when working with Checkpoints and Validators, which can take Expectation Suites as input (rather than having a set Expectation Suite pre-defined in their configuration).
+Expectation Stores can be used to store and retrieve Expectation Suites.  This means that Expectation Stores may also come into play when working with <TechnicalTag relative="../" tag="checkpoint" text="Checkpoints" /> and <TechnicalTag relative="../" tag="validator" text="Validators" />, which can take Expectation Suites as input (rather than having a set Expectation Suite pre-defined in their configuration).
 
 ## Use cases
 
