@@ -1,7 +1,6 @@
 from typing import Dict, List, Optional, Union
 
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
-from great_expectations.exceptions import ProfilerConfigurationError
 from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.domain_builder.cardinality_checker import (
@@ -77,6 +76,10 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
     def domain_type(self) -> Union[str, MetricDomainTypes]:
         return MetricDomainTypes.COLUMN
 
+    @property
+    def exclude_columns(self) -> List[str]:
+        return self._exclude_columns
+
     def _get_domains(
         self,
         variables: Optional[ParameterContainer] = None,
@@ -90,7 +93,7 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             List of domains that match the desired cardinality.
         """
 
-        batch_ids: List[str] = self._get_batch_ids(variables=variables)
+        batch_ids: List[str] = self.get_batch_ids(variables=variables)
         validator: Validator = self.get_validator(variables=variables)
 
         # Here we use a single get_metric call to get column names to build the
@@ -141,11 +144,11 @@ class CategoricalColumnDomainBuilder(DomainBuilder):
             )
         )
 
-        if self._exclude_columns is not None:
+        if self.exclude_columns is not None:
             table_column_names = [
                 colname
                 for colname in table_column_names
-                if colname not in self._exclude_columns
+                if colname not in self.exclude_columns
             ]
 
         return table_column_names
