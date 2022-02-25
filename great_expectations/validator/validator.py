@@ -372,13 +372,21 @@ class Validator:
             expectation for expectation in keys if expectation.startswith("expect_")
         ]
 
-    def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
-        """Return a dictionary with the requested metrics"""
+    def compute_metrics(
+        self, metric_configurations: List[MetricConfiguration]
+    ) -> Dict[Tuple[str, str, str], Any]:
+        """
+        metrics: List of desired MetricConfiguration objects to be resolved.
+        Return Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
+        """
         graph: ValidationGraph = ValidationGraph()
-        for metric_name, metric_configuration in metrics.items():
+
+        metric_configuration: MetricConfiguration
+        for metric_configuration in metric_configurations:
             provider_cls, _ = get_metric_provider(
                 metric_configuration.metric_name, self.execution_engine
             )
+
             self._get_default_domain_kwargs(
                 metric_provider_cls=provider_cls,
                 metric_configuration=metric_configuration,
@@ -403,14 +411,28 @@ class Validator:
             graph=graph,
             metrics=resolved_metrics,
         )
+
+        return resolved_metrics
+
+    def get_metrics(self, metrics: Dict[str, MetricConfiguration]) -> Dict[str, Any]:
+        """
+        metrics: Dictionary of desired metrics to be resolved, with metric_name as key and MetricConfiguration as value.
+        Return Dictionary with requested metrics resolved, with metric_name as key and computed metric as value.
+        """
+        resolved_metrics: Dict[Tuple[str, str, str], Any] = self.compute_metrics(
+            metric_configurations=list(metrics.values())
+        )
+
+        metric_configuration: MetricConfiguration
         return {
-            metric_name: resolved_metrics[metric_configuration.id]
-            for (metric_name, metric_configuration) in metrics.items()
+            metric_configuration.metric_name: resolved_metrics[metric_configuration.id]
+            for metric_configuration in metrics.values()
         }
 
     @staticmethod
     def _get_default_domain_kwargs(
-        metric_provider_cls: "MetricProvider", metric_configuration: MetricConfiguration
+        metric_provider_cls: "MetricProvider",  # noqa: F821
+        metric_configuration: MetricConfiguration,
     ) -> None:
         for key in metric_provider_cls.domain_keys:
             if (
@@ -423,7 +445,8 @@ class Validator:
 
     @staticmethod
     def _get_default_value_kwargs(
-        metric_provider_cls: "MetricProvider", metric_configuration: MetricConfiguration
+        metric_provider_cls: "MetricProvider",  # noqa: F821
+        metric_configuration: MetricConfiguration,
     ) -> None:
         for key in metric_provider_cls.value_keys:
             if (
@@ -436,7 +459,9 @@ class Validator:
 
     def get_metric(self, metric: MetricConfiguration) -> Any:
         """return the value of the requested metric."""
-        return self.get_metrics({"_": metric})["_"]
+        return self.get_metrics(metrics={metric.metric_name: metric})[
+            metric.metric_name
+        ]
 
     def graph_validate(
         self,

@@ -1,11 +1,11 @@
 import logging
 from typing import Any, Dict, Iterable, List, Optional, Set, Union
 
-import numpy as np
-
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 from great_expectations.rule_based_profiler.parameter_builder.parameter_builder import (
+    AttributedResolvedMetrics,
     MetricComputationResult,
+    MetricValues,
     ParameterBuilder,
 )
 from great_expectations.rule_based_profiler.types import (
@@ -146,14 +146,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
     @property
     def candidate_strings(
         self,
-    ) -> Union[
-        str,
-        Union[
-            Set[str],
-            List[str],
-            "SimpleDateFormatStringParameterBuilder.CANDIDATE_STRINGS",
-        ],
-    ]:  # noqa: F821
+    ) -> Union[str, Union[List[str], Set[str],],]:
         return self._candidate_strings
 
     def _build_parameters(
@@ -171,8 +164,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         """
         metric_computation_result: MetricComputationResult
 
-        metric_values: np.ndarray
-
         metric_computation_result = self.get_metrics(
             metric_name="column_values.nonnull.count",
             metric_domain_kwargs=self.metric_domain_kwargs,
@@ -181,19 +172,20 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             variables=variables,
             parameters=parameters,
         )
+
+        metric_values: MetricValues
+
         metric_values = metric_computation_result.metric_values
+
         # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
         metric_values = metric_values[:, 0]
 
         nonnull_count: int = sum(metric_values)
 
-        format_string_success_ratios: dict = {}
-
         # Obtain candidate_strings from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         candidate_strings: Union[
-            Set[str],
             List[str],
-            "SimpleDateFormatStringParameterBuilder.CANDIDATE_STRINGS",  # noqa: F821
+            Set[str],
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.candidate_strings,
@@ -206,36 +198,49 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         else:
             candidate_strings = SimpleDateFormatStringParameterBuilder.CANDIDATE_STRINGS
 
+        # Gather "metric_value_kwargs" for all candidate "strftime_format" strings.
         fmt_string: str
+        match_strftime_metric_value_kwargs_list: List[dict] = []
         match_strftime_metric_value_kwargs: dict
         for fmt_string in candidate_strings:
             if self.metric_value_kwargs:
-                match_strftime_metric_value_kwargs: dict = {
+                match_strftime_metric_value_kwargs = {
                     **self.metric_value_kwargs,
                     **{"strftime_format": fmt_string},
                 }
             else:
-                match_strftime_metric_value_kwargs: dict = {
+                match_strftime_metric_value_kwargs = {
                     "strftime_format": fmt_string,
                 }
 
-            metric_computation_result: MetricComputationResult = self.get_metrics(
-                metric_name="column_values.match_strftime_format.unexpected_count",
-                metric_domain_kwargs=self.metric_domain_kwargs,
-                metric_value_kwargs=match_strftime_metric_value_kwargs,
-                domain=domain,
-                variables=variables,
-                parameters=parameters,
+            match_strftime_metric_value_kwargs_list.append(
+                match_strftime_metric_value_kwargs
             )
-            metric_values = metric_computation_result.metric_values
+
+        # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
+        metric_computation_result: MetricComputationResult = self.get_metrics(
+            metric_name="column_values.match_strftime_format.unexpected_count",
+            metric_domain_kwargs=self.metric_domain_kwargs,
+            metric_value_kwargs=match_strftime_metric_value_kwargs_list,
+            domain=domain,
+            variables=variables,
+            parameters=parameters,
+        )
+
+        format_string_success_ratios: dict = {}
+
+        attributed_resolved_metrics: AttributedResolvedMetrics
+        for attributed_resolved_metrics in metric_computation_result.metric_values:
             # Now obtain 1-dimensional vector of values of computed metric (each element corresponds to a Batch ID).
-            metric_values = metric_values[:, 0]
+            metric_values = attributed_resolved_metrics.metric_values[:, 0]
 
             match_strftime_unexpected_count: int = sum(metric_values)
             success_ratio: float = (
                 nonnull_count - match_strftime_unexpected_count
             ) / nonnull_count
-            format_string_success_ratios[fmt_string] = success_ratio
+            format_string_success_ratios[
+                attributed_resolved_metrics.metric_attributes["strftime_format"]
+            ] = success_ratio
 
         best_fmt_string: Optional[str] = None
         best_ratio: float = 0.0
@@ -249,7 +254,6 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        fmt_string: str
         ratio: float
         for fmt_string, ratio in format_string_success_ratios.items():
             if ratio > best_ratio and ratio >= threshold:
