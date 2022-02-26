@@ -31,14 +31,14 @@ class ColumnValuesMatchSomeCriteria(ColumnMapMetricProvider):
         raise NotImplementedError
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
-    @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(cls, column, _dialect, **kwargs):
-        raise NotImplementedError
+    # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
+    # def _sqlalchemy(cls, column, _dialect, **kwargs):
+    #     raise NotImplementedError
 
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
-    @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, **kwargs):
-        raise NotImplementedError
+    # @column_condition_partial(engine=SparkDFExecutionEngine)
+    # def _spark(cls, column, **kwargs):
+    #     raise NotImplementedError
 
 
 # This class defines the Expectation itself
