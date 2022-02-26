@@ -221,7 +221,7 @@ class Validator:
         return list(combined_dir)
 
     @property
-    def data_context(self) -> Optional["DataContext"]:
+    def data_context(self) -> Optional["DataContext"]:  # noqa: F821
         return self._data_context
 
     @property
@@ -412,23 +412,9 @@ class Validator:
         )
 
         auto: Optional[bool] = expectation_kwargs.get("auto")
-        profiler_config: Optional[
-            Union[
-                RuleBasedProfilerConfig,
-                Dict[
-                    str,
-                    Union[
-                        str,
-                        float,
-                        Optional[Dict[str, Any]],
-                        Optional[Dict[str, Dict[str, Any]]],
-                    ],
-                ],
-            ]
-        ] = expectation_kwargs.get("profiler_config")
-        if isinstance(profiler_config, dict):
-            profiler_config = RuleBasedProfilerConfig(**profiler_config)
-
+        profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
+            "profiler_config"
+        )
         default_profiler_config: Optional[
             RuleBasedProfilerConfig
         ] = expectation_impl.default_kwarg_values.get("profiler_config")
@@ -498,20 +484,7 @@ class Validator:
         expectation_kwargs: dict,
         success_keys: Tuple[str],
         profiler_config: RuleBasedProfilerConfig,
-        override_profiler_config: Optional[
-            Union[
-                RuleBasedProfilerConfig,
-                Dict[
-                    str,
-                    Union[
-                        str,
-                        float,
-                        Optional[Dict[str, Any]],
-                        Optional[Dict[str, Dict[str, Any]]],
-                    ],
-                ],
-            ]
-        ] = None,
+        override_profiler_config: Optional[RuleBasedProfilerConfig] = None,
     ) -> BaseRuleBasedProfiler:
         assert (
             profiler_config.name == expectation_type

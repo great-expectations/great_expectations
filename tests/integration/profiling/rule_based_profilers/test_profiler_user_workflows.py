@@ -1,7 +1,7 @@
 import datetime
 import uuid
 from numbers import Number
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import numpy as np
 import pandas as pd
@@ -404,7 +404,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 
     result: ExpectationValidationResult
 
-    custom_profiler_config: Union[RuleBasedProfilerConfig, dict]
+    custom_profiler_config: RuleBasedProfilerConfig
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
     batch_request = {
@@ -419,11 +419,10 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
     )
     assert len(validator.batches) == 3
 
-    # Ensure that dictionary way of specifying custom "profiler_config" for Expectation works.
-    custom_profiler_config = {
-        "name": "expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        "config_version": 1.0,
-        "rules": {
+    custom_profiler_config = RuleBasedProfilerConfig(
+        name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        rules={
             "custom_column_values_between_rule": {
                 "parameter_builders": [
                     {
@@ -454,7 +453,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
                 ],
             },
         },
-    }
+    )
 
     column_name: str = "fare_amount"
 
@@ -463,7 +462,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         result_format="SUMMARY",
         include_config=True,
         auto=True,
-        profiler_config=custom_profiler_config,
+        profiler_config=custom_profiler_config.to_json_dict(),
     )
     assert result.success
     assert result.expectation_config["kwargs"] == {
@@ -474,7 +473,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "result_format": "SUMMARY",
         "include_config": True,
         "auto": True,
-        "profiler_config": custom_profiler_config,
+        "profiler_config": custom_profiler_config.to_json_dict(),
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
@@ -495,7 +494,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "result_format": "SUMMARY",
         "include_config": True,
         "auto": True,
-        "profiler_config": custom_profiler_config,
+        "profiler_config": custom_profiler_config.to_json_dict(),
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
@@ -517,7 +516,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "result_format": "SUMMARY",
         "include_config": True,
         "auto": True,
-        "profiler_config": custom_profiler_config,
+        "profiler_config": custom_profiler_config.to_json_dict(),
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
@@ -541,7 +540,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "data_connector_query": {"index": 1},
     }
 
-    # Ensure that RuleBasedProfilerConfig (object) way of specifying custom "profiler_config" for Expectation works.
     custom_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
@@ -666,17 +664,17 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
 
     result: ExpectationValidationResult
 
-    custom_profiler_config: Union[RuleBasedProfilerConfig, dict]
+    custom_profiler_config: RuleBasedProfilerConfig
 
-    custom_profiler_config = {
-        "name": "expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        "config_version": 1.0,
-        "variables": {
+    custom_profiler_config = RuleBasedProfilerConfig(
+        name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        variables={
             "mostly": 1.0,
             "strict_min": False,
             "strict_max": False,
         },
-        "rules": {
+        rules={
             "custom_column_values_between_rule": {
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
@@ -711,7 +709,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
                 ],
             },
         },
-    }
+    )
 
     # Use all batches, loaded by Validator, for estimating Expectation argument values.
     batch_request = {
@@ -744,7 +742,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "result_format": "SUMMARY",
         "include_config": True,
         "auto": True,
-        "profiler_config": custom_profiler_config,
+        "profiler_config": custom_profiler_config.to_json_dict(),
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
@@ -765,7 +763,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "result_format": "SUMMARY",
         "include_config": True,
         "auto": True,
-        "profiler_config": custom_profiler_config,
+        "profiler_config": custom_profiler_config.to_json_dict(),
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
@@ -787,7 +785,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "result_format": "SUMMARY",
         "include_config": True,
         "auto": True,
-        "profiler_config": custom_profiler_config,
+        "profiler_config": custom_profiler_config.to_json_dict(),
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
@@ -838,7 +836,6 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         },
     }
 
-    # Ensure that dictionary way of specifying custom "profiler_config" for Expectation works.
     custom_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
@@ -892,7 +889,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         result_format="SUMMARY",
         include_config=True,
         auto=True,
-        profiler_config=custom_profiler_config.to_json_dict(),
+        profiler_config=custom_profiler_config,
     )
     assert result.success
     assert result.expectation_config["kwargs"] == {
@@ -1180,7 +1177,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
 
     result: ExpectationValidationResult
 
-    custom_profiler_config: Union[RuleBasedProfilerConfig, dict]
+    custom_profiler_config: RuleBasedProfilerConfig
 
     expectation_suite_name: str = f"tmp.profiler_suite_{str(uuid.uuid4())[:8]}"
     try:
@@ -1269,7 +1266,6 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
             )
 
     parameter_builder_batch_request: dict
-    custom_profiler_config: dict
 
     # Use one batch (at index "1"), loaded by Validator as active_batch, for DomainBuilder purposes.
     domain_batch_request: dict = {
@@ -1291,11 +1287,10 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         },
     }
 
-    # Ensure that dictionary way of specifying custom "profiler_config" for Expectation works.
-    custom_profiler_config = {
-        "name": "expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
-        "config_version": 1.0,
-        "rules": {
+    custom_profiler_config = RuleBasedProfilerConfig(
+        name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
+        config_version=1.0,
+        rules={
             "column_quantiles_rule": {
                 "domain_builder": {
                     "class_name": "ColumnDomainBuilder",
@@ -1337,7 +1332,7 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
                 ],
             }
         },
-    }
+    )
 
     result = validator.expect_column_quantile_values_to_be_between(
         column="fare_amount",
@@ -1390,7 +1385,6 @@ def test_quentin_expect_column_quantile_values_to_be_between_auto_yes_default_pr
         "data_asset_name": "my_reports",
     }
 
-    # Ensure that RuleBasedProfilerConfig (object) way of specifying custom "profiler_config" for Expectation works.
     custom_profiler_config = RuleBasedProfilerConfig(
         name="expect_column_quantile_values_to_be_between",  # Convention: use "expectation_type" as profiler name.
         config_version=1.0,
