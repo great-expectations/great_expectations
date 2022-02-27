@@ -148,9 +148,7 @@ class ProfilerRunAnonymizer(Anonymizer):
         if batch_request:
             anonymized_domain_builder[
                 "anonymized_batch_request"
-            ] = self._batch_request_anonymizer.anonymize_batch_request(
-                *(), **batch_request
-            )
+            ] = self._batch_request_anonymizer.anonymize_batch_request(**batch_request)
             logger.debug("Anonymized batch request in DomainBuilder")
 
         return anonymized_domain_builder
@@ -225,27 +223,3 @@ class ProfilerRunAnonymizer(Anonymizer):
             logger.debug("Anonymized condition in ExpectationConfigurationBuilder")
 
         return anonymized_expectation_configuration_builder
-
-    # noinspection PyUnusedLocal,PyUnresolvedReferences
-    @staticmethod
-    def resolve_config_using_acceptable_arguments(
-        profiler: "RuleBasedProfiler",  # noqa: F821
-        variables: Optional[Dict[str, Any]] = None,
-        rules: Optional[Dict[str, Dict[str, Any]]] = None,
-    ) -> dict:
-        runtime_config: dict = profiler.config.to_dict()
-
-        # If applicable, override config attributes with runtime args
-        if variables:
-            runtime_config["variables"] = variables
-        if rules:
-            runtime_config["rules"] = rules
-
-        runtime_config["variable_count"] = len(runtime_config["variables"])
-        runtime_config["rule_count"] = len(runtime_config["rules"])
-
-        for attr in ("class_name", "module_name", "variables"):
-            runtime_config.pop(attr)
-            logger.debug("Removed unnecessary attr %s from profiler config", attr)
-
-        return runtime_config

@@ -6,6 +6,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.anonymizers.profiler_run_anonymizer import (
     ProfilerRunAnonymizer,
 )
+from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 
@@ -48,6 +49,11 @@ def usage_stats_profiler_config() -> dict:
 
 
 @pytest.fixture
+def usage_stats_profiler_config_custom_values() -> dict:
+    pass
+
+
+@pytest.fixture
 def usage_stats_profiler_config_multiple_rules(
     usage_stats_profiler_config: dict,
 ) -> dict:
@@ -71,6 +77,11 @@ def usage_stats_profiler_config_multiple_rules(
     usage_stats_profiler_config["rules"]["rule_2"] = rule
     usage_stats_profiler_config["rule_count"] += 1
     return usage_stats_profiler_config
+
+
+@pytest.fixture
+def usage_stats_profiler_config_multiple_rules_custom_values():
+    pass
 
 
 def test_anonymize_profiler_run(
@@ -105,6 +116,13 @@ def test_anonymize_profiler_run(
         "variable_count": 1,
         "rule_count": 1,
     }
+
+
+def test_anonymize_profiler_run_custom_values(
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
+    usage_stats_profiler_config_custom_values: dict,
+):
+    pass
 
 
 def test_anonymize_profiler_run_multiple_rules(
@@ -154,6 +172,13 @@ def test_anonymize_profiler_run_multiple_rules(
         "rule_count": 2,
         "variable_count": 1,
     }
+
+
+def test_anonymize_profiler_run_multiple_rules_custom_values(
+    profiler_run_anonymizer: ProfilerRunAnonymizer,
+    usage_stats_profiler_config_multiple_rules_custom_values: dict,
+):
+    pass
 
 
 def test_anonymize_profiler_run_with_batch_requests_in_builder_attrs(
@@ -265,7 +290,7 @@ def test_anonymize_profiler_run_with_condition_in_expectation_configuration_buil
 def test_resolve_config_using_acceptable_arguments(
     profiler_with_placeholder_args: RuleBasedProfiler,
 ):
-    config: dict = ProfilerRunAnonymizer.resolve_config_using_acceptable_arguments(
+    config: dict = RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
         profiler=profiler_with_placeholder_args
     )
 
@@ -288,7 +313,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
     assert all(rule.name != rule_name for rule in profiler_with_placeholder_args.rules)
 
     rules: Dict[str, dict] = {rule_name: {"foo": "bar"}}
-    config: dict = ProfilerRunAnonymizer.resolve_config_using_acceptable_arguments(
+    config: dict = RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
         profiler=profiler_with_placeholder_args, rules=rules
     )
 
@@ -312,7 +337,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_b
     rules: Dict[str, dict] = usage_stats_profiler_config["rules"]
     rules["rule_1"]["domain_builder"]["batch_request"] = batch_request
 
-    config: dict = ProfilerRunAnonymizer.resolve_config_using_acceptable_arguments(
+    config: dict = RuleBasedProfilerConfig.resolve_config_using_acceptable_arguments(
         profiler=profiler_with_placeholder_args, rules=rules
     )
 
