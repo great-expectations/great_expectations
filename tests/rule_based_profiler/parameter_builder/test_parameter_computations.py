@@ -8,10 +8,9 @@ from great_expectations.rule_based_profiler.parameter_builder.numeric_metric_ran
     DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
 )
 from great_expectations.rule_based_profiler.util import (
-    compute_bootstrap_quantiles,
-    compute_bootstrap_quantiles_mean,
+    compute_bootstrap_quantiles_bias_corrected_point_estimate,
+    compute_bootstrap_quantiles_point_estimate,
 )
-from tests.conftest import skip_if_python_below_minimum_version
 
 
 def _generate_distribution_samples(size: Optional[int] = 36) -> pd.DataFrame:
@@ -33,23 +32,31 @@ def _generate_distribution_samples(size: Optional[int] = 36) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def test_bootstrap_mean_efficacy():
+def test_bootstrap_point_estimate_efficacy():
     df: pd.DataFrame = _generate_distribution_samples(size=1000)
     false_positive_rate: np.float64 = np.float64(0.01)
     columns: pd.Index = df.columns
     column: str
-    lower_quantile: np.float64
-    upper_quantile: np.float64
+    lower_quantile_point_estimate: np.float64
+    upper_quantile_point_estimate: np.float64
     actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
     for column in columns:
-        (lower_quantile, upper_quantile,) = compute_bootstrap_quantiles_mean(
+        (
+            lower_quantile_point_estimate,
+            upper_quantile_point_estimate,
+        ) = compute_bootstrap_quantiles_point_estimate(
             metric_values=df[column],
             false_positive_rate=false_positive_rate,
             n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
         )
         actual_false_positive_rates[column] = (
             1.0
-            - np.sum(df[column].between(lower_quantile, upper_quantile)) / df.shape[0]
+            - np.sum(
+                df[column].between(
+                    lower_quantile_point_estimate, upper_quantile_point_estimate
+                )
+            )
+            / df.shape[0]
         )
         # Actual false-positives must be within 1% of desired (configured) false_positive_rate parameter value.
         assert (
@@ -57,3 +64,158 @@ def test_bootstrap_mean_efficacy():
             <= actual_false_positive_rates[column]
             <= false_positive_rate + 0.01
         )
+
+
+def test_bootstrap_bias_corrected_point_estimate_efficacy():
+    df: pd.DataFrame = _generate_distribution_samples(size=1000)
+    false_positive_rate: np.float64 = np.float64(0.01)
+    columns: pd.Index = df.columns
+    column: str
+    lower_quantile_bias_corrected_point_estimate: np.float64
+    upper_quantile_bias_corrected_point_estimate: np.float64
+    actual_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
+    for column in columns:
+        (
+            lower_quantile_bias_corrected_point_estimate,
+            upper_quantile_bias_corrected_point_estimate,
+        ) = compute_bootstrap_quantiles_bias_corrected_point_estimate(
+            metric_values=df[column],
+            false_positive_rate=false_positive_rate,
+            n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+        )
+        actual_false_positive_rates[column] = (
+            1.0
+            - np.sum(
+                df[column].between(
+                    lower_quantile_bias_corrected_point_estimate,
+                    upper_quantile_bias_corrected_point_estimate,
+                )
+            )
+            / df.shape[0]
+        )
+        # Actual false-positives must be within 1% of desired (configured) false_positive_rate parameter value.
+        assert (
+            false_positive_rate - 0.01
+            <= actual_false_positive_rates[column]
+            <= false_positive_rate + 0.01
+        )
+
+
+def test_compare_bootstrap_point_estimate_efficacy_bias_correction():
+    false_positive_rate: np.float64 = np.float64(0.01)
+    lower_quantile_point_estimate: np.float64
+    upper_quantile_point_estimate: np.float64
+    lower_quantile_bias_corrected_point_estimate: np.float64
+    upper_quantile_bias_corrected_point_estimate: np.float64
+    actual_biased_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
+    actual_bias_corrected_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
+    improvement: list = []
+    for i in range(100):
+        df: pd.DataFrame = _generate_distribution_samples(size=1000)
+        columns: pd.Index = df.columns
+        column: str
+        for column in columns:
+            (
+                lower_quantile_point_estimate,
+                upper_quantile_point_estimate,
+            ) = compute_bootstrap_quantiles_point_estimate(
+                metric_values=df[column],
+                false_positive_rate=false_positive_rate,
+                n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+            )
+            actual_biased_false_positive_rates[column] = (
+                1.0
+                - np.sum(
+                    df[column].between(
+                        lower_quantile_point_estimate,
+                        upper_quantile_point_estimate,
+                    )
+                )
+                / df.shape[0]
+            )
+
+            (
+                lower_quantile_bias_corrected_point_estimate,
+                upper_quantile_bias_corrected_point_estimate,
+            ) = compute_bootstrap_quantiles_bias_corrected_point_estimate(
+                metric_values=df[column],
+                false_positive_rate=false_positive_rate,
+                n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+            )
+            actual_bias_corrected_false_positive_rates[column] = (
+                1.0
+                - np.sum(
+                    df[column].between(
+                        lower_quantile_bias_corrected_point_estimate,
+                        upper_quantile_bias_corrected_point_estimate,
+                    )
+                )
+                / df.shape[0]
+            )
+
+            improvement.append(
+                actual_biased_false_positive_rates[column]
+                >= actual_bias_corrected_false_positive_rates[column]
+            )
+
+    assert sum(improvement) / len(improvement) > 0.99
+
+
+def test_compare_bootstrap_point_estimate_efficacy_sample_sample_bias_correction():
+    false_positive_rate: np.float64 = np.float64(0.01)
+    lower_quantile_point_estimate: np.float64
+    upper_quantile_point_estimate: np.float64
+    lower_quantile_bias_corrected_point_estimate: np.float64
+    upper_quantile_bias_corrected_point_estimate: np.float64
+    actual_biased_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
+    actual_bias_corrected_false_positive_rates: Dict[str, Union[float, np.float64]] = {}
+    improvement: list = []
+    for i in range(100):
+        df: pd.DataFrame = _generate_distribution_samples(size=100)
+        columns: pd.Index = df.columns
+        column: str
+        for column in columns:
+            (
+                lower_quantile_point_estimate,
+                upper_quantile_point_estimate,
+            ) = compute_bootstrap_quantiles_point_estimate(
+                metric_values=df[column],
+                false_positive_rate=false_positive_rate,
+                n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+            )
+            actual_biased_false_positive_rates[column] = (
+                1.0
+                - np.sum(
+                    df[column].between(
+                        lower_quantile_point_estimate,
+                        upper_quantile_point_estimate,
+                    )
+                )
+                / df.shape[0]
+            )
+
+            (
+                lower_quantile_bias_corrected_point_estimate,
+                upper_quantile_bias_corrected_point_estimate,
+            ) = compute_bootstrap_quantiles_bias_corrected_point_estimate(
+                metric_values=df[column],
+                false_positive_rate=false_positive_rate,
+                n_resamples=DEFAULT_BOOTSTRAP_NUM_RESAMPLES,
+            )
+            actual_bias_corrected_false_positive_rates[column] = (
+                1.0
+                - np.sum(
+                    df[column].between(
+                        lower_quantile_bias_corrected_point_estimate,
+                        upper_quantile_bias_corrected_point_estimate,
+                    )
+                )
+                / df.shape[0]
+            )
+
+            improvement.append(
+                actual_biased_false_positive_rates[column]
+                >= actual_bias_corrected_false_positive_rates[column]
+            )
+
+    assert sum(improvement) / len(improvement) > 0.99

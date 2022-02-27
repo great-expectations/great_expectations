@@ -246,18 +246,18 @@ def compute_quantiles(
         metric_values,
         q=(false_positive_rate / 2),
         axis=0,
-        interpolation="linear",  # can be omitted ("linear" is default)
+        method="linear",  # can be omitted ("linear" is default)
     )
     upper_quantile = np.quantile(
         metric_values,
         q=1.0 - (false_positive_rate / 2),
         axis=0,
-        interpolation="linear",  # can be omitted ("linear" is default)
+        method="linear",  # can be omitted ("linear" is default)
     )
     return lower_quantile, upper_quantile
 
 
-def compute_bootstrap_quantiles_mean(
+def compute_bootstrap_quantiles_point_estimate(
     metric_values: np.ndarray,
     false_positive_rate: np.float64,
     n_resamples: int,
@@ -307,17 +307,67 @@ def compute_bootstrap_quantiles_mean(
         bootstraps,
         q=false_positive_rate / 2,
         axis=1,
-        interpolation="linear",  # can be omitted ("linear" is default)
+        method="linear",  # can be omitted ("linear" is default)
     )
-    lower_quantile_mean: Number = np.mean(lower_quantiles)
+    lower_quantile_point_estimate: Number = np.mean(lower_quantiles)
     upper_quantiles: Union[np.nd_array, Number] = np.quantile(
         bootstraps,
         q=1.0 - (false_positive_rate / 2),
         axis=1,
-        interpolation="linear",  # can be omitted ("linear" is default)
+        method="linear",  # can be omitted ("linear" is default)
     )
-    upper_quantile_mean: Number = np.mean(upper_quantiles)
-    return lower_quantile_mean, upper_quantile_mean
+    upper_quantile_point_estimate: Number = np.mean(upper_quantiles)
+    return lower_quantile_point_estimate, upper_quantile_point_estimate
+
+
+def compute_bootstrap_quantiles_bias_corrected_point_estimate(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    n_resamples: int,
+) -> Tuple[Number, Number]:
+    """
+    Internal implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
+    See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+    """
+    bootstraps: np.ndarray = np.random.choice(
+        metric_values, size=(n_resamples, metric_values.size)
+    )
+    lower_quantiles: Union[np.nd_array, Number] = np.quantile(
+        bootstraps,
+        q=false_positive_rate / 2,
+        axis=1,
+        method="linear",  # can be omitted ("linear" is default)
+    )
+    lower_quantile_point_estimate: Number = np.mean(lower_quantiles)
+
+    lower_quantile_residuals: Union[np.ndarray, Number] = (
+        lower_quantiles - lower_quantile_point_estimate
+    )
+    lower_quantile_bias: Number = sum(lower_quantile_residuals) / len(lower_quantiles)
+    lower_quantile_bias_corrected_point_estimate = (
+        lower_quantile_point_estimate + lower_quantile_bias
+    )
+
+    upper_quantiles: Union[np.nd_array, Number] = np.quantile(
+        bootstraps,
+        q=1.0 - (false_positive_rate / 2),
+        axis=1,
+        method="linear",  # can be omitted ("linear" is default)
+    )
+    upper_quantile_point_estimate: Number = np.mean(upper_quantiles)
+
+    upper_quantile_residuals: Union[np.ndarray, Number] = (
+        upper_quantiles - upper_quantile_point_estimate
+    )
+    upper_quantile_bias: Number = sum(upper_quantile_residuals) / len(upper_quantiles)
+    upper_quantile_bias_corrected_point_estimate = (
+        upper_quantile_point_estimate + upper_quantile_bias
+    )
+
+    return (
+        lower_quantile_bias_corrected_point_estimate,
+        upper_quantile_bias_corrected_point_estimate,
+    )
 
 
 def compute_bootstrap_quantiles(
@@ -329,55 +379,39 @@ def compute_bootstrap_quantiles(
     SciPy implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
     See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
     """
-    data: tuple[np.ndarray] = (metric_values,)
-    lower_quantile_pct: float = false_positive_rate / 2
-    upper_quantile_pct: float = 1.0 - (false_positive_rate / 2)
-    axis: int = 1
-    interpolation: str = "linear"
-
-    # "method" parameter tells scipy.stats.bootstrap whether to return the ‘percentile’ bootstrap confidence interval
-    # ('percentile'), the ‘reverse’ or the bias - corrected and accelerated bootstrap confidence interval ('BCa').
-    # Note that even though we prefer to use 'BCa', only 'percentile' and 'basic' support multi-sample statistics as of
-    # February 25th, 2022. For a more complete write-up regarding the available methods, see:
-    # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html
-    method: str = "basic"
-
-    bootstrap_result: stats.bootstrap.BootstrapResult = stats.bootstrap(
-        data=data,
-        statistic=lambda data, axis=axis: np.quantile(
-            a=data,
-            q=[lower_quantile_pct, upper_quantile_pct],
-            axis=axis,
-            interpolation=interpolation,
-        ),
-        n_resamples=n_resamples,
-        method=method,
-    )
-    lower_ci: Union[np.nd_array, Number]
-    upper_ci: Union[np.nd_array, Number]
-    lower_ci, upper_ci = bootstrap_result.confidence_interval
-
-    # compute the mean of the bootstrapped quantile samples
-    lower_quantile_mean, upper_quantile_mean = compute_bootstrap_quantiles_mean(
+    # compute the mean of the quantiles of the bootstrapped samples
+    (
+        lower_quantile_point_estimate,
+        upper_quantile_point_estimate,
+    ) = compute_bootstrap_quantiles_point_estimate(
         metric_values=metric_values,
         false_positive_rate=false_positive_rate,
         n_resamples=n_resamples,
     )
 
-    # Hypothesis test that the actual quantiles are equal to the computed lower and upper quantile means
-    # We can use the bootstrap confidence interval
-    if not (lower_ci[0] < lower_quantile_mean < lower_ci[1]):
-        logger.warn(
-            """Computed lower quantile mean falls outside of the bootstrap confidence interval.
-We reject the hypothesis that the actual lower quantile statistic is equal to
-the mean of the bootstrapped sample lower quantiles."""
-        )
+    return lower_quantile_point_estimate, upper_quantile_point_estimate
 
-    if not (upper_ci[0] < upper_quantile_mean < upper_ci[1]):
-        logger.warn(
-            """Computed upper quantile mean falls outside of the bootstrap confidence interval.
-We reject the hypothesis that the actual upper quantile statistic is equal to
-the mean of the bootstrapped sample upper quantiles."""
-        )
 
-    return lower_quantile_mean, upper_quantile_mean
+def compute_bootstrap_quantiles_bc(
+    metric_values: np.ndarray,
+    false_positive_rate: np.float64,
+    n_resamples: int,
+) -> Tuple[Number, Number]:
+    """
+    SciPy implementation of the "bootstrap" estimator method, returning confidence interval for a distribution.
+    See https://en.wikipedia.org/wiki/Bootstrapping_(statistics) for an introduction to "bootstrapping" in statistics.
+    """
+    # compute the mean of the quantiles of the bootstrapped samples
+    (
+        lower_quantile_bias_corrected_point_estimate,
+        upper_quantile_bias_corrected_point_estimate,
+    ) = compute_bootstrap_quantiles_bias_corrected_point_estimate(
+        metric_values=metric_values,
+        false_positive_rate=false_positive_rate,
+        n_resamples=n_resamples,
+    )
+
+    return (
+        lower_quantile_bias_corrected_point_estimate,
+        upper_quantile_bias_corrected_point_estimate,
+    )
