@@ -41,12 +41,11 @@ class Anonymizer:
 
     def anonymize_object_info(
         self,
-        anonymized_info_dict,
-        ge_classes,
-        object_=None,
-        object_class=None,
-        object_config=None,
-        runtime_environment=None,
+        anonymized_info_dict: dict,
+        object_: Optional[object] = None,
+        object_class: Optional[type] = None,
+        object_config: Optional[dict] = None,
+        runtime_environment: Optional[dict] = None,
     ) -> dict:
         assert (
             object_ or object_class or object_config
@@ -56,6 +55,7 @@ class Anonymizer:
             runtime_environment = {}
 
         object_class_name: Optional[str] = None
+        object_module_name: Optional[str] = None
         try:
             if object_class is None and object_ is not None:
                 object_class = object_.__class__
@@ -65,23 +65,27 @@ class Anonymizer:
                     "module_name"
                 ) or runtime_environment.get("module_name")
                 object_class = load_class(object_class_name, object_module_name)
+
             object_class_name = object_class.__name__
+            object_module_name = object_class.__module__
 
-            for ge_class in ge_classes:
-                if issubclass(object_class, ge_class):
-                    anonymized_info_dict["parent_class"] = ge_class.__name__
-                    if not object_class == ge_class:
-                        anonymized_info_dict["anonymized_class"] = self.anonymize(
-                            object_class_name
-                        )
-                    break
+            # Is the class in question a core GE class?
+            # What is the parent of the class in question?
 
-            if not anonymized_info_dict.get("parent_class"):
-                anonymized_info_dict["parent_class"] = "__not_recognized__"
+            if not object_module_name.startswith("great_expectations"):
                 anonymized_info_dict["anonymized_class"] = self.anonymize(
                     object_class_name
                 )
-        except AttributeError:
+
+            bases = object_class.__bases__
+            parent_class = bases[0]
+            parent_module_name = parent_class.__module__
+            if parent_module_name.startswith("great_expectations"):
+                anonymized_info_dict["parent_class"] = parent_class.__name__
+            else:
+                anonymized_info_dict["parent_class"] = "__not_recognized__"
+
+        except (AttributeError, IndexError):
             anonymized_info_dict["parent_class"] = "__not_recognized__"
             anonymized_info_dict["anonymized_class"] = self.anonymize(object_class_name)
 
