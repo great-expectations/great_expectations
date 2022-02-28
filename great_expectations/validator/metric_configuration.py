@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Tuple
+from typing import Tuple
 
 from great_expectations.core.id_dict import IDDict
 
@@ -8,7 +8,7 @@ class MetricConfiguration:
     def __init__(
         self,
         metric_name: str,
-        metric_domain_kwargs: Dict,
+        metric_domain_kwargs: dict,
         metric_value_kwargs: dict = None,
         metric_dependencies: dict = None,
     ):

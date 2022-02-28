@@ -28,7 +28,7 @@ your data at various levels of granularity:
 This guide will use the `tables` section that is part of the following `SimpleSqlalchemyDatasource` configuration as an
 example:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L9-L71
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L9-L77
 ```
 
 ## Preliminary Steps
@@ -50,7 +50,7 @@ Load your `DataContext` into memory using the `get_context()` method.
 Using the above example configuration, specify the connection string for your database.  Then run this code to test your
 configuration:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L80
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L86
 ```
 
 Feel free to adjust your configuration and re-run `test_yaml_config()` as needed.
@@ -59,7 +59,7 @@ Feel free to adjust your configuration and re-run `test_yaml_config()` as needed
 
 Save the configuration into your `DataContext` by using the `add_datasource()` function.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L82
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L88
 ```
 
 ## Splitting and Sampling
@@ -76,12 +76,12 @@ the rows sampled at random, which is specified by the parameter `p` (stands for 
 
 Finally, confirm the expected number of batches was retrieved and the reduced size of a batch (due to `Sampling`):
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L164-L168
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L169-L173
 ```
 
 (set `data_asset_name` to `"taxi__yellow_tripdata_sample_2019_01__asset"` for the present example).
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L174-L181
+```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L179-L186
 ```
 
 ## Additional Notes
