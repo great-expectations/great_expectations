@@ -13,7 +13,7 @@ title: "Setup: Index"
 - [How to configure credentials](../../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
 - [How to instantiate a Data Context without a yml file](../../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
 
-## Stores
+## Metadata Stores
 
 ### Expectation Stores
 - [How to configure an Expectation store to use Amazon S3](../../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3.md)
@@ -38,6 +38,5 @@ title: "Setup: Index"
 - [How to host and share Data Docs on GCS](../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md)
 - [How to host and share Data Docs on Amazon S3](../../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3.md)
 
-## Advanced
-- [How to use the project check-config command](../../guides/miscellaneous/how_to_use_the_project_check_config_command.md)
+## Miscellaneous
 - [How to use the Great Expectations Docker images](../../guides/miscellaneous/how_to_use_the_great_expectation_docker_images.md)

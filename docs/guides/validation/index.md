@@ -12,11 +12,11 @@ title: "Validate Data: Index"
 - [How to configure a new Checkpoint using test_yaml_config](../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
 - [How to pass an in-memory DataFrame to a Checkpoint](../../guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md)
 
-## Validation Actions
+## Actions
 - [How to trigger Email as a Validation Action](../../guides/validation/validation_actions/how_to_trigger_email_as_a_validation_action.md)
-- [How to trigger Slack notifications as a Validation Action](../../guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action.md)
 - [How to collect OpenLineage metadata using a Validation Action](../../guides/validation/validation_actions/how_to_collect_openlineage_metadata_using_a_validation_action.md)
 - [How to trigger Opsgenie notifications as a Validation Action](../../guides/validation/validation_actions/how_to_trigger_opsgenie_notifications_as_a_validation_action.md)
+- [How to trigger Slack notifications as a Validation Action](../../guides/validation/validation_actions/how_to_trigger_slack_notifications_as_a_validation_action.md)
 - [How to update Data Docs after validating a Checkpoint](../../guides/validation/validation_actions/how_to_update_data_docs_as_a_validation_action.md)
 
 ## Advanced

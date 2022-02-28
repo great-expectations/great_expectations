@@ -1,5 +1,5 @@
 ---
-title: "Deployment Patterns: Index"
+title: "Reference Architectures: Index"
 ---
 - [Deploying Great Expectations in a hosted environment without file system or CLI](../deployment_patterns/how_to_instantiate_a_data_context_hosted_environments.md)
 - [How to Use Great Expectations in Databricks](../deployment_patterns/how_to_use_great_expectations_in_databricks.md)
@@ -7,3 +7,4 @@ title: "Deployment Patterns: Index"
 - [How to instantiate a Data Context on an EMR Spark cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
 - [How to Use Great Expectations with Airflow](../deployment_patterns/how_to_use_great_expectations_with_airflow.md)
 - [How to Use Great Expectations in Flyte](../deployment_patterns/how_to_use_great_expectations_in_flyte.md)
+- [How to use Great Expectations in Deepnote](../deployment_patterns/how_to_use_great_expectations_in_deepnote.md)

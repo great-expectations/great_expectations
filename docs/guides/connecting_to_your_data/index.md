@@ -42,3 +42,4 @@ title: "Connect to Data: Index"
 ## Advanced
 - [How to configure a DataConnector for splitting and sampling a file system or blob store](../../guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store.md)
 - [How to configure a DataConnector for splitting and sampling tables in SQL](../../guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql.md)
+
