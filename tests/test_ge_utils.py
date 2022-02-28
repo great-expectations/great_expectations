@@ -566,4 +566,21 @@ def test_hyphen():
 
 
 def test_deep_filter_properties_iterable_on_batch_request_dict():
-    pass
+    batch_request: dict = {
+        "datasource_name": "df78ebde1957385a02d8736cd2c9a6d9",
+        "data_connector_name": "123a3221fc4b65014d061cce4a71782e",
+        "data_asset_name": "eac128c5824b698c22b441ada61022d4",
+        "batch_spec_passthrough": {},
+        "data_connector_query": {"batch_filter_parameters": {}},
+        "limit": None,
+    }
+
+    deep_filter_properties_iterable(
+        properties=batch_request, clean_nulls=True, clean_falsy=True, inplace=True
+    )
+
+    assert batch_request == {
+        "datasource_name": "df78ebde1957385a02d8736cd2c9a6d9",
+        "data_connector_name": "123a3221fc4b65014d061cce4a71782e",
+        "data_asset_name": "eac128c5824b698c22b441ada61022d4",
+    }

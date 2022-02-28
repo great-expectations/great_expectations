@@ -26,7 +26,7 @@ from inspect import (
 )
 from pathlib import Path
 from types import CodeType, FrameType, ModuleType
-from typing import Any, Callable, List, Optional, Set, Union
+from typing import Any, Callable, List, Optional, Set, Tuple, Union
 
 from dateutil.parser import parse
 from packaging import version
@@ -1184,12 +1184,19 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
-        to_delete: List[str] = []
-        for key, value in properties.items():
-            if (clean_nulls and value is None) or (clean_falsy and not value):
-                to_delete.append(key)
-
-        for key in to_delete:
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        keys_to_delete: List[str] = list(
+            filter(
+                lambda k: _is_to_be_removed_from_deep_filter_properties_iterable(
+                    value=properties[k],
+                    clean_nulls=clean_nulls,
+                    clean_falsy=clean_falsy,
+                    keep_falsy_numerics=keep_falsy_numerics,
+                ),
+                properties.keys(),
+            )
+        )
+        for key in keys_to_delete:
             properties.pop(key)
 
     elif isinstance(properties, (list, set, tuple)):
@@ -1208,17 +1215,34 @@ def deep_filter_properties_iterable(
                 inplace=True,
             )
 
-        properties_to_keep: List[str] = []
-        for value in properties:
-            if (clean_nulls and value is None) or (clean_falsy and not value):
-                continue
-            properties_to_keep.append(value)
-        properties = properties_to_keep
+        # Upon unwinding the call stack, do a sanity check to ensure cleaned properties
+        properties = list(
+            filter(
+                lambda v: not _is_to_be_removed_from_deep_filter_properties_iterable(
+                    value=v,
+                    clean_nulls=clean_nulls,
+                    clean_falsy=clean_falsy,
+                    keep_falsy_numerics=keep_falsy_numerics,
+                ),
+                properties,
+            )
+        )
 
     if inplace:
         return None
 
     return properties
+
+
+def _is_to_be_removed_from_deep_filter_properties_iterable(
+    value: Any, clean_nulls: bool, clean_falsy: bool, keep_falsy_numerics: bool
+) -> bool:
+    conditions: Tuple[bool, ...] = (
+        clean_nulls and value is None,
+        not keep_falsy_numerics and is_numeric(value) and value == 0,
+        clean_falsy and not is_numeric(value) and not value,
+    )
+    return any(condition for condition in conditions)
 
 
 def is_truthy(value: Any) -> bool:
