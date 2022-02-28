@@ -290,7 +290,7 @@ detected.
         parameter_values: Dict[str, Any] = {
             f"$parameter.{self.name}": {
                 "value": {
-                    "value_range": metric_value_range,
+                    "value_range": metric_value_range.tolist(),
                 },
                 "details": details,
             },
