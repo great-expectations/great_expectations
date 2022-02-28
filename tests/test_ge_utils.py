@@ -563,3 +563,7 @@ def test_deep_filter_properties_iterable():
 def test_hyphen():
     txt: str = "suite_validation_result"
     assert hyphen(txt=txt) == "suite-validation-result"
+
+
+def test_deep_filter_properties_iterable_on_batch_request_dict():
+    pass
