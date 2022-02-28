@@ -303,7 +303,7 @@ def test_resolve_config_using_acceptable_arguments(
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
     profiler_with_placeholder_args: RuleBasedProfiler,
 ) -> None:
-    rule_name: str = "my_rule"
+    rule_name: str = "my_new_rule"
     assert all(rule.name != rule_name for rule in profiler_with_placeholder_args.rules)
 
     rules: Dict[str, dict] = {rule_name: {"foo": "bar"}}
@@ -313,7 +313,7 @@ def test_resolve_config_using_acceptable_arguments_with_runtime_overrides(
         )
     )
 
-    assert len(config.rules) == 1 and rule_name in config.rules
+    assert len(config.rules) == 2 and rule_name in config.rules
 
 
 def test_resolve_config_using_acceptable_arguments_with_runtime_overrides_with_batch_requests(

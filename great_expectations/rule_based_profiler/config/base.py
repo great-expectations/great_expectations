@@ -1,3 +1,4 @@
+import copy
 import logging
 from typing import Any, Dict, List, Optional, Type, Union
 
@@ -313,11 +314,18 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     ) -> "RuleBasedProfilerConfig":
         runtime_config: RuleBasedProfilerConfig = profiler.config
 
-        # If applicable, override config attributes with runtime args
-        runtime_rules: dict = rules if rules is not None else runtime_config.rules
-        runtime_variables: Optional[dict] = (
-            variables if variables is not None else runtime_config.variables
-        )
+        runtime_rules: Dict[str, dict] = copy.deepcopy(runtime_config.rules)
+
+        runtime_variables: Dict[str, dict]
+        if runtime_config.variables is not None:
+            runtime_variables = copy.deepcopy(runtime_config.variables)
+        else:
+            runtime_variables = {}
+
+        if rules:
+            runtime_rules.update(rules)
+        if variables:
+            runtime_variables.update(variables)
 
         return cls(
             name=runtime_config.name,
